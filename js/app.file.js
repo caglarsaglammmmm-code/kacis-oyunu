@@ -137,18 +137,19 @@ const CONFIG = {
   ],
 
   // En az 5 araba. durability hasarı böler, mass polis çarpışmalarını etkiler.
-  // Sıra önemli: pahalılaştıkça hız, kayma ve dayanıklılık artar. engine: motor sesi
+  // Sıra önemli: pahalılaştıkça hız, kayma ve dayanıklılık artar.
+  // engine: motor sesi. kind ses karakteri (js/audio.js ENGINE_KINDS), cyl silindir, idle-red devir aralığı, gears vites
   cars: [
-    { id: 'atmaca', paints: [{ name: 'Mahalle Beji', color: '#d9d4c7', finish: 'gloss' }, { name: 'Şarap Kırmızı', color: '#8e1b24', finish: 'metal' }, { name: 'Mat Asker Yeşili', color: '#4d5a3a', finish: 'matte' }, { name: 'Çift Ton Krem-Bordo', color: '#e6dcc2', finish: 'gloss', roof: '#6d1620' }], finish: 'gloss', name: 'Atmaca', cost: 0, desc: 'Her mahallenin emektarı', shape: 'atmaca', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { base: 46, range: 150, wave: 'sawtooth', sub: 1.5, gain: 1 } },
-    { id: 'motor', paints: [{ name: 'Yarış Kırmızı', color: '#e8352e', finish: 'gloss', accent: '#ffe14d' }, { name: 'Elektrik Mavi', color: '#0a7cff', finish: 'metal', accent: '#ffffff' }, { name: 'Mat Siyah', color: '#1b1d22', finish: 'matte', accent: '#ff7a00' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl', accent: '#e8352e' }], finish: 'gloss', name: 'Motosiklet', cost: 100, desc: 'Dar sokakların kralı', shape: 'moto', maxSpeed: 445, accel: 610, turnRate: 3.3, grip: 4.5, driftGrip: 1.1, durability: 1.05, mass: 0.9, len: 36, wid: 16, color: '#e8352e', accent: '#ffe14d', engine: { base: 88, range: 270, wave: 'square', sub: 2, gain: 0.8 } },
-    { id: 'granit', paints: [{ name: 'Gece Mavisi', color: '#1f3a68', finish: 'metal' }, { name: 'Kor Turuncu', color: '#e8551e', finish: 'metal' }, { name: 'Mat Gümüş', color: '#a7aeb7', finish: 'matte' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl' }], finish: 'metal', name: 'Granit SUV', cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'granit', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { base: 42, range: 125, wave: 'sawtooth', sub: 1.33, gain: 1 } },
-    { id: 'elektra', paints: [{ name: 'Anadolu Kırmızı', color: '#b3122a', finish: 'metal' }, { name: 'Fırtına Grisi', color: '#4a5560', finish: 'metal' }, { name: 'Mat Toprak', color: '#8a6a4a', finish: 'matte' }, { name: 'Buz Mavisi', color: '#bcd9e6', finish: 'pearl' }], finish: 'metal', name: 'Elektra X1', cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'elektra', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { base: 240, range: 620, wave: 'sine', sub: 1.5, gain: 0.45 } },
-    { id: 'simsek', paints: [{ name: 'Mat Siyah Sarı Şerit', color: '#111318', finish: 'matte', accent: '#ffd23f' }, { name: 'Ateş Turuncu', color: '#ff5a12', finish: 'gloss', accent: '#111318' }, { name: 'Neon Yeşil', color: '#39d353', finish: 'gloss', accent: '#111318' }, { name: 'Mor Metalik', color: '#6a2bd9', finish: 'metal', accent: '#21d4fd' }], finish: 'matte', name: 'Şimşek', cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'simsek', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { base: 50, range: 175, wave: 'sawtooth', sub: 1.5, gain: 1.15 } },
-    { id: 'cinar', paints: [{ name: 'Efsane Turuncu', color: '#e8782a', finish: 'gloss', accent: '#f6efe0' }, { name: 'Bebek Mavisi', color: '#7ec6e8', finish: 'gloss', accent: '#f6efe0' }, { name: 'Çift Ton Krem-Vişne', color: '#ead9b0', finish: 'gloss', roof: '#8a1f2f' }, { name: 'Mat Zeytin', color: '#6b6b3a', finish: 'matte', accent: '#f6efe0' }], finish: 'gloss', name: 'Çınar A', cost: 680, desc: 'Klasik efsane', shape: 'cinar', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { base: 40, range: 140, wave: 'square', sub: 1.5, gain: 0.9 } },
-    { id: 'efe', paints: [{ name: 'Boğaz Mavisi', color: '#2f6fb0', finish: 'gloss' }, { name: 'Haki', color: '#75805a', finish: 'matte' }, { name: 'Gümüş', color: '#b9c1ca', finish: 'metal' }, { name: 'Çift Ton Bej-Kahve', color: '#dcc9a4', finish: 'gloss', roof: '#5c3a22' }], finish: 'gloss', name: 'Efe 131', cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'efe', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { base: 38, range: 150, wave: 'sawtooth', sub: 1.26, gain: 1.1 } },
-    { id: 'marmara', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: 'Marmara S', cost: 1200, desc: 'Sade sedan, sürprizli', shape: 'marmara', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { base: 52, range: 165, wave: 'triangle', sub: 1.5, gain: 1.2 } },
-    { id: 'liva', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: 'Liva', cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'liva', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { base: 56, range: 185, wave: 'triangle', sub: 2, gain: 1.15 } },
-    { id: 'bozkir', paints: [{ name: 'Kanyon Turuncusu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: 'Bozkır 4x4', cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'bozkir', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { base: 44, range: 160, wave: 'sawtooth', sub: 1.5, gain: 1.25 } },
+    { id: 'atmaca', paints: [{ name: 'Mahalle Beji', color: '#d9d4c7', finish: 'gloss' }, { name: 'Şarap Kırmızı', color: '#8e1b24', finish: 'metal' }, { name: 'Mat Asker Yeşili', color: '#4d5a3a', finish: 'matte' }, { name: 'Çift Ton Krem-Bordo', color: '#e6dcc2', finish: 'gloss', roof: '#6d1620' }], finish: 'gloss', name: 'Atmaca', cost: 0, desc: 'Her mahallenin emektarı', shape: 'atmaca', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { kind: 'old', cyl: 4, idle: 800, red: 5000, gears: 4, gain: 1 } },
+    { id: 'motor', paints: [{ name: 'Yarış Kırmızı', color: '#e8352e', finish: 'gloss', accent: '#ffe14d' }, { name: 'Elektrik Mavi', color: '#0a7cff', finish: 'metal', accent: '#ffffff' }, { name: 'Mat Siyah', color: '#1b1d22', finish: 'matte', accent: '#ff7a00' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl', accent: '#e8352e' }], finish: 'gloss', name: 'Motosiklet', cost: 100, desc: 'Dar sokakların kralı', shape: 'moto', maxSpeed: 445, accel: 610, turnRate: 3.3, grip: 4.5, driftGrip: 1.1, durability: 1.05, mass: 0.9, len: 36, wid: 16, color: '#e8352e', accent: '#ffe14d', engine: { kind: 'moto', cyl: 4, idle: 1500, red: 12500, gears: 6, gain: 0.8 } },
+    { id: 'granit', paints: [{ name: 'Gece Mavisi', color: '#1f3a68', finish: 'metal' }, { name: 'Kor Turuncu', color: '#e8551e', finish: 'metal' }, { name: 'Mat Gümüş', color: '#a7aeb7', finish: 'matte' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl' }], finish: 'metal', name: 'Granit SUV', cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'granit', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { kind: 'diesel', cyl: 4, idle: 750, red: 4300, gears: 6, gain: 1 } },
+    { id: 'elektra', paints: [{ name: 'Anadolu Kırmızı', color: '#b3122a', finish: 'metal' }, { name: 'Fırtına Grisi', color: '#4a5560', finish: 'metal' }, { name: 'Mat Toprak', color: '#8a6a4a', finish: 'matte' }, { name: 'Buz Mavisi', color: '#bcd9e6', finish: 'pearl' }], finish: 'metal', name: 'Elektra X1', cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'elektra', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { kind: 'ev', cyl: 6, idle: 0, red: 24000, gears: 1, gain: 0.7 } },
+    { id: 'simsek', paints: [{ name: 'Mat Siyah Sarı Şerit', color: '#111318', finish: 'matte', accent: '#ffd23f' }, { name: 'Ateş Turuncu', color: '#ff5a12', finish: 'gloss', accent: '#111318' }, { name: 'Neon Yeşil', color: '#39d353', finish: 'gloss', accent: '#111318' }, { name: 'Mor Metalik', color: '#6a2bd9', finish: 'metal', accent: '#21d4fd' }], finish: 'matte', name: 'Şimşek', cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'simsek', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { kind: 'turbo', cyl: 4, idle: 950, red: 7400, gears: 5, gain: 1 } },
+    { id: 'cinar', paints: [{ name: 'Efsane Turuncu', color: '#e8782a', finish: 'gloss', accent: '#f6efe0' }, { name: 'Bebek Mavisi', color: '#7ec6e8', finish: 'gloss', accent: '#f6efe0' }, { name: 'Çift Ton Krem-Vişne', color: '#ead9b0', finish: 'gloss', roof: '#8a1f2f' }, { name: 'Mat Zeytin', color: '#6b6b3a', finish: 'matte', accent: '#f6efe0' }], finish: 'gloss', name: 'Çınar A', cost: 680, desc: 'Klasik efsane', shape: 'cinar', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { kind: 'old', cyl: 3, idle: 700, red: 4600, gears: 4, gain: 1.05 } },
+    { id: 'efe', paints: [{ name: 'Boğaz Mavisi', color: '#2f6fb0', finish: 'gloss' }, { name: 'Haki', color: '#75805a', finish: 'matte' }, { name: 'Gümüş', color: '#b9c1ca', finish: 'metal' }, { name: 'Çift Ton Bej-Kahve', color: '#dcc9a4', finish: 'gloss', roof: '#5c3a22' }], finish: 'gloss', name: 'Efe 131', cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'efe', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { kind: 'old', cyl: 6, idle: 650, red: 5200, gears: 4, gain: 1 } },
+    { id: 'marmara', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: 'Marmara S', cost: 1200, desc: 'Sade sedan, sürprizli', shape: 'marmara', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { kind: 'inline', cyl: 4, idle: 800, red: 6400, gears: 5, gain: 1 } },
+    { id: 'liva', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: 'Liva', cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'liva', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { kind: 'thin', cyl: 3, idle: 950, red: 7200, gears: 5, gain: 0.95 } },
+    { id: 'bozkir', paints: [{ name: 'Kanyon Turuncusu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: 'Bozkır 4x4', cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'bozkir', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { kind: 'v8', cyl: 8, idle: 620, red: 5800, gears: 5, gain: 1.15 } },
   ],
 
   damage: {
@@ -3480,6 +3481,7 @@ class Game {
       this.stuckT = 0;
     }
     stepCar(p, steer, reverse ? -1 : 1, this.carSpec, surf, dt);
+    p.gas = reverse ? 0 : Math.abs(p.steer) > CONFIG.physics.cornerSteer ? 0.45 : 1; // Motor sesi gazı buradan okur
     if (this.hitCd > 0) this.hitCd -= dt;
 
     // Derin suya düştü: ölümsüzlükte duvar gibi davranır, testler ve geliştirici için
@@ -7935,7 +7937,7 @@ class Stage {
     scene.add(this.ring);
     const glowT = tex(T, 256, 256, (g, w) => {
       const c = g.createRadialGradient(w / 2, w / 2, w * 0.2, w / 2, w / 2, w / 2);
-      c.addColorStop(0, 'rgba(255,160,70,.5)'); c.addColorStop(1, 'rgba(255,120,40,0)');
+      c.addColorStop(0, 'rgba(255,160,70,.16)'); c.addColorStop(1, 'rgba(255,120,40,0)');
       g.fillStyle = c; g.fillRect(0, 0, w, w);
     });
     const glow = new T.Mesh(new T.PlaneGeometry(10, 10), new T.MeshBasicMaterial({ map: glowT, transparent: true, blending: T.AdditiveBlending, depthWrite: false }));
@@ -7980,8 +7982,27 @@ class Stage {
     this.dust = new T.Points(dg, new T.PointsMaterial({ color: '#ffcf90', size: 0.05, transparent: true, opacity: 0.8, blending: T.AdditiveBlending, depthWrite: false }));
     scene.add(this.dust);
 
+    // Temas gölgesi ve neon taban ışığı
+    const blob = (inner, outer) => tex(T, 256, 256, (g, w) => {
+      const c = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
+      c.addColorStop(0, inner); c.addColorStop(0.55, inner); c.addColorStop(1, outer);
+      g.fillStyle = c; g.fillRect(0, 0, w, w);
+    });
+    const shadow = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ map: blob('rgba(0,0,0,.92)', 'rgba(0,0,0,0)'), transparent: true, depthWrite: false }));
+    shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.045; shadow.scale.set(6.2, 3.3, 1);
+    this.neonA = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ map: blob('rgba(255,255,255,.75)', 'rgba(255,255,255,0)'), transparent: true, blending: T.AdditiveBlending, depthWrite: false, color: '#21d4fd' }));
+    this.neonA.rotation.x = -Math.PI / 2; this.neonA.position.y = 0.05; this.neonA.scale.set(7.2, 3.9, 1);
+    this.shadow = shadow;
     this.turn = new T.Group();
     scene.add(this.turn);
+    this.turn.add(this.neonA, shadow);
+    this.body = new T.Group();
+    this.turn.add(this.body);
+    this.flareMap = tex(T, 128, 128, (g, w) => {
+      const c = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
+      c.addColorStop(0, 'rgba(255,255,255,1)'); c.addColorStop(0.18, 'rgba(225,245,255,.75)'); c.addColorStop(1, 'rgba(160,210,255,0)');
+      g.fillStyle = c; g.fillRect(0, 0, w, w);
+    });
   }
 
   // shape: model, paint: boya
@@ -7989,24 +8010,45 @@ class Stage {
     const key = `${shape}|${paint.color}|${paint.finish}|${paint.roof || ''}|${paint.accent || ''}`;
     if (key === this.carKey || !this.ok) return;
     this.carKey = key;
-    const { T, turn } = this;
+    const { T, body: turn } = this;
     while (turn.children.length) {
       const o = turn.children.pop();
       o.traverse((m) => { if (m.geometry) m.geometry.dispose(); if (m.material) { if (m.material.map) m.material.map.dispose(); m.material.dispose(); } });
     }
     const car = buildCar(T, shape, { ...paint, premium: 1, caliper: '#ff3a2a' });
-    const { L } = car.userData;
+    const { L, W } = car.userData;
     const k = 4.6 / Math.max(L, 2.4);
     const pivot = new T.Group();
     car.position.x = -L / 2;
     pivot.add(car);
+    // Yanan farlar: burun tarafında parlayan iki nokta
+    if (shape !== 'moto') {
+      for (const s of [-1, 1]) {
+        const f = new T.Sprite(new T.SpriteMaterial({ map: this.flareMap, color: '#eaf6ff', transparent: true, blending: T.AdditiveBlending, depthWrite: false, opacity: 0.7 }));
+        f.position.set(-L / 2 - 0.02, 0.72, s * W * 0.36);
+        f.scale.setScalar(0.4);
+        f.userData.flare = true;
+        pivot.add(f);
+      }
+    }
     pivot.scale.setScalar(shape === 'moto' ? 1.5 : k);
     turn.add(pivot);
     // Yerde yansıma: ters çevrilmiş kopya
     const mirror = pivot.clone();
+    mirror.traverse((o) => { if (o.userData.flare) o.visible = false; });
     mirror.scale.y *= -1;
     mirror.position.y = -0.01;
     turn.add(mirror);
+  }
+
+  // Seçili aracın rengine yakın neon: çok koyu boyada camgöbeği kalır
+  setGlow(color) {
+    if (!this.ok) return;
+    const c = new this.T.Color(color);
+    const hsl = {};
+    c.getHSL(hsl);
+    if (hsl.s < 0.25 || hsl.l < 0.16) this.neonHue = 0.52;
+    else this.neonHue = hsl.h;
   }
 
   setMode(mode) {
@@ -8030,14 +8072,20 @@ class Stage {
     if (this.spinHold > 0) this.spinHold -= dt;
     else if (this.drag === null) this.angle += this.spin * dt;
     this.turn.rotation.y = this.angle;
+    // Hafif süspansiyon sallanması ve nabız gibi neon
+    this.body.position.y = 0.016 * Math.sin(t * 1.7);
+    this.body.rotation.x = 0.006 * Math.sin(t * 1.3);
+    this.body.rotation.z = 0.005 * Math.sin(t * 1.1 + 1);
+    this.neonA.material.opacity = 0.8 + 0.2 * Math.sin(t * 2.4);
+    this.neonA.material.color.setHSL(((this.neonHue ?? 0.52) + 0.04 * Math.sin(t * 0.5) + 1) % 1, 0.95, 0.58);
 
     const asp = this.cam.aspect;
     const portrait = asp < 1;
     const garage = this.mode === 'garage';
     // Araç genişliğe sığsın: kamera uzaklığı en boy oranından gelir
     const dist = Math.max(11, 11 / asp) * (garage ? 0.92 : 1);
-    const lift = portrait ? (garage ? -2.1 : -0.55) : 0;
-    const lateral = !portrait ? (garage ? 2.2 : -1.4) : 0;
+    const lift = portrait ? (garage ? -1.75 : -1.05) : 0;
+    const lateral = !portrait ? 2.2 : 0;
     const orbit = Math.sin(t * 0.14) * 0.07;
     const ease = Math.min(1, dt * 3);
     this.cx = this.cx === undefined ? dist : this.cx + (dist - this.cx) * ease;
@@ -10026,7 +10074,7 @@ function defaultSave() {
     coins: 0,
     owned: [CONFIG.cars[0].id],
     selected: CONFIG.cars[0].id,
-    settings: { sound: true, vibrate: true, ambient: true },
+    settings: { sound: true, vibrate: true, ambient: true, volume: 80 },
     dev: { god: false, startTime: 0 },
     tutorial: false,
     paints: {},
@@ -10050,6 +10098,7 @@ function sanitize(data) {
     d.settings.sound = data.settings.sound !== false;
     d.settings.vibrate = data.settings.vibrate !== false;
     d.settings.ambient = data.settings.ambient !== false;
+    if (Number.isFinite(data.settings.volume)) d.settings.volume = Math.max(0, Math.min(100, data.settings.volume));
   }
   if (data.dev) {
     d.dev.god = data.dev.god === true;
@@ -10138,13 +10187,42 @@ class Storage {
 // --- audio.js ---
 // Tüm sesler Web Audio ile üretilir; harici dosya yok.
 
+// Motor karakterleri. harm: ana sesin harmonikleri, sub: yarım perde gövde, high: çift perde vızıltı,
+// air: emiş gürültüsü, rough: tırtıl derinliği, roughRate: tırtılın ateşleme frekansına oranı, lp: süzgeç alt ve üst sınırı
+const ENGINE_KINDS = {
+  v8: { harm: [1, 0.85, 0.6, 0.42, 0.26, 0.14], sub: 0.75, high: 0.1, air: 0.05, rough: 0.2, roughRate: 0.25, lp: [260, 1500] },
+  thin: { harm: [0.55, 1, 0.7, 0.5, 0.42, 0.3], sub: 0.08, high: 0.34, air: 0.03, rough: 0.05, roughRate: 0.33, lp: [620, 3800] },
+  inline: { harm: [1, 0.7, 0.42, 0.26, 0.14], sub: 0.3, high: 0.16, air: 0.05, rough: 0.07, roughRate: 0.5, lp: [420, 2500] },
+  old: { harm: [1, 0.95, 0.75, 0.55, 0.3], sub: 0.5, high: 0.08, air: 0.09, rough: 0.62, roughRate: 0.25, lp: [240, 1150] },
+  turbo: { harm: [0.9, 0.8, 0.6, 0.5, 0.35, 0.25], sub: 0.4, high: 0.26, air: 0.16, rough: 0.1, roughRate: 0.5, lp: [420, 3000] },
+  diesel: { harm: [1, 0.9, 0.8, 0.6, 0.4], sub: 0.6, high: 0.06, air: 0.1, rough: 0.34, roughRate: 0.5, lp: [210, 850] },
+  moto: { harm: [0.7, 1, 0.85, 0.6, 0.5, 0.4], sub: 0.14, high: 0.3, air: 0.06, rough: 0.12, roughRate: 0.25, lp: [700, 4600] },
+  ev: { harm: [1, 0, 0.14, 0, 0.05], sub: 0, high: 0.44, air: 0, rough: 0, roughRate: 0, lp: [1800, 6500] },
+};
+
+// Hız oranından devir ve vites: vites büyüdükçe devir düşer, tepe devre ulaşınca sıradaki vitese atar
+function engineRpm(e, k) {
+  const n = e.gears;
+  const speed = Math.max(0, Math.min(1.1, k));
+  if (n === 1) return { rpm: e.idle + (e.red - e.idle) * Math.min(1, speed), gear: 0 };
+  const g = Math.min(n - 1, Math.floor(speed * n));
+  const within = Math.min(1, speed * n - g);
+  const low = g === 0 ? e.idle : e.red * 0.6;
+  return { rpm: low + (e.red - low) * within, gear: g };
+}
+
 class AudioEngine {
   constructor() {
     this.ctx = null;
     this.enabled = true;
     this.ambientOn = true;
     this.ambT = 2;
-    this.engine = { base: 46, range: 150, wave: 'sawtooth', sub: 1.5, gain: 1 };
+    this.engine = CONFIG.cars[0].engine;
+    this.volume = 0.8;
+    this.nightK = 0;
+    this.pv = null;
+    this.gear = 0;
+    this.shiftT = 0;
     this.coinStreak = 0;
     this.coinAt = 0;
     this.master = null;
@@ -10162,7 +10240,7 @@ class AudioEngine {
     const ctx = new AC();
     this.ctx = ctx;
     this.master = ctx.createGain();
-    this.master.gain.value = this.enabled ? 0.8 : 0;
+    this.master.gain.value = this.enabled ? this.volume : 0;
     const comp = ctx.createDynamicsCompressor();
     this.master.connect(comp);
     comp.connect(ctx.destination);
@@ -10173,25 +10251,49 @@ class AudioEngine {
     const d = this.noise.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
 
-    // Motor: iki testere + alçak geçiren
+    // Motor: ateşleme sesi, yarım perde gövde, çift perde vızıltı ve emiş gürültüsü. Hepsi tırtıl kazancından geçer
     this.engGain = ctx.createGain();
     this.engGain.gain.value = 0;
     this.engFilter = ctx.createBiquadFilter();
     this.engFilter.type = 'lowpass';
     this.engFilter.frequency.value = 500;
-    this.eng1 = ctx.createOscillator();
-    this.eng2 = ctx.createOscillator();
-    this.eng1.type = 'sawtooth';
-    this.eng2.type = 'square';
-    this.eng1.connect(this.engFilter);
-    const sub = ctx.createGain();
-    sub.gain.value = 0.4;
-    this.eng2.connect(sub);
-    sub.connect(this.engFilter);
-    this.engFilter.connect(this.engGain);
+    this.engRough = ctx.createGain();
+    this.engRough.gain.value = 1;
+    this.engFilter.connect(this.engRough);
+    this.engRough.connect(this.engGain);
     this.engGain.connect(this.master);
-    this.eng1.start();
-    this.eng2.start();
+    const layer = (type) => {
+      const o = ctx.createOscillator();
+      o.type = type;
+      const g = ctx.createGain();
+      o.connect(g);
+      g.connect(this.engFilter);
+      o.start();
+      return { o, g };
+    };
+    this.eng1 = layer('sawtooth');
+    this.eng2 = layer('sawtooth');
+    this.eng3 = layer('square');
+    const air = ctx.createBufferSource();
+    air.buffer = this.noise;
+    air.loop = true;
+    this.engAirF = ctx.createBiquadFilter();
+    this.engAirF.type = 'bandpass';
+    this.engAirF.Q.value = 1.2;
+    this.engAir = ctx.createGain();
+    this.engAir.gain.value = 0;
+    air.connect(this.engAirF);
+    this.engAirF.connect(this.engAir);
+    this.engAir.connect(this.engGain);
+    air.start();
+    this.lfo = ctx.createOscillator();
+    this.lfo.type = 'sine';
+    this.lfoGain = ctx.createGain();
+    this.lfoGain.gain.value = 0;
+    this.lfo.connect(this.lfoGain);
+    this.lfoGain.connect(this.engRough.gain);
+    this.lfo.start();
+    this.waves = {};
 
     // Drift cızırtısı: bant geçiren gürültü
     const nsrc = ctx.createBufferSource();
@@ -10273,8 +10375,44 @@ class AudioEngine {
   setEngine(e) {
     this.engine = e;
     if (!this.eng1) return;
-    this.eng1.type = e.wave;
-    this.eng2.type = e.wave === 'sine' ? 'sine' : 'square';
+    const K = ENGINE_KINDS[e.kind] || ENGINE_KINDS.inline;
+    this.kind = K;
+    if (!this.waves[e.kind]) {
+      const real = new Float32Array(K.harm.length + 1);
+      const imag = new Float32Array(K.harm.length + 1);
+      K.harm.forEach((v, i) => { imag[i + 1] = v; });
+      this.waves[e.kind] = this.ctx.createPeriodicWave(real, imag);
+    }
+    this.eng1.o.setPeriodicWave(this.waves[e.kind]);
+    const t = this.ctx.currentTime;
+    this.eng2.g.gain.setTargetAtTime(K.sub, t, 0.02);
+    this.eng3.g.gain.setTargetAtTime(K.high, t, 0.02);
+    this.lfoGain.gain.setTargetAtTime(K.rough * 0.5, t, 0.02);
+    this.engAir.gain.setTargetAtTime(K.air, t, 0.02);
+  }
+
+  // Motor ön izlemesi: rev gazlama, start kontak ve çalışma
+  preview(e, mode = 'rev') {
+    if (!this.ctx || !this.enabled) return;
+    this.setEngine(e);
+    this.pv = { mode, at: this.ctx.currentTime, len: mode === 'start' ? 1.5 : 1.25 };
+    if (mode === 'start') {
+      // Marş dişlisi: hızlı tekrar eden kısa vuruşlar
+      if (e.kind !== 'ev') for (let i = 0; i < 6; i++) this.tone(120 + i * 8, 0.05, 0.05, 'square', 70, i * 0.055);
+      else this.tone(500, 0.4, 0.04, 'sine', 1800);
+    }
+  }
+
+  // Ön izleme eğrisi: 0-1 arası ilerlemeden hız oranı ve gaz
+  previewState(pv, now) {
+    const u = (now - pv.at) / pv.len;
+    if (u >= 1) return null;
+    if (pv.mode === 'start') {
+      if (u < 0.22) return { k: 0, gas: 0, vol: 0 };
+      const v = (u - 0.22) / 0.78;
+      return { k: 0.28 * Math.sin(Math.min(1, v * 1.8) * Math.PI) + 0.05, gas: v < 0.5 ? 1 : 0.4, vol: Math.min(1, v * 6) * (1 - v * v) };
+    }
+    return { k: 0.62 * Math.sin(u * Math.PI), gas: u < 0.55 ? 1 : 0.2, vol: Math.min(1, u * 8) * Math.min(1, (1 - u) * 5) };
   }
 
   setAmbient(on) {
@@ -10282,9 +10420,14 @@ class AudioEngine {
     if (this.ambGain) this.ambGain.gain.setTargetAtTime(on ? 0.035 : 0, this.ctx.currentTime, 0.2);
   }
 
+  setVolume(v) {
+    this.volume = v;
+    if (this.master) this.master.gain.setTargetAtTime(this.enabled ? v : 0, this.ctx.currentTime, 0.02);
+  }
+
   setEnabled(on) {
     this.enabled = on;
-    if (this.master) this.master.gain.setTargetAtTime(on ? 0.8 : 0, this.ctx.currentTime, 0.02);
+    if (this.master) this.master.gain.setTargetAtTime(on ? this.volume : 0, this.ctx.currentTime, 0.02);
   }
 
   suspend() {
@@ -10301,14 +10444,38 @@ class AudioEngine {
     if (!c) return;
     const t = c.currentTime;
     const p = game.player;
-    const k = Math.min(1.1, p.speed / game.carSpec.maxSpeed);
     const on = active && game.state === 'play';
+    this.nightK = game.daylight ? game.daylight.k : 0;
+    let k = Math.min(1.1, p.speed / game.carSpec.maxSpeed);
+    let gas = on ? (p.gas ?? 1) : 0;
+    let vol = on ? 1 : 0;
+    // Ön izleme oyundan bağımsız çalar. Oyun başlayınca yerini gerçek sürüşe bırakır
+    if (this.pv) {
+      const s = this.previewState(this.pv, t);
+      if (s && !(on && this.pv.mode !== 'start')) { k = s.k; gas = s.gas; vol = Math.max(vol * 0.6, s.vol); }
+      if (!s) { this.pv = null; if (this.engine !== game.carSpec.engine) this.setEngine(game.carSpec.engine); }
+    }
     const e = this.engine;
-    const base = e.base + e.range * k + (p.drifting ? e.range * 0.22 : 0);
-    this.eng1.frequency.setTargetAtTime(base, t, 0.06);
-    this.eng2.frequency.setTargetAtTime(base * e.sub, t, 0.06);
-    this.engFilter.frequency.setTargetAtTime(300 + 1300 * k, t, 0.08);
-    this.engGain.gain.setTargetAtTime(on ? (0.05 + 0.09 * k) * e.gain : 0, t, 0.08);
+    const K = this.kind;
+    // Kayarken tekerlek boşa döner: devir fırlar
+    const spin = on && p.drifting ? 0.09 : 0;
+    const state = engineRpm(e, k + spin);
+    if (state.gear !== this.gear) {
+      if (state.gear > this.gear) this.shiftT = t + 0.09; // Vites atarken gaz bir an kesilir
+      this.gear = state.gear;
+    }
+    const cut = t < this.shiftT ? 0.45 : 1;
+    const rpm = state.rpm * (gas < 0.2 ? 0.86 : 1);
+    const f0 = Math.max(18, (rpm / 60) * (e.cyl / 2));
+    const ratio = Math.min(1, rpm / e.red);
+    const glide = t < this.shiftT ? 0.03 : 0.07;
+    this.eng1.o.frequency.setTargetAtTime(f0, t, glide);
+    this.eng2.o.frequency.setTargetAtTime(f0 / 2, t, glide);
+    this.eng3.o.frequency.setTargetAtTime(f0 * 2, t, glide);
+    this.lfo.frequency.setTargetAtTime(Math.max(4, f0 * K.roughRate), t, 0.08);
+    this.engAirF.frequency.setTargetAtTime(500 + 1900 * ratio, t, 0.08);
+    this.engFilter.frequency.setTargetAtTime(K.lp[0] + (K.lp[1] - K.lp[0]) * ratio * (0.35 + 0.65 * gas), t, 0.07);
+    this.engGain.gain.setTargetAtTime(vol * (0.05 + 0.05 * ratio + 0.05 * gas) * e.gain * cut, t, 0.05);
 
     // Ara sıra sokak sesleri
     if (this.ambientOn && this.enabled) {
@@ -10442,7 +10609,19 @@ class AudioEngine {
   }
 
   // Ortam: kuş, uzak korna, çay kaşığı, uzaktan seslenen satıcı
+  // Gece: uzaktan havlayan köpek ve cırcır böceği
+  nightSound() {
+    if (Math.random() < 0.55) {
+      const n = 2 + Math.floor(Math.random() * 3);
+      const f = 330 + Math.random() * 160;
+      for (let i = 0; i < n; i++) { this.tone(f, 0.11, 0.022, 'sawtooth', f * 0.62, i * 0.24); this.tone(f * 1.5, 0.08, 0.008, 'square', f, i * 0.24); }
+    } else {
+      for (let i = 0; i < 8; i++) this.tone(4300, 0.035, 0.007, 'sine', 0, i * 0.075);
+    }
+  }
+
   streetSound() {
+    if (this.nightK > 0.6 && Math.random() < 0.6) { this.nightSound(); return; }
     const r = Math.random();
     if (r < 0.34) {
       // Kuş cıvıltısı
@@ -10654,11 +10833,12 @@ class UI {
   bind() {
     const a = this.actions;
     const click = (id, fn) => $(id).addEventListener('click', () => { a.tap(); fn(); });
-    click('btn-play', () => a.play());
+    click('btn-play', () => a.start());
+    click('btn-mute', () => { const d2 = this.storage.data; d2.settings.sound = !d2.settings.sound; this.storage.save(); this.syncSettings(); a.applySettings(); });
     click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
     click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
-    click('car-prev', () => this.stepCar(-1));
-    click('car-next', () => this.stepCar(1));
+    click('car-prev', () => { this.stepCar(-1); a.preview(CONFIG.cars[this.gi]); });
+    click('car-next', () => { this.stepCar(1); a.preview(CONFIG.cars[this.gi]); });
     click('btn-settings', () => { this.show('settings'); a.stage(null); });
     click('btn-howto', () => { this.show('howto'); a.stage(null); });
     for (const b of document.querySelectorAll('[data-back]')) {
@@ -10674,6 +10854,7 @@ class UI {
 
     const d = this.storage.data;
     $('set-sound').addEventListener('change', (e) => { d.settings.sound = e.target.checked; this.storage.save(); a.applySettings(); });
+    $('set-volume').addEventListener('input', (e) => { d.settings.volume = Number(e.target.value); this.storage.save(); a.applySettings(); });
     $('set-ambient').addEventListener('change', (e) => { d.settings.ambient = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-vibrate').addEventListener('change', (e) => { d.settings.vibrate = e.target.checked; this.storage.save(); a.applySettings(); });
     $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
@@ -10688,10 +10869,34 @@ class UI {
   syncSettings() {
     const d = this.storage.data;
     $('set-sound').checked = d.settings.sound;
+    $('set-volume').value = String(d.settings.volume);
+    this.syncMute();
     $('set-vibrate').checked = d.settings.vibrate;
     $('set-ambient').checked = d.settings.ambient;
     $('dev-god').checked = d.dev.god;
     $('dev-start').value = String(d.dev.startTime);
+  }
+
+  syncMute() {
+    $('btn-mute').classList.toggle('muted', !this.storage.data.settings.sound);
+  }
+
+  // Yazılar harf harf belirir: her harf kendi gecikmesiyle neon gibi yanar
+  intro() {
+    const fill = (id, text, step, start, cls) => {
+      const el = $(id);
+      el.textContent = '';
+      [...text].forEach((ch, i) => {
+        const s = document.createElement('i');
+        s.className = cls;
+        s.setAttribute('aria-hidden', 'true');
+        s.textContent = ch === ' ' ? '\u00a0' : ch;
+        s.style.animationDelay = `${start + i * step}ms`;
+        el.appendChild(s);
+      });
+    };
+    fill('logo', 'DRIFT LAB', 95, 150, 'lt');
+    fill('maker', 'Çağlar Sağlam tarafından yapıldı', 24, 1150, 'mk');
   }
 
   show(name) {
@@ -10722,7 +10927,7 @@ class UI {
     setTimeout(() => {
       el.hidden = true;
       done();
-    }, 3000);
+    }, 700);
   }
 
   buildStars() {
@@ -10926,7 +11131,7 @@ class UI {
       t.textContent = label;
       const bar = document.createElement('i');
       const fill = document.createElement('b');
-      fill.style.width = `${Math.round(25 + value * 75)}%`;
+      fill.style.setProperty('--w', `${Math.round(25 + value * 75)}%`);
       bar.appendChild(fill);
       const n = document.createElement('em');
       n.textContent = text;
@@ -10934,8 +11139,10 @@ class UI {
       stats.appendChild(row);
     };
     const norm = (v, a, b) => (v - a) / (b - a);
+    const range = (key) => { const v = cars.map((c) => c[key]); return [Math.min(...v), Math.max(...v)]; };
     stat('Hız', norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
-    stat('Kayma', norm(base.driftGrip / car.driftGrip, 1, base.driftGrip / top.driftGrip), String(Math.round((base.driftGrip / car.driftGrip) * 100)));
+    stat('İvme', norm(car.accel, ...range('accel')), String(Math.round(car.accel / 7)));
+    stat('Yol tutuş', norm(car.grip, ...range('grip')), String(Math.round(car.grip * 20)));
     stat('Dayanıklılık', norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
 
     const act = $('garage-action');
@@ -10948,7 +11155,7 @@ class UI {
     }
     act.onclick = () => {
       this.actions.tap();
-      if (owned) this.storage.select(car.id);
+      if (owned) { this.storage.select(car.id); this.actions.preview(car); }
       else if (this.storage.buy(car.id)) this.actions.purchased();
       this.actions.carChanged();
       this.renderGarage();
@@ -10965,11 +11172,11 @@ class UI {
       const label = document.createElement('span');
       label.textContent = has ? c.name : `${c.cost}`;
       b.append(art, label);
-      b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.gp = 0; this.renderGarage(); });
+      b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.gp = 0; this.renderGarage(); this.actions.preview(c); });
       list.appendChild(b);
     });
     const on = list.children[this.gi];
-    if (on && on.scrollIntoView) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+    if (on) list.scrollLeft = on.offsetLeft - list.clientWidth / 2 + on.offsetWidth / 2;
   }
 
   stepCar(dir) {
@@ -10983,6 +11190,84 @@ class UI {
   atlasLoaded() {
     if (!$('garage').hidden) this.renderGarage();
   }
+}
+
+// --- transition.js ---
+// BAŞLA geçişi: hız çizgileriyle yakınlaşma, beyaz parlama, sonra oyuna dairesel açılış. Tek tuval, DOM yükü yok.
+const RUSH = 720; // Çizgilerin hızlandığı süre (ms)
+const IRIS = 520; // Dairesel açılış süresi (ms)
+
+function warp(canvas, midpoint, done) {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.hidden = false;
+  const g = canvas.getContext('2d');
+  g.scale(dpr, dpr);
+  const R = Math.hypot(w, h) * 0.56;
+  const cx = w / 2;
+  const cy = h * 0.46;
+  const lines = [];
+  for (let i = 0; i < 90; i++) {
+    lines.push({ a: Math.random() * 6.283, r: 0.1 + Math.random() * 0.9, sp: 0.6 + Math.random() * 1.2, w: 0.8 + Math.random() * 2.6, hot: Math.random() < 0.3 });
+  }
+  const t0 = performance.now();
+  let swapped = false;
+  const step = (now) => {
+    const t = now - t0;
+    g.clearRect(0, 0, w, h);
+    if (t < RUSH) {
+      const k = t / RUSH;
+      const e = k * k;
+      g.fillStyle = `rgba(4,6,16,${e * 0.82})`;
+      g.fillRect(0, 0, w, h);
+      g.lineCap = 'round';
+      for (const l of lines) {
+        const head = ((l.r + e * l.sp * 2.4) % 1) * R * (0.5 + e);
+        const len = 30 + e * R * 0.62 * l.sp;
+        const ca = Math.cos(l.a); const sa = Math.sin(l.a);
+        g.strokeStyle = l.hot ? 'rgba(125,255,207,.9)' : 'rgba(255,255,255,.85)';
+        g.globalAlpha = Math.min(1, k * 2.2);
+        g.lineWidth = l.w * (1 + e * 2);
+        g.beginPath();
+        g.moveTo(cx + ca * head, cy + sa * head);
+        g.lineTo(cx + ca * (head + len), cy + sa * (head + len));
+        g.stroke();
+      }
+      g.globalAlpha = 1;
+      if (k > 0.7) {
+        g.fillStyle = `rgba(255,255,255,${(k - 0.7) / 0.3})`;
+        g.fillRect(0, 0, w, h);
+      }
+      requestAnimationFrame(step);
+      return;
+    }
+    if (!swapped) {
+      swapped = true;
+      midpoint();
+    }
+    const k = Math.min(1, (t - RUSH) / IRIS);
+    const e = 1 - (1 - k) * (1 - k) * (1 - k);
+    g.fillStyle = '#04060f';
+    g.fillRect(0, 0, w, h);
+    g.globalCompositeOperation = 'destination-out';
+    g.beginPath();
+    g.arc(cx, h / 2, e * R * 1.05, 0, 6.283);
+    g.fill();
+    g.globalCompositeOperation = 'source-over';
+    // Açılan dairenin neon kenarı
+    g.strokeStyle = `rgba(125,255,207,${1 - k})`;
+    g.lineWidth = 6;
+    g.beginPath();
+    g.arc(cx, h / 2, e * R * 1.05, 0, 6.283);
+    g.stroke();
+    if (k < 1) { requestAnimationFrame(step); return; }
+    canvas.hidden = true;
+    if (done) done();
+  };
+  requestAnimationFrame(step);
 }
 
 // --- main.js ---
@@ -11017,6 +11302,8 @@ function vibrate(ms) {
 
 function applySettings() {
   audio.setEnabled(storage.data.settings.sound);
+  audio.setVolume(storage.data.settings.volume / 100);
+  ui.syncMute();
   audio.setAmbient(storage.data.settings.ambient);
 }
 
@@ -11054,6 +11341,22 @@ function play() {
   keepAwake(true);
 }
 
+// BAŞLA: motor marşı ve sinematik geçiş. Otomatik testler ve hareket azaltma tercihinde doğrudan başlar
+let starting = false;
+function start() {
+  if (starting) return;
+  const quick = (navigator.webdriver && !params.has('fx')) || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  audio.unlock();
+  if (quick) { play(); return; }
+  starting = true;
+  audio.preview(storage.selectedCar().engine, 'start');
+  document.body.classList.add('warping');
+  warp(document.getElementById('warp'), () => {
+    document.body.classList.remove('warping');
+    play();
+  }, () => { starting = false; });
+}
+
 function toMenu() {
   paused = false;
   ui.setHud(false);
@@ -11062,6 +11365,7 @@ function toMenu() {
   game.startAttract();
   ui.refreshMenu();
   ui.show('menu');
+  ui.intro();
   showStage('menu');
   keepAwake(false);
 }
@@ -11077,6 +11381,7 @@ function syncStage(car = storage.selectedCar(), paintIdx = storage.paintIndex(ca
   if (!stage || !stage.ok) return;
   const paint = car.paints[paintIdx] || car.paints[0];
   stage.setCar(car.shape, { ...paint, accent: paint.accent || car.accent });
+  stage.setGlow(paint.color);
 }
 
 function loadThree() {
@@ -11114,7 +11419,8 @@ function resume() {
 
 const ui = new UI(storage, {
   tap() { audio.unlock(); },
-  play, toMenu, pause, resume, applySettings,
+  play, start, toMenu, pause, resume, applySettings,
+  preview(car) { audio.unlock(); audio.preview(car.engine, 'rev'); },
   carChanged() { game.carSpec = storage.selectedCar(); game.paint = storage.paintIndex(game.carSpec.id); },
   previewCar(car, paintIdx) { syncStage(car, paintIdx); },
   stage(mode) { showStage(mode); },

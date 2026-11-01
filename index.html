@@ -61,14 +61,16 @@
     <div class="sea"></div>
   </div>
   <div class="menu-coins"><i class="coin"></i><span id="menu-coins">0</span></div>
-  <h1 class="logo" aria-label="Drift Lab"><svg class="logo-mark" viewBox="0 0 120 96" aria-hidden="true"><path class="lm-skid" d="M4 90C26 88 34 70 40 56M18 92C40 88 48 72 54 60"/><path class="lm-flask" d="M52 8h28M59 8v28L38 80q-3 8 6 8h46q9 0 6-8L73 36V8"/><path class="lm-liquid" d="M47 62h40l9 20q1 3-3 3H41q-4 0-3-3z"/><circle class="lm-bub" cx="60" cy="72" r="4"/><circle class="lm-bub" cx="74" cy="66" r="3"/><circle class="lm-bub" cx="67" cy="48" r="2.5"/></svg><span>DRIFT</span><em>LAB</em></h1>
+  <h1 class="logo" id="logo" aria-label="Drift Lab"></h1>
+  <p class="maker" id="maker" aria-label="Çağlar Sağlam tarafından yapıldı"></p>
+  <button id="btn-mute" class="mute" aria-label="Sesi aç veya kapat"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="wave" d="M16 8a5 5 0 0 1 0 8M18.500 5.500a9 9 0 0 1 0 13"/><path class="off" d="M16 9l5 6M21 9l-5 6"/></svg></button>
   <button id="btn-garage2" class="car-tag"><b id="menu-car-name"></b><small id="menu-car-paint"></small></button>
   <div class="menu-panel">
     <p id="menu-best" class="sub"></p>
     <nav>
-      <button id="btn-play" class="play"><span>OYNA</span><i></i></button>
+      <button id="btn-play" class="start"><i class="ring"></i><i class="ring r2"></i><span>BAŞLA</span></button>
       <div class="row">
-        <button id="btn-garage" class="tile t-garage"><svg viewBox="0 0 24 24"><path d="M3 11l9-6 9 6v9h-3v-7H6v7H3zM8 15h8v2H8zM8 18h8v2H8z"/></svg><span>Garaj</span></button>
+        <button id="btn-garage" class="tile t-garage"><svg viewBox="0 0 24 24"><path d="M3 11l9-6 9 6v9h-3v-7H6v7H3zM8 15h8v2H8zM8 18h8v2H8z"/></svg><span>Araba Seç</span></button>
         <button id="btn-settings" class="tile t-set"><svg viewBox="0 0 24 24"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5zM19.4 13l2-1.5-2-3.4-2.3.9a7 7 0 0 0-1.7-1L15 5h-4l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 1.7 1L11 22h4l.4-2.5a7 7 0 0 0 1.7-1l2.3.9 2-3.4-2-1.5a7 7 0 0 0 0-2z" transform="translate(0 -1.5)"/></svg><span>Ayarlar</span></button>
         <button id="btn-howto" class="tile t-how"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm1 14h-2v-2h2zm2-7c0 2-3 2-3 4h-2c0-3 3-3 3-4.500A1.500 1.500 0 0 0 10 9H8a4 4 0 0 1 7 1z"/></svg><span>Nasıl?</span></button>
       </div>
@@ -97,6 +99,7 @@
   <header><button class="back" data-back="menu" aria-label="Geri">←</button><h2>Ayarlar</h2></header>
   <div class="form">
     <label class="toggle"><span>Ses</span><input id="set-sound" type="checkbox"><i></i></label>
+    <label class="volume"><span>Ses düzeyi</span><input id="set-volume" type="range" min="0" max="100" step="5"></label>
     <label class="toggle"><span>Sokak ambiyansı</span><input id="set-ambient" type="checkbox"><i></i></label>
     <label class="toggle"><span>Titreşim</span><input id="set-vibrate" type="checkbox"><i></i></label>
     <div id="dev-panel" hidden>
@@ -155,6 +158,7 @@
   </div>
 </section>
 
+<canvas id="warp" hidden></canvas>
 <div id="splash" hidden><p>Drift Lab</p></div>
 
 <script>

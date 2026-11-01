@@ -10,7 +10,7 @@ export function defaultSave() {
     coins: 0,
     owned: [CONFIG.cars[0].id],
     selected: CONFIG.cars[0].id,
-    settings: { sound: true, vibrate: true, ambient: true },
+    settings: { sound: true, vibrate: true, ambient: true, volume: 80 },
     dev: { god: false, startTime: 0 },
     tutorial: false,
     paints: {},
@@ -34,6 +34,7 @@ export function sanitize(data) {
     d.settings.sound = data.settings.sound !== false;
     d.settings.vibrate = data.settings.vibrate !== false;
     d.settings.ambient = data.settings.ambient !== false;
+    if (Number.isFinite(data.settings.volume)) d.settings.volume = Math.max(0, Math.min(100, data.settings.volume));
   }
   if (data.dev) {
     d.dev.god = data.dev.god === true;

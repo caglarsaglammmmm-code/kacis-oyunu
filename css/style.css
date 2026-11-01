@@ -360,3 +360,98 @@ body:not(.has3d) .garage3d { background: linear-gradient(160deg, #15183a, #0a0c1
   #hud-time { font-size: 22px; }
   #hud-powers { top: calc(var(--safe-t) + 92px); left: calc(var(--safe-l) + 12px); }
 }
+
+/* v8: giriş ekranı. Harf harf neon başlık, yuvarlak BAŞLA, cam düğmeler */
+#splash p { font: 400 clamp(34px, 9vw, 60px)/1 Bungee, sans-serif; }
+.logo { top: calc(var(--safe-t) + 4.2vh); left: 0; right: 0; padding: 0 8px; white-space: nowrap; font-size: clamp(44px, 14.4vw, 118px); line-height: 1; color: #fff; }
+.logo::after { display: none; }
+.logo i.lt { display: inline-block; font-style: normal; opacity: 0; color: #f4fffb; text-shadow: 0 0 6px #7dffcf, 0 0 20px #21d4a0, 0 0 42px #0fb6a0, 0 3px 0 #0a5a50; animation: letterIn .62s cubic-bezier(.2, .8, .2, 1) both, neonHum 4.6s 2.6s infinite; }
+.logo i.lt:nth-child(n+7) { color: #ffe9a6; text-shadow: 0 0 6px #ffd23f, 0 0 20px #ff8a1f, 0 0 42px #ff4f1f, 0 3px 0 #7a2b0a; }
+@keyframes letterIn {
+  0% { opacity: 0; transform: translateY(-18px) scale(1.5); filter: blur(7px); }
+  45% { opacity: 1; transform: translateY(2px) scale(.96); filter: blur(0); }
+  58% { opacity: .35; }
+  68% { opacity: 1; transform: translateX(-2px); }
+  82% { transform: translateX(2px); opacity: .7; }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+@keyframes neonHum { 0%, 91%, 100% { opacity: 1; } 92% { opacity: .55; } 93.5% { opacity: 1; } 95% { opacity: .7; } }
+.maker { position: absolute; left: 0; right: 0; top: calc(var(--safe-t) + 4.2vh + clamp(52px, 16.4vw, 128px)); margin: 0; text-align: center; font: 800 clamp(12px, 3.5vw, 16px)/1.2 Nunito, sans-serif; letter-spacing: .05em; color: #cffff0; pointer-events: none !important; }
+.maker i.mk { display: inline-block; font-style: normal; opacity: 0; text-shadow: 0 0 8px rgba(125, 255, 207, .8), 0 1px 3px #000; animation: makerIn .38s ease-out both; }
+@keyframes makerIn { 0% { opacity: 0; transform: translateY(6px); filter: blur(3px); } 70% { opacity: 1; } 85% { opacity: .5; } 100% { opacity: 1; transform: none; filter: none; } }
+.has3d .menu { background: linear-gradient(180deg, rgba(4, 4, 18, .72), rgba(4, 4, 18, .1) 24%, transparent 54%, rgba(4, 4, 16, .9) 82%); }
+
+.mute { position: absolute; left: calc(var(--safe-l) + 12px); top: calc(var(--safe-t) + 10px); z-index: 3; width: 44px; height: 44px; padding: 9px; border-radius: 50%; }
+.mute svg { width: 100%; height: 100%; fill: #eafcff; stroke: #eafcff; stroke-width: 0; }
+.mute .wave, .mute .off { fill: none; stroke-width: 2; stroke-linecap: round; }
+.mute .off { display: none; stroke: #ff6a5a; }
+.mute.muted .off { display: block; }
+.mute.muted .wave { display: none; }
+.mute, .tile, .car-tag, .btn.apk { background: rgba(255, 255, 255, .09); border: 1px solid rgba(255, 255, 255, .24); -webkit-backdrop-filter: blur(10px) saturate(1.4); backdrop-filter: blur(10px) saturate(1.4); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 6px 18px rgba(0, 0, 0, .35); transition: transform .18s cubic-bezier(.3, 1.6, .5, 1), box-shadow .18s, background .18s; cursor: pointer; color: #fff; }
+.mute:active, .tile:active, .car-tag:active, .btn.apk:active { transform: scale(.93); background: rgba(125, 255, 207, .2); box-shadow: 0 0 22px rgba(125, 255, 207, .55); }
+.car-tag:active { transform: translateX(-50%) scale(.95); }
+.tile { clip-path: none; border-radius: 18px; height: 70px; }
+.btn.apk { clip-path: none; border-radius: 14px; min-height: 40px; font-size: 14px; }
+.car-tag { clip-path: none; border-radius: 16px; bottom: calc(var(--safe-b) + 336px); padding: 6px 18px; }
+
+.menu nav { align-items: center; }
+.menu nav .row { width: 100%; }
+.start { position: relative; width: 148px; height: 148px; margin: 2px 0 6px; border: 0; border-radius: 50%; cursor: pointer; color: #06241c; background: radial-gradient(circle at 34% 28%, #eafff8 0, #7dffcf 26%, #17d3a0 62%, #098a72 100%); box-shadow: 0 0 0 4px rgba(255, 255, 255, .5), 0 0 34px #21d4a0, 0 0 80px rgba(33, 212, 160, .6), inset 0 -10px 22px rgba(0, 70, 60, .5); touch-action: manipulation; transition: transform .2s cubic-bezier(.3, 1.6, .5, 1); animation: startBeat 1.5s ease-in-out infinite; }
+.start span { position: relative; z-index: 1; font: 400 33px/1 Bungee, sans-serif; letter-spacing: .03em; text-shadow: 0 1px 0 rgba(255, 255, 255, .7); }
+.start:active { transform: scale(.9); }
+.start .ring { position: absolute; inset: -4px; border-radius: 50%; border: 3px solid #7dffcf; pointer-events: none; animation: ringOut 1.8s cubic-bezier(.2, .6, .3, 1) infinite; }
+.start .ring.r2 { animation-delay: .9s; }
+@keyframes ringOut { 0% { transform: scale(1); opacity: .95; } 100% { transform: scale(1.62); opacity: 0; } }
+@keyframes startBeat { 0%, 100% { filter: brightness(1); } 12% { filter: brightness(1.2); } 24% { filter: brightness(1); } 36% { filter: brightness(1.14); } 48% { filter: brightness(1); } }
+.menu-panel .sub { margin: 0 0 8px; }
+
+/* Geçiş */
+#warp { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; }
+.warping #stage3d { transition: transform .72s cubic-bezier(.6, 0, 1, .4); transform: scale(1.9); }
+.warping .menu > * { transition: opacity .3s; opacity: 0; }
+
+/* Ayarlar: ses düzeyi */
+.volume { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; }
+.volume input { flex: 1; max-width: 62%; accent-color: #21d4a0; height: 28px; }
+
+/* v8: garaj. Büyük araç, cam sayfa, dolan çubuklar, seçili karta neon */
+.gsheet { max-height: 56%; background: linear-gradient(180deg, rgba(10, 14, 30, .28), rgba(6, 8, 20, .88) 26%); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border-top: 0; }
+.spec h3 { font-size: 30px; color: #fff; text-shadow: 0 0 12px #7dffcf, 0 0 28px #21d4a0; }
+.stat i { background: rgba(255, 255, 255, .1); border-radius: 6px; overflow: hidden; }
+.stat i b { display: block; height: 100%; width: var(--w); background: linear-gradient(90deg, #17d3a0, #7dffcf 70%, #fff); border-radius: 6px; box-shadow: 0 0 10px rgba(125, 255, 207, .8); animation: barIn .55s cubic-bezier(.2, .8, .2, 1) both; transform-origin: left; }
+@keyframes barIn { from { transform: scaleX(.05); } }
+.spec .btn { border-radius: 14px; clip-path: none; }
+#garage-list { position: relative; scroll-snap-type: x proximity; gap: 10px; padding: 12px 8px 6px; -webkit-overflow-scrolling: touch; }
+.thumb { scroll-snap-align: center; width: 112px; border-radius: 14px; clip-path: none; background: rgba(255, 255, 255, .07); transition: transform .2s, box-shadow .2s, border-color .2s; }
+.thumb .car-art { width: 96px; }
+.thumb.on { transform: translateY(-3px) scale(1.04); border-color: #7dffcf; background: rgba(125, 255, 207, .14); box-shadow: 0 0 18px rgba(125, 255, 207, .7), inset 0 0 12px rgba(125, 255, 207, .25); }
+.thumb.selected span { color: #7dffcf; }
+.nav-arrow { border-radius: 50%; clip-path: none; width: 48px; height: 48px; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .24); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .logo { left: calc(var(--safe-l) + 62px); right: auto; top: calc(var(--safe-t) + 8px); font-size: 44px; padding: 0; }
+  .maker { left: calc(var(--safe-l) + 64px); right: auto; top: calc(var(--safe-t) + 58px); text-align: left; font-size: 12px; }
+  .start { width: 106px; height: 106px; }
+  .start span { font-size: 24px; }
+  .tile { height: 56px; }
+  .car-tag { bottom: calc(var(--safe-b) + 8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo i.lt, .maker i.mk { animation: none; opacity: 1; }
+  .start, .start .ring { animation: none; }
+}
+.logo { top: calc(var(--safe-t) + 62px); font-size: clamp(44px, 13.6vw, 118px); }
+.maker { top: calc(var(--safe-t) + 62px + clamp(50px, 15.4vw, 128px)); }
+.start { width: 128px; height: 128px; }
+.start span { font-size: 28px; }
+.car-tag { bottom: calc(var(--safe-b) + 322px); padding: 4px 16px; min-width: 170px; }
+.tile { height: 62px; }
+.menu-panel .sub { font-size: 13px; margin-bottom: 4px; }
+@media (orientation: landscape) and (max-height: 520px) {
+  .logo { top: calc(var(--safe-t) + 8px); font-size: 38px; }
+  .maker { top: calc(var(--safe-t) + 52px); }
+  .start { width: 104px; height: 104px; }
+  .start span { font-size: 23px; }
+  .car-tag { bottom: calc(var(--safe-b) + 8px); left: 24%; }
+  .menu-coins { left: auto; right: calc(var(--safe-r) + 10px); }
+}

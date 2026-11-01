@@ -28,11 +28,12 @@ export class UI {
   bind() {
     const a = this.actions;
     const click = (id, fn) => $(id).addEventListener('click', () => { a.tap(); fn(); });
-    click('btn-play', () => a.play());
+    click('btn-play', () => a.start());
+    click('btn-mute', () => { const d2 = this.storage.data; d2.settings.sound = !d2.settings.sound; this.storage.save(); this.syncSettings(); a.applySettings(); });
     click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
     click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
-    click('car-prev', () => this.stepCar(-1));
-    click('car-next', () => this.stepCar(1));
+    click('car-prev', () => { this.stepCar(-1); a.preview(CONFIG.cars[this.gi]); });
+    click('car-next', () => { this.stepCar(1); a.preview(CONFIG.cars[this.gi]); });
     click('btn-settings', () => { this.show('settings'); a.stage(null); });
     click('btn-howto', () => { this.show('howto'); a.stage(null); });
     for (const b of document.querySelectorAll('[data-back]')) {
@@ -48,6 +49,7 @@ export class UI {
 
     const d = this.storage.data;
     $('set-sound').addEventListener('change', (e) => { d.settings.sound = e.target.checked; this.storage.save(); a.applySettings(); });
+    $('set-volume').addEventListener('input', (e) => { d.settings.volume = Number(e.target.value); this.storage.save(); a.applySettings(); });
     $('set-ambient').addEventListener('change', (e) => { d.settings.ambient = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-vibrate').addEventListener('change', (e) => { d.settings.vibrate = e.target.checked; this.storage.save(); a.applySettings(); });
     $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
@@ -62,10 +64,34 @@ export class UI {
   syncSettings() {
     const d = this.storage.data;
     $('set-sound').checked = d.settings.sound;
+    $('set-volume').value = String(d.settings.volume);
+    this.syncMute();
     $('set-vibrate').checked = d.settings.vibrate;
     $('set-ambient').checked = d.settings.ambient;
     $('dev-god').checked = d.dev.god;
     $('dev-start').value = String(d.dev.startTime);
+  }
+
+  syncMute() {
+    $('btn-mute').classList.toggle('muted', !this.storage.data.settings.sound);
+  }
+
+  // Yazılar harf harf belirir: her harf kendi gecikmesiyle neon gibi yanar
+  intro() {
+    const fill = (id, text, step, start, cls) => {
+      const el = $(id);
+      el.textContent = '';
+      [...text].forEach((ch, i) => {
+        const s = document.createElement('i');
+        s.className = cls;
+        s.setAttribute('aria-hidden', 'true');
+        s.textContent = ch === ' ' ? '\u00a0' : ch;
+        s.style.animationDelay = `${start + i * step}ms`;
+        el.appendChild(s);
+      });
+    };
+    fill('logo', 'DRIFT LAB', 95, 150, 'lt');
+    fill('maker', 'Çağlar Sağlam tarafından yapıldı', 24, 1150, 'mk');
   }
 
   show(name) {
@@ -96,7 +122,7 @@ export class UI {
     setTimeout(() => {
       el.hidden = true;
       done();
-    }, 3000);
+    }, 700);
   }
 
   buildStars() {
@@ -300,7 +326,7 @@ export class UI {
       t.textContent = label;
       const bar = document.createElement('i');
       const fill = document.createElement('b');
-      fill.style.width = `${Math.round(25 + value * 75)}%`;
+      fill.style.setProperty('--w', `${Math.round(25 + value * 75)}%`);
       bar.appendChild(fill);
       const n = document.createElement('em');
       n.textContent = text;
@@ -308,8 +334,10 @@ export class UI {
       stats.appendChild(row);
     };
     const norm = (v, a, b) => (v - a) / (b - a);
+    const range = (key) => { const v = cars.map((c) => c[key]); return [Math.min(...v), Math.max(...v)]; };
     stat('Hız', norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
-    stat('Kayma', norm(base.driftGrip / car.driftGrip, 1, base.driftGrip / top.driftGrip), String(Math.round((base.driftGrip / car.driftGrip) * 100)));
+    stat('İvme', norm(car.accel, ...range('accel')), String(Math.round(car.accel / 7)));
+    stat('Yol tutuş', norm(car.grip, ...range('grip')), String(Math.round(car.grip * 20)));
     stat('Dayanıklılık', norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
 
     const act = $('garage-action');
@@ -322,7 +350,7 @@ export class UI {
     }
     act.onclick = () => {
       this.actions.tap();
-      if (owned) this.storage.select(car.id);
+      if (owned) { this.storage.select(car.id); this.actions.preview(car); }
       else if (this.storage.buy(car.id)) this.actions.purchased();
       this.actions.carChanged();
       this.renderGarage();
@@ -339,11 +367,11 @@ export class UI {
       const label = document.createElement('span');
       label.textContent = has ? c.name : `${c.cost}`;
       b.append(art, label);
-      b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.gp = 0; this.renderGarage(); });
+      b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.gp = 0; this.renderGarage(); this.actions.preview(c); });
       list.appendChild(b);
     });
     const on = list.children[this.gi];
-    if (on && on.scrollIntoView) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+    if (on) list.scrollLeft = on.offsetLeft - list.clientWidth / 2 + on.offsetWidth / 2;
   }
 
   stepCar(dir) {

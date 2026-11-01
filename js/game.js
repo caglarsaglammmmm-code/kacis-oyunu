@@ -357,6 +357,7 @@ export class Game {
       this.stuckT = 0;
     }
     stepCar(p, steer, reverse ? -1 : 1, this.carSpec, surf, dt);
+    p.gas = reverse ? 0 : Math.abs(p.steer) > CONFIG.physics.cornerSteer ? 0.45 : 1; // Motor sesi gazı buradan okur
     if (this.hitCd > 0) this.hitCd -= dt;
 
     // Derin suya düştü: ölümsüzlükte duvar gibi davranır, testler ve geliştirici için

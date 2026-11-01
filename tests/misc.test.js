@@ -156,3 +156,18 @@ test('tek dosyalık pakette üst düzey ad çakışması yok', () => {
     }
   }
 });
+
+test('motor: devir hızla artar, vites atınca düşer, her aracın sesi ayrı, elektrikli vites atmaz', async () => {
+  const { engineRpm, ENGINE_KINDS } = await import('../js/audio.js');
+  const e = CONFIG.cars[0].engine;
+  assert.ok(engineRpm(e, 0.2).rpm > engineRpm(e, 0.05).rpm);
+  const justBefore = engineRpm(e, 1 / e.gears - 0.01);
+  const justAfter = engineRpm(e, 1 / e.gears + 0.01);
+  assert.equal(justAfter.gear, justBefore.gear + 1);
+  assert.ok(justAfter.rpm < justBefore.rpm * 0.8, 'vites devri düşürür');
+  const ev = CONFIG.cars.find((c) => c.engine.kind === 'ev').engine;
+  assert.equal(engineRpm(ev, 0.9).gear, 0);
+  assert.equal(new Set(CONFIG.cars.map((c) => JSON.stringify(c.engine))).size, CONFIG.cars.length);
+  for (const c of CONFIG.cars) assert.ok(ENGINE_KINDS[c.engine.kind], c.id);
+  assert.ok(new Set(CONFIG.cars.map((c) => c.engine.kind)).size >= 6);
+});
