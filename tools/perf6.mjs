@@ -4,7 +4,8 @@ const rate = Number(process.argv[2] || 6);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: 'new', args: ['--enable-gpu-rasterization', '--ignore-gpu-blocklist', '--use-angle=d3d11'], protocolTimeout: 180000 });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const place = (test, x, y, ang) => `(()=>{const g=__drift.game;const p=g.player;g.god=true;for(let r=1;r<70;r++)for(let cy=-r;cy<=r;cy++)for(let cx=-r;cx<=r;cx++){if(Math.max(Math.abs(cx),Math.abs(cy))!==r)continue;const c=g.world.chunk(cx,cy);if(!(${test}))continue;p.x=c.x+${x};p.y=c.y+${y};p.a=${ang};p.vx=p.vy=0;g.cam.x=p.x;g.cam.y=p.y;g.cam.lvx=g.cam.lvy=0;return 'ok'}return 'yok'})()`;
-const S = { otoban: place('c.hw&&c.biome==="city"', 200, 700, 0), kule: place('c.template==="downtown"', 60, 200, 1.57) };
+const night = `;__drift.game.dayT=((0.7-__drift.cfg.day.start+1)%1)*__drift.cfg.day.length`;
+const S = { otoban: place('c.hw&&c.biome==="city"', 200, 700, 0), kule: place('c.template==="downtown"', 60, 200, 1.57), gece: place('c.template==="esnaf"', 60, 200, 1.57) + night };
 for (const n of Object.keys(S)) {
   const page = await b.newPage();
   const errs = [];

@@ -4,7 +4,7 @@ Mobil öncelikli, Türkiye sokaklarını andıran bir şehirde geçen kuşbakı�
 
 **Oyna:** https://caglarsaglammmmm-code.github.io/kacis-oyunu/drift-lab/
 
-**Android APK indir:** https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v7.0.0/DriftLab.apk
+**Android APK indir:** https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v8.0.0/DriftLab.apk
 
 **Gizlilik politikası:** https://caglarsaglammmmm-code.github.io/kacis-oyunu/drift-lab/privacy.html
 

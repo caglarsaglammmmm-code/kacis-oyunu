@@ -6,7 +6,7 @@ import { paintTr } from './cars.js';
 import { sheetSprite } from './sheet.js';
 import { paintBuilding2, shadowOf } from './buildings.js';
 import { FX } from './effects.js';
-import { rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintUfo, paintRover, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
+import { signKind, paintDoner, paintPromo, paintDancer, paintBalcony, paintWashing, paintMoon, paintStars, rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintUfo, paintRover, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
 
 const PF = CONFIG.perf;
 const SPR = 3; // Sprite ölçeği: arabalar yakın çekimde de keskin kalsın
@@ -44,11 +44,28 @@ function glow(size, stops) {
   return c;
 }
 
+// Her tabela rengine özel yumuşak ışık: önbellekli
+const haloCache = new Map();
+function signHalo(color) {
+  let c = haloCache.get(color);
+  if (c) return c;
+  c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 2, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.4, 'rgba(255,255,255,.4)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  g.globalCompositeOperation = 'source-in';
+  g.fillStyle = shade(color, 0.4); g.fillRect(0, 0, 64, 64);
+  haloCache.set(color, c);
+  return c;
+}
+
 // Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
 const signOut = { x: 0, y: 0, w: 0, h: 0 };
 function signBox(r, img) {
   const size = r.signSize ?? 1;
-  const hTarget = [10, 16, 24, 40][size] ?? 16;
+  const hTarget = [18, 24, 32, 46][size] ?? 24;
   const maxW = size === 3 ? r.w * 0.94 : r.w - 6;
   const w = Math.min(maxW, (img.width / img.height) * hTarget);
   const h = (w / img.width) * img.height;
@@ -265,13 +282,62 @@ export class Renderer {
           ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
           if (r.sign) {
             const img = signCanvas(r.sign, r.signColor, r.seed);
-            const w = Math.min((X1 - X0) * 0.86, (img.width / img.height) * 26);
+            const w = Math.min((X1 - X0) * 0.92, (img.width / img.height) * 38);
             const h = (w / img.width) * img.height;
             ctx.drawImage(img, (X0 + X1) / 2 - w / 2, (Y0 + Y1) / 2 - h / 2, w, h);
           }
         }
       }
     }
+  }
+
+  // Balkon hayatı: yalnızca oyuncu yakınındaki apartmanlarda, sınırlı sayıda. Geceleri içeri girerler
+  drawBalconies(game, now, c0x, c1x, c0y, c1y, tall) {
+    const B = CONFIG.balcony;
+    const night = game.daylight.k;
+    if (night > 0.75) return;
+    const ctx = this.ctx;
+    const sp = this.sprites;
+    const p = game.player;
+    const cam = game.cam;
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+    ctx.globalAlpha = 1 - night / 0.75;
+    let drawn = 0;
+    const R2 = B.range * B.range;
+    const swing = Math.floor(now / 260);
+    for (let cy = c0y; cy <= c1y && drawn < B.maxDrawn; cy++) {
+      for (let cx = c0x; cx <= c1x && drawn < B.maxDrawn; cx++) {
+        const c = game.world.chunks.get((cx + 32768) * 65536 + (cy + 32768));
+        if (!c) continue;
+        for (const r of c.balc) {
+          if (!r.alive || drawn >= B.maxDrawn || (r.tall > 0) !== tall) continue;
+          const mx = r.x + r.w / 2; const my = r.y + r.h;
+          const dx = mx - p.x; const dy = my - p.y;
+          if (dx * dx + dy * dy > R2) continue;
+          // Yüksek binada güney duvarı kameraya bakıyorsa duvara, değilse cepheye yerleşir
+          const k = r.tall;
+          if (k && cam.y <= my) continue;
+          const slots = 1 + (r.seed % 3);
+          for (let i = 0; i < slots; i++) {
+            const h = ((r.seed * (i + 3) * 2654435761) >>> 0) / 4294967296;
+            const u = 0.14 + ((i + h * 0.7) / slots) * 0.74;
+            const b = k ? 0.3 + ((r.seed >> (i + 1)) % 5) * 0.11 : 0;
+            const x0 = r.x + r.w * u;
+            const fx = k ? x0 + (x0 - cam.x) * k * b : x0;
+            const fy = k ? my + (my - cam.y) * k * b : my - 7;
+            const q = 1 + (k ? k * b : 0);
+            if (h < 0.34) {
+              ctx.drawImage(sp.washing[(swing + i + (r.seed & 3)) % 3], fx - 15 * q, fy - 15 * q, 30 * q, 18 * q);
+            } else {
+              const act = sp.balcony[Math.floor(h * 97) % 4];
+              ctx.drawImage(act[Math.floor(now / 480 + h * 7) & 1], fx - 10 * q, fy - 21 * q, 20 * q, 24 * q);
+            }
+            drawn++;
+          }
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
   }
 
   // Yangın: en fazla birkaç alev karesi, parçacık harcamaz
@@ -356,6 +422,17 @@ export class Renderer {
       s.pedKinds[k] = [0, 1].map((step) => sprite(34, 34, (g) => paintPedKind(g, k, step)));
     }
     s.simit = sprite(16, 16, paintSimit);
+    // Dükkân önü: döner şişi, afişler, üç renk şişme balon
+    s.doner = [0, 1, 2, 3].map((f) => sprite(18, 24, (g) => paintDoner(g, f)));
+    s.promos = CONFIG.signs.promos.map((t, i) => sprite(44, 26, (g) => paintPromo(g, t, i)));
+    s.dancers = ['#e8352e', '#ffd23f', '#21a9e0'].map((c) => [0, 1, 2, 3, 4, 5].map((f) => sprite(46, 78, (g) => paintDancer(g, c, f))));
+    // Balkon: çay içen, el sallayan, çiçek sulayan, çamaşır asan ve sallanan çamaşır
+    s.balcony = ['tea', 'wave', 'water', 'hang'].map((a) => [0, 1].map((f) => sprite(20, 24, (g) => paintBalcony(g, a, f, SHIRT[(a.length * 3 + f * 0) % SHIRT.length]))));
+    s.washing = [0, 1, 2].map((f) => sprite(30, 18, (g) => paintWashing(g, f)));
+    // Gökyüzü: yıldızlar iki kümede, sırayla parıldar
+    s.moon = sprite(44, 44, paintMoon);
+    s.stars = [11, 37].map((seed) => sprite(320, 90, (g) => paintStars(g, seed)));
+    s.tail = glow(32, [[0, 'rgba(255,50,40,.85)'], [0.5, 'rgba(255,30,30,.3)'], [1, 'rgba(255,20,20,0)']]);
     s.lamp = glow(96, [[0, 'rgba(255,225,150,.75)'], [0.3, 'rgba(255,200,110,.3)'], [1, 'rgba(255,180,80,0)']]);
     s.win = glow(48, [[0, 'rgba(255,214,130,.95)'], [0.6, 'rgba(255,190,100,.35)'], [1, 'rgba(255,170,80,0)']]);
     s.neons = CONFIG.signs.neon.map((c) => glow(96, [[0, `${c}cc`], [0.45, `${c}55`], [1, `${c}00`]]));
@@ -1213,7 +1290,9 @@ export class Renderer {
     this.drawPeds(game, vx0, vx1, vy0, vy1, true);
     this.drawLights(game, c0x, c1x, c0y, c1y);
     this.drawFires(game, now, c0x, c1x, c0y, c1y);
+    this.drawBalconies(game, now, c0x, c1x, c0y, c1y, false); // Alçak binalar yüksek binaların altında kalır
     this.drawTalls(game, c0x, c1x, c0y, c1y);
+    this.drawBalconies(game, now, c0x, c1x, c0y, c1y, true);
     this.drawUfos(game, now, vx0, vx1, vy0, vy1);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawNight(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now);
@@ -1345,7 +1424,7 @@ export class Renderer {
         for (let i = 0; i < c.propCount; i++) {
           const pr = c.props[i];
           if (!pr.alive || pr.x < x0 - 30 || pr.x > x1 + 30 || pr.y < y0 - 30 || pr.y > y1 + 30) continue;
-          const isTall = pr.kind === PROP.QUEUE || pr.kind === PROP.TREE || pr.kind === PROP.PALM || pr.kind === PROP.PINE || pr.kind === PROP.LAUNDRY;
+          const isTall = pr.kind === PROP.QUEUE || pr.kind === PROP.DANCER || pr.kind === PROP.TREE || pr.kind === PROP.PALM || pr.kind === PROP.PINE || pr.kind === PROP.LAUNDRY;
           if (isTall !== tall) continue;
           if (isPower(pr.kind)) {
             const bob = 1 + 0.1 * Math.sin(now * 0.006 + pr.phase * 5);
@@ -1357,6 +1436,21 @@ export class Renderer {
             const pw = 42 * bob;
             ctx.drawImage(sp.props[pr.kind], pr.x - pw / 2, pr.y - pw / 2, pw, pw);
             if (!look) continue;
+            continue;
+          }
+          if (pr.kind === PROP.DONER) {
+            ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+            ctx.drawImage(sp.doner[Math.floor(now / 130 + pr.x) & 3], pr.x - 9, pr.y - 20, 18, 24);
+            continue;
+          }
+          if (pr.kind === PROP.PROMO) {
+            ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+            ctx.drawImage(sp.promos[pr.v || 0], pr.x - 22, pr.y - 20, 44, 26);
+            continue;
+          }
+          if (pr.kind === PROP.DANCER) {
+            ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+            ctx.drawImage(sp.dancers[pr.v || 0][Math.abs(Math.floor(now / 105 + pr.x * 0.1)) % 6], pr.x - 23, pr.y - 72, 46, 78);
             continue;
           }
           if (pr.kind === PROP.COIN) {
@@ -1459,8 +1553,8 @@ export class Renderer {
             ctx.globalAlpha = night * 0.85;
             ctx.drawImage(sp.lamp, l.x - 70, l.y - 70, 140, 140);
           } else if (l.kind === 1) {
-            if (!l.rect.alive || (l.rect.seed + i) % 3 === 0) continue; // Bazı evlerde ışık kapalı
-            ctx.globalAlpha = night * 0.8;
+            if (!l.rect.alive || (l.rect.seed + i) % 4 === 0 || night <= l.at) continue; // Bazı evlerde ışık kapalı
+            ctx.globalAlpha = Math.min(1, (night - l.at) / 0.16) * 0.85; // Her pencere kendi sırasında yanar
             ctx.drawImage(sp.win, l.x, l.y, l.w, l.h);
           } else if (l.kind === 2) {
             if (!l.rect.alive) continue;
@@ -1486,9 +1580,31 @@ export class Renderer {
         }
       }
     }
-    // Araç farları
+    // Tabela ışıltısı ve yola düşen yansıması
     ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = night * 0.9;
+    for (let cy = c0y; cy <= c1y; cy++) {
+      for (let cx = c0x; cx <= c1x; cx++) {
+        const c = game.world.chunk(cx, cy);
+        for (let i = 0; i < c.lightCount; i++) {
+          const l = c.lights[i];
+          if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1 + 40) continue;
+          const r = l.rect;
+          const img = signCanvas(r.sign, r.signColor, r.seed);
+          const b = signBox(r, img);
+          const halo = signHalo(r.signColor);
+          const led = signKind(r.sign) === 'led';
+          const flick = led ? 0.82 + 0.18 * Math.sin(now * 0.02 + r.seed) : 1;
+          ctx.globalAlpha = night * 0.6 * flick;
+          ctx.drawImage(img, b.x, b.y, b.w, b.h);
+          ctx.globalAlpha = night * 0.5 * flick;
+          ctx.drawImage(halo, b.x - 26, b.y - 22, b.w + 52, b.h + 44);
+          ctx.globalAlpha = night * 0.3;
+          ctx.drawImage(halo, r.x - 6, r.y + r.h - 2, r.w + 12, 40);
+        }
+      }
+    }
+    // Araç farları
+    ctx.globalAlpha = night;
     const beam = sp.beam;
     const bw = beam.width / SPR;
     const bh = beam.height / SPR;
@@ -1496,12 +1612,32 @@ export class Renderer {
       if (b.x < x0 - 120 || b.x > x1 + 120 || b.y < y0 - 120 || b.y > y1 + 120) return;
       this.place(b.x + Math.cos(b.a) * b.len * 0.46, b.y + Math.sin(b.a) * b.len * 0.46, b.a);
       ctx.drawImage(beam, -bw / 2, -bh / 2, bw, bh);
+      // Stop lambası ve farın asfalttaki parıltısı
+      ctx.globalAlpha = night * 0.7;
+      ctx.drawImage(sp.tail, -b.len * 0.92 - 14, -14, 28, 28);
+      ctx.globalAlpha = night * 0.32;
+      ctx.drawImage(sp.lamp, 40, -44, 110, 88);
+      ctx.globalAlpha = night;
     };
     if (game.state === 'play') head(game.player);
     for (const c of game.cops) if (c.type !== 'tank' && !c.flying) head(c);
     for (const n of game.crowd.npcs) if (n.alive && n.state === 'drive') head(n);
     for (const n of game.crowd.hw) if (n.alive) head(n);
     ctx.globalCompositeOperation = 'source-over';
+    // Gök: üst kenarda ay ve sırayla parıldayan yıldızlar
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    if (night > 0.3) {
+      const a = (night - 0.3) / 0.7;
+      const W = this.w;
+      ctx.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 2; i++) {
+        ctx.globalAlpha = a * (0.45 + 0.4 * Math.sin(now * 0.0016 + i * 2.4));
+        ctx.drawImage(sp.stars[i], 0, 0, W, 104);
+      }
+      ctx.globalAlpha = a * 0.95;
+      ctx.drawImage(sp.moon, W * 0.62, 12, 44, 44);
+      ctx.globalCompositeOperation = 'source-over';
+    }
     ctx.globalAlpha = 1;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }

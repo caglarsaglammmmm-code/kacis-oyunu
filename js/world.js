@@ -14,7 +14,7 @@ const ART = W.arterial;
 export const PROP = {
   TREE: 0, FENCE: 1, CRATE: 2, BARREL: 3, CONE: 4, BARRIER: 5, PARKED: 6, HYDRANT: 7, BENCH: 8, COIN: 9, BUSH: 10,
   PALM: 11, UMBRELLA: 12, PINE: 13, ROCK: 14, CACTUS: 15, HAY: 16, POWER_BLAST: 17, POWER_GHOST: 18, POWER_HEAL: 19, POWER_GIANT: 20,
-  CHAIRS: 21, UNCLES: 22, SIMITCART: 23, STALL: 24, LAUNDRY: 25, QUEUE: 26,
+  CHAIRS: 21, UNCLES: 22, SIMITCART: 23, STALL: 24, LAUNDRY: 25, QUEUE: 26, DONER: 27, PROMO: 28, DANCER: 29,
 };
 
 // r: çarpışma yarıçapı, brk: kırılması için gereken hız, drag: arabanın kaybettiği hız payı,
@@ -47,6 +47,9 @@ export const PROP_INFO = [
   { r: 15, brk: 25, drag: 0.05, dmg: 0.3, coin: true, chip: '#5bb04a', snd: 'chairs' },
   { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true },
   { r: 15, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#2a1f3a', safe: true },
+  { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true }, // Döner şişi, vitrinde
+  { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true }, // İndirim afişi
+  { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true }, // Şişme balon
 ];
 
 export const POWER_KINDS = ['blast', 'ghost', 'heal', 'giant'];
@@ -86,7 +89,7 @@ const HOUSE_ROOFS = ['#c8553d', '#b5523b', '#d9822b', '#8c5a3c', '#a44a3f', '#5f
 // Karoları bitişik dizilen şehir için yardımcı
 function newChunk() {
   return {
-    pads: [], padCount: 0, road: 0, alley: 0, paths: [], hw: false, talls: [], fires: [],
+    pads: [], padCount: 0, road: 0, alley: 0, paths: [], hw: false, talls: [], fires: [], balc: [],
     cx: 0, cy: 0, x: 0, y: 0,
     ground: new Uint8Array(CELLS),
     cost: new Uint8Array(CELLS), // 0 = geçilmez
@@ -312,6 +315,7 @@ export class World {
     c.paths.length = 0;
     c.talls.length = 0;
     c.fires.length = 0;
+    c.balc.length = 0;
     c.hw = isHighwayRow(cy);
     c.siteName = '';
     c.dirty = true;
@@ -375,6 +379,7 @@ export class World {
     if (c.hw) this.carveHighway(c);
     this.arterialDetails(c);
     this.fitStreets(c);
+    this.dressShops(c);
     this.finishCost(c);
     c.baseProps = c.propCount;
     this.collectTalls(c);
@@ -871,7 +876,7 @@ export class World {
 
   addLight(c, kind, x, y, w, h, rect) {
     let l = c.lights[c.lightCount];
-    if (!l) { l = { kind: 0, x: 0, y: 0, w: 0, h: 0, rect: null }; c.lights[c.lightCount] = l; }
+    if (!l) { l = { kind: 0, x: 0, y: 0, w: 0, h: 0, rect: null, at: 0 }; c.lights[c.lightCount] = l; }
     c.lightCount++;
     l.kind = kind; l.x = x; l.y = y; l.w = w; l.h = h; l.rect = rect;
   }
@@ -893,6 +898,7 @@ export class World {
         c.talls.push(r);
       }
       if (r.fire) c.fires.push(r);
+      if (r.style === S.APARTMENT || r.style === S.SITE_BLOCK) c.balc.push(r);
     }
   }
 
@@ -901,7 +907,15 @@ export class World {
     for (let i = 0; i < c.rectCount; i++) {
       const r = c.rects[i];
       if (r.kind !== 'building' || r.style === BUILD.MESA) continue;
-      if (r.style !== BUILD.STADIUM) this.addLight(c, 1, r.x + 3, r.y + r.h - 12, r.w - 6, 11, r);
+      if (r.style !== BUILD.STADIUM) {
+        // Her pencere kendi sırasında yanar: at, gecenin hangi anında yanacağı
+        const n = Math.max(1, Math.min(6, Math.floor((r.w - 6) / 16)));
+        const cw = (r.w - 6) / n;
+        for (let k = 0; k < n; k++) {
+          this.addLight(c, 1, r.x + 3 + k * cw, r.y + r.h - 12, cw - 3, 11, r);
+          c.lights[c.lightCount - 1].at = 0.08 + (((r.seed * 31 + k * 97) * 2654435761 >>> 0) / 4294967296) * 0.74;
+        }
+      }
       if (r.sign) this.addLight(c, r.neon ? 2 : 3, r.x, r.y, r.w, r.h, r);
     }
     if (c.biome === 'city' || c.biome === 'beach') {
@@ -1311,6 +1325,28 @@ export class World {
       if (!solid(x1, y1 - 1) && !solid(x1 - 1, y1) && !solid(x1, y1)) m |= 8;
       r.corners = m;
       r.radius = Math.min(cornerRadius, r.w * 0.5, r.h * 0.5);
+    }
+  }
+
+  // Dükkân önleri: rastgele değil, bina tohumundan: aynı yerde hep aynı afiş. Yalnızca sokağa bakan cephelerde
+  dressShops(c) {
+    const F = CONFIG.signs.front;
+    const promos = CONFIG.signs.promos.length;
+    const S = BUILD;
+    for (let i = 0; i < c.rectCount; i++) {
+      const r = c.rects[i];
+      if (r.kind !== 'building' || !r.sign || r.w < 50) continue;
+      if (r.style !== S.SHOP && r.style !== S.SHOPROW && r.style !== S.CHAIN && r.style !== S.MARKET && r.style !== S.CAFE) continue;
+      const south = Math.ceil((r.y + r.h - c.y) / TILE);
+      const tx = Math.floor((r.x + r.w / 2 - c.x) / TILE);
+      if (south >= CT || c.rectAt[south * CT + tx] !== 0 || c.ground[south * CT + tx] === GROUND.WATER) continue;
+      const h1 = ((r.seed * 2654435761) >>> 0) / 4294967296;
+      const h2 = ((r.seed * 40503 + 7919) >>> 0) % 1000 / 1000;
+      const y = r.y + r.h;
+      const doner = /döner/i.test(r.sign);
+      if (doner) this.addProp(c, PROP.DONER, r.x + r.w * 0.26, y - 7);
+      if (doner || h1 < F.promo) this.addProp(c, PROP.PROMO, r.x + r.w * 0.72, y + 1).v = Math.floor(h1 * 997) % promos;
+      if (h2 < (doner ? F.donerDancer : F.dancer)) this.addProp(c, PROP.DANCER, r.x + (h2 < 0.05 ? r.w - 7 : 7), y + 2).v = Math.floor(h2 * 991) % 3;
     }
   }
 

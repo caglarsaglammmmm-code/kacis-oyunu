@@ -17,8 +17,8 @@ const BUILD = {
 
 const CONFIG = {
   name: 'Drift Lab',
-  version: '7.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v7.0.0/DriftLab.apk',
+  version: '8.0.0',
+  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v8.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -375,10 +375,13 @@ const CONFIG = {
   signs: {
     bigshops: ['Merkez Çarşı İş Hanı', 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
     hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', 'Sahil Palas Oteli', 'Otel Saray', 'Mavi Otel'],
-    shops: ['Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Nane Döner', 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Çınar Kafe'],
+    shops: ['Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Piksel Oyun Salonu', 'Bit Bilgisayar', 'Telefoncu', 'Nane Döner', 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Çınar Kafe'],
     chains: { 'Pazarcık Market': '#3f8f5b', Ucuzlar: '#7b3fa0', 'Sepet Market': '#1f9e9e', 'Yıldız Mağazaları': '#c23b6b', 'Dörtyol Market': '#6a7f2a', 'Teknoloji Durağı': '#2b3a67', 'Yapı Dünyası': '#8a5a2b', 'Köşe Bakkal': '#b5651d' },
     banks: { 'Yıldız Bankası': '#3b3f8f', 'Anadolu Tasarruf': '#8a6d1f', 'Bereket Bankası': '#6b8e23', 'Güven Kredi': '#5b2a86', 'Marmara Yatırım': '#0f6e84' },
     sites: ['Yeşil Tepe Sitesi', 'Boğaz Evleri', 'Mavi Konak Sitesi', 'Çamlık Sitesi', 'Güneş Sitesi', 'Lale Evleri', 'Marmara Konutları', 'Park Evleri'],
+    // Dükkân önü: indirim yazıları ve görülme olasılıkları
+    promos: ['%30 İNDİRİM', 'BUGÜNE ÖZEL', '%50 İNDİRİM', '2 AL 1 ÖDE', 'KAMPANYA', 'FIRSAT!', 'YENİ AÇILDI', 'SON GÜN'],
+    front: { promo: 0.34, dancer: 0.12, donerDancer: 0.6 },
     cafes: ['Melodi Kafe', 'Akustik Kafe', 'Sahne Kafe', 'Çınaraltı Çay Bahçesi', 'Bahçe Çay Evi', 'Çay Bahçesi', 'Demir Spor Salonu', 'Kondisyon Spor Salonu'],
     cafeColors: ['#c9773b', '#3f8f6b', '#8a5fb0', '#d1a03c'],
     neon: ['#ff2a6d', '#21d4fd', '#b967ff', '#05ffa1', '#fffb96'],
@@ -387,7 +390,7 @@ const CONFIG = {
   },
 
   // Gece-gündüz: tek döngü süresi (saniye). start: başlangıç evresi (0 gündüz, 0.55 gece başı)
-  day: { length: 170, start: 0.08, duskFrom: 0.42, nightFrom: 0.55, dawnFrom: 0.86, darkness: 0.62 },
+  day: { length: 170, start: 0.08, duskFrom: 0.38, nightFrom: 0.56, dawnFrom: 0.82, darkness: 0.62 },
 
   powers: {
     duration: 15, // Süreli güçler (görünmezlik, dev mod)
@@ -401,6 +404,9 @@ const CONFIG = {
     giantMass: 3,
     giantCrushTank: 200,
   },
+
+  // Balkon canlılığı: yalnızca oyuncunun bu yakınındaki binalarda çizilir
+  balcony: { range: 560, maxDrawn: 26 },
 
   perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.72, bakePool: 9, bakeBudget: 3, slowFrameMs: 21 },
 };
@@ -603,7 +609,7 @@ const ART = W.arterial;
 const PROP = {
   TREE: 0, FENCE: 1, CRATE: 2, BARREL: 3, CONE: 4, BARRIER: 5, PARKED: 6, HYDRANT: 7, BENCH: 8, COIN: 9, BUSH: 10,
   PALM: 11, UMBRELLA: 12, PINE: 13, ROCK: 14, CACTUS: 15, HAY: 16, POWER_BLAST: 17, POWER_GHOST: 18, POWER_HEAL: 19, POWER_GIANT: 20,
-  CHAIRS: 21, UNCLES: 22, SIMITCART: 23, STALL: 24, LAUNDRY: 25, QUEUE: 26,
+  CHAIRS: 21, UNCLES: 22, SIMITCART: 23, STALL: 24, LAUNDRY: 25, QUEUE: 26, DONER: 27, PROMO: 28, DANCER: 29,
 };
 
 // r: çarpışma yarıçapı, brk: kırılması için gereken hız, drag: arabanın kaybettiği hız payı,
@@ -636,6 +642,9 @@ const PROP_INFO = [
   { r: 15, brk: 25, drag: 0.05, dmg: 0.3, coin: true, chip: '#5bb04a', snd: 'chairs' },
   { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true },
   { r: 15, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#2a1f3a', safe: true },
+  { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true }, // Döner şişi, vitrinde
+  { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true }, // İndirim afişi
+  { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true }, // Şişme balon
 ];
 
 const POWER_KINDS = ['blast', 'ghost', 'heal', 'giant'];
@@ -675,7 +684,7 @@ const HOUSE_ROOFS = ['#c8553d', '#b5523b', '#d9822b', '#8c5a3c', '#a44a3f', '#5f
 // Karoları bitişik dizilen şehir için yardımcı
 function newChunk() {
   return {
-    pads: [], padCount: 0, road: 0, alley: 0, paths: [], hw: false, talls: [], fires: [],
+    pads: [], padCount: 0, road: 0, alley: 0, paths: [], hw: false, talls: [], fires: [], balc: [],
     cx: 0, cy: 0, x: 0, y: 0,
     ground: new Uint8Array(CELLS),
     cost: new Uint8Array(CELLS), // 0 = geçilmez
@@ -901,6 +910,7 @@ class World {
     c.paths.length = 0;
     c.talls.length = 0;
     c.fires.length = 0;
+    c.balc.length = 0;
     c.hw = isHighwayRow(cy);
     c.siteName = '';
     c.dirty = true;
@@ -964,6 +974,7 @@ class World {
     if (c.hw) this.carveHighway(c);
     this.arterialDetails(c);
     this.fitStreets(c);
+    this.dressShops(c);
     this.finishCost(c);
     c.baseProps = c.propCount;
     this.collectTalls(c);
@@ -1460,7 +1471,7 @@ class World {
 
   addLight(c, kind, x, y, w, h, rect) {
     let l = c.lights[c.lightCount];
-    if (!l) { l = { kind: 0, x: 0, y: 0, w: 0, h: 0, rect: null }; c.lights[c.lightCount] = l; }
+    if (!l) { l = { kind: 0, x: 0, y: 0, w: 0, h: 0, rect: null, at: 0 }; c.lights[c.lightCount] = l; }
     c.lightCount++;
     l.kind = kind; l.x = x; l.y = y; l.w = w; l.h = h; l.rect = rect;
   }
@@ -1482,6 +1493,7 @@ class World {
         c.talls.push(r);
       }
       if (r.fire) c.fires.push(r);
+      if (r.style === S.APARTMENT || r.style === S.SITE_BLOCK) c.balc.push(r);
     }
   }
 
@@ -1490,7 +1502,15 @@ class World {
     for (let i = 0; i < c.rectCount; i++) {
       const r = c.rects[i];
       if (r.kind !== 'building' || r.style === BUILD.MESA) continue;
-      if (r.style !== BUILD.STADIUM) this.addLight(c, 1, r.x + 3, r.y + r.h - 12, r.w - 6, 11, r);
+      if (r.style !== BUILD.STADIUM) {
+        // Her pencere kendi sırasında yanar: at, gecenin hangi anında yanacağı
+        const n = Math.max(1, Math.min(6, Math.floor((r.w - 6) / 16)));
+        const cw = (r.w - 6) / n;
+        for (let k = 0; k < n; k++) {
+          this.addLight(c, 1, r.x + 3 + k * cw, r.y + r.h - 12, cw - 3, 11, r);
+          c.lights[c.lightCount - 1].at = 0.08 + (((r.seed * 31 + k * 97) * 2654435761 >>> 0) / 4294967296) * 0.74;
+        }
+      }
       if (r.sign) this.addLight(c, r.neon ? 2 : 3, r.x, r.y, r.w, r.h, r);
     }
     if (c.biome === 'city' || c.biome === 'beach') {
@@ -1900,6 +1920,28 @@ class World {
       if (!solid(x1, y1 - 1) && !solid(x1 - 1, y1) && !solid(x1, y1)) m |= 8;
       r.corners = m;
       r.radius = Math.min(cornerRadius, r.w * 0.5, r.h * 0.5);
+    }
+  }
+
+  // Dükkân önleri: rastgele değil, bina tohumundan: aynı yerde hep aynı afiş. Yalnızca sokağa bakan cephelerde
+  dressShops(c) {
+    const F = CONFIG.signs.front;
+    const promos = CONFIG.signs.promos.length;
+    const S = BUILD;
+    for (let i = 0; i < c.rectCount; i++) {
+      const r = c.rects[i];
+      if (r.kind !== 'building' || !r.sign || r.w < 50) continue;
+      if (r.style !== S.SHOP && r.style !== S.SHOPROW && r.style !== S.CHAIN && r.style !== S.MARKET && r.style !== S.CAFE) continue;
+      const south = Math.ceil((r.y + r.h - c.y) / TILE);
+      const tx = Math.floor((r.x + r.w / 2 - c.x) / TILE);
+      if (south >= CT || c.rectAt[south * CT + tx] !== 0 || c.ground[south * CT + tx] === GROUND.WATER) continue;
+      const h1 = ((r.seed * 2654435761) >>> 0) / 4294967296;
+      const h2 = ((r.seed * 40503 + 7919) >>> 0) % 1000 / 1000;
+      const y = r.y + r.h;
+      const doner = /döner/i.test(r.sign);
+      if (doner) this.addProp(c, PROP.DONER, r.x + r.w * 0.26, y - 7);
+      if (doner || h1 < F.promo) this.addProp(c, PROP.PROMO, r.x + r.w * 0.72, y + 1).v = Math.floor(h1 * 997) % promos;
+      if (h2 < (doner ? F.donerDancer : F.dancer)) this.addProp(c, PROP.DANCER, r.x + (h2 < 0.05 ? r.w - 7 : 7), y + 2).v = Math.floor(h2 * 991) % 3;
     }
   }
 
@@ -2605,6 +2647,7 @@ class Crowd {
 
   // --- Yayalar ---
   pickKind() {
+    if (this.g.daylight.k > 0.5 && Math.random() < 0.22) return 'cat'; // Gece sokak kedilerin
     let r = Math.random() * pedWeight;
     for (const k of PED_KIND_NAMES) {
       r -= PD.kinds[k].weight;
@@ -3182,13 +3225,14 @@ function dayState(t, out = {}) {
   if (p >= Y.duskFrom && p < Y.nightFrom) k = (p - Y.duskFrom) / (Y.nightFrom - Y.duskFrom);
   else if (p >= Y.nightFrom && p < Y.dawnFrom) k = 1;
   else if (p >= Y.dawnFrom) k = 1 - (p - Y.dawnFrom) / (1 - Y.dawnFrom);
-  k = k * k * (3 - 2 * k);
-  const warm = Math.sin(Math.min(1, k * 1.15) * Math.PI); // Geçişte turuncu
+  k = k * k * k * (k * (k * 6 - 15) + 10);
+  // Gün doğumu gün batımından daha hafif: göz almayan sıcak turuncu
+  const warm = Math.sin(Math.min(1, k * 1.1) * Math.PI) * (p >= Y.dawnFrom || p < Y.duskFrom ? 0.65 : 1);
   out.k = k;
-  out.a = +(k * Y.darkness + warm * 0.14).toFixed(3);
-  out.r = Math.round(8 + warm * 190);
-  out.g = Math.round(12 + warm * 70);
-  out.b = Math.round(46 - warm * 20);
+  out.a = +(k * Y.darkness + warm * 0.1).toFixed(3);
+  out.r = Math.round(10 + warm * 150);
+  out.g = Math.round(14 + warm * 62);
+  out.b = Math.round(46 - warm * 16);
   return out;
 }
 
@@ -5218,28 +5262,33 @@ function roofClutter(g, r) {
 
 // Tabelalar önbelleğe alınır: bina çizimi telefonda ucuz kalsın
 const signCache = new Map();
-// Tabela: on farklı yazı tarzı. Aynı ad farklı tohumda farklı görünür
-const SIGN_FONTS = [
-  ['800 30px Nunito, sans-serif', 'panel'],
-  ['400 34px Anton, Impact, sans-serif', 'panel'],
-  ['500 30px Oswald, sans-serif', 'dark'],
-  ['400 34px Lobster, cursive', 'bare'],
-  ['400 30px Pacifico, cursive', 'board'],
-  ['400 34px "Tilt Neon", sans-serif', 'neon'],
-  ['400 32px Monoton, sans-serif', 'neon'],
-  ['400 32px Righteous, sans-serif', 'two'],
-  ['400 30px Bungee, sans-serif', 'bare'],
-  ['italic 400 30px Playfair, Georgia, serif', 'brass'],
-];
+// Tabela türü adından anlaşılır; her türün kendi fontu ve zemini vardır
+const SIGN_STYLES = {
+  corp: [['500 30px Oswald, sans-serif', 'corp'], ['800 30px Nunito, sans-serif', 'corp']],
+  vivid: [['400 34px Anton, Impact, sans-serif', 'vivid'], ['400 32px Righteous, sans-serif', 'vivid']],
+  led: [['400 34px "Tilt Neon", sans-serif', 'led'], ['400 32px Monoton, sans-serif', 'led']],
+  wood: [['400 30px Pacifico, cursive', 'wood'], ['400 34px Lobster, cursive', 'wood']],
+  lux: [['italic 400 30px Playfair, Georgia, serif', 'brass']],
+  box: [['400 30px Bungee, sans-serif', 'box'], ['800 30px Nunito, sans-serif', 'box']],
+};
+function signKind(text) {
+  if (/bank|kredi|tasarruf|yatırım|hastane|ilkokul|kolej/i.test(text)) return 'corp';
+  if (/teknoloji|oyun|piksel|bilgisayar|telefon/i.test(text)) return 'led';
+  if (/market|bakkal|manav|gross|mağaza|ucuzlar|büfe|bayii|dünyası/i.test(text)) return 'vivid';
+  if (/döner|kebap|pide|lahmacun|iskender|ciğer|börek|lokanta|kafe|çay|kahve|tost|tatlı|fırın|ocağı|köfte/i.test(text)) return 'wood';
+  if (/otel|hotel|rezidans|residence|palas|sitesi/i.test(text)) return 'lux';
+  return 'box';
+}
 
 function signCanvas(text, color, seed = 0) {
-  const v = seed % SIGN_FONTS.length;
+  const list = SIGN_STYLES[signKind(text)];
+  const v = seed % list.length;
   const key = text + color + v;
   let c = signCache.get(key);
   if (c) return c;
   if (signCache.size > 400) signCache.clear();
-  const [font, kind] = SIGN_FONTS[v];
-  const shown = v === 1 || v === 8 ? text.toLocaleUpperCase('tr') : text;
+  const [font, kind] = list[v];
+  const shown = kind === 'vivid' || font.includes('Bungee') ? text.toLocaleUpperCase('tr') : text;
   c = document.createElement('canvas');
   const g0 = c.getContext('2d');
   g0.font = font;
@@ -5251,7 +5300,44 @@ function signCanvas(text, color, seed = 0) {
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   const cy = 29;
-  if (kind === 'panel') {
+  if (kind === 'corp') {
+    g.fillStyle = color; g.fillRect(1, 5, w - 2, 46);
+    g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(1, 5, w - 2, 3);
+    g.fillStyle = '#fff'; g.fillText(shown, w / 2, cy + 1);
+  } else if (kind === 'vivid') {
+    g.fillStyle = color; rr(g, 2, 3, w - 4, 50, 9); g.fill();
+    g.save(); g.globalAlpha = 0.16; g.fillStyle = '#fff';
+    for (let px = -40; px < w; px += 26) { g.beginPath(); g.moveTo(px, 53); g.lineTo(px + 12, 53); g.lineTo(px + 44, 3); g.lineTo(px + 32, 3); g.fill(); }
+    g.restore();
+    g.lineWidth = 3; g.strokeStyle = '#ffd23f'; rr(g, 2, 3, w - 4, 50, 9); g.stroke();
+    g.lineWidth = 6; g.lineJoin = 'round'; g.strokeStyle = '#1a1420'; g.strokeText(shown, w / 2, cy);
+    g.fillStyle = '#ffe14d'; g.fillText(shown, w / 2, cy);
+  } else if (kind === 'led') {
+    g.fillStyle = '#07080e'; rr(g, 2, 4, w - 4, 48, 5); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.05)';
+    for (let py = 7; py < 50; py += 4) for (let px = 5; px < w - 4; px += 4) g.fillRect(px, py, 1.6, 1.6);
+    const glow = shade(color, 0.55);
+    g.lineWidth = 2; g.strokeStyle = glow; rr(g, 3, 5, w - 6, 46, 5); g.stroke();
+    g.shadowColor = glow; g.shadowBlur = 16;
+    g.fillStyle = glow; g.fillText(shown, w / 2, cy); g.fillText(shown, w / 2, cy);
+    g.shadowBlur = 0;
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.fillText(shown, w / 2, cy);
+  } else if (kind === 'wood') {
+    g.fillStyle = '#6f4522'; rr(g, 2, 3, w - 4, 50, 6); g.fill();
+    for (let py = 3; py < 52; py += 12) {
+      g.fillStyle = py % 2 ? '#7c4f28' : '#855730'; g.fillRect(4, py + 1, w - 8, 11);
+      g.fillStyle = 'rgba(30,14,4,.35)'; g.fillRect(4, py, w - 8, 1.2);
+    }
+    g.fillStyle = '#2a1608';
+    for (const [px, py] of [[9, 9], [w - 9, 9], [9, 47], [w - 9, 47]]) { g.beginPath(); g.arc(px, py, 2, 0, 7); g.fill(); }
+    g.fillStyle = 'rgba(30,14,4,.8)'; g.fillText(shown, w / 2 + 1.5, cy + 1.5);
+    g.fillStyle = '#ffeec8'; g.fillText(shown, w / 2, cy);
+  } else if (kind === 'box') {
+    g.fillStyle = '#20242c'; rr(g, 1, 3, w - 2, 50, 4); g.fill();
+    g.fillStyle = '#fbfbf4'; rr(g, 4, 6, w - 8, 44, 2); g.fill();
+    g.fillStyle = color; g.fillRect(4, 44, w - 8, 6);
+    g.fillStyle = shade(color, -0.15); g.fillText(shown, w / 2, cy - 2);
+  } else if (kind === 'panel') {
     g.fillStyle = color; rr(g, 2, 4, w - 4, 48, 7); g.fill();
     g.lineWidth = 3; g.strokeStyle = '#fff'; g.stroke();
     g.fillStyle = '#fff'; g.fillText(shown, w / 2, cy);
@@ -5430,6 +5516,132 @@ function paintPedKind(g, kind, step) {
       g.fillStyle = '#fff';
       g.fillRect(-3, -0.8, 3, 1.6);
     }
+  }
+}
+
+// --- Dükkân önü ---
+function paintDoner(g, f) {
+  g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(-7, 9, 14, 3);
+  g.fillStyle = '#8b939c'; g.fillRect(-1, -12, 2, 23);
+  g.fillStyle = '#4a4f55'; g.fillRect(-6, 8, 12, 3);
+  // Koni et: bantlar kare kare kayar, dönüyormuş gibi görünür
+  g.beginPath(); g.moveTo(-6.5, -9); g.lineTo(6.5, -9); g.lineTo(3.8, 7); g.lineTo(-3.8, 7); g.closePath();
+  g.save(); g.clip();
+  g.fillStyle = '#8c4f22'; g.fillRect(-8, -10, 16, 18);
+  for (let i = 0; i < 6; i++) {
+    const x = -9 + ((i * 3.6 + f * 0.9) % 18);
+    g.fillStyle = i % 2 ? '#b8722f' : '#6f3a18';
+    g.fillRect(x, -10, 1.8, 18);
+  }
+  g.fillStyle = 'rgba(255,190,110,.32)'; g.fillRect(-2, -10, 3, 18);
+  g.restore();
+  g.fillStyle = '#d6dbe1'; g.fillRect(-7, -11, 14, 2);
+}
+
+function paintPromo(g, text, i) {
+  const bg = ['#e8352e', '#ffd23f', '#16a34a', '#7b3fa0', '#ff6a13', '#0a84d6', '#e11d74', '#111827'][i % 8];
+  const fg = i % 8 === 1 ? '#7a1408' : '#ffffff';
+  g.fillStyle = 'rgba(0,0,0,.28)'; g.fillRect(-19, 10, 40, 3);
+  g.fillStyle = '#3c4148'; g.fillRect(-17, 7, 2, 6); g.fillRect(15, 7, 2, 6);
+  g.fillStyle = bg; rr(g, -21, -11, 42, 20, 2); g.fill();
+  g.lineWidth = 1.2; g.strokeStyle = 'rgba(255,255,255,.85)'; g.setLineDash([3, 2]); rr(g, -19.5, -9.5, 39, 17, 1.5); g.stroke(); g.setLineDash([]);
+  g.fillStyle = fg;
+  g.font = '400 8px Anton, Impact, sans-serif';
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(text, 0, -1, 37);
+}
+
+// Şişme hava dansçısı: gövde dalgalanır, kollar savrulur. Yerde üfleyici
+function paintDancer(g, col, f) {
+  const ph = (f / 6) * Math.PI * 2;
+  g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(0, 33, 9, 3, 0, 0, 7); g.fill();
+  g.fillStyle = '#2f343c'; g.fillRect(-6, 27, 12, 6);
+  const pts = [];
+  for (let i = 0; i <= 8; i++) {
+    const t = i / 8;
+    pts.push([Math.sin(ph + t * 4) * (1 + t * 7), 28 - t * 52]);
+  }
+  g.strokeStyle = col; g.lineWidth = 8.5; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.beginPath(); pts.forEach(([x, y], i) => g[i ? 'lineTo' : 'moveTo'](x, y)); g.stroke();
+  g.strokeStyle = shade(col, 0.3); g.lineWidth = 2.5;
+  g.beginPath(); pts.forEach(([x, y], i) => g[i ? 'lineTo' : 'moveTo'](x - 1.6, y)); g.stroke();
+  const [sx, sy] = pts[6];
+  g.strokeStyle = col; g.lineWidth = 4;
+  for (const s of [-1, 1]) {
+    const a = ph * (s > 0 ? 1 : -1) + s * 0.6;
+    const ex = sx + s * (9 + 5 * Math.cos(a));
+    const ey = sy - 7 + 9 * Math.sin(a);
+    g.beginPath(); g.moveTo(sx, sy); g.quadraticCurveTo(sx + s * 8, sy - 5, ex, ey); g.lineTo(ex + s * 7 * Math.cos(a + ph), ey - 7); g.stroke();
+  }
+  const [hx, hy] = pts[8];
+  g.fillStyle = shade(col, 0.15); g.beginPath(); g.arc(hx, hy - 4, 6.2, 0, 7); g.fill();
+  g.fillStyle = '#fff'; for (const s of [-1, 1]) { g.beginPath(); g.arc(hx + s * 2.4, hy - 5, 1.9, 0, 7); g.fill(); }
+  g.fillStyle = '#141414'; for (const s of [-1, 1]) { g.beginPath(); g.arc(hx + s * 2.4, hy - 5, 0.9, 0, 7); g.fill(); }
+  g.strokeStyle = '#141414'; g.lineWidth = 1; g.beginPath(); g.arc(hx, hy - 3.4, 2.8, 0.3, 2.84); g.stroke();
+  g.strokeStyle = '#111'; g.lineWidth = 1.2; for (let i = -2; i <= 2; i++) { g.beginPath(); g.moveTo(hx + i * 2, hy - 9.5); g.lineTo(hx + i * 2.6, hy - 13 - (i & 1)); g.stroke(); }
+}
+
+// --- Balkon hayatı: gövde, baş, eylem, önünde korkuluk ---
+function paintBalcony(g, act, f, shirt) {
+  const skin = '#e0a878';
+  g.fillStyle = 'rgba(30,40,55,.75)'; g.fillRect(-9, -11, 18, 21); // Balkon gölgesi
+  g.fillStyle = shirt; g.beginPath(); g.roundRect(-3.5, -3, 7, 9, 2); g.fill();
+  g.fillStyle = skin; g.beginPath(); g.arc(0, -6, 2.8, 0, 7); g.fill();
+  g.fillStyle = '#3b2a1e'; g.beginPath(); g.arc(0, -7, 2.9, 3.14, 0); g.fill();
+  g.strokeStyle = skin; g.lineWidth = 1.5; g.lineCap = 'round';
+  if (act === 'tea') {
+    const up = f ? -5 : -1;
+    g.beginPath(); g.moveTo(3, -1); g.lineTo(5, up + 2); g.stroke();
+    g.fillStyle = '#f4ead2'; g.fillRect(4.4, up - 1, 2.4, 3);
+    g.fillStyle = '#b5482f'; g.fillRect(4.6, up - 1, 2, 1);
+  } else if (act === 'wave') {
+    g.beginPath(); g.moveTo(3, -2); g.lineTo(f ? 7 : 4, -8); g.stroke();
+    g.beginPath(); g.arc(f ? 7 : 4, -9, 1.1, 0, 7); g.fillStyle = skin; g.fill();
+  } else if (act === 'water') {
+    g.beginPath(); g.moveTo(3, -1); g.lineTo(6, 0); g.stroke();
+    g.fillStyle = '#3f8f5b'; g.fillRect(5, -1.5, 4, 3);
+    g.fillStyle = '#9fd8ff'; for (let i = 0; i < 3; i++) g.fillRect(8.4, 1.5 + ((i * 2 + f * 2) % 6), 0.9, 1.3);
+    g.fillStyle = '#b5482f'; g.fillRect(4.5, 5, 5, 2.4);
+    g.fillStyle = '#e8533f'; g.beginPath(); g.arc(7, 4.4, 1.6, 0, 7); g.fill();
+  } else {
+    g.strokeStyle = '#dfe4ea'; g.lineWidth = 0.7; g.beginPath(); g.moveTo(-9, -9); g.lineTo(9, -9); g.stroke();
+    g.strokeStyle = skin; g.lineWidth = 1.5; g.beginPath(); g.moveTo(3, -2); g.lineTo(5, f ? -9 : -7); g.stroke();
+    g.fillStyle = '#f4f6f8'; g.fillRect(4, f ? -9 : -8.6, 4, 6);
+  }
+  g.fillStyle = 'rgba(245,247,250,.95)'; g.fillRect(-10, 4, 20, 1.3);
+  g.fillStyle = 'rgba(245,247,250,.75)'; for (let x = -9.4; x < 10; x += 2.6) g.fillRect(x, 4, 0.7, 6);
+  g.fillStyle = 'rgba(200,205,212,.95)'; g.fillRect(-10, 9.6, 20, 1);
+}
+
+function paintWashing(g, f) {
+  g.strokeStyle = '#dfe4ea'; g.lineWidth = 0.7;
+  g.beginPath(); g.moveTo(-14, -6); g.quadraticCurveTo(0, -3.8, 14, -6); g.stroke();
+  const cols = ['#f4f6f8', '#e8533f', '#3e7cb1', '#f2c14e', '#7a5ea8'];
+  const sway = [-1.3, 0, 1.3][f];
+  for (let i = 0; i < 4; i++) {
+    const x = -12 + i * 6.2;
+    g.fillStyle = cols[i];
+    g.beginPath(); g.moveTo(x, -5); g.lineTo(x + 4.6, -5); g.lineTo(x + 4.6 + sway * (1 + i * 0.1), 4); g.lineTo(x + sway * (1 + i * 0.1), 4); g.closePath(); g.fill();
+  }
+}
+
+function paintMoon(g) {
+  const gr = g.createRadialGradient(0, 0, 8, 0, 0, 22);
+  gr.addColorStop(0, 'rgba(255,245,210,.5)'); gr.addColorStop(1, 'rgba(255,240,200,0)');
+  g.fillStyle = gr; g.fillRect(-22, -22, 44, 44);
+  g.fillStyle = '#fff4d0'; g.beginPath(); g.arc(0, 0, 10, 0, 7); g.fill();
+  g.globalCompositeOperation = 'destination-out';
+  g.beginPath(); g.arc(4.5, -2.5, 8.6, 0, 7); g.fill();
+  g.globalCompositeOperation = 'source-over';
+}
+
+function paintStars(g, seed) {
+  let s = seed;
+  const r = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+  for (let i = 0; i < 34; i++) {
+    g.fillStyle = r() < 0.2 ? '#ffe9b0' : '#ffffff';
+    const q = 0.7 + r() * 1;
+    g.fillRect(-160 + r() * 320, -45 + r() * r() * 90, q, q);
   }
 }
 
@@ -8179,11 +8391,28 @@ function glow(size, stops) {
   return c;
 }
 
+// Her tabela rengine özel yumuşak ışık: önbellekli
+const haloCache = new Map();
+function signHalo(color) {
+  let c = haloCache.get(color);
+  if (c) return c;
+  c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 2, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.4, 'rgba(255,255,255,.4)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  g.globalCompositeOperation = 'source-in';
+  g.fillStyle = shade(color, 0.4); g.fillRect(0, 0, 64, 64);
+  haloCache.set(color, c);
+  return c;
+}
+
 // Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
 const signOut = { x: 0, y: 0, w: 0, h: 0 };
 function signBox(r, img) {
   const size = r.signSize ?? 1;
-  const hTarget = [10, 16, 24, 40][size] ?? 16;
+  const hTarget = [18, 24, 32, 46][size] ?? 24;
   const maxW = size === 3 ? r.w * 0.94 : r.w - 6;
   const w = Math.min(maxW, (img.width / img.height) * hTarget);
   const h = (w / img.width) * img.height;
@@ -8400,13 +8629,62 @@ class Renderer {
           ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
           if (r.sign) {
             const img = signCanvas(r.sign, r.signColor, r.seed);
-            const w = Math.min((X1 - X0) * 0.86, (img.width / img.height) * 26);
+            const w = Math.min((X1 - X0) * 0.92, (img.width / img.height) * 38);
             const h = (w / img.width) * img.height;
             ctx.drawImage(img, (X0 + X1) / 2 - w / 2, (Y0 + Y1) / 2 - h / 2, w, h);
           }
         }
       }
     }
+  }
+
+  // Balkon hayatı: yalnızca oyuncu yakınındaki apartmanlarda, sınırlı sayıda. Geceleri içeri girerler
+  drawBalconies(game, now, c0x, c1x, c0y, c1y, tall) {
+    const B = CONFIG.balcony;
+    const night = game.daylight.k;
+    if (night > 0.75) return;
+    const ctx = this.ctx;
+    const sp = this.sprites;
+    const p = game.player;
+    const cam = game.cam;
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+    ctx.globalAlpha = 1 - night / 0.75;
+    let drawn = 0;
+    const R2 = B.range * B.range;
+    const swing = Math.floor(now / 260);
+    for (let cy = c0y; cy <= c1y && drawn < B.maxDrawn; cy++) {
+      for (let cx = c0x; cx <= c1x && drawn < B.maxDrawn; cx++) {
+        const c = game.world.chunks.get((cx + 32768) * 65536 + (cy + 32768));
+        if (!c) continue;
+        for (const r of c.balc) {
+          if (!r.alive || drawn >= B.maxDrawn || (r.tall > 0) !== tall) continue;
+          const mx = r.x + r.w / 2; const my = r.y + r.h;
+          const dx = mx - p.x; const dy = my - p.y;
+          if (dx * dx + dy * dy > R2) continue;
+          // Yüksek binada güney duvarı kameraya bakıyorsa duvara, değilse cepheye yerleşir
+          const k = r.tall;
+          if (k && cam.y <= my) continue;
+          const slots = 1 + (r.seed % 3);
+          for (let i = 0; i < slots; i++) {
+            const h = ((r.seed * (i + 3) * 2654435761) >>> 0) / 4294967296;
+            const u = 0.14 + ((i + h * 0.7) / slots) * 0.74;
+            const b = k ? 0.3 + ((r.seed >> (i + 1)) % 5) * 0.11 : 0;
+            const x0 = r.x + r.w * u;
+            const fx = k ? x0 + (x0 - cam.x) * k * b : x0;
+            const fy = k ? my + (my - cam.y) * k * b : my - 7;
+            const q = 1 + (k ? k * b : 0);
+            if (h < 0.34) {
+              ctx.drawImage(sp.washing[(swing + i + (r.seed & 3)) % 3], fx - 15 * q, fy - 15 * q, 30 * q, 18 * q);
+            } else {
+              const act = sp.balcony[Math.floor(h * 97) % 4];
+              ctx.drawImage(act[Math.floor(now / 480 + h * 7) & 1], fx - 10 * q, fy - 21 * q, 20 * q, 24 * q);
+            }
+            drawn++;
+          }
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
   }
 
   // Yangın: en fazla birkaç alev karesi, parçacık harcamaz
@@ -8491,6 +8769,17 @@ class Renderer {
       s.pedKinds[k] = [0, 1].map((step) => sprite(34, 34, (g) => paintPedKind(g, k, step)));
     }
     s.simit = sprite(16, 16, paintSimit);
+    // Dükkân önü: döner şişi, afişler, üç renk şişme balon
+    s.doner = [0, 1, 2, 3].map((f) => sprite(18, 24, (g) => paintDoner(g, f)));
+    s.promos = CONFIG.signs.promos.map((t, i) => sprite(44, 26, (g) => paintPromo(g, t, i)));
+    s.dancers = ['#e8352e', '#ffd23f', '#21a9e0'].map((c) => [0, 1, 2, 3, 4, 5].map((f) => sprite(46, 78, (g) => paintDancer(g, c, f))));
+    // Balkon: çay içen, el sallayan, çiçek sulayan, çamaşır asan ve sallanan çamaşır
+    s.balcony = ['tea', 'wave', 'water', 'hang'].map((a) => [0, 1].map((f) => sprite(20, 24, (g) => paintBalcony(g, a, f, SHIRT[(a.length * 3 + f * 0) % SHIRT.length]))));
+    s.washing = [0, 1, 2].map((f) => sprite(30, 18, (g) => paintWashing(g, f)));
+    // Gökyüzü: yıldızlar iki kümede, sırayla parıldar
+    s.moon = sprite(44, 44, paintMoon);
+    s.stars = [11, 37].map((seed) => sprite(320, 90, (g) => paintStars(g, seed)));
+    s.tail = glow(32, [[0, 'rgba(255,50,40,.85)'], [0.5, 'rgba(255,30,30,.3)'], [1, 'rgba(255,20,20,0)']]);
     s.lamp = glow(96, [[0, 'rgba(255,225,150,.75)'], [0.3, 'rgba(255,200,110,.3)'], [1, 'rgba(255,180,80,0)']]);
     s.win = glow(48, [[0, 'rgba(255,214,130,.95)'], [0.6, 'rgba(255,190,100,.35)'], [1, 'rgba(255,170,80,0)']]);
     s.neons = CONFIG.signs.neon.map((c) => glow(96, [[0, `${c}cc`], [0.45, `${c}55`], [1, `${c}00`]]));
@@ -9348,7 +9637,9 @@ class Renderer {
     this.drawPeds(game, vx0, vx1, vy0, vy1, true);
     this.drawLights(game, c0x, c1x, c0y, c1y);
     this.drawFires(game, now, c0x, c1x, c0y, c1y);
+    this.drawBalconies(game, now, c0x, c1x, c0y, c1y, false); // Alçak binalar yüksek binaların altında kalır
     this.drawTalls(game, c0x, c1x, c0y, c1y);
+    this.drawBalconies(game, now, c0x, c1x, c0y, c1y, true);
     this.drawUfos(game, now, vx0, vx1, vy0, vy1);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawNight(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now);
@@ -9480,7 +9771,7 @@ class Renderer {
         for (let i = 0; i < c.propCount; i++) {
           const pr = c.props[i];
           if (!pr.alive || pr.x < x0 - 30 || pr.x > x1 + 30 || pr.y < y0 - 30 || pr.y > y1 + 30) continue;
-          const isTall = pr.kind === PROP.QUEUE || pr.kind === PROP.TREE || pr.kind === PROP.PALM || pr.kind === PROP.PINE || pr.kind === PROP.LAUNDRY;
+          const isTall = pr.kind === PROP.QUEUE || pr.kind === PROP.DANCER || pr.kind === PROP.TREE || pr.kind === PROP.PALM || pr.kind === PROP.PINE || pr.kind === PROP.LAUNDRY;
           if (isTall !== tall) continue;
           if (isPower(pr.kind)) {
             const bob = 1 + 0.1 * Math.sin(now * 0.006 + pr.phase * 5);
@@ -9492,6 +9783,21 @@ class Renderer {
             const pw = 42 * bob;
             ctx.drawImage(sp.props[pr.kind], pr.x - pw / 2, pr.y - pw / 2, pw, pw);
             if (!look) continue;
+            continue;
+          }
+          if (pr.kind === PROP.DONER) {
+            ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+            ctx.drawImage(sp.doner[Math.floor(now / 130 + pr.x) & 3], pr.x - 9, pr.y - 20, 18, 24);
+            continue;
+          }
+          if (pr.kind === PROP.PROMO) {
+            ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+            ctx.drawImage(sp.promos[pr.v || 0], pr.x - 22, pr.y - 20, 44, 26);
+            continue;
+          }
+          if (pr.kind === PROP.DANCER) {
+            ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+            ctx.drawImage(sp.dancers[pr.v || 0][Math.abs(Math.floor(now / 105 + pr.x * 0.1)) % 6], pr.x - 23, pr.y - 72, 46, 78);
             continue;
           }
           if (pr.kind === PROP.COIN) {
@@ -9594,8 +9900,8 @@ class Renderer {
             ctx.globalAlpha = night * 0.85;
             ctx.drawImage(sp.lamp, l.x - 70, l.y - 70, 140, 140);
           } else if (l.kind === 1) {
-            if (!l.rect.alive || (l.rect.seed + i) % 3 === 0) continue; // Bazı evlerde ışık kapalı
-            ctx.globalAlpha = night * 0.8;
+            if (!l.rect.alive || (l.rect.seed + i) % 4 === 0 || night <= l.at) continue; // Bazı evlerde ışık kapalı
+            ctx.globalAlpha = Math.min(1, (night - l.at) / 0.16) * 0.85; // Her pencere kendi sırasında yanar
             ctx.drawImage(sp.win, l.x, l.y, l.w, l.h);
           } else if (l.kind === 2) {
             if (!l.rect.alive) continue;
@@ -9621,9 +9927,31 @@ class Renderer {
         }
       }
     }
-    // Araç farları
+    // Tabela ışıltısı ve yola düşen yansıması
     ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = night * 0.9;
+    for (let cy = c0y; cy <= c1y; cy++) {
+      for (let cx = c0x; cx <= c1x; cx++) {
+        const c = game.world.chunk(cx, cy);
+        for (let i = 0; i < c.lightCount; i++) {
+          const l = c.lights[i];
+          if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1 + 40) continue;
+          const r = l.rect;
+          const img = signCanvas(r.sign, r.signColor, r.seed);
+          const b = signBox(r, img);
+          const halo = signHalo(r.signColor);
+          const led = signKind(r.sign) === 'led';
+          const flick = led ? 0.82 + 0.18 * Math.sin(now * 0.02 + r.seed) : 1;
+          ctx.globalAlpha = night * 0.6 * flick;
+          ctx.drawImage(img, b.x, b.y, b.w, b.h);
+          ctx.globalAlpha = night * 0.5 * flick;
+          ctx.drawImage(halo, b.x - 26, b.y - 22, b.w + 52, b.h + 44);
+          ctx.globalAlpha = night * 0.3;
+          ctx.drawImage(halo, r.x - 6, r.y + r.h - 2, r.w + 12, 40);
+        }
+      }
+    }
+    // Araç farları
+    ctx.globalAlpha = night;
     const beam = sp.beam;
     const bw = beam.width / SPR;
     const bh = beam.height / SPR;
@@ -9631,12 +9959,32 @@ class Renderer {
       if (b.x < x0 - 120 || b.x > x1 + 120 || b.y < y0 - 120 || b.y > y1 + 120) return;
       this.place(b.x + Math.cos(b.a) * b.len * 0.46, b.y + Math.sin(b.a) * b.len * 0.46, b.a);
       ctx.drawImage(beam, -bw / 2, -bh / 2, bw, bh);
+      // Stop lambası ve farın asfalttaki parıltısı
+      ctx.globalAlpha = night * 0.7;
+      ctx.drawImage(sp.tail, -b.len * 0.92 - 14, -14, 28, 28);
+      ctx.globalAlpha = night * 0.32;
+      ctx.drawImage(sp.lamp, 40, -44, 110, 88);
+      ctx.globalAlpha = night;
     };
     if (game.state === 'play') head(game.player);
     for (const c of game.cops) if (c.type !== 'tank' && !c.flying) head(c);
     for (const n of game.crowd.npcs) if (n.alive && n.state === 'drive') head(n);
     for (const n of game.crowd.hw) if (n.alive) head(n);
     ctx.globalCompositeOperation = 'source-over';
+    // Gök: üst kenarda ay ve sırayla parıldayan yıldızlar
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    if (night > 0.3) {
+      const a = (night - 0.3) / 0.7;
+      const W = this.w;
+      ctx.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 2; i++) {
+        ctx.globalAlpha = a * (0.45 + 0.4 * Math.sin(now * 0.0016 + i * 2.4));
+        ctx.drawImage(sp.stars[i], 0, 0, W, 104);
+      }
+      ctx.globalAlpha = a * 0.95;
+      ctx.drawImage(sp.moon, W * 0.62, 12, 44, 44);
+      ctx.globalCompositeOperation = 'source-over';
+    }
     ctx.globalAlpha = 1;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }

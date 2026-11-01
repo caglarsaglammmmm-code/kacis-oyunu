@@ -415,7 +415,7 @@ body:not(.has3d) .garage3d { background: linear-gradient(160deg, #15183a, #0a0c1
 .volume input { flex: 1; max-width: 62%; accent-color: #21d4a0; height: 28px; }
 
 /* v8: garaj. Büyük araç, cam sayfa, dolan çubuklar, seçili karta neon */
-.gsheet { max-height: 56%; background: linear-gradient(180deg, rgba(10, 14, 30, .28), rgba(6, 8, 20, .88) 26%); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border-top: 0; }
+.gsheet { max-height: 56%; background: linear-gradient(180deg, rgba(6, 8, 20, .45), rgba(6, 8, 20, .92) 22%); border-top: 0; }
 .spec h3 { font-size: 30px; color: #fff; text-shadow: 0 0 12px #7dffcf, 0 0 28px #21d4a0; }
 .stat i { background: rgba(255, 255, 255, .1); border-radius: 6px; overflow: hidden; }
 .stat i b { display: block; height: 100%; width: var(--w); background: linear-gradient(90deg, #17d3a0, #7dffcf 70%, #fff); border-radius: 6px; box-shadow: 0 0 10px rgba(125, 255, 207, .8); animation: barIn .55s cubic-bezier(.2, .8, .2, 1) both; transform-origin: left; }

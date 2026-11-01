@@ -225,6 +225,7 @@ export class Crowd {
 
   // --- Yayalar ---
   pickKind() {
+    if (this.g.daylight.k > 0.5 && Math.random() < 0.22) return 'cat'; // Gece sokak kedilerin
     let r = Math.random() * pedWeight;
     for (const k of PED_KIND_NAMES) {
       r -= PD.kinds[k].weight;
