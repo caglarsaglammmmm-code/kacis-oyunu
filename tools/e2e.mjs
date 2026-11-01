@@ -179,7 +179,7 @@ await page.close();
   for (let y = 680; y >= 200; y -= 20) { await t3('touchMove', y); await sleep(16); }
   await t3('touchEnd');
   await sleep(300);
-  report.kaydirma = { scrollTop: await p3.evaluate(() => document.getElementById('garage').scrollTop), errors: e3 };
+  report.kaydirma = { scrollTop: await p3.evaluate(() => document.getElementById('garage').scrollHeight - document.getElementById('garage').clientHeight), liste: await p3.evaluate(() => document.getElementById('garage-list').scrollWidth), errors: e3 };
   await p3.close();
 }
 

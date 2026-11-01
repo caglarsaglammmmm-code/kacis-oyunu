@@ -108,6 +108,7 @@ test('başlangıç aracı Tofaş Doğan; sırayla pahalılaşır, hızlanır, ka
     assert.ok(cars[i].engine, 'motor sesi');
   }
   assert.equal(new Set(cars.map((c) => c.shape)).size, cars.length, 'her aracın şekli ayrı');
+  for (const c of cars) assert.ok(['gloss', 'metal', 'matte'].includes(c.finish), 'boya türü');
   assert.equal(new Set(cars.map((c) => c.color)).size, cars.length, 'her aracın rengi ayrı');
 });
 

@@ -16,6 +16,7 @@ export const PED_FLY = 2;
 export const PED_DOWN = 3;
 export const PED_WAIT = 4;
 export const PED_CROSS = 5;
+export const PED_IDLE = 6;
 
 // Yönler: 0 doğu, 1 güney, 2 batı, 3 kuzey. Trafik sağdan akar.
 const DX = [1, 0, -1, 0];
@@ -45,7 +46,7 @@ export class Crowd {
     for (let i = 0; i < PD.max; i++) {
       this.peds.push({
         alive: false, x: 0, y: 0, a: 0, vx: 0, vy: 0, z: 0, vz: 0, spin: 0, state: 0, t: 0, turnT: 0,
-        look: 0, step: 0, kind: 'man', info: PD.kinds.man, tx: 0, ty: 0, axis: 0, jx: 0, jy: 0,
+        look: 0, step: 0, scale: 1, pace: 1, kind: 'man', info: PD.kinds.man, tx: 0, ty: 0, axis: 0, jx: 0, jy: 0,
       });
     }
     this.npcs = [];
@@ -121,7 +122,9 @@ export class Crowd {
     p.a = a;
     p.state = PED_WALK;
     p.t = 0; p.turnT = 1 + Math.random() * 3; p.step = Math.random() * 6;
-    p.look = Math.floor(Math.random() * 6);
+    p.look = Math.floor(Math.random() * (kind === 'woman' ? 7 : 7)) + (kind === 'woman' ? 7 : 0);
+    p.scale = 0.84 + Math.random() * 0.32; // Boy farkı
+    p.pace = 0.75 + Math.random() * 0.55; // Yürüyüş hızı farkı
   }
 
   spawnPed() {
@@ -142,6 +145,8 @@ export class Crowd {
       const chance = gr === GROUND.ROAD && PD.kinds[kind].road ? 1 : PD.density[gr] || 0;
       if (Math.random() > chance || g.world.blockedAt(x, y)) continue;
       this.setupPed(p, kind, x, y, Math.floor(Math.random() * 4) * 1.5708);
+      // Bazıları dükkân önünde durur, sohbet eder
+      if (!PD.kinds[kind].road && kind !== 'cat' && gr === GROUND.WALK && Math.random() < PD.idleChance) p.state = PED_IDLE;
       return;
     }
   }
@@ -254,6 +259,16 @@ export class Crowd {
       if (n.alive && Math.abs(n.x - p.x) < 80 && Math.abs(n.y - p.y) < 80 && this.checkHit(p, n, false)) return;
     }
 
+    if (p.state === PED_IDLE) {
+      const ix = p.x - pl.x;
+      const iy = p.y - pl.y;
+      if (ix * ix + iy * iy < PD.fearDist * PD.fearDist && pl.speed > 150 && g.state === 'play') {
+        p.state = PED_RUN;
+        p.a = Math.atan2(iy, ix);
+        p.turnT = 1.6;
+      }
+      return;
+    }
     if (p.state === PED_WAIT) {
       p.t -= dt;
       if (lightState(this.clock, p.jx, p.jy, p.axis) === 'r') p.state = PED_CROSS;
@@ -286,7 +301,7 @@ export class Crowd {
         g.emit('scream', 0.45);
       }
     }
-    const speed = (p.state === PED_RUN ? PD.runSpeed : PD.walkSpeed * p.info.speed);
+    const speed = (p.state === PED_RUN ? PD.runSpeed : PD.walkSpeed * p.info.speed) * p.pace;
     const nx = p.x + Math.cos(p.a) * speed * dt;
     const ny = p.y + Math.sin(p.a) * speed * dt;
     const lookX = p.x + Math.cos(p.a) * 16;

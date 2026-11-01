@@ -1,6 +1,7 @@
 // Koddan üretilen çizimler: lüks araba, polis çeşitleri, sivil araçlar, yayalar, güçler, binalar.
 // Tüm araçlar burun +x yönünde çizilir.
 import { BUILD } from './config.js';
+import { paintTr } from './cars.js';
 
 export function rr(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -125,129 +126,6 @@ export function paintLux(g, len, wid, body, accent) {
   g.fillStyle = '#b6bcc4';
   g.fillRect(-L - 1.2, -H * 0.3, 1.2, 1.8);
   g.fillRect(-L - 1.2, H * 0.3 - 1.8, 1.2, 1.8);
-}
-
-// Türk arabaları: tek çizici, araca özgü oran ve ayrıntılar tablodan gelir
-// corner: köşe yuvarlaklığı, hood/trunk: kaput ve bagaj oranı, chrome: krom tampon
-const TR_SHAPES = {
-  dogan: { corner: 3.5, hood: 0.46, trunk: 0.42, chrome: true, tail: 'box' },
-  sahin: { corner: 3.5, hood: 0.46, trunk: 0.42, chrome: false, tail: 'box', wing: true, stripes: true, darkGlass: true },
-  murat: { corner: 2.5, hood: 0.5, trunk: 0.46, chrome: true, tail: 'round', twin: true },
-  anadol: { corner: 7, hood: 0.62, trunk: 0.3, chrome: true, tail: 'round', twin: true, stripes: true },
-  egea: { corner: 7, hood: 0.42, trunk: 0.4, tail: 'led' },
-  clio: { corner: 9, hood: 0.4, trunk: 0.12, tail: 'led', twoTone: true },
-  suv: { corner: 6, hood: 0.36, trunk: 0.14, tail: 'led', rails: true, big: true },
-  duster: { corner: 5, hood: 0.38, trunk: 0.14, tail: 'led', rails: true, big: true, cladding: true, stripes: true },
-  tog: { corner: 8, hood: 0.34, trunk: 0.16, tail: 'bar', twoTone: true, big: true, ledFront: true },
-};
-
-export function paintTr(g, len, wid, body, accent, shape) {
-  if (shape === 'moto') { paintPlayerMoto(g, len, wid, body, accent); return; }
-  const S = TR_SHAPES[shape];
-  const L = len / 2;
-  const H = wid / 2;
-  const tw = S.big ? 12 : 10;
-  for (const [x, y] of [[L * 0.56, -H], [L * 0.56, H], [-L * 0.56, -H], [-L * 0.56, H]]) wheel(g, x, y, tw, S.big ? 6 : 5);
-  const paint = g.createLinearGradient(0, -H, 0, H);
-  paint.addColorStop(0, shade(body, 0.34));
-  paint.addColorStop(0.4, body);
-  paint.addColorStop(1, shade(body, -0.38));
-  if (S.cladding) { g.fillStyle = '#2a2d33'; rr(g, -L - 0.5, -H - 0.7, len + 1, wid + 1.4, S.corner + 1); g.fill(); }
-  g.fillStyle = paint;
-  rr(g, -L, -H, len, wid, S.corner);
-  g.fill();
-  g.strokeStyle = 'rgba(0,0,0,.5)';
-  g.lineWidth = 0.7;
-  g.stroke();
-  const front = L - len * 0.5 * S.hood; // ön cam hattı
-  const rear = -L + len * 0.5 * S.trunk + 2; // arka cam hattı
-  if (S.stripes) {
-    g.fillStyle = accent;
-    g.fillRect(-L + 1, -H * 0.3, len - 2, H * 0.2);
-    g.fillRect(-L + 1, H * 0.1, len - 2, H * 0.2);
-  }
-  // Camlar
-  g.fillStyle = S.darkGlass ? '#090b10' : '#1f3346';
-  g.beginPath();
-  g.moveTo(front, -H * 0.76);
-  g.lineTo(front, H * 0.76);
-  g.lineTo(rear, H * 0.72);
-  g.lineTo(rear, -H * 0.72);
-  g.closePath();
-  g.fill();
-  g.fillStyle = 'rgba(170,225,255,.5)';
-  g.fillRect(front - 3, -H * 0.62, 1.6, H * 1.24);
-  // Tavan
-  const rf = front - (front - rear) * 0.22;
-  const rb = rear + (front - rear) * 0.2;
-  g.fillStyle = S.twoTone ? accent : paint;
-  rr(g, rb, -H * 0.62, rf - rb, H * 1.24, 2.5);
-  g.fill();
-  g.fillStyle = 'rgba(255,255,255,.2)';
-  rr(g, rb + 2, -H * 0.5, (rf - rb) * 0.6, H * 0.26, 1);
-  g.fill();
-  if (S.rails) {
-    g.fillStyle = '#c6ccd4';
-    g.fillRect(rb, -H * 0.72, rf - rb, 1.3);
-    g.fillRect(rb, H * 0.72 - 1.3, rf - rb, 1.3);
-  }
-  // Kaput çizgisi
-  g.strokeStyle = 'rgba(0,0,0,.22)';
-  g.lineWidth = 0.6;
-  g.strokeRect(front + 2, -H * 0.66, L - front - 4, H * 1.32);
-  // Tamponlar
-  if (S.chrome) {
-    g.fillStyle = '#d8dde3';
-    g.fillRect(L - 1.2, -H + 1, 2, wid - 2);
-    g.fillRect(-L - 0.8, -H + 1, 2, wid - 2);
-  }
-  // Farlar
-  g.fillStyle = '#fff6c9';
-  if (S.ledFront) {
-    g.fillStyle = '#e8fbff';
-    g.fillRect(L - 1.6, -H + 2, 1.6, wid - 4);
-  } else if (S.twin) {
-    for (const y of [-H + 2, -H + 6.2, H - 5.2, H - 9.4]) g.fillRect(L - 2.2, y, 2.2, 3.2);
-  } else {
-    g.fillRect(L - 2.4, -H + 2.4, 2.4, 5);
-    g.fillRect(L - 2.4, H - 7.4, 2.4, 5);
-  }
-  // Stoplar
-  g.fillStyle = '#ff2733';
-  if (S.tail === 'bar') g.fillRect(-L - 0.2, -H + 1.5, 1.6, wid - 3);
-  else if (S.tail === 'led') { g.fillRect(-L, -H + 1.6, 1.8, 6); g.fillRect(-L, H - 7.6, 1.8, 6); }
-  else if (S.tail === 'round') { g.beginPath(); g.arc(-L + 1.6, -H + 4.5, 2.1, 0, 7); g.arc(-L + 1.6, H - 4.5, 2.1, 0, 7); g.fill(); }
-  else { g.fillRect(-L, -H + 2, 2, 7); g.fillRect(-L, H - 9, 2, 7); }
-  if (S.wing) {
-    g.fillStyle = accent;
-    rr(g, -L - 2.6, -H - 1, 3.4, wid + 2, 1);
-    g.fill();
-  }
-}
-
-function paintPlayerMoto(g, len, wid, body, accent) {
-  const L = len / 2;
-  g.fillStyle = '#0f0f13';
-  rr(g, L * 0.42, -2.2, 12, 4.4, 2); g.fill();
-  rr(g, -L - 0.5, -2.6, 13, 5.2, 2); g.fill();
-  const paint = g.createLinearGradient(0, -5, 0, 5);
-  paint.addColorStop(0, shade(body, 0.4));
-  paint.addColorStop(1, shade(body, -0.35));
-  g.fillStyle = paint;
-  rr(g, -L * 0.62, -4.6, L * 1.42, 9.2, 4); g.fill();
-  g.fillStyle = accent;
-  g.fillRect(L * 0.2, -1, L * 0.5, 2);
-  g.strokeStyle = '#c9d2dc';
-  g.lineWidth = 1.7;
-  g.beginPath(); g.moveTo(L * 0.56, -7); g.lineTo(L * 0.56, 7); g.stroke();
-  g.fillStyle = '#20252f';
-  g.beginPath(); g.ellipse(-2, 0, 5.4, 6.4, 0, 0, 7); g.fill();
-  g.fillStyle = accent;
-  g.beginPath(); g.arc(1.5, 0, 3.9, 0, 7); g.fill();
-  g.fillStyle = '#16212e';
-  g.fillRect(3, -2.4, 2, 4.8);
-  g.fillStyle = '#fff6c9'; g.fillRect(L - 1, -1.6, 2, 3.2);
-  g.fillStyle = '#ff2733'; g.fillRect(-L - 1, -1.8, 1.6, 3.6);
 }
 
 // Düz gövdeli araba (park etmiş, sivil, polis tabanı)
@@ -418,11 +296,11 @@ export function paintTurret(g) {
 }
 
 // --- Sivil araçlar ---
-export function paintNpc(g, kind, spec, color) {
+export function paintNpc(g, kind, spec, color, finish) {
   const L = spec.len / 2;
   const H = spec.wid / 2;
   if (spec.shape) {
-    paintTr(g, spec.len, spec.wid, color, '#101216', spec.shape);
+    paintTr(g, spec.len, spec.wid, color, '#101216', spec.shape, finish);
     if (kind === 'taxi') {
       // Dama şerit ve tepe lambası
       for (let x = -L + 4; x < L - 6; x += 5) {
@@ -1011,6 +889,33 @@ export function paintPedKind(g, kind, step) {
       g.beginPath(); g.arc(4.6, 0, 4.4, 0, 7); g.stroke(); // Askılı tepsi
       g.fillStyle = '#b5481f';
       for (const [x, y] of [[3.2, -1.6], [6, -1.6], [4.6, 1.6]]) { g.beginPath(); g.arc(x, y, 1.2, 0, 7); g.fill(); }
+      break;
+    case 'student':
+      person('#2a4d8f', '#f0c8a0', '#2b2b33');
+      g.fillStyle = '#e8533f'; rr(g, -5.6, -3, 3.4, 6, 1.2); g.fill();
+      break;
+    case 'tourist':
+      person('#f7a8c4', '#f0d0b0', '#d9c48a');
+      g.fillStyle = '#e8d9a8'; g.beginPath(); g.arc(0, 0, 3.4, 0, 7); g.fill(); // Hasır şapka
+      g.fillStyle = '#1b1b1f'; g.fillRect(2.4, -2, 2.4, 1.8);
+      break;
+    case 'jogger':
+      person('#21d4a8', '#d9a06a', '#16131a');
+      g.fillStyle = '#ff2a6d'; g.fillRect(-0.6, -2.4, 1.2, 4.8); // Saç bandı
+      break;
+    case 'guard':
+      person('#11131a', '#e0a878', '#11131a');
+      g.fillStyle = '#e8c547'; g.fillRect(-1, 2.2, 2, 1.4);
+      break;
+    case 'teyze':
+      person('#7a4a6a', '#e0a878', '#7a4a6a');
+      g.fillStyle = '#c7a24a'; g.beginPath(); g.arc(0, 0, 2.8, 0, 7); g.fill(); // Çiçekli başörtü
+      g.fillStyle = '#6b4a2b'; rr(g, 1, 4, 4, 3, 1); g.fill(); // Pazar çantası
+      break;
+    case 'hawker':
+      person('#b5482f', '#d9a06a', '#3b2a1e');
+      g.fillStyle = '#e8d9a8'; rr(g, 3, -5, 7, 10, 1); g.fill();
+      g.fillStyle = '#ff9d1a'; g.beginPath(); g.arc(6, -2, 1.3, 0, 7); g.arc(6, 2, 1.3, 0, 7); g.fill();
       break;
     case 'esnaf':
       person('#ececec', '#e0a878', '#16131a');

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CONFIG } from '../js/config.js';
-import { Game, difficultyAt, damageStage, impactDamage, interp } from '../js/game.js';
+import { Game, difficultyAt, damageStage, impactDamage, interp, dayState } from '../js/game.js';
 import { lightState } from '../js/crowd.js';
 import { resetBody } from '../js/physics.js';
 
@@ -239,6 +239,51 @@ test('haritadaki güç alınır, kalıcı olarak kaybolur', () => {
   assert.ok(g.damage < 50);
 });
 
+test('gece-gündüz döngüsü yumuşak değişir', () => {
+  const L = CONFIG.day.length;
+  let prev = dayState(0).k;
+  let max = 0;
+  let min = 1;
+  for (let t = 0; t < L; t += 0.5) {
+    const k = dayState(t).k;
+    assert.ok(Math.abs(k - prev) < 0.06, 'ani geçiş yok');
+    prev = k; max = Math.max(max, k); min = Math.min(min, k);
+  }
+  assert.equal(max, 1);
+  assert.equal(min, 0);
+  assert.equal(dayState(0).k, 0, 'oyun gündüz başlar');
+});
+
+test('en az 8 siren; aynı anda gelen polisler farklı siren çalar', () => {
+  assert.ok(CONFIG.sirens.length >= 8);
+  assert.equal(new Set(CONFIG.sirens).size, CONFIG.sirens.length);
+  const g = game({ startTime: 100, god: true });
+  const ids = [];
+  for (let i = 0; i < 8; i++) ids.push(g.spawnCop('car', 'chaser', 5000 + i * 80, 5000, 0).sirenId);
+  assert.equal(new Set(ids).size, 8, ids.join());
+  assert.equal(g.spawnCop('tank', 'chaser', 7000, 5000, 0).sirenId, -1);
+});
+
+test('yeni sokak insanları ve sesleri; dükkân önünde durur, tehlikede kaçar', () => {
+  for (const k of ['student', 'tourist', 'jogger', 'guard', 'teyze', 'hawker']) assert.ok(CONFIG.peds.kinds[k], k);
+  for (const v of ['teen', 'grandma', 'tourist']) assert.ok(CONFIG.peds.words[v], v);
+  const g = game();
+  const p = g.crowd.peds[0];
+  g.crowd.setupPed(p, 'teyze', g.player.x + 100, g.player.y, 0);
+  p.state = 6;
+  const x = p.x;
+  g.player.speed = 0;
+  g.crowd.updatePed(p, dt);
+  assert.equal(p.x, x, 'duruyor');
+  g.player.speed = 300;
+  g.player.vx = 300;
+  g.crowd.updatePed(p, dt);
+  assert.equal(p.state, 1, 'kaçıyor');
+  const sizes = new Set();
+  for (let i = 0; i < 40; i++) { g.crowd.setupPed(p, 'man', 0, 0, 0); sizes.add(p.scale.toFixed(2)); }
+  assert.ok(sizes.size > 10, 'boylar farklı');
+});
+
 test('süreli güçler 15 saniye', () => {
   assert.equal(CONFIG.powers.duration, 15);
 });
@@ -306,7 +351,7 @@ test('sivil Türk trafiği: oyuncudan zayıf, çarpılınca savrulur', () => {
     assert.ok(t.colors.length >= 1);
   }
   assert.ok(CONFIG.npc.types.taxi.colors[0] === '#f7c600', 'taksi sarı');
-  for (const k of ['tog', 'tofas', 'anadol', 'murat', 'minibus', 'bus', 'taxi']) assert.ok(CONFIG.npc.types[k], k);
+  for (const k of ['tog', 'tofas', 'anadol', 'murat', 'minibus', 'bus', 'taxi', 'bavyera', 'halka', 'yildiz', 'golf', 'megane', 'linea', 'focus', 'kore', 'truck', 'pickup', 'motosiklet']) assert.ok(CONFIG.npc.types[k], k);
   const g = game({ god: true });
   g.player.vy = 0;
   for (let i = 0; i < 60 * 14; i++) g.tick(dt, 0, true);

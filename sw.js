@@ -1,5 +1,5 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'penci-zorn-v3';
+const CACHE = 'penci-zorn-v4';
 const ASSETS = [
   './',
   'index.html',
@@ -12,6 +12,8 @@ const ASSETS = [
   'js/police.js',
   'js/crowd.js',
   'js/art.js',
+  'js/cars.js',
+  'js/buildings.js',
   'js/game.js',
   'js/render.js',
   'js/input.js',

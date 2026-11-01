@@ -13,7 +13,7 @@ const SC = CONFIG.score;
 const BAR = CONFIG.barricade;
 const TK = CONFIG.tank;
 const PW = CONFIG.powers;
-const tmpSirens = { wail: 1e9, yelp: 1e9, hilo: 1e9, chirp: 1e9 };
+const tmpSirens = new Float32Array(CONFIG.sirens.length);
 
 export function interp(curve, t) {
   if (t <= curve[0][0]) return curve[0][1];
@@ -43,6 +43,24 @@ export function difficultyAt(t, out = {}) {
   out.fastShare = t >= D.fastFrom ? interp(D.fastShare, t) : 0;
   out.tanks = t >= D.tanksAt ? Math.round(interp(D.tankCount, t)) : 0;
   out.barricadeEvery = t >= BAR.from ? interp(BAR.intervalCurve, t) : Infinity;
+  return out;
+}
+
+// Gece-gündüz: k gece oranı, r/g/b/a ekran rengi. Gündüz boş, alacakaranlık turuncu, gece lacivert
+export function dayState(t, out = {}) {
+  const Y = CONFIG.day;
+  const p = ((t / Y.length + Y.start) % 1 + 1) % 1;
+  let k = 0;
+  if (p >= Y.duskFrom && p < Y.nightFrom) k = (p - Y.duskFrom) / (Y.nightFrom - Y.duskFrom);
+  else if (p >= Y.nightFrom && p < Y.dawnFrom) k = 1;
+  else if (p >= Y.dawnFrom) k = 1 - (p - Y.dawnFrom) / (1 - Y.dawnFrom);
+  k = k * k * (3 - 2 * k);
+  const warm = Math.sin(Math.min(1, k * 1.15) * Math.PI); // Geçişte turuncu
+  out.k = k;
+  out.a = +(k * Y.darkness + warm * 0.14).toFixed(3);
+  out.r = Math.round(8 + warm * 190);
+  out.g = Math.round(12 + warm * 70);
+  out.b = Math.round(46 - warm * 20);
   return out;
 }
 
@@ -79,6 +97,8 @@ export class Game {
     this.world = new World(seed);
     this.fx = new Effects();
     this.crowd = new Crowd(this);
+    this.dayT = 0;
+    this.daylight = dayState(0);
     this.sirens = tmpSirens;
     this.flow = new FlowField();
     this.player = makeBody();
@@ -158,6 +178,8 @@ export class Game {
     this.god = god;
     this.world.reset(seed);
     this.resetRun(startTime);
+    this.dayT = 0;
+    dayState(0, this.daylight);
     resetBody(this.player, 100, 300, Math.PI / 2, carSpec);
     this.player.vy = 120;
     this.player.vx = 0;
@@ -193,6 +215,10 @@ export class Game {
   // --- Ana adım ---
   tick(dt, steer, reverse) {
     this.tickCount++;
+    if (this.state === 'play') {
+      this.dayT += dt;
+      if (this.tickCount % 12 === 0) dayState(this.dayT, this.daylight);
+    }
     // Sert darbede kısa duraksama: çarpışma hissi
     if (this.stopT > 0) {
       this.stopT -= dt;
@@ -603,6 +629,7 @@ export class Game {
     c.role = role;
     c.state = 'chase';
     c.crusher = type === 'tank';
+    c.sirenId = spec.siren ? this.pickSiren(spec.siren) : -1;
     c.wanderT = 0;
     c.staticBody = false;
     // Polis son hızı her zaman oyuncu arabasına oranlıdır, yani hep biraz yavaştır
@@ -619,6 +646,20 @@ export class Game {
     c.turret = a; c.fireT = TK.fireEvery * 0.6; c.fxT = Math.random() * 3; c.hurtFlash = 0;
     this.cops.push(c);
     return c;
+  }
+
+  // En az kullanılan siren: aynı anda gelen polisler farklı duyulur.
+  // Eşitlikte önce araç tipinin sireni, sonra rastgele biri
+  pickSiren(pref) {
+    const n = CONFIG.sirens.length;
+    const use = new Array(n).fill(0);
+    for (const c of this.cops) if (c.sirenId >= 0) use[c.sirenId]++;
+    const min = Math.min(...use);
+    const p = CONFIG.sirens.indexOf(pref);
+    if (use[p] === min) return p;
+    const free = [];
+    for (let i = 0; i < n; i++) if (use[i] === min) free.push(i);
+    return free[Math.floor(Math.random() * free.length)];
   }
 
   removeCop(i) {
@@ -667,7 +708,7 @@ export class Game {
     let nearest = 1e9;
     let closing = 0;
     const sirens = this.sirens;
-    sirens.wail = 1e9; sirens.yelp = 1e9; sirens.hilo = 1e9; sirens.chirp = 1e9;
+    sirens.fill(1e9);
     const playing = this.state === 'play';
 
     for (let i = this.cops.length - 1; i >= 0; i--) {
@@ -730,8 +771,7 @@ export class Game {
           nearest = dist;
           closing = (dx * (c.vx - p.vx) + dy * (c.vy - p.vy)) / (dist || 1);
         }
-        const sk = c.spec.siren;
-        if (sk && dist < sirens[sk]) sirens[sk] = dist;
+        if (c.sirenId >= 0 && dist < sirens[c.sirenId]) sirens[c.sirenId] = dist;
         if (c.type === 'tank' && this.ghostT <= 0) this.tankFire(c, dist, dt);
       }
     }

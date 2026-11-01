@@ -1,4 +1,5 @@
 // Tüm sesler Web Audio ile üretilir; harici dosya yok.
+import { CONFIG } from './config.js';
 
 export class AudioEngine {
   constructor() {
@@ -121,6 +122,10 @@ export class AudioEngine {
     makeVoice('yelp', 'sawtooth', 1200);
     makeVoice('hilo', 'square', 620);
     makeVoice('chirp', 'triangle', 1900);
+    makeVoice('euro', 'square', 760);
+    makeVoice('rumble', 'sawtooth', 300);
+    makeVoice('horn', 'sawtooth', 480);
+    makeVoice('bip', 'square', 1700);
     this.radioT = 6;
   }
 
@@ -186,21 +191,25 @@ export class AudioEngine {
     const sec = now / 1000;
     const S = game.sirens;
     const quiet = game.ghostT > 0 ? 0.35 : 1;
-    const setVoice = (name, freq) => {
+    const setVoice = (name, freq, gate = 1) => {
       const v = this.voices[name];
-      const d = S[name];
-      if (on && d < 1300) {
+      const d = S[CONFIG.sirens.indexOf(name)];
+      if (on && d < 1300 && gate) {
         const vol = 1 - d / 1300;
         v.osc.frequency.setTargetAtTime(freq * doppler, t, 0.02);
-        v.gain.gain.setTargetAtTime((0.02 + vol * vol * 0.075) * quiet, t, 0.1);
+        v.gain.gain.setTargetAtTime((0.018 + vol * vol * 0.062) * quiet, t, 0.04);
       } else {
-        v.gain.gain.setTargetAtTime(0, t, 0.15);
+        v.gain.gain.setTargetAtTime(0, t, gate ? 0.15 : 0.02);
       }
     };
     setVoice('wail', 680 + 760 * (0.5 - 0.5 * Math.cos((sec / 3.6) * 6.283))); // Yavaş uluma
     setVoice('yelp', 760 + 720 * (0.5 + 0.5 * Math.sin(sec * 19))); // Hızlı yelp
     setVoice('hilo', Math.floor(sec / 0.62) % 2 ? 640 : 475); // Ağır araç iki tonlu
     setVoice('chirp', 1300 + 900 * (sec * 9 - Math.floor(sec * 9))); // Motosiklet kesik siren
+    setVoice('euro', Math.floor(sec / 0.42) % 2 ? 580 : 435); // Hızlı iki ton
+    setVoice('rumble', 170 + 130 * Math.abs(Math.sin(sec * 2.2))); // Tok gürültü
+    setVoice('horn', 330, Math.floor(sec * 2.6) % 3 === 0 ? 1 : 0); // Hava kornası
+    setVoice('bip', 1760, Math.floor(sec * 7) % 4 === 0 ? 1 : 0); // Megafon bip
 
     // Ara sıra polis telsizi ve megafon
     if (on && game.sirenDist < 1000) {
@@ -308,6 +317,9 @@ export class AudioEngine {
       woman: { pitch: [380, 460, 560], form: [900, 1700, 3000], rise: 1.5, vib: 0.04, dur: 0.6 },
       child: { pitch: [620, 740, 860], form: [1100, 2100, 3500], rise: 1.6, vib: 0.05, dur: 0.45 },
       old: { pitch: [150, 180, 215], form: [550, 1000, 2100], rise: 1.15, vib: 0.1, dur: 0.75 },
+      teen: { pitch: [260, 320, 400], form: [800, 1500, 2700], rise: 1.8, vib: 0.05, dur: 0.4 },
+      grandma: { pitch: [290, 340, 390], form: [780, 1350, 2500], rise: 1.2, vib: 0.14, dur: 0.8 },
+      tourist: { pitch: [230, 300, 480], form: [700, 1800, 2900], rise: 1.05, vib: 0.02, dur: 0.55 },
     }[voice] || { pitch: [200], form: [700, 1200, 2400], rise: 1.3, vib: 0.03, dur: 0.5 };
     const dur = P.dur + Math.random() * 0.25;
     const base = P.pitch[Math.floor(Math.random() * P.pitch.length)];

@@ -158,19 +158,20 @@ function frame(now) {
   if (!paused) {
     accumulator += elapsed;
     let steps = 0;
-    while (accumulator >= STEP && steps < 5) {
+    // Menü kendi sahnesini çizer: arkada oyun dönmez, pil harcanmaz
+    while (game.state !== 'attract' && accumulator >= STEP && steps < 5) {
       input.tick(STEP);
       game.tick(STEP, input.steer, input.reverse);
       accumulator -= STEP;
       steps++;
     }
-    if (steps === 5) accumulator = 0;
+    if (steps === 5 || game.state === 'attract') accumulator = 0;
     if (hintT > 0) {
       hintT -= elapsed;
       if (hintT <= 0) ui.showHint(false);
     }
   }
-  renderer.draw(game, now);
+  if (game.state !== 'attract') renderer.draw(game, now);
   audio.update(game, !paused, now);
 
   hudT -= elapsed;

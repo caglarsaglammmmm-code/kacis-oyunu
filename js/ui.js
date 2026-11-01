@@ -2,6 +2,7 @@
 import { CONFIG, MAX_STARS } from './config.js';
 import { carSprite } from './render.js';
 import { paintPower, POWER_LOOK } from './art.js';
+import { paintTr, paintSide } from './cars.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -29,7 +30,9 @@ export class UI {
     const a = this.actions;
     const click = (id, fn) => $(id).addEventListener('click', () => { a.tap(); fn(); });
     click('btn-play', () => a.play());
-    click('btn-garage', () => { this.renderGarage(); this.show('garage'); });
+    click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
+    click('car-prev', () => this.stepCar(-1));
+    click('car-next', () => this.stepCar(1));
     click('btn-settings', () => this.show('settings'));
     click('btn-howto', () => this.show('howto'));
     for (const b of document.querySelectorAll('[data-back]')) {
@@ -81,7 +84,8 @@ export class UI {
     const d = this.storage.data;
     $('menu-coins').textContent = d.coins;
     $('menu-best').textContent = d.bestScore ? `En iyi: ${d.bestScore.toLocaleString('tr-TR')} puan · ${formatTime(d.bestTime)}` : 'İlk kaçışın seni bekliyor';
-    $('menu-car').textContent = this.storage.selectedCar().name;
+    $('menu-car-name').textContent = this.storage.selectedCar().name;
+    this.drawMenuCar();
   }
 
   splash(done) {
@@ -191,6 +195,13 @@ export class UI {
     const score = Math.floor(g.score).toLocaleString('tr-TR');
     if (score !== l.score) { l.score = score; $('hud-score').textContent = score; }
     if (g.coins !== l.coins) { l.coins = g.coins; $('hud-coins').textContent = g.coins; }
+    const health = Math.max(0, Math.round(100 - g.damage));
+    if (health !== l.health) {
+      l.health = health;
+      const bar = $('hud-health').firstElementChild;
+      bar.style.width = `${health}%`;
+      bar.style.background = health > 45 ? '#3ce07a' : health > 20 ? '#ffb020' : '#ff4a3a';
+    }
     const stage = g.stage;
     if (stage !== l.stage) {
       l.stage = stage;
@@ -239,65 +250,89 @@ export class UI {
 
   renderGarage() {
     const d = this.storage.data;
-    $('garage-coins').textContent = d.coins;
-    const list = $('garage-list');
-    list.textContent = '';
     const cars = CONFIG.cars;
+    $('garage-coins').textContent = d.coins;
+    if (this.gi === undefined) this.gi = Math.max(0, cars.findIndex((c) => c.id === d.selected));
+    const car = cars[this.gi];
+    const owned = d.owned.includes(car.id);
+    const selected = d.selected === car.id;
+    const side = $('garage-side');
+    paintSide(side.getContext('2d'), side.width, side.height, car);
+    $('garage-name').textContent = car.name;
+    $('garage-desc').textContent = car.desc;
+
+    const stats = $('garage-stats');
+    stats.textContent = '';
     const top = cars[cars.length - 1];
     const base = cars[0];
-    for (const car of cars) {
-      const owned = d.owned.includes(car.id);
-      const selected = d.selected === car.id;
-      const card = document.createElement('div');
-      card.className = `car-card${selected ? ' selected' : ''}${owned ? '' : ' locked'}`;
+    const stat = (label, value, text) => {
+      const row = document.createElement('div');
+      row.className = 'stat';
+      const t = document.createElement('span');
+      t.textContent = label;
+      const bar = document.createElement('i');
+      const fill = document.createElement('b');
+      fill.style.width = `${Math.round(25 + value * 75)}%`;
+      bar.appendChild(fill);
+      const n = document.createElement('em');
+      n.textContent = text;
+      row.append(t, bar, n);
+      stats.appendChild(row);
+    };
+    const norm = (v, a, b) => (v - a) / (b - a);
+    stat('Hız', norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
+    stat('Kayma', norm(base.driftGrip / car.driftGrip, 1, base.driftGrip / top.driftGrip), String(Math.round((base.driftGrip / car.driftGrip) * 100)));
+    stat('Dayanıklılık', norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
 
-      const art = carSprite(car);
-      art.className = 'car-art';
-      card.appendChild(art);
-
-      const name = document.createElement('h3');
-      name.textContent = car.name;
-      card.appendChild(name);
-      const desc = document.createElement('p');
-      desc.textContent = car.desc;
-      card.appendChild(desc);
-
-      const stat = (label, value, text) => {
-        const row = document.createElement('div');
-        row.className = 'stat';
-        const t = document.createElement('span');
-        t.textContent = label;
-        const bar = document.createElement('i');
-        const fill = document.createElement('b');
-        fill.style.width = `${Math.round(25 + value * 75)}%`;
-        bar.appendChild(fill);
-        const n = document.createElement('em');
-        n.textContent = text;
-        row.append(t, bar, n);
-        card.appendChild(row);
-      };
-      const norm = (v, a, b) => (v - a) / (b - a);
-      stat('Hız', norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
-      stat('Kayma', norm(base.driftGrip / car.driftGrip, 1, base.driftGrip / top.driftGrip), String(Math.round((base.driftGrip / car.driftGrip) * 100)));
-      stat('Dayanıklılık', norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
-
-      const btn = document.createElement('button');
-      btn.className = `btn small${owned ? '' : ' buy'}`;
-      if (selected) { btn.textContent = 'Seçili'; btn.disabled = true; }
-      else if (owned) btn.textContent = 'Seç';
-      else {
-        btn.textContent = d.coins >= car.cost ? `Satın al · ${car.cost}` : `${car.cost} coin`;
-        btn.disabled = d.coins < car.cost;
-      }
-      btn.addEventListener('click', () => {
-        this.actions.tap();
-        if (owned) this.storage.select(car.id);
-        else if (this.storage.buy(car.id)) this.actions.purchased();
-        this.actions.carChanged();
-        this.renderGarage();
-      });
-      card.appendChild(btn);
-      list.appendChild(card);
+    const act = $('garage-action');
+    act.classList.toggle('buy', !owned);
+    if (selected) { act.textContent = 'Seçili'; act.disabled = true; }
+    else if (owned) { act.textContent = 'Seç'; act.disabled = false; }
+    else {
+      act.textContent = d.coins >= car.cost ? `Satın al · ${car.cost}` : `${car.cost} coin`;
+      act.disabled = d.coins < car.cost;
     }
+    act.onclick = () => {
+      this.actions.tap();
+      if (owned) this.storage.select(car.id);
+      else if (this.storage.buy(car.id)) this.actions.purchased();
+      this.actions.carChanged();
+      this.drawMenuCar();
+      this.renderGarage();
+    };
+
+    const list = $('garage-list');
+    list.textContent = '';
+    cars.forEach((c, i) => {
+      const b = document.createElement('button');
+      const has = d.owned.includes(c.id);
+      b.className = `thumb${i === this.gi ? ' on' : ''}${has ? '' : ' locked'}${d.selected === c.id ? ' selected' : ''}`;
+      const art = carSprite(c);
+      art.className = 'car-art';
+      const label = document.createElement('span');
+      label.textContent = has ? c.name : `${c.cost}`;
+      b.append(art, label);
+      b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.renderGarage(); });
+      list.appendChild(b);
+    });
+    const on = list.children[this.gi];
+    if (on && on.scrollIntoView) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+  }
+
+  stepCar(dir) {
+    const n = CONFIG.cars.length;
+    this.gi = (this.gi + dir + n) % n;
+    this.renderGarage();
+  }
+
+  drawMenuCar() {
+    const cv = $('menu-car');
+    const spec = this.storage.selectedCar();
+    const g = cv.getContext('2d');
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, cv.width, cv.height);
+    const k = 6.4;
+    g.setTransform(0, k, -k, 0, cv.width / 2, cv.height / 2); // Burun aşağı bakar, dönerken sırayla görünür
+    paintTr(g, spec.len, spec.wid, spec.color, spec.accent, spec.shape, spec.finish);
   }
 }

@@ -11,8 +11,13 @@ Mobil öncelikli, Türk sokaklarında geçen kuşbakışı polis kaçış ve dri
 - **Biyomlar:** şehir (gökdelenli merkez dahil), sahil (kum, sığ su, deniz, köprüler), orman, çöl, kırsal. Zemin, nesne ve bina biyoma göre değişir.
 - **Özel güçler:** Patlama, Görünmezlik (15 sn), Can, Dev mod (15 sn).
 - **Garaj:** Tofaş Doğan ile başlarsın; coinlerle motosiklet, Grandland, TOG, Şahin, Anadol, Murat 131, Egea, Clio ve Duster açılır.
-- **Polisler:** normal, hızlı, motosiklet, SWAT, gelişmiş, tank. Her biri farklı boyut, hız ve sirende.
+- **Polisler:** normal, hızlı, motosiklet, SWAT, gelişmiş, tank. Sekiz farklı siren var, aynı anda gelen polisler farklı çalar.
+- **Gece-gündüz:** sokak lambaları, pencereler, tabelalar, neon mekânlar ve araç farları gece yanar.
 - **Türk sokakları:** tabelalı dükkânlar, marketler, çay ocakları, Nevada Kafe, kapalı pazar, kediler, simitçiler, trafik ışıkları, dolmuş, taksi ve belediye otobüsü. Haritada tek bir turuncu Sistem Koleji vardır.
+
+## v4 yenilikleri
+
+Her model için ayrı araç çizimi ve garajda yandan profil, marka havalı özgün NPC araçlar, yeni menü, garaj ve HUD, zincir mağazalar, bankalar, rezidans ve iş merkezleri, cami, stadyum, hastane, okul, gecekondu, çıkmaz sokaklar, pavyonlar, Natura Park ve Doğa Şehir siteleri, çok büyük tek Sistem Koleji. Tabelalardaki mağaza ve banka adları yalnızca yazıdır, gerçek logo kullanılmaz.
 
 ## v3 oyun hissi iyileştirmeleri
 
