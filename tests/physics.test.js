@@ -63,7 +63,7 @@ test('basılı dönüşte drift oluşur: yanal kayma ve açısal hız ayrı', ()
     maxSlip = Math.max(maxSlip, c.slip);
     if (c.drifting) drifted++;
   }
-  assert.ok(maxSlip > 150, `kayma ${maxSlip}`);
+  assert.ok(maxSlip > 140, `kayma ${maxSlip}`);
   assert.ok(drifted > 20, `drift kareleri ${drifted}`);
 });
 

@@ -201,3 +201,9 @@ h2 { font: 400 26px/1.1 Bungee, sans-serif; text-transform: uppercase; }
   .menu nav .btn { min-height: 40px; }
   .btn.apk { font-size: 15px; }
 }
+
+/* v3: garaj */
+.stat { grid-template-columns: 78px 1fr 30px; }
+.stat em { font-style: normal; text-align: right; color: #fff; font-weight: 800; }
+.car-card.locked .car-art { filter: saturate(.75) brightness(.92); }
+.btn.buy:not(:disabled) { background: linear-gradient(#35d07f, #15a35c); color: #fff; box-shadow: 0 4px 0 #0c6b3b; }

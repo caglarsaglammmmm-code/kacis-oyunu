@@ -11,16 +11,22 @@ const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 
 const BUILD = {
   TOWER_GLASS: 7, TOWER_ROUND: 8, TOWER_STEP: 9, HUT: 10, LIFEGUARD: 11, LIGHTHOUSE: 12, CABIN: 13,
   FIRETOWER: 14, ADOBE: 15, MESA: 16, BARN: 17, SILO: 18, WINDMILL: 19, WATERTOWER: 20, GAS: 21,
+  APARTMENT: 22, MARKET: 23, SISTEM: 24, BAZAAR: 25,
 };
 
 const CONFIG = {
-  version: '2.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/KacKacabilirsen.apk',
+  name: 'Penci Zorn',
+  version: '3.0.0',
+  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk',
 
   // Geliştirici kısayolları. Adres çubuğundan da verilebilir: ?t=280&god=1
   dev: {
     startTime: 0, // Oyun bu saniyeden başlar (ör. 280 = tanklar)
     godMode: false, // Ölümsüzlük. Ayarlarda sürüm yazısına 7 kez dokununca da açılır
+  },
+
+  input: {
+    bothDelay: 0.09, // Baş parmak geçişi geri vites sanılmasın: ikisine bu kadar basılı kalınca geri
   },
 
   world: {
@@ -32,13 +38,17 @@ const CONFIG = {
     biomeCell: 11, // Bir biyom bölgesinin chunk cinsinden boyutu (rastgele sınırlı)
     biomes: { city: 34, beach: 20, forest: 16, desert: 15, rural: 15 },
     seaRadius: 0.42, // Sahil bölgesinin ortasındaki denizin biyom hücresine oranı
-    templates: { city: 30, downtown: 18, suburb: 16, park: 12, lake: 7, industrial: 11, plaza: 6 },
+    templates: { mahalle: 30, city: 24, pazar: 8, downtown: 10, suburb: 10, park: 8, lake: 5, industrial: 6, plaza: 5 },
+    sistemRing: [5, 12], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
   },
 
   camera: {
     viewArea: 740, // Ekran alanının karekökü bu kadar dünya birimine denk gelir
     lookAhead: 0.46, // Hızın önüne kaç saniyelik bakılır
-    follow: 4.5,
+    follow: 5.5,
+    followFast: 8, // Son hızda kamera arabadan kopmaz
+    lookSmooth: 3.2, // Bakış yönü drift sırasında titremesin
+    kick: 14, // Sert darbede kameranın itilmesi
     zoomOut: 0.2, // Son hızda ne kadar uzaklaşılır
     zoomRate: 1.8,
     shakeDecay: 6,
@@ -76,13 +86,18 @@ const CONFIG = {
   ],
 
   // En az 5 araba. durability hasarı böler, mass polis çarpışmalarını etkiler.
+  // Sıra önemli: pahalılaştıkça hız, kayma ve dayanıklılık artar. engine: motor sesi
   cars: [
-    { id: 'serce', name: 'Serçe', cost: 0, desc: 'Dengeli başlangıç arabası', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#e8112d', accent: '#ffe14d' },
-    { id: 'pars', name: 'Pars', cost: 150, desc: 'Hızlı ama kırılgan', maxSpeed: 482, accel: 570, turnRate: 3, grip: 4.4, driftGrip: 1.2, durability: 0.8, mass: 0.9, len: 50, wid: 24, color: '#ff8a00', accent: '#1d1d24' },
-    { id: 'tosun', name: 'Tosun', cost: 300, desc: 'Ağır gran turismo, darbeye dayanıklı', maxSpeed: 408, accel: 450, turnRate: 2.8, grip: 5.2, driftGrip: 1.6, durability: 1.6, mass: 1.7, len: 54, wid: 27, color: '#0fa958', accent: '#eaf7d0' },
-    { id: 'kelebek', name: 'Kelebek', cost: 350, desc: 'Drift ustası, kuyruk bırakır', maxSpeed: 444, accel: 530, turnRate: 3.65, grip: 3.7, driftGrip: 0.72, durability: 0.95, mass: 0.95, len: 47, wid: 24, color: '#e81fa8', accent: '#7af6ff' },
-    { id: 'yildirim', name: 'Yıldırım', cost: 800, desc: 'En yüksek son hız', maxSpeed: 530, accel: 630, turnRate: 3.15, grip: 4.7, driftGrip: 1.05, durability: 0.85, mass: 0.95, len: 50, wid: 24, color: '#0aa5e8', accent: '#ffffff' },
-    { id: 'kaplan', name: 'Kaplan', cost: 1500, desc: 'Her işi iyi yapan efsane', maxSpeed: 498, accel: 630, turnRate: 3.5, grip: 4.9, driftGrip: 0.92, durability: 1.35, mass: 1.35, len: 52, wid: 26, color: '#f5b800', accent: '#111111' },
+    { id: 'dogan', name: 'Tofaş Doğan', cost: 0, desc: 'Her mahallenin emektarı', shape: 'dogan', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { base: 46, range: 150, wave: 'sawtooth', sub: 1.5, gain: 1 } },
+    { id: 'motor', name: 'Motosiklet', cost: 100, desc: 'Dar sokakların kralı', shape: 'moto', maxSpeed: 445, accel: 610, turnRate: 3.3, grip: 4.5, driftGrip: 1.1, durability: 1.05, mass: 0.9, len: 36, wid: 16, color: '#e8352e', accent: '#ffe14d', engine: { base: 88, range: 270, wave: 'square', sub: 2, gain: 0.8 } },
+    { id: 'grandland', name: 'Grandland', cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'suv', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { base: 42, range: 125, wave: 'sawtooth', sub: 1.33, gain: 1 } },
+    { id: 'tog', name: 'TOG', cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'tog', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { base: 240, range: 620, wave: 'sine', sub: 1.5, gain: 0.45 } },
+    { id: 'sahin', name: 'Tofaş Şahin', cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'sahin', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { base: 50, range: 175, wave: 'sawtooth', sub: 1.5, gain: 1.15 } },
+    { id: 'anadol', name: 'Anadol', cost: 680, desc: 'Fiberglas efsane', shape: 'anadol', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { base: 40, range: 140, wave: 'square', sub: 1.5, gain: 0.9 } },
+    { id: 'murat', name: 'Murat 131', cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'murat', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { base: 38, range: 150, wave: 'sawtooth', sub: 1.26, gain: 1.1 } },
+    { id: 'egea', name: 'Fiat Egea', cost: 1200, desc: 'Filo arabası, sürprizli', shape: 'egea', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { base: 52, range: 165, wave: 'triangle', sub: 1.5, gain: 1.2 } },
+    { id: 'clio', name: 'Renault Clio', cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'clio', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { base: 56, range: 185, wave: 'triangle', sub: 2, gain: 1.15 } },
+    { id: 'duster', name: 'Dacia Duster', cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'duster', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { base: 44, range: 160, wave: 'sawtooth', sub: 1.5, gain: 1.25 } },
   ],
 
   damage: {
@@ -92,6 +107,10 @@ const CONFIG = {
     earlyGraceUntil: 30, // Bu saniyeye kadar hasar azaltılır
     earlyGraceMul: 0.48,
     hitCooldown: 0.28, // Aynı temasın üst üste saymaması için
+    hitStop: 0.055, // Sert darbede oyun bir an durur: çarpışma hissi
+    hitStopMin: 9,
+    autoReverseAfter: 1.1, // Duvara saplanınca kendiliğinden geri çıkar
+    autoReverseTime: 0.75,
     copScale: 0.5, // Polis darbesi duvara göre kaç kat işler (kafa kafaya da öldürmesin)
     maxCopHit: 15, // Normal polisin tek darbesi; ram değeriyle çarpılır, maxSingleHit sınırlar
     stages: [30, 55, 80, 100], // hafif duman, yoğun duman+kıvılcım, ateş, patlama
@@ -140,7 +159,8 @@ const CONFIG = {
   },
 
   policeAI: {
-    despawnDist: 2300,
+    despawnDist: 2100,
+    catchUpDist: 1150, // Polis bu kadar geride kalınca yenisi öne doğar: kovalama kopmasın
     wallDamage: 0.22,
     wallMinImpact: 85,
     ramDamage: 0.34, // Oyuncu polise çarpınca polisin aldığı (hız başına)
@@ -188,35 +208,72 @@ const CONFIG = {
     comboKillStep: 0.25,
     nearMissDist: 66,
     nearMissSpeed: 130,
-    coinPerSeconds: 20, // Bitişte her bu kadar saniye için 1 coin
+    coinPerSeconds: 8, // Bitişte her bu kadar saniye için 1 coin
+    coinPerNearMisses: 2, // Her bu kadar yakın kaçış için 1 coin
+    coinPerKill: 2,
   },
 
   coin: { magnet: 56, dropChance: 0.3 },
 
-  // Yayalar. density: zemin başına doğma olasılığı (GROUND sırasıyla)
+  // Sokak insanları. density: zemin başına doğma olasılığı (GROUND sırasıyla)
+  // voice: bağırma sesi, road: yolda gider, dodge: asla çarpılmaz, fx: özel dağılma
   peds: {
-    max: 30, spawnEvery: 0.18, despawn: 1300,
+    max: 46, spawnEvery: 0.1, waiterEvery: 0.7, despawn: 1300,
     walkSpeed: 26, runSpeed: 82, fearDist: 130, hitSpeed: 45,
     launch: 190, launchUp: 330, gravity: 900, downTime: 2.2,
     density: [0.12, 0, 1, 1, 0, 0.55, 0.15, 0.3, 0.1],
-  },
-
-  // Sivil arabalar: ana yollarda sağdan akar
-  npc: {
-    max: 9, spawnEvery: 0.9, despawn: 1700, laneOffset: 50, turnChance: 0.28,
-    hitScale: 0.42, maxHit: 12,
-    totalWeight: 10,
-    colors: ['#d9534f', '#3e7cb1', '#f2c14e', '#4f9d69', '#e8e8e8', '#7a5ea8', '#333a45', '#e8833a'],
-    types: {
-      sedan: { weight: 5, len: 44, wid: 23, mass: 1.3, cruise: 205, turnRate: 2.4, grip: 7 },
-      pickup: { weight: 2.6, len: 50, wid: 25, mass: 1.9, cruise: 190, turnRate: 2.2, grip: 7 },
-      bus: { weight: 1.2, len: 96, wid: 30, mass: 7, cruise: 150, turnRate: 1.7, grip: 8 },
-      truck: { weight: 1.2, len: 108, wid: 32, mass: 8, cruise: 155, turnRate: 1.6, grip: 8 },
+    kinds: {
+      man: { weight: 5, speed: 1, voice: 'man' },
+      woman: { weight: 5, speed: 1, voice: 'woman' },
+      child: { weight: 2.6, speed: 1.4, voice: 'child' },
+      elder: { weight: 2.2, speed: 0.6, voice: 'old' },
+      simitci: { weight: 1.3, speed: 0.8, voice: 'man', fx: 'simit', words: ['SİMİTLERİM!', 'SİMİİİT!', 'TEPSİM!'] },
+      stroller: { weight: 1, speed: 0.8, voice: 'woman' },
+      wheelchair: { weight: 0.7, speed: 0.75, voice: 'old' },
+      bike: { weight: 1.5, speed: 3, voice: 'man' },
+      courier: { weight: 1, speed: 5.4, voice: 'man', road: true, words: ['PAKET GİTTİ!', 'SİPARİŞ!', 'OHA!'] },
+      cayci: { weight: 1.1, speed: 1, voice: 'man', fx: 'tea', words: ['ÇAYLAR!', 'BARDAKLAR!', 'TAZE DEMLEMİŞTİM!'] },
+      esnaf: { weight: 1.5, speed: 0.9, voice: 'man', words: ['DÜKKÂNIM!', 'HOOP!', 'YAVAŞ OĞLUM!'] },
+      cat: { weight: 1.7, speed: 1.3, voice: 'cat', dodge: true },
+    },
+    words: {
+      man: ['YANDIM!', 'OHA!', 'HOOP!', 'NOLUYOR YA!'],
+      woman: ['AMAN!', 'İMDAT!', 'EYVAH!', 'YAPMA!'],
+      child: ['ANNEE!', 'VIIIU!', 'YİNE!'],
+      old: ['EVLADIM!', 'TÖVBE!', 'GENÇLİK İŞTE!'],
+      cat: ['MİYAV!'],
     },
   },
 
+  // Sivil Türk trafiği: hepsi oyuncu araçlarından yavaş. Ana yollarda sağdan akar
+  npc: {
+    max: 14, spawnEvery: 0.55, despawn: 1700, laneOffset: 50, turnChance: 0.28,
+    hitScale: 0.42, maxHit: 12,
+    panicDist: 300, panicSpeed: 300, panicTime: 2.4, panicLane: 76, panicBoost: 1.3,
+    types: {
+      tofas: { weight: 3.4, shape: 'dogan', len: 46, wid: 23, mass: 1.2, cruise: 195, turnRate: 2.4, grip: 7, horn: 'car', colors: ['#d9d4c7', '#8a1f1f', '#3e7cb1', '#2f6b4f'] },
+      murat: { weight: 2, shape: 'murat', len: 47, wid: 24, mass: 1.25, cruise: 175, turnRate: 2.3, grip: 7, horn: 'old', colors: ['#2f6fb0', '#e8e4d8', '#b5352a'] },
+      anadol: { weight: 1.2, shape: 'anadol', len: 47, wid: 23, mass: 1.15, cruise: 165, turnRate: 2.3, grip: 7, horn: 'old', colors: ['#e8782a', '#e0c060'] },
+      tog: { weight: 1.2, shape: 'tog', len: 48, wid: 25, mass: 1.4, cruise: 215, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#3f4a55', '#e8e8e8', '#14506b'] },
+      taxi: { weight: 2.6, shape: 'egea', len: 48, wid: 24, mass: 1.25, cruise: 225, turnRate: 2.6, grip: 7, horn: 'taxi', colors: ['#f7c600'] },
+      minibus: { weight: 1.8, len: 64, wid: 28, mass: 3, cruise: 190, turnRate: 2, grip: 8, horn: 'dolmus', colors: ['#f4f6f8'] },
+      bus: { weight: 1.2, len: 96, wid: 30, mass: 7, cruise: 150, turnRate: 1.7, grip: 8, horn: 'bus', colors: ['#2a7fc1', '#2c9e8f'] },
+      truck: { weight: 0.8, len: 108, wid: 32, mass: 8, cruise: 155, turnRate: 1.6, grip: 8, horn: 'truck', colors: ['#d9534f', '#3e7cb1', '#e8833a'] },
+    },
+  },
+
+  // Trafik ışığı süreleri (saniye)
+  traffic: { green: 6, yellow: 1.2, allRed: 0.8, stopLine: 128, brake: 520, hornAfter: 2.5, hornRate: 0.5 },
+
+  // Tabela adları. Marketler uydurmadır, gerçek marka değildir
+  signs: {
+    shops: ['Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Tekel', 'Çay Ocağı', 'Kuaför', 'Nargile Cafe', 'Bakkal', 'Kahveci', 'Nevada Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Baba Pide', 'Kardeşler Bakkal', 'Tekel 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Nevada Kafe'],
+    markets: ['Ucuzluk Market', 'Bereket Gross', 'Komşu Market', 'Anadolu Gross', 'Yıldız Gross', 'Hesaplı Market', 'Doyuran Gross', 'Tasarruf Market'],
+    colors: ['#c8261e', '#1d6fb8', '#178a4d', '#d97706', '#6d28a8', '#0f766e', '#be185d', '#1f2937'],
+  },
+
   powers: {
-    duration: 30, // Süreli güçler (görünmezlik, dev mod)
+    duration: 15, // Süreli güçler (görünmezlik, dev mod)
     chunkChance: 0.34, // Bir chunk'ta güç bulunma olasılığı
     spawnEvery: 24, // Oyuncunun önüne yol üstüne bırakma aralığı
     weights: { blast: 1, ghost: 1, heal: 1.2, giant: 0.8 },
@@ -378,6 +435,7 @@ const ART = W.arterial;
 const PROP = {
   TREE: 0, FENCE: 1, CRATE: 2, BARREL: 3, CONE: 4, BARRIER: 5, PARKED: 6, HYDRANT: 7, BENCH: 8, COIN: 9, BUSH: 10,
   PALM: 11, UMBRELLA: 12, PINE: 13, ROCK: 14, CACTUS: 15, HAY: 16, POWER_BLAST: 17, POWER_GHOST: 18, POWER_HEAL: 19, POWER_GIANT: 20,
+  CHAIRS: 21, UNCLES: 22, SIMITCART: 23, STALL: 24, LAUNDRY: 25,
 };
 
 // r: çarpışma yarıçapı, brk: kırılması için gereken hız, drag: arabanın kaybettiği hız payı,
@@ -404,10 +462,15 @@ const PROP_INFO = [
   { r: 18, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#a07bff' },
   { r: 18, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#2fd872' },
   { r: 18, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#ffd23f' },
+  { r: 13, brk: 20, drag: 0.03, dmg: 0, coin: true, chip: '#d9281e', snd: 'chairs' },
+  { r: 14, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#5c6b7a', snd: 'uncles' },
+  { r: 13, brk: 30, drag: 0.05, dmg: 0.3, coin: true, chip: '#d9a441', snd: 'simit' },
+  { r: 15, brk: 25, drag: 0.05, dmg: 0.3, coin: true, chip: '#5bb04a', snd: 'chairs' },
+  { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true },
 ];
 
 const POWER_KINDS = ['blast', 'ghost', 'heal', 'giant'];
-const isPower = (kind) => kind >= PROP.POWER_BLAST;
+const isPower = (kind) => kind >= PROP.POWER_BLAST && kind <= PROP.POWER_GIANT;
 const powerName = (kind) => POWER_KINDS[kind - PROP.POWER_BLAST];
 const isWaterRect = (rect) => rect.kind === 'water' || rect.kind === 'sea';
 
@@ -450,6 +513,7 @@ function newChunk() {
 class World {
   constructor(seed = 12345) {
     this.seed = seed | 0;
+    this.sistem = null;
     this.chunks = new Map();
     this.free = [];
     this.onRelease = null; // Çizim tarafı önbelleği geri alır
@@ -468,6 +532,7 @@ class World {
     this.lastChunk = null;
     this.lastKey = -1;
     this.seed = seed | 0;
+    this.sistem = null;
   }
 
   release(c) {
@@ -651,18 +716,24 @@ class World {
       }
     }
 
+    const sis = this.sistemChunk(); // Rastgele diziyi bozmasın diye önce hesaplanır
     this.biomeAt(cx, cy, biomeOut);
     seedRng(cx, cy, this.seed);
     c.biome = biomeOut.biome;
     const home = Math.abs(cx) <= 1 && Math.abs(cy) <= 1;
-    let t = 'city';
-    if (!home) {
+    let t = home ? 'mahalle' : 'city';
+    if (cx === sis.cx && cy === sis.cy) {
+      t = 'sistem';
+    } else if (!home) {
       if (c.biome === 'city') t = pickTemplate();
       else if (c.biome === 'beach') t = biomeOut.sea ? 'sea' : 'beach';
       else t = c.biome;
     }
     c.template = t;
     if (t === 'city' || t === 'downtown') this.fillCity(c);
+    else if (t === 'mahalle') this.fillMahalle(c);
+    else if (t === 'pazar') this.fillPazar(c);
+    else if (t === 'sistem') this.fillSistem(c);
     else if (t === 'sea') this.fillSea(c);
     else if (t === 'beach') this.fillBeach(c);
     else if (t === 'forest') this.fillForest(c);
@@ -689,6 +760,7 @@ class World {
     if (!r) { r = { kind: '', x: 0, y: 0, w: 0, h: 0, style: 0, color: '', alive: true, seed: 0 }; c.rects[c.rectCount] = r; }
     c.rectCount++;
     r.kind = kind; r.style = style; r.color = color; r.alive = true; r.seed = rint(0, 999);
+    r.sign = ''; r.signColor = '';
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -775,18 +847,31 @@ class World {
   building(c, x0, y0, x1, y1) {
     const area = (x1 - x0) * (y1 - y0);
     const downtown = c.template === 'downtown';
-    if (area >= 9 && chance(downtown ? 0.75 : 0.14)) {
+    if (area >= 9 && chance(downtown ? 0.75 : 0.1)) {
       this.addRect(c, 'building', x0, y0, x1, y1, 3, rint(BUILD.TOWER_GLASS, BUILD.TOWER_STEP), TOWER_COLORS[rint(0, TOWER_COLORS.length - 1)]);
       return;
     }
-    const style = area >= 30 ? rint(0, 4) : rint(0, 3);
-    this.addRect(c, 'building', x0, y0, x1, y1, 3, style, ROOFS[rint(0, ROOFS.length - 1)]);
+    const SG = CONFIG.signs;
+    // Büyük parsel gross market, geri kalanı tabelalı apartman ve dükkân
+    if (area >= 15 && chance(0.32)) {
+      const r = this.addRect(c, 'building', x0, y0, x1, y1, 3, BUILD.MARKET, SG.colors[rint(0, SG.colors.length - 1)]);
+      r.sign = SG.markets[rint(0, SG.markets.length - 1)];
+      r.signColor = r.color;
+      return;
+    }
+    const apt = chance(0.72);
+    const style = apt ? BUILD.APARTMENT : area >= 30 ? rint(0, 4) : rint(0, 3);
+    const r = this.addRect(c, 'building', x0, y0, x1, y1, 3, style, ROOFS[rint(0, ROOFS.length - 1)]);
+    if (chance(0.85)) {
+      r.sign = SG.shops[rint(0, SG.shops.length - 1)];
+      r.signColor = SG.colors[rint(0, SG.colors.length - 1)];
+    }
   }
 
   sidewalkTrees(c, x0, y0, x1, y1) {
     for (let x = x0 + 1; x < x1 - 1; x += 2) {
-      if (chance(0.3)) this.addProp(c, chance(0.8) ? PROP.TREE : PROP.HYDRANT, c.x + (x + 0.5) * TILE, c.y + y0 * TILE + 13);
-      if (chance(0.3)) this.addProp(c, chance(0.8) ? PROP.TREE : PROP.BENCH, c.x + (x + 0.5) * TILE, c.y + y1 * TILE - 13);
+      if (chance(0.3)) this.addProp(c, this.streetProp(), c.x + (x + 0.5) * TILE, c.y + y0 * TILE + 13);
+      if (chance(0.3)) this.addProp(c, this.streetProp(), c.x + (x + 0.5) * TILE, c.y + y1 * TILE - 13);
     }
     for (let y = y0 + 1; y < y1 - 1; y += 2) {
       if (chance(0.25)) this.addProp(c, PROP.TREE, c.x + x0 * TILE + 13, c.y + (y + 0.5) * TILE);
@@ -794,10 +879,96 @@ class World {
     }
   }
 
+  // Kaldırım hayatı: ağaç, plastik masa, amcalar, simit arabası
+  streetProp() {
+    const k = rnd();
+    if (k < 0.38) return PROP.TREE;
+    if (k < 0.6) return PROP.CHAIRS;
+    if (k < 0.76) return PROP.UNCLES;
+    if (k < 0.9) return PROP.SIMITCART;
+    return PROP.HYDRANT;
+  }
+
+  // Dar mahalle: 2 karo genişlikte sokaklar, ip ip çamaşır, sıkışık apartmanlar
+  fillMahalle(c) {
+    const cut = (vertical, out) => {
+      out.length = 0;
+      out.push(ART);
+      const n = rint(2, 3);
+      let at = ART + rint(5, 6);
+      for (let i = 0; i < n && at + 2 < CT - 4; i++) {
+        this.addStreet(c, vertical, at, 2);
+        out.push(at, at + 2);
+        at += 2 + rint(5, 6);
+      }
+      out.push(CT);
+    };
+    cut(true, xsBuf);
+    cut(false, ysBuf);
+    for (let j = 0; j < ysBuf.length; j += 2) {
+      for (let i = 0; i < xsBuf.length; i += 2) {
+        this.cityLot(c, xsBuf[i], ysBuf[j], xsBuf[i + 1], ysBuf[j + 1]);
+      }
+    }
+    // Sokağın üstünden geçen çamaşır ipleri
+    for (let i = 0; i < c.streetCount; i++) {
+      const s = c.streets[i];
+      for (let k = ART + rint(2, 5); k < CT - 1; k += rint(6, 10)) {
+        const m = (s.pos + s.width / 2) * TILE;
+        const at = (k + 0.5) * TILE;
+        if (s.vertical) this.addProp(c, PROP.LAUNDRY, c.x + m, c.y + at, 0);
+        else this.addProp(c, PROP.LAUNDRY, c.x + at, c.y + m, Math.PI / 2);
+      }
+    }
+  }
+
+  // Üstü kapalı pazar yeri ve çevresindeki tezgâhlar
+  fillPazar(c) {
+    this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
+    this.addRect(c, 'building', 9, 9, 20, 13, 3, BUILD.BAZAAR, '#d9281e');
+    this.addRect(c, 'building', 9, 16, 20, 20, 3, BUILD.BAZAAR, '#1d6fb8');
+    this.scatter(c, PROP.STALL, 22, [GROUND.PLAZA]);
+    this.scatter(c, PROP.CHAIRS, 8, [GROUND.PLAZA]);
+    this.scatter(c, PROP.UNCLES, 5, [GROUND.PLAZA]);
+    this.scatter(c, PROP.SIMITCART, 4, [GROUND.PLAZA]);
+  }
+
+  // Haritanın tek Sistem Koleji chunk'ı: tohuma bağlı, başlangıca yakın bir şehir bölgesinde
+  sistemChunk() {
+    if (this.sistem) return this.sistem;
+    const [a, b] = W.sistemRing;
+    const out = { biome: '', sea: false };
+    let found = null;
+    for (let i = 0; i < 400 && !found; i++) {
+      seedRng(i, 77, this.seed ^ 0x1357);
+      const r = a + rnd() * (b - a);
+      const t = rnd() * 6.283;
+      const cx = Math.round(Math.cos(t) * r);
+      const cy = Math.round(Math.sin(t) * r);
+      this.biomeAt(cx, cy, out);
+      if (out.biome === 'city' && Math.max(Math.abs(cx), Math.abs(cy)) > 1) found = { cx, cy };
+    }
+    this.sistem = found || { cx: a, cy: a };
+    return this.sistem;
+  }
+
+  fillSistem(c) {
+    this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
+    const r = this.addRect(c, 'building', 9, 8, 20, 18, 3, BUILD.SISTEM, '#ff7a00');
+    r.sign = 'SİSTEM KOLEJİ';
+    r.signColor = '#ff7a00';
+    for (let k = 7; k < 22; k += 3) {
+      this.addProp(c, PROP.TREE, c.x + (k + 0.5) * TILE, c.y + 6.5 * TILE);
+      this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 20.5 * TILE);
+    }
+    this.scatter(c, PROP.SIMITCART, 3, [GROUND.PLAZA]);
+  }
+
   // Yol kenarına park etmiş arabalar; kavşak ağızlarına konmaz
   parkedAlongStreets(c, p) {
     for (let i = 0; i < c.streetCount; i++) {
       const s = c.streets[i];
+      if (s.width < 3) continue; // Dar sokak park almaz
       const a = (s.pos * TILE) + 15;
       const b = ((s.pos + s.width) * TILE) - 15;
       for (let k = ART + 1; k < CT - 2; k += 2) {
@@ -1210,7 +1381,7 @@ function pickFrom(t) {
 // --- effects.js ---
 // Efekt verileri (çizimden bağımsız). Her şey sabit boyutlu havuzda: oyun sırasında bellek ayrılmaz.
 
-const FX = { SMOKE: 0, DARK: 1, FIRE: 2, SPARK: 3, DEBRIS: 4, GLINT: 5, DUST: 6, WATER: 7 };
+const FX = { SMOKE: 0, DARK: 1, FIRE: 2, SPARK: 3, DEBRIS: 4, GLINT: 5, DUST: 6, WATER: 7, SIMIT: 8 };
 
 const FXP = CONFIG.perf;
 
@@ -1617,42 +1788,70 @@ function driveCop(cop, g, dt) {
 }
 
 // --- crowd.js ---
-// Yayalar ve sivil trafik. Sabit havuz kullanır, sadece oyuncunun çevresinde yaşar.
+// Yayalar, sokak insanları, kediler, sivil trafik ve trafik ışıkları.
+// Sabit havuz kullanır, sadece oyuncunun çevresinde yaşar.
 
 const PD = CONFIG.peds;
 const NP = CONFIG.npc;
-const ART_MID = (CONFIG.world.arterial * TILE) / 2;
+const TL = CONFIG.traffic;
+const ROAD_W = CONFIG.world.arterial * TILE;
+const ART_MID = ROAD_W / 2;
 const PED_WALK = 0;
 const PED_RUN = 1;
 const PED_FLY = 2;
 const PED_DOWN = 3;
+const PED_WAIT = 4;
+const PED_CROSS = 5;
 
 // Yönler: 0 doğu, 1 güney, 2 batı, 3 kuzey. Trafik sağdan akar.
 const DX = [1, 0, -1, 0];
 const DY = [0, 1, 0, -1];
 const LANE = [1, -1, -1, 1];
 
+const PED_KIND_NAMES = Object.keys(PD.kinds);
+let pedWeight = 0;
+for (const k of PED_KIND_NAMES) pedWeight += PD.kinds[k].weight;
+let npcWeight = 0;
+for (const k in NP.types) npcWeight += NP.types[k].weight;
+
+// Trafik ışığı: her kavşağın kendi evresi var. axis: 0 doğu-batı, 1 kuzey-güney
+function lightState(time, jx, jy, axis) {
+  const cycle = (TL.green + TL.yellow + TL.allRed) * 2;
+  const offset = (((jx * 7 + jy * 13) % 16) + 16) % 16;
+  const t = (time + offset + (axis ? cycle / 2 : 0)) % cycle;
+  if (t < TL.green) return 'g';
+  if (t < TL.green + TL.yellow) return 'y';
+  return 'r';
+}
+
 class Crowd {
   constructor(game) {
     this.g = game;
     this.peds = [];
     for (let i = 0; i < PD.max; i++) {
-      this.peds.push({ alive: false, x: 0, y: 0, a: 0, vx: 0, vy: 0, z: 0, vz: 0, spin: 0, state: 0, t: 0, turnT: 0, look: 0, step: 0 });
+      this.peds.push({
+        alive: false, x: 0, y: 0, a: 0, vx: 0, vy: 0, z: 0, vz: 0, spin: 0, state: 0, t: 0, turnT: 0,
+        look: 0, step: 0, kind: 'man', info: PD.kinds.man, tx: 0, ty: 0, axis: 0, jx: 0, jy: 0,
+      });
     }
     this.npcs = [];
     for (let i = 0; i < NP.max; i++) {
       const b = makeBody();
-      b.alive = false; b.kind = 'sedan'; b.spec = null; b.state = 'drive'; b.color = 0; b.t = 0;
+      b.alive = false; b.kind = 'tofas'; b.spec = null; b.state = 'drive'; b.color = 0; b.t = 0;
       b.dir = 0; b.line = 0; b.lastCross = 1e9; b.hornT = 0; b.ctlS = 0; b.ctlT = 1; b.breaker = true;
+      b.panicT = 0; b.waitT = 0;
       b.drive = { maxSpeed: 0, accel: 0, turnRate: 0, grip: 0, driftGrip: 0 };
       this.npcs.push(b);
     }
     this.pedT = 0;
     this.npcT = 0;
+    this.waitT = 0;
     this.limit = 1; // Yavaş cihazda azalır
     this.screamT = 0;
+    this.meowT = 0;
     this.pedCount = 0;
     this.npcCount = 0;
+    this.clock = 0;
   }
 
   clear() {
@@ -1664,9 +1863,13 @@ class Crowd {
 
   update(dt) {
     const g = this.g;
+    this.clock += dt;
     this.screamT -= dt;
+    this.meowT -= dt;
     this.pedT -= dt;
     if (this.pedT <= 0) { this.pedT = PD.spawnEvery; this.spawnPed(); }
+    this.waitT -= dt;
+    if (this.waitT <= 0) { this.waitT = PD.waiterEvery; this.spawnWaiter(); }
     this.npcT -= dt;
     if (this.npcT <= 0) { this.npcT = NP.spawnEvery; this.spawnNpc(); }
 
@@ -1687,6 +1890,26 @@ class Crowd {
   }
 
   // --- Yayalar ---
+  pickKind() {
+    let r = Math.random() * pedWeight;
+    for (const k of PED_KIND_NAMES) {
+      r -= PD.kinds[k].weight;
+      if (r < 0) return k;
+    }
+    return 'man';
+  }
+
+  setupPed(p, kind, x, y, a) {
+    p.alive = true;
+    p.kind = kind;
+    p.info = PD.kinds[kind];
+    p.x = x; p.y = y; p.z = 0;
+    p.a = a;
+    p.state = PED_WALK;
+    p.t = 0; p.turnT = 1 + Math.random() * 3; p.step = Math.random() * 6;
+    p.look = Math.floor(Math.random() * 6);
+  }
+
   spawnPed() {
     const g = this.g;
     if (this.pedCount >= PD.max * this.limit) return;
@@ -1694,6 +1917,7 @@ class Crowd {
     if (!p) return;
     const pl = g.player;
     const R = g.viewRadius();
+    const kind = this.pickKind();
     for (let i = 0; i < 6; i++) {
       const a = Math.random() * 6.283;
       const r = R * (0.75 + Math.random() * 0.55);
@@ -1701,16 +1925,44 @@ class Crowd {
       const y = pl.y + Math.sin(a) * r;
       if (g.onScreen(x, y, 30)) continue;
       const gr = g.world.groundAt(x, y);
-      const chance = PD.density[gr] || 0;
+      const chance = gr === GROUND.ROAD && PD.kinds[kind].road ? 1 : PD.density[gr] || 0;
       if (Math.random() > chance || g.world.blockedAt(x, y)) continue;
-      p.alive = true;
-      p.x = x; p.y = y; p.z = 0;
-      p.a = Math.floor(Math.random() * 4) * 1.5708;
-      p.state = PED_WALK;
-      p.t = 0; p.turnT = 1 + Math.random() * 3; p.step = Math.random() * 6;
-      p.look = Math.floor(Math.random() * 6);
+      this.setupPed(p, kind, x, y, Math.floor(Math.random() * 4) * 1.5708);
       return;
     }
+  }
+
+  // Kavşakta yaya geçidi önünde bekleyen yaya: arabalara kırmızı yanınca karşıya geçer
+  spawnWaiter() {
+    const g = this.g;
+    if (this.pedCount >= PD.max * this.limit) return;
+    const p = this.peds.find((k) => !k.alive);
+    if (!p) return;
+    const pl = g.player;
+    const jx = Math.floor(pl.x / CHUNK) + Math.floor(Math.random() * 3) - 1;
+    const jy = Math.floor(pl.y / CHUNK) + Math.floor(Math.random() * 3) - 1;
+    const c = g.world.chunk(jx, jy);
+    if (c.biome !== 'city') return;
+    const vertical = Math.random() < 0.5; // Dikey ana yolu mu geçiyor
+    const flip = Math.random() < 0.5;
+    const a = -18;
+    const b = ROAD_W + 18;
+    const along = ROAD_W + 13;
+    const fromS = flip ? b : a;
+    const toS = flip ? a : b;
+    const x = c.x + (vertical ? fromS : along);
+    const y = c.y + (vertical ? along : fromS);
+    const tx = c.x + (vertical ? toS : along);
+    const ty = c.y + (vertical ? along : toS);
+    if (g.onScreen(x, y, 40) || g.world.blockedAt(x, y) || g.world.blockedAt(tx, ty)) return;
+    let kind = this.pickKind();
+    if (PD.kinds[kind].road || PD.kinds[kind].dodge) kind = 'man';
+    this.setupPed(p, kind, x, y, Math.atan2(ty - y, tx - x));
+    p.state = PED_WAIT;
+    p.tx = tx; p.ty = ty;
+    p.axis = vertical ? 1 : 0;
+    p.jx = jx; p.jy = jy;
+    p.t = 14;
   }
 
   launch(p, b, scream) {
@@ -1723,19 +1975,30 @@ class Crowd {
     p.vy = b.vy * 0.85 + (dy / d) * PD.launch;
     p.vz = PD.launchUp * (0.8 + Math.random() * 0.4);
     p.spin = (Math.random() < 0.5 ? -1 : 1) * (9 + Math.random() * 8);
-    g.fx.burst(FX.GLINT, p.x, p.y, 6, 150, 0.4, 4);
+    g.fx.burst(FX.GLINT, p.x, p.y, 7, 150, 0.45, 4); // Çizgi film yıldızları
     g.fx.burst(FX.DUST, p.x, p.y, 4, 60, 0.5, 8);
+    const info = p.info;
+    if (info.fx === 'simit') {
+      g.fx.burst(FX.SIMIT, p.x, p.y, 12, 240, 1.3, 7);
+      g.emit('simit');
+    } else if (info.fx === 'tea') {
+      g.fx.debris(p.x, p.y, '#c9622b', 6, 200);
+      g.fx.debris(p.x, p.y, '#e8f3ff', 6, 240);
+      g.emit('tea');
+    }
     if (scream && this.screamT <= 0) {
-      this.screamT = 0.22;
+      this.screamT = 0.2;
+      g.lastVoice = info.voice;
       g.emit('scream', Math.min(1, 500 / (Math.hypot(p.x - g.player.x, p.y - g.player.y) + 200)));
-      if (Math.random() < 0.4) g.fx.float(p.x, p.y - 16, 'AAAH!', '#ffffff');
+      const words = info.words || PD.words[info.voice];
+      if (Math.random() < 0.6) g.fx.float(p.x, p.y - 16, words[Math.floor(Math.random() * words.length)], '#ffffff');
     }
     g.emit('thud');
   }
 
-  blockedForPed(x, y) {
+  blockedForPed(p, x, y) {
     const w = this.g.world;
-    return w.blockedAt(x, y) || w.groundAt(x, y) === GROUND.ROAD;
+    return w.blockedAt(x, y) || (!p.info.road && w.groundAt(x, y) === GROUND.ROAD);
   }
 
   updatePed(p, dt) {
@@ -1777,6 +2040,24 @@ class Crowd {
       if (n.alive && Math.abs(n.x - p.x) < 80 && Math.abs(n.y - p.y) < 80 && this.checkHit(p, n, false)) return;
     }
 
+    if (p.state === PED_WAIT) {
+      p.t -= dt;
+      if (lightState(this.clock, p.jx, p.jy, p.axis) === 'r') p.state = PED_CROSS;
+      else if (p.t <= 0) p.state = PED_WALK;
+      return;
+    }
+    if (p.state === PED_CROSS) {
+      const dx = p.tx - p.x;
+      const dy = p.ty - p.y;
+      const d = Math.hypot(dx, dy);
+      if (d < 8) { p.state = PED_WALK; return; }
+      const v = PD.walkSpeed * 2.1 * dt;
+      p.x += (dx / d) * v;
+      p.y += (dy / d) * v;
+      p.step += dt * 16;
+      return;
+    }
+
     const dx = p.x - pl.x;
     const dy = p.y - pl.y;
     const d2 = dx * dx + dy * dy;
@@ -1787,15 +2068,16 @@ class Crowd {
       p.turnT = 1.6;
       if (this.screamT <= 0 && Math.random() < 0.35) {
         this.screamT = 0.5;
+        g.lastVoice = p.info.voice;
         g.emit('scream', 0.45);
       }
     }
-    const speed = p.state === PED_RUN ? PD.runSpeed : PD.walkSpeed;
+    const speed = (p.state === PED_RUN ? PD.runSpeed : PD.walkSpeed * p.info.speed);
     const nx = p.x + Math.cos(p.a) * speed * dt;
     const ny = p.y + Math.sin(p.a) * speed * dt;
     const lookX = p.x + Math.cos(p.a) * 16;
     const lookY = p.y + Math.sin(p.a) * 16;
-    if (p.state === PED_WALK ? this.blockedForPed(lookX, lookY) : g.world.blockedAt(lookX, lookY)) {
+    if (p.state === PED_WALK ? this.blockedForPed(p, lookX, lookY) : g.world.blockedAt(lookX, lookY)) {
       p.a += (Math.random() < 0.5 ? 1 : -1) * 1.5708;
       p.turnT = 1 + Math.random() * 3;
     } else {
@@ -1817,6 +2099,21 @@ class Crowd {
     const dy = p.y - b.y;
     if (dx * dx + dy * dy >= r * r) return false;
     const speed = Math.hypot(b.vx, b.vy);
+    // Kedi ezilmez: son anda sıçrar
+    if (p.info.dodge) {
+      const d = Math.hypot(dx, dy) || 1;
+      p.x += (dx / d) * 34;
+      p.y += (dy / d) * 34;
+      p.a = Math.atan2(dy, dx);
+      p.state = PED_RUN;
+      p.turnT = 1.4;
+      if (this.meowT <= 0) {
+        this.meowT = 1;
+        this.g.lastVoice = 'cat';
+        this.g.emit('scream', 0.5);
+      }
+      return false;
+    }
     if (speed < PD.hitSpeed) {
       p.a = Math.atan2(dy, dx);
       p.state = PED_RUN;
@@ -1830,7 +2127,7 @@ class Crowd {
 
   blast(x, y, R) {
     for (const p of this.peds) {
-      if (!p.alive || p.state === PED_FLY) continue;
+      if (!p.alive || p.state === PED_FLY || p.info.dodge) continue;
       if (Math.hypot(p.x - x, p.y - y) < R * 0.6) this.launch(p, { x, y, vx: 0, vy: 0 }, true);
     }
     const g = this.g;
@@ -1844,7 +2141,7 @@ class Crowd {
   explodeNpc(n) {
     const g = this.g;
     g.fx.explosion(n.x, n.y, 60);
-    g.fx.debris(n.x, n.y, NP.colors[n.color], 12, 260);
+    g.fx.debris(n.x, n.y, n.spec.colors[n.color], 12, 260);
     n.alive = false;
   }
 
@@ -1867,8 +2164,8 @@ class Crowd {
     if (g.onScreen(x, y, 100)) return;
     for (const o of this.npcs) if (o.alive && Math.hypot(o.x - x, o.y - y) < 180) return;
 
-    let r = Math.random() * NP.totalWeight;
-    let kind = 'sedan';
+    let r = Math.random() * npcWeight;
+    let kind = 'tofas';
     for (const k in NP.types) {
       r -= NP.types[k].weight;
       if (r < 0) { kind = k; break; }
@@ -1881,34 +2178,47 @@ class Crowd {
     n.state = 'drive';
     n.dir = dir;
     n.line = line;
-    n.color = Math.floor(Math.random() * NP.colors.length);
+    n.color = Math.floor(Math.random() * spec.colors.length);
     n.t = 0;
     n.lastCross = 1e9;
     n.hornT = 0;
+    n.panicT = 0;
+    n.waitT = 0;
     n.drive.maxSpeed = spec.cruise * (0.9 + Math.random() * 0.2);
     n.drive.accel = 260;
     n.drive.turnRate = spec.turnRate;
     n.drive.grip = spec.grip;
     n.drive.driftGrip = spec.grip;
-    n.vx = DX[dir] * n.drive.maxSpeed;
-    n.vy = DY[dir] * n.drive.maxSpeed;
+    n.vx = DX[n.dir] * n.drive.maxSpeed;
+    n.vy = DY[n.dir] * n.drive.maxSpeed;
   }
 
-  // Kavşağa gelince bazen sağa ya da sola döner
+  // Öndeki kavşağa uzaklık. Kavşağa gelince bazen sağa ya da sola döner
   crossing(n) {
     const horizontal = n.dir === 0 || n.dir === 2;
+    const forward = n.dir === 0 || n.dir === 1;
     const pos = horizontal ? n.x : n.y;
-    const k = Math.round((pos - ART_MID) / CHUNK);
+    const u = (pos - ART_MID) / CHUNK;
+    const k = forward ? Math.ceil(u) : Math.floor(u);
     const center = k * CHUNK + ART_MID;
-    const ahead = (center - pos) * (n.dir === 0 || n.dir === 1 ? 1 : -1);
-    if (ahead < 70 && ahead > 0 && n.lastCross !== k) {
+    const ahead = (center - pos) * (forward ? 1 : -1);
+    if (ahead < 70 && n.lastCross !== k) {
       n.lastCross = k;
       if (Math.random() < NP.turnChance) {
         n.dir = (n.dir + (Math.random() < 0.5 ? 1 : 3)) % 4;
         n.line = center;
         n.lastCross = 1e9;
+        return 1e9;
       }
     }
+    n.jk = k;
+    return ahead;
+  }
+
+  hold(n) {
+    n.ctlS = 0;
+    if (n.speed > 14) n.ctlT = -0.75;
+    else { n.ctlT = 0; n.vx *= 0.8; n.vy *= 0.8; }
   }
 
   updateNpc(n, dt, g) {
@@ -1918,30 +2228,8 @@ class Crowd {
     n.t += dt;
     if (n.hornT > 0) n.hornT -= dt;
 
-    if (n.state === 'drive') {
-      this.crossing(n);
-      const lane = n.line + LANE[n.dir] * NP.laneOffset;
-      const horizontal = n.dir === 0 || n.dir === 2;
-      const tx = horizontal ? n.x + DX[n.dir] * 90 : lane;
-      const ty = horizontal ? lane : n.y + DY[n.dir] * 90;
-      const err = wrapAngle(Math.atan2(ty - n.y, tx - n.x) - n.a);
-      n.ctlS = Math.max(-1, Math.min(1, err * 2.4));
-      n.ctlT = Math.abs(err) > 0.5 && n.speed > 110 ? -0.4 : n.speed < n.drive.maxSpeed ? 1 : 0;
-      // Önündeki oyuncuya fren ve korna
-      const fx = Math.cos(n.a);
-      const fy = Math.sin(n.a);
-      const ax = p.x - n.x;
-      const ay = p.y - n.y;
-      const front = ax * fx + ay * fy;
-      const side = Math.abs(-ax * fy + ay * fx);
-      if (front > 0 && front < 150 + n.len && side < 34) {
-        n.ctlT = -0.8;
-        if (n.hornT <= 0 && g.state === 'play') {
-          n.hornT = 3;
-          g.emit('horn', n.kind === 'bus' || n.kind === 'truck' ? 1 : 0);
-        }
-      }
-    } else {
+    if (n.state === 'drive') this.driveNpc(n, dt, g);
+    else {
       n.ctlS = 0;
       n.ctlT = 0;
       n.grip = Math.min(n.grip, 1.2); // Savrulurken lastik tutmaz
@@ -1950,7 +2238,7 @@ class Crowd {
     const surf = CONFIG.surfaces[g.world.groundAt(n.x, n.y)];
     stepCar(n, n.ctlS, n.ctlT, n.drive, surf, dt);
     g.collideWorld(n, false);
-    if ((g.tickCount + n.line) % 4 < 1 && g.onScreen(n.x, n.y, 120)) g.collideProps(n, false);
+    if ((g.tickCount + n.dir) % 4 < 1 && g.onScreen(n.x, n.y, 120)) g.collideProps(n, false);
 
     // Oyuncuyla çarpışma
     if (g.state === 'play' && far < (n.len + p.len) * 0.8) {
@@ -1971,12 +2259,93 @@ class Crowd {
     }
   }
 
+  driveNpc(n, dt, g) {
+    const p = g.player;
+    const ahead = this.crossing(n);
+    const horizontal = n.dir === 0 || n.dir === 2;
+
+    // Panik: siren ya da hızlı oyuncu yaklaşınca kenara kaçar, korna çalar, ışık dinlemez
+    if (n.panicT > 0) n.panicT -= dt;
+    let threat = g.state === 'play' && p.speed > NP.panicSpeed && Math.hypot(p.x - n.x, p.y - n.y) < NP.panicDist;
+    if (!threat && g.state === 'play') {
+      for (const c of g.cops) {
+        if (Math.abs(c.x - n.x) < NP.panicDist && Math.abs(c.y - n.y) < NP.panicDist && c.state === 'chase') { threat = true; break; }
+      }
+    }
+    if (threat) {
+      if (n.panicT <= 0 && n.hornT <= 0) {
+        n.hornT = 2.5;
+        g.emit('horn', n.spec.horn);
+      }
+      n.panicT = NP.panicTime;
+    }
+    const panic = n.panicT > 0;
+    const offset = panic ? NP.panicLane : NP.laneOffset;
+    const lane = n.line + LANE[n.dir] * offset;
+    const tx = horizontal ? n.x + DX[n.dir] * 90 : lane;
+    const ty = horizontal ? lane : n.y + DY[n.dir] * 90;
+    const err = wrapAngle(Math.atan2(ty - n.y, tx - n.x) - n.a);
+    const top = n.drive.maxSpeed * (panic ? NP.panicBoost : 1);
+    n.ctlS = Math.max(-1, Math.min(1, err * 2.4));
+    n.ctlT = Math.abs(err) > 0.5 && n.speed > 110 ? -0.4 : n.speed < top ? 1 : 0;
+
+    // Öndeki araç
+    const fx = Math.cos(n.a);
+    const fy = Math.sin(n.a);
+    let blocked = false;
+    for (const o of this.npcs) {
+      if (o === n || !o.alive) continue;
+      const ax = o.x - n.x;
+      const ay = o.y - n.y;
+      const front = ax * fx + ay * fy;
+      const gap = (n.len + o.len) / 2 + 26 + n.speed * 0.22;
+      if (front > 0 && front < gap && Math.abs(-ax * fy + ay * fx) < 26) { blocked = true; break; }
+    }
+
+    // Trafik ışığı: yalnızca şehir kavşaklarında
+    let waiting = false;
+    if (ahead < 1e8 && !panic) {
+      const stopDist = ahead - TL.stopLine;
+      const need = (n.speed * n.speed) / (2 * TL.brake) + 18;
+      if (stopDist > -4 && stopDist < need) {
+        const jx = horizontal ? n.jk : Math.floor(n.line / CHUNK);
+        const jy = horizontal ? Math.floor(n.line / CHUNK) : n.jk;
+        if (g.world.chunk(jx, jy).biome === 'city' && lightState(this.clock, jx, jy, horizontal ? 0 : 1) !== 'g') waiting = true;
+      }
+    }
+    if (waiting || blocked) this.hold(n);
+
+    // Önündeki oyuncuya fren ve korna
+    const ax = p.x - n.x;
+    const ay = p.y - n.y;
+    const front = ax * fx + ay * fy;
+    const side = Math.abs(-ax * fy + ay * fx);
+    if (front > 0 && front < 150 + n.len && side < 34 && !panic) {
+      n.ctlT = -0.8;
+      if (n.hornT <= 0 && g.state === 'play') {
+        n.hornT = 3;
+        g.emit('horn', n.spec.horn);
+      }
+    }
+
+    // Işıkta bekleyen sabırsız korna
+    if (n.speed < 20 && (waiting || blocked)) {
+      n.waitT += dt;
+      if (n.waitT > TL.hornAfter && n.hornT <= 0 && Math.random() < dt * TL.hornRate && Math.hypot(ax, ay) < 900) {
+        n.hornT = 2;
+        g.emit('horn', n.spec.horn);
+      }
+    } else {
+      n.waitT = 0;
+    }
+  }
+
   hitNpc(n, rv, byPlayer) {
     const g = this.g;
     if (n.state !== 'wreck') { n.state = 'wreck'; n.t = 0; }
     n.w += (Math.random() < 0.5 ? -1 : 1) * Math.min(5, rv / 90) / Math.sqrt(n.mass);
     g.fx.sparks(n.x, n.y, 8);
-    g.fx.debris(n.x, n.y, NP.colors[n.color], 4);
+    g.fx.debris(n.x, n.y, n.spec.colors[n.color], 4);
     if (byPlayer) {
       g.npcHits++;
       g.playerImpact(rv + 30, NP.hitScale * Math.min(2, Math.sqrt(n.mass)), true, NP.maxHit);
@@ -2074,7 +2443,7 @@ class Game {
     this.state = 'idle';
     this.carSpec = CONFIG.cars[0];
     this.view = { w: 390, h: 844 };
-    this.cam = { x: 0, y: 0, zoom: 1, shake: 0, sx: 0, sy: 0, scale: 1, halfW: 200, halfH: 400 };
+    this.cam = { x: 0, y: 0, zoom: 1, shake: 0, sx: 0, sy: 0, kx: 0, ky: 0, lvx: 0, lvy: 0, scale: 1, halfW: 200, halfH: 400 };
     this.onEvent = null;
     this.god = false;
     this.tickCount = 0;
@@ -2109,6 +2478,9 @@ class Game {
     this.burning = false;
     this.burnT = 0;
     this.hitCd = 0;
+    this.stopT = 0;
+    this.stuckT = 0;
+    this.autoRevT = 0;
     this.sinceHit = 0;
     this.smokeT = 0;
     this.dyingT = 0;
@@ -2145,6 +2517,8 @@ class Game {
     this.cam.y = this.player.y;
     this.cam.zoom = 1;
     this.cam.shake = 0;
+    this.cam.lvx = 0;
+    this.cam.lvy = 0;
   }
 
   // Menü arkası: ana yolda giden bir kaçış sahnesi
@@ -2170,6 +2544,13 @@ class Game {
   // --- Ana adım ---
   tick(dt, steer, reverse) {
     this.tickCount++;
+    // Sert darbede kısa duraksama: çarpışma hissi
+    if (this.stopT > 0) {
+      this.stopT -= dt;
+      this.fx.update(dt);
+      this.updateCamera(dt);
+      return;
+    }
     if (this.state === 'attract') this.tickAttract(dt);
     else if (this.state === 'play') this.tickPlay(dt, steer, reverse);
     else if (this.state === 'dying') this.tickDying(dt);
@@ -2235,6 +2616,19 @@ class Game {
     const p = this.player;
     const g = this.world.groundAt(p.x, p.y);
     const surf = CONFIG.surfaces[g];
+    // Duvara saplanınca kendiliğinden geri çıkar: tek parmakla oyun kilitlenmesin
+    if (this.autoRevT > 0) {
+      this.autoRevT -= dt;
+      reverse = true;
+    } else if (p.speed < 40 && !reverse) {
+      this.stuckT += dt;
+      if (this.stuckT > DMG.autoReverseAfter) {
+        this.stuckT = 0;
+        this.autoRevT = DMG.autoReverseTime;
+      }
+    } else {
+      this.stuckT = 0;
+    }
     stepCar(p, steer, reverse ? -1 : 1, this.carSpec, surf, dt);
     if (this.hitCd > 0) this.hitCd -= dt;
 
@@ -2290,6 +2684,11 @@ class Game {
     this.fx.sparks(p.x, p.y, 8 + Math.round(dmg));
     this.cam.shake = Math.min(14, this.cam.shake + dmg * 0.5);
     this.hitFlash = Math.min(1, dmg / 25);
+    if (dmg >= DMG.hitStopMin) this.stopT = DMG.hitStop;
+    // Kamera darbenin yönüne itilir
+    const sp = p.speed || 1;
+    this.cam.kx = (p.vx / sp) * CONFIG.camera.kick * Math.min(1, dmg / 20);
+    this.cam.ky = (p.vy / sp) * CONFIG.camera.kick * Math.min(1, dmg / 20);
     return dmg;
   }
 
@@ -2359,7 +2758,7 @@ class Game {
   finish() {
     this.state = 'over';
     if (this.giantT > 0) this.setGiant(false);
-    const earned = this.coins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills;
+    const earned = this.coins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
     this.result = {
       score: Math.floor(this.score),
       time: this.time,
@@ -2451,6 +2850,7 @@ class Game {
             continue;
           }
           const info = PROP_INFO[pr.kind];
+          if (info.pass) continue;
           const rr = info.r + R;
           const d2 = dx * dx + dy * dy;
           if (d2 >= rr * rr) continue;
@@ -2483,6 +2883,15 @@ class Game {
     this.addScore(SC.prop, pr.x, pr.y);
     if (info.dmg > 0) this.hurt(info.dmg / this.carSpec.durability);
     this.emit('break', info.drag);
+    if (info.snd) {
+      this.emit(info.snd);
+      if (pr.kind === PROP.SIMITCART) this.fx.burst(FX.SIMIT, pr.x, pr.y, 10, 210, 1.2, 7);
+      if (pr.kind === PROP.UNCLES) {
+        this.lastVoice = 'old';
+        this.emit('scream', 0.8);
+        this.fx.float(pr.x, pr.y - 16, 'HAYIRDIR EVLADIM!', '#ffffff');
+      }
+    }
     if (info.coin && Math.random() < CONFIG.coin.dropChance) {
       this.world.dropCoin(pr.x + (Math.random() - 0.5) * 30, pr.y + (Math.random() - 0.5) * 30);
     }
@@ -2770,6 +3179,8 @@ class Game {
     const p = this.player;
     if (this.runTime < Math.min(D.firstSpawnAt, this.time < D.swatAt ? D.firstSpawnAt : 2)) return;
     this.spawnT -= dt;
+    // Oyuncu çok açılırsa kovalama kopmasın
+    if (this.sirenDist > AI.catchUpDist && this.spawnT > 0.6) this.spawnT = 0.6;
     const active = this.cops.length;
     if (this.spawnT <= 0 && active < d.maxPolice) {
       const min = this.viewRadius() + AI.viewMargin;
@@ -3049,19 +3460,25 @@ class Game {
     c.scale = base * c.zoom;
     c.halfW = this.view.w / 2 / c.scale;
     c.halfH = this.view.h / 2 / c.scale;
-    const tx = p.x + p.vx * V.lookAhead;
+    // Bakış yönü yumuşatılır: drift sırasında kamera sallanmaz
+    const ls = 1 - Math.exp(-V.lookSmooth * dt);
+    c.lvx += (p.vx - c.lvx) * ls;
+    c.lvy += (p.vy - c.lvy) * ls;
+    const tx = p.x + c.lvx * V.lookAhead;
     // Menüde araba üst tarafta, düğmelerin arkasında kalmasın
-    const ty = p.y + p.vy * V.lookAhead + (this.state === 'attract' ? c.halfH * 0.6 : 0);
-    const k = 1 - Math.exp(-V.follow * dt);
+    const ty = p.y + c.lvy * V.lookAhead + (this.state === 'attract' ? c.halfH * 0.6 : 0);
+    const k = 1 - Math.exp(-(V.follow + (V.followFast - V.follow) * speedK) * dt);
     c.x += (tx - c.x) * k;
     c.y += (ty - c.y) * k;
+    c.kx *= Math.exp(-9 * dt);
+    c.ky *= Math.exp(-9 * dt);
     if (c.shake > 0.05) {
-      c.sx = (Math.random() - 0.5) * c.shake * 2;
-      c.sy = (Math.random() - 0.5) * c.shake * 2;
+      c.sx = (Math.random() - 0.5) * c.shake * 2 + c.kx;
+      c.sy = (Math.random() - 0.5) * c.shake * 2 + c.ky;
       c.shake *= Math.exp(-V.shakeDecay * dt);
     } else {
-      c.sx = 0;
-      c.sy = 0;
+      c.sx = c.kx;
+      c.sy = c.ky;
       c.shake = 0;
     }
   }
@@ -3196,6 +3613,129 @@ function paintLux(g, len, wid, body, accent) {
   g.fillStyle = '#b6bcc4';
   g.fillRect(-L - 1.2, -H * 0.3, 1.2, 1.8);
   g.fillRect(-L - 1.2, H * 0.3 - 1.8, 1.2, 1.8);
+}
+
+// Türk arabaları: tek çizici, araca özgü oran ve ayrıntılar tablodan gelir
+// corner: köşe yuvarlaklığı, hood/trunk: kaput ve bagaj oranı, chrome: krom tampon
+const TR_SHAPES = {
+  dogan: { corner: 3.5, hood: 0.46, trunk: 0.42, chrome: true, tail: 'box' },
+  sahin: { corner: 3.5, hood: 0.46, trunk: 0.42, chrome: false, tail: 'box', wing: true, stripes: true, darkGlass: true },
+  murat: { corner: 2.5, hood: 0.5, trunk: 0.46, chrome: true, tail: 'round', twin: true },
+  anadol: { corner: 7, hood: 0.62, trunk: 0.3, chrome: true, tail: 'round', twin: true, stripes: true },
+  egea: { corner: 7, hood: 0.42, trunk: 0.4, tail: 'led' },
+  clio: { corner: 9, hood: 0.4, trunk: 0.12, tail: 'led', twoTone: true },
+  suv: { corner: 6, hood: 0.36, trunk: 0.14, tail: 'led', rails: true, big: true },
+  duster: { corner: 5, hood: 0.38, trunk: 0.14, tail: 'led', rails: true, big: true, cladding: true, stripes: true },
+  tog: { corner: 8, hood: 0.34, trunk: 0.16, tail: 'bar', twoTone: true, big: true, ledFront: true },
+};
+
+function paintTr(g, len, wid, body, accent, shape) {
+  if (shape === 'moto') { paintPlayerMoto(g, len, wid, body, accent); return; }
+  const S = TR_SHAPES[shape];
+  const L = len / 2;
+  const H = wid / 2;
+  const tw = S.big ? 12 : 10;
+  for (const [x, y] of [[L * 0.56, -H], [L * 0.56, H], [-L * 0.56, -H], [-L * 0.56, H]]) wheel(g, x, y, tw, S.big ? 6 : 5);
+  const paint = g.createLinearGradient(0, -H, 0, H);
+  paint.addColorStop(0, shade(body, 0.34));
+  paint.addColorStop(0.4, body);
+  paint.addColorStop(1, shade(body, -0.38));
+  if (S.cladding) { g.fillStyle = '#2a2d33'; rr(g, -L - 0.5, -H - 0.7, len + 1, wid + 1.4, S.corner + 1); g.fill(); }
+  g.fillStyle = paint;
+  rr(g, -L, -H, len, wid, S.corner);
+  g.fill();
+  g.strokeStyle = 'rgba(0,0,0,.5)';
+  g.lineWidth = 0.7;
+  g.stroke();
+  const front = L - len * 0.5 * S.hood; // ön cam hattı
+  const rear = -L + len * 0.5 * S.trunk + 2; // arka cam hattı
+  if (S.stripes) {
+    g.fillStyle = accent;
+    g.fillRect(-L + 1, -H * 0.3, len - 2, H * 0.2);
+    g.fillRect(-L + 1, H * 0.1, len - 2, H * 0.2);
+  }
+  // Camlar
+  g.fillStyle = S.darkGlass ? '#090b10' : '#1f3346';
+  g.beginPath();
+  g.moveTo(front, -H * 0.76);
+  g.lineTo(front, H * 0.76);
+  g.lineTo(rear, H * 0.72);
+  g.lineTo(rear, -H * 0.72);
+  g.closePath();
+  g.fill();
+  g.fillStyle = 'rgba(170,225,255,.5)';
+  g.fillRect(front - 3, -H * 0.62, 1.6, H * 1.24);
+  // Tavan
+  const rf = front - (front - rear) * 0.22;
+  const rb = rear + (front - rear) * 0.2;
+  g.fillStyle = S.twoTone ? accent : paint;
+  rr(g, rb, -H * 0.62, rf - rb, H * 1.24, 2.5);
+  g.fill();
+  g.fillStyle = 'rgba(255,255,255,.2)';
+  rr(g, rb + 2, -H * 0.5, (rf - rb) * 0.6, H * 0.26, 1);
+  g.fill();
+  if (S.rails) {
+    g.fillStyle = '#c6ccd4';
+    g.fillRect(rb, -H * 0.72, rf - rb, 1.3);
+    g.fillRect(rb, H * 0.72 - 1.3, rf - rb, 1.3);
+  }
+  // Kaput çizgisi
+  g.strokeStyle = 'rgba(0,0,0,.22)';
+  g.lineWidth = 0.6;
+  g.strokeRect(front + 2, -H * 0.66, L - front - 4, H * 1.32);
+  // Tamponlar
+  if (S.chrome) {
+    g.fillStyle = '#d8dde3';
+    g.fillRect(L - 1.2, -H + 1, 2, wid - 2);
+    g.fillRect(-L - 0.8, -H + 1, 2, wid - 2);
+  }
+  // Farlar
+  g.fillStyle = '#fff6c9';
+  if (S.ledFront) {
+    g.fillStyle = '#e8fbff';
+    g.fillRect(L - 1.6, -H + 2, 1.6, wid - 4);
+  } else if (S.twin) {
+    for (const y of [-H + 2, -H + 6.2, H - 5.2, H - 9.4]) g.fillRect(L - 2.2, y, 2.2, 3.2);
+  } else {
+    g.fillRect(L - 2.4, -H + 2.4, 2.4, 5);
+    g.fillRect(L - 2.4, H - 7.4, 2.4, 5);
+  }
+  // Stoplar
+  g.fillStyle = '#ff2733';
+  if (S.tail === 'bar') g.fillRect(-L - 0.2, -H + 1.5, 1.6, wid - 3);
+  else if (S.tail === 'led') { g.fillRect(-L, -H + 1.6, 1.8, 6); g.fillRect(-L, H - 7.6, 1.8, 6); }
+  else if (S.tail === 'round') { g.beginPath(); g.arc(-L + 1.6, -H + 4.5, 2.1, 0, 7); g.arc(-L + 1.6, H - 4.5, 2.1, 0, 7); g.fill(); }
+  else { g.fillRect(-L, -H + 2, 2, 7); g.fillRect(-L, H - 9, 2, 7); }
+  if (S.wing) {
+    g.fillStyle = accent;
+    rr(g, -L - 2.6, -H - 1, 3.4, wid + 2, 1);
+    g.fill();
+  }
+}
+
+function paintPlayerMoto(g, len, wid, body, accent) {
+  const L = len / 2;
+  g.fillStyle = '#0f0f13';
+  rr(g, L * 0.42, -2.2, 12, 4.4, 2); g.fill();
+  rr(g, -L - 0.5, -2.6, 13, 5.2, 2); g.fill();
+  const paint = g.createLinearGradient(0, -5, 0, 5);
+  paint.addColorStop(0, shade(body, 0.4));
+  paint.addColorStop(1, shade(body, -0.35));
+  g.fillStyle = paint;
+  rr(g, -L * 0.62, -4.6, L * 1.42, 9.2, 4); g.fill();
+  g.fillStyle = accent;
+  g.fillRect(L * 0.2, -1, L * 0.5, 2);
+  g.strokeStyle = '#c9d2dc';
+  g.lineWidth = 1.7;
+  g.beginPath(); g.moveTo(L * 0.56, -7); g.lineTo(L * 0.56, 7); g.stroke();
+  g.fillStyle = '#20252f';
+  g.beginPath(); g.ellipse(-2, 0, 5.4, 6.4, 0, 0, 7); g.fill();
+  g.fillStyle = accent;
+  g.beginPath(); g.arc(1.5, 0, 3.9, 0, 7); g.fill();
+  g.fillStyle = '#16212e';
+  g.fillRect(3, -2.4, 2, 4.8);
+  g.fillStyle = '#fff6c9'; g.fillRect(L - 1, -1.6, 2, 3.2);
+  g.fillStyle = '#ff2733'; g.fillRect(-L - 1, -1.8, 1.6, 3.6);
 }
 
 // Düz gövdeli araba (park etmiş, sivil, polis tabanı)
@@ -3369,15 +3909,42 @@ function paintTurret(g) {
 function paintNpc(g, kind, spec, color) {
   const L = spec.len / 2;
   const H = spec.wid / 2;
-  if (kind === 'sedan') {
-    paintCar(g, spec.len, spec.wid, color, color);
-  } else if (kind === 'pickup') {
-    paintCar(g, spec.len, spec.wid, color, color);
-    g.fillStyle = shade(color, -0.35);
-    rr(g, -L + 2, -H + 2.5, spec.len * 0.42, spec.wid - 5, 2); g.fill();
-    g.strokeStyle = 'rgba(0,0,0,.3)';
-    g.lineWidth = 1;
-    for (let x = -L + 7; x < -L + spec.len * 0.4; x += 6) { g.beginPath(); g.moveTo(x, -H + 3); g.lineTo(x, H - 3); g.stroke(); }
+  if (spec.shape) {
+    paintTr(g, spec.len, spec.wid, color, '#101216', spec.shape);
+    if (kind === 'taxi') {
+      // Dama şerit ve tepe lambası
+      for (let x = -L + 4; x < L - 6; x += 5) {
+        g.fillStyle = Math.round(x / 5) % 2 ? '#111' : '#fff';
+        g.fillRect(x, -H + 0.6, 2.5, 1.6);
+        g.fillRect(x, H - 2.2, 2.5, 1.6);
+      }
+      g.fillStyle = '#1b1b1f';
+      rr(g, -5, -6, 8, 12, 1); g.fill();
+      g.fillStyle = '#ffe14d';
+      g.font = 'bold 4px sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.save(); g.rotate(1.57); g.fillText('TAKSİ', 0, 1); g.restore();
+    }
+  } else if (kind === 'minibus') {
+    g.fillStyle = '#121216';
+    for (const x of [L * 0.6, -L * 0.6]) { g.fillRect(x - 6, -H - 1, 12, 3); g.fillRect(x - 6, H - 2, 12, 3); }
+    g.fillStyle = color;
+    rr(g, -L, -H, spec.len, spec.wid, 6); g.fill();
+    g.fillStyle = '#2878b5';
+    g.fillRect(-L + 2, -H, spec.len - 12, 3);
+    g.fillRect(-L + 2, H - 3, spec.len - 12, 3);
+    g.fillStyle = '#24384c';
+    rr(g, L - 13, -H + 3, 7, spec.wid - 6, 2); g.fill();
+    g.fillStyle = 'rgba(0,0,0,.14)';
+    rr(g, -L + 5, -H + 5, spec.len - 22, spec.wid - 10, 2); g.fill();
+    g.fillStyle = '#ffffff';
+    g.font = 'bold 6.5px sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText('DOLMUŞ', -6, 0.5);
+    g.fillStyle = '#fff7c2';
+    g.fillRect(L - 2, -H + 3, 2, 4); g.fillRect(L - 2, H - 7, 2, 4);
   } else if (kind === 'bus') {
     g.fillStyle = '#121216';
     for (const x of [L * 0.6, -L * 0.6]) { g.fillRect(x - 7, -H - 1, 14, 3); g.fillRect(x - 7, H - 2, 14, 3); }
@@ -3388,7 +3955,12 @@ function paintNpc(g, kind, spec, color) {
     g.fillStyle = '#24384c';
     rr(g, L - 9, -H + 3, 6, spec.wid - 6, 2); g.fill();
     g.fillStyle = 'rgba(0,0,0,.2)';
-    for (let x = -L + 10; x < L - 18; x += 20) { rr(g, x, -6, 11, 12, 2); g.fill(); }
+    for (let x = -L + 10; x < L - 18; x += 20) { rr(g, x, -H + 6, 11, 3, 1); g.fill(); rr(g, x, H - 9, 11, 3, 1); g.fill(); }
+    g.fillStyle = '#ffffff';
+    g.font = 'bold 8px sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText('BELEDİYE', -6, 0.6);
     g.fillStyle = '#fff7c2';
     g.fillRect(L - 2, -H + 3, 2, 4); g.fillRect(L - 2, H - 7, 2, 4);
   } else {
@@ -3688,6 +4260,83 @@ function paintSpecial(g, r) {
       g.beginPath(); g.arc(cx - 3, cy - 3, d * 0.44, 0, 7); g.fill();
       break;
     }
+    case S.APARTMENT: {
+      // Apartman: düz çatı, merdiven kulesi, balkonlu cephe
+      const wall = 12;
+      g.fillStyle = shade(color, -0.44);
+      rr(g, x, y, w, h, 3); g.fill();
+      g.fillStyle = 'rgba(205,235,255,.75)';
+      for (let px = x + 6; px < x + w - 7; px += 12) g.fillRect(px, y + h - wall + 2, 7, 4);
+      // Balkon çamaşırı
+      const cols = ['#f4f6f8', '#e8533f', '#3e7cb1', '#f2c14e'];
+      for (let px = x + 6; px < x + w - 8; px += 8) {
+        if ((seed + px) % 3 === 0) { g.fillStyle = cols[(seed + px) % 4]; g.fillRect(px, y + h - wall + 6, 5, 5); }
+      }
+      g.fillStyle = shade(color, 0.42);
+      rr(g, x, y, w, h - wall, 3); g.fill();
+      g.strokeStyle = 'rgba(0,0,0,.16)';
+      g.lineWidth = 2;
+      g.strokeRect(x + 3, y + 3, w - 6, h - wall - 6);
+      g.fillStyle = shade(color, 0.15);
+      g.fillRect(x + w * 0.62, y + 6, 15, 13);
+      g.fillStyle = 'rgba(0,0,0,.2)';
+      g.fillRect(x + w * 0.62, y + 16, 15, 3);
+      break;
+    }
+    case S.MARKET: {
+      // Gross market: geniş çatı, çizgili tente
+      g.fillStyle = '#c9ced4';
+      rr(g, x, y, w, h, 3); g.fill();
+      g.fillStyle = '#dfe3e7';
+      rr(g, x + 2, y + 2, w - 4, h - 24, 3); g.fill();
+      g.strokeStyle = 'rgba(0,0,0,.08)';
+      g.lineWidth = 2;
+      for (let px = x + 12; px < x + w - 6; px += 16) { g.beginPath(); g.moveTo(px, y + 4); g.lineTo(px, y + h - 26); g.stroke(); }
+      for (let i = 0; i * 12 < w; i++) {
+        g.fillStyle = i % 2 ? '#ffffff' : color;
+        g.fillRect(x + i * 12, y + h - 24, Math.min(12, w - i * 12), 7);
+      }
+      g.fillStyle = color;
+      g.fillRect(x, y + h - 17, w, 17);
+      break;
+    }
+    case S.SISTEM: {
+      // Haritanın tek turuncu binası
+      g.fillStyle = '#b84f00';
+      rr(g, x, y, w, h, 5); g.fill();
+      g.fillStyle = '#ff7a00';
+      rr(g, x, y, w, h - 16, 5); g.fill();
+      g.fillStyle = '#ffa24a';
+      rr(g, x + 14, y + 14, w - 28, h - 44, 4); g.fill();
+      g.fillStyle = '#ff7a00';
+      rr(g, x + 34, y + 34, w - 68, h - 84, 3); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.75)';
+      for (let px = x + 12; px < x + w - 14; px += 20) g.fillRect(px, y + h - 12, 12, 7);
+      g.strokeStyle = '#fff';
+      g.lineWidth = 3;
+      g.beginPath(); g.moveTo(cx, y + 10); g.lineTo(cx, cy); g.stroke();
+      g.fillStyle = '#e30a17';
+      g.fillRect(cx, y + 10, 26, 16);
+      g.fillStyle = '#fff';
+      g.beginPath(); g.arc(cx + 10, y + 18, 5, 0, 7); g.fill();
+      g.fillStyle = '#e30a17';
+      g.beginPath(); g.arc(cx + 12, y + 18, 4, 0, 7); g.fill();
+      break;
+    }
+    case S.BAZAAR: {
+      // Üstü kapalı pazar: çizgili branda
+      g.fillStyle = '#7b7f85';
+      g.fillRect(x, y, w, h);
+      for (let i = 0; i * 26 < w; i++) {
+        g.fillStyle = i % 2 ? '#f6efe0' : color;
+        g.fillRect(x + i * 26, y, Math.min(26, w - i * 26), h - 8);
+      }
+      g.fillStyle = 'rgba(0,0,0,.14)';
+      g.fillRect(x, y + (h - 8) / 2, w, (h - 8) / 2);
+      g.fillStyle = 'rgba(255,255,255,.35)';
+      g.fillRect(x, y + (h - 8) / 2 - 1.5, w, 3);
+      break;
+    }
     default: {
       // Benzin istasyonu
       g.fillStyle = '#efefef';
@@ -3697,6 +4346,177 @@ function paintSpecial(g, r) {
       g.fillRect(x, y + h - 14, w, 8);
       g.fillStyle = '#5c6066';
       for (let i = 0; i < 3; i++) g.fillRect(x + (w * (i + 0.5)) / 3 - 4, cy - 6, 8, 12);
+    }
+  }
+}
+
+// Çatı detayları: uydu çanakları ve termosifon
+function roofClutter(g, r) {
+  const n = 1 + (r.seed % 3);
+  const wall = 12;
+  for (let i = 0; i < n; i++) {
+    const px = r.x + 10 + ((r.seed * (i + 2) * 17) % Math.max(1, r.w - 22));
+    const py = r.y + 9 + ((r.seed * (i + 4) * 23) % Math.max(1, r.h - wall - 24));
+    g.fillStyle = 'rgba(0,0,0,.22)';
+    g.beginPath(); g.ellipse(px + 2, py + 2, 5.5, 5, 0, 0, 7); g.fill();
+    g.fillStyle = '#eceff2';
+    g.beginPath(); g.ellipse(px, py, 5.5, 5, -0.6, 0, 7); g.fill();
+    g.fillStyle = '#b8bfc7';
+    g.beginPath(); g.ellipse(px, py, 3, 2.7, -0.6, 0, 7); g.fill();
+    g.strokeStyle = '#6d7782';
+    g.lineWidth = 1;
+    g.beginPath(); g.moveTo(px, py); g.lineTo(px + 4, py - 4); g.stroke();
+  }
+  if (r.seed % 2 === 0 && r.w > 60) {
+    const px = r.x + r.w - 26;
+    g.fillStyle = '#1f3f77';
+    g.fillRect(px, r.y + 8, 15, 9);
+    g.fillStyle = '#d7dde2';
+    g.fillRect(px, r.y + 6, 15, 3);
+  }
+}
+
+// Tabelalar önbelleğe alınır: bina çizimi telefonda ucuz kalsın
+const signCache = new Map();
+function signCanvas(text, color) {
+  const key = text + color;
+  let c = signCache.get(key);
+  if (c) return c;
+  c = document.createElement('canvas');
+  const g0 = c.getContext('2d');
+  g0.font = '800 30px Nunito, sans-serif';
+  const w = Math.ceil(g0.measureText(text).width) + 30;
+  c.width = w;
+  c.height = 46;
+  const g = c.getContext('2d');
+  g.fillStyle = color;
+  rr(g, 1, 1, w - 2, 44, 7);
+  g.fill();
+  g.lineWidth = 3;
+  g.strokeStyle = '#fff';
+  g.stroke();
+  g.fillStyle = '#fff';
+  g.font = '800 30px Nunito, sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(text, w / 2, 24);
+  signCache.set(key, c);
+  return c;
+}
+
+function paintLight(g, st) {
+  g.fillStyle = 'rgba(0,0,0,.25)';
+  rr(g, -4, -10, 10, 23, 2); g.fill();
+  g.fillStyle = '#20232a';
+  rr(g, -5, -12, 10, 23, 2); g.fill();
+  g.fillStyle = st === 'r' ? '#ff3030' : '#4a1414';
+  g.beginPath(); g.arc(0, -7.5, 3, 0, 7); g.fill();
+  g.fillStyle = st === 'y' ? '#ffc21f' : '#4a3a12';
+  g.beginPath(); g.arc(0, -0.5, 3, 0, 7); g.fill();
+  g.fillStyle = st === 'g' ? '#2fe36a' : '#124a22';
+  g.beginPath(); g.arc(0, 6.5, 3, 0, 7); g.fill();
+}
+
+function paintSimit(g) {
+  g.strokeStyle = '#b5742a';
+  g.lineWidth = 4.2;
+  g.beginPath(); g.arc(0, 0, 4.6, 0, 7); g.stroke();
+  g.strokeStyle = '#e0ad62';
+  g.lineWidth = 1.4;
+  g.beginPath(); g.arc(-0.5, -0.5, 4.6, 0, 7); g.stroke();
+}
+
+// Sokak insanları: 34 birimlik çizim, baş +x yönüne bakar
+function paintPedKind(g, kind, step) {
+  g.scale(1.1, 1.1);
+  const person = (shirt, skin, hair) => paintPed(g, shirt, skin, hair, step);
+  switch (kind) {
+    case 'woman':
+      person('#c45fbd', '#f0c8a0', '#c45fbd');
+      g.fillStyle = '#d07ac9'; // Başörtüsü
+      g.beginPath(); g.arc(0, 0, 2.8, 0, 7); g.fill();
+      break;
+    case 'child':
+      g.save(); g.scale(0.72, 0.72);
+      person('#ffb400', '#f0c8a0', '#3b2a1e');
+      g.restore();
+      g.fillStyle = '#2ec4b6';
+      g.beginPath(); g.arc(-3, 0, 2.2, 0, 7); g.fill(); // Sırt çantası
+      break;
+    case 'elder':
+      person('#6b5a4a', '#e0a878', '#e8e8e8');
+      g.strokeStyle = '#7a4e2c'; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(1, 4.2); g.lineTo(6.5, 5.5); g.stroke(); // Baston
+      break;
+    case 'simitci':
+      person('#3e7cb1', '#e0a878', '#3b2a1e');
+      g.fillStyle = '#c9a050';
+      g.beginPath(); g.ellipse(0, 0, 6.4, 6.4, 0, 0, 7); g.fill(); // Başta tepsi
+      g.strokeStyle = '#a8651f'; g.lineWidth = 1.5;
+      for (const [x, y] of [[-3, -2], [2, -3], [3, 2], [-2, 3]]) { g.beginPath(); g.arc(x, y, 1.6, 0, 7); g.stroke(); }
+      break;
+    case 'stroller':
+      person('#4f9d69', '#f0c8a0', '#6b4a2b');
+      g.fillStyle = '#e8533f';
+      rr(g, 6, -4, 10, 8, 3); g.fill(); // Bebek arabası
+      g.fillStyle = '#f7b5a9';
+      rr(g, 11, -4, 5, 8, 2.5); g.fill();
+      g.fillStyle = '#222';
+      for (const [x, y] of [[7, -5], [7, 4], [14, -5], [14, 4]]) { g.beginPath(); g.arc(x, y, 1.1, 0, 7); g.fill(); }
+      break;
+    case 'wheelchair':
+      g.fillStyle = '#1e2228';
+      g.fillRect(-3, -6.4, 7, 2); g.fillRect(-3, 4.4, 7, 2); // Büyük tekerler
+      g.fillStyle = '#7a8796';
+      rr(g, -4, -4.4, 8, 8.8, 1.5); g.fill();
+      person('#5c6b7a', '#e0a878', '#dfe3e8');
+      break;
+    case 'bike':
+      g.fillStyle = '#16181d';
+      g.fillRect(-10, -0.8, 7, 1.6); g.fillRect(4, -0.8, 7, 1.6); // Tekerler
+      g.fillStyle = '#2a9df4';
+      g.fillRect(-5, -1, 10, 2);
+      g.strokeStyle = '#c9d2dc'; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(5, -3.4); g.lineTo(5, 3.4); g.stroke();
+      person('#f2c14e', '#e0a878', '#2b2b33');
+      break;
+    case 'courier':
+      g.fillStyle = '#14161a';
+      g.fillRect(-11, -1, 8, 2); g.fillRect(5, -1, 8, 2);
+      g.fillStyle = '#d9281e';
+      rr(g, -6, -3, 13, 6, 2); g.fill();
+      g.fillStyle = '#ff7a1a';
+      rr(g, -13, -5, 9, 10, 1.5); g.fill(); // Paket kutusu
+      g.fillStyle = '#fff'; g.fillRect(-13, -1, 9, 1.5);
+      g.fillStyle = '#20252f';
+      g.beginPath(); g.arc(1, 0, 3.4, 0, 7); g.fill();
+      g.fillStyle = '#ff7a1a';
+      g.beginPath(); g.arc(1.6, 0, 2.3, 0, 7); g.fill();
+      break;
+    case 'cayci':
+      person('#f4f6f8', '#e0a878', '#3b2a1e');
+      g.strokeStyle = '#c0c6cc'; g.lineWidth = 1.2;
+      g.beginPath(); g.arc(4.6, 0, 4.4, 0, 7); g.stroke(); // Askılı tepsi
+      g.fillStyle = '#b5481f';
+      for (const [x, y] of [[3.2, -1.6], [6, -1.6], [4.6, 1.6]]) { g.beginPath(); g.arc(x, y, 1.2, 0, 7); g.fill(); }
+      break;
+    case 'esnaf':
+      person('#ececec', '#e0a878', '#16131a');
+      g.fillStyle = '#7a4e2c';
+      g.fillRect(-1.2, -3, 2.4, 6); // Önlük
+      break;
+    default: {
+      // Sokak kedisi
+      g.fillStyle = '#e8903a';
+      g.beginPath(); g.ellipse(-1, 0, 4.8, 2.6, 0, 0, 7); g.fill();
+      g.strokeStyle = '#e8903a'; g.lineWidth = 1.6;
+      g.beginPath(); g.moveTo(-5, 0); g.quadraticCurveTo(-8, step ? 3 : -3, -10, step ? 1 : -1); g.stroke();
+      g.beginPath(); g.arc(4, 0, 2.6, 0, 7); g.fill();
+      g.fillStyle = '#e8903a';
+      g.beginPath(); g.moveTo(3.6, -2); g.lineTo(6, -3.2); g.lineTo(5.6, -0.8); g.fill();
+      g.beginPath(); g.moveTo(3.6, 2); g.lineTo(6, 3.2); g.lineTo(5.6, 0.8); g.fill();
+      g.fillStyle = '#fff';
+      g.fillRect(-3, -0.8, 3, 1.6);
     }
   }
 }
@@ -3741,7 +4561,7 @@ function glow(size, stops) {
 }
 
 function carSprite(spec) {
-  return sprite(spec.len + 10, spec.wid + 10, (g) => paintLux(g, spec.len, spec.wid, spec.color, spec.accent));
+  return sprite(spec.len + 10, spec.wid + 14, (g) => paintTr(g, spec.len, spec.wid, spec.color, spec.accent, spec.shape));
 }
 
 class Renderer {
@@ -3808,10 +4628,17 @@ class Renderer {
     s.npc = {};
     for (const kind of Object.keys(N.types)) {
       const spec = N.types[kind];
-      s.npc[kind] = N.colors.map((col) => sprite(spec.len + 8, spec.wid + 8, (g) => paintNpc(g, kind, spec, col)));
+      s.npc[kind] = spec.colors.map((col) => sprite(spec.len + 8, spec.wid + 8, (g) => paintNpc(g, kind, spec, col)));
     }
     const LOOKS = [['#e8533f', '#e0a878', '#3b2a1e'], ['#3e7cb1', '#f0c8a0', '#6b4a2b'], ['#f2c14e', '#8d5a3a', '#16131a'], ['#4f9d69', '#e0a878', '#c9a24a'], ['#c45fbd', '#f0c8a0', '#2b2b33'], ['#ececec', '#8d5a3a', '#16131a']];
     s.peds = LOOKS.map(([a, b, c]) => [0, 1].map((step) => sprite(20, 20, (g) => paintPed(g, a, b, c, step))));
+    s.pedKinds = {};
+    for (const k of Object.keys(CONFIG.peds.kinds)) {
+      if (k === 'man') continue;
+      s.pedKinds[k] = [0, 1].map((step) => sprite(34, 34, (g) => paintPedKind(g, k, step)));
+    }
+    s.simit = sprite(16, 16, paintSimit);
+    s.lights = ['r', 'y', 'g'].map((st) => sprite(12, 26, (g) => paintLight(g, st)));
     s.props = [];
     s.props[PROP.PALM] = prop(70, 70, (g) => {
       g.fillStyle = 'rgba(0,0,0,.18)';
@@ -3879,6 +4706,41 @@ class Renderer {
       g.strokeStyle = '#b8922e';
       g.lineWidth = 1.6;
       for (const r of [4, 8]) { g.beginPath(); g.arc(0, 0, r, 0.4, 5.6); g.stroke(); }
+    });
+    s.props[PROP.CHAIRS] = prop(46, 46, (g) => {
+      // Plastik masa ve dört sandalye, üstünde ince belli çay
+      g.fillStyle = 'rgba(0,0,0,.16)'; g.fillRect(-9, -7, 22, 22);
+      for (const [x, y] of [[-14, 0], [14, 0], [0, -14], [0, 14]]) { g.fillStyle = '#d9281e'; rr(g, x - 5, y - 5, 10, 10, 2.5); g.fill(); g.fillStyle = '#f04a3e'; rr(g, x - 3, y - 3, 6, 6, 1.5); g.fill(); }
+      g.fillStyle = '#f4f6f8'; rr(g, -9, -9, 18, 18, 3); g.fill();
+      g.fillStyle = '#b5481f'; g.beginPath(); g.arc(-3, -2, 2.2, 0, 7); g.arc(4, 3, 2.2, 0, 7); g.fill();
+    });
+    s.props[PROP.UNCLES] = prop(52, 40, (g) => {
+      // Apartman önünde iki amca ve tabure
+      for (const [x, col] of [[-10, '#5c6b7a'], [10, '#7a6a55']]) {
+        g.fillStyle = '#6b4a2b'; rr(g, x - 6, -5, 12, 11, 2); g.fill();
+        g.fillStyle = col; g.beginPath(); g.ellipse(x, 1, 6, 5.4, 0, 0, 7); g.fill();
+        g.fillStyle = '#e0a878'; g.beginPath(); g.arc(x, -1, 3, 0, 7); g.fill();
+        g.fillStyle = '#dfe3e8'; g.beginPath(); g.arc(x - 0.6, -1.4, 2.2, 0, 7); g.fill();
+      }
+      g.fillStyle = '#c9622b'; g.beginPath(); g.arc(0, 2, 1.8, 0, 7); g.fill();
+    });
+    s.props[PROP.SIMITCART] = prop(44, 36, (g) => {
+      g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(-14, -7, 32, 20);
+      g.fillStyle = '#c62828'; rr(g, -16, -10, 32, 20, 3); g.fill();
+      g.fillStyle = '#f5e6b8'; rr(g, -13, -7, 26, 14, 2); g.fill();
+      for (const [x, y] of [[-8, -3], [0, -3], [8, -3], [-4, 3], [4, 3]]) { g.strokeStyle = '#b5742a'; g.lineWidth = 2.4; g.beginPath(); g.arc(x, y, 2.6, 0, 7); g.stroke(); }
+    });
+    s.props[PROP.STALL] = prop(46, 40, (g) => {
+      g.fillStyle = 'rgba(0,0,0,.16)'; g.fillRect(-15, -10, 36, 26);
+      for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? '#fff' : '#1d9a4f'; g.fillRect(-18 + i * 6, -13, 6, 26); }
+      g.fillStyle = 'rgba(0,0,0,.1)'; g.fillRect(-18, 3, 36, 10);
+      for (const [x, y, col] of [[-9, -5, '#e8352e'], [0, 2, '#ff9d1a'], [9, -6, '#7fc241'], [-5, 5, '#ffd23f']]) { g.fillStyle = col; g.beginPath(); g.arc(x, y, 3, 0, 7); g.fill(); }
+    });
+    s.props[PROP.LAUNDRY] = prop(90, 26, (g) => {
+      // Sokak üstünde ip: yukarıdan görünen çamaşırlar
+      g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 1; g.beginPath(); g.moveTo(-42, -2); g.quadraticCurveTo(0, 3, 42, -2); g.stroke();
+      const cols = ['#f4f6f8', '#e8533f', '#3e7cb1', '#f2c14e', '#7a5ea8', '#4f9d69'];
+      for (let i = 0; i < 6; i++) { g.fillStyle = cols[i]; g.fillRect(-34 + i * 12, -1, 9, 9 + (i % 2) * 3); }
     });
     s.auras = [];
     for (const [i, name] of ['blast', 'ghost', 'heal', 'giant'].entries()) {
@@ -4053,6 +4915,14 @@ class Renderer {
         }
       }
     }
+    // Kavşak öncesi dur çizgileri
+    if (urban) {
+      g.fillStyle = 'rgba(255,255,255,.85)';
+      g.fillRect(c.x + 4, c.y + ART_W + 26, ART_W / 2 - 6, 4);
+      g.fillRect(c.x + ART_W + 26, c.y + ART_W / 2 + 2, 4, ART_W / 2 - 6);
+      g.fillRect(c.x + ART_W / 2 + 2, c.y - 30, ART_W / 2 - 6, 4);
+      g.fillRect(c.x - 30, c.y + 4, 4, ART_W / 2 - 6);
+    }
     // Sığ su kıyısında köpük
     if (sea) {
       g.fillStyle = 'rgba(255,255,255,.7)';
@@ -4152,7 +5022,12 @@ class Renderer {
   }
 
   bakeBuilding(g, r) {
-    if (r.style >= 7) { paintSpecial(g, r); return; }
+    if (r.style >= 7) { paintSpecial(g, r); this.bakeSign(g, r); return; }
+    this.bakeRoof(g, r);
+    this.bakeSign(g, r);
+  }
+
+  bakeRoof(g, r) {
     const wall = 9; // Güneye bakan cephe: yükseklik hissi
     g.fillStyle = shade(r.color, -0.42);
     rr(g, r.x, r.y, r.w, r.h, 5);
@@ -4257,6 +5132,18 @@ class Renderer {
     }
   }
 
+  // Tabela, uydu çanağı, güneş paneli ve balkon çamaşırı
+  bakeSign(g, r) {
+    if (r.style === 0 || r.style === 1 || r.style === 2 || r.style === 3 || r.style === 5 || r.style === BUILD.APARTMENT) roofClutter(g, r);
+    if (!r.sign) return;
+    const img = signCanvas(r.sign, r.signColor);
+    const maxW = r.w - 6;
+    const h = r.style === BUILD.SISTEM ? 34 : 16;
+    const w = Math.min(maxW, (img.width / img.height) * h);
+    const hh = (w / img.width) * img.height;
+    g.drawImage(img, r.x + (r.w - w) / 2, r.y + r.h - hh - 8, w, hh);
+  }
+
   bakeWall(g, r) {
     g.fillStyle = 'rgba(0,10,30,.25)';
     g.fillRect(r.x + 4, r.y + 5, r.w, r.h);
@@ -4324,6 +5211,7 @@ class Renderer {
     if (game.state !== 'dying' && game.state !== 'over') this.drawPlayer(game);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, true);
     this.drawPeds(game, vx0, vx1, vy0, vy1, true);
+    this.drawLights(game, c0x, c1x, c0y, c1y);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawSirens(game, now, vx0, vx1, vy0, vy1);
     this.drawWaves(game);
@@ -4453,7 +5341,7 @@ class Renderer {
         for (let i = 0; i < c.propCount; i++) {
           const pr = c.props[i];
           if (!pr.alive || pr.x < x0 - 30 || pr.x > x1 + 30 || pr.y < y0 - 30 || pr.y > y1 + 30) continue;
-          const isTall = pr.kind === PROP.TREE || pr.kind === PROP.PALM || pr.kind === PROP.PINE;
+          const isTall = pr.kind === PROP.TREE || pr.kind === PROP.PALM || pr.kind === PROP.PINE || pr.kind === PROP.LAUNDRY;
           if (isTall !== tall) continue;
           if (isPower(pr.kind)) {
             const bob = 1 + 0.1 * Math.sin(now * 0.006 + pr.phase * 5);
@@ -4499,9 +5387,10 @@ class Renderer {
     for (const p of game.crowd.peds) {
       if (!p.alive || (p.state === PED_FLY) !== flying) continue;
       if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) continue;
-      const img = sp.peds[p.look][Math.floor(p.step) & 1];
+      const frame = Math.floor(p.step) & 1;
+      const img = p.kind === 'man' ? sp.peds[p.look][frame] : sp.pedKinds[p.kind][frame];
       const k = 1 + p.z / 170;
-      const size = 27 * k;
+      const size = (p.kind === 'man' ? 27 : 46) * k;
       if (flying) {
         ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
         ctx.globalAlpha = 0.3;
@@ -4512,6 +5401,27 @@ class Renderer {
       ctx.drawImage(img, -size / 2, -size / 2, size, size);
     }
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
+  // Trafik ışıkları yalnızca şehir kavşaklarında, köşelere çizilir
+  drawLights(game, c0x, c1x, c0y, c1y) {
+    const ctx = this.ctx;
+    const sp = this.sprites.lights;
+    const clock = game.crowd.clock;
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+    const idx = (st) => (st === 'r' ? 0 : st === 'y' ? 1 : 2);
+    for (let cy = c0y; cy <= c1y + 1; cy++) {
+      for (let cx = c0x; cx <= c1x + 1; cx++) {
+        const c = game.world.chunk(cx, cy);
+        if (c.biome !== 'city') continue;
+        const ew = sp[idx(lightState(clock, cx, cy, 0))];
+        const ns = sp[idx(lightState(clock, cx, cy, 1))];
+        ctx.drawImage(ew, c.x - 22, c.y - 34, 12, 26);
+        ctx.drawImage(ew, c.x + ART_W + 10, c.y + ART_W + 8, 12, 26);
+        ctx.drawImage(ns, c.x + ART_W + 10, c.y - 34, 12, 26);
+        ctx.drawImage(ns, c.x - 22, c.y + ART_W + 8, 12, 26);
+      }
+    }
   }
 
   drawNpcs(game, x0, x1, y0, y1) {
@@ -4601,6 +5511,12 @@ class Renderer {
       if (k === FX.FIRE || k === FX.SPARK || k === FX.GLINT) continue;
       if (x[i] < x0 || x[i] > x1 || y[i] < y0 || y[i] > y1) continue;
       const t = life[i] / ttl[i];
+      if (k === FX.SIMIT) {
+        const q = size[i];
+        ctx.globalAlpha = Math.min(1, t * 2.5);
+        ctx.drawImage(sp.simit, x[i] - q, y[i] - q, q * 2, q * 2);
+        continue;
+      }
       if (k === FX.DEBRIS) {
         this.place(x[i], y[i], rot[i]);
         ctx.globalAlpha = Math.min(1, t * 2);
@@ -4772,6 +5688,13 @@ class Input {
     this.keyL = false;
     this.keyR = false;
     this.width = 1;
+    this.last = 'R'; // Son basılan yön: iki parmak kısa süre çakışınca bu kazanır
+    this.bothT = 0;
+  }
+
+  // Her fizik adımında çağrılır
+  tick(dt) {
+    this.bothT = this.left && this.right ? this.bothT + dt : 0;
   }
 
   get left() {
@@ -4787,18 +5710,20 @@ class Input {
   }
 
   get reverse() {
-    return this.left && this.right;
+    return this.bothT >= CONFIG.input.bothDelay;
   }
 
   get steer() {
     const l = this.left;
     const r = this.right;
-    if (l === r) return 0;
+    if (!l && !r) return 0;
+    if (l && r) return this.reverse ? 0 : this.last === 'R' ? 1 : -1;
     return r ? 1 : -1;
   }
 
   press(id, side) {
     this.touches.set(id, side);
+    this.last = side;
   }
 
   release(id) {
@@ -4809,6 +5734,7 @@ class Input {
     this.touches.clear();
     this.keyL = false;
     this.keyR = false;
+    this.bothT = 0;
   }
 
   sideOf(x) {
@@ -4816,8 +5742,8 @@ class Input {
   }
 
   key(code, down) {
-    if (code === 'ArrowLeft' || code === 'KeyA') { this.keyL = down; return true; }
-    if (code === 'ArrowRight' || code === 'KeyD') { this.keyR = down; return true; }
+    if (code === 'ArrowLeft' || code === 'KeyA') { this.keyL = down; if (down) this.last = 'L'; return true; }
+    if (code === 'ArrowRight' || code === 'KeyD') { this.keyR = down; if (down) this.last = 'R'; return true; }
     return false;
   }
 
@@ -4846,7 +5772,7 @@ class Input {
 // --- storage.js ---
 // En yüksek skor, coin, arabalar ve ayarlar localStorage'da.
 
-const KEY = 'kac-kacabilirsen-v1';
+const KEY = 'kac-kacabilirsen-v1'; // Eski adla kalır: mevcut coin ve rekorlar kaybolmasın
 
 function defaultSave() {
   return {
@@ -4855,7 +5781,7 @@ function defaultSave() {
     coins: 0,
     owned: [CONFIG.cars[0].id],
     selected: CONFIG.cars[0].id,
-    settings: { sound: true, vibrate: true },
+    settings: { sound: true, vibrate: true, ambient: true },
     dev: { god: false, startTime: 0 },
     tutorial: false,
   };
@@ -4877,6 +5803,7 @@ function sanitize(data) {
   if (data.settings) {
     d.settings.sound = data.settings.sound !== false;
     d.settings.vibrate = data.settings.vibrate !== false;
+    d.settings.ambient = data.settings.ambient !== false;
   }
   if (data.dev) {
     d.dev.god = data.dev.god === true;
@@ -4953,6 +5880,11 @@ class AudioEngine {
   constructor() {
     this.ctx = null;
     this.enabled = true;
+    this.ambientOn = true;
+    this.ambT = 2;
+    this.engine = { base: 46, range: 150, wave: 'sawtooth', sub: 1.5, gain: 1 };
+    this.coinStreak = 0;
+    this.coinAt = 0;
     this.master = null;
     this.running = false;
   }
@@ -5014,6 +5946,21 @@ class AudioEngine {
     this.driftGain.connect(this.master);
     nsrc.start();
 
+    // Sokak uğultusu: çok kısık alçak gürültü
+    const ambSrc = ctx.createBufferSource();
+    ambSrc.buffer = this.noise;
+    ambSrc.loop = true;
+    const ambF = ctx.createBiquadFilter();
+    ambF.type = 'lowpass';
+    ambF.frequency.value = 420;
+    this.ambGain = ctx.createGain();
+    this.ambGain.gain.value = this.ambientOn ? 0.035 : 0;
+    ambSrc.connect(ambF);
+    ambF.connect(this.ambGain);
+    this.ambGain.connect(this.master);
+    ambSrc.start();
+    this.setEngine(this.engine);
+
     // Lastik ciyaklaması: dar bant testere
     this.tyreOsc = ctx.createOscillator();
     this.tyreOsc.type = 'sawtooth';
@@ -5053,6 +6000,18 @@ class AudioEngine {
     this.radioT = 6;
   }
 
+  setEngine(e) {
+    this.engine = e;
+    if (!this.eng1) return;
+    this.eng1.type = e.wave;
+    this.eng2.type = e.wave === 'sine' ? 'sine' : 'square';
+  }
+
+  setAmbient(on) {
+    this.ambientOn = on;
+    if (this.ambGain) this.ambGain.gain.setTargetAtTime(on ? 0.035 : 0, this.ctx.currentTime, 0.2);
+  }
+
   setEnabled(on) {
     this.enabled = on;
     if (this.master) this.master.gain.setTargetAtTime(on ? 0.8 : 0, this.ctx.currentTime, 0.02);
@@ -5074,11 +6033,22 @@ class AudioEngine {
     const p = game.player;
     const k = Math.min(1.1, p.speed / game.carSpec.maxSpeed);
     const on = active && game.state === 'play';
-    const base = 52 + 150 * k + (p.drifting ? 34 : 0);
+    const e = this.engine;
+    const base = e.base + e.range * k + (p.drifting ? e.range * 0.22 : 0);
     this.eng1.frequency.setTargetAtTime(base, t, 0.06);
-    this.eng2.frequency.setTargetAtTime(base * 1.5, t, 0.06);
+    this.eng2.frequency.setTargetAtTime(base * e.sub, t, 0.06);
     this.engFilter.frequency.setTargetAtTime(300 + 1300 * k, t, 0.08);
-    this.engGain.gain.setTargetAtTime(on ? 0.05 + 0.09 * k : 0, t, 0.08);
+    this.engGain.gain.setTargetAtTime(on ? (0.05 + 0.09 * k) * e.gain : 0, t, 0.08);
+
+    // Ara sıra sokak sesleri
+    if (this.ambientOn && this.enabled) {
+      this.ambT -= Math.min(0.05, (now - (this.ambNow || now)) / 1000);
+      this.ambNow = now;
+      if (this.ambT <= 0) {
+        this.ambT = 2.5 + Math.random() * 6;
+        this.streetSound();
+      }
+    }
 
     const slip = on && p.drifting ? Math.min(1, p.slip / 240) : 0;
     this.driftGain.gain.setTargetAtTime(slip * 0.26, t, 0.05);
@@ -5161,10 +6131,13 @@ class AudioEngine {
   }
 
   crash(k) {
-    this.burst(0.2 + k * 0.2, 800 + k * 1400, 0.3 + k * 0.5, 'lowpass', 180);
-    this.tone(150, 0.14, 0.2 * k + 0.08, 'square', 60);
-    if (k > 0.35) {
-      if (Math.random() < 0.5) this.metal(k); else this.glass(k);
+    const r = Math.random();
+    this.burst(0.2 + k * 0.2, 700 + k * (r < 0.5 ? 1000 : 1900), 0.3 + k * 0.5, 'lowpass', 160);
+    this.tone(120 + r * 90, 0.14, 0.2 * k + 0.08, 'square', 55);
+    if (k > 0.3) {
+      if (r < 0.4) this.metal(k);
+      else if (r < 0.7) this.glass(k);
+      else this.tone(90, 0.3, 0.2 * k, 'sawtooth', 40); // Gövde gümbürtüsü
     }
   }
 
@@ -5179,22 +6152,50 @@ class AudioEngine {
     for (let i = 0; i < 5; i++) this.tone(2600 + Math.random() * 3200, 0.1, 0.05, 'sine', 0, i * 0.03);
   }
 
-  // Sentez çığlık: testere sesi + iki gırtlak bandı + titreme
-  scream(k = 1) {
+  // Ortam: kuş, uzak korna, çay kaşığı, uzaktan seslenen satıcı
+  streetSound() {
+    const r = Math.random();
+    if (r < 0.34) {
+      // Kuş cıvıltısı
+      const f = 2600 + Math.random() * 1400;
+      for (let i = 0; i < 3; i++) this.tone(f, 0.08, 0.018, 'sine', f * 1.3, i * 0.13);
+    } else if (r < 0.58) {
+      // Uzak korna
+      this.tone(380, 0.28, 0.018, 'square');
+      this.tone(478, 0.28, 0.015, 'square');
+    } else if (r < 0.8) {
+      // Bardakta çay kaşığı
+      for (let i = 0; i < 3; i++) this.tone(3400 + Math.random() * 500, 0.05, 0.025, 'sine', 0, i * 0.11);
+    } else {
+      // Satıcı sesi: iki uzun hece
+      this.tone(240, 0.4, 0.02, 'sawtooth', 300);
+      this.tone(300, 0.6, 0.02, 'sawtooth', 210, 0.42);
+    }
+  }
+
+  // Sentez bağırma: testere sesi, gırtlak bantları, titreme. Sesler kişiye göre değişir
+  scream(k = 1, voice = 'man') {
     const c = this.ctx;
     if (!c || !this.enabled) return;
+    if (voice === 'cat') { this.meow(k); return; }
     const t = c.currentTime;
-    const dur = 0.45 + Math.random() * 0.45;
-    const base = [300, 390, 520, 640, 780][Math.floor(Math.random() * 5)];
+    const P = {
+      man: { pitch: [170, 210, 250], form: [650, 1150, 2400], rise: 1.3, vib: 0.03, dur: 0.5 },
+      woman: { pitch: [380, 460, 560], form: [900, 1700, 3000], rise: 1.5, vib: 0.04, dur: 0.6 },
+      child: { pitch: [620, 740, 860], form: [1100, 2100, 3500], rise: 1.6, vib: 0.05, dur: 0.45 },
+      old: { pitch: [150, 180, 215], form: [550, 1000, 2100], rise: 1.15, vib: 0.1, dur: 0.75 },
+    }[voice] || { pitch: [200], form: [700, 1200, 2400], rise: 1.3, vib: 0.03, dur: 0.5 };
+    const dur = P.dur + Math.random() * 0.25;
+    const base = P.pitch[Math.floor(Math.random() * P.pitch.length)];
     const o = c.createOscillator();
     o.type = 'sawtooth';
     o.frequency.setValueAtTime(base * 0.9, t);
-    o.frequency.exponentialRampToValueAtTime(base * 1.5, t + dur * 0.28);
+    o.frequency.exponentialRampToValueAtTime(base * P.rise, t + dur * 0.28);
     o.frequency.exponentialRampToValueAtTime(base * 0.75, t + dur);
     const vib = c.createOscillator();
     vib.frequency.value = 7 + Math.random() * 5;
     const vibGain = c.createGain();
-    vibGain.gain.value = base * 0.05;
+    vibGain.gain.value = base * P.vib;
     vib.connect(vibGain);
     vibGain.connect(o.frequency);
     const g = c.createGain();
@@ -5202,11 +6203,11 @@ class AudioEngine {
     g.gain.exponentialRampToValueAtTime(0.16 * k + 0.03, t + 0.04);
     g.gain.setValueAtTime(0.16 * k + 0.03, t + dur * 0.6);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    for (const [freq, q] of [[850, 7], [1500, 9], [2800, 11]]) {
+    for (let i = 0; i < 3; i++) {
       const f = c.createBiquadFilter();
       f.type = 'bandpass';
-      f.frequency.value = freq * (0.92 + Math.random() * 0.16);
-      f.Q.value = q;
+      f.frequency.value = P.form[i] * (0.92 + Math.random() * 0.16);
+      f.Q.value = 7 + i * 2;
       o.connect(f);
       f.connect(g);
     }
@@ -5222,10 +6223,43 @@ class AudioEngine {
     this.burst(0.07, 900, 0.16, 'lowpass');
   }
 
-  horn(big) {
-    const f = big ? 196 : 392;
-    this.tone(f, 0.34, 0.09, 'square');
-    this.tone(f * 1.26, 0.34, 0.08, 'square');
+  meow(k) {
+    this.tone(620, 0.16, 0.1 * k + 0.04, 'triangle', 980);
+    this.tone(980, 0.24, 0.1 * k + 0.04, 'triangle', 520, 0.15);
+  }
+
+  // Araca göre korna: dolmuşun melodili kornası dahil
+  horn(kind = 'car') {
+    const T = {
+      car: [[392, 494, 0.3]],
+      old: [[300, 340, 0.4]],
+      taxi: [[440, 554, 0.12], [440, 554, 0.12, 0.17], [440, 554, 0.28, 0.34]],
+      bus: [[185, 233, 0.6]],
+      truck: [[131, 165, 0.8]],
+      dolmus: [[523, 659, 0.13], [587, 740, 0.13, 0.16], [659, 831, 0.13, 0.32], [784, 988, 0.26, 0.48]],
+    }[kind] || [[392, 494, 0.3]];
+    for (const [a, b, d, at = 0] of T) {
+      this.tone(a, d, 0.07, 'square', 0, at);
+      this.tone(b, d, 0.06, 'square', 0, at);
+    }
+  }
+
+  // Simit dağılması: hafif tıkırtılar
+  simit() {
+    for (let i = 0; i < 7; i++) this.tone(420 + Math.random() * 500, 0.05, 0.08, 'triangle', 200, i * 0.035);
+    this.burst(0.18, 1400, 0.1, 'bandpass');
+  }
+
+  // Çay bardakları kırılır
+  tea() {
+    this.glass(0.8);
+    for (let i = 0; i < 4; i++) this.tone(3000 + Math.random() * 1500, 0.08, 0.05, 'sine', 0, 0.05 + i * 0.05);
+  }
+
+  // Plastik masa sandalye
+  chairs() {
+    for (let i = 0; i < 4; i++) this.tone(170 + Math.random() * 140, 0.07, 0.14, 'square', 90, i * 0.05);
+    this.burst(0.14, 1800, 0.14, 'bandpass');
   }
 
   // Telsiz: cızırtı ve kısa konuşma darbeleri
@@ -5251,12 +6285,25 @@ class AudioEngine {
     seq.forEach((f, i) => this.tone(f, 0.2, 0.17, name === 'giant' ? 'sawtooth' : 'triangle', 0, i * 0.08));
   }
 
+  // Satın alma: kasa zili
+  purchase() {
+    [784, 988, 1175, 1568].forEach((f, i) => this.tone(f, 0.16, 0.18, 'triangle', 0, i * 0.07));
+    this.burst(0.25, 5000, 0.07, 'highpass');
+  }
+
   powerEnd() { this.tone(660, 0.18, 0.1, 'triangle', 240); }
 
   crunch() { this.burst(0.12, 1300, 0.22, 'bandpass', 500); }
+  // Coin: üst üste toplayınca perde yükselir
   coin() {
-    this.tone(1320, 0.07, 0.16, 'square');
-    this.tone(1975, 0.14, 0.16, 'square', 0, 0.06);
+    const c = this.ctx;
+    if (!c) return;
+    const t = c.currentTime;
+    this.coinStreak = t - this.coinAt < 0.7 ? Math.min(8, this.coinStreak + 1) : 0;
+    this.coinAt = t;
+    const k = 2 ** (this.coinStreak / 12);
+    this.tone(1320 * k, 0.07, 0.15, 'square');
+    this.tone(1975 * k, 0.14, 0.15, 'square', 0, 0.06);
   }
 
   nearMiss() { this.tone(500, 0.22, 0.14, 'sawtooth', 1500); }
@@ -5326,6 +6373,7 @@ class UI {
 
     const d = this.storage.data;
     $('set-sound').addEventListener('change', (e) => { d.settings.sound = e.target.checked; this.storage.save(); a.applySettings(); });
+    $('set-ambient').addEventListener('change', (e) => { d.settings.ambient = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-vibrate').addEventListener('change', (e) => { d.settings.vibrate = e.target.checked; this.storage.save(); a.applySettings(); });
     $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
     $('dev-start').addEventListener('change', (e) => { d.dev.startTime = Number(e.target.value); this.storage.save(); });
@@ -5340,6 +6388,7 @@ class UI {
     const d = this.storage.data;
     $('set-sound').checked = d.settings.sound;
     $('set-vibrate').checked = d.settings.vibrate;
+    $('set-ambient').checked = d.settings.ambient;
     $('dev-god').checked = d.dev.god;
     $('dev-start').value = String(d.dev.startTime);
   }
@@ -5418,7 +6467,7 @@ class UI {
       this.pw[kind] = { el, t, fill, last: '' };
     }
     const list = $('howto-powers');
-    const info = { blast: 'Yakındaki bütün arabalar patlar', ghost: '30 sn polis seni göremez', heal: 'Hasarı onarır, ateşi söndürür', giant: '30 sn devleşirsin, hasar almazsın' };
+    const info = { blast: 'Yakındaki bütün arabalar patlar', ghost: `${CONFIG.powers.duration} sn polis seni göremez`, heal: 'Hasarı onarır, ateşi söndürür', giant: `${CONFIG.powers.duration} sn devleşirsin, hasar almazsın` };
     for (const kind of Object.keys(info)) {
       const row = document.createElement('div');
       const name = document.createElement('b');
@@ -5521,16 +6570,14 @@ class UI {
     $('garage-coins').textContent = d.coins;
     const list = $('garage-list');
     list.textContent = '';
-    const max = {
-      maxSpeed: Math.max(...CONFIG.cars.map((c) => c.maxSpeed)),
-      durability: Math.max(...CONFIG.cars.map((c) => c.durability)),
-    };
-    const minDrift = Math.min(...CONFIG.cars.map((c) => c.driftGrip));
-    for (const car of CONFIG.cars) {
+    const cars = CONFIG.cars;
+    const top = cars[cars.length - 1];
+    const base = cars[0];
+    for (const car of cars) {
       const owned = d.owned.includes(car.id);
       const selected = d.selected === car.id;
       const card = document.createElement('div');
-      card.className = `car-card${selected ? ' selected' : ''}`;
+      card.className = `car-card${selected ? ' selected' : ''}${owned ? '' : ' locked'}`;
 
       const art = carSprite(car);
       art.className = 'car-art';
@@ -5543,34 +6590,37 @@ class UI {
       desc.textContent = car.desc;
       card.appendChild(desc);
 
-      const stat = (label, value) => {
+      const stat = (label, value, text) => {
         const row = document.createElement('div');
         row.className = 'stat';
         const t = document.createElement('span');
         t.textContent = label;
         const bar = document.createElement('i');
         const fill = document.createElement('b');
-        fill.style.width = `${Math.round(value * 100)}%`;
+        fill.style.width = `${Math.round(25 + value * 75)}%`;
         bar.appendChild(fill);
-        row.append(t, bar);
+        const n = document.createElement('em');
+        n.textContent = text;
+        row.append(t, bar, n);
         card.appendChild(row);
       };
-      stat('Hız', (car.maxSpeed - 340) / (max.maxSpeed - 340));
-      stat('Sağlamlık', car.durability / max.durability);
-      stat('Drift', minDrift / car.driftGrip);
+      const norm = (v, a, b) => (v - a) / (b - a);
+      stat('Hız', norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
+      stat('Kayma', norm(base.driftGrip / car.driftGrip, 1, base.driftGrip / top.driftGrip), String(Math.round((base.driftGrip / car.driftGrip) * 100)));
+      stat('Dayanıklılık', norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
 
       const btn = document.createElement('button');
-      btn.className = 'btn small';
+      btn.className = `btn small${owned ? '' : ' buy'}`;
       if (selected) { btn.textContent = 'Seçili'; btn.disabled = true; }
       else if (owned) btn.textContent = 'Seç';
       else {
-        btn.textContent = `${car.cost} coin`;
+        btn.textContent = d.coins >= car.cost ? `Satın al · ${car.cost}` : `${car.cost} coin`;
         btn.disabled = d.coins < car.cost;
       }
       btn.addEventListener('click', () => {
         this.actions.tap();
         if (owned) this.storage.select(car.id);
-        else this.storage.buy(car.id);
+        else if (this.storage.buy(car.id)) this.actions.purchased();
         this.actions.carChanged();
         this.renderGarage();
       });
@@ -5610,6 +6660,7 @@ function vibrate(ms) {
 
 function applySettings() {
   audio.setEnabled(storage.data.settings.sound);
+  audio.setAmbient(storage.data.settings.ambient);
 }
 
 function resize() {
@@ -5635,6 +6686,7 @@ function play() {
   ui.resetHud();
   ui.setHud(true);
   game.start(storage.selectedCar(), { startTime, god });
+  audio.setEngine(storage.selectedCar().engine);
   perf.i = 0;
   perf.count = 0;
   hintT = storage.data.tutorial ? 0 : 5;
@@ -5673,6 +6725,7 @@ const ui = new UI(storage, {
   tap() { audio.unlock(); },
   play, toMenu, pause, resume, applySettings,
   carChanged() { game.carSpec = storage.selectedCar(); },
+  purchased() { audio.purchase(); vibrate([30, 30, 60]); },
 });
 
 let wakeLock = null;
@@ -5690,7 +6743,11 @@ async function keepAwake(on) {
 game.onEvent = (name, v) => {
   switch (name) {
     case 'crash': audio.crash(v); vibrate(Math.round(18 + v * 40)); break;
-    case 'scream': audio.scream(v); break;
+    case 'scream': audio.scream(v, game.lastVoice); break;
+    case 'simit': audio.simit(); break;
+    case 'tea': audio.tea(); break;
+    case 'chairs': audio.chairs(); break;
+    case 'uncles': break;
     case 'thud': audio.thud(); vibrate(15); break;
     case 'horn': audio.horn(v); break;
     case 'power': audio.power(v); ui.powerToast(v); vibrate(35); break;
@@ -5728,6 +6785,7 @@ function frame(now) {
     accumulator += elapsed;
     let steps = 0;
     while (accumulator >= STEP && steps < 5) {
+      input.tick(STEP);
       game.tick(STEP, input.steer, input.reverse);
       accumulator -= STEP;
       steps++;
@@ -5806,6 +6864,7 @@ function boot() {
   }
   input.attach(canvas);
   applySettings();
+  if (document.fonts) document.fonts.load('800 30px Nunito', 'ÇŞĞİ').catch(() => {});
   resize();
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', resize);

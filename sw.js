@@ -1,5 +1,5 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'kac-kacabilirsen-v2';
+const CACHE = 'penci-zorn-v3';
 const ASSETS = [
   './',
   'index.html',

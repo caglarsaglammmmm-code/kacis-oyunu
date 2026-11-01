@@ -2,6 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CONFIG } from '../js/config.js';
 import { Game, difficultyAt, damageStage, impactDamage, interp } from '../js/game.js';
+import { lightState } from '../js/crowd.js';
+import { resetBody } from '../js/physics.js';
 
 const dt = 1 / 60;
 const car = CONFIG.cars[0];
@@ -237,6 +239,36 @@ test('haritadaki güç alınır, kalıcı olarak kaybolur', () => {
   assert.ok(g.damage < 50);
 });
 
+test('süreli güçler 15 saniye', () => {
+  assert.equal(CONFIG.powers.duration, 15);
+});
+
+test('duvara saplanan araba kendiliğinden geri çıkar', () => {
+  const g = game();
+  const p = g.player;
+  g.updatePlayer(dt, 0, false);
+  p.vx = 0; p.vy = 0;
+  let backed = false;
+  for (let i = 0; i < 60 * 2; i++) {
+    p.vx = 0; p.vy = i < 80 ? 0 : p.vy; p.speed = 0;
+    g.autoRevT > 0 ? (backed = true) : g.updatePlayer(dt, 0, false);
+    if (backed) break;
+    p.vx = 0; p.vy = 0;
+  }
+  assert.ok(backed);
+});
+
+test('sert darbede kısa duraksama ve kamera itmesi', () => {
+  const g = game({ startTime: 100 });
+  g.player.vx = 300; g.player.speed = 300;
+  g.playerImpact(400, 1, false);
+  assert.ok(g.stopT > 0);
+  assert.ok(g.cam.kx > 0);
+  const t = g.time;
+  g.tick(dt, 0, false);
+  assert.equal(g.time, t, 'duraksamada oyun zamanı durur');
+});
+
 test('polis çeşitleri zamana göre gelir, şekil ve hızları farklı', () => {
   assert.equal(difficultyAt(10).motoShare, 0);
   assert.equal(difficultyAt(20).fastShare, 0);
@@ -258,8 +290,7 @@ test('yayalar doğar, araba çarpınca fırlar ve ses olayı gelir', () => {
   const live = g.crowd.peds.filter((p) => p.alive);
   assert.ok(live.length > 3, `yaya ${live.length}`);
   const p = live[0];
-  p.state = 0; p.z = 0;
-  p.x = g.player.x + 10; p.y = g.player.y;
+  g.crowd.setupPed(p, 'man', g.player.x + 10, g.player.y, 0);
   g.player.vx = 300; g.player.speed = 300;
   g.crowd.checkHit(p, g.player, true);
   assert.equal(p.state, 2);
@@ -269,26 +300,98 @@ test('yayalar doğar, araba çarpınca fırlar ve ses olayı gelir', () => {
   assert.ok(p.z === 0);
 });
 
-test('sivil arabalar ana yolda şeridinde gider, çarpılınca savrulur', () => {
+test('sivil Türk trafiği: oyuncudan zayıf, çarpılınca savrulur', () => {
+  for (const [k, t] of Object.entries(CONFIG.npc.types)) {
+    assert.ok(t.cruise * CONFIG.npc.panicBoost < CONFIG.cars[0].maxSpeed, k);
+    assert.ok(t.colors.length >= 1);
+  }
+  assert.ok(CONFIG.npc.types.taxi.colors[0] === '#f7c600', 'taksi sarı');
+  for (const k of ['tog', 'tofas', 'anadol', 'murat', 'minibus', 'bus', 'taxi']) assert.ok(CONFIG.npc.types[k], k);
   const g = game({ god: true });
   g.player.vy = 0;
   for (let i = 0; i < 60 * 14; i++) g.tick(dt, 0, true);
   const live = g.crowd.npcs.filter((n) => n.alive);
-  assert.ok(live.length >= 2, `araç ${live.length}`);
-  const kinds = new Set();
-  for (let i = 0; i < 300; i++) { g.crowd.npcT = 0; g.crowd.update(dt); g.crowd.npcs.forEach((n) => { if (n.alive) { kinds.add(n.kind); n.alive = i > 290; } }); }
-  assert.ok(kinds.size >= 3, [...kinds].join());
-  for (const n of g.crowd.npcs) n.alive = false;
-  g.crowd.npcCount = 0;
-  g.crowd.npcT = 1e9;
-  g.crowd.spawnNpc();
-  let n = g.crowd.npcs.find((k) => k.alive);
-  for (let tries = 0; !n && tries < 50; tries++) { g.crowd.spawnNpc(); n = g.crowd.npcs.find((k) => k.alive); }
-  assert.ok(n);
+  assert.ok(live.length >= 3, `araç ${live.length}`);
+  const n = live[0];
   const w0 = n.w;
   g.crowd.hitNpc(n, 300, false);
   assert.equal(n.state, 'wreck');
   assert.notEqual(n.w, w0);
+});
+
+test('trafik ışığı: renkler döner, iki yön aynı anda yeşil olmaz', () => {
+  const seen = new Set();
+  for (let t = 0; t < 40; t += 0.1) {
+    const a = lightState(t, 3, 5, 0);
+    const b = lightState(t, 3, 5, 1);
+    seen.add(a);
+    assert.ok(!(a === 'g' && b === 'g'), `${t}`);
+  }
+  assert.deepEqual([...seen].sort(), ['g', 'r', 'y']);
+});
+
+test('NPC kırmızıda durur, yeşilde gider', () => {
+  const g = game({ god: true });
+  const c = g.crowd;
+  let jx = 2; // Şehir kavşağı bul
+  while (g.world.chunk(jx, 2).biome !== 'city') jx++;
+  const p = g.player;
+  p.x = (jx - 1) * 960 + 100; p.y = 2 * 960 - 300; p.vx = 0; p.vy = 0;
+  g.cops.length = 0;
+  c.clear();
+  c.npcT = 1e9;
+  const n = c.npcs[0];
+  const center = jx * 960 + 100;
+  const spec = CONFIG.npc.types.tofas;
+  // Yakın olan kırmızıyı garanti et
+  c.clock = 0;
+  while (lightState(c.clock, jx, 2, 0) !== 'r' || lightState(c.clock + 4, jx, 2, 0) !== 'r') c.clock += 0.1;
+  resetBody(n, center - 330, 2 * 960 + 150, 0, spec);
+  Object.assign(n, { alive: true, kind: 'tofas', spec, state: 'drive', dir: 0, line: 2 * 960 + 100, color: 0, t: 0, lastCross: 1e9, hornT: 9, panicT: 0, waitT: 0 });
+  n.drive.maxSpeed = 195; n.drive.accel = 260; n.drive.turnRate = 2.4; n.drive.grip = 7; n.drive.driftGrip = 7;
+  n.vx = 195;
+  p.x = center - 900;
+  for (let i = 0; i < 60 * 3.5; i++) { c.updateNpc(n, dt, g); c.clock += dt; }
+  assert.ok(n.speed < 25, `hız ${n.speed}`);
+  const stopped = n.x;
+  assert.ok(center - stopped > CONFIG.traffic.stopLine - 30, 'dur çizgisinde');
+  for (let i = 0; i < 60 * 14; i++) { c.updateNpc(n, dt, g); c.clock += dt; if (n.x > center) break; }
+  assert.ok(n.x > center || n.dir !== 0, 'yeşilde geçti');
+});
+
+test('polis yaklaşınca NPC panikler, kedi ezilmez, simitçi simit saçar', () => {
+  const g = game({ god: true });
+  const ev = [];
+  g.onEvent = (n) => ev.push(n);
+  for (let i = 0; i < 60 * 8; i++) g.tick(dt, 0, true);
+  g.onEvent = (n) => ev.push(n);
+  const n = g.crowd.npcs.find((k) => k.alive);
+  n.state = 'drive';
+  n.hornT = 0;
+  n.panicT = 0;
+  g.spawnCop('car', 'chaser', n.x + 80, n.y, 0);
+  g.crowd.updateNpc(n, dt, g);
+  assert.ok(n.panicT > 0);
+  assert.ok(ev.includes('horn'));
+  const p = g.crowd.peds.find((k) => k.alive) || g.crowd.peds[0];
+  g.crowd.setupPed(p, 'cat', g.player.x + 8, g.player.y, 0);
+  g.player.vx = 300;
+  assert.equal(g.crowd.checkHit(p, g.player, true), false);
+  assert.notEqual(p.state, 2);
+  g.crowd.setupPed(p, 'simitci', g.player.x + 8, g.player.y, 0);
+  ev.length = 0;
+  g.crowd.checkHit(p, g.player, true);
+  assert.equal(p.state, 2);
+  assert.ok(ev.includes('simit') && ev.includes('scream'));
+  let rings = 0;
+  for (let i = 0; i < g.fx.max; i++) if (g.fx.kind[i] === 8 && g.fx.life[i] > 0) rings++;
+  assert.ok(rings >= 10);
+});
+
+test('her NPC türünün sesi var; kadın, erkek, çocuk, yaşlı ayrı', () => {
+  const voices = new Set(Object.values(CONFIG.peds.kinds).map((k) => k.voice));
+  for (const v of ['man', 'woman', 'child', 'old', 'cat']) assert.ok(voices.has(v), v);
+  for (const k of ['simitci', 'stroller', 'wheelchair', 'bike', 'courier', 'cayci', 'esnaf', 'child']) assert.ok(CONFIG.peds.kinds[k], k);
 });
 
 test('uzun simülasyon: tüm süreler boyunca hata yok, polis sınırı aşılmaz, efekt havuzu sınırlı', () => {

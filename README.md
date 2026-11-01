@@ -1,17 +1,22 @@
-# Kaç Kaçabilirsen
+# Penci Zorn
 
-Mobil öncelikli, kuşbakışı polis kaçış ve drift oyunu. Saf HTML, CSS, JavaScript ve Canvas; çerçeve ve derleme adımı yok. Yatay ve dikey ekranda oynanır, çevrimdışı çalışır. Tüm görseller ve sesler koddan üretilir.
+Mobil öncelikli, Türk sokaklarında geçen kuşbakışı polis kaçış ve drift oyunu. Saf HTML, CSS, JavaScript ve Canvas; çerçeve ve derleme adımı yok. Yatay ve dikey ekranda oynanır, çevrimdışı çalışır. Tüm görseller ve sesler koddan üretilir.
 
 **Oyna:** https://caglarsaglammmmm-code.github.io/kacis-oyunu/
 
-**Android APK indir (hep en güncel sürüm):** https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/KacKacabilirsen.apk
+**Android APK indir (hep en güncel sürüm):** https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk
 
 ## Oyunda neler var
 
 - **Biyomlar:** şehir (gökdelenli merkez dahil), sahil (kum, sığ su, deniz, köprüler), orman, çöl, kırsal. Zemin, nesne ve bina biyoma göre değişir.
-- **Özel güçler:** Patlama, Görünmezlik (30 sn), Can, Dev mod (30 sn).
+- **Özel güçler:** Patlama, Görünmezlik (15 sn), Can, Dev mod (15 sn).
+- **Garaj:** Tofaş Doğan ile başlarsın; coinlerle motosiklet, Grandland, TOG, Şahin, Anadol, Murat 131, Egea, Clio ve Duster açılır.
 - **Polisler:** normal, hızlı, motosiklet, SWAT, gelişmiş, tank. Her biri farklı boyut, hız ve sirende.
-- **Şehir hayatı:** yürüyen yayalar; sedan, kamyonet, otobüs ve kamyon trafiği.
+- **Türk sokakları:** tabelalı dükkânlar, marketler, çay ocakları, Nevada Kafe, kapalı pazar, kediler, simitçiler, trafik ışıkları, dolmuş, taksi ve belediye otobüsü. Haritada tek bir turuncu Sistem Koleji vardır.
+
+## v3 oyun hissi iyileştirmeleri
+
+Coin kazancı yeniden dengelendi, sert darbede kısa duraksama ve kamera itmesi eklendi, kamera drift sırasında daha sakin takip ediyor, duvara saplanan araba kendiliğinden geri çıkıyor, baş parmak geçişi yanlışlıkla geri vites sayılmıyor, oyuncu polisten çok açılınca kovalama kopmuyor.
 
 ## Kontroller
 
@@ -38,12 +43,12 @@ npm install
 npm run android:build
 ```
 
-Sonuç: `dist/KacKacabilirsen.apk`. Debug imzalıdır: telefona kurulur, Google Play'e yüklenemez. Telefonda indirip açın ve bilinmeyen kaynaktan yükleme iznini verin.
+Sonuç: `dist/PenciZorn.apk`. Debug imzalıdır: telefona kurulur, Google Play'e yüklenemez. Telefonda indirip açın ve bilinmeyen kaynaktan yükleme iznini verin.
 
 Yeni sürüm yayınlamak için `android/app/build.gradle` içindeki sürümü artırın, sonra APK'yı bu adla Release'e ekleyin:
 
 ```
-gh release create vX.Y.Z dist/KacKacabilirsen.apk --title "vX.Y.Z"
+gh release create vX.Y.Z dist/PenciZorn.apk --title "vX.Y.Z"
 ```
 
 Dosya adı sabit kaldığı için oyundaki **APK İndir** düğmesi kendiliğinden en güncel sürüme gider.

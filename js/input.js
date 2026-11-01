@@ -1,5 +1,6 @@
 // Tek parmak kontrol: sağ yarı = sağa drift, sol yarı = sola drift, ikisi birden = geri.
 // Klavye: sol/sağ ok veya A/D, ikisi birden = geri.
+import { CONFIG } from './config.js';
 
 export class Input {
   constructor() {
@@ -7,6 +8,13 @@ export class Input {
     this.keyL = false;
     this.keyR = false;
     this.width = 1;
+    this.last = 'R'; // Son basılan yön: iki parmak kısa süre çakışınca bu kazanır
+    this.bothT = 0;
+  }
+
+  // Her fizik adımında çağrılır
+  tick(dt) {
+    this.bothT = this.left && this.right ? this.bothT + dt : 0;
   }
 
   get left() {
@@ -22,18 +30,20 @@ export class Input {
   }
 
   get reverse() {
-    return this.left && this.right;
+    return this.bothT >= CONFIG.input.bothDelay;
   }
 
   get steer() {
     const l = this.left;
     const r = this.right;
-    if (l === r) return 0;
+    if (!l && !r) return 0;
+    if (l && r) return this.reverse ? 0 : this.last === 'R' ? 1 : -1;
     return r ? 1 : -1;
   }
 
   press(id, side) {
     this.touches.set(id, side);
+    this.last = side;
   }
 
   release(id) {
@@ -44,6 +54,7 @@ export class Input {
     this.touches.clear();
     this.keyL = false;
     this.keyR = false;
+    this.bothT = 0;
   }
 
   sideOf(x) {
@@ -51,8 +62,8 @@ export class Input {
   }
 
   key(code, down) {
-    if (code === 'ArrowLeft' || code === 'KeyA') { this.keyL = down; return true; }
-    if (code === 'ArrowRight' || code === 'KeyD') { this.keyR = down; return true; }
+    if (code === 'ArrowLeft' || code === 'KeyA') { this.keyL = down; if (down) this.last = 'L'; return true; }
+    if (code === 'ArrowRight' || code === 'KeyD') { this.keyR = down; if (down) this.last = 'R'; return true; }
     return false;
   }
 

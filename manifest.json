@@ -1,7 +1,7 @@
 {
-  "name": "Kaç Kaçabilirsen",
-  "short_name": "Kaç Kaçabilirsen",
-  "description": "Kuşbakışı polis kaçış ve drift oyunu",
+  "name": "Penci Zorn",
+  "short_name": "Penci Zorn",
+  "description": "Türk sokaklarında kuşbakışı polis kaçış ve drift oyunu",
   "lang": "tr",
   "start_url": "./index.html",
   "scope": "./",

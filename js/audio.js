@@ -4,6 +4,11 @@ export class AudioEngine {
   constructor() {
     this.ctx = null;
     this.enabled = true;
+    this.ambientOn = true;
+    this.ambT = 2;
+    this.engine = { base: 46, range: 150, wave: 'sawtooth', sub: 1.5, gain: 1 };
+    this.coinStreak = 0;
+    this.coinAt = 0;
     this.master = null;
     this.running = false;
   }
@@ -65,6 +70,21 @@ export class AudioEngine {
     this.driftGain.connect(this.master);
     nsrc.start();
 
+    // Sokak uğultusu: çok kısık alçak gürültü
+    const ambSrc = ctx.createBufferSource();
+    ambSrc.buffer = this.noise;
+    ambSrc.loop = true;
+    const ambF = ctx.createBiquadFilter();
+    ambF.type = 'lowpass';
+    ambF.frequency.value = 420;
+    this.ambGain = ctx.createGain();
+    this.ambGain.gain.value = this.ambientOn ? 0.035 : 0;
+    ambSrc.connect(ambF);
+    ambF.connect(this.ambGain);
+    this.ambGain.connect(this.master);
+    ambSrc.start();
+    this.setEngine(this.engine);
+
     // Lastik ciyaklaması: dar bant testere
     this.tyreOsc = ctx.createOscillator();
     this.tyreOsc.type = 'sawtooth';
@@ -104,6 +124,18 @@ export class AudioEngine {
     this.radioT = 6;
   }
 
+  setEngine(e) {
+    this.engine = e;
+    if (!this.eng1) return;
+    this.eng1.type = e.wave;
+    this.eng2.type = e.wave === 'sine' ? 'sine' : 'square';
+  }
+
+  setAmbient(on) {
+    this.ambientOn = on;
+    if (this.ambGain) this.ambGain.gain.setTargetAtTime(on ? 0.035 : 0, this.ctx.currentTime, 0.2);
+  }
+
   setEnabled(on) {
     this.enabled = on;
     if (this.master) this.master.gain.setTargetAtTime(on ? 0.8 : 0, this.ctx.currentTime, 0.02);
@@ -125,11 +157,22 @@ export class AudioEngine {
     const p = game.player;
     const k = Math.min(1.1, p.speed / game.carSpec.maxSpeed);
     const on = active && game.state === 'play';
-    const base = 52 + 150 * k + (p.drifting ? 34 : 0);
+    const e = this.engine;
+    const base = e.base + e.range * k + (p.drifting ? e.range * 0.22 : 0);
     this.eng1.frequency.setTargetAtTime(base, t, 0.06);
-    this.eng2.frequency.setTargetAtTime(base * 1.5, t, 0.06);
+    this.eng2.frequency.setTargetAtTime(base * e.sub, t, 0.06);
     this.engFilter.frequency.setTargetAtTime(300 + 1300 * k, t, 0.08);
-    this.engGain.gain.setTargetAtTime(on ? 0.05 + 0.09 * k : 0, t, 0.08);
+    this.engGain.gain.setTargetAtTime(on ? (0.05 + 0.09 * k) * e.gain : 0, t, 0.08);
+
+    // Ara sıra sokak sesleri
+    if (this.ambientOn && this.enabled) {
+      this.ambT -= Math.min(0.05, (now - (this.ambNow || now)) / 1000);
+      this.ambNow = now;
+      if (this.ambT <= 0) {
+        this.ambT = 2.5 + Math.random() * 6;
+        this.streetSound();
+      }
+    }
 
     const slip = on && p.drifting ? Math.min(1, p.slip / 240) : 0;
     this.driftGain.gain.setTargetAtTime(slip * 0.26, t, 0.05);
@@ -212,10 +255,13 @@ export class AudioEngine {
   }
 
   crash(k) {
-    this.burst(0.2 + k * 0.2, 800 + k * 1400, 0.3 + k * 0.5, 'lowpass', 180);
-    this.tone(150, 0.14, 0.2 * k + 0.08, 'square', 60);
-    if (k > 0.35) {
-      if (Math.random() < 0.5) this.metal(k); else this.glass(k);
+    const r = Math.random();
+    this.burst(0.2 + k * 0.2, 700 + k * (r < 0.5 ? 1000 : 1900), 0.3 + k * 0.5, 'lowpass', 160);
+    this.tone(120 + r * 90, 0.14, 0.2 * k + 0.08, 'square', 55);
+    if (k > 0.3) {
+      if (r < 0.4) this.metal(k);
+      else if (r < 0.7) this.glass(k);
+      else this.tone(90, 0.3, 0.2 * k, 'sawtooth', 40); // Gövde gümbürtüsü
     }
   }
 
@@ -230,22 +276,50 @@ export class AudioEngine {
     for (let i = 0; i < 5; i++) this.tone(2600 + Math.random() * 3200, 0.1, 0.05, 'sine', 0, i * 0.03);
   }
 
-  // Sentez çığlık: testere sesi + iki gırtlak bandı + titreme
-  scream(k = 1) {
+  // Ortam: kuş, uzak korna, çay kaşığı, uzaktan seslenen satıcı
+  streetSound() {
+    const r = Math.random();
+    if (r < 0.34) {
+      // Kuş cıvıltısı
+      const f = 2600 + Math.random() * 1400;
+      for (let i = 0; i < 3; i++) this.tone(f, 0.08, 0.018, 'sine', f * 1.3, i * 0.13);
+    } else if (r < 0.58) {
+      // Uzak korna
+      this.tone(380, 0.28, 0.018, 'square');
+      this.tone(478, 0.28, 0.015, 'square');
+    } else if (r < 0.8) {
+      // Bardakta çay kaşığı
+      for (let i = 0; i < 3; i++) this.tone(3400 + Math.random() * 500, 0.05, 0.025, 'sine', 0, i * 0.11);
+    } else {
+      // Satıcı sesi: iki uzun hece
+      this.tone(240, 0.4, 0.02, 'sawtooth', 300);
+      this.tone(300, 0.6, 0.02, 'sawtooth', 210, 0.42);
+    }
+  }
+
+  // Sentez bağırma: testere sesi, gırtlak bantları, titreme. Sesler kişiye göre değişir
+  scream(k = 1, voice = 'man') {
     const c = this.ctx;
     if (!c || !this.enabled) return;
+    if (voice === 'cat') { this.meow(k); return; }
     const t = c.currentTime;
-    const dur = 0.45 + Math.random() * 0.45;
-    const base = [300, 390, 520, 640, 780][Math.floor(Math.random() * 5)];
+    const P = {
+      man: { pitch: [170, 210, 250], form: [650, 1150, 2400], rise: 1.3, vib: 0.03, dur: 0.5 },
+      woman: { pitch: [380, 460, 560], form: [900, 1700, 3000], rise: 1.5, vib: 0.04, dur: 0.6 },
+      child: { pitch: [620, 740, 860], form: [1100, 2100, 3500], rise: 1.6, vib: 0.05, dur: 0.45 },
+      old: { pitch: [150, 180, 215], form: [550, 1000, 2100], rise: 1.15, vib: 0.1, dur: 0.75 },
+    }[voice] || { pitch: [200], form: [700, 1200, 2400], rise: 1.3, vib: 0.03, dur: 0.5 };
+    const dur = P.dur + Math.random() * 0.25;
+    const base = P.pitch[Math.floor(Math.random() * P.pitch.length)];
     const o = c.createOscillator();
     o.type = 'sawtooth';
     o.frequency.setValueAtTime(base * 0.9, t);
-    o.frequency.exponentialRampToValueAtTime(base * 1.5, t + dur * 0.28);
+    o.frequency.exponentialRampToValueAtTime(base * P.rise, t + dur * 0.28);
     o.frequency.exponentialRampToValueAtTime(base * 0.75, t + dur);
     const vib = c.createOscillator();
     vib.frequency.value = 7 + Math.random() * 5;
     const vibGain = c.createGain();
-    vibGain.gain.value = base * 0.05;
+    vibGain.gain.value = base * P.vib;
     vib.connect(vibGain);
     vibGain.connect(o.frequency);
     const g = c.createGain();
@@ -253,11 +327,11 @@ export class AudioEngine {
     g.gain.exponentialRampToValueAtTime(0.16 * k + 0.03, t + 0.04);
     g.gain.setValueAtTime(0.16 * k + 0.03, t + dur * 0.6);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    for (const [freq, q] of [[850, 7], [1500, 9], [2800, 11]]) {
+    for (let i = 0; i < 3; i++) {
       const f = c.createBiquadFilter();
       f.type = 'bandpass';
-      f.frequency.value = freq * (0.92 + Math.random() * 0.16);
-      f.Q.value = q;
+      f.frequency.value = P.form[i] * (0.92 + Math.random() * 0.16);
+      f.Q.value = 7 + i * 2;
       o.connect(f);
       f.connect(g);
     }
@@ -273,10 +347,43 @@ export class AudioEngine {
     this.burst(0.07, 900, 0.16, 'lowpass');
   }
 
-  horn(big) {
-    const f = big ? 196 : 392;
-    this.tone(f, 0.34, 0.09, 'square');
-    this.tone(f * 1.26, 0.34, 0.08, 'square');
+  meow(k) {
+    this.tone(620, 0.16, 0.1 * k + 0.04, 'triangle', 980);
+    this.tone(980, 0.24, 0.1 * k + 0.04, 'triangle', 520, 0.15);
+  }
+
+  // Araca göre korna: dolmuşun melodili kornası dahil
+  horn(kind = 'car') {
+    const T = {
+      car: [[392, 494, 0.3]],
+      old: [[300, 340, 0.4]],
+      taxi: [[440, 554, 0.12], [440, 554, 0.12, 0.17], [440, 554, 0.28, 0.34]],
+      bus: [[185, 233, 0.6]],
+      truck: [[131, 165, 0.8]],
+      dolmus: [[523, 659, 0.13], [587, 740, 0.13, 0.16], [659, 831, 0.13, 0.32], [784, 988, 0.26, 0.48]],
+    }[kind] || [[392, 494, 0.3]];
+    for (const [a, b, d, at = 0] of T) {
+      this.tone(a, d, 0.07, 'square', 0, at);
+      this.tone(b, d, 0.06, 'square', 0, at);
+    }
+  }
+
+  // Simit dağılması: hafif tıkırtılar
+  simit() {
+    for (let i = 0; i < 7; i++) this.tone(420 + Math.random() * 500, 0.05, 0.08, 'triangle', 200, i * 0.035);
+    this.burst(0.18, 1400, 0.1, 'bandpass');
+  }
+
+  // Çay bardakları kırılır
+  tea() {
+    this.glass(0.8);
+    for (let i = 0; i < 4; i++) this.tone(3000 + Math.random() * 1500, 0.08, 0.05, 'sine', 0, 0.05 + i * 0.05);
+  }
+
+  // Plastik masa sandalye
+  chairs() {
+    for (let i = 0; i < 4; i++) this.tone(170 + Math.random() * 140, 0.07, 0.14, 'square', 90, i * 0.05);
+    this.burst(0.14, 1800, 0.14, 'bandpass');
   }
 
   // Telsiz: cızırtı ve kısa konuşma darbeleri
@@ -302,12 +409,25 @@ export class AudioEngine {
     seq.forEach((f, i) => this.tone(f, 0.2, 0.17, name === 'giant' ? 'sawtooth' : 'triangle', 0, i * 0.08));
   }
 
+  // Satın alma: kasa zili
+  purchase() {
+    [784, 988, 1175, 1568].forEach((f, i) => this.tone(f, 0.16, 0.18, 'triangle', 0, i * 0.07));
+    this.burst(0.25, 5000, 0.07, 'highpass');
+  }
+
   powerEnd() { this.tone(660, 0.18, 0.1, 'triangle', 240); }
 
   crunch() { this.burst(0.12, 1300, 0.22, 'bandpass', 500); }
+  // Coin: üst üste toplayınca perde yükselir
   coin() {
-    this.tone(1320, 0.07, 0.16, 'square');
-    this.tone(1975, 0.14, 0.16, 'square', 0, 0.06);
+    const c = this.ctx;
+    if (!c) return;
+    const t = c.currentTime;
+    this.coinStreak = t - this.coinAt < 0.7 ? Math.min(8, this.coinStreak + 1) : 0;
+    this.coinAt = t;
+    const k = 2 ** (this.coinStreak / 12);
+    this.tone(1320 * k, 0.07, 0.15, 'square');
+    this.tone(1975 * k, 0.14, 0.15, 'square', 0, 0.06);
   }
 
   nearMiss() { this.tone(500, 0.22, 0.14, 'sawtooth', 1500); }

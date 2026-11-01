@@ -34,6 +34,7 @@ function vibrate(ms) {
 
 function applySettings() {
   audio.setEnabled(storage.data.settings.sound);
+  audio.setAmbient(storage.data.settings.ambient);
 }
 
 function resize() {
@@ -59,6 +60,7 @@ function play() {
   ui.resetHud();
   ui.setHud(true);
   game.start(storage.selectedCar(), { startTime, god });
+  audio.setEngine(storage.selectedCar().engine);
   perf.i = 0;
   perf.count = 0;
   hintT = storage.data.tutorial ? 0 : 5;
@@ -97,6 +99,7 @@ const ui = new UI(storage, {
   tap() { audio.unlock(); },
   play, toMenu, pause, resume, applySettings,
   carChanged() { game.carSpec = storage.selectedCar(); },
+  purchased() { audio.purchase(); vibrate([30, 30, 60]); },
 });
 
 let wakeLock = null;
@@ -114,7 +117,11 @@ async function keepAwake(on) {
 game.onEvent = (name, v) => {
   switch (name) {
     case 'crash': audio.crash(v); vibrate(Math.round(18 + v * 40)); break;
-    case 'scream': audio.scream(v); break;
+    case 'scream': audio.scream(v, game.lastVoice); break;
+    case 'simit': audio.simit(); break;
+    case 'tea': audio.tea(); break;
+    case 'chairs': audio.chairs(); break;
+    case 'uncles': break;
     case 'thud': audio.thud(); vibrate(15); break;
     case 'horn': audio.horn(v); break;
     case 'power': audio.power(v); ui.powerToast(v); vibrate(35); break;
@@ -152,6 +159,7 @@ function frame(now) {
     accumulator += elapsed;
     let steps = 0;
     while (accumulator >= STEP && steps < 5) {
+      input.tick(STEP);
       game.tick(STEP, input.steer, input.reverse);
       accumulator -= STEP;
       steps++;
@@ -230,6 +238,7 @@ function boot() {
   }
   input.attach(canvas);
   applySettings();
+  if (document.fonts) document.fonts.load('800 30px Nunito', 'ÇŞĞİ').catch(() => {});
   resize();
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', resize);

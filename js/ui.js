@@ -45,6 +45,7 @@ export class UI {
 
     const d = this.storage.data;
     $('set-sound').addEventListener('change', (e) => { d.settings.sound = e.target.checked; this.storage.save(); a.applySettings(); });
+    $('set-ambient').addEventListener('change', (e) => { d.settings.ambient = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-vibrate').addEventListener('change', (e) => { d.settings.vibrate = e.target.checked; this.storage.save(); a.applySettings(); });
     $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
     $('dev-start').addEventListener('change', (e) => { d.dev.startTime = Number(e.target.value); this.storage.save(); });
@@ -59,6 +60,7 @@ export class UI {
     const d = this.storage.data;
     $('set-sound').checked = d.settings.sound;
     $('set-vibrate').checked = d.settings.vibrate;
+    $('set-ambient').checked = d.settings.ambient;
     $('dev-god').checked = d.dev.god;
     $('dev-start').value = String(d.dev.startTime);
   }
@@ -137,7 +139,7 @@ export class UI {
       this.pw[kind] = { el, t, fill, last: '' };
     }
     const list = $('howto-powers');
-    const info = { blast: 'Yakındaki bütün arabalar patlar', ghost: '30 sn polis seni göremez', heal: 'Hasarı onarır, ateşi söndürür', giant: '30 sn devleşirsin, hasar almazsın' };
+    const info = { blast: 'Yakındaki bütün arabalar patlar', ghost: `${CONFIG.powers.duration} sn polis seni göremez`, heal: 'Hasarı onarır, ateşi söndürür', giant: `${CONFIG.powers.duration} sn devleşirsin, hasar almazsın` };
     for (const kind of Object.keys(info)) {
       const row = document.createElement('div');
       const name = document.createElement('b');
@@ -240,16 +242,14 @@ export class UI {
     $('garage-coins').textContent = d.coins;
     const list = $('garage-list');
     list.textContent = '';
-    const max = {
-      maxSpeed: Math.max(...CONFIG.cars.map((c) => c.maxSpeed)),
-      durability: Math.max(...CONFIG.cars.map((c) => c.durability)),
-    };
-    const minDrift = Math.min(...CONFIG.cars.map((c) => c.driftGrip));
-    for (const car of CONFIG.cars) {
+    const cars = CONFIG.cars;
+    const top = cars[cars.length - 1];
+    const base = cars[0];
+    for (const car of cars) {
       const owned = d.owned.includes(car.id);
       const selected = d.selected === car.id;
       const card = document.createElement('div');
-      card.className = `car-card${selected ? ' selected' : ''}`;
+      card.className = `car-card${selected ? ' selected' : ''}${owned ? '' : ' locked'}`;
 
       const art = carSprite(car);
       art.className = 'car-art';
@@ -262,34 +262,37 @@ export class UI {
       desc.textContent = car.desc;
       card.appendChild(desc);
 
-      const stat = (label, value) => {
+      const stat = (label, value, text) => {
         const row = document.createElement('div');
         row.className = 'stat';
         const t = document.createElement('span');
         t.textContent = label;
         const bar = document.createElement('i');
         const fill = document.createElement('b');
-        fill.style.width = `${Math.round(value * 100)}%`;
+        fill.style.width = `${Math.round(25 + value * 75)}%`;
         bar.appendChild(fill);
-        row.append(t, bar);
+        const n = document.createElement('em');
+        n.textContent = text;
+        row.append(t, bar, n);
         card.appendChild(row);
       };
-      stat('Hız', (car.maxSpeed - 340) / (max.maxSpeed - 340));
-      stat('Sağlamlık', car.durability / max.durability);
-      stat('Drift', minDrift / car.driftGrip);
+      const norm = (v, a, b) => (v - a) / (b - a);
+      stat('Hız', norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
+      stat('Kayma', norm(base.driftGrip / car.driftGrip, 1, base.driftGrip / top.driftGrip), String(Math.round((base.driftGrip / car.driftGrip) * 100)));
+      stat('Dayanıklılık', norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
 
       const btn = document.createElement('button');
-      btn.className = 'btn small';
+      btn.className = `btn small${owned ? '' : ' buy'}`;
       if (selected) { btn.textContent = 'Seçili'; btn.disabled = true; }
       else if (owned) btn.textContent = 'Seç';
       else {
-        btn.textContent = `${car.cost} coin`;
+        btn.textContent = d.coins >= car.cost ? `Satın al · ${car.cost}` : `${car.cost} coin`;
         btn.disabled = d.coins < car.cost;
       }
       btn.addEventListener('click', () => {
         this.actions.tap();
         if (owned) this.storage.select(car.id);
-        else this.storage.buy(car.id);
+        else if (this.storage.buy(car.id)) this.actions.purchased();
         this.actions.carChanged();
         this.renderGarage();
       });

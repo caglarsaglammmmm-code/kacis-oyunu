@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GROUND } from '../js/config.js';
+import { GROUND, BUILD } from '../js/config.js';
 import { World, TILE, CT, CHUNK, PROP } from '../js/world.js';
 
 test('aynı tohum aynı chunk, başka tohum başka chunk üretir', () => {
@@ -73,7 +73,7 @@ test('her sokak yol parçası iki uçlu: iç sokak ana yola bağlanır', () => {
         const near = s.vertical ? c.cost[5 * CT + s.pos] : c.cost[s.pos * CT + 5];
         const far = s.vertical ? c.cost[(CT - 1) * CT + s.pos] : c.cost[s.pos * CT + CT - 1];
         assert.ok(near > 0 && far > 0);
-        assert.ok(s.width >= 3, 'araç geçecek genişlikte');
+        assert.ok(s.width >= 2, 'araç geçecek genişlikte');
       }
     }
   }
@@ -164,6 +164,44 @@ test('sahile gidilebilir: kum ve sığ suya araba girer, derin deniz kapalı', (
     }
   }
   assert.ok(seen > 0, 'deniz bulunamadı');
+});
+
+test('tüm haritada tek bir turuncu Sistem Koleji var', () => {
+  for (const seed of [1, 2, 3]) {
+    const w = new World(seed);
+    let count = 0;
+    for (let cy = -40; cy < 40; cy++) {
+      for (let cx = -40; cx < 40; cx++) {
+        const c = w.chunk(cx, cy);
+        for (let i = 0; i < c.rectCount; i++) if (c.rects[i].style === BUILD.SISTEM) { count++; assert.equal(c.rects[i].color, '#ff7a00'); }
+      }
+      for (const c of w.list.splice(0)) w.chunks.delete((c.cx + 32768) * 65536 + (c.cy + 32768)); // Bellek şişmesin
+      w.lastKey = -1;
+    }
+    assert.equal(count, 1, `tohum ${seed}: ${count}`);
+  }
+});
+
+test('Türkiye teması: tabelalar, market, çay ocağı, Nevada, amcalar, pazar, dar sokak', () => {
+  const w = new World(4);
+  const signs = new Set();
+  const props = new Set();
+  const tpl = new Set();
+  let narrow = 0;
+  for (let cy = -40; cy < 40; cy += 2) {
+    for (let cx = -40; cx < 40; cx += 2) {
+      const c = w.chunk(cx, cy);
+      tpl.add(c.template);
+      for (let i = 0; i < c.rectCount; i++) if (c.rects[i].sign) signs.add(c.rects[i].sign);
+      for (let i = 0; i < c.propCount; i++) props.add(c.props[i].kind);
+      for (let i = 0; i < c.streetCount; i++) if (c.streets[i].width === 2) narrow++;
+    }
+  }
+  for (const s of ['Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Tekel', 'Çay Ocağı', 'Kuaför', 'Nargile Cafe', 'Nevada Kafe', 'Bakkal', 'Kahveci']) assert.ok(signs.has(s), s);
+  assert.ok([...signs].filter((s) => /Market|Gross/.test(s)).length >= 4, 'farklı marketler');
+  for (const p of ['CHAIRS', 'UNCLES', 'SIMITCART', 'STALL', 'LAUNDRY']) assert.ok(props.has(PROP[p]), p);
+  assert.ok(tpl.has('mahalle') && tpl.has('pazar'));
+  assert.ok(narrow > 20);
 });
 
 test('negatif koordinatlarda sorgular doğru', () => {

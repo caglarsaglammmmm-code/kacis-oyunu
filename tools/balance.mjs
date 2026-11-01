@@ -36,10 +36,10 @@ for (const [skill, avoid] of [[0.35, false], [0.8, true]]) {
       if ((t * 60 | 0) % 8 === 0) s = bot(g, skill, avoid);
       g.tick(dt, s, false); t += dt;
     }
-    res.push({ t: g.time, kills: g.kills, score: g.score | 0 });
+    res.push({ t: g.time, kills: g.kills, score: g.score | 0, coins: g.result ? g.result.coins : 0 });
     if (g.time < 30) d30++;
   }
   const ts = res.map((r) => r.t).sort((a, b) => a - b);
   const q = (k) => ts[Math.floor(ts.length * k)].toFixed(0);
-  console.log(`bot ${avoid ? 'polisten kaçan' : 'kör'}: min ${q(0)} p25 ${q(.25)} medyan ${q(.5)} p75 ${q(.75)} max ${ts.at(-1).toFixed(0)} | 30 sn altı ölüm ${d30}/${N} | ort. kill ${(res.reduce((a,r)=>a+r.kills,0)/N).toFixed(1)}`);
+  console.log(`bot ${avoid ? 'polisten kaçan' : 'kör'}: min ${q(0)} p25 ${q(.25)} medyan ${q(.5)} p75 ${q(.75)} max ${ts.at(-1).toFixed(0)} | 30 sn altı ölüm ${d30}/${N} | ort. kill ${(res.reduce((a,r)=>a+r.kills,0)/N).toFixed(1)} | ort. coin ${(res.reduce((a,r)=>a+r.coins,0)/N).toFixed(0)}`);
 }

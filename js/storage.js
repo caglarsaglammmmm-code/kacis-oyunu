@@ -1,7 +1,7 @@
 // En yüksek skor, coin, arabalar ve ayarlar localStorage'da.
 import { CONFIG } from './config.js';
 
-const KEY = 'kac-kacabilirsen-v1';
+const KEY = 'kac-kacabilirsen-v1'; // Eski adla kalır: mevcut coin ve rekorlar kaybolmasın
 
 export function defaultSave() {
   return {
@@ -10,7 +10,7 @@ export function defaultSave() {
     coins: 0,
     owned: [CONFIG.cars[0].id],
     selected: CONFIG.cars[0].id,
-    settings: { sound: true, vibrate: true },
+    settings: { sound: true, vibrate: true, ambient: true },
     dev: { god: false, startTime: 0 },
     tutorial: false,
   };
@@ -32,6 +32,7 @@ export function sanitize(data) {
   if (data.settings) {
     d.settings.sound = data.settings.sound !== false;
     d.settings.vibrate = data.settings.vibrate !== false;
+    d.settings.ambient = data.settings.ambient !== false;
   }
   if (data.dev) {
     d.dev.god = data.dev.god === true;

@@ -25,13 +25,13 @@ const toBiome = (biome, template) => {
     const c = w.chunk(cx, cy);
     if (template && c.template !== template) continue;
     const p = g.player;
-    p.x = c.x + 500; p.y = c.y + 100; p.vx = 0; p.vy = 0; p.a = 0; g.cam.x = p.x + 100; g.cam.y = p.y + 240;
+    p.x = c.x + 100; p.y = c.y + 500; p.vx = 0; p.vy = 0; p.a = 0; g.cam.x = c.x + 340; g.cam.y = c.y + 620;
     for (const k of g.cops) k.x += 1e5;
     return `${biome}`;
   }
 };
-for (const [b, tpl] of [['beach', 'sea'], ['beach', 'beach'], ['forest'], ['desert'], ['rural'], ['city', 'downtown']]) {
-  await scene(`${b}-${tpl || ''}`, 390, 844, '?god=1', `(${toBiome.toString()})('${b}', ${tpl ? `'${tpl}'` : 'undefined'})`, 1800);
+for (const [b, tpl] of [['city', 'mahalle'], ['city', 'pazar'], ['city', 'city']]) {
+  await scene(`${b}-${tpl || ''}`, 390, 844, '?god=1&x=' + b, `(${toBiome.toString()})('${b}', ${tpl ? `'${tpl}'` : 'undefined'})`, 1800);
 }
 await scene('guc', 390, 844, '?t=100&god=1', () => {
   const g = globalThis.__kacis.game; const p = g.player;
@@ -42,12 +42,17 @@ await scene('guc', 390, 844, '?t=100&god=1', () => {
 }, 500);
 await scene('kalabalik', 844, 390, '?t=60&god=1', () => {
   const g = globalThis.__kacis.game; const p = g.player;
-  const peds = g.crowd.peds; for (let i = 0; i < 10; i++) { const k = peds[i]; k.alive = true; k.state = 0; k.z = 0; k.look = i % 6; k.a = i; k.x = p.x + 40 + i * 12; k.y = p.y + 70 + (i % 3) * 16; }
-  for (let i = 0; i < 4; i++) g.crowd.launch(peds[i], p, false);
-  const kinds = ['sedan', 'pickup', 'bus', 'truck']; let n = 0;
+  const peds = g.crowd.peds; const K = Object.keys(globalThis.__kacis.cfg.peds.kinds); for (let i = 0; i < K.length; i++) { g.crowd.setupPed(peds[i], K[i], p.x - 90 + i * 24, p.y - 60 - (i % 2) * 22, 0); peds[i].turnT = 9; }
+  g.crowd.setupPed(peds[20], 'simitci', p.x + 40, p.y + 30, 0); g.crowd.launch(peds[20], p, false);
+  const kinds = ['taxi', 'minibus', 'bus', 'murat']; let n = 0;
   for (const o of g.crowd.npcs) { if (n >= 4) break; g.crowd.npcT = 1e9; g.crowd.spawnNpc(); }
-  for (const o of g.crowd.npcs) if (o.alive) { o.kind = kinds[n % 4]; o.spec = globalThis.__kacis.cfg.npc.types[o.kind]; o.len = o.spec.len; o.wid = o.spec.wid; o.x = p.x - 280 + n * 150; o.y = p.y + 170; o.vx = 0; o.vy = 0; o.a = 0; o.drive.maxSpeed = 1; n++; }
+  for (const o of g.crowd.npcs) if (o.alive) { o.kind = kinds[n % 4]; o.color = 0; o.spec = globalThis.__kacis.cfg.npc.types[o.kind]; o.len = o.spec.len; o.wid = o.spec.wid; o.x = p.x - 280 + n * 150; o.y = p.y + 170; o.vx = 0; o.vy = 0; o.a = 0; o.drive.maxSpeed = 1; n++; }
 }, 280);
+await scene('sistem', 390, 844, '?god=1', () => {
+  const g = globalThis.__kacis.game; const s = g.world.sistemChunk(); const c = g.world.chunk(s.cx, s.cy); const p = g.player;
+  p.x = c.x + 580; p.y = c.y + 790; p.a = 0; p.vx = 0; p.vy = 0; g.cam.x = p.x; g.cam.y = p.y - 200;
+  for (const k of g.cops) k.x += 1e5;
+}, 1200);
 await scene('tank', 390, 844, '?t=285&god=1', () => {
   const g = globalThis.__kacis.game; const p = g.player;
   const c = g.spawnCop('tank', 'chaser', p.x + 60, p.y + 300, -1.57);

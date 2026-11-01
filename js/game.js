@@ -92,7 +92,7 @@ export class Game {
     this.state = 'idle';
     this.carSpec = CONFIG.cars[0];
     this.view = { w: 390, h: 844 };
-    this.cam = { x: 0, y: 0, zoom: 1, shake: 0, sx: 0, sy: 0, scale: 1, halfW: 200, halfH: 400 };
+    this.cam = { x: 0, y: 0, zoom: 1, shake: 0, sx: 0, sy: 0, kx: 0, ky: 0, lvx: 0, lvy: 0, scale: 1, halfW: 200, halfH: 400 };
     this.onEvent = null;
     this.god = false;
     this.tickCount = 0;
@@ -127,6 +127,9 @@ export class Game {
     this.burning = false;
     this.burnT = 0;
     this.hitCd = 0;
+    this.stopT = 0;
+    this.stuckT = 0;
+    this.autoRevT = 0;
     this.sinceHit = 0;
     this.smokeT = 0;
     this.dyingT = 0;
@@ -163,6 +166,8 @@ export class Game {
     this.cam.y = this.player.y;
     this.cam.zoom = 1;
     this.cam.shake = 0;
+    this.cam.lvx = 0;
+    this.cam.lvy = 0;
   }
 
   // Menü arkası: ana yolda giden bir kaçış sahnesi
@@ -188,6 +193,13 @@ export class Game {
   // --- Ana adım ---
   tick(dt, steer, reverse) {
     this.tickCount++;
+    // Sert darbede kısa duraksama: çarpışma hissi
+    if (this.stopT > 0) {
+      this.stopT -= dt;
+      this.fx.update(dt);
+      this.updateCamera(dt);
+      return;
+    }
     if (this.state === 'attract') this.tickAttract(dt);
     else if (this.state === 'play') this.tickPlay(dt, steer, reverse);
     else if (this.state === 'dying') this.tickDying(dt);
@@ -253,6 +265,19 @@ export class Game {
     const p = this.player;
     const g = this.world.groundAt(p.x, p.y);
     const surf = CONFIG.surfaces[g];
+    // Duvara saplanınca kendiliğinden geri çıkar: tek parmakla oyun kilitlenmesin
+    if (this.autoRevT > 0) {
+      this.autoRevT -= dt;
+      reverse = true;
+    } else if (p.speed < 40 && !reverse) {
+      this.stuckT += dt;
+      if (this.stuckT > DMG.autoReverseAfter) {
+        this.stuckT = 0;
+        this.autoRevT = DMG.autoReverseTime;
+      }
+    } else {
+      this.stuckT = 0;
+    }
     stepCar(p, steer, reverse ? -1 : 1, this.carSpec, surf, dt);
     if (this.hitCd > 0) this.hitCd -= dt;
 
@@ -308,6 +333,11 @@ export class Game {
     this.fx.sparks(p.x, p.y, 8 + Math.round(dmg));
     this.cam.shake = Math.min(14, this.cam.shake + dmg * 0.5);
     this.hitFlash = Math.min(1, dmg / 25);
+    if (dmg >= DMG.hitStopMin) this.stopT = DMG.hitStop;
+    // Kamera darbenin yönüne itilir
+    const sp = p.speed || 1;
+    this.cam.kx = (p.vx / sp) * CONFIG.camera.kick * Math.min(1, dmg / 20);
+    this.cam.ky = (p.vy / sp) * CONFIG.camera.kick * Math.min(1, dmg / 20);
     return dmg;
   }
 
@@ -377,7 +407,7 @@ export class Game {
   finish() {
     this.state = 'over';
     if (this.giantT > 0) this.setGiant(false);
-    const earned = this.coins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills;
+    const earned = this.coins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
     this.result = {
       score: Math.floor(this.score),
       time: this.time,
@@ -469,6 +499,7 @@ export class Game {
             continue;
           }
           const info = PROP_INFO[pr.kind];
+          if (info.pass) continue;
           const rr = info.r + R;
           const d2 = dx * dx + dy * dy;
           if (d2 >= rr * rr) continue;
@@ -501,6 +532,15 @@ export class Game {
     this.addScore(SC.prop, pr.x, pr.y);
     if (info.dmg > 0) this.hurt(info.dmg / this.carSpec.durability);
     this.emit('break', info.drag);
+    if (info.snd) {
+      this.emit(info.snd);
+      if (pr.kind === PROP.SIMITCART) this.fx.burst(FX.SIMIT, pr.x, pr.y, 10, 210, 1.2, 7);
+      if (pr.kind === PROP.UNCLES) {
+        this.lastVoice = 'old';
+        this.emit('scream', 0.8);
+        this.fx.float(pr.x, pr.y - 16, 'HAYIRDIR EVLADIM!', '#ffffff');
+      }
+    }
     if (info.coin && Math.random() < CONFIG.coin.dropChance) {
       this.world.dropCoin(pr.x + (Math.random() - 0.5) * 30, pr.y + (Math.random() - 0.5) * 30);
     }
@@ -788,6 +828,8 @@ export class Game {
     const p = this.player;
     if (this.runTime < Math.min(D.firstSpawnAt, this.time < D.swatAt ? D.firstSpawnAt : 2)) return;
     this.spawnT -= dt;
+    // Oyuncu çok açılırsa kovalama kopmasın
+    if (this.sirenDist > AI.catchUpDist && this.spawnT > 0.6) this.spawnT = 0.6;
     const active = this.cops.length;
     if (this.spawnT <= 0 && active < d.maxPolice) {
       const min = this.viewRadius() + AI.viewMargin;
@@ -1067,19 +1109,25 @@ export class Game {
     c.scale = base * c.zoom;
     c.halfW = this.view.w / 2 / c.scale;
     c.halfH = this.view.h / 2 / c.scale;
-    const tx = p.x + p.vx * V.lookAhead;
+    // Bakış yönü yumuşatılır: drift sırasında kamera sallanmaz
+    const ls = 1 - Math.exp(-V.lookSmooth * dt);
+    c.lvx += (p.vx - c.lvx) * ls;
+    c.lvy += (p.vy - c.lvy) * ls;
+    const tx = p.x + c.lvx * V.lookAhead;
     // Menüde araba üst tarafta, düğmelerin arkasında kalmasın
-    const ty = p.y + p.vy * V.lookAhead + (this.state === 'attract' ? c.halfH * 0.6 : 0);
-    const k = 1 - Math.exp(-V.follow * dt);
+    const ty = p.y + c.lvy * V.lookAhead + (this.state === 'attract' ? c.halfH * 0.6 : 0);
+    const k = 1 - Math.exp(-(V.follow + (V.followFast - V.follow) * speedK) * dt);
     c.x += (tx - c.x) * k;
     c.y += (ty - c.y) * k;
+    c.kx *= Math.exp(-9 * dt);
+    c.ky *= Math.exp(-9 * dt);
     if (c.shake > 0.05) {
-      c.sx = (Math.random() - 0.5) * c.shake * 2;
-      c.sy = (Math.random() - 0.5) * c.shake * 2;
+      c.sx = (Math.random() - 0.5) * c.shake * 2 + c.kx;
+      c.sy = (Math.random() - 0.5) * c.shake * 2 + c.ky;
       c.shake *= Math.exp(-V.shakeDecay * dt);
     } else {
-      c.sx = 0;
-      c.sy = 0;
+      c.sx = c.kx;
+      c.sy = c.ky;
       c.shake = 0;
     }
   }

@@ -127,6 +127,129 @@ export function paintLux(g, len, wid, body, accent) {
   g.fillRect(-L - 1.2, H * 0.3 - 1.8, 1.2, 1.8);
 }
 
+// Türk arabaları: tek çizici, araca özgü oran ve ayrıntılar tablodan gelir
+// corner: köşe yuvarlaklığı, hood/trunk: kaput ve bagaj oranı, chrome: krom tampon
+const TR_SHAPES = {
+  dogan: { corner: 3.5, hood: 0.46, trunk: 0.42, chrome: true, tail: 'box' },
+  sahin: { corner: 3.5, hood: 0.46, trunk: 0.42, chrome: false, tail: 'box', wing: true, stripes: true, darkGlass: true },
+  murat: { corner: 2.5, hood: 0.5, trunk: 0.46, chrome: true, tail: 'round', twin: true },
+  anadol: { corner: 7, hood: 0.62, trunk: 0.3, chrome: true, tail: 'round', twin: true, stripes: true },
+  egea: { corner: 7, hood: 0.42, trunk: 0.4, tail: 'led' },
+  clio: { corner: 9, hood: 0.4, trunk: 0.12, tail: 'led', twoTone: true },
+  suv: { corner: 6, hood: 0.36, trunk: 0.14, tail: 'led', rails: true, big: true },
+  duster: { corner: 5, hood: 0.38, trunk: 0.14, tail: 'led', rails: true, big: true, cladding: true, stripes: true },
+  tog: { corner: 8, hood: 0.34, trunk: 0.16, tail: 'bar', twoTone: true, big: true, ledFront: true },
+};
+
+export function paintTr(g, len, wid, body, accent, shape) {
+  if (shape === 'moto') { paintPlayerMoto(g, len, wid, body, accent); return; }
+  const S = TR_SHAPES[shape];
+  const L = len / 2;
+  const H = wid / 2;
+  const tw = S.big ? 12 : 10;
+  for (const [x, y] of [[L * 0.56, -H], [L * 0.56, H], [-L * 0.56, -H], [-L * 0.56, H]]) wheel(g, x, y, tw, S.big ? 6 : 5);
+  const paint = g.createLinearGradient(0, -H, 0, H);
+  paint.addColorStop(0, shade(body, 0.34));
+  paint.addColorStop(0.4, body);
+  paint.addColorStop(1, shade(body, -0.38));
+  if (S.cladding) { g.fillStyle = '#2a2d33'; rr(g, -L - 0.5, -H - 0.7, len + 1, wid + 1.4, S.corner + 1); g.fill(); }
+  g.fillStyle = paint;
+  rr(g, -L, -H, len, wid, S.corner);
+  g.fill();
+  g.strokeStyle = 'rgba(0,0,0,.5)';
+  g.lineWidth = 0.7;
+  g.stroke();
+  const front = L - len * 0.5 * S.hood; // ön cam hattı
+  const rear = -L + len * 0.5 * S.trunk + 2; // arka cam hattı
+  if (S.stripes) {
+    g.fillStyle = accent;
+    g.fillRect(-L + 1, -H * 0.3, len - 2, H * 0.2);
+    g.fillRect(-L + 1, H * 0.1, len - 2, H * 0.2);
+  }
+  // Camlar
+  g.fillStyle = S.darkGlass ? '#090b10' : '#1f3346';
+  g.beginPath();
+  g.moveTo(front, -H * 0.76);
+  g.lineTo(front, H * 0.76);
+  g.lineTo(rear, H * 0.72);
+  g.lineTo(rear, -H * 0.72);
+  g.closePath();
+  g.fill();
+  g.fillStyle = 'rgba(170,225,255,.5)';
+  g.fillRect(front - 3, -H * 0.62, 1.6, H * 1.24);
+  // Tavan
+  const rf = front - (front - rear) * 0.22;
+  const rb = rear + (front - rear) * 0.2;
+  g.fillStyle = S.twoTone ? accent : paint;
+  rr(g, rb, -H * 0.62, rf - rb, H * 1.24, 2.5);
+  g.fill();
+  g.fillStyle = 'rgba(255,255,255,.2)';
+  rr(g, rb + 2, -H * 0.5, (rf - rb) * 0.6, H * 0.26, 1);
+  g.fill();
+  if (S.rails) {
+    g.fillStyle = '#c6ccd4';
+    g.fillRect(rb, -H * 0.72, rf - rb, 1.3);
+    g.fillRect(rb, H * 0.72 - 1.3, rf - rb, 1.3);
+  }
+  // Kaput çizgisi
+  g.strokeStyle = 'rgba(0,0,0,.22)';
+  g.lineWidth = 0.6;
+  g.strokeRect(front + 2, -H * 0.66, L - front - 4, H * 1.32);
+  // Tamponlar
+  if (S.chrome) {
+    g.fillStyle = '#d8dde3';
+    g.fillRect(L - 1.2, -H + 1, 2, wid - 2);
+    g.fillRect(-L - 0.8, -H + 1, 2, wid - 2);
+  }
+  // Farlar
+  g.fillStyle = '#fff6c9';
+  if (S.ledFront) {
+    g.fillStyle = '#e8fbff';
+    g.fillRect(L - 1.6, -H + 2, 1.6, wid - 4);
+  } else if (S.twin) {
+    for (const y of [-H + 2, -H + 6.2, H - 5.2, H - 9.4]) g.fillRect(L - 2.2, y, 2.2, 3.2);
+  } else {
+    g.fillRect(L - 2.4, -H + 2.4, 2.4, 5);
+    g.fillRect(L - 2.4, H - 7.4, 2.4, 5);
+  }
+  // Stoplar
+  g.fillStyle = '#ff2733';
+  if (S.tail === 'bar') g.fillRect(-L - 0.2, -H + 1.5, 1.6, wid - 3);
+  else if (S.tail === 'led') { g.fillRect(-L, -H + 1.6, 1.8, 6); g.fillRect(-L, H - 7.6, 1.8, 6); }
+  else if (S.tail === 'round') { g.beginPath(); g.arc(-L + 1.6, -H + 4.5, 2.1, 0, 7); g.arc(-L + 1.6, H - 4.5, 2.1, 0, 7); g.fill(); }
+  else { g.fillRect(-L, -H + 2, 2, 7); g.fillRect(-L, H - 9, 2, 7); }
+  if (S.wing) {
+    g.fillStyle = accent;
+    rr(g, -L - 2.6, -H - 1, 3.4, wid + 2, 1);
+    g.fill();
+  }
+}
+
+function paintPlayerMoto(g, len, wid, body, accent) {
+  const L = len / 2;
+  g.fillStyle = '#0f0f13';
+  rr(g, L * 0.42, -2.2, 12, 4.4, 2); g.fill();
+  rr(g, -L - 0.5, -2.6, 13, 5.2, 2); g.fill();
+  const paint = g.createLinearGradient(0, -5, 0, 5);
+  paint.addColorStop(0, shade(body, 0.4));
+  paint.addColorStop(1, shade(body, -0.35));
+  g.fillStyle = paint;
+  rr(g, -L * 0.62, -4.6, L * 1.42, 9.2, 4); g.fill();
+  g.fillStyle = accent;
+  g.fillRect(L * 0.2, -1, L * 0.5, 2);
+  g.strokeStyle = '#c9d2dc';
+  g.lineWidth = 1.7;
+  g.beginPath(); g.moveTo(L * 0.56, -7); g.lineTo(L * 0.56, 7); g.stroke();
+  g.fillStyle = '#20252f';
+  g.beginPath(); g.ellipse(-2, 0, 5.4, 6.4, 0, 0, 7); g.fill();
+  g.fillStyle = accent;
+  g.beginPath(); g.arc(1.5, 0, 3.9, 0, 7); g.fill();
+  g.fillStyle = '#16212e';
+  g.fillRect(3, -2.4, 2, 4.8);
+  g.fillStyle = '#fff6c9'; g.fillRect(L - 1, -1.6, 2, 3.2);
+  g.fillStyle = '#ff2733'; g.fillRect(-L - 1, -1.8, 1.6, 3.6);
+}
+
 // Düz gövdeli araba (park etmiş, sivil, polis tabanı)
 export function paintCar(g, len, wid, body, accent, style = 'plain') {
   const L = len / 2;
@@ -298,15 +421,42 @@ export function paintTurret(g) {
 export function paintNpc(g, kind, spec, color) {
   const L = spec.len / 2;
   const H = spec.wid / 2;
-  if (kind === 'sedan') {
-    paintCar(g, spec.len, spec.wid, color, color);
-  } else if (kind === 'pickup') {
-    paintCar(g, spec.len, spec.wid, color, color);
-    g.fillStyle = shade(color, -0.35);
-    rr(g, -L + 2, -H + 2.5, spec.len * 0.42, spec.wid - 5, 2); g.fill();
-    g.strokeStyle = 'rgba(0,0,0,.3)';
-    g.lineWidth = 1;
-    for (let x = -L + 7; x < -L + spec.len * 0.4; x += 6) { g.beginPath(); g.moveTo(x, -H + 3); g.lineTo(x, H - 3); g.stroke(); }
+  if (spec.shape) {
+    paintTr(g, spec.len, spec.wid, color, '#101216', spec.shape);
+    if (kind === 'taxi') {
+      // Dama şerit ve tepe lambası
+      for (let x = -L + 4; x < L - 6; x += 5) {
+        g.fillStyle = Math.round(x / 5) % 2 ? '#111' : '#fff';
+        g.fillRect(x, -H + 0.6, 2.5, 1.6);
+        g.fillRect(x, H - 2.2, 2.5, 1.6);
+      }
+      g.fillStyle = '#1b1b1f';
+      rr(g, -5, -6, 8, 12, 1); g.fill();
+      g.fillStyle = '#ffe14d';
+      g.font = 'bold 4px sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.save(); g.rotate(1.57); g.fillText('TAKSİ', 0, 1); g.restore();
+    }
+  } else if (kind === 'minibus') {
+    g.fillStyle = '#121216';
+    for (const x of [L * 0.6, -L * 0.6]) { g.fillRect(x - 6, -H - 1, 12, 3); g.fillRect(x - 6, H - 2, 12, 3); }
+    g.fillStyle = color;
+    rr(g, -L, -H, spec.len, spec.wid, 6); g.fill();
+    g.fillStyle = '#2878b5';
+    g.fillRect(-L + 2, -H, spec.len - 12, 3);
+    g.fillRect(-L + 2, H - 3, spec.len - 12, 3);
+    g.fillStyle = '#24384c';
+    rr(g, L - 13, -H + 3, 7, spec.wid - 6, 2); g.fill();
+    g.fillStyle = 'rgba(0,0,0,.14)';
+    rr(g, -L + 5, -H + 5, spec.len - 22, spec.wid - 10, 2); g.fill();
+    g.fillStyle = '#ffffff';
+    g.font = 'bold 6.5px sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText('DOLMUŞ', -6, 0.5);
+    g.fillStyle = '#fff7c2';
+    g.fillRect(L - 2, -H + 3, 2, 4); g.fillRect(L - 2, H - 7, 2, 4);
   } else if (kind === 'bus') {
     g.fillStyle = '#121216';
     for (const x of [L * 0.6, -L * 0.6]) { g.fillRect(x - 7, -H - 1, 14, 3); g.fillRect(x - 7, H - 2, 14, 3); }
@@ -317,7 +467,12 @@ export function paintNpc(g, kind, spec, color) {
     g.fillStyle = '#24384c';
     rr(g, L - 9, -H + 3, 6, spec.wid - 6, 2); g.fill();
     g.fillStyle = 'rgba(0,0,0,.2)';
-    for (let x = -L + 10; x < L - 18; x += 20) { rr(g, x, -6, 11, 12, 2); g.fill(); }
+    for (let x = -L + 10; x < L - 18; x += 20) { rr(g, x, -H + 6, 11, 3, 1); g.fill(); rr(g, x, H - 9, 11, 3, 1); g.fill(); }
+    g.fillStyle = '#ffffff';
+    g.font = 'bold 8px sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText('BELEDİYE', -6, 0.6);
     g.fillStyle = '#fff7c2';
     g.fillRect(L - 2, -H + 3, 2, 4); g.fillRect(L - 2, H - 7, 2, 4);
   } else {
@@ -617,6 +772,83 @@ export function paintSpecial(g, r) {
       g.beginPath(); g.arc(cx - 3, cy - 3, d * 0.44, 0, 7); g.fill();
       break;
     }
+    case S.APARTMENT: {
+      // Apartman: düz çatı, merdiven kulesi, balkonlu cephe
+      const wall = 12;
+      g.fillStyle = shade(color, -0.44);
+      rr(g, x, y, w, h, 3); g.fill();
+      g.fillStyle = 'rgba(205,235,255,.75)';
+      for (let px = x + 6; px < x + w - 7; px += 12) g.fillRect(px, y + h - wall + 2, 7, 4);
+      // Balkon çamaşırı
+      const cols = ['#f4f6f8', '#e8533f', '#3e7cb1', '#f2c14e'];
+      for (let px = x + 6; px < x + w - 8; px += 8) {
+        if ((seed + px) % 3 === 0) { g.fillStyle = cols[(seed + px) % 4]; g.fillRect(px, y + h - wall + 6, 5, 5); }
+      }
+      g.fillStyle = shade(color, 0.42);
+      rr(g, x, y, w, h - wall, 3); g.fill();
+      g.strokeStyle = 'rgba(0,0,0,.16)';
+      g.lineWidth = 2;
+      g.strokeRect(x + 3, y + 3, w - 6, h - wall - 6);
+      g.fillStyle = shade(color, 0.15);
+      g.fillRect(x + w * 0.62, y + 6, 15, 13);
+      g.fillStyle = 'rgba(0,0,0,.2)';
+      g.fillRect(x + w * 0.62, y + 16, 15, 3);
+      break;
+    }
+    case S.MARKET: {
+      // Gross market: geniş çatı, çizgili tente
+      g.fillStyle = '#c9ced4';
+      rr(g, x, y, w, h, 3); g.fill();
+      g.fillStyle = '#dfe3e7';
+      rr(g, x + 2, y + 2, w - 4, h - 24, 3); g.fill();
+      g.strokeStyle = 'rgba(0,0,0,.08)';
+      g.lineWidth = 2;
+      for (let px = x + 12; px < x + w - 6; px += 16) { g.beginPath(); g.moveTo(px, y + 4); g.lineTo(px, y + h - 26); g.stroke(); }
+      for (let i = 0; i * 12 < w; i++) {
+        g.fillStyle = i % 2 ? '#ffffff' : color;
+        g.fillRect(x + i * 12, y + h - 24, Math.min(12, w - i * 12), 7);
+      }
+      g.fillStyle = color;
+      g.fillRect(x, y + h - 17, w, 17);
+      break;
+    }
+    case S.SISTEM: {
+      // Haritanın tek turuncu binası
+      g.fillStyle = '#b84f00';
+      rr(g, x, y, w, h, 5); g.fill();
+      g.fillStyle = '#ff7a00';
+      rr(g, x, y, w, h - 16, 5); g.fill();
+      g.fillStyle = '#ffa24a';
+      rr(g, x + 14, y + 14, w - 28, h - 44, 4); g.fill();
+      g.fillStyle = '#ff7a00';
+      rr(g, x + 34, y + 34, w - 68, h - 84, 3); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.75)';
+      for (let px = x + 12; px < x + w - 14; px += 20) g.fillRect(px, y + h - 12, 12, 7);
+      g.strokeStyle = '#fff';
+      g.lineWidth = 3;
+      g.beginPath(); g.moveTo(cx, y + 10); g.lineTo(cx, cy); g.stroke();
+      g.fillStyle = '#e30a17';
+      g.fillRect(cx, y + 10, 26, 16);
+      g.fillStyle = '#fff';
+      g.beginPath(); g.arc(cx + 10, y + 18, 5, 0, 7); g.fill();
+      g.fillStyle = '#e30a17';
+      g.beginPath(); g.arc(cx + 12, y + 18, 4, 0, 7); g.fill();
+      break;
+    }
+    case S.BAZAAR: {
+      // Üstü kapalı pazar: çizgili branda
+      g.fillStyle = '#7b7f85';
+      g.fillRect(x, y, w, h);
+      for (let i = 0; i * 26 < w; i++) {
+        g.fillStyle = i % 2 ? '#f6efe0' : color;
+        g.fillRect(x + i * 26, y, Math.min(26, w - i * 26), h - 8);
+      }
+      g.fillStyle = 'rgba(0,0,0,.14)';
+      g.fillRect(x, y + (h - 8) / 2, w, (h - 8) / 2);
+      g.fillStyle = 'rgba(255,255,255,.35)';
+      g.fillRect(x, y + (h - 8) / 2 - 1.5, w, 3);
+      break;
+    }
     default: {
       // Benzin istasyonu
       g.fillStyle = '#efefef';
@@ -626,6 +858,177 @@ export function paintSpecial(g, r) {
       g.fillRect(x, y + h - 14, w, 8);
       g.fillStyle = '#5c6066';
       for (let i = 0; i < 3; i++) g.fillRect(x + (w * (i + 0.5)) / 3 - 4, cy - 6, 8, 12);
+    }
+  }
+}
+
+// Çatı detayları: uydu çanakları ve termosifon
+export function roofClutter(g, r) {
+  const n = 1 + (r.seed % 3);
+  const wall = 12;
+  for (let i = 0; i < n; i++) {
+    const px = r.x + 10 + ((r.seed * (i + 2) * 17) % Math.max(1, r.w - 22));
+    const py = r.y + 9 + ((r.seed * (i + 4) * 23) % Math.max(1, r.h - wall - 24));
+    g.fillStyle = 'rgba(0,0,0,.22)';
+    g.beginPath(); g.ellipse(px + 2, py + 2, 5.5, 5, 0, 0, 7); g.fill();
+    g.fillStyle = '#eceff2';
+    g.beginPath(); g.ellipse(px, py, 5.5, 5, -0.6, 0, 7); g.fill();
+    g.fillStyle = '#b8bfc7';
+    g.beginPath(); g.ellipse(px, py, 3, 2.7, -0.6, 0, 7); g.fill();
+    g.strokeStyle = '#6d7782';
+    g.lineWidth = 1;
+    g.beginPath(); g.moveTo(px, py); g.lineTo(px + 4, py - 4); g.stroke();
+  }
+  if (r.seed % 2 === 0 && r.w > 60) {
+    const px = r.x + r.w - 26;
+    g.fillStyle = '#1f3f77';
+    g.fillRect(px, r.y + 8, 15, 9);
+    g.fillStyle = '#d7dde2';
+    g.fillRect(px, r.y + 6, 15, 3);
+  }
+}
+
+// Tabelalar önbelleğe alınır: bina çizimi telefonda ucuz kalsın
+const signCache = new Map();
+export function signCanvas(text, color) {
+  const key = text + color;
+  let c = signCache.get(key);
+  if (c) return c;
+  c = document.createElement('canvas');
+  const g0 = c.getContext('2d');
+  g0.font = '800 30px Nunito, sans-serif';
+  const w = Math.ceil(g0.measureText(text).width) + 30;
+  c.width = w;
+  c.height = 46;
+  const g = c.getContext('2d');
+  g.fillStyle = color;
+  rr(g, 1, 1, w - 2, 44, 7);
+  g.fill();
+  g.lineWidth = 3;
+  g.strokeStyle = '#fff';
+  g.stroke();
+  g.fillStyle = '#fff';
+  g.font = '800 30px Nunito, sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(text, w / 2, 24);
+  signCache.set(key, c);
+  return c;
+}
+
+export function paintLight(g, st) {
+  g.fillStyle = 'rgba(0,0,0,.25)';
+  rr(g, -4, -10, 10, 23, 2); g.fill();
+  g.fillStyle = '#20232a';
+  rr(g, -5, -12, 10, 23, 2); g.fill();
+  g.fillStyle = st === 'r' ? '#ff3030' : '#4a1414';
+  g.beginPath(); g.arc(0, -7.5, 3, 0, 7); g.fill();
+  g.fillStyle = st === 'y' ? '#ffc21f' : '#4a3a12';
+  g.beginPath(); g.arc(0, -0.5, 3, 0, 7); g.fill();
+  g.fillStyle = st === 'g' ? '#2fe36a' : '#124a22';
+  g.beginPath(); g.arc(0, 6.5, 3, 0, 7); g.fill();
+}
+
+export function paintSimit(g) {
+  g.strokeStyle = '#b5742a';
+  g.lineWidth = 4.2;
+  g.beginPath(); g.arc(0, 0, 4.6, 0, 7); g.stroke();
+  g.strokeStyle = '#e0ad62';
+  g.lineWidth = 1.4;
+  g.beginPath(); g.arc(-0.5, -0.5, 4.6, 0, 7); g.stroke();
+}
+
+// Sokak insanları: 34 birimlik çizim, baş +x yönüne bakar
+export function paintPedKind(g, kind, step) {
+  g.scale(1.1, 1.1);
+  const person = (shirt, skin, hair) => paintPed(g, shirt, skin, hair, step);
+  switch (kind) {
+    case 'woman':
+      person('#c45fbd', '#f0c8a0', '#c45fbd');
+      g.fillStyle = '#d07ac9'; // Başörtüsü
+      g.beginPath(); g.arc(0, 0, 2.8, 0, 7); g.fill();
+      break;
+    case 'child':
+      g.save(); g.scale(0.72, 0.72);
+      person('#ffb400', '#f0c8a0', '#3b2a1e');
+      g.restore();
+      g.fillStyle = '#2ec4b6';
+      g.beginPath(); g.arc(-3, 0, 2.2, 0, 7); g.fill(); // Sırt çantası
+      break;
+    case 'elder':
+      person('#6b5a4a', '#e0a878', '#e8e8e8');
+      g.strokeStyle = '#7a4e2c'; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(1, 4.2); g.lineTo(6.5, 5.5); g.stroke(); // Baston
+      break;
+    case 'simitci':
+      person('#3e7cb1', '#e0a878', '#3b2a1e');
+      g.fillStyle = '#c9a050';
+      g.beginPath(); g.ellipse(0, 0, 6.4, 6.4, 0, 0, 7); g.fill(); // Başta tepsi
+      g.strokeStyle = '#a8651f'; g.lineWidth = 1.5;
+      for (const [x, y] of [[-3, -2], [2, -3], [3, 2], [-2, 3]]) { g.beginPath(); g.arc(x, y, 1.6, 0, 7); g.stroke(); }
+      break;
+    case 'stroller':
+      person('#4f9d69', '#f0c8a0', '#6b4a2b');
+      g.fillStyle = '#e8533f';
+      rr(g, 6, -4, 10, 8, 3); g.fill(); // Bebek arabası
+      g.fillStyle = '#f7b5a9';
+      rr(g, 11, -4, 5, 8, 2.5); g.fill();
+      g.fillStyle = '#222';
+      for (const [x, y] of [[7, -5], [7, 4], [14, -5], [14, 4]]) { g.beginPath(); g.arc(x, y, 1.1, 0, 7); g.fill(); }
+      break;
+    case 'wheelchair':
+      g.fillStyle = '#1e2228';
+      g.fillRect(-3, -6.4, 7, 2); g.fillRect(-3, 4.4, 7, 2); // Büyük tekerler
+      g.fillStyle = '#7a8796';
+      rr(g, -4, -4.4, 8, 8.8, 1.5); g.fill();
+      person('#5c6b7a', '#e0a878', '#dfe3e8');
+      break;
+    case 'bike':
+      g.fillStyle = '#16181d';
+      g.fillRect(-10, -0.8, 7, 1.6); g.fillRect(4, -0.8, 7, 1.6); // Tekerler
+      g.fillStyle = '#2a9df4';
+      g.fillRect(-5, -1, 10, 2);
+      g.strokeStyle = '#c9d2dc'; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(5, -3.4); g.lineTo(5, 3.4); g.stroke();
+      person('#f2c14e', '#e0a878', '#2b2b33');
+      break;
+    case 'courier':
+      g.fillStyle = '#14161a';
+      g.fillRect(-11, -1, 8, 2); g.fillRect(5, -1, 8, 2);
+      g.fillStyle = '#d9281e';
+      rr(g, -6, -3, 13, 6, 2); g.fill();
+      g.fillStyle = '#ff7a1a';
+      rr(g, -13, -5, 9, 10, 1.5); g.fill(); // Paket kutusu
+      g.fillStyle = '#fff'; g.fillRect(-13, -1, 9, 1.5);
+      g.fillStyle = '#20252f';
+      g.beginPath(); g.arc(1, 0, 3.4, 0, 7); g.fill();
+      g.fillStyle = '#ff7a1a';
+      g.beginPath(); g.arc(1.6, 0, 2.3, 0, 7); g.fill();
+      break;
+    case 'cayci':
+      person('#f4f6f8', '#e0a878', '#3b2a1e');
+      g.strokeStyle = '#c0c6cc'; g.lineWidth = 1.2;
+      g.beginPath(); g.arc(4.6, 0, 4.4, 0, 7); g.stroke(); // Askılı tepsi
+      g.fillStyle = '#b5481f';
+      for (const [x, y] of [[3.2, -1.6], [6, -1.6], [4.6, 1.6]]) { g.beginPath(); g.arc(x, y, 1.2, 0, 7); g.fill(); }
+      break;
+    case 'esnaf':
+      person('#ececec', '#e0a878', '#16131a');
+      g.fillStyle = '#7a4e2c';
+      g.fillRect(-1.2, -3, 2.4, 6); // Önlük
+      break;
+    default: {
+      // Sokak kedisi
+      g.fillStyle = '#e8903a';
+      g.beginPath(); g.ellipse(-1, 0, 4.8, 2.6, 0, 0, 7); g.fill();
+      g.strokeStyle = '#e8903a'; g.lineWidth = 1.6;
+      g.beginPath(); g.moveTo(-5, 0); g.quadraticCurveTo(-8, step ? 3 : -3, -10, step ? 1 : -1); g.stroke();
+      g.beginPath(); g.arc(4, 0, 2.6, 0, 7); g.fill();
+      g.fillStyle = '#e8903a';
+      g.beginPath(); g.moveTo(3.6, -2); g.lineTo(6, -3.2); g.lineTo(5.6, -0.8); g.fill();
+      g.beginPath(); g.moveTo(3.6, 2); g.lineTo(6, 3.2); g.lineTo(5.6, 0.8); g.fill();
+      g.fillStyle = '#fff';
+      g.fillRect(-3, -0.8, 3, 1.6);
     }
   }
 }

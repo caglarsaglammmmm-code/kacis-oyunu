@@ -1,9 +1,9 @@
 // Canvas çizimi. Sprite'lar açılışta koddan üretilir; sadece ekrandaki nesneler çizilir.
-import { CONFIG, GROUND } from './config.js';
+import { CONFIG, GROUND, BUILD } from './config.js';
 import { CHUNK, CT, TILE, PROP, isPower, powerName } from './world.js';
-import { PED_FLY } from './crowd.js';
+import { PED_FLY, lightState } from './crowd.js';
 import { FX } from './effects.js';
-import { rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
+import { rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintTr, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
 
 const PF = CONFIG.perf;
 const SPR = 3; // Sprite ölçeği: arabalar yakın çekimde de keskin kalsın
@@ -42,7 +42,7 @@ function glow(size, stops) {
 }
 
 export function carSprite(spec) {
-  return sprite(spec.len + 10, spec.wid + 10, (g) => paintLux(g, spec.len, spec.wid, spec.color, spec.accent));
+  return sprite(spec.len + 10, spec.wid + 14, (g) => paintTr(g, spec.len, spec.wid, spec.color, spec.accent, spec.shape));
 }
 
 export class Renderer {
@@ -109,10 +109,17 @@ export class Renderer {
     s.npc = {};
     for (const kind of Object.keys(N.types)) {
       const spec = N.types[kind];
-      s.npc[kind] = N.colors.map((col) => sprite(spec.len + 8, spec.wid + 8, (g) => paintNpc(g, kind, spec, col)));
+      s.npc[kind] = spec.colors.map((col) => sprite(spec.len + 8, spec.wid + 8, (g) => paintNpc(g, kind, spec, col)));
     }
     const LOOKS = [['#e8533f', '#e0a878', '#3b2a1e'], ['#3e7cb1', '#f0c8a0', '#6b4a2b'], ['#f2c14e', '#8d5a3a', '#16131a'], ['#4f9d69', '#e0a878', '#c9a24a'], ['#c45fbd', '#f0c8a0', '#2b2b33'], ['#ececec', '#8d5a3a', '#16131a']];
     s.peds = LOOKS.map(([a, b, c]) => [0, 1].map((step) => sprite(20, 20, (g) => paintPed(g, a, b, c, step))));
+    s.pedKinds = {};
+    for (const k of Object.keys(CONFIG.peds.kinds)) {
+      if (k === 'man') continue;
+      s.pedKinds[k] = [0, 1].map((step) => sprite(34, 34, (g) => paintPedKind(g, k, step)));
+    }
+    s.simit = sprite(16, 16, paintSimit);
+    s.lights = ['r', 'y', 'g'].map((st) => sprite(12, 26, (g) => paintLight(g, st)));
     s.props = [];
     s.props[PROP.PALM] = prop(70, 70, (g) => {
       g.fillStyle = 'rgba(0,0,0,.18)';
@@ -180,6 +187,41 @@ export class Renderer {
       g.strokeStyle = '#b8922e';
       g.lineWidth = 1.6;
       for (const r of [4, 8]) { g.beginPath(); g.arc(0, 0, r, 0.4, 5.6); g.stroke(); }
+    });
+    s.props[PROP.CHAIRS] = prop(46, 46, (g) => {
+      // Plastik masa ve dört sandalye, üstünde ince belli çay
+      g.fillStyle = 'rgba(0,0,0,.16)'; g.fillRect(-9, -7, 22, 22);
+      for (const [x, y] of [[-14, 0], [14, 0], [0, -14], [0, 14]]) { g.fillStyle = '#d9281e'; rr(g, x - 5, y - 5, 10, 10, 2.5); g.fill(); g.fillStyle = '#f04a3e'; rr(g, x - 3, y - 3, 6, 6, 1.5); g.fill(); }
+      g.fillStyle = '#f4f6f8'; rr(g, -9, -9, 18, 18, 3); g.fill();
+      g.fillStyle = '#b5481f'; g.beginPath(); g.arc(-3, -2, 2.2, 0, 7); g.arc(4, 3, 2.2, 0, 7); g.fill();
+    });
+    s.props[PROP.UNCLES] = prop(52, 40, (g) => {
+      // Apartman önünde iki amca ve tabure
+      for (const [x, col] of [[-10, '#5c6b7a'], [10, '#7a6a55']]) {
+        g.fillStyle = '#6b4a2b'; rr(g, x - 6, -5, 12, 11, 2); g.fill();
+        g.fillStyle = col; g.beginPath(); g.ellipse(x, 1, 6, 5.4, 0, 0, 7); g.fill();
+        g.fillStyle = '#e0a878'; g.beginPath(); g.arc(x, -1, 3, 0, 7); g.fill();
+        g.fillStyle = '#dfe3e8'; g.beginPath(); g.arc(x - 0.6, -1.4, 2.2, 0, 7); g.fill();
+      }
+      g.fillStyle = '#c9622b'; g.beginPath(); g.arc(0, 2, 1.8, 0, 7); g.fill();
+    });
+    s.props[PROP.SIMITCART] = prop(44, 36, (g) => {
+      g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(-14, -7, 32, 20);
+      g.fillStyle = '#c62828'; rr(g, -16, -10, 32, 20, 3); g.fill();
+      g.fillStyle = '#f5e6b8'; rr(g, -13, -7, 26, 14, 2); g.fill();
+      for (const [x, y] of [[-8, -3], [0, -3], [8, -3], [-4, 3], [4, 3]]) { g.strokeStyle = '#b5742a'; g.lineWidth = 2.4; g.beginPath(); g.arc(x, y, 2.6, 0, 7); g.stroke(); }
+    });
+    s.props[PROP.STALL] = prop(46, 40, (g) => {
+      g.fillStyle = 'rgba(0,0,0,.16)'; g.fillRect(-15, -10, 36, 26);
+      for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? '#fff' : '#1d9a4f'; g.fillRect(-18 + i * 6, -13, 6, 26); }
+      g.fillStyle = 'rgba(0,0,0,.1)'; g.fillRect(-18, 3, 36, 10);
+      for (const [x, y, col] of [[-9, -5, '#e8352e'], [0, 2, '#ff9d1a'], [9, -6, '#7fc241'], [-5, 5, '#ffd23f']]) { g.fillStyle = col; g.beginPath(); g.arc(x, y, 3, 0, 7); g.fill(); }
+    });
+    s.props[PROP.LAUNDRY] = prop(90, 26, (g) => {
+      // Sokak üstünde ip: yukarıdan görünen çamaşırlar
+      g.strokeStyle = 'rgba(255,255,255,.75)'; g.lineWidth = 1; g.beginPath(); g.moveTo(-42, -2); g.quadraticCurveTo(0, 3, 42, -2); g.stroke();
+      const cols = ['#f4f6f8', '#e8533f', '#3e7cb1', '#f2c14e', '#7a5ea8', '#4f9d69'];
+      for (let i = 0; i < 6; i++) { g.fillStyle = cols[i]; g.fillRect(-34 + i * 12, -1, 9, 9 + (i % 2) * 3); }
     });
     s.auras = [];
     for (const [i, name] of ['blast', 'ghost', 'heal', 'giant'].entries()) {
@@ -354,6 +396,14 @@ export class Renderer {
         }
       }
     }
+    // Kavşak öncesi dur çizgileri
+    if (urban) {
+      g.fillStyle = 'rgba(255,255,255,.85)';
+      g.fillRect(c.x + 4, c.y + ART_W + 26, ART_W / 2 - 6, 4);
+      g.fillRect(c.x + ART_W + 26, c.y + ART_W / 2 + 2, 4, ART_W / 2 - 6);
+      g.fillRect(c.x + ART_W / 2 + 2, c.y - 30, ART_W / 2 - 6, 4);
+      g.fillRect(c.x - 30, c.y + 4, 4, ART_W / 2 - 6);
+    }
     // Sığ su kıyısında köpük
     if (sea) {
       g.fillStyle = 'rgba(255,255,255,.7)';
@@ -453,7 +503,12 @@ export class Renderer {
   }
 
   bakeBuilding(g, r) {
-    if (r.style >= 7) { paintSpecial(g, r); return; }
+    if (r.style >= 7) { paintSpecial(g, r); this.bakeSign(g, r); return; }
+    this.bakeRoof(g, r);
+    this.bakeSign(g, r);
+  }
+
+  bakeRoof(g, r) {
     const wall = 9; // Güneye bakan cephe: yükseklik hissi
     g.fillStyle = shade(r.color, -0.42);
     rr(g, r.x, r.y, r.w, r.h, 5);
@@ -558,6 +613,18 @@ export class Renderer {
     }
   }
 
+  // Tabela, uydu çanağı, güneş paneli ve balkon çamaşırı
+  bakeSign(g, r) {
+    if (r.style === 0 || r.style === 1 || r.style === 2 || r.style === 3 || r.style === 5 || r.style === BUILD.APARTMENT) roofClutter(g, r);
+    if (!r.sign) return;
+    const img = signCanvas(r.sign, r.signColor);
+    const maxW = r.w - 6;
+    const h = r.style === BUILD.SISTEM ? 34 : 16;
+    const w = Math.min(maxW, (img.width / img.height) * h);
+    const hh = (w / img.width) * img.height;
+    g.drawImage(img, r.x + (r.w - w) / 2, r.y + r.h - hh - 8, w, hh);
+  }
+
   bakeWall(g, r) {
     g.fillStyle = 'rgba(0,10,30,.25)';
     g.fillRect(r.x + 4, r.y + 5, r.w, r.h);
@@ -625,6 +692,7 @@ export class Renderer {
     if (game.state !== 'dying' && game.state !== 'over') this.drawPlayer(game);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, true);
     this.drawPeds(game, vx0, vx1, vy0, vy1, true);
+    this.drawLights(game, c0x, c1x, c0y, c1y);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawSirens(game, now, vx0, vx1, vy0, vy1);
     this.drawWaves(game);
@@ -754,7 +822,7 @@ export class Renderer {
         for (let i = 0; i < c.propCount; i++) {
           const pr = c.props[i];
           if (!pr.alive || pr.x < x0 - 30 || pr.x > x1 + 30 || pr.y < y0 - 30 || pr.y > y1 + 30) continue;
-          const isTall = pr.kind === PROP.TREE || pr.kind === PROP.PALM || pr.kind === PROP.PINE;
+          const isTall = pr.kind === PROP.TREE || pr.kind === PROP.PALM || pr.kind === PROP.PINE || pr.kind === PROP.LAUNDRY;
           if (isTall !== tall) continue;
           if (isPower(pr.kind)) {
             const bob = 1 + 0.1 * Math.sin(now * 0.006 + pr.phase * 5);
@@ -800,9 +868,10 @@ export class Renderer {
     for (const p of game.crowd.peds) {
       if (!p.alive || (p.state === PED_FLY) !== flying) continue;
       if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) continue;
-      const img = sp.peds[p.look][Math.floor(p.step) & 1];
+      const frame = Math.floor(p.step) & 1;
+      const img = p.kind === 'man' ? sp.peds[p.look][frame] : sp.pedKinds[p.kind][frame];
       const k = 1 + p.z / 170;
-      const size = 27 * k;
+      const size = (p.kind === 'man' ? 27 : 46) * k;
       if (flying) {
         ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
         ctx.globalAlpha = 0.3;
@@ -813,6 +882,27 @@ export class Renderer {
       ctx.drawImage(img, -size / 2, -size / 2, size, size);
     }
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
+  // Trafik ışıkları yalnızca şehir kavşaklarında, köşelere çizilir
+  drawLights(game, c0x, c1x, c0y, c1y) {
+    const ctx = this.ctx;
+    const sp = this.sprites.lights;
+    const clock = game.crowd.clock;
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+    const idx = (st) => (st === 'r' ? 0 : st === 'y' ? 1 : 2);
+    for (let cy = c0y; cy <= c1y + 1; cy++) {
+      for (let cx = c0x; cx <= c1x + 1; cx++) {
+        const c = game.world.chunk(cx, cy);
+        if (c.biome !== 'city') continue;
+        const ew = sp[idx(lightState(clock, cx, cy, 0))];
+        const ns = sp[idx(lightState(clock, cx, cy, 1))];
+        ctx.drawImage(ew, c.x - 22, c.y - 34, 12, 26);
+        ctx.drawImage(ew, c.x + ART_W + 10, c.y + ART_W + 8, 12, 26);
+        ctx.drawImage(ns, c.x + ART_W + 10, c.y - 34, 12, 26);
+        ctx.drawImage(ns, c.x - 22, c.y + ART_W + 8, 12, 26);
+      }
+    }
   }
 
   drawNpcs(game, x0, x1, y0, y1) {
@@ -902,6 +992,12 @@ export class Renderer {
       if (k === FX.FIRE || k === FX.SPARK || k === FX.GLINT) continue;
       if (x[i] < x0 || x[i] > x1 || y[i] < y0 || y[i] > y1) continue;
       const t = life[i] / ttl[i];
+      if (k === FX.SIMIT) {
+        const q = size[i];
+        ctx.globalAlpha = Math.min(1, t * 2.5);
+        ctx.drawImage(sp.simit, x[i] - q, y[i] - q, q * 2, q * 2);
+        continue;
+      }
       if (k === FX.DEBRIS) {
         this.place(x[i], y[i], rot[i]);
         ctx.globalAlpha = Math.min(1, t * 2);

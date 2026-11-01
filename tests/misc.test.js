@@ -20,11 +20,16 @@ test('dokunma: sağ, sol, ikisi', () => {
   assert.equal(i.steer, 1);
   assert.equal(i.reverse, false);
   i.press(2, i.sideOf(50));
+  assert.equal(i.reverse, false, 'parmak geçişi geri vites sayılmaz');
+  assert.equal(i.steer, -1, 'son basılan yön kazanır');
+  i.tick(0.2);
   assert.equal(i.steer, 0);
   assert.equal(i.reverse, true);
   i.release(1);
+  i.tick(0.02);
   assert.equal(i.steer, -1);
   i.release(2);
+  i.tick(0.02);
   assert.equal(i.steer, 0);
   assert.equal(i.reverse, false);
 });
@@ -34,6 +39,7 @@ test('klavye: ok ve A/D, ikisi birden geri', () => {
   assert.ok(i.key('ArrowLeft', true));
   assert.equal(i.steer, -1);
   assert.ok(i.key('KeyD', true));
+  i.tick(0.2);
   assert.equal(i.reverse, true);
   i.clear();
   assert.equal(i.reverse, false);
@@ -55,23 +61,23 @@ test('kayıt: yükle, yaz, rekor, coin', () => {
 
 test('kayıt: satın alma ve seçim kuralları', () => {
   const s = new Storage(mem());
-  assert.equal(s.buy('pars'), false, 'coin yetmez');
-  s.data.coins = 200;
-  assert.equal(s.select('pars'), false, 'sahip değil');
-  assert.equal(s.buy('pars'), true);
+  assert.equal(s.buy('motor'), false, 'coin yetmez');
+  s.data.coins = 150;
+  assert.equal(s.select('motor'), false, 'sahip değil');
+  assert.equal(s.buy('motor'), true);
   assert.equal(s.data.coins, 50);
-  assert.equal(s.selectedCar().id, 'pars');
-  assert.equal(s.buy('pars'), false, 'iki kez alınmaz');
+  assert.equal(s.selectedCar().id, 'motor');
+  assert.equal(s.buy('motor'), false, 'iki kez alınmaz');
   assert.equal(s.buy('yok'), false);
 });
 
 test('kayıt: bozuk veri güvenli', () => {
   assert.deepEqual(sanitize(null), defaultSave());
-  const d = sanitize({ coins: -5, bestScore: 'x', owned: ['yok', 'pars', 'pars'], selected: 'kaplan', settings: { sound: false } });
+  const d = sanitize({ coins: -5, bestScore: 'x', owned: ['yok', 'motor', 'motor', 'pars'], selected: 'duster', settings: { sound: false } });
   assert.equal(d.coins, 0);
   assert.equal(d.bestScore, 0);
-  assert.deepEqual(d.owned, ['serce', 'pars']);
-  assert.equal(d.selected, 'serce');
+  assert.deepEqual(d.owned, ['dogan', 'motor']);
+  assert.equal(d.selected, 'dogan');
   assert.equal(d.settings.sound, false);
   const b = { getItem: () => '{bozuk', setItem() { throw new Error('dolu'); } };
   const s = new Storage(b);
@@ -87,6 +93,31 @@ test('efekt havuzu taşmaz, süresi biteni temizler', () => {
   assert.equal(e.liveCount(), 0);
   for (let i = 0; i < 5000; i++) e.addSkid(0, 0, 1, 1);
   assert.ok(e.skidCursor < e.skidMax);
+});
+
+test('başlangıç aracı Tofaş Doğan; sırayla pahalılaşır, hızlanır, kayar, dayanır', () => {
+  const cars = CONFIG.cars;
+  assert.equal(cars[0].id, 'dogan');
+  assert.equal(cars[0].cost, 0);
+  assert.deepEqual(cars.map((c) => c.id), ['dogan', 'motor', 'grandland', 'tog', 'sahin', 'anadol', 'murat', 'egea', 'clio', 'duster']);
+  for (let i = 1; i < cars.length; i++) {
+    assert.ok(cars[i].cost > cars[i - 1].cost, 'fiyat');
+    assert.ok(cars[i].maxSpeed > cars[i - 1].maxSpeed, 'hız');
+    assert.ok(cars[i].driftGrip < cars[i - 1].driftGrip, 'kayma');
+    assert.ok(cars[i].durability > cars[i - 1].durability, 'dayanıklılık');
+    assert.ok(cars[i].engine, 'motor sesi');
+  }
+  assert.equal(new Set(cars.map((c) => c.shape)).size, cars.length, 'her aracın şekli ayrı');
+  assert.equal(new Set(cars.map((c) => c.color)).size, cars.length, 'her aracın rengi ayrı');
+});
+
+test('oyun adı her yerde Penci Zorn', () => {
+  assert.equal(CONFIG.name, 'Penci Zorn');
+  assert.ok(fs.readFileSync('index.html', 'utf8').includes('<title>Penci Zorn</title>'));
+  assert.equal(JSON.parse(fs.readFileSync('manifest.json', 'utf8')).name, 'Penci Zorn');
+  assert.equal(JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8')).appName, 'Penci Zorn');
+  assert.ok(fs.readFileSync('android/app/src/main/res/values/strings.xml', 'utf8').includes('Penci Zorn'));
+  assert.ok(CONFIG.apkUrl.endsWith('/PenciZorn.apk'));
 });
 
 test('js/app.file.js güncel (değilse: npm run bundle)', () => {
