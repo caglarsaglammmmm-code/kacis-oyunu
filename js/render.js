@@ -924,6 +924,7 @@ export class Renderer {
   bakePads(g, c) {
     for (let i = 0; i < c.padCount; i++) {
       const p = c.pads[i];
+      if (p.w <= 0 || p.h <= 0) continue; // Otoban bandında kalan saha iptal edilmiştir
       const x = c.x + p.tx * TILE + 3;
       const y = c.y + p.ty * TILE + 3;
       const w = p.w * TILE - 6;
