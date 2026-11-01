@@ -33,12 +33,12 @@ test('ana yollar kesintisiz ve hiçbir yol karosu engelli değil (200 chunk)', (
 test('çıkmaz yok: 9x9 chunk içindeki her geçilebilir karo merkezden ulaşılabilir', () => {
   for (const seed of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {
     const w = new World(seed);
-    const n = 9 * CT;
+    const n = 13 * CT;
     const cost = new Uint8Array(n * n);
-    const ox = -4 * CT;
+    const ox = (seed * 9 - 6) * CT; // Farklı biyomlara denk gelsin
     w.fillCost(cost, ox, ox, n);
     const seen = new Uint8Array(n * n);
-    const stack = [(4 * CT + 2) * n + 4 * CT + 2];
+    const stack = [2 * n + 2];
     seen[stack[0]] = 1;
     while (stack.length) {
       const i = stack.pop();
@@ -70,10 +70,9 @@ test('her sokak yol parçası iki uçlu: iç sokak ana yola bağlanır', () => {
       for (let i = 0; i < c.streetCount; i++) {
         const s = c.streets[i];
         streets++;
-        const near = s.vertical ? c.ground[5 * CT + s.pos] : c.ground[s.pos * CT + 5];
-        const far = s.vertical ? c.ground[(CT - 1) * CT + s.pos] : c.ground[s.pos * CT + CT - 1];
-        assert.equal(near, GROUND.ROAD);
-        assert.equal(far, GROUND.ROAD);
+        const near = s.vertical ? c.cost[5 * CT + s.pos] : c.cost[s.pos * CT + 5];
+        const far = s.vertical ? c.cost[(CT - 1) * CT + s.pos] : c.cost[s.pos * CT + CT - 1];
+        assert.ok(near > 0 && far > 0);
         assert.ok(s.width >= 3, 'araç geçecek genişlikte');
       }
     }
@@ -86,9 +85,11 @@ test('tüm çeşitler üretilir: bina, duvar, su, ağaç, çit, park araba, bari
   const rects = new Set();
   const props = new Set();
   const templates = new Set();
-  for (let cy = -14; cy < 14; cy++) {
-    for (let cx = -14; cx < 14; cx++) {
+  const biomes = new Set();
+  for (let cy = -90; cy < 90; cy += 3) {
+    for (let cx = -90; cx < 90; cx += 3) {
       const c = w.chunk(cx, cy);
+      biomes.add(c.biome);
       templates.add(c.template);
       for (let i = 0; i < c.rectCount; i++) rects.add(c.rects[i].kind);
       for (let i = 0; i < c.propCount; i++) props.add(c.props[i].kind);
@@ -96,7 +97,10 @@ test('tüm çeşitler üretilir: bina, duvar, su, ağaç, çit, park araba, bari
   }
   for (const r of ['building', 'wall', 'water']) assert.ok(rects.has(r), r);
   for (const p of ['TREE', 'FENCE', 'CRATE', 'BARREL', 'CONE', 'BARRIER', 'PARKED', 'COIN']) assert.ok(props.has(PROP[p]), p);
-  assert.equal(templates.size, 6);
+  assert.ok(templates.size >= 11, [...templates].join());
+  for (const b of ['city', 'beach', 'forest', 'desert', 'rural']) assert.ok(biomes.has(b), b);
+  assert.ok(rects.has('sea'));
+  for (const p of ['PALM', 'UMBRELLA', 'PINE', 'ROCK', 'CACTUS', 'HAY', 'POWER_BLAST', 'POWER_GHOST', 'POWER_HEAL', 'POWER_GIANT']) assert.ok(props.has(PROP[p]), p);
 });
 
 test('güncelleme uzak chunkları siler, sayı sınırlı kalır', () => {
@@ -122,6 +126,44 @@ test('binaya çarpma ve ezme', () => {
   assert.ok(!w.circleHit(r.x + r.w / 2, r.y + r.h / 2, 12, out) || out.rect !== r);
   assert.ok(!w.blockedAt(r.x + r.w / 2, r.y + r.h / 2));
   assert.ok(c.dirty);
+});
+
+test('silinen chunk geri gelince kırılan, toplanan ve yıkılan aynı kalır', () => {
+  const w = new World(9);
+  const c = w.chunk(5, 5);
+  const before = c.propCount;
+  c.props[0].alive = false;
+  let idx = -1;
+  for (let i = 0; i < c.rectCount; i++) if (c.rects[i].kind === 'building') { idx = i; break; }
+  const r = c.rects[idx];
+  const mid = [r.x + r.w / 2, r.y + r.h / 2];
+  w.crush(c, r);
+  w.addProp(c, PROP.COIN, c.x + 50, c.y + 50);
+  for (let i = 0; i < 60; i++) w.update(100000, 100000); // Uzaklaş, chunk silinsin
+  assert.ok(!w.chunks.has((5 + 32768) * 65536 + (5 + 32768)));
+  const back = w.chunk(5, 5);
+  assert.equal(back.props[0].alive, false);
+  assert.equal(back.rects[idx].alive, false);
+  assert.ok(!w.blockedAt(mid[0], mid[1]));
+  assert.equal(back.propCount, before + 1, 'düşen coin duruyor');
+  assert.equal(back.props[back.propCount - 1].kind, PROP.COIN);
+});
+
+test('sahile gidilebilir: kum ve sığ suya araba girer, derin deniz kapalı', () => {
+  const w = new World(3);
+  let seen = 0;
+  for (let cy = -60; cy < 60 && seen < 3; cy++) {
+    for (let cx = -60; cx < 60 && seen < 3; cx++) {
+      const c = w.chunk(cx, cy);
+      if (c.template !== 'sea') continue;
+      seen++;
+      for (let i = 0; i < CT * CT; i++) {
+        if (c.ground[i] === GROUND.SAND || c.ground[i] === GROUND.SHALLOW) assert.ok(c.cost[i] > 0);
+        if (c.ground[i] === GROUND.WATER) assert.equal(c.cost[i], 0);
+      }
+    }
+  }
+  assert.ok(seen > 0, 'deniz bulunamadı');
 });
 
 test('negatif koordinatlarda sorgular doğru', () => {

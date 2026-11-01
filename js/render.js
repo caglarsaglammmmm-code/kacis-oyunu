@@ -1,172 +1,26 @@
 // Canvas çizimi. Sprite'lar açılışta koddan üretilir; sadece ekrandaki nesneler çizilir.
 import { CONFIG, GROUND } from './config.js';
-import { CHUNK, CT, TILE, PROP } from './world.js';
+import { CHUNK, CT, TILE, PROP, isPower, powerName } from './world.js';
+import { PED_FLY } from './crowd.js';
 import { FX } from './effects.js';
+import { rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
 
 const PF = CONFIG.perf;
 const SPR = 3; // Sprite ölçeği: arabalar yakın çekimde de keskin kalsın
 const ART_W = CONFIG.world.arterial * TILE;
+const BIOME_COLORS = {
+  city: { grass: '#6cc24a', road: '#585f6b', sand: '#f2dfa4', dirt: '#b79c6c' },
+  beach: { grass: '#8ecb62', road: '#666b74', sand: '#f8e6ae', dirt: '#d4b98a' },
+  forest: { grass: '#3f8f44', road: '#4c4f55', sand: '#d9cf9e', dirt: '#8f6f47' },
+  desert: { grass: '#d2a964', road: '#6f675d', sand: '#ecc680', dirt: '#c29655' },
+  rural: { grass: '#9ccd58', road: '#5e6168', sand: '#e6d7a2', dirt: '#a98d5c' },
+};
 
 function makeCanvas(w, h) {
   const c = document.createElement('canvas');
   c.width = Math.ceil(w);
   c.height = Math.ceil(h);
   return c;
-}
-
-function rr(ctx, x, y, w, h, r) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
-}
-
-function shade(hex, k) {
-  const n = parseInt(hex.slice(1), 16);
-  const f = (v) => Math.max(0, Math.min(255, Math.round(k < 0 ? v * (1 + k) : v + (255 - v) * k)));
-  return `rgb(${f(n >> 16)},${f((n >> 8) & 255)},${f(n & 255)})`;
-}
-
-// --- Araba çizimleri: burun +x yönünde ---
-export function paintCar(g, len, wid, body, accent, style = 'sport') {
-  const L = len / 2;
-  const H = wid / 2;
-  g.fillStyle = '#16161c';
-  for (const [x, y] of [[L * 0.52, -H - 1.2], [L * 0.52, H - 3], [-L * 0.62, -H - 1.2], [-L * 0.62, H - 3]]) {
-    rr(g, x - 5, y, 10, 4.2, 1.5);
-    g.fill();
-  }
-  const grad = g.createLinearGradient(0, -H, 0, H);
-  grad.addColorStop(0, shade(body, 0.28));
-  grad.addColorStop(0.5, body);
-  grad.addColorStop(1, shade(body, -0.28));
-  g.fillStyle = grad;
-  rr(g, -L, -H, len, wid, 7);
-  g.fill();
-  g.strokeStyle = 'rgba(0,0,0,.45)';
-  g.lineWidth = 1;
-  g.stroke();
-
-  // Boylamasına şerit
-  g.fillStyle = accent;
-  if (style === 'sport') {
-    g.fillRect(-L + 2, -2.4, len - 4, 1.8);
-    g.fillRect(-L + 2, 0.6, len - 4, 1.8);
-  }
-  // Ön ve arka cam, tavan
-  g.fillStyle = '#20303f';
-  rr(g, L * 0.02, -H + 3.5, L * 0.5, wid - 7, 3);
-  g.fill();
-  rr(g, -L * 0.72, -H + 4, L * 0.3, wid - 8, 3);
-  g.fill();
-  g.fillStyle = 'rgba(160,220,255,.55)';
-  g.fillRect(L * 0.3, -H + 5, 2.4, wid - 10);
-  g.fillStyle = grad;
-  rr(g, -L * 0.42, -H + 3.8, L * 0.44, wid - 7.6, 3);
-  g.fill();
-  g.fillStyle = 'rgba(255,255,255,.22)';
-  rr(g, -L * 0.38, -H + 5, L * 0.36, 3, 1.5);
-  g.fill();
-  // Farlar ve stoplar
-  g.fillStyle = '#fff7c2';
-  g.fillRect(L - 2.5, -H + 2.5, 2.5, 4.5);
-  g.fillRect(L - 2.5, H - 7, 2.5, 4.5);
-  g.fillStyle = '#ff2b2b';
-  g.fillRect(-L, -H + 2.5, 2, 4.5);
-  g.fillRect(-L, H - 7, 2, 4.5);
-}
-
-function paintPolice(g, spec, advanced) {
-  const L = spec.len / 2;
-  const H = spec.wid / 2;
-  paintCar(g, spec.len, spec.wid, advanced ? '#20242f' : '#f5f7fb', advanced ? '#4d7cff' : '#2356c7', 'plain');
-  g.fillStyle = advanced ? '#4d7cff' : '#2356c7';
-  g.fillRect(-L * 0.42, -H, L * 0.44, 3.5);
-  g.fillRect(-L * 0.42, H - 3.5, L * 0.44, 3.5);
-  g.fillRect(L * 0.62, -H + 2, L * 0.3, spec.wid - 4);
-  // Tepe lambası
-  g.fillStyle = '#ff2a3c';
-  rr(g, -L * 0.28, -H + 2, 5, wid2(H), 1.5);
-  g.fill();
-  g.fillStyle = '#2a66ff';
-  rr(g, -L * 0.28, 0, 5, wid2(H), 1.5);
-  g.fill();
-}
-const wid2 = (H) => H - 2;
-
-function paintSwat(g, spec) {
-  const L = spec.len / 2;
-  const H = spec.wid / 2;
-  g.fillStyle = '#101014';
-  for (const [x, y] of [[L * 0.6, -H - 1.5], [L * 0.6, H - 3.5], [-L * 0.6, -H - 1.5], [-L * 0.6, H - 3.5], [0, -H - 1.5], [0, H - 3.5]]) {
-    rr(g, x - 7, y, 14, 5, 1.5);
-    g.fill();
-  }
-  g.fillStyle = '#23272f';
-  rr(g, -L, -H, spec.len, spec.wid, 5);
-  g.fill();
-  g.fillStyle = '#343a45';
-  rr(g, -L + 3, -H + 3, spec.len - 18, spec.wid - 6, 3);
-  g.fill();
-  g.fillStyle = '#16212b';
-  rr(g, L - 14, -H + 3, 9, spec.wid - 6, 2);
-  g.fill();
-  g.fillStyle = '#ffd23f';
-  g.fillRect(-L + 6, -2.5, spec.len - 26, 5);
-  g.fillStyle = '#16161c';
-  g.font = 'bold 6px sans-serif';
-  g.textAlign = 'center';
-  g.textBaseline = 'middle';
-  g.fillText('SWAT', -8, 0.4);
-  g.fillStyle = '#444b57';
-  g.fillRect(L - 2, -H, 3, spec.wid); // tampon
-  g.fillStyle = '#ff2a3c';
-  g.fillRect(4, -H + 3, 5, H - 3);
-  g.fillStyle = '#2a66ff';
-  g.fillRect(4, 0, 5, H - 3);
-}
-
-function paintTankHull(g, spec) {
-  const L = spec.len / 2;
-  const H = spec.wid / 2;
-  g.fillStyle = '#23261d';
-  rr(g, -L, -H, spec.len, 14, 4);
-  g.fill();
-  rr(g, -L, H - 14, spec.len, 14, 4);
-  g.fill();
-  g.fillStyle = '#3a3e30';
-  for (let x = -L + 3; x < L - 3; x += 7) {
-    g.fillRect(x, -H + 1, 3.5, 12);
-    g.fillRect(x, H - 13, 3.5, 12);
-  }
-  g.fillStyle = '#6d7a42';
-  rr(g, -L + 4, -H + 11, spec.len - 8, spec.wid - 22, 5);
-  g.fill();
-  g.fillStyle = '#556131';
-  g.fillRect(L - 18, -H + 13, 10, spec.wid - 26);
-  g.fillRect(-L + 10, -H + 13, 12, spec.wid - 26);
-  g.fillStyle = '#8c9a58';
-  g.beginPath(); g.arc(-22, 12, 6, 0, 7); g.fill();
-  g.beginPath(); g.arc(24, -10, 5, 0, 7); g.fill();
-}
-
-function paintTurret(g) {
-  g.fillStyle = '#4c5730';
-  g.fillRect(14, -3.5, 56, 7);
-  g.fillStyle = '#3a4324';
-  g.fillRect(62, -4.8, 10, 9.6);
-  g.fillStyle = '#7a8749';
-  g.beginPath(); g.arc(0, 0, 21, 0, 7); g.fill();
-  g.strokeStyle = 'rgba(0,0,0,.35)';
-  g.lineWidth = 1.5;
-  g.stroke();
-  g.fillStyle = '#5f6b39';
-  g.beginPath(); g.arc(-4, 2, 9, 0, 7); g.fill();
-  g.fillStyle = '#c2d07c';
-  g.beginPath(); g.arc(8, -8, 3, 0, 7); g.fill();
 }
 
 function sprite(w, h, paint) {
@@ -188,7 +42,7 @@ function glow(size, stops) {
 }
 
 export function carSprite(spec) {
-  return sprite(spec.len + 8, spec.wid + 8, (g) => paintCar(g, spec.len, spec.wid, spec.color, spec.accent, 'sport'));
+  return sprite(spec.len + 10, spec.wid + 10, (g) => paintLux(g, spec.len, spec.wid, spec.color, spec.accent));
 }
 
 export class Renderer {
@@ -230,6 +84,8 @@ export class Renderer {
     const P = CONFIG.police;
     const s = this.sprites;
     s.car = sprite(P.car.len + 8, P.car.wid + 8, (g) => paintPolice(g, P.car, false));
+    s.fast = sprite(P.fast.len + 10, P.fast.wid + 10, (g) => paintPoliceFast(g, P.fast));
+    s.moto = sprite(P.moto.len + 12, P.moto.wid + 14, (g) => paintMoto(g, P.moto));
     s.advanced = sprite(P.advanced.len + 8, P.advanced.wid + 8, (g) => paintPolice(g, P.advanced, true));
     s.swat = sprite(P.swat.len + 8, P.swat.wid + 8, (g) => paintSwat(g, P.swat));
     s.tank = sprite(P.tank.len + 8, P.tank.wid + 8, (g) => paintTankHull(g, P.tank));
@@ -247,10 +103,90 @@ export class Renderer {
     s.dust = glow(64, [[0, 'rgba(205,175,125,.7)'], [1, 'rgba(205,175,125,0)']]);
     s.water = glow(64, [[0, 'rgba(235,250,255,.9)'], [1, 'rgba(180,230,255,0)']]);
     s.glint = glow(32, [[0, 'rgba(255,255,220,1)'], [0.4, 'rgba(255,215,70,.8)'], [1, 'rgba(255,200,0,0)']]);
-    s.head = glow(128, [[0, 'rgba(255,245,200,.35)'], [1, 'rgba(255,245,200,0)']]);
 
     const prop = (w, h, paint) => sprite(w, h, paint);
+    const N = CONFIG.npc;
+    s.npc = {};
+    for (const kind of Object.keys(N.types)) {
+      const spec = N.types[kind];
+      s.npc[kind] = N.colors.map((col) => sprite(spec.len + 8, spec.wid + 8, (g) => paintNpc(g, kind, spec, col)));
+    }
+    const LOOKS = [['#e8533f', '#e0a878', '#3b2a1e'], ['#3e7cb1', '#f0c8a0', '#6b4a2b'], ['#f2c14e', '#8d5a3a', '#16131a'], ['#4f9d69', '#e0a878', '#c9a24a'], ['#c45fbd', '#f0c8a0', '#2b2b33'], ['#ececec', '#8d5a3a', '#16131a']];
+    s.peds = LOOKS.map(([a, b, c]) => [0, 1].map((step) => sprite(20, 20, (g) => paintPed(g, a, b, c, step))));
     s.props = [];
+    s.props[PROP.PALM] = prop(70, 70, (g) => {
+      g.fillStyle = 'rgba(0,0,0,.18)';
+      g.beginPath(); g.ellipse(8, 9, 20, 18, 0, 0, 7); g.fill();
+      for (let i = 0; i < 7; i++) {
+        const a = (i / 7) * 6.283 + 0.3;
+        g.save(); g.rotate(a);
+        g.fillStyle = i % 2 ? '#4ea03a' : '#6fbc47';
+        g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(13, -7.5, 25, 0); g.quadraticCurveTo(13, 6, 0, 0); g.fill();
+        g.restore();
+      }
+      g.fillStyle = '#9a6b3f';
+      g.beginPath(); g.arc(0, 0, 3.6, 0, 7); g.fill();
+    });
+    s.props[PROP.UMBRELLA] = prop(56, 56, (g) => {
+      g.fillStyle = '#f7f1e3'; g.fillRect(9, 3, 11, 17); // Havlu
+      g.fillStyle = '#3fa7d6'; g.fillRect(9, 8, 11, 4);
+      g.fillStyle = 'rgba(0,0,0,.16)';
+      g.beginPath(); g.arc(3, 4, 15, 0, 7); g.fill();
+      for (let i = 0; i < 8; i++) {
+        g.fillStyle = i % 2 ? '#fff' : '#ff5a4d';
+        g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, 15, (i / 8) * 6.283, ((i + 1) / 8) * 6.283); g.fill();
+      }
+    });
+    s.props[PROP.PINE] = prop(64, 64, (g) => {
+      g.fillStyle = 'rgba(0,0,0,.24)';
+      g.beginPath(); g.arc(7, 8, 20, 0, 7); g.fill();
+      for (const [r, c] of [[21, '#1f5e38'], [15, '#2b7846'], [9, '#3b9558']]) {
+        g.fillStyle = c;
+        g.beginPath();
+        for (let i = 0; i < 16; i++) {
+          const a = (i / 16) * 6.283;
+          const rad = i % 2 ? r : r * 0.74;
+          g.lineTo(Math.cos(a) * rad, Math.sin(a) * rad);
+        }
+        g.closePath();
+        g.fill();
+      }
+    });
+    s.props[PROP.ROCK] = prop(44, 44, (g) => {
+      g.fillStyle = 'rgba(0,0,0,.22)';
+      g.beginPath(); g.ellipse(3, 4, 16, 13, 0, 0, 7); g.fill();
+      g.fillStyle = '#8e8a84';
+      g.beginPath(); g.moveTo(-15, 3); g.lineTo(-9, -11); g.lineTo(5, -13); g.lineTo(15, -3); g.lineTo(11, 10); g.lineTo(-7, 12); g.closePath(); g.fill();
+      g.fillStyle = '#b4b0a8';
+      g.beginPath(); g.moveTo(-9, -8); g.lineTo(4, -10); g.lineTo(8, -2); g.lineTo(-4, 1); g.closePath(); g.fill();
+    });
+    s.props[PROP.CACTUS] = prop(36, 36, (g) => {
+      g.fillStyle = 'rgba(0,0,0,.2)';
+      g.beginPath(); g.ellipse(4, 5, 7, 11, 0, 0, 7); g.fill();
+      g.fillStyle = '#3f9a5c';
+      rr(g, -3.5, -11, 7, 22, 3.5); g.fill();
+      rr(g, -11, -5, 8, 5, 2.5); g.fill();
+      rr(g, 3, -1, 8, 5, 2.5); g.fill();
+      rr(g, -11, -10, 4.4, 9, 2.2); g.fill();
+      rr(g, 7, -7, 4.4, 9, 2.2); g.fill();
+      g.fillStyle = '#74c98e';
+      g.fillRect(-1, -10, 1.6, 19);
+    });
+    s.props[PROP.HAY] = prop(34, 34, (g) => {
+      g.fillStyle = 'rgba(0,0,0,.2)';
+      g.beginPath(); g.arc(3, 4, 12, 0, 7); g.fill();
+      g.fillStyle = '#e0c060';
+      g.beginPath(); g.arc(0, 0, 12, 0, 7); g.fill();
+      g.strokeStyle = '#b8922e';
+      g.lineWidth = 1.6;
+      for (const r of [4, 8]) { g.beginPath(); g.arc(0, 0, r, 0.4, 5.6); g.stroke(); }
+    });
+    s.auras = [];
+    for (const [i, name] of ['blast', 'ghost', 'heal', 'giant'].entries()) {
+      s.props[PROP.POWER_BLAST + i] = prop(40, 40, (g) => paintPower(g, name));
+      const col = POWER_LOOK[name].color;
+      s.auras[i] = glow(96, [[0, `${col}cc`], [0.55, `${col}55`], [1, `${col}00`]]);
+    }
     s.props[PROP.TREE] = prop(64, 64, (g) => {
       g.fillStyle = 'rgba(0,0,0,.2)';
       g.beginPath(); g.ellipse(6, 7, 21, 19, 0, 0, 7); g.fill();
@@ -306,7 +242,7 @@ export class Renderer {
       g.fillStyle = '#9a6b3f'; g.fillRect(-12, -4, 24, 8);
       g.fillStyle = '#c29465'; g.fillRect(-12, -4, 24, 2);
     });
-    s.parked = ['#6a7aa0', '#b0504a', '#d6c56b', '#59a58c', '#dddddd'].map((col) => sprite(54, 32, (g) => paintCar(g, 44, 24, col, col, 'plain')));
+    s.parked = ['#6a7aa0', '#b0504a', '#d6c56b', '#59a58c', '#dddddd'].map((col) => sprite(54, 32, (g) => paintCar(g, 44, 24, col, col)));
     s.coin = sprite(32, 32, (g) => {
       g.fillStyle = '#b8860b'; g.beginPath(); g.arc(0, 1, 10.5, 0, 7); g.fill();
       g.fillStyle = '#ffd23f'; g.beginPath(); g.arc(0, 0, 10, 0, 7); g.fill();
@@ -348,7 +284,12 @@ export class Renderer {
     }
     for (let i = 0; i < c.rectCount; i++) {
       const r = c.rects[i];
-      if (r.alive && r.kind === 'building') { g.fillStyle = 'rgba(0,10,30,.26)'; rr(g, r.x + 12, r.y + 15, r.w, r.h, 5); g.fill(); }
+      if (r.alive && r.kind === 'building') {
+        const k2 = TALL_STYLES.has(r.style) ? 2.4 : 1;
+        g.fillStyle = 'rgba(0,10,30,.26)';
+        rr(g, r.x + 12 * k2, r.y + 15 * k2, r.w, r.h, 5);
+        g.fill();
+      }
     }
     for (let i = 0; i < c.rectCount; i++) {
       const r = c.rects[i];
@@ -360,9 +301,13 @@ export class Renderer {
   }
 
   bakeGround(g, c) {
-    // Su karosu altta kıyı rengindedir; yuvarlak gölet köşelerinde mavi taşmasın
-    const shore = c.template === 'lake' ? '#f2dfa4' : c.template === 'plaza' ? '#e5d7bf' : '#6cc24a';
-    const colors = ['#6cc24a', '#585f6b', '#cdd2d6', '#e5d7bf', shore, '#f2dfa4', '#b79c6c'];
+    // Biyoma göre palet. Su karosu kıyı rengindedir; yuvarlak gölet köşelerinde mavi taşmasın
+    const pal = BIOME_COLORS[c.biome];
+    const urban = c.biome === 'city';
+    const sea = c.template === 'sea';
+    const shore = sea ? '#1f8fd6' : c.template === 'lake' ? pal.sand : c.template === 'plaza' ? '#e5d7bf' : pal.grass;
+    const colors = [pal.grass, pal.road, '#cdd2d6', '#e5d7bf', shore, pal.sand, pal.dirt, '#5fd3e6', '#c9ae4c'];
+    const fieldGreen = (c.cx + c.cy) & 1;
     for (let y = 0; y < CT; y++) {
       for (let x = 0; x < CT; x++) {
         const t = c.ground[y * CT + x];
@@ -371,7 +316,20 @@ export class Renderer {
         const py = c.y + y * TILE;
         g.fillRect(px, py, TILE + 1, TILE + 1);
         const h = ((x * 73856093) ^ (y * 19349663) ^ (c.cx * 83492791) ^ (c.cy * 49979693)) >>> 0;
-        if (t === GROUND.GRASS) {
+        if (t === GROUND.FIELD) {
+          // Tarla sıraları
+          if (fieldGreen) { g.fillStyle = '#7fae3f'; g.fillRect(px, py, TILE + 1, TILE + 1); }
+          g.fillStyle = fieldGreen ? 'rgba(40,90,20,.35)' : 'rgba(120,80,20,.3)';
+          for (let k = 3; k < TILE; k += 9) g.fillRect(px, py + k, TILE, 3);
+        } else if (t === GROUND.WATER && sea) {
+          g.fillStyle = 'rgba(255,255,255,.14)';
+          g.fillRect(px + (h % 26), py + ((h >>> 7) % 34), 14, 2.5);
+          g.fillStyle = 'rgba(0,50,110,.12)';
+          g.fillRect(px + ((h >>> 3) % 20), py + ((h >>> 11) % 30), 20, 6);
+        } else if (t === GROUND.SHALLOW) {
+          g.fillStyle = 'rgba(255,255,255,.2)';
+          g.fillRect(px + (h % 24), py + ((h >>> 9) % 32), 12, 2);
+        } else if (t === GROUND.GRASS) {
           g.fillStyle = h & 1 ? 'rgba(40,120,40,.05)' : 'rgba(170,230,110,.07)';
           g.fillRect(px, py, TILE, TILE);
           g.fillStyle = 'rgba(30,100,40,.3)';
@@ -396,8 +354,23 @@ export class Renderer {
         }
       }
     }
-    // Kaldırım kenarları
-    g.fillStyle = 'rgba(245,247,250,.85)';
+    // Sığ su kıyısında köpük
+    if (sea) {
+      g.fillStyle = 'rgba(255,255,255,.7)';
+      for (let y = 1; y < CT - 1; y++) {
+        for (let x = 1; x < CT - 1; x++) {
+          if (c.ground[y * CT + x] !== GROUND.SHALLOW) continue;
+          const px = c.x + x * TILE;
+          const py = c.y + y * TILE;
+          if (c.ground[y * CT + x - 1] === GROUND.SAND) g.fillRect(px - 1, py, 4, TILE);
+          if (c.ground[y * CT + x + 1] === GROUND.SAND) g.fillRect(px + TILE - 3, py, 4, TILE);
+          if (c.ground[(y - 1) * CT + x] === GROUND.SAND) g.fillRect(px, py - 1, TILE, 4);
+          if (c.ground[(y + 1) * CT + x] === GROUND.SAND) g.fillRect(px, py + TILE - 3, TILE, 4);
+        }
+      }
+    }
+    // Kaldırım kenarları: şehirde beyaz, kırda sade, denizde köprü korkuluğu
+    g.fillStyle = urban || sea ? 'rgba(245,247,250,.85)' : 'rgba(0,0,0,.2)';
     for (let y = 0; y < CT; y++) {
       for (let x = 0; x < CT; x++) {
         if (c.ground[y * CT + x] !== GROUND.ROAD) continue;
@@ -423,7 +396,7 @@ export class Renderer {
       g.fillRect(c.x + d, c.y + mid - 2, 30, 4);
     }
     g.fillStyle = 'rgba(255,255,255,.8)';
-    for (let i = 8; i < ART_W - 8; i += 18) {
+    for (let i = 8; i < ART_W - 8 && urban; i += 18) {
       g.fillRect(c.x + i, c.y + ART_W + 4, 9, 18);
       g.fillRect(c.x + ART_W + 4, c.y + i, 18, 9);
       g.fillRect(c.x + i, c.y - 22, 9, 18);
@@ -433,6 +406,7 @@ export class Renderer {
     g.fillStyle = 'rgba(255,255,255,.65)';
     for (let i = 0; i < c.streetCount; i++) {
       const s = c.streets[i];
+      if (s.ground !== GROUND.ROAD) continue;
       const m = (s.pos + s.width / 2) * TILE;
       for (let d = ART_W + 26; d < CHUNK - 30; d += 50) {
         if (s.vertical) {
@@ -479,6 +453,7 @@ export class Renderer {
   }
 
   bakeBuilding(g, r) {
+    if (r.style >= 7) { paintSpecial(g, r); return; }
     const wall = 9; // Güneye bakan cephe: yükseklik hissi
     g.fillStyle = shade(r.color, -0.42);
     rr(g, r.x, r.y, r.w, r.h, 5);
@@ -636,16 +611,20 @@ export class Renderer {
       }
     }
     // Görünmeden önce hazırla: kaydırmada takılma olmasın (karede en fazla 1)
-    if (game.state === 'play') this.prebake(game, c0x, c1x, c0y, c1y);
+    // Telefonda takılma olmasın diye dört karede bir
+    if (game.state === 'play' && this.frameId % 4 === 0) this.prebake(game, c0x, c1x, c0y, c1y);
 
     this.drawDecals(game, vx0, vx1, vy0, vy1);
     this.drawSkids(game, vx0, vx1, vy0, vy1);
     this.drawSpikes(game);
     this.drawShots(game, now);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, false);
+    this.drawPeds(game, vx0, vx1, vy0, vy1, false);
+    this.drawNpcs(game, vx0, vx1, vy0, vy1);
     this.drawCops(game, now, vx0, vx1, vy0, vy1);
     if (game.state !== 'dying' && game.state !== 'over') this.drawPlayer(game);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, true);
+    this.drawPeds(game, vx0, vx1, vy0, vy1, true);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawSirens(game, now, vx0, vx1, vy0, vy1);
     this.drawWaves(game);
@@ -775,8 +754,20 @@ export class Renderer {
         for (let i = 0; i < c.propCount; i++) {
           const pr = c.props[i];
           if (!pr.alive || pr.x < x0 - 30 || pr.x > x1 + 30 || pr.y < y0 - 30 || pr.y > y1 + 30) continue;
-          const isTall = pr.kind === PROP.TREE;
+          const isTall = pr.kind === PROP.TREE || pr.kind === PROP.PALM || pr.kind === PROP.PINE;
           if (isTall !== tall) continue;
+          if (isPower(pr.kind)) {
+            const bob = 1 + 0.1 * Math.sin(now * 0.006 + pr.phase * 5);
+            const look = POWER_LOOK[powerName(pr.kind)];
+            ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+            ctx.globalAlpha = 0.45 + 0.25 * Math.sin(now * 0.005);
+            ctx.drawImage(sp.auras[pr.kind - PROP.POWER_BLAST], pr.x - 46, pr.y - 46, 92, 92);
+            ctx.globalAlpha = 1;
+            const pw = 42 * bob;
+            ctx.drawImage(sp.props[pr.kind], pr.x - pw / 2, pr.y - pw / 2, pw, pw);
+            if (!look) continue;
+            continue;
+          }
           if (pr.kind === PROP.COIN) {
             const w = 22 * Math.abs(Math.cos(now * 0.006 + pr.phase * 7));
             ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
@@ -803,7 +794,37 @@ export class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
-  drawBody(img, b, shadowScale = 1) {
+  drawPeds(game, x0, x1, y0, y1, flying) {
+    const ctx = this.ctx;
+    const sp = this.sprites;
+    for (const p of game.crowd.peds) {
+      if (!p.alive || (p.state === PED_FLY) !== flying) continue;
+      if (p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) continue;
+      const img = sp.peds[p.look][Math.floor(p.step) & 1];
+      const k = 1 + p.z / 170;
+      const size = 27 * k;
+      if (flying) {
+        ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+        ctx.globalAlpha = 0.3;
+        ctx.drawImage(sp.dark, p.x - 8, p.y - 6, 16, 12);
+        ctx.globalAlpha = 1;
+      }
+      this.place(p.x, p.y - p.z * 0.7, p.a);
+      ctx.drawImage(img, -size / 2, -size / 2, size, size);
+    }
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
+  drawNpcs(game, x0, x1, y0, y1) {
+    const sp = this.sprites.npc;
+    for (const n of game.crowd.npcs) {
+      if (!n.alive || n.x < x0 - 80 || n.x > x1 + 80 || n.y < y0 - 80 || n.y > y1 + 80) continue;
+      this.drawBody(sp[n.kind][n.color], n);
+    }
+    this.ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
+  drawBody(img, b, shadowScale = 1, k = 1) {
     const ctx = this.ctx;
     const sp = this.sprites.shadow;
     ctx.globalAlpha = 0.28;
@@ -813,8 +834,8 @@ export class Renderer {
     ctx.drawImage(sp, -sw / 2, -sh / 2, sw, sh);
     ctx.globalAlpha = 1;
     this.place(b.x, b.y, b.a);
-    const w = img.width / SPR;
-    const h = img.height / SPR;
+    const w = (img.width / SPR) * k;
+    const h = (img.height / SPR) * k;
     ctx.drawImage(img, -w / 2, -h / 2, w, h);
   }
 
@@ -825,14 +846,18 @@ export class Renderer {
       this.playerId = game.carSpec.id;
       this.playerSprite = carSprite(game.carSpec);
     }
-    // Far ışığı
-    const fx = Math.cos(p.a);
-    const fy = Math.sin(p.a);
-    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
-    ctx.globalAlpha = 0.6;
-    ctx.drawImage(this.sprites.head, p.x + fx * 60 - 50, p.y + fy * 60 - 50, 100, 100);
+    const k = p.len / game.carSpec.len;
+    if (game.giantT > 0 || game.ghostT > 0) {
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      const aura = game.giantT > 0 ? this.sprites.auras[3] : this.sprites.auras[1];
+      const R = p.len * 1.25;
+      ctx.globalAlpha = 0.6;
+      ctx.drawImage(aura, p.x - R, p.y - R, R * 2, R * 2);
+      ctx.globalAlpha = 1;
+    }
+    if (game.ghostT > 0) ctx.globalAlpha = 0.5;
+    this.drawBody(this.playerSprite, p, k, k);
     ctx.globalAlpha = 1;
-    this.drawBody(this.playerSprite, p);
     if (game.stage >= 2) {
       ctx.globalAlpha = game.stage >= 3 ? 0.42 : 0.22;
       ctx.drawImage(this.sprites.dark, -p.len * 0.2, -p.wid * 0.9, p.len, p.wid * 1.8);
@@ -919,13 +944,13 @@ export class Renderer {
     const sp = this.sprites;
     ctx.globalCompositeOperation = 'lighter';
     for (const c of game.cops) {
-      if (c.type === 'tank') continue;
+      if (c.type === 'tank' || game.ghostT > 0) continue;
       if (c.x < x0 - 90 || c.x > x1 + 90 || c.y < y0 - 90 || c.y > y1 + 90) continue;
       const on = Math.floor(now / 130 + c.id) % 2 === 0;
       const side = c.wid * 0.5;
       const nx = -Math.sin(c.a) * side;
       const ny = Math.cos(c.a) * side;
-      const R = c.type === 'swat' ? 66 : 54;
+      const R = c.type === 'swat' ? 66 : c.type === 'moto' ? 38 : 54;
       ctx.globalAlpha = on ? 0.85 : 0.22;
       ctx.drawImage(sp.red, c.x - nx - R, c.y - ny - R, R * 2, R * 2);
       ctx.globalAlpha = on ? 0.22 : 0.85;

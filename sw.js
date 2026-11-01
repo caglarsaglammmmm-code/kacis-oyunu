@@ -1,5 +1,5 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'kac-kacabilirsen-v1';
+const CACHE = 'kac-kacabilirsen-v2';
 const ASSETS = [
   './',
   'index.html',
@@ -10,6 +10,8 @@ const ASSETS = [
   'js/world.js',
   'js/effects.js',
   'js/police.js',
+  'js/crowd.js',
+  'js/art.js',
   'js/game.js',
   'js/render.js',
   'js/input.js',

@@ -1,6 +1,6 @@
 // Debug APK üretir: npm run android:build
 // JAVA_HOME ve ANDROID_HOME tanımlı değilse %LOCALAPPDATA%\Android altındaki
-// JDK 21 ve SDK kullanılır. Sonuç: dist/KacKacabilirsen-debug.apk
+// JDK 21 ve SDK kullanılır. Sonuç: dist/KacKacabilirsen.apk (Release'e bu adla eklenir)
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -24,7 +24,7 @@ fs.writeFileSync(
 const project = path.join(root, 'android');
 run(path.join(project, process.platform === 'win32' ? 'gradlew.bat' : 'gradlew'), ['assembleDebug', '--no-daemon'], project);
 
-const output = path.join(root, 'dist', 'KacKacabilirsen-debug.apk');
+const output = path.join(root, 'dist', 'KacKacabilirsen.apk');
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.copyFileSync(path.join(root, 'android/app/build/outputs/apk/debug/app-debug.apk'), output);
 console.log(`APK: ${output}`);

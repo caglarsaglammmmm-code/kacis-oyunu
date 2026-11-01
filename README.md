@@ -4,6 +4,15 @@ Mobil öncelikli, kuşbakışı polis kaçış ve drift oyunu. Saf HTML, CSS, Ja
 
 **Oyna:** https://caglarsaglammmmm-code.github.io/kacis-oyunu/
 
+**Android APK indir (hep en güncel sürüm):** https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/KacKacabilirsen.apk
+
+## Oyunda neler var
+
+- **Biyomlar:** şehir (gökdelenli merkez dahil), sahil (kum, sığ su, deniz, köprüler), orman, çöl, kırsal. Zemin, nesne ve bina biyoma göre değişir.
+- **Özel güçler:** Patlama, Görünmezlik (30 sn), Can, Dev mod (30 sn).
+- **Polisler:** normal, hızlı, motosiklet, SWAT, gelişmiş, tank. Her biri farklı boyut, hız ve sirende.
+- **Şehir hayatı:** yürüyen yayalar; sedan, kamyonet, otobüs ve kamyon trafiği.
+
 ## Kontroller
 
 | Girdi | Sonuç |
@@ -29,7 +38,15 @@ npm install
 npm run android:build
 ```
 
-Sonuç: `dist/KacKacabilirsen-debug.apk`. Debug imzalıdır: telefona kurulur, Google Play'e yüklenemez. Dosyayı telefona atıp açın ve bilinmeyen kaynaktan yükleme iznini verin. `dist/` depoya alınmaz, bu komutla üretilir.
+Sonuç: `dist/KacKacabilirsen.apk`. Debug imzalıdır: telefona kurulur, Google Play'e yüklenemez. Telefonda indirip açın ve bilinmeyen kaynaktan yükleme iznini verin.
+
+Yeni sürüm yayınlamak için `android/app/build.gradle` içindeki sürümü artırın, sonra APK'yı bu adla Release'e ekleyin:
+
+```
+gh release create vX.Y.Z dist/KacKacabilirsen.apk --title "vX.Y.Z"
+```
+
+Dosya adı sabit kaldığı için oyundaki **APK İndir** düğmesi kendiliğinden en güncel sürüme gider.
 
 ## Ayarlar ve test kısayolları
 
@@ -60,6 +77,7 @@ js/world.js    sonsuz şehir üretimi   js/input.js    dokunma ve klavye
 js/game.js     oyun mantığı           js/audio.js    Web Audio sesleri
 js/effects.js  parçacık havuzları     js/storage.js  localStorage kaydı
 js/ui.js       menüler ve gösterge    js/main.js     döngü ve bağlantılar
+js/crowd.js    yayalar, sivil trafik  js/art.js      araba, bina ve güç çizimleri
 ```
 
 Fontlar (Bungee, Nunito, Playfair Display) SIL Open Font License ile dağıtılır; lisanslar `fonts/` içindedir.

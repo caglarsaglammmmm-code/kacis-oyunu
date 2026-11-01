@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+import androidx.activity.OnBackPressedCallback;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -15,6 +16,17 @@ public class MainActivity extends BridgeActivity {
         // Oyun sırasında ekran kapanmasın
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         hideSystemBars();
+        // Geri tuşu oyundan çıkarmasın: kararı oyun verir (duraklat, menü, iki kez basınca çık)
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                getBridge().getWebView().evaluateJavascript(
+                    "window.__kacisBack ? window.__kacisBack() : true",
+                    value -> {
+                        if ("true".equals(value)) finish();
+                    });
+            }
+        });
     }
 
     @Override

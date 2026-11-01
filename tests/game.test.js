@@ -175,6 +175,122 @@ test('kırılabilir nesne hızlı temasta kırılır, sayaç artar', () => {
   assert.equal(g.broken, 1);
 });
 
+test('dört güç: can, görünmezlik, dev mod, patlama', () => {
+  const g = game({ startTime: 100 });
+  const P = CONFIG.powers;
+  g.damage = 90; g.burning = true;
+  g.takePower('heal', 0, 0);
+  assert.equal(g.damage, 90 - P.healAmount);
+  assert.equal(g.burning, false);
+
+  g.takePower('ghost', 0, 0);
+  assert.equal(g.ghostT, P.duration);
+  g.takePower('giant', 0, 0);
+  assert.equal(g.giantT, P.duration);
+  assert.ok(g.player.len > car.len * 1.5);
+  const d = g.damage;
+  g.hurt(50);
+  assert.equal(g.damage, d, 'dev modda hasar yok');
+  for (let i = 0; i < 60 * 31; i++) g.updatePowers(dt);
+  assert.equal(g.ghostT, 0);
+  assert.equal(g.giantT, 0);
+  assert.equal(g.player.len, car.len, 'boyut geri döner');
+});
+
+test('patlama yakındaki araçları yok eder, uzaktakine ve tanka tam işlemez', () => {
+  const g = game({ startTime: 100, god: true });
+  const p = g.player;
+  g.spawnCop('car', 'chaser', p.x + 100, p.y, 0);
+  g.spawnCop('swat', 'chaser', p.x - 200, p.y, 0);
+  const far = g.spawnCop('car', 'chaser', p.x + 900, p.y, 0);
+  const tank = g.spawnCop('tank', 'chaser', p.x, p.y + 200, 0);
+  g.takePower('blast', p.x, p.y);
+  assert.deepEqual(g.cops.map((c) => c.type).sort(), ['car', 'tank']);
+  assert.ok(g.cops.includes(far) && g.cops.includes(tank));
+  assert.ok(tank.hp < tank.maxHp);
+  assert.ok(g.kills >= 2);
+});
+
+test('görünmezken polis oyuncuya yönelmez ve çarpamaz, dev modda polis ezilir', () => {
+  const g = game({ startTime: 100 });
+  const p = g.player;
+  g.ghostT = 30;
+  const c = g.spawnCop('car', 'chaser', p.x + 30, p.y, 0);
+  g.updateCops(dt);
+  assert.equal(g.damage, 0);
+  g.ghostT = 0;
+  g.takePower('giant', 0, 0);
+  g.copContact(c, 200);
+  g.updateCops(dt);
+  assert.equal(g.damage, 0);
+  assert.ok(!g.cops.includes(c));
+});
+
+test('haritadaki güç alınır, kalıcı olarak kaybolur', () => {
+  const g = game();
+  const ev = [];
+  g.onEvent = (n, v) => { if (n === 'power') ev.push(v); };
+  g.world.addPower(g.player.x + 30, g.player.y, 19);
+  g.damage = 50;
+  g.tick(dt, 0, false);
+  assert.deepEqual(ev, ['heal']);
+  assert.ok(g.damage < 50);
+});
+
+test('polis çeşitleri zamana göre gelir, şekil ve hızları farklı', () => {
+  assert.equal(difficultyAt(10).motoShare, 0);
+  assert.equal(difficultyAt(20).fastShare, 0);
+  assert.ok(difficultyAt(60).motoShare > 0 && difficultyAt(60).fastShare > 0);
+  const P = CONFIG.police;
+  assert.ok(new Set(Object.values(P).map((p) => p.speed)).size >= 5);
+  assert.ok(new Set(Object.values(P).map((p) => p.len)).size >= 5);
+  const g = game({ startTime: 120 });
+  const seen = new Set();
+  for (let i = 0; i < 400; i++) seen.add(g.pickType(Math.random()));
+  for (const t of ['car', 'fast', 'moto', 'swat']) assert.ok(seen.has(t), t);
+});
+
+test('yayalar doğar, araba çarpınca fırlar ve ses olayı gelir', () => {
+  const g = game();
+  const ev = [];
+  g.onEvent = (n) => ev.push(n);
+  for (let i = 0; i < 60 * 12; i++) g.tick(dt, 0, false);
+  const live = g.crowd.peds.filter((p) => p.alive);
+  assert.ok(live.length > 3, `yaya ${live.length}`);
+  const p = live[0];
+  p.state = 0; p.z = 0;
+  p.x = g.player.x + 10; p.y = g.player.y;
+  g.player.vx = 300; g.player.speed = 300;
+  g.crowd.checkHit(p, g.player, true);
+  assert.equal(p.state, 2);
+  assert.ok(p.vz > 0);
+  assert.ok(ev.includes('thud'));
+  for (let i = 0; i < 60 * 2; i++) g.crowd.updatePed(p, dt);
+  assert.ok(p.z === 0);
+});
+
+test('sivil arabalar ana yolda şeridinde gider, çarpılınca savrulur', () => {
+  const g = game({ god: true });
+  g.player.vy = 0;
+  for (let i = 0; i < 60 * 14; i++) g.tick(dt, 0, true);
+  const live = g.crowd.npcs.filter((n) => n.alive);
+  assert.ok(live.length >= 2, `araç ${live.length}`);
+  const kinds = new Set();
+  for (let i = 0; i < 300; i++) { g.crowd.npcT = 0; g.crowd.update(dt); g.crowd.npcs.forEach((n) => { if (n.alive) { kinds.add(n.kind); n.alive = i > 290; } }); }
+  assert.ok(kinds.size >= 3, [...kinds].join());
+  for (const n of g.crowd.npcs) n.alive = false;
+  g.crowd.npcCount = 0;
+  g.crowd.npcT = 1e9;
+  g.crowd.spawnNpc();
+  let n = g.crowd.npcs.find((k) => k.alive);
+  for (let tries = 0; !n && tries < 50; tries++) { g.crowd.spawnNpc(); n = g.crowd.npcs.find((k) => k.alive); }
+  assert.ok(n);
+  const w0 = n.w;
+  g.crowd.hitNpc(n, 300, false);
+  assert.equal(n.state, 'wreck');
+  assert.notEqual(n.w, w0);
+});
+
 test('uzun simülasyon: tüm süreler boyunca hata yok, polis sınırı aşılmaz, efekt havuzu sınırlı', () => {
   const g = game({ god: true });
   let maxCops = 0;

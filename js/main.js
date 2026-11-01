@@ -114,6 +114,11 @@ async function keepAwake(on) {
 game.onEvent = (name, v) => {
   switch (name) {
     case 'crash': audio.crash(v); vibrate(Math.round(18 + v * 40)); break;
+    case 'scream': audio.scream(v); break;
+    case 'thud': audio.thud(); vibrate(15); break;
+    case 'horn': audio.horn(v); break;
+    case 'power': audio.power(v); ui.powerToast(v); vibrate(35); break;
+    case 'powerend': audio.powerEnd(); break;
     case 'break': audio.crunch(); break;
     case 'crush': audio.crunch(); vibrate(25); break;
     case 'coin': audio.coin(); break;
@@ -175,15 +180,54 @@ function frame(now) {
   if (perf.count % 120 === 0 && perf.count >= 120 && game.state === 'play') {
     let sum = 0;
     for (let k = 1; k <= 120; k++) sum += perf.frames[(perf.i - k + perf.frames.length) % perf.frames.length];
-    if (sum / 120 > 21 && dprCap > 1) {
-      dprCap = Math.max(1, dprCap - 0.25);
-      perf.dprDrops++;
-      resize();
+    if (sum / 120 > CONFIG.perf.slowFrameMs) {
+      // Önce çözünürlük, sonra kalabalık azalır
+      if (dprCap > 1) {
+        dprCap = Math.max(1, dprCap - 0.25);
+        perf.dprDrops++;
+        resize();
+      } else if (game.crowd.limit > 0.4) {
+        game.crowd.limit -= 0.2;
+        perf.dprDrops++;
+      }
     }
   }
 }
 
+// Geri tuşu: oyundan çıkarmaz. Sırayla duraklatır, menüye döner; menüde iki kez basınca çıkar.
+let lastBack = 0;
+function handleBack() {
+  const visible = (id) => !document.getElementById(id).hidden;
+  if (visible('splash')) return false;
+  if (game.state === 'play' || game.state === 'dying') {
+    if (paused) resume(); else pause();
+    return false;
+  }
+  if (visible('over')) { toMenu(); return false; }
+  if (visible('menu')) {
+    const t = performance.now();
+    if (t - lastBack < 2000) return true;
+    lastBack = t;
+    ui.toast('Çıkmak için tekrar bas', '#ffffff');
+    return false;
+  }
+  ui.refreshMenu();
+  ui.show('menu');
+  return false;
+}
+globalThis.__kacisBack = handleBack;
+
 function boot() {
+  const native = !!(globalThis.Capacitor && globalThis.Capacitor.isNativePlatform && globalThis.Capacitor.isNativePlatform());
+  ui.setApkButton(!native, CONFIG.apkUrl);
+  // Telefona kurulu web sürümünde de geri tuşu oyunu kapatmasın
+  if (!native && location.protocol !== 'file:') {
+    history.pushState({ kacis: 1 }, '');
+    window.addEventListener('popstate', () => {
+      if (handleBack()) history.back();
+      else history.pushState({ kacis: 1 }, '');
+    });
+  }
   input.attach(canvas);
   applySettings();
   resize();
@@ -202,15 +246,17 @@ function boot() {
   requestAnimationFrame(frame);
   ui.splash(() => { toMenu(); });
 
-  const native = globalThis.Capacitor && globalThis.Capacitor.isNativePlatform && globalThis.Capacitor.isNativePlatform();
-  if ('serviceWorker' in navigator && location.protocol === 'https:' && !native) {
+  if ('serviceWorker' in navigator && !native && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('sw.js').catch(() => {});
-  } else if ('serviceWorker' in navigator && location.hostname === 'localhost' && !native) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    // Yeni sürüm gelince menüdeyken yenile, oyun sırasında bölme
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadController && game.state !== 'play') location.reload();
+    });
   }
 }
 
 // Test ve geliştirici erişimi
-globalThis.__kacis = { game, input, perf, storage, renderer, ui, play, pause, resume };
+globalThis.__kacis = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG };
 
 boot();

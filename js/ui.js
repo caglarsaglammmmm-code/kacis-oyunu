@@ -1,6 +1,7 @@
 // Menüler ve oyun içi gösterge. HUD yalnızca değer değişince DOM'a yazar.
 import { CONFIG, MAX_STARS } from './config.js';
 import { carSprite } from './render.js';
+import { paintPower, POWER_LOOK } from './art.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -19,6 +20,7 @@ export class UI {
     this.devTaps = 0;
     this.bind();
     this.buildStars();
+    this.buildPowers();
     this.syncSettings();
     this.refreshMenu();
   }
@@ -100,6 +102,68 @@ export class UI {
     }
   }
 
+  setApkButton(show, url) {
+    const a = $('btn-apk');
+    a.href = url;
+    a.hidden = !show;
+  }
+
+  // Güç simgesi küçük tuval olarak: HUD ve Nasıl Oynanır aynı çizimi kullanır
+  powerCanvas(kind, size) {
+    const c = document.createElement('canvas');
+    c.width = size * 2;
+    c.height = size * 2;
+    c.className = 'pw-icon';
+    const g = c.getContext('2d');
+    g.setTransform((size * 2) / 36, 0, 0, (size * 2) / 36, size, size);
+    paintPower(g, kind);
+    return c;
+  }
+
+  buildPowers() {
+    this.pw = {};
+    const box = $('hud-powers');
+    for (const kind of ['ghost', 'giant']) {
+      const el = document.createElement('div');
+      el.className = 'pw';
+      el.hidden = true;
+      el.style.setProperty('--c', POWER_LOOK[kind].color);
+      const t = document.createElement('b');
+      const bar = document.createElement('i');
+      const fill = document.createElement('u');
+      bar.appendChild(fill);
+      el.append(this.powerCanvas(kind, 15), t, bar);
+      box.appendChild(el);
+      this.pw[kind] = { el, t, fill, last: '' };
+    }
+    const list = $('howto-powers');
+    const info = { blast: 'Yakındaki bütün arabalar patlar', ghost: '30 sn polis seni göremez', heal: 'Hasarı onarır, ateşi söndürür', giant: '30 sn devleşirsin, hasar almazsın' };
+    for (const kind of Object.keys(info)) {
+      const row = document.createElement('div');
+      const name = document.createElement('b');
+      name.textContent = POWER_LOOK[kind].name;
+      const d = document.createElement('span');
+      d.textContent = info[kind];
+      const text = document.createElement('p');
+      text.append(name, d);
+      row.append(this.powerCanvas(kind, 20), text);
+      list.appendChild(row);
+    }
+  }
+
+  toast(text, color) {
+    const el = $('toast');
+    el.textContent = text;
+    el.style.color = color;
+    el.classList.remove('run');
+    void el.offsetWidth;
+    el.classList.add('run');
+  }
+
+  powerToast(kind) {
+    this.toast(POWER_LOOK[kind].name, POWER_LOOK[kind].color);
+  }
+
   alert(stage) {
     const text = CONFIG.difficulty.alerts[[0, CONFIG.difficulty.swatAt, CONFIG.difficulty.advancedAt, CONFIG.difficulty.tanksAt][stage]];
     const el = $('alert');
@@ -136,8 +200,20 @@ export class UI {
       const list = $('hud-stars').children;
       for (let i = 0; i < list.length; i++) list[i].classList.toggle('on', i < stars);
     }
+    this.powerChip('ghost', g.ghostT);
+    this.powerChip('giant', g.giantT);
     const combo = g.combo >= 1.25 ? `x${g.combo.toFixed(1).replace('.', ',')}` : '';
     if (combo !== l.combo) { l.combo = combo; $('hud-combo').textContent = combo; }
+  }
+
+  powerChip(kind, left) {
+    const p = this.pw[kind];
+    const text = left > 0 ? String(Math.ceil(left)) : '';
+    if (text === p.last) return;
+    p.last = text;
+    p.el.hidden = left <= 0;
+    p.t.textContent = text;
+    p.fill.style.width = `${Math.round((left / CONFIG.powers.duration) * 100)}%`;
   }
 
   over(result, record) {
@@ -198,7 +274,7 @@ export class UI {
         row.append(t, bar);
         card.appendChild(row);
       };
-      stat('Hız', (car.maxSpeed - 280) / (max.maxSpeed - 280));
+      stat('Hız', (car.maxSpeed - 340) / (max.maxSpeed - 340));
       stat('Sağlamlık', car.durability / max.durability);
       stat('Drift', minDrift / car.driftGrip);
 

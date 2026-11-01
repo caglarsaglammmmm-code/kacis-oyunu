@@ -170,7 +170,20 @@ function drivePatrol(cop, g, dt) {
     target.y = p.y + p.vy * 0.32 + fy * back + fx * side * gap;
   }
 
-  if (!cop.los && g.flowReady) g.flow.sample(cop.x, cop.y, target, 5);
+  if (g.ghostT > 0) {
+    // Görünmezlik: oyuncuyu göremez, bulunduğu yerde rastgele dolaşır
+    cop.wanderT -= dt;
+    if (cop.wanderT <= 0) {
+      const a = cop.a + (Math.random() - 0.5) * 2.4;
+      cop.wx = cop.x + Math.cos(a) * 320;
+      cop.wy = cop.y + Math.sin(a) * 320;
+      cop.wanderT = 1.5 + Math.random() * 2.5;
+    }
+    target.x = cop.wx;
+    target.y = cop.wy;
+  } else if (!cop.los && g.flowReady) {
+    g.flow.sample(cop.x, cop.y, target, 5);
+  }
 
   const err = wrapAngle(Math.atan2(target.y - cop.y, target.x - cop.x) - cop.a);
   let steer = Math.max(-1, Math.min(1, err * 2.6));
@@ -213,8 +226,8 @@ function drivePatrol(cop, g, dt) {
 
 function driveTank(cop, g, dt) {
   const p = g.player;
-  target.x = p.x;
-  target.y = p.y;
+  target.x = g.ghostT > 0 ? cop.x + Math.cos(cop.a) * 200 : p.x;
+  target.y = g.ghostT > 0 ? cop.y + Math.sin(cop.a) * 200 : p.y;
   const ahead = g.world.groundAt(cop.x + Math.cos(cop.a) * 110, cop.y + Math.sin(cop.a) * 110);
   if (ahead === GROUND.WATER && g.flowReady) g.flow.sample(cop.x, cop.y, target, 6);
   const err = wrapAngle(Math.atan2(target.y - cop.y, target.x - cop.x) - cop.a);
@@ -230,7 +243,7 @@ export function driveCop(cop, g, dt) {
     cop.ctlT = 0;
     cop.wakeT -= dt;
     const d = Math.hypot(g.player.x - cop.x, g.player.y - cop.y);
-    if (d < CONFIG.barricade.wakeDist || cop.wakeT <= 0) cop.state = 'chase';
+    if ((d < CONFIG.barricade.wakeDist && g.ghostT <= 0) || cop.wakeT <= 0) cop.state = 'chase';
     return;
   }
   if (cop.type === 'tank') driveTank(cop, g, dt);

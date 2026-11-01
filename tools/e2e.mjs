@@ -40,7 +40,7 @@ async function statsOf(page) {
     const w = Array.from(p.work.slice(0, n)).sort((a, b) => a - b);
     const pick = (arr, q) => +arr[Math.floor(arr.length * q)].toFixed(2);
     const g = k.game;
-    return { n, frameAvg: +(f.reduce((a, b) => a + b, 0) / n).toFixed(2), frameP50: pick(f, 0.5), frameP95: pick(f, 0.95), frameP99: pick(f, 0.99), workP50: pick(w, 0.5), workP95: pick(w, 0.95), workP99: pick(w, 0.99), dprDrops: p.dprDrops, dpr: k.renderer.dpr, state: g.state, time: +g.time.toFixed(1), cops: g.cops.length, chunks: g.world.chunks.size, kills: g.kills, damage: +g.damage.toFixed(1), score: Math.floor(g.score), particles: g.fx.liveCount() };
+    return { n, frameAvg: +(f.reduce((a, b) => a + b, 0) / n).toFixed(2), frameP50: pick(f, 0.5), frameP95: pick(f, 0.95), frameP99: pick(f, 0.99), workP50: pick(w, 0.5), workP95: pick(w, 0.95), workP99: pick(w, 0.99), workMax: pick(w, 0.9999), frameMax: pick(f, 0.9999), dprDrops: p.dprDrops, dpr: k.renderer.dpr, state: g.state, time: +g.time.toFixed(1), cops: g.cops.length, chunks: g.world.chunks.size, kills: g.kills, damage: +g.damage.toFixed(1), score: Math.floor(g.score), particles: g.fx.liveCount() };
   });
 }
 
@@ -146,6 +146,26 @@ await page.close();
   const again = await p2.evaluate(() => globalThis.__kacis.game.state);
   report.klavye = { keyTurn, rev, again, errors: e2 };
   await p2.close();
+}
+
+// Geri tuşu mantığı ve APK düğmesi
+{
+  const { page: p6, errors: e6 } = await open(390, 844);
+  await p6.waitForFunction(() => !document.getElementById('menu').hidden, { timeout: 8000 });
+  const apk = await p6.evaluate(() => { const a = document.getElementById('btn-apk'); const r = a.getBoundingClientRect(); return { href: a.href, visible: !a.hidden && r.width > 100 && r.bottom <= innerHeight }; });
+  await p6.click('#btn-play');
+  await sleep(500);
+  const seq = [];
+  const st = () => p6.evaluate(() => ({ state: globalThis.__kacis.game.state, pause: !document.getElementById('pause').hidden, menu: !document.getElementById('menu').hidden }));
+  seq.push(await p6.evaluate(() => globalThis.__kacisBack()), await st());
+  seq.push(await p6.evaluate(() => globalThis.__kacisBack()), await st());
+  await p6.evaluate(() => globalThis.__kacis.pause());
+  await p6.click('#btn-pause-menu');
+  await sleep(200);
+  const first = await p6.evaluate(() => globalThis.__kacisBack());
+  const second = await p6.evaluate(() => globalThis.__kacisBack());
+  report.geri = { apk, seq, menuBirinci: first, menuIkinci: second, errors: e6 };
+  await p6.close();
 }
 
 // Araçlar listesi parmakla kaydırılabiliyor mu

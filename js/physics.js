@@ -56,7 +56,7 @@ export function stepCar(c, steerIn, throttle, spec, surf, dt) {
 
   // 3) Açısal hız: ağırlık hissi için hedefe üstel yaklaşır, anında dönmez
   const dir = vF >= 0 ? 1 : -1;
-  const speedFactor = Math.min(1, speed / 130) * (1 - 0.18 * Math.min(1, speed / spec.maxSpeed));
+  const speedFactor = Math.min(1, speed / 140) * (1 - 0.1 * Math.min(1, speed / spec.maxSpeed));
   const yawTarget = c.steer * spec.turnRate * speedFactor * dir;
   c.w += (yawTarget - c.w) * (1 - Math.exp(-P.yawResponse * dt));
 

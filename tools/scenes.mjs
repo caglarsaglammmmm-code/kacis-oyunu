@@ -17,25 +17,41 @@ async function scene(name, w, h, q, setup, wait = 700) {
   await page.screenshot({ path: `${OUT}/z-${name}.png` });
   await page.close();
 }
+const toBiome = (biome, template) => {
+  const g = globalThis.__kacis.game; const w = g.world; const out = {};
+  for (let r = 3; r < 90; r++) for (let cy = -r; cy <= r; cy += 2) for (let cx = -r; cx <= r; cx += 2) {
+    w.biomeAt(cx, cy, out);
+    if (out.biome !== biome || (template === 'sea') !== out.sea) continue;
+    const c = w.chunk(cx, cy);
+    if (template && c.template !== template) continue;
+    const p = g.player;
+    p.x = c.x + 500; p.y = c.y + 100; p.vx = 0; p.vy = 0; p.a = 0; g.cam.x = p.x + 100; g.cam.y = p.y + 240;
+    for (const k of g.cops) k.x += 1e5;
+    return `${biome}`;
+  }
+};
+for (const [b, tpl] of [['beach', 'sea'], ['beach', 'beach'], ['forest'], ['desert'], ['rural'], ['city', 'downtown']]) {
+  await scene(`${b}-${tpl || ''}`, 390, 844, '?god=1', `(${toBiome.toString()})('${b}', ${tpl ? `'${tpl}'` : 'undefined'})`, 1800);
+}
+await scene('guc', 390, 844, '?t=100&god=1', () => {
+  const g = globalThis.__kacis.game; const p = g.player;
+  g.takePower('giant', p.x, p.y); g.takePower('ghost', p.x, p.y);
+  for (const [i, k] of [17, 18, 19, 20].entries()) g.world.addPower(p.x + 40 + i * 60, p.y + 260, k);
+  g.spawnCop('moto', 'chaser', p.x - 60, p.y + 120, 1);
+  g.spawnCop('fast', 'chaser', p.x + 60, p.y + 200, 1);
+}, 500);
+await scene('kalabalik', 844, 390, '?t=60&god=1', () => {
+  const g = globalThis.__kacis.game; const p = g.player;
+  const peds = g.crowd.peds; for (let i = 0; i < 10; i++) { const k = peds[i]; k.alive = true; k.state = 0; k.z = 0; k.look = i % 6; k.a = i; k.x = p.x + 40 + i * 12; k.y = p.y + 70 + (i % 3) * 16; }
+  for (let i = 0; i < 4; i++) g.crowd.launch(peds[i], p, false);
+  const kinds = ['sedan', 'pickup', 'bus', 'truck']; let n = 0;
+  for (const o of g.crowd.npcs) { if (n >= 4) break; g.crowd.npcT = 1e9; g.crowd.spawnNpc(); }
+  for (const o of g.crowd.npcs) if (o.alive) { o.kind = kinds[n % 4]; o.spec = globalThis.__kacis.cfg.npc.types[o.kind]; o.len = o.spec.len; o.wid = o.spec.wid; o.x = p.x - 280 + n * 150; o.y = p.y + 170; o.vx = 0; o.vy = 0; o.a = 0; o.drive.maxSpeed = 1; n++; }
+}, 280);
 await scene('tank', 390, 844, '?t=285&god=1', () => {
   const g = globalThis.__kacis.game; const p = g.player;
   const c = g.spawnCop('tank', 'chaser', p.x + 60, p.y + 300, -1.57);
-  c.turret = -1.4;
-  c.fireT = 0.1;
+  c.turret = -1.4; c.fireT = 0.1;
   g.spawnCop('swat', 'chaser', p.x - 60, p.y + 180, -1.57);
-  g.spawnCop('advanced', 'flanker', p.x + 70, p.y - 60, 1.57);
 }, 400);
-await scene('barikat', 844, 390, '?t=120&god=1', () => {
-  const g = globalThis.__kacis.game; const p = g.player;
-  g.time = 120; g.cam.halfW = 100; g.cam.halfH = 100;
-  for (let i = 0; i < 30 && !g.placeBarricade(); i++);
-  const c = g.cops.find((k) => k.state === 'barricade');
-  if (c) { p.x = c.x - 0; p.y = c.y - 240; g.player.vy = 200; g.player.vx=0; p.a = 1.57; g.cam.x = p.x; g.cam.y = p.y + 100; }
-  console.log(!!c);
-}, 300);
-await scene('ates', 390, 844, '?t=60', () => {
-  const g = globalThis.__kacis.game; g.damage = 85;
-}, 900);
-await scene('duman', 844, 390, '?t=60', () => { globalThis.__kacis.game.damage = 60; }, 900);
-await scene('uyari', 390, 844, '?t=198&god=1', () => {}, 1500);
 await b.close();

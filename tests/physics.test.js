@@ -63,18 +63,18 @@ test('basılı dönüşte drift oluşur: yanal kayma ve açısal hız ayrı', ()
     maxSlip = Math.max(maxSlip, c.slip);
     if (c.drifting) drifted++;
   }
-  assert.ok(maxSlip > 90, `kayma ${maxSlip}`);
+  assert.ok(maxSlip > 150, `kayma ${maxSlip}`);
   assert.ok(drifted > 20, `drift kareleri ${drifted}`);
 });
 
-test('bırakınca kayarak toparlar: kayma hemen bitmez ama 1,5 sn içinde biter', () => {
+test('bırakınca kayarak toparlar: kayma hemen bitmez ama 2,5 sn içinde biter', () => {
   const c = car();
   run(c, 0, 1, 3);
   run(c, 1, 1, 1);
   const at = c.slip;
   run(c, 0, 1, 0.1);
   assert.ok(c.slip > at * 0.4, `0,1 sn sonra kayma ${c.slip} / ${at}`);
-  run(c, 0, 1, 1.4);
+  run(c, 0, 1, 2.4);
   assert.ok(c.slip < 20, `kayma ${c.slip}`);
   assert.ok(Math.abs(c.w) < 0.4, `açısal ${c.w}`);
   assert.ok(Math.cos(Math.atan2(c.vy, c.vx) - c.a) > 0.97, 'burun gidiş yönünde');
@@ -89,7 +89,7 @@ test('90 derece dönüş yaklaşık bir saniyede ve ana yol genişliğinde biter
   while (c.a < Math.PI / 2 - 0.25 && t < 3) { stepCar(c, 1, 1, spec, road, dt); t += dt; }
   run(c, 0, 1, 0.4);
   assert.ok(t < 1.1, `süre ${t}`);
-  assert.ok(c.x - x0 < 340, `açılma ${c.x - x0}`);
+  assert.ok(c.x - x0 < 520, `açılma ${c.x - x0}`);
   assert.ok(c.y > y0);
 });
 

@@ -1,9 +1,10 @@
 // Oyun mantığı. DOM'a dokunmaz; tarayıcısız test edilebilir.
 import { CONFIG, GROUND, MAX_STARS } from './config.js';
 import { makeBody, resetBody, stepCar, bounceOff } from './physics.js';
-import { World, PROP, PROP_INFO, TILE, CHUNK } from './world.js';
+import { World, PROP, PROP_INFO, TILE, CHUNK, isWaterRect, isPower, powerName, POWER_KINDS } from './world.js';
 import { Effects, FX } from './effects.js';
 import { FlowField, driveCop, planBarricade, newPlan } from './police.js';
+import { Crowd } from './crowd.js';
 
 const D = CONFIG.difficulty;
 const DMG = CONFIG.damage;
@@ -11,6 +12,8 @@ const AI = CONFIG.policeAI;
 const SC = CONFIG.score;
 const BAR = CONFIG.barricade;
 const TK = CONFIG.tank;
+const PW = CONFIG.powers;
+const tmpSirens = { wail: 1e9, yelp: 1e9, hilo: 1e9, chirp: 1e9 };
 
 export function interp(curve, t) {
   if (t <= curve[0][0]) return curve[0][1];
@@ -36,6 +39,8 @@ export function difficultyAt(t, out = {}) {
   out.flankerShare = interp(D.flankerShare, t);
   out.swatShare = t >= D.swatAt ? interp(D.swatShare, t) : 0;
   out.advancedShare = t >= D.advancedAt ? interp(D.advancedShare, t) : 0;
+  out.motoShare = t >= D.motoFrom ? interp(D.motoShare, t) : 0;
+  out.fastShare = t >= D.fastFrom ? interp(D.fastShare, t) : 0;
   out.tanks = t >= D.tanksAt ? Math.round(interp(D.tankCount, t)) : 0;
   out.barricadeEvery = t >= BAR.from ? interp(BAR.intervalCurve, t) : Infinity;
   return out;
@@ -61,6 +66,7 @@ function makeCop() {
   b.ctlS = 0; b.ctlT = 1; b.stuckT = 0; b.reverseT = 0; b.reverses = 0;
   b.los = false; b.hitCd = 0; b.nearCd = 0; b.wakeT = 0;
   b.turret = 0; b.fireT = 0; b.fxT = 0; b.hurtFlash = 0;
+  b.wanderT = 0; b.wx = 0; b.wy = 0;
   return b;
 }
 
@@ -72,6 +78,8 @@ export class Game {
   constructor(seed = (Math.random() * 1e9) | 0) {
     this.world = new World(seed);
     this.fx = new Effects();
+    this.crowd = new Crowd(this);
+    this.sirens = tmpSirens;
     this.flow = new FlowField();
     this.player = makeBody();
     this.cops = [];
@@ -106,6 +114,12 @@ export class Game {
     this.broken = 0;
     this.driftTime = 0;
     this.nearMisses = 0;
+    this.pedHits = 0;
+    this.npcHits = 0;
+    this.ghostT = 0;
+    this.giantT = 0;
+    this.powerT = 12;
+    this.powersTaken = 0;
     this.combo = 1;
     this.comboT = 0;
     this.damage = 0;
@@ -130,6 +144,7 @@ export class Game {
     for (const s of this.shots) s.alive = false;
     for (const s of this.spikes) s.alive = false;
     this.fx.clear();
+    this.crowd.clear();
     difficultyAt(this.time, this.diff);
     this.lastStage = this.diff.stage;
     this.result = null;
@@ -186,6 +201,7 @@ export class Game {
     p.speed = 300;
     for (const c of this.cops) { c.x += c.vx * dt; c.fxT += dt; }
     this.world.update(p.x, p.y);
+    this.crowd.update(dt);
   }
 
   tickPlay(dt, steer, reverse) {
@@ -205,7 +221,9 @@ export class Game {
     this.updatePlayer(dt, steer, reverse);
     this.updateFlow(dt);
     this.updateCops(dt);
+    this.crowd.update(dt);
     this.director(dt);
+    this.updatePowers(dt);
     this.updateShots(dt);
     this.updateSpikes();
     this.updateScore(dt);
@@ -224,6 +242,7 @@ export class Game {
     p.y += p.vy * dt;
     if (Math.random() < 0.3) this.fx.burst(FX.DARK, p.x, p.y, 1, 40, 1, 15);
     this.updateCops(dt * 0.5);
+    this.crowd.update(dt);
     this.updateShots(dt);
     if (this.hitFlash > 0) this.hitFlash -= dt * 3;
     if (this.dyingT <= 0) this.finish();
@@ -238,11 +257,16 @@ export class Game {
     if (this.hitCd > 0) this.hitCd -= dt;
 
     const impact = this.collideWorld(p, true);
-    if (impact > 0) this.playerImpact(impact, 1, false);
+    if (impact > 0) this.playerImpact(impact, hit.rect && isWaterRect(hit.rect) ? 0.35 : 1, false);
     this.collideProps(p, true);
     this.driftEffects(dt, g);
 
     if (this.hitFlash > 0 && Math.random() < 0.02) this.fx.sparks(p.x, p.y, 2);
+    // Sığ suda sıçrama, kumda toz
+    if (p.speed > 130 && Math.random() < 0.4) {
+      if (g === GROUND.SHALLOW) this.fx.spawn(FX.WATER, p.x, p.y, -p.vx * 0.15 + (Math.random() - 0.5) * 90, -p.vy * 0.15 + (Math.random() - 0.5) * 90, 0.5, 9);
+      else if (g === GROUND.SAND || g === GROUND.DIRT) this.fx.spawn(FX.DUST, p.x, p.y, p.vx * 0.1, p.vy * 0.1, 0.6, 11);
+    }
   }
 
   driftEffects(dt, ground) {
@@ -288,7 +312,7 @@ export class Game {
   }
 
   hurt(amount) {
-    if (this.god) return;
+    if (this.god || this.giantT > 0) return;
     this.damage = Math.min(DMG.stages[3], this.damage + amount);
     if (amount >= 2) this.sinceHit = 0;
     if (this.burning) this.burnT = DMG.burnTime;
@@ -304,7 +328,7 @@ export class Game {
       }
       this.burnT -= dt;
       if (this.burnT > 0) {
-        if (!this.god) this.damage += DMG.burnRate * dt;
+        if (!this.god && this.giantT <= 0) this.damage += DMG.burnRate * dt;
       } else {
         this.damage = Math.max(DMG.regenFloor, this.damage - DMG.regenRate * dt);
       }
@@ -352,6 +376,7 @@ export class Game {
 
   finish() {
     this.state = 'over';
+    if (this.giantT > 0) this.setGiant(false);
     const earned = this.coins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills;
     this.result = {
       score: Math.floor(this.score),
@@ -376,7 +401,7 @@ export class Game {
       const cy = b.y + Math.sin(b.a) * off * sign;
       if (!this.world.circleHit(cx, cy, r, hit)) continue;
       const rect = hit.rect;
-      if (b.crusher && rect.kind !== 'water') {
+      if (b.crusher && !isWaterRect(rect)) {
         this.crushRect(hit.chunk, rect);
         continue;
       }
@@ -387,7 +412,7 @@ export class Game {
       if (impact > 60) {
         const px = cx - hit.nx * r;
         const py = cy - hit.ny * r;
-        if (rect.kind === 'water') {
+        if (isWaterRect(rect)) {
           this.fx.burst(FX.WATER, px, py, 8, 170, 0.5, 8);
           if (isPlayer) this.emit('splash');
         } else {
@@ -425,6 +450,13 @@ export class Game {
           const dx = pr.x - b.x;
           const dy = pr.y - b.y;
           if (dx > 90 || dx < -90 || dy > 90 || dy < -90) continue;
+          if (isPower(pr.kind)) {
+            if (isPlayer && dx * dx + dy * dy < (40 + R) * (40 + R)) {
+              pr.alive = false;
+              this.takePower(powerName(pr.kind), pr.x, pr.y);
+            }
+            continue;
+          }
           if (pr.kind === PROP.COIN) {
             if (!isPlayer) continue;
             const m = CONFIG.coin.magnet;
@@ -441,7 +473,7 @@ export class Game {
           const d2 = dx * dx + dy * dy;
           if (d2 >= rr * rr) continue;
           const speed = Math.hypot(b.vx, b.vy);
-          if (speed >= info.brk || b.crusher) {
+          if (speed >= info.brk || b.crusher || b.breaker || (isPlayer && this.giantT > 0)) {
             this.breakProp(b, pr, info, isPlayer);
           } else {
             // Yavaş temas: katı engel gibi it
@@ -531,6 +563,7 @@ export class Game {
     c.role = role;
     c.state = 'chase';
     c.crusher = type === 'tank';
+    c.wanderT = 0;
     c.staticBody = false;
     // Polis son hızı her zaman oyuncu arabasına oranlıdır, yani hep biraz yavaştır
     c.drive.maxSpeed = this.carSpec.maxSpeed * spec.speed;
@@ -593,6 +626,8 @@ export class Game {
     const world = this.world;
     let nearest = 1e9;
     let closing = 0;
+    const sirens = this.sirens;
+    sirens.wail = 1e9; sirens.yelp = 1e9; sirens.hilo = 1e9; sirens.chirp = 1e9;
     const playing = this.state === 'play';
 
     for (let i = this.cops.length - 1; i >= 0; i--) {
@@ -622,8 +657,8 @@ export class Game {
           c.hp -= (impact - AI.wallMinImpact) * AI.wallDamage * (40 / Math.max(40, c.spec.hp * 0.5));
           c.hurtFlash = 0.3;
         }
-        if (c.type !== 'tank' && Math.abs(c.x - p.x) < 900 && Math.abs(c.y - p.y) < 900) this.collideProps(c, false);
-        else if (c.type === 'tank') this.collideProps(c, false);
+        // Nesne taraması ekran çevresinde ve kare atlayarak: telefonda yük azalır
+        if ((this.tickCount + c.id) % 3 === 0 && this.onScreen(c.x, c.y, 160)) this.collideProps(c, false);
       }
 
       if (c.hurtFlash > 0) c.hurtFlash -= dt;
@@ -634,13 +669,13 @@ export class Game {
 
       if (playing) {
         // Oyuncu ile çarpışma
-        if (dist < (c.len + p.len) * 0.75) {
+        if (dist < (c.len + p.len) * 0.75 && this.ghostT <= 0) {
           const rv = this.collideCars(p, c);
           if (rv > 1) this.copContact(c, rv, i);
           if (i >= this.cops.length || this.cops[i] !== c) continue;
         }
         // Yakın kaçış
-        if (c.nearCd <= 0 && c.hitCd <= 0 && dist < SC.nearMissDist + c.wid * 0.5 && c.state === 'chase') {
+        if (this.ghostT <= 0 && c.nearCd <= 0 && c.hitCd <= 0 && dist < SC.nearMissDist + c.wid * 0.5 && c.state === 'chase') {
           const rvx = p.vx - c.vx;
           const rvy = p.vy - c.vy;
           const rel = Math.hypot(rvx, rvy);
@@ -655,7 +690,9 @@ export class Game {
           nearest = dist;
           closing = (dx * (c.vx - p.vx) + dy * (c.vy - p.vy)) / (dist || 1);
         }
-        if (c.type === 'tank') this.tankFire(c, dist, dt);
+        const sk = c.spec.siren;
+        if (sk && dist < sirens[sk]) sirens[sk] = dist;
+        if (c.type === 'tank' && this.ghostT <= 0) this.tankFire(c, dist, dt);
       }
     }
 
@@ -680,6 +717,13 @@ export class Game {
     if (c.hitCd > 0) return;
     c.hitCd = 0.5;
     const spec = c.spec;
+    if (this.giantT > 0) {
+      // Dev mod: polisi ezer, hasar almaz
+      c.hp -= c.type === 'tank' ? PW.giantCrushTank : 1e6;
+      this.fx.sparks(c.x, c.y, 14);
+      this.cam.shake = Math.min(12, this.cam.shake + 4);
+      return;
+    }
     const mul = spec.ram * c.power * Math.min(2, Math.sqrt(spec.mass / this.carSpec.mass));
     this.playerImpact(rv + 40, mul * DMG.copScale, true, DMG.maxCopHit * spec.ram * c.power);
     // Oyuncu ne kadar ağır ve hızlıysa polise o kadar vurur. Ağır araçlara az işler.
@@ -706,8 +750,14 @@ export class Game {
 
   pickType(r) {
     const d = this.diff;
-    if (r < d.advancedShare) return 'advanced';
-    if (r < d.advancedShare + d.swatShare) return 'swat';
+    let s = d.advancedShare;
+    if (r < s) return 'advanced';
+    s += d.swatShare;
+    if (r < s) return 'swat';
+    s += d.fastShare;
+    if (r < s) return 'fast';
+    s += d.motoShare;
+    if (r < s) return 'moto';
     return 'car';
   }
 
@@ -765,7 +815,7 @@ export class Game {
       }
     }
 
-    if (d.barricadeEvery < Infinity) {
+    if (d.barricadeEvery < Infinity && this.ghostT <= 0) {
       this.barricadeT -= dt;
       if (this.barricadeT <= 0) {
         this.barricadeT = this.placeBarricade() ? d.barricadeEvery : 1.5;
@@ -889,10 +939,92 @@ export class Game {
       // Düştüğü bina yıkılır
       const tx = Math.floor(s.x / TILE);
       const ty = Math.floor(s.y / TILE);
-      if (this.world.costAtTile(tx, ty) === 0 && this.world.circleHit(s.x, s.y, 8, hit) && hit.rect.kind !== 'water') {
+      if (this.world.costAtTile(tx, ty) === 0 && this.world.circleHit(s.x, s.y, 8, hit) && !isWaterRect(hit.rect)) {
         this.crushRect(hit.chunk, hit.rect);
       }
     }
+  }
+
+  // --- Özel güçler ---
+  updatePowers(dt) {
+    if (this.ghostT > 0) {
+      this.ghostT -= dt;
+      if (this.ghostT <= 0) { this.ghostT = 0; this.emit('powerend'); }
+    }
+    if (this.giantT > 0) {
+      this.giantT -= dt;
+      if (this.giantT <= 0) { this.giantT = 0; this.setGiant(false); this.emit('powerend'); }
+    }
+    this.powerT -= dt;
+    if (this.powerT <= 0) {
+      const min = this.viewRadius() * 0.9;
+      if (this.findSpawn(spawnPt, min, min + 500, true)) {
+        const w = PW.weights;
+        let r = Math.random() * (w.blast + w.ghost + w.heal + w.giant);
+        let i = 0;
+        for (const k of POWER_KINDS) {
+          r -= w[k];
+          if (r < 0) break;
+          i++;
+        }
+        this.world.addPower(spawnPt.x, spawnPt.y, PROP.POWER_BLAST + Math.min(3, i));
+        this.powerT = PW.spawnEvery;
+      } else {
+        this.powerT = 1;
+      }
+    }
+  }
+
+  takePower(name, x, y) {
+    this.powersTaken++;
+    const p = this.player;
+    this.fx.burst(FX.GLINT, x, y, 16, 220, 0.6, 7);
+    this.fx.wave(x, y, 120);
+    this.emit('power', name);
+    if (name === 'blast') this.blast();
+    else if (name === 'heal') {
+      this.damage = Math.max(0, this.damage - PW.healAmount);
+      this.burning = false;
+      this.burnT = 0;
+      this.sinceHit = 0;
+      this.fx.float(p.x, p.y - 34, 'CAN +', '#2fd872');
+    } else if (name === 'ghost') {
+      this.ghostT = PW.duration;
+      this.fx.float(p.x, p.y - 34, 'GÖRÜNMEZ', '#a07bff');
+    } else if (name === 'giant') {
+      this.giantT = PW.duration;
+      this.setGiant(true);
+      this.fx.float(p.x, p.y - 34, 'DEV MOD', '#ffd23f');
+    }
+  }
+
+  setGiant(on) {
+    const p = this.player;
+    const s = this.carSpec;
+    const k = on ? PW.giantScale : 1;
+    p.len = s.len * k;
+    p.wid = s.wid * k;
+    p.mass = s.mass * (on ? PW.giantMass : 1);
+  }
+
+  // Patlama: çevredeki tüm polis ve sivil araçlar patlar; tank ağır hasar alır
+  blast() {
+    const p = this.player;
+    const R = PW.blastRadius;
+    this.fx.explosion(p.x, p.y, 150);
+    this.fx.wave(p.x, p.y, R);
+    this.emit('explosion', 0.9);
+    for (let i = this.cops.length - 1; i >= 0; i--) {
+      const c = this.cops[i];
+      if (Math.hypot(c.x - p.x, c.y - p.y) > R) continue;
+      if (c.type === 'tank') {
+        c.hp -= PW.blastTankDamage;
+        c.hurtFlash = 0.5;
+        if (c.hp > 0) continue;
+      }
+      this.destroyCop(i, true);
+    }
+    this.crowd.blast(p.x, p.y, R);
   }
 
   // --- Skor ---
@@ -929,7 +1061,7 @@ export class Game {
     const V = CONFIG.camera;
     const top = this.carSpec.maxSpeed;
     const speedK = Math.min(1, p.speed / top);
-    const z = 1 - V.zoomOut * speedK;
+    const z = (1 - V.zoomOut * speedK) * (this.giantT > 0 ? 0.82 : 1);
     c.zoom += (z - c.zoom) * (1 - Math.exp(-V.zoomRate * dt));
     const base = Math.sqrt(this.view.w * this.view.h) / V.viewArea;
     c.scale = base * c.zoom;
