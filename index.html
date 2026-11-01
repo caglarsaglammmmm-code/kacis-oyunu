@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Kaç Kaçabilirsen</title>
+<meta name="description" content="Kuşbakışı polis kaçış ve drift oyunu">
+<meta name="theme-color" content="#14161f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="game" aria-label="Oyun alanı"></canvas>
+
+<div id="hud" hidden>
+  <div class="hud-left">
+    <div id="hud-time">0:00</div>
+    <div id="hud-score">0</div>
+    <div id="hud-combo"></div>
+  </div>
+  <button id="btn-pause" aria-label="Duraklat">❚❚</button>
+  <div class="hud-right">
+    <div class="hud-coins"><i class="coin"></i><span id="hud-coins">0</span></div>
+    <div id="hud-stars" aria-label="Arananlık"></div>
+    <div id="hud-car" data-stage="0" aria-label="Hasar">
+      <svg viewBox="0 0 64 34"><rect x="6" y="5" width="52" height="24" rx="7"/><rect class="glass" x="33" y="9" width="12" height="16" rx="3"/><rect class="glass" x="11" y="10" width="7" height="14" rx="2"/></svg>
+      <b class="puff p1"></b><b class="puff p2"></b><b class="flame"></b>
+    </div>
+  </div>
+</div>
+<div id="hint" hidden>
+  <div><b>Sola bas</b><span>sola drift</span></div>
+  <div class="mid"><b>İkisine bas</b><span>geri vites</span></div>
+  <div><b>Sağa bas</b><span>sağa drift</span></div>
+</div>
+<div id="alert"></div>
+
+<section id="menu" class="screen menu" hidden>
+  <div class="menu-coins"><i class="coin"></i><span id="menu-coins">0</span></div>
+  <h1><span>KAÇ</span><em>KAÇABİLİRSEN</em></h1>
+  <p id="menu-best" class="sub"></p>
+  <nav>
+    <button id="btn-play" class="btn primary">Oyna</button>
+    <button id="btn-garage" class="btn">Araçlar · <span id="menu-car"></span></button>
+    <div class="row">
+      <button id="btn-settings" class="btn">Ayarlar</button>
+      <button id="btn-howto" class="btn">Nasıl Oynanır</button>
+    </div>
+  </nav>
+</section>
+
+<section id="garage" class="screen panel" hidden>
+  <header><button class="back" data-back="menu" aria-label="Geri">←</button><h2>Araçlar</h2><div class="menu-coins static"><i class="coin"></i><span id="garage-coins">0</span></div></header>
+  <div id="garage-list"></div>
+</section>
+
+<section id="settings" class="screen panel" hidden>
+  <header><button class="back" data-back="menu" aria-label="Geri">←</button><h2>Ayarlar</h2></header>
+  <div class="form">
+    <label class="toggle"><span>Ses</span><input id="set-sound" type="checkbox"><i></i></label>
+    <label class="toggle"><span>Titreşim</span><input id="set-vibrate" type="checkbox"><i></i></label>
+    <div id="dev-panel" hidden>
+      <h3>Geliştirici</h3>
+      <label class="toggle"><span>Ölümsüzlük</span><input id="dev-god" type="checkbox"><i></i></label>
+      <label class="select"><span>Başlangıç süresi</span>
+        <select id="dev-start">
+          <option value="0">0 sn</option><option value="45">45 sn (SWAT öncesi)</option><option value="195">195 sn (takviye öncesi)</option><option value="275">275 sn (tank öncesi)</option><option value="280">280 sn (tanklar)</option>
+        </select>
+      </label>
+    </div>
+    <p id="version" class="version"></p>
+  </div>
+</section>
+
+<section id="howto" class="screen panel" hidden>
+  <header><button class="back" data-back="menu" aria-label="Geri">←</button><h2>Nasıl Oynanır</h2></header>
+  <div class="howto">
+    <div class="demo right"><div class="phone"><i class="half l"></i><i class="half r"></i><b class="finger f1"></b><b class="toy"></b></div><h3>Sağ yarıya bas</h3><p>Sağa döner, drift atar</p></div>
+    <div class="demo left"><div class="phone"><i class="half l"></i><i class="half r"></i><b class="finger f1"></b><b class="toy"></b></div><h3>Sol yarıya bas</h3><p>Sola döner, drift atar</p></div>
+    <div class="demo both"><div class="phone"><i class="half l"></i><i class="half r"></i><b class="finger f1"></b><b class="finger f2"></b><b class="toy"></b></div><h3>İkisine birden bas</h3><p>Durur ve geri gider</p></div>
+  </div>
+  <ul class="tips">
+    <li>Araba kendi gider. Sen yalnızca yön verirsin.</li>
+    <li>Duvarlar hasar verir: duman, kıvılcım, ateş, patlama.</li>
+    <li>Polise kıl payı yaklaşmak ve drift atmak combo çarpanını büyütür.</li>
+    <li>Polisleri duvara bindir ya da çarparak devir.</li>
+    <li>Kırmızı daire görürsen hemen çık: tank ateşi geliyor!</li>
+  </ul>
+</section>
+
+<section id="pause" class="screen panel center" hidden>
+  <h2>Duraklatıldı</h2>
+  <button id="btn-resume" class="btn primary">Devam et</button>
+  <button id="btn-pause-menu" class="btn">Ana menü</button>
+</section>
+
+<section id="over" class="screen panel center" hidden>
+  <h2 id="over-title">YAKALANDIN!</h2>
+  <div class="big-score"><span>Skor</span><strong id="over-score">0</strong></div>
+  <div class="summary">
+    <div><span>Süre</span><b id="over-time">0:00</b></div>
+    <div><span>Coin</span><b id="over-coins">0</b></div>
+    <div><span>Devrilen polis</span><b id="over-kills">0</b></div>
+    <div><span>Kırılan nesne</span><b id="over-broken">0</b></div>
+    <div><span>Yakın kaçış</span><b id="over-near">0</b></div>
+    <div><span>Drift</span><b id="over-drift">0</b></div>
+  </div>
+  <p id="over-best" class="sub"></p>
+  <div id="over-actions">
+    <button id="btn-retry" class="btn primary">Tekrar dene</button>
+    <button id="btn-over-menu" class="btn">Ana menü</button>
+  </div>
+</section>
+
+<div id="splash" hidden><p>Çağlar Sağlam bu oyuna şaplağını vurdu</p></div>
+
+<script>
+  // file:// üzerinde ES modül çalışmaz; orada tek dosyalık kopya yüklenir.
+  (function () {
+    var s = document.createElement('script');
+    if (location.protocol === 'file:') s.src = 'js/app.file.js';
+    else { s.type = 'module'; s.src = 'js/main.js'; }
+    document.body.appendChild(s);
+  })();
+</script>
+</body>
+</html>

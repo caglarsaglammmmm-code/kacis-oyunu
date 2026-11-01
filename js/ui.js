@@ -1,0 +1,224 @@
+// Menüler ve oyun içi gösterge. HUD yalnızca değer değişince DOM'a yazar.
+import { CONFIG, MAX_STARS } from './config.js';
+import { carSprite } from './render.js';
+
+const $ = (id) => document.getElementById(id);
+
+export function formatTime(t) {
+  const s = Math.floor(t);
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+const SCREENS = ['menu', 'garage', 'settings', 'howto', 'over', 'pause'];
+
+export class UI {
+  constructor(storage, actions) {
+    this.storage = storage;
+    this.actions = actions; // play, resume, toMenu, sound, vibrate
+    this.last = { time: '', score: '', coins: '', stage: -1, stars: -1, combo: '' };
+    this.devTaps = 0;
+    this.bind();
+    this.buildStars();
+    this.syncSettings();
+    this.refreshMenu();
+  }
+
+  bind() {
+    const a = this.actions;
+    const click = (id, fn) => $(id).addEventListener('click', () => { a.tap(); fn(); });
+    click('btn-play', () => a.play());
+    click('btn-garage', () => { this.renderGarage(); this.show('garage'); });
+    click('btn-settings', () => this.show('settings'));
+    click('btn-howto', () => this.show('howto'));
+    for (const b of document.querySelectorAll('[data-back]')) {
+      b.addEventListener('click', () => { a.tap(); this.refreshMenu(); this.show(b.dataset.back); });
+    }
+    click('btn-retry', () => a.play());
+    click('btn-over-menu', () => a.toMenu());
+    click('btn-pause', () => a.pause());
+    click('btn-resume', () => a.resume());
+    click('btn-pause-menu', () => a.toMenu());
+    // Duraklat tuşu sürüş girdisi sayılmasın
+    $('btn-pause').addEventListener('pointerdown', (e) => e.stopPropagation());
+
+    const d = this.storage.data;
+    $('set-sound').addEventListener('change', (e) => { d.settings.sound = e.target.checked; this.storage.save(); a.applySettings(); });
+    $('set-vibrate').addEventListener('change', (e) => { d.settings.vibrate = e.target.checked; this.storage.save(); a.applySettings(); });
+    $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
+    $('dev-start').addEventListener('change', (e) => { d.dev.startTime = Number(e.target.value); this.storage.save(); });
+    // Gizli geliştirici bölümü: sürüm yazısına 7 kez dokun
+    $('version').textContent = `Sürüm ${CONFIG.version}`;
+    $('version').addEventListener('click', () => {
+      if (++this.devTaps >= 7) $('dev-panel').hidden = false;
+    });
+  }
+
+  syncSettings() {
+    const d = this.storage.data;
+    $('set-sound').checked = d.settings.sound;
+    $('set-vibrate').checked = d.settings.vibrate;
+    $('dev-god').checked = d.dev.god;
+    $('dev-start').value = String(d.dev.startTime);
+  }
+
+  show(name) {
+    for (const s of SCREENS) $(s).hidden = s !== name;
+  }
+
+  hideAll() {
+    this.show('');
+  }
+
+  setHud(on) {
+    $('hud').hidden = !on;
+  }
+
+  refreshMenu() {
+    const d = this.storage.data;
+    $('menu-coins').textContent = d.coins;
+    $('menu-best').textContent = d.bestScore ? `En iyi: ${d.bestScore.toLocaleString('tr-TR')} puan · ${formatTime(d.bestTime)}` : 'İlk kaçışın seni bekliyor';
+    $('menu-car').textContent = this.storage.selectedCar().name;
+  }
+
+  splash(done) {
+    const el = $('splash');
+    el.hidden = false;
+    el.classList.add('play');
+    setTimeout(() => {
+      el.hidden = true;
+      done();
+    }, 3000);
+  }
+
+  buildStars() {
+    const box = $('hud-stars');
+    box.textContent = '';
+    for (let i = 0; i < MAX_STARS; i++) {
+      const s = document.createElement('span');
+      s.textContent = '★';
+      box.appendChild(s);
+    }
+  }
+
+  alert(stage) {
+    const text = CONFIG.difficulty.alerts[[0, CONFIG.difficulty.swatAt, CONFIG.difficulty.advancedAt, CONFIG.difficulty.tanksAt][stage]];
+    const el = $('alert');
+    el.textContent = text;
+    el.classList.remove('run');
+    void el.offsetWidth; // Animasyonu baştan başlat
+    el.classList.add('run');
+  }
+
+  showHint(on) {
+    $('hint').hidden = !on;
+  }
+
+  resetHud() {
+    this.last = { time: '', score: '', coins: '', stage: -1, stars: -1, combo: '' };
+    $('alert').classList.remove('run');
+  }
+
+  hud(g) {
+    const l = this.last;
+    const time = formatTime(g.time);
+    if (time !== l.time) { l.time = time; $('hud-time').textContent = time; }
+    const score = Math.floor(g.score).toLocaleString('tr-TR');
+    if (score !== l.score) { l.score = score; $('hud-score').textContent = score; }
+    if (g.coins !== l.coins) { l.coins = g.coins; $('hud-coins').textContent = g.coins; }
+    const stage = g.stage;
+    if (stage !== l.stage) {
+      l.stage = stage;
+      $('hud-car').dataset.stage = stage;
+    }
+    const stars = g.diff.stars;
+    if (stars !== l.stars) {
+      l.stars = stars;
+      const list = $('hud-stars').children;
+      for (let i = 0; i < list.length; i++) list[i].classList.toggle('on', i < stars);
+    }
+    const combo = g.combo >= 1.25 ? `x${g.combo.toFixed(1).replace('.', ',')}` : '';
+    if (combo !== l.combo) { l.combo = combo; $('hud-combo').textContent = combo; }
+  }
+
+  over(result, record) {
+    const d = this.storage.data;
+    $('over-title').textContent = record.newScore ? 'YENİ REKOR!' : 'YAKALANDIN!';
+    $('over-title').classList.toggle('record', record.newScore);
+    $('over-score').textContent = result.score.toLocaleString('tr-TR');
+    $('over-time').textContent = formatTime(result.time);
+    $('over-coins').textContent = `+${result.coins}`;
+    $('over-kills').textContent = result.kills;
+    $('over-broken').textContent = result.broken;
+    $('over-near').textContent = result.nearMisses;
+    $('over-drift').textContent = `${result.driftTime.toFixed(1).replace('.', ',')} sn`;
+    $('over-best').textContent = `En iyi skor: ${d.bestScore.toLocaleString('tr-TR')} · En uzun süre: ${formatTime(d.bestTime)}`;
+    this.show('over');
+    // Hâlâ basılı parmak yanlışlıkla düğmeye basmasın
+    const btns = $('over-actions');
+    btns.classList.add('wait');
+    setTimeout(() => btns.classList.remove('wait'), 700);
+  }
+
+  renderGarage() {
+    const d = this.storage.data;
+    $('garage-coins').textContent = d.coins;
+    const list = $('garage-list');
+    list.textContent = '';
+    const max = {
+      maxSpeed: Math.max(...CONFIG.cars.map((c) => c.maxSpeed)),
+      durability: Math.max(...CONFIG.cars.map((c) => c.durability)),
+    };
+    const minDrift = Math.min(...CONFIG.cars.map((c) => c.driftGrip));
+    for (const car of CONFIG.cars) {
+      const owned = d.owned.includes(car.id);
+      const selected = d.selected === car.id;
+      const card = document.createElement('div');
+      card.className = `car-card${selected ? ' selected' : ''}`;
+
+      const art = carSprite(car);
+      art.className = 'car-art';
+      card.appendChild(art);
+
+      const name = document.createElement('h3');
+      name.textContent = car.name;
+      card.appendChild(name);
+      const desc = document.createElement('p');
+      desc.textContent = car.desc;
+      card.appendChild(desc);
+
+      const stat = (label, value) => {
+        const row = document.createElement('div');
+        row.className = 'stat';
+        const t = document.createElement('span');
+        t.textContent = label;
+        const bar = document.createElement('i');
+        const fill = document.createElement('b');
+        fill.style.width = `${Math.round(value * 100)}%`;
+        bar.appendChild(fill);
+        row.append(t, bar);
+        card.appendChild(row);
+      };
+      stat('Hız', (car.maxSpeed - 280) / (max.maxSpeed - 280));
+      stat('Sağlamlık', car.durability / max.durability);
+      stat('Drift', minDrift / car.driftGrip);
+
+      const btn = document.createElement('button');
+      btn.className = 'btn small';
+      if (selected) { btn.textContent = 'Seçili'; btn.disabled = true; }
+      else if (owned) btn.textContent = 'Seç';
+      else {
+        btn.textContent = `${car.cost} coin`;
+        btn.disabled = d.coins < car.cost;
+      }
+      btn.addEventListener('click', () => {
+        this.actions.tap();
+        if (owned) this.storage.select(car.id);
+        else this.storage.buy(car.id);
+        this.actions.carChanged();
+        this.renderGarage();
+      });
+      card.appendChild(btn);
+      list.appendChild(card);
+    }
+  }
+}

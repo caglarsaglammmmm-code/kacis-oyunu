@@ -1,0 +1,22 @@
+{
+  "name": "kac-kacabilirsen",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/physics.test.js tests/world.test.js tests/game.test.js tests/police.test.js tests/misc.test.js",
+    "bundle": "node tools/bundle-file.mjs",
+    "serve": "node tools/serve.mjs",
+    "e2e": "node tools/e2e.mjs",
+    "icons": "node tools/make-icons.mjs",
+    "android:build": "node tools/build-apk.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/core": "^8.6.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
+    "puppeteer-core": "^24.0.0"
+  }
+}

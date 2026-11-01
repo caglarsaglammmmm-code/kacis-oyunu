@@ -1,0 +1,10 @@
+{
+  "appId": "com.caglarsaglam.kackacabilirsen",
+  "appName": "Kaç Kaçabilirsen",
+  "webDir": "www",
+  "backgroundColor": "#07070b",
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  }
+}
