@@ -60,7 +60,7 @@ Dosya adı sabit kaldığı için oyundaki **APK İndir** düğmesi kendiliğind
 
 ## Ayarlar ve test kısayolları
 
-Tüm denge değerleri tek dosyada: `js/config.js` (zaman eşikleri, polis gücü ve sayısı, hasar, arabalar, skor). Değiştirince `npm run bundle` çalıştırın.
+Tüm denge değerleri tek dosyada: `js/config.js` (zaman eşikleri, polis gücü ve sayısı, hasar, arabalar, skor). Tüm araç hızları tek yerden, `speedScale` ile ayarlanır. Değiştirince `npm run bundle` çalıştırın.
 
 - **Başlangıç süresi:** `config.js` içinde `dev.startTime` veya adres çubuğunda `?t=280`.
 - **Ölümsüzlük:** `dev.godMode` veya `?god=1`. Ayrıca Ayarlar ekranında sürüm yazısına 7 kez dokununca gizli geliştirici bölümü açılır.
@@ -74,6 +74,7 @@ Tüm denge değerleri tek dosyada: `js/config.js` (zaman eşikleri, polis gücü
 | `npm test` | Birim testleri |
 | `npm run e2e` | Sunucu açıkken Edge'de uçtan uca deneme (dokunma, ekranlar, çevrimdışı, kare süresi). `E2E_SECONDS`, `E2E_THROTTLE` |
 | `node tools/balance.mjs 40 0` | Botlarla denge ölçümü. İkinci sayı başlangıç saniyesi |
+| `node tools/turnbot.mjs 40 150` | Dönüş botu: sokak dönüşü, kavşak, U dönüşü ve çıkmaz sokak dener, takılanları sayar |
 | `npm run icons` | Simgeleri yeniden üretir |
 
 Dosyalar değişince `sw.js` içindeki `CACHE` sürümünü artırın, yoksa telefonlar eski kopyayı kullanır.

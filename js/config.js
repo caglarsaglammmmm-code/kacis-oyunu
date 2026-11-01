@@ -13,8 +13,13 @@ export const BUILD = {
 
 export const CONFIG = {
   name: 'Penci Zorn',
-  version: '6.0.0',
+  version: '7.0.0',
   apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk',
+
+  // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
+  // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
+  // police: polis zaten oyuncu hızına oranlıdır, yani player ile birlikte yavaşlar; bu ek çarpandır.
+  speedScale: { player: 0.88, npc: 0.88, highway: 0.88, police: 1 },
 
   // Geliştirici kısayolları. Adres çubuğundan da verilebilir: ?t=280&god=1
   dev: {
@@ -57,6 +62,9 @@ export const CONFIG = {
     // half: bir yönün karo sayısı, lanes: yön başına şerit
     highway: { every: 10, offset: 2, y0: 10, half: 5, lanes: 4 },
     // Yol tonları: yalnızca üç aile, araçlar net ayrılsın
+    // Sokak geometrisi. setback: binaların sokağa bakan cephesi karodan bu kadar içeride, yani bir karoluk
+    // sokak 40 + 2 * setback genişliğindedir. cornerRadius: açık bina köşelerinin çarpışma yuvarlaması
+    street: { setback: 7, cornerRadius: 16 },
     roadTones: ['#3f4249', '#5b5f66', '#a4a7a9'], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
     bigSites: [
       { name: 'Natura Park Sitesi', color: '#7fa86b', ring: [5, 11], layout: 0 },
@@ -77,7 +85,7 @@ export const CONFIG = {
   },
 
   physics: {
-    driftMinSpeed: 110, // Bunun altında arka lastikler kaymaz
+    driftMinSpeed: 175, // Bunun altında arka lastikler kaymaz: dar sokak hızında araç yol tutar
     driftLateral: 52, // Drift sayılması için yanal hız
     steerResponse: 12, // Parmak girdisinin direksiyona geçiş hızı
     gripLoseRate: 9, // Direksiyon kırınca yol tutuşun düşme hızı
@@ -92,6 +100,21 @@ export const CONFIG = {
     brakeDecel: 950,
     wallBounce: 0.3,
     wallFriction: 0.05,
+    // Düşük ve orta hız çevikliği: agileFrom altında tam, agileTo üstünde yok. Yüksek hız drift hissi değişmez
+    agileFrom: 170,
+    agileTo: 330,
+    agileTurn: 0.42, // Dönüş hızına eklenen pay
+    agileYaw: 4, // Burnun tepki hızına eklenen pay
+    pivot: 0.35, // Duran araçta kalan dönüş payı
+    lowTurnSpeed: 78, // Bu hızın altında dönüş hıza oranla azalır (en küçük yarıçapı belirler)
+    // Direksiyon sonuna kadar kırılınca araba kendi hız keser: tek parmakla sokağa girilir
+    cornerSteer: 0.6,
+    cornerSpeed: 165,
+    cornerBrake: 230,
+    // Sürtme: hız yönü duvarla bu orandan dar açı yapıyorsa araç sekmeden boyunca kayar
+    slideRatio: 0.62,
+    slideFriction: 0.008,
+    slideAlign: 0.16, // Kayarken burun duvara paralele döner (temas başına pay)
   },
 
   // Zemin etkileri, GROUND sırasına göre: grip ve speed çarpan, drag ek sürtünme
@@ -127,6 +150,7 @@ export const CONFIG = {
   damage: {
     minImpact: 90, // Bunun altındaki darbeler hasar vermez
     perSpeed: 0.072, // Hız birimi başına hasar: 430 hızla kafa kafaya ~24
+    grazeScale: 0.2, // Duvar boyunca sürtmede hasar ve sarsıntı payı
     wallScale: 0.5, // Dar sokaklarda duvar darbesi: bina teması oyunu tek başına bitirmesin
     maxSingleHit: 34, // Tek darbe en fazla bu kadar: anlık ölüm yok
     earlyGraceUntil: 45, // Bu saniyeye kadar hasar azaltılır
@@ -134,7 +158,7 @@ export const CONFIG = {
     hitCooldown: 0.28, // Aynı temasın üst üste saymaması için
     hitStop: 0.055, // Sert darbede oyun bir an durur: çarpışma hissi
     hitStopMin: 9,
-    autoReverseAfter: 1.1, // Duvara saplanınca kendiliğinden geri çıkar
+    autoReverseAfter: 0.7, // Duvara saplanınca kendiliğinden geri çıkar
     autoReverseTime: 0.75,
     copScale: 0.5, // Polis darbesi duvara göre kaç kat işler (kafa kafaya da öldürmesin)
     maxCopHit: 15, // Normal polisin tek darbesi; ram değeriyle çarpılır, maxSingleHit sınırlar
@@ -377,6 +401,17 @@ export const CONFIG = {
 
   perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.72, bakePool: 9, bakeBudget: 3, slowFrameMs: 21 },
 };
+
+// Hız çarpanlarını uygula: yukarıdaki sayılar temel değerdir, ayar speedScale üzerinden yapılır
+{
+  const S = CONFIG.speedScale;
+  for (const c of CONFIG.cars) c.maxSpeed = Math.round(c.maxSpeed * S.player);
+  for (const t of Object.values(CONFIG.npc.types)) t.cruise = Math.round(t.cruise * S.npc);
+  const H = CONFIG.highwayTraffic;
+  H.speed = H.speed.map((v) => Math.round(v * S.highway));
+  H.truckSpeed = H.truckSpeed.map((v) => Math.round(v * S.highway));
+  CONFIG.npc.panicSpeed = Math.round(CONFIG.npc.panicSpeed * S.player);
+}
 
 // Yıldız seviyesi: başlangıçta 1, her eşikte artar
 export const MAX_STARS = 4;

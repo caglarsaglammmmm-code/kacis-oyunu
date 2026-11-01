@@ -524,7 +524,8 @@ export class Game {
       if (isPlayer && !this.god && isDeep(rect)) continue; // Oyuncu suya girer, batış ayrı karar verilir
       b.x += hit.nx * hit.depth;
       b.y += hit.ny * hit.depth;
-      const impact = bounceOff(b, hit.nx, hit.ny);
+      let impact = bounceOff(b, hit.nx, hit.ny);
+      if (b.graze) impact *= DMG.grazeScale; // Sürtme sayılır: hasar ve sarsıntı çok az
       if (impact > best) best = impact;
       if (impact > 60) {
         const px = cx - hit.nx * r;
@@ -696,7 +697,7 @@ export class Game {
     c.wanderT = 0;
     c.staticBody = false;
     // Polis son hızı her zaman oyuncu arabasına oranlıdır, yani hep biraz yavaştır
-    c.drive.maxSpeed = this.carSpec.maxSpeed * spec.speed;
+    c.drive.maxSpeed = this.carSpec.maxSpeed * spec.speed * CONFIG.speedScale.police;
     c.drive.accel = spec.accel;
     c.drive.turnRate = spec.turnRate;
     c.drive.grip = spec.grip;

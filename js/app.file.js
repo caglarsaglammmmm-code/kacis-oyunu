@@ -17,8 +17,13 @@ const BUILD = {
 
 const CONFIG = {
   name: 'Penci Zorn',
-  version: '6.0.0',
+  version: '7.0.0',
   apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk',
+
+  // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
+  // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
+  // police: polis zaten oyuncu hızına oranlıdır, yani player ile birlikte yavaşlar; bu ek çarpandır.
+  speedScale: { player: 0.88, npc: 0.88, highway: 0.88, police: 1 },
 
   // Geliştirici kısayolları. Adres çubuğundan da verilebilir: ?t=280&god=1
   dev: {
@@ -61,6 +66,9 @@ const CONFIG = {
     // half: bir yönün karo sayısı, lanes: yön başına şerit
     highway: { every: 10, offset: 2, y0: 10, half: 5, lanes: 4 },
     // Yol tonları: yalnızca üç aile, araçlar net ayrılsın
+    // Sokak geometrisi. setback: binaların sokağa bakan cephesi karodan bu kadar içeride, yani bir karoluk
+    // sokak 40 + 2 * setback genişliğindedir. cornerRadius: açık bina köşelerinin çarpışma yuvarlaması
+    street: { setback: 7, cornerRadius: 16 },
     roadTones: ['#3f4249', '#5b5f66', '#a4a7a9'], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
     bigSites: [
       { name: 'Natura Park Sitesi', color: '#7fa86b', ring: [5, 11], layout: 0 },
@@ -81,7 +89,7 @@ const CONFIG = {
   },
 
   physics: {
-    driftMinSpeed: 110, // Bunun altında arka lastikler kaymaz
+    driftMinSpeed: 175, // Bunun altında arka lastikler kaymaz: dar sokak hızında araç yol tutar
     driftLateral: 52, // Drift sayılması için yanal hız
     steerResponse: 12, // Parmak girdisinin direksiyona geçiş hızı
     gripLoseRate: 9, // Direksiyon kırınca yol tutuşun düşme hızı
@@ -96,6 +104,21 @@ const CONFIG = {
     brakeDecel: 950,
     wallBounce: 0.3,
     wallFriction: 0.05,
+    // Düşük ve orta hız çevikliği: agileFrom altında tam, agileTo üstünde yok. Yüksek hız drift hissi değişmez
+    agileFrom: 170,
+    agileTo: 330,
+    agileTurn: 0.42, // Dönüş hızına eklenen pay
+    agileYaw: 4, // Burnun tepki hızına eklenen pay
+    pivot: 0.35, // Duran araçta kalan dönüş payı
+    lowTurnSpeed: 78, // Bu hızın altında dönüş hıza oranla azalır (en küçük yarıçapı belirler)
+    // Direksiyon sonuna kadar kırılınca araba kendi hız keser: tek parmakla sokağa girilir
+    cornerSteer: 0.6,
+    cornerSpeed: 165,
+    cornerBrake: 230,
+    // Sürtme: hız yönü duvarla bu orandan dar açı yapıyorsa araç sekmeden boyunca kayar
+    slideRatio: 0.62,
+    slideFriction: 0.008,
+    slideAlign: 0.16, // Kayarken burun duvara paralele döner (temas başına pay)
   },
 
   // Zemin etkileri, GROUND sırasına göre: grip ve speed çarpan, drag ek sürtünme
@@ -131,6 +154,7 @@ const CONFIG = {
   damage: {
     minImpact: 90, // Bunun altındaki darbeler hasar vermez
     perSpeed: 0.072, // Hız birimi başına hasar: 430 hızla kafa kafaya ~24
+    grazeScale: 0.2, // Duvar boyunca sürtmede hasar ve sarsıntı payı
     wallScale: 0.5, // Dar sokaklarda duvar darbesi: bina teması oyunu tek başına bitirmesin
     maxSingleHit: 34, // Tek darbe en fazla bu kadar: anlık ölüm yok
     earlyGraceUntil: 45, // Bu saniyeye kadar hasar azaltılır
@@ -138,7 +162,7 @@ const CONFIG = {
     hitCooldown: 0.28, // Aynı temasın üst üste saymaması için
     hitStop: 0.055, // Sert darbede oyun bir an durur: çarpışma hissi
     hitStopMin: 9,
-    autoReverseAfter: 1.1, // Duvara saplanınca kendiliğinden geri çıkar
+    autoReverseAfter: 0.7, // Duvara saplanınca kendiliğinden geri çıkar
     autoReverseTime: 0.75,
     copScale: 0.5, // Polis darbesi duvara göre kaç kat işler (kafa kafaya da öldürmesin)
     maxCopHit: 15, // Normal polisin tek darbesi; ram değeriyle çarpılır, maxSingleHit sınırlar
@@ -382,6 +406,17 @@ const CONFIG = {
   perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.72, bakePool: 9, bakeBudget: 3, slowFrameMs: 21 },
 };
 
+// Hız çarpanlarını uygula: yukarıdaki sayılar temel değerdir, ayar speedScale üzerinden yapılır
+{
+  const S = CONFIG.speedScale;
+  for (const c of CONFIG.cars) c.maxSpeed = Math.round(c.maxSpeed * S.player);
+  for (const t of Object.values(CONFIG.npc.types)) t.cruise = Math.round(t.cruise * S.npc);
+  const H = CONFIG.highwayTraffic;
+  H.speed = H.speed.map((v) => Math.round(v * S.highway));
+  H.truckSpeed = H.truckSpeed.map((v) => Math.round(v * S.highway));
+  CONFIG.npc.panicSpeed = Math.round(CONFIG.npc.panicSpeed * S.player);
+}
+
 // Yıldız seviyesi: başlangıçta 1, her eşikte artar
 const MAX_STARS = 4;
 
@@ -417,9 +452,15 @@ function stepCar(c, steerIn, throttle, spec, surf, dt) {
   let vL = -c.vx * sa + c.vy * ca; // yanal bileşen (sağa doğru pozitif)
   const speed = Math.hypot(vF, vL);
   const top = spec.maxSpeed * surf.speed;
+  const agile = 1 - Math.max(0, Math.min(1, (speed - P.agileFrom) / (P.agileTo - P.agileFrom)));
 
   // 1) Boyuna: motor, fren, geri vites
-  if (throttle > 0) {
+  // Sonuna kadar kırılan direksiyon gazı keser ve hızı viraj hızına indirir: dar sokağa fren basmadan girilir
+  const cornering = throttle > 0 && vF > 0 && Math.abs(c.steer) > P.cornerSteer;
+  if (cornering) {
+    if (vF > P.cornerSpeed) vF = Math.max(P.cornerSpeed, vF - P.cornerBrake * dt);
+    else vF += spec.accel * 0.35 * (1 - vF / P.cornerSpeed) * dt;
+  } else if (throttle > 0) {
     if (vF < 0) vF += P.brakeDecel * throttle * dt;
     else if (vF < top) vF += spec.accel * throttle * (1 - vF / top) * dt;
   } else if (throttle < 0) {
@@ -443,9 +484,10 @@ function stepCar(c, steerIn, throttle, spec, surf, dt) {
 
   // 3) Açısal hız: ağırlık hissi için hedefe üstel yaklaşır, anında dönmez
   const dir = vF >= 0 ? 1 : -1;
-  const speedFactor = Math.min(1, speed / 140) * (1 - 0.1 * Math.min(1, speed / spec.maxSpeed));
-  const yawTarget = c.steer * spec.turnRate * speedFactor * dir;
-  c.w += (yawTarget - c.w) * (1 - Math.exp(-P.yawResponse * dt));
+  // Duvara dayalı duran araç da burnunu yavaşça çevirebilir: direksiyon kırılıysa kilitlenmez
+  const speedFactor = Math.max(throttle !== 0 ? P.pivot : 0, Math.min(1, speed / P.lowTurnSpeed)) * (1 - 0.1 * Math.min(1, speed / spec.maxSpeed));
+  const yawTarget = c.steer * spec.turnRate * (1 + P.agileTurn * agile) * speedFactor * dir;
+  c.w += (yawTarget - c.w) * (1 - Math.exp(-(P.yawResponse + P.agileYaw * agile) * dt));
 
   // 4) Bırakınca burun gidiş yönüne döner
   if (!steering && speed > 40 && vF > 0) {
@@ -494,18 +536,51 @@ function circleRect(cx, cy, r, rx, ry, rw, rh, out) {
 // Duvara çarpma: hızı normal boyunca yansıtır, darbe şiddetini döndürür.
 function bounceOff(b, nx, ny) {
   const vn = b.vx * nx + b.vy * ny;
+  b.graze = false;
   if (vn >= 0) return 0;
-  const e = P.wallBounce;
+  const speed = Math.hypot(b.vx, b.vy) || 1;
+  const graze = -vn / speed < P.slideRatio;
+  b.graze = graze;
+  const e = graze ? 0 : P.wallBounce;
   b.vx -= (1 + e) * vn * nx;
   b.vy -= (1 + e) * vn * ny;
-  const keep = 1 - P.wallFriction;
+  const keep = 1 - (graze ? P.slideFriction : P.wallFriction);
   b.vx *= keep;
   b.vy *= keep;
+  if (graze) {
+    // Sürtme: sekme yok, burun duvar boyunca döner ve araç takılmadan devam eder
+    const heading = Math.atan2(b.vy, b.vx);
+    b.a += wrapAngle(heading - b.a) * P.slideAlign * Math.max(0, Math.min(1, (speed - 90) / 120));
+    return -vn;
+  }
   // Burun duvardan uzağa, teğete doğru döner
   const fx = Math.cos(b.a);
   const fy = Math.sin(b.a);
   b.w += (fx * ny - fy * nx) * vn * 0.008;
   return -vn;
+}
+
+// Açık bina köşesi: dik köşe yerine yay. rect.corners bitleri 1 KB, 2 KD, 4 GB, 8 GD.
+// circleRect temas bulduktan sonra çağrılır; köşe bölgesindeyse derinliği ve normali yayla düzeltir.
+function roundCorner(cx, cy, r, rect, out, depth) {
+  const R = rect.radius;
+  const west = cx < rect.x + R;
+  const east = cx > rect.x + rect.w - R;
+  const north = cy < rect.y + R;
+  const south = cy > rect.y + rect.h - R;
+  if (!(west || east) || !(north || south)) return depth;
+  const bit = (north ? (west ? 1 : 2) : (west ? 4 : 8));
+  if (!(rect.corners & bit)) return depth;
+  const ox = west ? rect.x + R : rect.x + rect.w - R;
+  const oy = north ? rect.y + R : rect.y + rect.h - R;
+  const dx = cx - ox;
+  const dy = cy - oy;
+  const d = Math.hypot(dx, dy);
+  if (d >= r + R) return -1;
+  if (d < 1e-6) return depth;
+  out.nx = dx / d;
+  out.ny = dy / d;
+  return r + R - d;
 }
 
 function wrapAngle(a) {
@@ -758,7 +833,8 @@ class World {
         const rect = c.rects[id - 1];
         if (rect === prev) continue;
         prev = rect;
-        const depth = circleRect(x, y, r, rect.x, rect.y, rect.w, rect.h, this.tmp);
+        let depth = circleRect(x, y, r, rect.x, rect.y, rect.w, rect.h, this.tmp);
+        if (depth > 0 && rect.corners) depth = roundCorner(x, y, r, rect, this.tmp, depth);
         if (depth > best) {
           best = depth;
           out.nx = this.tmp.nx;
@@ -879,6 +955,7 @@ class World {
 
     if (c.hw) this.carveHighway(c);
     this.arterialDetails(c);
+    this.fitStreets(c);
     this.finishCost(c);
     c.baseProps = c.propCount;
     this.collectTalls(c);
@@ -895,7 +972,7 @@ class World {
     if (!r) { r = { kind: '', x: 0, y: 0, w: 0, h: 0, style: 0, color: '', alive: true, seed: 0 }; c.rects[c.rectCount] = r; }
     c.rectCount++;
     r.kind = kind; r.style = style; r.color = color; r.alive = true; r.seed = rint(0, 999);
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false;
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -1089,14 +1166,18 @@ class World {
     const P = this.P;
     const w = x1 - x0;
     const h = y1 - y0;
-    // Çıkmaz sokak: bloğun kenarından içeri bir karo, ucu binaya dayanır
+    // Çıkmaz sokak: bloğun kenarından içeri bir karo, ucunda araç dönsün diye üç karo genişliğinde cep var
     if (w >= 9 && h >= 7 && chance(P.stub)) {
       const sx = x0 + rint(3, w - 4);
-      const len = rint(3, h - 3);
+      const len = Math.max(3, rint(3, h - 3));
+      const by = y0 + len - 2; // Cebin üst kenarı
       this.setGround(c, sx, y0, sx + 1, y0 + len, GROUND.ALLEY);
-      this.split2(c, x0, y0, sx, y1, P.maxB);
-      this.split2(c, sx + 1, y0, x1, y1, P.maxB);
-      this.split2(c, sx, y0 + len, sx + 1, y1, P.maxB);
+      this.setGround(c, sx - 1, by, sx + 2, y0 + len, GROUND.ALLEY);
+      this.split2(c, x0, y0, sx - 1, y1, P.maxB);
+      this.split2(c, sx + 2, y0, x1, y1, P.maxB);
+      this.split2(c, sx - 1, y0, sx, by, P.maxB);
+      this.split2(c, sx + 1, y0, sx + 2, by, P.maxB);
+      this.split2(c, sx - 1, y0 + len, sx + 2, y1, P.maxB);
       return;
     }
     this.split2(c, x0, y0, x1, y1, P.maxB);
@@ -1777,6 +1858,40 @@ class World {
       const vertical = chance(0.5);
       const along = rint(7, 20) * TILE;
       this.addProp(c, PROP.POWER_BLAST + pickPowerIndex(), c.x + (vertical ? 60 : along), c.y + (vertical ? along : 60));
+    }
+  }
+
+  // Binaların sokağa bakan cepheleri geri çekilir ve açık köşeleri yuvarlanır. Karo yerleşimi değişmez,
+  // yalnızca çizilen ve çarpılan dikdörtgen küçülür. Rastgele sayı kullanmaz, tohumu etkilemez
+  fitStreets(c) {
+    const { setback, cornerRadius } = W.street;
+    const solid = (x, y) => x >= 0 && y >= 0 && x < CT && y < CT && c.rectAt[y * CT + x] !== 0;
+    for (let i = 0; i < c.rectCount; i++) {
+      const r = c.rects[i];
+      if (r.kind !== 'building') continue;
+      const x0 = Math.floor((r.x - c.x) / TILE);
+      const y0 = Math.floor((r.y - c.y) / TILE);
+      const x1 = Math.ceil((r.x + r.w - c.x) / TILE);
+      const y1 = Math.ceil((r.y + r.h - c.y) / TILE);
+      let w = false; let e = false; let n = false; let s = false;
+      for (let y = y0; y < y1; y++) { if (!solid(x0 - 1, y)) w = true; if (!solid(x1, y)) e = true; }
+      for (let x = x0; x < x1; x++) { if (!solid(x, y0 - 1)) n = true; if (!solid(x, y1)) s = true; }
+      const left = c.x + x0 * TILE + (w ? setback : 1);
+      const top = c.y + y0 * TILE + (n ? setback : 1);
+      const right = c.x + x1 * TILE - (e ? setback : 1);
+      const bottom = c.y + y1 * TILE - (s ? setback : 1);
+      // Mevcut payı küçültmez: ayrık binalar yerinde kalır
+      const nx0 = Math.max(r.x, left); const ny0 = Math.max(r.y, top);
+      const nx1 = Math.min(r.x + r.w, right); const ny1 = Math.min(r.y + r.h, bottom);
+      if (nx1 - nx0 >= 20 && ny1 - ny0 >= 20) { r.x = nx0; r.y = ny0; r.w = nx1 - nx0; r.h = ny1 - ny0; }
+      // Köşe açık sayılır: iki yanı ve çaprazı boşsa. Bitişik binanın dikişinde çentik oluşmasın
+      let m = 0;
+      if (!solid(x0 - 1, y0) && !solid(x0, y0 - 1) && !solid(x0 - 1, y0 - 1)) m |= 1;
+      if (!solid(x1, y0) && !solid(x1 - 1, y0 - 1) && !solid(x1, y0 - 1)) m |= 2;
+      if (!solid(x0 - 1, y1 - 1) && !solid(x0, y1) && !solid(x0 - 1, y1)) m |= 4;
+      if (!solid(x1, y1 - 1) && !solid(x1 - 1, y1) && !solid(x1, y1)) m |= 8;
+      r.corners = m;
+      r.radius = Math.min(cornerRadius, r.w * 0.5, r.h * 0.5);
     }
   }
 
@@ -3514,7 +3629,8 @@ class Game {
       if (isPlayer && !this.god && isDeep(rect)) continue; // Oyuncu suya girer, batış ayrı karar verilir
       b.x += hit.nx * hit.depth;
       b.y += hit.ny * hit.depth;
-      const impact = bounceOff(b, hit.nx, hit.ny);
+      let impact = bounceOff(b, hit.nx, hit.ny);
+      if (b.graze) impact *= DMG.grazeScale; // Sürtme sayılır: hasar ve sarsıntı çok az
       if (impact > best) best = impact;
       if (impact > 60) {
         const px = cx - hit.nx * r;
@@ -3686,7 +3802,7 @@ class Game {
     c.wanderT = 0;
     c.staticBody = false;
     // Polis son hızı her zaman oyuncu arabasına oranlıdır, yani hep biraz yavaştır
-    c.drive.maxSpeed = this.carSpec.maxSpeed * spec.speed;
+    c.drive.maxSpeed = this.carSpec.maxSpeed * spec.speed * CONFIG.speedScale.police;
     c.drive.accel = spec.accel;
     c.drive.turnRate = spec.turnRate;
     c.drive.grip = spec.grip;

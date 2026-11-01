@@ -2,7 +2,7 @@
 // Bağlantı garantisi: her chunk'ın batı ve kuzey kenarı kesintisiz ana yoldur; iç sokaklar
 // kenardan kenara uzanır, yani iki ucu da ana yola bağlıdır. Çıkmaz sokak oluşmaz.
 import { CONFIG, GROUND, BUILD } from './config.js';
-import { circleRect } from './physics.js';
+import { circleRect, roundCorner } from './physics.js';
 
 const W = CONFIG.world;
 export const TILE = W.tile;
@@ -243,7 +243,8 @@ export class World {
         const rect = c.rects[id - 1];
         if (rect === prev) continue;
         prev = rect;
-        const depth = circleRect(x, y, r, rect.x, rect.y, rect.w, rect.h, this.tmp);
+        let depth = circleRect(x, y, r, rect.x, rect.y, rect.w, rect.h, this.tmp);
+        if (depth > 0 && rect.corners) depth = roundCorner(x, y, r, rect, this.tmp, depth);
         if (depth > best) {
           best = depth;
           out.nx = this.tmp.nx;
@@ -364,6 +365,7 @@ export class World {
 
     if (c.hw) this.carveHighway(c);
     this.arterialDetails(c);
+    this.fitStreets(c);
     this.finishCost(c);
     c.baseProps = c.propCount;
     this.collectTalls(c);
@@ -380,7 +382,7 @@ export class World {
     if (!r) { r = { kind: '', x: 0, y: 0, w: 0, h: 0, style: 0, color: '', alive: true, seed: 0 }; c.rects[c.rectCount] = r; }
     c.rectCount++;
     r.kind = kind; r.style = style; r.color = color; r.alive = true; r.seed = rint(0, 999);
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false;
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -574,14 +576,18 @@ export class World {
     const P = this.P;
     const w = x1 - x0;
     const h = y1 - y0;
-    // Çıkmaz sokak: bloğun kenarından içeri bir karo, ucu binaya dayanır
+    // Çıkmaz sokak: bloğun kenarından içeri bir karo, ucunda araç dönsün diye üç karo genişliğinde cep var
     if (w >= 9 && h >= 7 && chance(P.stub)) {
       const sx = x0 + rint(3, w - 4);
-      const len = rint(3, h - 3);
+      const len = Math.max(3, rint(3, h - 3));
+      const by = y0 + len - 2; // Cebin üst kenarı
       this.setGround(c, sx, y0, sx + 1, y0 + len, GROUND.ALLEY);
-      this.split2(c, x0, y0, sx, y1, P.maxB);
-      this.split2(c, sx + 1, y0, x1, y1, P.maxB);
-      this.split2(c, sx, y0 + len, sx + 1, y1, P.maxB);
+      this.setGround(c, sx - 1, by, sx + 2, y0 + len, GROUND.ALLEY);
+      this.split2(c, x0, y0, sx - 1, y1, P.maxB);
+      this.split2(c, sx + 2, y0, x1, y1, P.maxB);
+      this.split2(c, sx - 1, y0, sx, by, P.maxB);
+      this.split2(c, sx + 1, y0, sx + 2, by, P.maxB);
+      this.split2(c, sx - 1, y0 + len, sx + 2, y1, P.maxB);
       return;
     }
     this.split2(c, x0, y0, x1, y1, P.maxB);
@@ -1262,6 +1268,40 @@ export class World {
       const vertical = chance(0.5);
       const along = rint(7, 20) * TILE;
       this.addProp(c, PROP.POWER_BLAST + pickPowerIndex(), c.x + (vertical ? 60 : along), c.y + (vertical ? along : 60));
+    }
+  }
+
+  // Binaların sokağa bakan cepheleri geri çekilir ve açık köşeleri yuvarlanır. Karo yerleşimi değişmez,
+  // yalnızca çizilen ve çarpılan dikdörtgen küçülür. Rastgele sayı kullanmaz, tohumu etkilemez
+  fitStreets(c) {
+    const { setback, cornerRadius } = W.street;
+    const solid = (x, y) => x >= 0 && y >= 0 && x < CT && y < CT && c.rectAt[y * CT + x] !== 0;
+    for (let i = 0; i < c.rectCount; i++) {
+      const r = c.rects[i];
+      if (r.kind !== 'building') continue;
+      const x0 = Math.floor((r.x - c.x) / TILE);
+      const y0 = Math.floor((r.y - c.y) / TILE);
+      const x1 = Math.ceil((r.x + r.w - c.x) / TILE);
+      const y1 = Math.ceil((r.y + r.h - c.y) / TILE);
+      let w = false; let e = false; let n = false; let s = false;
+      for (let y = y0; y < y1; y++) { if (!solid(x0 - 1, y)) w = true; if (!solid(x1, y)) e = true; }
+      for (let x = x0; x < x1; x++) { if (!solid(x, y0 - 1)) n = true; if (!solid(x, y1)) s = true; }
+      const left = c.x + x0 * TILE + (w ? setback : 1);
+      const top = c.y + y0 * TILE + (n ? setback : 1);
+      const right = c.x + x1 * TILE - (e ? setback : 1);
+      const bottom = c.y + y1 * TILE - (s ? setback : 1);
+      // Mevcut payı küçültmez: ayrık binalar yerinde kalır
+      const nx0 = Math.max(r.x, left); const ny0 = Math.max(r.y, top);
+      const nx1 = Math.min(r.x + r.w, right); const ny1 = Math.min(r.y + r.h, bottom);
+      if (nx1 - nx0 >= 20 && ny1 - ny0 >= 20) { r.x = nx0; r.y = ny0; r.w = nx1 - nx0; r.h = ny1 - ny0; }
+      // Köşe açık sayılır: iki yanı ve çaprazı boşsa. Bitişik binanın dikişinde çentik oluşmasın
+      let m = 0;
+      if (!solid(x0 - 1, y0) && !solid(x0, y0 - 1) && !solid(x0 - 1, y0 - 1)) m |= 1;
+      if (!solid(x1, y0) && !solid(x1 - 1, y0 - 1) && !solid(x1, y0 - 1)) m |= 2;
+      if (!solid(x0 - 1, y1 - 1) && !solid(x0, y1) && !solid(x0 - 1, y1)) m |= 4;
+      if (!solid(x1, y1 - 1) && !solid(x1 - 1, y1) && !solid(x1, y1)) m |= 8;
+      r.corners = m;
+      r.radius = Math.min(cornerRadius, r.w * 0.5, r.h * 0.5);
     }
   }
 

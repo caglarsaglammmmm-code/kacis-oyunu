@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CONFIG } from '../js/config.js';
-import { makeBody, resetBody, stepCar, circleRect, bounceOff, wrapAngle } from '../js/physics.js';
+import { makeBody, resetBody, stepCar, circleRect, bounceOff, wrapAngle, roundCorner } from '../js/physics.js';
 
 const spec = CONFIG.cars[0];
 const road = CONFIG.surfaces[1];
@@ -127,4 +127,57 @@ test('tüm arabalar ayırt edilir ve en az 5 tane', () => {
   for (const key of ['maxSpeed', 'durability', 'driftGrip']) {
     assert.ok(new Set(CONFIG.cars.map((c) => c[key])).size >= 4, key);
   }
+});
+
+test('hız çarpanı: tüm araçlar ölçeklenir, polis oyuncudan hep yavaş', () => {
+  const S = CONFIG.speedScale;
+  assert.ok(S.player >= 0.8 && S.player <= 0.92, 'yaklaşık %10-15 yavaş');
+  assert.equal(CONFIG.cars[0].maxSpeed, Math.round(432 * S.player));
+  for (const p of Object.values(CONFIG.police)) assert.ok(p.speed * S.police < 1);
+  assert.equal(CONFIG.npc.types.bus.cruise, Math.round(150 * S.npc));
+  assert.equal(CONFIG.highwayTraffic.speed[1], Math.round(400 * S.highway));
+});
+
+test('düşük hızda dönüş yarıçapı bir karoluk sokağa sığar, direksiyon tek başına hız keser', () => {
+  const c = car();
+  c.vx = 120;
+  run(c, 1, 1, 3);
+  const r = c.speed / Math.abs(c.w);
+  assert.ok(r < 46, 'yarıçap ' + r);
+  const f = car();
+  run(f, 0, 1, 4);
+  const v0 = f.speed;
+  run(f, 1, 1, 1.2);
+  assert.ok(f.speed < v0 * 0.72, 'viraj hızı ' + f.speed);
+});
+
+test('duvara dayalı duran araç direksiyonla burnunu çevirir', () => {
+  const c = car();
+  run(c, 1, 1, 0.5);
+  assert.ok(Math.abs(c.a) > 0.15, 'açı ' + c.a);
+});
+
+test('sürtme: dar açıda sekme yok, hız korunur; dik darbede sekme sürer', () => {
+  const b = makeBody();
+  b.vx = 300; b.vy = 60; b.a = 0.2;
+  bounceOff(b, 0, -1);
+  assert.equal(b.graze, true);
+  assert.ok(Math.abs(b.vy) < 1e-6, 'duvardan sekmez');
+  assert.ok(b.vx > 290, 'hız korunur ' + b.vx);
+  const h = makeBody();
+  h.vy = 300;
+  bounceOff(h, 0, -1);
+  assert.equal(h.graze, false);
+  assert.ok(h.vy < 0);
+});
+
+test('açık bina köşesi yay gibi çalışır, kapalı köşe dik kalır', () => {
+  const rect = { x: 0, y: 0, w: 100, h: 100, radius: 16, corners: 1 };
+  const out = { nx: 0, ny: 0 };
+  // Köşeye çapraz yaklaşan daire: dik köşede temas var, yayda henüz yok
+  const px = -4; const py = -4;
+  const d = circleRect(px, py, 12, rect.x, rect.y, rect.w, rect.h, out);
+  assert.ok(d > 0);
+  assert.equal(roundCorner(px, py, 12, rect, out, d), -1);
+  assert.equal(roundCorner(px, py, 12, { ...rect, corners: 2 }, out, d), d);
 });

@@ -363,3 +363,22 @@ test('binaların yaklaşık %15-20 si yüksek; harabe, inşaat, sanayi ve yangı
   for (const z of ['insaat', 'harabe', 'sanayi']) assert.ok(zones.has(z), z);
   assert.ok(fire >= 3 && fire < all * 0.02, 'yangın ' + fire);
 });
+
+test('sokaklar genişledi: bina cepheleri geri çekilir, açık köşeler yuvarlak, çıkmazların cebi var', () => {
+  const w = new World(321);
+  const { setback } = CONFIG.world.street;
+  let rounded = 0; let checked = 0;
+  for (let cy = -4; cy <= 4; cy++) {
+    for (let cx = -4; cx <= 4; cx++) {
+      const c = w.chunk(cx, cy);
+      for (let i = 0; i < c.rectCount; i++) {
+        const r = c.rects[i];
+        if (r.kind !== 'building') continue;
+        if (r.corners) rounded++;
+        const tx = Math.floor((r.x - c.x) / TILE); const ty = Math.floor((r.y - c.y) / TILE);
+        if (tx > 0 && r.w > 60 && r.h > 60 && !c.rectAt[ty * CT + tx - 1]) { checked++; assert.ok(r.x - (c.x + tx * TILE) >= setback, 'cephe geri çekilmeli'); }
+      }
+    }
+  }
+  assert.ok(checked > 50 && rounded > 50, checked + ' ' + rounded);
+});
