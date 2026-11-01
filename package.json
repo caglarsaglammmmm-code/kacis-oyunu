@@ -17,6 +17,15 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.6.0",
-    "puppeteer-core": "^24.0.0"
+    "@fontsource/anton": "^5.3.0",
+    "@fontsource/lobster": "^5.3.0",
+    "@fontsource/monoton": "^5.3.0",
+    "@fontsource/oswald": "^5.3.0",
+    "@fontsource/pacifico": "^5.3.0",
+    "@fontsource/righteous": "^5.3.0",
+    "@fontsource/tilt-neon": "^5.3.0",
+    "esbuild": "^0.28.2",
+    "puppeteer-core": "^24.0.0",
+    "three": "^0.170.0"
   }
 }

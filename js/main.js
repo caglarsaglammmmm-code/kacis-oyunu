@@ -6,6 +6,8 @@ import { Input } from './input.js';
 import { AudioEngine } from './audio.js';
 import { Storage } from './storage.js';
 import { UI } from './ui.js';
+import { Stage } from './menu3d.js';
+import { loadAtlas } from './sheet.js';
 
 const STEP = 1 / 60;
 const canvas = document.getElementById('game');
@@ -16,7 +18,9 @@ const input = new Input();
 const audio = new AudioEngine();
 game.world.onRelease = (c) => renderer.releaseChunk(c);
 game.carSpec = storage.selectedCar();
+game.paint = storage.paintIndex(game.carSpec.id);
 
+let stage = null;
 const params = new URLSearchParams(location.search);
 let paused = false;
 let accumulator = 0;
@@ -59,7 +63,9 @@ function play() {
   ui.hideAll();
   ui.resetHud();
   ui.setHud(true);
+  game.paint = storage.paintIndex(storage.selectedCar().id);
   game.start(storage.selectedCar(), { startTime, god });
+  showStage(null);
   audio.setEngine(storage.selectedCar().engine);
   perf.i = 0;
   perf.count = 0;
@@ -77,7 +83,39 @@ function toMenu() {
   game.startAttract();
   ui.refreshMenu();
   ui.show('menu');
+  showStage('menu');
   keepAwake(false);
+}
+
+// 3B sahne: seçili araç, seçili boya
+function showStage(mode) {
+  if (!stage || !stage.ok) return;
+  stage.setMode(mode);
+  if (mode) syncStage();
+}
+
+function syncStage(car = storage.selectedCar(), paintIdx = storage.paintIndex(car.id)) {
+  if (!stage || !stage.ok) return;
+  const paint = car.paints[paintIdx] || car.paints[0];
+  stage.setCar(car.shape, { ...paint, accent: paint.accent || car.accent });
+}
+
+function loadThree() {
+  if (!document.getElementById('stage3d')) return;
+  const s = document.createElement('script');
+  s.src = 'vendor/three.min.js';
+  s.onload = () => {
+    try {
+      stage = new Stage(document.getElementById('stage3d'));
+    } catch { stage = null; }
+    if (stage && stage.ok) {
+      document.body.classList.add('has3d');
+      const on = ['menu', 'garage'].find((id) => !document.getElementById(id).hidden);
+      showStage(on || null);
+      if (!on) stage.setMode(null);
+    }
+  };
+  document.body.appendChild(s);
 }
 
 function pause() {
@@ -98,7 +136,9 @@ function resume() {
 const ui = new UI(storage, {
   tap() { audio.unlock(); },
   play, toMenu, pause, resume, applySettings,
-  carChanged() { game.carSpec = storage.selectedCar(); },
+  carChanged() { game.carSpec = storage.selectedCar(); game.paint = storage.paintIndex(game.carSpec.id); },
+  previewCar(car, paintIdx) { syncStage(car, paintIdx); },
+  stage(mode) { showStage(mode); },
   purchased() { audio.purchase(); vibrate([30, 30, 60]); },
 });
 
@@ -154,6 +194,7 @@ function frame(now) {
   const elapsed = Math.min(0.1, (now - last) / 1000);
   last = now;
   const t0 = performance.now();
+  if (stage && stage.mode) stage.frame(now, elapsed);
 
   if (!paused) {
     accumulator += elapsed;
@@ -222,6 +263,7 @@ function handleBack() {
   }
   ui.refreshMenu();
   ui.show('menu');
+  showStage('menu');
   return false;
 }
 globalThis.__kacisBack = handleBack;
@@ -241,7 +283,7 @@ function boot() {
   applySettings();
   if (document.fonts) document.fonts.load('800 30px Nunito', 'ÇŞĞİ').catch(() => {});
   resize();
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', () => { resize(); if (stage) stage.resize(); });
   window.addEventListener('orientationchange', resize);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
@@ -254,6 +296,8 @@ function boot() {
 
   game.startAttract();
   requestAnimationFrame(frame);
+  loadThree();
+  loadAtlas(() => { renderer.useAtlas(); ui.atlasLoaded(); });
   ui.splash(() => { toMenu(); });
 
   if ('serviceWorker' in navigator && !native && (location.protocol === 'https:' || location.hostname === 'localhost')) {
@@ -267,6 +311,6 @@ function boot() {
 }
 
 // Test ve geliştirici erişimi
-globalThis.__kacis = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG };
+globalThis.__kacis = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, get stage() { return stage; } };
 
 boot();

@@ -2,7 +2,6 @@
 import { CONFIG, MAX_STARS } from './config.js';
 import { carSprite } from './render.js';
 import { paintPower, POWER_LOOK } from './art.js';
-import { paintTr, paintSide } from './cars.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -30,13 +29,14 @@ export class UI {
     const a = this.actions;
     const click = (id, fn) => $(id).addEventListener('click', () => { a.tap(); fn(); });
     click('btn-play', () => a.play());
-    click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
+    click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
+    click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
     click('car-prev', () => this.stepCar(-1));
     click('car-next', () => this.stepCar(1));
-    click('btn-settings', () => this.show('settings'));
-    click('btn-howto', () => this.show('howto'));
+    click('btn-settings', () => { this.show('settings'); a.stage(null); });
+    click('btn-howto', () => { this.show('howto'); a.stage(null); });
     for (const b of document.querySelectorAll('[data-back]')) {
-      b.addEventListener('click', () => { a.tap(); this.refreshMenu(); this.show(b.dataset.back); });
+      b.addEventListener('click', () => { a.tap(); this.refreshMenu(); this.show(b.dataset.back); a.stage(b.dataset.back); a.carChanged(); });
     }
     click('btn-retry', () => a.play());
     click('btn-over-menu', () => a.toMenu());
@@ -84,8 +84,9 @@ export class UI {
     const d = this.storage.data;
     $('menu-coins').textContent = d.coins;
     $('menu-best').textContent = d.bestScore ? `En iyi: ${d.bestScore.toLocaleString('tr-TR')} puan · ${formatTime(d.bestTime)}` : 'İlk kaçışın seni bekliyor';
-    $('menu-car-name').textContent = this.storage.selectedCar().name;
-    this.drawMenuCar();
+    const car = this.storage.selectedCar();
+    $('menu-car-name').textContent = car.name;
+    $('menu-car-paint').textContent = (car.paints[this.storage.paintIndex(car.id)] || car.paints[0]).name;
   }
 
   splash(done) {
@@ -200,7 +201,8 @@ export class UI {
       l.health = health;
       const bar = $('hud-health').firstElementChild;
       bar.style.width = `${health}%`;
-      bar.style.background = health > 45 ? '#3ce07a' : health > 20 ? '#ffb020' : '#ff4a3a';
+      bar.style.background = health > 45 ? 'linear-gradient(90deg,#16c172,#7dffb0)' : health > 20 ? 'linear-gradient(90deg,#ff9d00,#ffd23f)' : 'linear-gradient(90deg,#ff2a3c,#ff7a5a)';
+      $('hud-hp').textContent = health;
     }
     const stage = g.stage;
     if (stage !== l.stage) {
@@ -256,8 +258,26 @@ export class UI {
     const car = cars[this.gi];
     const owned = d.owned.includes(car.id);
     const selected = d.selected === car.id;
-    const side = $('garage-side');
-    paintSide(side.getContext('2d'), side.width, side.height, car);
+    const paintI = owned ? this.storage.paintIndex(car.id) : (this.gp || 0);
+    this.actions.previewCar(car, paintI);
+    const swatch = $('garage-paints');
+    swatch.textContent = '';
+    car.paints.forEach((p, i) => {
+      const b = document.createElement('button');
+      b.className = `swatch ${p.finish}${i === paintI ? ' on' : ''}`;
+      b.style.setProperty('--c', p.color);
+      b.style.setProperty('--r', p.roof || p.color);
+      b.title = p.name;
+      b.setAttribute('aria-label', p.name);
+      b.addEventListener('click', () => {
+        this.actions.tap();
+        this.gp = i;
+        if (owned) { this.storage.setPaint(car.id, i); this.actions.carChanged(); }
+        this.renderGarage();
+      });
+      swatch.appendChild(b);
+    });
+    $('garage-paint-name').textContent = `${car.paints[paintI].name} · ${{ gloss: 'Parlak', metal: 'Metalik', matte: 'Mat', pearl: 'İnci' }[car.paints[paintI].finish]}${car.paints[paintI].roof ? ' · Çift ton' : ''}`;
     $('garage-name').textContent = car.name;
     $('garage-desc').textContent = car.desc;
 
@@ -297,7 +317,6 @@ export class UI {
       if (owned) this.storage.select(car.id);
       else if (this.storage.buy(car.id)) this.actions.purchased();
       this.actions.carChanged();
-      this.drawMenuCar();
       this.renderGarage();
     };
 
@@ -307,12 +326,12 @@ export class UI {
       const b = document.createElement('button');
       const has = d.owned.includes(c.id);
       b.className = `thumb${i === this.gi ? ' on' : ''}${has ? '' : ' locked'}${d.selected === c.id ? ' selected' : ''}`;
-      const art = carSprite(c);
+      const art = carSprite(c, this.storage.paintIndex(c.id));
       art.className = 'car-art';
       const label = document.createElement('span');
       label.textContent = has ? c.name : `${c.cost}`;
       b.append(art, label);
-      b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.renderGarage(); });
+      b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.gp = 0; this.renderGarage(); });
       list.appendChild(b);
     });
     const on = list.children[this.gi];
@@ -322,17 +341,12 @@ export class UI {
   stepCar(dir) {
     const n = CONFIG.cars.length;
     this.gi = (this.gi + dir + n) % n;
+    this.gp = 0;
     this.renderGarage();
   }
 
-  drawMenuCar() {
-    const cv = $('menu-car');
-    const spec = this.storage.selectedCar();
-    const g = cv.getContext('2d');
-    g.setTransform(1, 0, 0, 1, 0, 0);
-    g.clearRect(0, 0, cv.width, cv.height);
-    const k = 6.4;
-    g.setTransform(0, k, -k, 0, cv.width / 2, cv.height / 2); // Burun aşağı bakar, dönerken sırayla görünür
-    paintTr(g, spec.len, spec.wid, spec.color, spec.accent, spec.shape, spec.finish);
+  // Atlas geç yüklenirse garaj küçük resimleri yenilenir
+  atlasLoaded() {
+    if (!$('garage').hidden) this.renderGarage();
   }
 }

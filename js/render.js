@@ -3,6 +3,7 @@ import { CONFIG, GROUND, BUILD } from './config.js';
 import { CHUNK, CT, TILE, PROP, isPower, powerName } from './world.js';
 import { PED_FLY, lightState } from './crowd.js';
 import { paintTr } from './cars.js';
+import { sheetSprite } from './sheet.js';
 import { paintBuilding2, shadowOf } from './buildings.js';
 import { FX } from './effects.js';
 import { rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
@@ -43,7 +44,9 @@ function glow(size, stops) {
   return c;
 }
 
-export function carSprite(spec) {
+export function carSprite(spec, paint = 0) {
+  const img = sheetSprite(`p:${spec.id}:${paint}`, spec.len);
+  if (img) return img;
   return sprite(spec.len + 10, spec.wid + 14, (g) => paintTr(g, spec.len, spec.wid, spec.color, spec.accent, spec.shape, spec.finish));
 }
 
@@ -61,6 +64,23 @@ export class Renderer {
     this.playerSprite = null;
     this.playerId = '';
     this.makeSprites();
+  }
+
+  // Atlas yüklenince polis ve park etmiş araçlar 3B modellerden gelir
+  useAtlas() {
+    const P = CONFIG.police;
+    const s = this.sprites;
+    for (const k of ['car', 'fast', 'advanced', 'swat', 'moto']) {
+      const img = sheetSprite(`cop:${k}`, P[k].len);
+      if (img) s[k] = img;
+    }
+    const list = [];
+    for (const [k, n] of [['egea', 4], ['clio', 4], ['tofas', 5], ['golf', 5], ['focus', 4], ['megane', 4], ['linea', 4], ['bavyera', 5], ['kore', 4], ['murat', 4]]) {
+      for (let i = 0; i < n; i++) { const img = sheetSprite(`npc:${k}:${i}`, 44); if (img) list.push(img); }
+    }
+    if (list.length) s.parked = list;
+    s.npc = {};
+    this.playerId = '';
   }
 
   resize(w, h, dpr) {
@@ -871,8 +891,8 @@ export class Renderer {
           }
           let img = sp.props[pr.kind];
           if (pr.kind === PROP.PARKED) img = sp.parked[Math.abs(Math.floor(pr.phase * 100)) % sp.parked.length];
-          const w = img.width / SPR;
-          const h = img.height / SPR;
+          const w = img.wu || img.width / SPR;
+          const h = img.hu || img.height / SPR;
           if (pr.rot) {
             this.place(pr.x, pr.y, pr.rot);
             ctx.drawImage(img, -w / 2, -h / 2, w, h);
@@ -1009,7 +1029,7 @@ export class Renderer {
       let img = sp[key];
       if (!img) {
         const spec = n.spec;
-        img = sprite(spec.len + 8, spec.wid + 10, (g) => paintNpc(g, n.kind, spec, spec.colors[n.color], fins[n.color % fins.length]));
+        img = sheetSprite(`npc:${n.kind}:${n.color}`, spec.len) || sprite(spec.len + 8, spec.wid + 10, (g) => paintNpc(g, n.kind, spec, spec.colors[n.color], fins[n.color % fins.length]));
         sp[key] = img;
       }
       this.drawBody(img, n);
@@ -1027,17 +1047,18 @@ export class Renderer {
     ctx.drawImage(sp, -sw / 2, -sh / 2, sw, sh);
     ctx.globalAlpha = 1;
     this.place(b.x, b.y, b.a);
-    const w = (img.width / SPR) * k;
-    const h = (img.height / SPR) * k;
+    const w = (img.wu || img.width / SPR) * k;
+    const h = (img.hu || img.height / SPR) * k;
     ctx.drawImage(img, -w / 2, -h / 2, w, h);
   }
 
   drawPlayer(game) {
     const ctx = this.ctx;
     const p = game.player;
-    if (this.playerId !== game.carSpec.id) {
-      this.playerId = game.carSpec.id;
-      this.playerSprite = carSprite(game.carSpec);
+    const pid = `${game.carSpec.id}:${game.paint || 0}`;
+    if (this.playerId !== pid) {
+      this.playerId = pid;
+      this.playerSprite = carSprite(game.carSpec, game.paint || 0);
     }
     const k = p.len / game.carSpec.len;
     if (game.giantT > 0 || game.ghostT > 0) {

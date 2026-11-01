@@ -13,6 +13,7 @@ export function defaultSave() {
     settings: { sound: true, vibrate: true, ambient: true },
     dev: { god: false, startTime: 0 },
     tutorial: false,
+    paints: {},
   };
 }
 
@@ -39,6 +40,12 @@ export function sanitize(data) {
     d.dev.startTime = num(data.dev.startTime);
   }
   d.tutorial = data.tutorial === true;
+  if (data.paints && typeof data.paints === 'object') {
+    for (const c of CONFIG.cars) {
+      const i = data.paints[c.id];
+      if (Number.isInteger(i) && i >= 0 && i < c.paints.length) d.paints[c.id] = i;
+    }
+  }
   return d;
 }
 
@@ -65,6 +72,16 @@ export class Storage {
     try {
       this.store().setItem(KEY, JSON.stringify(this.data));
     } catch { /* Gizli sekme ya da dolu depo: oyun yine çalışır */ }
+  }
+
+  paintIndex(id) {
+    return (this.data.paints && this.data.paints[id]) || 0;
+  }
+
+  setPaint(id, i) {
+    if (!this.data.paints) this.data.paints = {};
+    this.data.paints[id] = i;
+    this.save();
   }
 
   selectedCar() {

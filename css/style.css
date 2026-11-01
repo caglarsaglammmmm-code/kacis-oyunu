@@ -208,79 +208,134 @@ h2 { font: 400 26px/1.1 Bungee, sans-serif; text-transform: uppercase; }
 .car-card.locked .car-art { filter: saturate(.75) brightness(.92); }
 .btn.buy:not(:disabled) { background: linear-gradient(#35d07f, #15a35c); color: #fff; box-shadow: 0 4px 0 #0c6b3b; }
 
-/* v4: yeni tasarım dili. Gece mavisi, gün batımı turuncusu, cam paneller */
-:root { --night: #0d1026; --dusk: #ff7a3c; --glass: rgba(14,17,38,.62); --edge: rgba(255,255,255,.16); }
-.menu { background: linear-gradient(#1a1140 0%, #5a1e6a 34%, #e8553f 58%, #ffb15a 72%); display: block; padding: 0; overflow: hidden; touch-action: manipulation; }
-.scene, .scene * { pointer-events: none; }
+/* v5: sinematik arayüz. Koyu cam, keskin kesimler, gün batımı turuncusu */
+:root { --night: #0a0c1e; --hot: #ff6a1f; --amber: #ffb020; --ice: #7af6ff; --glass: rgba(10,12,28,.6); --edge: rgba(255,255,255,.16); --cut: 14px; }
+#stage3d { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.menu { background: linear-gradient(#17103c 0%, #54206a 36%, #e8553f 60%, #ffb15a 74%); display: block; padding: 0; overflow: hidden; touch-action: manipulation; pointer-events: none; }
+.menu > * { pointer-events: auto; }
+.has3d .menu { background: linear-gradient(180deg, rgba(8,8,26,.5), transparent 26%, transparent 58%, rgba(6,6,20,.86) 84%); }
+.has3d .scene { display: none; }
+.scene, .scene * { pointer-events: none !important; }
 .scene { position: absolute; inset: 0; }
 .sun { position: absolute; left: 50%; top: 40%; width: 46vmin; height: 46vmin; margin-left: -23vmin; border-radius: 50%; background: radial-gradient(circle, #ffe9a6 0 45%, #ffb15a 70%, rgba(255,160,70,0) 72%); opacity: .9; }
 .skyline { position: absolute; left: 0; right: 0; bottom: 22%; width: 100%; height: 34%; }
 .skyline .far { fill: #4a2360; }
 .skyline .near { fill: #1c1238; }
 .skyline .bridge path { stroke: #2d1a4a; stroke-width: 4; fill: none; }
-.skyline .win rect { fill: #ffd27a; animation: twinkle 3s infinite alternate; }
-@keyframes twinkle { to { opacity: .4; } }
+.skyline .win rect { fill: #ffd27a; }
 .sea { position: absolute; left: 0; right: 0; bottom: 0; height: 22.2%; background: linear-gradient(#20204f, #0d1026); }
-.sea::after { content: ''; position: absolute; left: 30%; right: 30%; top: 0; bottom: 40%; background: repeating-linear-gradient(transparent 0 6px, rgba(255,190,110,.5) 6px 8px); }
-.menu h1 { position: absolute; left: 0; right: 0; top: calc(var(--safe-t) + 4vh); transform: rotate(-2deg); }
-.menu h1 span { font-size: clamp(64px, 21vw, 118px); color: #ffe14d; text-shadow: 4px 4px 0 #e0352b, 8px 8px 0 rgba(0,0,0,.25); }
-.menu h1 em { font-size: clamp(44px, 15vw, 84px); color: #fff; text-shadow: 3px 3px 0 #2356c7, 6px 6px 0 rgba(0,0,0,.25); margin-top: -4px; letter-spacing: 3px; }
-.turntable { position: absolute; left: 50%; top: 37%; width: 62vmin; height: 62vmin; max-width: 300px; max-height: 300px; transform: translate(-50%, -50%) perspective(620px) rotateX(58deg); border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.2) 0 58%, rgba(255,255,255,.04) 60% 68%, transparent 70%); }
-.turntable canvas { width: 100%; height: 100%; display: block; animation: spin 9s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.menu-panel { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px calc(var(--safe-r) + 16px) calc(var(--safe-b) + 16px) calc(var(--safe-l) + 16px); display: flex; flex-direction: column; align-items: center; gap: 8px; background: linear-gradient(transparent, rgba(8,8,26,.82) 26%); }
-.menu > .menu-coins { z-index: 2; background: var(--glass); padding: 6px 12px; border-radius: 20px; }
-.btn { border-radius: 16px; background: linear-gradient(rgba(255,255,255,.2), rgba(255,255,255,.08)); color: #fff; border: 1px solid var(--edge); box-shadow: 0 3px 0 rgba(0,0,0,.35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-.btn:active { box-shadow: 0 1px 0 rgba(0,0,0,.35); }
-.btn.primary { background: linear-gradient(#ffb020, #ff5a2d); border: 0; box-shadow: 0 5px 0 #a8341a; color: #fff; }
-.btn.primary:disabled { background: #4a4f60; box-shadow: none; opacity: 1; }
-.btn.apk { border: 0; }
-.panel { background: linear-gradient(160deg, #15183a, #0d1026 60%, #2a1540); }
+
+/* Logo */
+.logo { position: absolute; left: 0; right: 0; top: calc(var(--safe-t) + 3.4vh); text-align: center; pointer-events: none !important; font-family: Bungee, sans-serif; font-weight: 400; line-height: .86; transform: skewX(-8deg); filter: drop-shadow(0 8px 18px rgba(0,0,0,.55)); }
+.logo span { display: block; font-size: clamp(58px, 19vw, 112px); background: linear-gradient(180deg, #fff6c8 8%, #ffd23f 42%, #ff8a1f 58%, #d42a1c 92%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 1px rgba(255,235,180,.5); }
+.logo em { display: block; margin-top: 2px; font-style: normal; font-size: clamp(40px, 13.4vw, 80px); letter-spacing: .14em; padding-left: .14em; background: linear-gradient(180deg, #ffffff 30%, #a9c8ff 60%, #4a7ce0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.logo::after { content: ''; display: block; height: 3px; width: min(62%, 340px); margin: 10px auto 0; background: linear-gradient(90deg, transparent, var(--hot), #fff, var(--hot), transparent); animation: logoLine 3.4s ease-in-out infinite; }
+@keyframes logoLine { 50% { filter: brightness(1.6); transform: scaleX(1.12); } }
+
+.car-tag { position: absolute; left: 50%; bottom: calc(var(--safe-b) + 300px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; min-width: 200px; max-width: 86%; padding: 6px 22px; border: 0; color: #fff; background: linear-gradient(90deg, transparent, rgba(8,10,28,.74) 18%, rgba(8,10,28,.74) 82%, transparent); cursor: pointer; }
+.car-tag b { font: 400 18px/1.15 Bungee, sans-serif; text-transform: uppercase; color: #fff; }
+.car-tag small { font: 800 12px/1.2 Nunito, sans-serif; color: var(--amber); }
+
+.menu-panel { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 calc(var(--safe-r) + 18px) calc(var(--safe-b) + 18px) calc(var(--safe-l) + 18px); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.menu-panel .sub { font-size: 14px; }
+.menu nav { width: min(380px, 100%); display: flex; flex-direction: column; gap: 10px; }
+.menu nav .row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.menu > .menu-coins { z-index: 2; position: absolute; right: calc(var(--safe-r) + 14px); top: calc(var(--safe-t) + 12px); background: var(--glass); padding: 7px 14px; border-radius: 22px; border: 1px solid rgba(255,210,63,.4); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+
+/* Dev OYNA düğmesi: kesik köşeli, ışık süpüren */
+.play { position: relative; overflow: hidden; width: 100%; height: 84px; border: 0; cursor: pointer; color: #fff; touch-action: manipulation; clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut)); background: linear-gradient(100deg, #ff3d1f, #ff7a1a 52%, #ffc23a); box-shadow: inset 0 3px 0 rgba(255,255,255,.45), inset 0 -6px 0 rgba(120,20,0,.5); transition: transform .12s, filter .12s; }
+.play span { position: relative; z-index: 1; font: 400 42px/1 Bungee, sans-serif; letter-spacing: .1em; text-shadow: 0 3px 0 rgba(120,20,0,.75), 0 0 22px rgba(255,240,180,.5); }
+.play i { position: absolute; top: -20%; bottom: -20%; left: -40%; width: 26%; transform: skewX(-20deg); background: linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent); animation: sweep 2.6s ease-in-out infinite; }
+@keyframes sweep { 0%, 35% { left: -40%; } 100% { left: 130%; } }
+.play:active { transform: scale(.975); filter: brightness(1.15); }
+
+.tile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 72px; padding: 6px 2px; border: 1px solid var(--edge); border-bottom: 3px solid var(--c, var(--amber)); color: #fff; cursor: pointer; font: 800 14px/1 Nunito, sans-serif; background: linear-gradient(180deg, rgba(40,44,74,.82), rgba(10,12,28,.86)); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: transform .1s; touch-action: manipulation; }
+.tile svg { width: 27px; height: 27px; fill: var(--c, var(--amber)); filter: drop-shadow(0 0 6px var(--c, var(--amber))); }
+.tile:active { transform: translateY(2px); }
+.t-garage { --c: #ffb020; }
+.t-set { --c: #7af6ff; }
+.t-how { --c: #ff7ac6; }
+
+.btn { border-radius: 0; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); background: linear-gradient(180deg, rgba(60,66,100,.9), rgba(20,22,44,.92)); color: #fff; border: 0; box-shadow: none; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.btn:active { box-shadow: none; transform: translateY(2px); }
+.btn.primary { background: linear-gradient(100deg, #ff3d1f, #ff7a1a 55%, #ffc23a); color: #fff; box-shadow: inset 0 2px 0 rgba(255,255,255,.4); text-shadow: 0 2px 0 rgba(120,20,0,.7); }
+.btn.primary:disabled { background: #3c4054; box-shadow: none; opacity: 1; text-shadow: none; }
+.btn.apk { min-height: 42px; font-size: 15px; }
+
+.panel { background: linear-gradient(160deg, #15183a, #0a0c1e 60%, #2a1540); }
 .panel header { padding-bottom: 8px; border-bottom: 1px solid var(--edge); }
-#garage-hero { display: flex; flex-direction: column; gap: 10px; }
-.stage { position: relative; display: flex; align-items: center; justify-content: center; border-radius: 18px; background: radial-gradient(ellipse at 50% 88%, rgba(255,160,80,.34), transparent 66%), linear-gradient(#20244c, #151936); border: 1px solid var(--edge); }
-#garage-side { width: 100%; max-width: 480px; height: auto; display: block; }
-.nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--glass); color: #fff; font-size: 26px; line-height: 1; }
-#car-prev { left: 6px; }
-#car-next { right: 6px; }
-.spec h3 { font: 400 24px/1.1 Bungee, sans-serif; text-transform: uppercase; color: #ffe14d; }
-.spec p { color: var(--muted); margin: 2px 0 8px; }
-.spec .btn { width: 100%; margin-top: 10px; min-height: 54px; font-size: 21px; }
-.btn.primary.buy:not(:disabled) { background: linear-gradient(#35d07f, #15a35c); box-shadow: 0 5px 0 #0c6b3b; }
-#garage-list { display: flex; gap: 8px; overflow-x: auto; padding: 12px 2px 6px; touch-action: pan-x; scrollbar-width: none; grid-template-columns: none; }
-.thumb { flex: none; width: 96px; padding: 6px 4px; border-radius: 12px; border: 1px solid var(--edge); background: rgba(255,255,255,.05); color: #fff; font: 800 12px/1.1 Nunito, sans-serif; }
-.thumb .car-art { width: 76px; display: block; margin: 0 auto 4px; }
-.thumb.on { border-color: #ffb020; background: rgba(255,176,32,.14); }
+.back { clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); border: 0; border-radius: 0; background: rgba(60,66,100,.9); }
+
+/* Garaj: 3B sahnenin üstünde cam panel */
+.garage3d { padding: 0; pointer-events: none; touch-action: manipulation; }
+.garage3d > * { pointer-events: auto; }
+.has3d .garage3d { background: linear-gradient(180deg, rgba(8,8,26,.55), transparent 22%, transparent 42%, rgba(6,6,20,.5) 60%); }
+body:not(.has3d) .garage3d { background: linear-gradient(160deg, #15183a, #0a0c1e 60%, #2a1540); }
+.garage3d header { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 12px; padding: calc(var(--safe-t) + 12px) calc(var(--safe-r) + 14px) 8px calc(var(--safe-l) + 14px); }
+.garage3d header h2 { flex: 1; }
+.nav-arrow { position: absolute; top: 28%; width: 46px; height: 62px; border: 0; color: #fff; font-size: 30px; line-height: 1; background: var(--glass); clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
+#car-prev { left: calc(var(--safe-l) + 8px); }
+#car-next { right: calc(var(--safe-r) + 8px); }
+.gsheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 62%; overflow-y: auto; touch-action: pan-y; padding: 12px calc(var(--safe-r) + 16px) calc(var(--safe-b) + 12px) calc(var(--safe-l) + 16px); background: linear-gradient(180deg, rgba(14,16,38,.72), rgba(8,9,24,.95)); border-top: 2px solid var(--hot); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.spec h3 { font: 400 24px/1.05 Bungee, sans-serif; text-transform: uppercase; color: #ffe14d; }
+.spec p { color: var(--muted); margin: 2px 0 6px; }
+.spec .btn { width: 100%; margin-top: 8px; min-height: 54px; font-size: 21px; }
+.btn.primary.buy:not(:disabled) { background: linear-gradient(100deg, #15a35c, #35d07f); }
+.paint-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; min-height: 40px; }
+#garage-paints { display: flex; gap: 8px; }
+.paint-row small { color: #dfe6f2; font: 800 12px/1.2 Nunito, sans-serif; }
+.swatch { --c: #888; --r: #888; width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,.3); background: linear-gradient(135deg, var(--r) 0 50%, var(--c) 50%); cursor: pointer; }
+.swatch.metal, .swatch.pearl { box-shadow: inset 3px 3px 6px rgba(255,255,255,.6), inset -3px -3px 6px rgba(0,0,0,.4); }
+.swatch.gloss { box-shadow: inset 3px 3px 3px rgba(255,255,255,.5); }
+.swatch.on { border-color: #ffb020; outline: 2px solid #ffb020; outline-offset: 2px; }
+#garage-list { display: flex; gap: 8px; overflow-x: auto; padding: 10px 2px 4px; touch-action: pan-x; scrollbar-width: none; grid-template-columns: none; }
+.thumb { flex: none; width: 96px; padding: 6px 4px; border: 1px solid var(--edge); background: rgba(255,255,255,.05); color: #fff; font: 800 12px/1.1 Nunito, sans-serif; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+.thumb .car-art { width: 82px; display: block; margin: 0 auto 4px; }
+.thumb.on { border-color: #ffb020; background: rgba(255,176,32,.16); }
 .thumb.selected span { color: #ffe14d; }
 .thumb.locked .car-art { filter: grayscale(.8) brightness(.7); }
 .stat { grid-template-columns: 92px 1fr 34px; font-size: 14px; margin-bottom: 4px; }
-.stat i { height: 9px; }
-/* HUD: cam kartlar */
-.hud-left, .hud-right { background: var(--glass); border: 1px solid var(--edge); border-radius: 16px; padding: 7px 12px; -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
-.hud-left { min-width: 104px; }
-#hud-time { font-size: 28px; }
-#hud-score { font-size: 17px; }
+.stat i { height: 9px; transform: skewX(-18deg); border-radius: 1px; }
+.stat b { background: linear-gradient(90deg, #ff3d1f, #ffc23a); }
+
+/* HUD: net sayılar, kesik köşeli koyu kartlar */
+.hud-left, .hud-right { background: linear-gradient(180deg, rgba(10,12,28,.72), rgba(10,12,28,.44)); padding: 8px 12px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); text-shadow: 0 1px 2px rgba(0,0,0,.7); }
+.hud-left { min-width: 140px; border-left: 3px solid #3ce07a; }
+.hud-right { border-right: 3px solid var(--gold); }
+.hud-hp { display: flex; align-items: center; gap: 7px; }
+.hud-hp b { font: 400 17px/1 Bungee, sans-serif; min-width: 32px; }
+#hud-health { flex: 1; width: 92px; height: 12px; background: rgba(255,255,255,.16); overflow: hidden; transform: skewX(-18deg); }
+#hud-health i { display: block; height: 100%; width: 100%; background: #3ce07a; transition: width .2s; }
+#hud-time { font-size: 27px; margin-top: 5px; }
+#hud-score { font-size: 16px; margin-top: 3px; text-align: right; }
 #hud-combo { font-size: 16px; min-height: 0; }
-#hud-stars { font-size: 17px; }
+#hud-stars { font-size: 17px; justify-content: flex-end; }
 #hud-car { display: none; }
-#hud-health { width: 96px; height: 10px; border-radius: 5px; background: rgba(255,255,255,.18); overflow: hidden; }
-#hud-health i { display: block; height: 100%; width: 100%; background: #3ce07a; transition: width .2s, background .3s; }
-#hud-powers { top: calc(var(--safe-t) + 102px); }
+#hud-powers { top: calc(var(--safe-t) + 106px); }
 .pw { background: var(--glass); border: 1px solid var(--edge); }
+#btn-pause { border-radius: 0; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); background: rgba(10,12,28,.6); }
+
+/* Yatay telefon */
 @media (orientation: landscape) and (max-height: 520px) {
-  .menu { display: block; }
-  .menu h1 { left: calc(var(--safe-l) + 24px); right: auto; top: calc(var(--safe-t) + 8px); text-align: left; }
-  .menu h1 span { font-size: 56px; }
-  .menu h1 em { font-size: 40px; }
-  .turntable { left: 26%; top: 62%; width: 200px; height: 200px; }
-  .menu-panel { left: auto; top: 0; right: 0; width: 46%; justify-content: center; background: linear-gradient(90deg, transparent, rgba(8,8,26,.8) 22%); padding-top: calc(var(--safe-t) + 6px); padding-bottom: calc(var(--safe-b) + 6px); }
-  .menu-panel nav { width: 100%; max-width: 320px; }
+  .logo { left: calc(var(--safe-l) + 20px); right: auto; top: calc(var(--safe-t) + 8px); text-align: left; }
+  .logo span { font-size: 52px; }
+  .logo em { font-size: 36px; }
+  .logo::after { margin: 6px 0 0; }
+  .car-tag { left: 26%; bottom: calc(var(--safe-b) + 8px); }
+  .menu-panel { left: auto; top: 0; right: 0; width: 44%; justify-content: center; background: linear-gradient(90deg, transparent, rgba(8,8,26,.78) 20%); padding-top: calc(var(--safe-t) + 6px); padding-bottom: calc(var(--safe-b) + 6px); }
+  .menu-panel nav { max-width: 320px; gap: 7px; }
   .menu-panel .sub { display: none; }
-  #garage-hero { flex-direction: row; }
-  .stage { flex: 1.1; min-width: 0; }
-  .spec { flex: 1; min-width: 0; }
+  .play { height: 66px; }
+  .play span { font-size: 32px; }
+  .tile { height: 58px; font-size: 12px; }
+  .tile svg { width: 21px; height: 21px; }
+  .btn.apk { min-height: 34px; font-size: 13px; }
+  .menu > .menu-coins { right: auto; left: 34%; }
+  .gsheet { left: auto; top: 0; width: 50%; max-height: none; border-top: 0; border-left: 2px solid var(--hot); }
+  .garage3d header { right: 50%; padding-right: 8px; }
+  #car-next { right: calc(50% + 8px); }
   .spec h3 { font-size: 19px; }
-  .spec .btn { min-height: 42px; font-size: 16px; }
+  .spec .btn { min-height: 44px; font-size: 17px; }
   #hud-time { font-size: 22px; }
-  #hud-powers { top: calc(var(--safe-t) + 88px); left: calc(var(--safe-l) + 12px); }
+  #hud-powers { top: calc(var(--safe-t) + 92px); left: calc(var(--safe-l) + 12px); }
 }
