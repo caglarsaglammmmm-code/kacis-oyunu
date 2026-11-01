@@ -1,5 +1,5 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'penci-zorn-v5';
+const CACHE = 'penci-zorn-v6';
 const ASSETS = [
   './',
   'index.html',

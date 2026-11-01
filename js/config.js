@@ -1,7 +1,7 @@
 // Oyunun TÜM ayarları burada. Denge değiştirmek için yalnızca bu dosyayı düzenleyin,
 // ardından `npm run bundle` çalıştırın (file:// kopyası için).
 
-export const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 6, SHALLOW: 7, FIELD: 8, ALLEY: 9 };
+export const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 6, SHALLOW: 7, FIELD: 8, ALLEY: 9, TRACK: 10 };
 
 // Bina stilleri. 0-6 şehir çatıları, sonrası js/art.js içinde özel çizilir
 export const BUILD = {
@@ -13,7 +13,7 @@ export const BUILD = {
 
 export const CONFIG = {
   name: 'Penci Zorn',
-  version: '5.0.0',
+  version: '6.0.0',
   apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk',
 
   // Geliştirici kısayolları. Adres çubuğundan da verilebilir: ?t=280&god=1
@@ -35,17 +35,22 @@ export const CONFIG = {
     biomeCell: 8, // Bir biyom bölgesinin chunk cinsinden boyutu (rastgele sınırlı)
     biomes: { city: 62, beach: 22, forest: 6, desert: 4, rural: 6 },
     seaRadius: 0.42, // Sahil bölgesinin ortasındaki denizin biyom hücresine oranı
-    templates: { mahalle: 30, downtown: 15, esnaf: 12, gecekondu: 7, site: 7, gece: 5, cami: 7, stadyum: 2, hastane: 4, okul: 5, spor: 6, golet: 4, park: 2, pazar: 3, industrial: 3 },
+    templates: { mahalle: 26, downtown: 13, esnaf: 10, gecekondu: 6, site: 6, gece: 4, cami: 6, stadyum: 2, hastane: 3, okul: 4, spor: 5, golet: 3, park: 2, pazar: 2, industrial: 2, donel: 8, viraj: 14 },
     // Yoğunluk: alleys ara sokak sayısı (dikey, yatay), maxB en büyük parsel, wide iki karo sokak olasılığı,
     // detached ayrık bina olasılığı, stub çıkmaz sokak olasılığı
     profiles: {
-      mahalle: { alleys: [1, 1], maxB: 7, wide: 0.15, detached: 0.14, stub: 0.5 },
-      downtown: { alleys: [1, 1], maxB: 11, wide: 0.35, detached: 0.2, stub: 0.1 },
-      esnaf: { alleys: [1, 1], maxB: 5, wide: 0.2, detached: 0.05, stub: 0.4 },
-      gecekondu: { alleys: [1, 1], maxB: 3, wide: 0, detached: 0.3, stub: 0.7 },
-      gece: { alleys: [1, 1], maxB: 6, wide: 0.3, detached: 0.1, stub: 0.2 },
+      mahalle: { alleys: [4, 3], maxB: 6, wide: 0.72, detached: 0.14, stub: 0.3 },
+      downtown: { alleys: [3, 3], maxB: 9, wide: 0.9, detached: 0.2, stub: 0.1 },
+      esnaf: { alleys: [4, 3], maxB: 5, wide: 0.7, detached: 0.05, stub: 0.25 },
+      gecekondu: { alleys: [4, 3], maxB: 3, wide: 0.4, detached: 0.3, stub: 0.5 },
+      gece: { alleys: [3, 3], maxB: 6, wide: 0.8, detached: 0.1, stub: 0.2 },
     },
-    sistemRing: [4, 9], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
+    sistemRing: [4, 9],
+    // Otoban: her satırı doğudan batıya kesen geniş yol. every: kaç chunk'ta bir, y0: bant başlangıç karosu
+    // half: bir yönün karo sayısı, lanes: yön başına şerit
+    highway: { every: 10, offset: 2, y0: 10, half: 5, lanes: 4 },
+    // Yol tonları: yalnızca üç aile, araçlar net ayrılsın
+    roadTones: ['#3f4249', '#5b5f66', '#a4a7a9'], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
     bigSites: [
       { name: 'Natura Park Sitesi', color: '#7fa86b', ring: [5, 11], layout: 0 },
       { name: 'Doğa Şehir Sitesi', color: '#c98a5a', ring: [8, 15], layout: 1 },
@@ -94,6 +99,7 @@ export const CONFIG = {
     { grip: 0.6, speed: 0.66, drag: 0.55, name: 'shallow' },
     { grip: 0.72, speed: 0.9, drag: 0.22, name: 'field' },
     { grip: 0.97, speed: 0.98, drag: 0.02, name: 'alley' },
+    { grip: 1, speed: 1, drag: 0, name: 'track' },
   ],
 
   // En az 5 araba. durability hasarı böler, mass polis çarpışmalarını etkiler.
@@ -257,7 +263,7 @@ export const CONFIG = {
     max: 50, spawnEvery: 0.09, waiterEvery: 0.7, despawn: 1300,
     walkSpeed: 26, runSpeed: 82, fearDist: 130, hitSpeed: 45,
     launch: 190, launchUp: 330, gravity: 900, downTime: 2.2,
-    density: [0.12, 0, 1, 1, 0, 0.55, 0.15, 0.3, 0.1, 0.8],
+    density: [0.12, 0, 1, 1, 0, 0.55, 0.15, 0.3, 0.1, 0.8, 0],
     kinds: {
       man: { weight: 5, speed: 1, voice: 'man' },
       woman: { weight: 5, speed: 1, voice: 'woman' },
@@ -322,6 +328,9 @@ export const CONFIG = {
       truck: { weight: 0.8, accent: '#2a6db0', len: 108, wid: 32, mass: 8, cruise: 155, turnRate: 1.6, grip: 8, horn: 'truck', colors: ['#d9534f', '#3e7cb1', '#e8833a', '#2f7a4f'] },
     },
   },
+
+  // Otoban trafiği: hafif kinematik araçlar, fizik maliyeti yok
+  highwayTraffic: { count: 70, speed: [290, 400], truckSpeed: [240, 290], spawnEvery: 0.025, near: 1300, range: 1250, safeGap: 34, brake: 620, accel: 240, hitScale: 0.5, maxHit: 14, mix: { car: 66, taxi: 10, minibus: 9, bus: 6, truck: 9 }, hornDist: 170 },
 
   // Trafik ışığı süreleri (saniye)
   traffic: { green: 6, yellow: 1.2, allRed: 0.8, stopLine: 94, brake: 520, hornAfter: 2.5, hornRate: 0.5 },

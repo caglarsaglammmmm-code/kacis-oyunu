@@ -267,7 +267,7 @@ test('negatif koordinatlarda sorgular doğru', () => {
   assert.ok(TILE > 0);
 });
 
-test('yoğun şehir: bina oranı yüksek, binalar bitişik, ara sokak bir karo', () => {
+test('şehir dengesi: yol ve bina yaklaşık yarı yarıya, dar sokaklar var', () => {
   const w = new World(7);
   let sum = 0; let n = 0; let narrow = 0;
   for (let cy = -14; cy < 14; cy++) {
@@ -280,8 +280,9 @@ test('yoğun şehir: bina oranı yüksek, binalar bitişik, ara sokak bir karo',
       for (let i = 0; i < c.streetCount; i++) if (c.streets[i].width === 1) narrow++;
     }
   }
-  assert.ok(sum / n > 0.7, 'oran ' + sum / n);
-  assert.ok(narrow > n / 2, 'dar sokak ' + narrow);
+  // v6: yollar ana öğe, bina payı %45-52 bandında
+  assert.ok(sum / n > 0.43 && sum / n < 0.54, 'oran ' + sum / n);
+  assert.ok(narrow > n / 4, 'dar sokak ' + narrow);
 });
 
 test('yol malzemeleri, spor sahaları, derin göletler ve her tür bina üretilir', () => {
@@ -301,9 +302,41 @@ test('yol malzemeleri, spor sahaları, derin göletler ve her tür bina üretili
       }
     }
   }
-  assert.equal(roads.size, 4);
+  assert.equal(roads.size, 3);
   for (const k of ['foot', 'basket', 'hali', 'yard', 'ambulance', 'parking']) assert.ok(pads.has(k), k);
   for (const s of [BUILD.HOSPITAL, BUILD.BANK, BUILD.SCHOOL, BUILD.MOSQUE, BUILD.RESIDENCE, BUILD.SKYSCRAPER, BUILD.HOTEL, BUILD.ISHANI, BUILD.APARTMENT, BUILD.VILLA, BUILD.GECEKONDU, BUILD.SHOP, BUILD.CLUB]) assert.ok(styles.has(s), s);
   assert.ok(deep > 3);
   assert.ok(huge > 3, 'dev tabela');
+});
+
+test('otoban: satırı baştan sona keser, ortasında bariyer, içinde bina yok', () => {
+  const w = new World(5);
+  const H = CONFIG.world.highway;
+  for (let cx = -30; cx < 30; cx++) {
+    const c = w.chunk(cx, H.offset);
+    assert.ok(c.hw);
+    for (let x = 3; x < CT; x++) {
+      for (let y = H.y0; y < H.y0 + H.half * 2 + 1; y++) {
+        const id = c.rectAt[y * CT + x];
+        if (y === H.y0 + H.half) { assert.equal(c.rects[id - 1].kind, 'barrier'); continue; }
+        assert.equal(id, 0, 'bant boş olmalı');
+        assert.equal(c.ground[y * CT + x], GROUND.ROAD);
+      }
+    }
+  }
+  assert.equal(w.chunk(0, H.offset + 1).hw, false);
+  assert.equal(w.chunk(0, H.offset + H.every).hw, true);
+});
+
+test('dönel kavşak, U dönüşü, Y ayrımı ve kıvrımlı yollar üretilir, her yere ulaşılır', () => {
+  const w = new World(21);
+  let ring = 0; let curve = 0;
+  for (let cy = -20; cy < 20; cy++) {
+    for (let cx = -20; cx < 20; cx++) {
+      const c = w.chunk(cx, cy);
+      for (const p of c.paths) if (p.ring) ring++; else curve++;
+    }
+  }
+  assert.ok(ring >= 3, 'dönel ' + ring);
+  assert.ok(curve >= 10, 'viraj ' + curve);
 });

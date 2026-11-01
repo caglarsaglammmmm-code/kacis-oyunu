@@ -52,6 +52,10 @@ export const PROP_INFO = [
 export const POWER_KINDS = ['blast', 'ghost', 'heal', 'giant'];
 export const isPower = (kind) => kind >= PROP.POWER_BLAST && kind <= PROP.POWER_GIANT;
 export const powerName = (kind) => POWER_KINDS[kind - PROP.POWER_BLAST];
+const HW = W.highway;
+// Otoban satırı: bu chunk sırasını doğudan batıya kesen bant
+export const isHighwayRow = (cy) => ((cy - HW.offset) % HW.every + HW.every) % HW.every === 0;
+export const HIGHWAY = { top: HW.y0 * TILE, mid: (HW.y0 + HW.half + 0.5) * TILE, bottom: (HW.y0 + HW.half * 2 + 1) * TILE };
 export const isWaterRect = (rect) => rect.kind === 'water' || rect.kind === 'sea';
 // Havuz ve şadırvan duvar gibidir; göl, gölet ve denize araba düşer
 export const isDeep = (rect) => rect.kind === 'sea' || (rect.kind === 'water' && rect.deep);
@@ -82,7 +86,7 @@ const HOUSE_ROOFS = ['#c8553d', '#b5523b', '#d9822b', '#8c5a3c', '#a44a3f', '#5f
 // Karoları bitişik dizilen şehir için yardımcı
 function newChunk() {
   return {
-    pads: [], padCount: 0, road: 0, alley: 0,
+    pads: [], padCount: 0, road: 0, alley: 0, paths: [], hw: false,
     cx: 0, cy: 0, x: 0, y: 0,
     ground: new Uint8Array(CELLS),
     cost: new Uint8Array(CELLS), // 0 = geçilmez
@@ -295,6 +299,8 @@ export class World {
     c.streetCount = 0;
     c.lightCount = 0;
     c.padCount = 0;
+    c.paths.length = 0;
+    c.hw = isHighwayRow(cy);
     c.siteName = '';
     c.dirty = true;
     seedRng(cx, cy, this.seed);
@@ -312,8 +318,8 @@ export class World {
     this.biomeAt(cx, cy, biomeOut);
     seedRng(cx, cy, this.seed);
     c.biome = biomeOut.biome;
-    c.road = rint(0, 3); // Yol malzemesi: koyu asfalt, beton, parke taşı, kırık asfalt
-    c.alley = rint(0, 2);
+    c.road = rint(0, 2); // Yol tonu: koyu asfalt, gri asfalt, açık beton
+    c.alley = rint(0, 1);
     const home = Math.abs(cx) <= 1 && Math.abs(cy) <= 1;
     let t = home ? 'mahalle' : 'city';
     if (cx === sis.cx && cy === sis.cy) {
@@ -339,6 +345,8 @@ export class World {
     else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: 'Atatürk İlkokulu' });
     else if (t === 'spor') this.fillDense(c, 'mahalle', { sport: true });
     else if (t === 'golet') this.fillDense(c, 'mahalle', { pond: true });
+    else if (t === 'donel') this.fillRoundabout(c);
+    else if (t === 'viraj') this.fillCurvy(c);
     else if (t === 'pazar') this.fillPazar(c);
     else if (t === 'sistem') this.fillSistem(c);
     else if (t === 'sea') this.fillSea(c);
@@ -351,6 +359,7 @@ export class World {
     else if (t === 'industrial') this.fillIndustrial(c);
     else this.fillPlaza(c);
 
+    if (c.hw) this.carveHighway(c);
     this.arterialDetails(c);
     this.finishCost(c);
     c.baseProps = c.propCount;
@@ -391,8 +400,10 @@ export class World {
     this.P = P;
     this.profile = profile;
     this.setGround(c, ART, ART, CT, CT, GROUND.WALK);
-    this.cutAlleys(c, true, P.alleys[0], P.wide, xsBuf);
-    this.cutAlleys(c, false, P.alleys[1], P.wide, ysBuf);
+    // Özel yapı büyük blok ister: sokak sayısı azalır
+    const big = mark && (mark.sport || mark.style === BUILD.STADIUM);
+    this.cutAlleys(c, true, mark ? (big ? 1 : 2) : P.alleys[0], P.wide, xsBuf);
+    this.cutAlleys(c, false, mark ? 1 : P.alleys[1], P.wide, ysBuf);
     // En büyük blok özel yapıya ayrılır
     let bi = -1; let bj = -1; let best = 0;
     for (let j = 0; j < ysBuf.length; j += 2) {
@@ -413,6 +424,133 @@ export class World {
     else { this.scatter(c, PROP.CRATE, 5, [GROUND.ALLEY, GROUND.WALK]); this.scatter(c, PROP.UNCLES, 4, [GROUND.WALK]); }
   }
 
+  // Boş kaldırım karolarını parsellere böler: kıvrımlı yolun çevresi gibi düzensiz alanlar için
+  fillGreedy(c, maxB, y0 = ART, y1 = CT) {
+    const free = (x, y) => {
+      if (x >= CT || y >= y1) return false;
+      const i = y * CT + x;
+      if (c.rectAt[i] || c.ground[i] !== GROUND.WALK) return false;
+      for (const [rx, ry] of RESERVED) if (rx === x && ry === y) return false;
+      return true;
+    };
+    for (let y = y0; y < y1; y++) {
+      for (let x = ART; x < CT; x++) {
+        if (!free(x, y)) continue;
+        const mw = rint(2, maxB); const mh = rint(2, maxB);
+        let w = 1;
+        while (w < mw && free(x + w, y)) w++;
+        let h = 1;
+        for (; h < mh; h++) {
+          let ok = true;
+          for (let k = 0; k < w; k++) if (!free(x + k, y + h)) { ok = false; break; }
+          if (!ok) break;
+        }
+        this.building2(c, x, y, x + w, y + h); // Tek karo da dolar: kapalı cep kalmasın
+      }
+    }
+  }
+
+  // Yol izi: yumuşak eğriyle karolar açılır, çizim tarafı aynı eğriyi çizer
+  carve(c, pts, rad, ring) {
+    const r2 = rad * rad;
+    const stamp = (px, py) => {
+      for (let y = Math.floor(py - rad); y <= Math.ceil(py + rad); y++) {
+        for (let x = Math.floor(px - rad); x <= Math.ceil(px + rad); x++) {
+          if (x < ART || y < ART || x >= CT || y >= CT) continue;
+          const dx = x + 0.5 - px; const dy = y + 0.5 - py;
+          if (dx * dx + dy * dy <= r2 && c.ground[y * CT + x] === GROUND.WALK) c.ground[y * CT + x] = GROUND.TRACK;
+        }
+      }
+    };
+    const dense = sampleCurve(pts, ring);
+    for (let i = 0; i < dense.length; i += 2) stamp(dense[i], dense[i + 1]);
+    c.paths.push({ pts: dense, w: rad * 2 * 0.8, ring: !!ring });
+  }
+
+  // Kıvrımlı yol, U dönüşü ya da Y ayrımı; çevresi yine parsellere bölünür
+  fillCurvy(c) {
+    const P = W.profiles.mahalle;
+    this.P = P; this.profile = 'mahalle';
+    this.setGround(c, ART, ART, CT, CT, GROUND.WALK);
+    const kind = rint(0, 2);
+    const v = rint(0, 3);
+    // Virajın yanında düz sokaklar da olsun
+    this.addStreet(c, true, rint(11, 13) + v, 2, GROUND.ROAD);
+    this.addStreet(c, true, rint(23, 26), 1, GROUND.ALLEY);
+    if (kind === 0) { // S virajı
+      const a = rint(7, 11); const b = rint(21, 26);
+      this.carve(c, [[ART, a], [11, a], [16, (a + b) / 2], [21, b], [CT, b]], 1.5);
+      this.carve(c, [[v + 7, ART], [v + 7, 13]], 1);
+      this.carve(c, [[26 - v, b], [26 - v, CT]], 1);
+    } else if (kind === 1) { // U dönüşü: iki paralel yol yarım daireyle birleşir
+      const y0 = rint(7, 9); const y1 = y0 + 10;
+      this.carve(c, [[ART, y0], [22, y0], [28, y0 + 1], [29.5, (y0 + y1) / 2], [28, y1 - 1], [22, y1], [ART, y1]], 1.5);
+      this.carve(c, [[ART, y1 + 7], [CT, y1 + 7]], 1.4);
+      this.carve(c, [[14, y0], [14, ART]], 1);
+    } else { // Y ayrımı: tek yol ikiye ayrılır
+      const m = rint(14, 18);
+      this.carve(c, [[ART, m], [13, m], [20, m - 3], [CT, rint(6, 8)]], 1.5);
+      this.carve(c, [[13, m], [20, m + 3], [CT, rint(25, 28)]], 1.5);
+      this.carve(c, [[8, m], [8, CT]], 1);
+    }
+    this.fillGreedy(c, P.maxB);
+    this.alleyLife(c);
+  }
+
+  // Dönel kavşak: dört kol, ortada ada
+  fillRoundabout(c) {
+    const P = W.profiles.mahalle;
+    this.P = P; this.profile = 'mahalle';
+    this.setGround(c, ART, ART, CT, CT, GROUND.WALK);
+    const m = rint(15, 19);
+    this.addStreet(c, true, m - 1, 2, GROUND.ROAD);
+    this.addStreet(c, false, m - 1, 2, GROUND.ROAD);
+    const n = 28;
+    const ring = [];
+    for (let i = 0; i <= n; i++) { const a = (i / n) * 6.2832; ring.push([m + Math.cos(a) * 5.2, m + Math.sin(a) * 5.2]); }
+    this.carve(c, ring, 1.9, true);
+    this.setGround(c, m - 3, m - 3, m + 3, m + 3, GROUND.GRASS);
+    const r = this.addRect(c, 'island', m - 3, m - 3, m + 3, m + 3, 18, 0, '#6fae3e');
+    r.cx = c.x + m * TILE; r.cy = c.y + m * TILE;
+    const r2 = rint(5, 8);
+    for (let k = 0; k < 2; k++) { const a = rint(5, 26); const horizontal = k === 0; if (Math.abs(a - m) < 9) continue; this.addStreet(c, !horizontal, a, 2, GROUND.ROAD); }
+    void r2;
+    this.fillGreedy(c, P.maxB);
+    this.alleyLife(c);
+  }
+
+  // Otoban bandı: içindeki her şey kalkar, kuzeye ve güneye şerit, ortada beton bariyer
+  carveHighway(c) {
+    const y0 = HW.y0; const y1 = HW.y0 + HW.half * 2 + 1;
+    const top = c.y + y0 * TILE; const bot = c.y + y1 * TILE;
+    for (let i = 0; i < c.rectCount; i++) {
+      const r = c.rects[i];
+      if (r.kind === 'gone' || r.y + r.h <= top || r.y >= bot) continue;
+      for (let k = 0; k < CELLS; k++) if (c.rectAt[k] === i + 1) c.rectAt[k] = 0;
+      r.kind = 'gone'; r.w = 0; r.h = 0; r.sign = '';
+    }
+    for (let j = 0; j < c.padCount; j++) {
+      const p = c.pads[j];
+      if (p.ty < y1 && p.ty + p.h > y0) { p.w = 0; p.h = 0; }
+    }
+    let n = 0;
+    for (let i = 0; i < c.propCount; i++) {
+      const p = c.props[i];
+      if (p.y >= top - 30 && p.y <= bot + 30) continue;
+      if (n !== i) { const t = c.props[n]; c.props[n] = p; c.props[i] = t; }
+      n++;
+    }
+    c.propCount = n;
+    this.setGround(c, ART, y0, CT, y1, GROUND.ROAD);
+    this.setGround(c, ART, y0 + HW.half, CT, y0 + HW.half + 1, GROUND.PLAZA);
+    const b = this.addRect(c, 'barrier', ART, y0 + HW.half, CT, y0 + HW.half + 1, 0, 0, '#c9ccd0');
+    b.y += 15; b.h = 10;
+    if (c.biome === 'city' && c.template !== 'site' && c.template !== 'bigsite') {
+      this.P = W.profiles.mahalle; this.profile = 'mahalle';
+      this.fillGreedy(c, 5, Math.max(ART, y0 - 6), Math.min(CT, y1 + 6));
+    }
+  }
+
   // n ara sokak: kenardan kenara, iki ucu da ana yola bağlanır
   cutAlleys(c, vertical, n, wide, out) {
     out.length = 0;
@@ -420,8 +558,9 @@ export class World {
     const span = CT - ART;
     for (let i = 1; i <= n; i++) {
       const w = chance(wide) ? 2 : 1;
-      const p = ART + Math.round((span * i) / (n + 1)) + rint(-3, 3);
-      this.addStreet(c, vertical, p, w, GROUND.ALLEY);
+      const p = ART + Math.round((span * i) / (n + 1)) + rint(-1, 1);
+      // İki karo sokak gerçek yol, bir karo dar ara sokak
+      this.addStreet(c, vertical, p, w, w >= 2 ? GROUND.ROAD : GROUND.ALLEY);
       out.push(p, p + w);
     }
     out.push(CT);
@@ -498,7 +637,7 @@ export class World {
     const bw = x1 - x0;
     const bh = y1 - y0;
     if (m.sport) {
-      const fw = Math.min(bw - 2, 14); const fh = Math.min(bh - 2, 9);
+      const fw = Math.min(bw - 6, 12); const fh = Math.min(bh - 2, 9);
       this.setGround(c, x0, y0, x0 + fw, y0 + fh, GROUND.PLAZA);
       this.addPad(c, 'foot', x0, y0, fw, fh);
       const hx = x0 + fw;
@@ -680,7 +819,7 @@ export class World {
           this.biomeAt(ax, ay, out);
           const sis = this.sistem;
           const clash = this.sites.some((o) => Math.abs(o.cx - ax) < 3 && Math.abs(o.cy - ay) < 3) || (Math.abs(sis.cx - ax) < 3 && Math.abs(sis.cy - ay) < 3);
-          if (out.biome === 'city' && !clash && Math.max(Math.abs(ax), Math.abs(ay)) > 3) {
+          if (out.biome === 'city' && !clash && !isHighwayRow(ay) && !isHighwayRow(ay + 1) && Math.max(Math.abs(ax), Math.abs(ay)) > 3) {
             this.sites.push({ ...s, cx: ax, cy: ay });
             break;
           }
@@ -747,7 +886,7 @@ export class World {
       const cx = Math.round(Math.cos(t) * r);
       const cy = Math.round(Math.sin(t) * r);
       this.biomeAt(cx, cy, out);
-      if (out.biome === 'city' && Math.max(Math.abs(cx), Math.abs(cy)) > 1) found = { cx, cy };
+      if (out.biome === 'city' && !isHighwayRow(cy) && Math.max(Math.abs(cx), Math.abs(cy)) > 1) found = { cx, cy };
     }
     this.sistem = found || { cx: a, cy: a };
     return this.sistem;
@@ -1083,7 +1222,7 @@ export class World {
   }
 
   finishCost(c) {
-    const COST = [3, 1, 2, 1, 0, 3, 2, 3, 3, 1];
+    const COST = [3, 1, 2, 1, 0, 3, 2, 3, 3, 1, 1];
     for (let i = 0; i < CELLS; i++) c.cost[i] = c.rectAt[i] ? 0 : COST[c.ground[i]];
     // Binaya bitişik karolar pahalı: polisler köşeye sürtmesin
     for (let y = 1; y < CT - 1; y++) {
@@ -1104,6 +1243,31 @@ const PASTELS = ['#7fa8c9', '#c9a27f', '#a0a8b8', '#8fb59a', '#c98f8f', '#b0a080
 const RESERVED = [[CT - 1, ART], [ART, CT - 1], [ART, ART]];
 const xsBuf = [];
 const ysBuf = [];
+
+// Köşeli noktalardan yumuşak eğri: düz dizi [x, y, x, y...] döner
+function sampleCurve(pts, ring) {
+  const out = [];
+  const n = pts.length;
+  if (ring || n < 3) {
+    for (let i = 0; i < n - 1; i++) {
+      const steps = ring ? 3 : Math.ceil(Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]) * 2);
+      for (let k = 0; k < steps; k++) { const t = k / steps; out.push(pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t); }
+    }
+    out.push(pts[n - 1][0], pts[n - 1][1]);
+    return out;
+  }
+  // Catmull-Rom
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)]; const p1 = pts[i]; const p2 = pts[i + 1]; const p3 = pts[Math.min(n - 1, i + 2)];
+    const steps = Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) * 2);
+    for (let k = 0; k < steps; k++) {
+      const t = k / steps; const t2 = t * t; const t3 = t2 * t;
+      for (let d = 0; d < 2; d++) out.push(0.5 * (2 * p1[d] + (p2[d] - p0[d]) * t + (2 * p0[d] - 5 * p1[d] + 4 * p2[d] - p3[d]) * t2 + (3 * p1[d] - p0[d] - 3 * p2[d] + p3[d]) * t3));
+    }
+  }
+  out.push(pts[n - 1][0], pts[n - 1][1]);
+  return out;
+}
 
 function pickTemplate() {
   return pickFrom(W.templates);

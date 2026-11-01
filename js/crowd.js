@@ -2,12 +2,14 @@
 // Sabit havuz kullanır, sadece oyuncunun çevresinde yaşar.
 import { CONFIG, GROUND } from './config.js';
 import { makeBody, resetBody, stepCar, wrapAngle } from './physics.js';
-import { CHUNK, TILE } from './world.js';
+import { CHUNK, TILE, isHighwayRow, HIGHWAY } from './world.js';
 import { FX } from './effects.js';
 
 const PD = CONFIG.peds;
 const NP = CONFIG.npc;
 const TL = CONFIG.traffic;
+const HT = CONFIG.highwayTraffic;
+const HWC = CONFIG.world.highway;
 const ROAD_W = CONFIG.world.arterial * TILE;
 const ART_MID = ROAD_W / 2;
 export const PED_WALK = 0;
@@ -24,6 +26,7 @@ const DY = [0, 1, 0, -1];
 const LANE = [1, -1, -1, 1];
 
 export const PED_KIND_NAMES = Object.keys(PD.kinds);
+const HW_CARS = ['tofas', 'murat', 'tog', 'bavyera', 'halka', 'yildiz', 'golf', 'focus', 'kore', 'megane', 'linea', 'pickup', 'clio', 'duster', 'grandland', 'egea'];
 let pedWeight = 0;
 for (const k of PED_KIND_NAMES) pedWeight += PD.kinds[k].weight;
 let npcWeight = 0;
@@ -58,6 +61,11 @@ export class Crowd {
       b.drive = { maxSpeed: 0, accel: 0, turnRate: 0, grip: 0, driftGrip: 0 };
       this.npcs.push(b);
     }
+    // Otoban: hafif araç havuzu
+    this.hw = [];
+    for (let i = 0; i < HT.count; i++) this.hw.push({ alive: false, x: 0, y: 0, a: 0, vx: 0, vy: 0, speed: 0, cruise: 0, dir: 1, lane: 0, row: 0, kind: 'taxi', color: 0, spec: null, len: 0, wid: 0, mass: 1, hitT: 0, hornT: 0 });
+    this.hwT = 0;
+    this.hwCount = 0;
     this.pedT = 0;
     this.npcT = 0;
     this.waitT = 0;
@@ -72,6 +80,8 @@ export class Crowd {
   clear() {
     for (const p of this.peds) p.alive = false;
     for (const n of this.npcs) n.alive = false;
+    for (const h of this.hw) h.alive = false;
+    this.hwCount = 0;
     this.pedCount = 0;
     this.npcCount = 0;
   }
@@ -102,6 +112,115 @@ export class Crowd {
       this.updateNpc(n, dt, g);
     }
     this.npcCount = npcs;
+    this.updateHighway(dt, g);
+  }
+
+  // --- Otoban trafiği ---
+  spawnHighway(g) {
+    const p = g.player;
+    const cy = Math.floor(p.y / CHUNK);
+    let row = null;
+    for (const k of [cy, cy - 1, cy + 1]) if (isHighwayRow(k)) row = k;
+    if (row === null) return;
+    const mid = row * CHUNK + HIGHWAY.mid;
+    if (Math.abs(p.y - mid) > HT.near) return;
+    const h = this.hw.find((k) => !k.alive);
+    if (!h) return;
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const lane = Math.floor(Math.random() * HWC.lanes);
+    const laneW = (HWC.half * TILE - 24) / HWC.lanes;
+    const y = mid + dir * (HIGHWAY.mid - HIGHWAY.top - 12 - laneW * (lane + 0.5));
+    const R = g.viewRadius() + 60 + Math.random() * 480;
+    const x = p.x + (Math.random() < 0.5 ? -R : R);
+    if (g.onScreen(x, y, 90)) return;
+    for (const o of this.hw) if (o.alive && o.y === y && Math.abs(o.x - x) < 110) return;
+    const m = HT.mix;
+    let r = Math.random() * (m.car + m.taxi + m.minibus + m.bus + m.truck);
+    let kind;
+    if ((r -= m.taxi) < 0) kind = 'taxi';
+    else if ((r -= m.minibus) < 0) kind = 'minibus';
+    else if ((r -= m.bus) < 0) kind = 'bus';
+    else if ((r -= m.truck) < 0) kind = 'truck';
+    else kind = HW_CARS[Math.floor(Math.random() * HW_CARS.length)];
+    const spec = NP.types[kind];
+    const heavy = kind === 'truck' || kind === 'bus';
+    const [a, b] = heavy ? HT.truckSpeed : HT.speed;
+    h.alive = true; h.x = x; h.y = y; h.dir = dir; h.lane = lane; h.row = row;
+    h.kind = kind; h.spec = spec; h.color = Math.floor(Math.random() * spec.colors.length);
+    h.len = spec.len; h.wid = spec.wid; h.mass = spec.mass;
+    h.a = dir > 0 ? 0 : Math.PI;
+    // İç şerit daha hızlı akar
+    h.cruise = a + (b - a) * ((HWC.lanes - lane) / HWC.lanes) * (0.8 + Math.random() * 0.2);
+    h.speed = h.cruise; h.hitT = 0; h.hornT = 0;
+    h.vx = dir * h.speed; h.vy = 0;
+  }
+
+  updateHighway(dt, g) {
+    this.hwT -= dt;
+    if (this.hwT <= 0) {
+      this.hwT = HT.spawnEvery;
+      if (this.hwCount < HT.count * this.limit) this.spawnHighway(g);
+    }
+    const p = g.player;
+    const hw = this.hw;
+    const tick = g.tickCount;
+    let n = 0;
+    for (let i = 0; i < hw.length; i++) {
+      const h = hw[i];
+      if (!h.alive) continue;
+      n++;
+      if (Math.abs(h.x - p.x) > HT.range || Math.abs(h.y - p.y) > HT.range) { h.alive = false; continue; }
+      // Öndeki aracı sırayla kontrol eder: her kare hepsi değil
+      if ((tick + i) % 5 === 0) {
+        let gap = 1e9; let lead = 0;
+        for (let j = 0; j < hw.length; j++) {
+          const o = hw[j];
+          if (!o.alive || o.y !== h.y || j === i) continue;
+          const d = (o.x - h.x) * h.dir;
+          if (d > 0 && d < gap) { gap = d; lead = o.speed; }
+        }
+        const pd = (p.x - h.x) * h.dir;
+        if (Math.abs(p.y - h.y) < 26 && pd > 0 && pd < gap) {
+          gap = pd; lead = Math.max(0, (p.vx || 0) * h.dir);
+          if (pd < HT.hornDist && h.hornT <= 0 && g.state === 'play') { h.hornT = 3; g.emit('horn', h.spec.horn); }
+        }
+        h.limit = gap < (h.len + 40) / 2 + HT.safeGap + h.speed * 0.28 ? lead : 1e9;
+      }
+      if (h.hornT > 0) h.hornT -= dt;
+      const want = h.hitT > 0 ? 0 : Math.min(h.cruise, h.limit ?? 1e9);
+      if (h.hitT > 0) h.hitT -= dt;
+      h.speed += Math.max(-HT.brake * dt, Math.min(HT.accel * dt, want - h.speed));
+      if (h.speed < 0) h.speed = 0;
+      h.vx = h.dir * h.speed;
+      h.x += h.vx * dt;
+      const dx = h.x - p.x;
+      const dy = h.y - p.y;
+      const reach = (h.len + p.len) * 0.62;
+      if (g.state === 'play' && dx * dx + dy * dy < reach * reach) {
+        const y = h.y;
+        const rv = g.collideCars(p, h);
+        h.y = y; h.vy = 0;
+        if (rv > 30) {
+          h.hitT = 2.5;
+          g.fx.sparks((h.x + p.x) / 2, (h.y + p.y) / 2, 8);
+          g.npcHits++;
+          g.playerImpact(rv + 30, HT.hitScale * Math.min(2, Math.sqrt(h.mass)), true, HT.maxHit);
+        }
+      }
+      if ((tick + i) % 3 === 0 && h.y > p.y - 1000 && h.y < p.y + 1000) {
+        for (const c of g.cops) {
+          if (c.flying) continue;
+          const ax = c.x - h.x; const ay = c.y - h.y;
+          const r2 = (c.len + h.len) * 0.55;
+          if (ax * ax + ay * ay > r2 * r2) continue;
+          const y = h.y;
+          const rv = g.collideCars(c, h);
+          h.y = y; h.vy = 0;
+          if (rv > 50) { c.hp -= rv * 0.04; h.hitT = 2; }
+        }
+      }
+    }
+    this.hwCount = n;
   }
 
   // --- Yayalar ---
@@ -418,6 +537,12 @@ export class Crowd {
     const x = horizontal ? p.x + back : line + LANE[dir] * NP.laneOffset;
     const y = horizontal ? line + LANE[dir] * NP.laneOffset : p.y + back;
     if (g.onScreen(x, y, 100)) return;
+    // Dikey ana yol otoban bandına araç bırakmaz
+    if (!horizontal) {
+      const row = Math.floor(y / CHUNK);
+      const ly = y - row * CHUNK;
+      if (isHighwayRow(row) && ly > HIGHWAY.top - 60) return;
+    }
     for (const o of this.npcs) if (o.alive && Math.hypot(o.x - x, o.y - y) < 180) return;
 
     let r = Math.random() * npcWeight;
@@ -460,7 +585,9 @@ export class Crowd {
     const ahead = (center - pos) * (forward ? 1 : -1);
     if (ahead < 70 && n.lastCross !== k) {
       n.lastCross = k;
-      if (Math.random() < NP.turnChance) {
+      // Otobana inen kol yok: dikey trafik bandın önünde döner
+      const hwAhead = !horizontal && (forward ? isHighwayRow(k) : isHighwayRow(k - 1));
+      if (hwAhead || Math.random() < NP.turnChance) {
         n.dir = (n.dir + (Math.random() < 0.5 ? 1 : 3)) % 4;
         n.line = center;
         n.lastCross = 1e9;

@@ -129,51 +129,22 @@ export class Renderer {
       return c;
     });
     const noise = (g, n, a, b, s = 3) => { for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? a : b; g.fillRect(Math.random() * T, Math.random() * T, s, s); } };
-    this.roads = [
-      mk((g, v) => { // Koyu asfalt
-        g.fillStyle = '#34373e'; g.fillRect(0, 0, T, T);
-        noise(g, 26, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.14)', 2);
-        if (v === 1) { g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(6, 10, 20, 9); }
-      }),
-      mk((g, v) => { // Açık beton: derzli plakalar
-        g.fillStyle = v % 2 ? '#aeb0ad' : '#a6a8a6'; g.fillRect(0, 0, T, T);
-        noise(g, 14, 'rgba(255,255,255,.1)', 'rgba(0,0,0,.08)', 2);
-        g.fillStyle = 'rgba(40,40,40,.35)'; g.fillRect(0, 0, T, 1.5); g.fillRect(0, 0, 1.5, T);
-      }),
-      mk((g, v) => { // Parke taşı
-        g.fillStyle = '#6d645b'; g.fillRect(0, 0, T, T);
-        const cols = ['#8b8074', '#7f7468', '#94897b', '#766c60'];
-        for (let y = 0; y < 4; y++) for (let x = -1; x < 5; x++) { g.fillStyle = cols[(x * 3 + y + v) & 3]; g.fillRect(x * 10 + (y % 2) * 5 + 0.6, y * 10 + 0.6, 8.8, 8.8); }
-      }),
-      mk((g, v) => { // Kırık asfalt: çatlak ve yama
-        g.fillStyle = '#44474c'; g.fillRect(0, 0, T, T);
-        noise(g, 22, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.14)', 2);
-        g.strokeStyle = 'rgba(10,10,12,.7)'; g.lineWidth = 1.2;
-        g.beginPath(); g.moveTo(Math.random() * T, 0);
-        for (let i = 1; i <= 4; i++) g.lineTo(Math.random() * T, (i / 4) * T);
-        g.stroke();
-        if (v === 2) { g.fillStyle = '#2b2d31'; g.fillRect(4, 8, 22, 17); }
-        if (v === 3) { g.fillStyle = 'rgba(20,18,16,.8)'; g.beginPath(); g.ellipse(20, 22, 7, 5, 0.4, 0, 7); g.fill(); }
-      }),
-    ];
-    this.alleys = [
-      mk((g, v) => { // Arnavut kaldırımı
-        g.fillStyle = '#5b554d'; g.fillRect(0, 0, T, T);
-        for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) { g.fillStyle = ['#8e8578', '#7a7267', '#9c9385'][(x + y * 2 + v) % 3]; g.beginPath(); g.arc(x * 8 + 4 + (y % 2) * 2, y * 8 + 4, 3.5, 0, 7); g.fill(); }
-      }),
-      mk(() => { // Yamalı beton
-        return;
-      }),
-      mk((g, v) => { // Tuğla döşeme
-        g.fillStyle = '#6e4a3c'; g.fillRect(0, 0, T, T);
-        for (let y = 0; y < 5; y++) for (let x = -1; x < 4; x++) { g.fillStyle = ['#a56a4e', '#96604a', '#b0745a'][(x + y + v) & 1]; g.fillRect(x * 14 + (y % 2) * 7 + 0.6, y * 8 + 0.6, 12.8, 6.8); }
-      }),
-    ];
-    this.alleys[1] = mk((g, v) => {
-      g.fillStyle = v === 2 ? '#7c7f82' : '#8b8e8f'; g.fillRect(0, 0, T, T);
-      noise(g, 16, 'rgba(255,255,255,.08)', 'rgba(0,0,0,.12)', 2);
-      if (v === 1) { g.fillStyle = '#6a6d70'; g.fillRect(8, 6, 18, 22); }
+    // Üç yol tonu: ince doku farkıyla, araçlar net ayrılsın
+    const tone = (col) => mk((g, v) => {
+      g.fillStyle = col; g.fillRect(0, 0, T, T);
+      noise(g, 22, 'rgba(255,255,255,.035)', 'rgba(0,0,0,.05)', 2);
+      if (v === 1) { g.fillStyle = 'rgba(0,0,0,.05)'; g.fillRect(6, 10, 22, 12); }
+      if (v === 3) { g.fillStyle = 'rgba(255,255,255,.03)'; g.fillRect(14, 4, 20, 26); }
     });
+    const RT = CONFIG.world.roadTones;
+    this.roads = RT.map(tone);
+    this.roads[2] = mk((g, v) => {
+      g.fillStyle = RT[2]; g.fillRect(0, 0, T, T);
+      noise(g, 14, 'rgba(255,255,255,.04)', 'rgba(0,0,0,.05)', 2);
+      g.fillStyle = 'rgba(40,40,40,.16)'; g.fillRect(0, 0, T, 1); g.fillRect(0, 0, 1, T);
+      if (v === 2) { g.fillStyle = 'rgba(0,0,0,.03)'; g.fillRect(0, 0, T, T); }
+    });
+    this.alleys = [this.roads[1], tone('#70747a')];
   }
 
   makeSprites() {
@@ -508,8 +479,8 @@ export class Renderer {
     const urban = c.biome === 'city';
     const sea = c.template === 'sea';
     const shore = sea ? '#1f8fd6' : c.template === 'lake' ? pal.sand : c.template === 'plaza' ? '#e5d7bf' : pal.grass;
-    const colors = [pal.grass, pal.road, '#cdd2d6', '#e5d7bf', shore, pal.sand, pal.dirt, '#5fd3e6', '#c9ae4c', '#8b8e8f'];
-    const roads = this.roads[urban ? c.road : 0];
+    const colors = [pal.grass, pal.road, '#cdd2d6', '#e5d7bf', shore, pal.sand, pal.dirt, '#5fd3e6', '#c9ae4c', '#70747a', '#cdd2d6'];
+    const roads = this.roads[urban ? c.road : 1];
     const alleys = this.alleys[c.alley];
     const fieldGreen = (c.cx + c.cy) & 1;
     for (let y = 0; y < CT; y++) {
@@ -584,7 +555,7 @@ export class Renderer {
     const K = 11;
     const stone = urban || sea ? '#c6cace' : 'rgba(0,0,0,.2)';
     const lip = urban || sea ? '#eef1f4' : 'rgba(0,0,0,.25)';
-    const open = (t) => t !== GROUND.ROAD && t !== GROUND.ALLEY;
+    const open = (t) => t !== GROUND.ROAD && t !== GROUND.ALLEY && t !== GROUND.TRACK;
     const edge = (px, py, dx, dy) => {
       g.fillStyle = stone;
       if (dx > 0) g.fillRect(px + TILE - K, py, K, TILE);
@@ -637,6 +608,87 @@ export class Renderer {
       g.fillRect(c.x - 22, c.y + i, 18, 9);
     }
     this.bakePads(g, c);
+    this.bakePaths(g, c);
+    if (c.hw) this.bakeHighway(g, c);
+  }
+
+  // Kıvrımlı yollar, U dönüşü, Y ayrımı ve dönel kavşak: yumuşak eğri olarak çizilir
+  bakePaths(g, c) {
+    if (!c.paths.length) return;
+    const tones = CONFIG.world.roadTones;
+    const col = tones[c.road];
+    const stroke = (p) => {
+      g.beginPath();
+      for (let i = 0; i < p.pts.length; i += 2) {
+        const x = c.x + p.pts[i] * TILE; const y = c.y + p.pts[i + 1] * TILE;
+        if (i) g.lineTo(x, y); else g.moveTo(x, y);
+      }
+      if (p.ring) g.closePath();
+    };
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    for (const p of c.paths) { stroke(p); g.strokeStyle = '#eef1f4'; g.lineWidth = p.w * TILE + 8; g.stroke(); }
+    for (const p of c.paths) { stroke(p); g.strokeStyle = col; g.lineWidth = p.w * TILE; g.stroke(); }
+    const light = c.road === 2;
+    g.strokeStyle = light ? '#6d7076' : '#ffd23f'; g.lineWidth = 3; g.setLineDash([22, 18]);
+    for (const p of c.paths) { stroke(p); g.stroke(); }
+    g.setLineDash([]);
+    for (let i = 0; i < c.rectCount; i++) {
+      const r = c.rects[i];
+      if (r.kind !== 'island') continue;
+      const R0 = r.w / 2 + 6;
+      g.fillStyle = '#eef1f4'; g.beginPath(); g.arc(r.cx, r.cy, R0 + 5, 0, 7); g.fill();
+      g.fillStyle = '#6fae3e'; g.beginPath(); g.arc(r.cx, r.cy, R0, 0, 7); g.fill();
+      g.fillStyle = '#4f9a3a'; for (let k = 0; k < 8; k++) { const a = (k / 8) * 6.283; g.beginPath(); g.arc(r.cx + Math.cos(a) * R0 * 0.68, r.cy + Math.sin(a) * R0 * 0.68, 11, 0, 7); g.fill(); }
+      g.fillStyle = '#e30a17'; g.beginPath(); g.arc(r.cx, r.cy, 13, 0, 7); g.fill();
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(r.cx, r.cy, 5, 0, 7); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.8)';
+      for (let k = 0; k < 4; k++) { const a = (k / 4) * 6.283 + 0.4; const q = R0 + 66; g.save(); g.translate(r.cx + Math.cos(a) * q, r.cy + Math.sin(a) * q); g.rotate(a + 1.57); g.fillRect(-12, -2, 16, 4); g.beginPath(); g.moveTo(4, -7); g.lineTo(15, 0); g.lineTo(4, 7); g.closePath(); g.fill(); g.restore(); }
+    }
+  }
+
+  // Otoban: asfalt, şerit, emniyet şeridi, beton bariyer, yeşil tabela köprüsü
+  bakeHighway(g, c) {
+    const H = CONFIG.world.highway;
+    const top = c.y + H.y0 * TILE; const bot = top + (H.half * 2 + 1) * TILE;
+    const x0 = c.x + ART_W; const x1 = c.x + CHUNK;
+    g.fillStyle = CONFIG.world.roadTones[0]; g.fillRect(x0, top, x1 - x0, bot - top);
+    const side = H.half * TILE;
+    const laneW = (side - 24) / H.lanes;
+    g.fillStyle = '#fff'; g.fillRect(x0, top + 6, x1 - x0, 4); g.fillRect(x0, bot - 10, x1 - x0, 4);
+    g.fillStyle = '#ffd23f'; g.fillRect(x0, top + side - 8, x1 - x0, 3); g.fillRect(x0, bot - side + 5, x1 - x0, 3);
+    g.fillStyle = 'rgba(255,255,255,.85)';
+    for (let k = 1; k < H.lanes; k++) {
+      for (let x = x0 + 16; x < x1; x += 58) {
+        g.fillRect(x, top + 12 + k * laneW, 32, 3);
+        g.fillRect(x, bot - 12 - k * laneW, 32, 3);
+      }
+    }
+    // Beton bariyer
+    const by = top + side + 15;
+    g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(x0, by + 4, x1 - x0, 12);
+    g.fillStyle = '#d4d7da'; g.fillRect(x0, by, x1 - x0, 10);
+    g.fillStyle = '#9ea2a6'; for (let x = x0; x < x1; x += 40) g.fillRect(x, by, 2, 10);
+    g.fillStyle = '#fff'; g.fillRect(x0, by + 3, x1 - x0, 2);
+    // Tabela köprüsü
+    const gx = c.x + CHUNK * 0.62;
+    g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(gx + 8, top + 8, 10, bot - top);
+    g.fillStyle = '#7e8690'; g.fillRect(gx, top - 6, 7, bot - top + 12);
+    const pan = (y, t) => {
+      g.font = '900 15px Nunito, sans-serif';
+      const w = g.measureText(t).width + 18;
+      g.fillStyle = '#0d6b3c'; g.fillRect(gx - w / 2 + 3, y - 15, w, 30);
+      g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.strokeRect(gx - w / 2 + 6, y - 12, w - 6, 24);
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, gx + 3, y + 1);
+    };
+    const h = (Math.imul(c.cx, 73856093) >>> 0) % 4;
+    pan(top + side * 0.5, ['← EDİRNE O-3', '← SARAY O-3', '← GEBZE O-4', '← ÇORLU O-3'][h]);
+    pan(bot - side * 0.5, ['ANKARA O-4 →', 'İZMİT O-4 →', 'BOLU O-4 →', 'BURSA O-5 →'][h]);
+    // Hız tabelası
+    for (const [y, t] of [[top + 2, '120'], [bot - 2, '120']]) {
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(c.x + CHUNK * 0.3, y, 11, 0, 7); g.fill();
+      g.strokeStyle = '#d0121b'; g.lineWidth = 3; g.stroke();
+      g.fillStyle = '#111'; g.font = '900 10px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, c.x + CHUNK * 0.3, y + 1);
+    }
   }
 
   // Trafik levhaları: pişirilir, oyun sırasında maliyeti yoktur
@@ -681,17 +733,25 @@ export class Renderer {
     // Ara sokak ağzı: tek yön ya da çıkmaz uyarısı
     for (let i = 0; i < c.streetCount; i++) {
       const s = c.streets[i];
-      if (s.ground !== GROUND.ALLEY) continue;
+      if (s.ground !== GROUND.ALLEY && s.ground !== GROUND.ROAD) continue;
       const at = (s.pos + s.width / 2) * TILE;
+      // Geniş sokakta kesik orta çizgi
+      if (s.width >= 2) {
+        g.fillStyle = c.road === 2 ? '#6d7076' : 'rgba(255,255,255,.75)';
+        for (let d = ART_W + 40; d < CHUNK - 30; d += 46) {
+          if (s.vertical) g.fillRect(c.x + at - 1.5, c.y + d, 3, 24);
+          else g.fillRect(c.x + d, c.y + at - 1.5, 24, 3);
+        }
+      }
       const sign = i % 2 ? round('#2a6fd6', '#fff', '⇧') : tri('Y');
       if (s.vertical) post(c.x + at + 13, c.y + ART_W - 5, sign);
       else post(c.x + ART_W - 5, c.y + at + 13, sign);
     }
     // Yaya geçitleri ara sokak ağızlarında
-    g.fillStyle = 'rgba(255,255,255,.7)';
+    g.fillStyle = 'rgba(255,255,255,.82)';
     for (let i = 0; i < c.streetCount; i++) {
       const s = c.streets[i];
-      if (s.ground !== GROUND.ALLEY) continue;
+      if (s.ground !== GROUND.ALLEY && s.ground !== GROUND.ROAD) continue;
       const a = s.pos * TILE + 4;
       const b = (s.pos + s.width) * TILE - 4;
       for (let k = a; k < b; k += 12) {
@@ -986,6 +1046,7 @@ export class Renderer {
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, false);
     this.drawPeds(game, vx0, vx1, vy0, vy1, false);
     this.drawNpcs(game, vx0, vx1, vy0, vy1);
+    this.drawHighway(game, vx0, vx1, vy0, vy1);
     this.drawCops(game, now, vx0, vx1, vy0, vy1);
     if (game.state !== 'dying' && game.state !== 'over') this.drawPlayer(game);
     this.drawUfos(game, now, vx0, vx1, vy0, vy1);
@@ -1202,6 +1263,13 @@ export class Renderer {
         ctx.drawImage(ew, c.x + ART_W + 10, c.y + ART_W + 8, 12, 26);
         ctx.drawImage(ns, c.x + ART_W + 10, c.y - 34, 12, 26);
         ctx.drawImage(ns, c.x - 22, c.y + ART_W + 8, 12, 26);
+        for (let i = 0; i < c.streetCount; i++) {
+          const s = c.streets[i];
+          if (s.width < 2) continue;
+          const at = (s.pos + s.width) * TILE + 6;
+          if (s.vertical) ctx.drawImage(ns, c.x + at, c.y + ART_W - 34, 10, 22);
+          else ctx.drawImage(ew, c.x + ART_W - 18, c.y + at, 10, 22);
+        }
       }
     }
   }
@@ -1270,9 +1338,27 @@ export class Renderer {
     if (game.state === 'play') head(game.player);
     for (const c of game.cops) if (c.type !== 'tank' && !c.flying) head(c);
     for (const n of game.crowd.npcs) if (n.alive && n.state === 'drive') head(n);
+    for (const n of game.crowd.hw) if (n.alive) head(n);
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
+  drawHighway(game, x0, x1, y0, y1) {
+    const sp = this.sprites.npc;
+    const list = game.crowd.hw;
+    for (const h of list) {
+      if (!h.alive || h.x < x0 - 80 || h.x > x1 + 80 || h.y < y0 - 60 || h.y > y1 + 60) continue;
+      const key = `${h.kind}${h.color}`;
+      let img = sp[key];
+      if (!img) {
+        img = sheetSprite(`npc:${h.kind}:${h.color}`, h.spec.len);
+        if (!img) continue;
+        sp[key] = img;
+      }
+      this.drawBody(img, h);
+    }
+    this.ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
   drawNpcs(game, x0, x1, y0, y1) {
@@ -1295,7 +1381,7 @@ export class Renderer {
   drawBody(img, b, shadowScale = 1, k = 1) {
     const ctx = this.ctx;
     const sp = this.sprites.shadow;
-    ctx.globalAlpha = 0.28;
+    ctx.globalAlpha = 0.42;
     this.place(b.x + 5 * shadowScale, b.y + 7 * shadowScale, b.a);
     const sw = (b.len + 6);
     const sh = (b.wid + 4);

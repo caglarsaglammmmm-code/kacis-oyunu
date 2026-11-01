@@ -5,7 +5,7 @@
 // Oyunun TÜM ayarları burada. Denge değiştirmek için yalnızca bu dosyayı düzenleyin,
 // ardından `npm run bundle` çalıştırın (file:// kopyası için).
 
-const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 6, SHALLOW: 7, FIELD: 8, ALLEY: 9 };
+const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 6, SHALLOW: 7, FIELD: 8, ALLEY: 9, TRACK: 10 };
 
 // Bina stilleri. 0-6 şehir çatıları, sonrası js/art.js içinde özel çizilir
 const BUILD = {
@@ -17,7 +17,7 @@ const BUILD = {
 
 const CONFIG = {
   name: 'Penci Zorn',
-  version: '5.0.0',
+  version: '6.0.0',
   apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk',
 
   // Geliştirici kısayolları. Adres çubuğundan da verilebilir: ?t=280&god=1
@@ -39,17 +39,22 @@ const CONFIG = {
     biomeCell: 8, // Bir biyom bölgesinin chunk cinsinden boyutu (rastgele sınırlı)
     biomes: { city: 62, beach: 22, forest: 6, desert: 4, rural: 6 },
     seaRadius: 0.42, // Sahil bölgesinin ortasındaki denizin biyom hücresine oranı
-    templates: { mahalle: 30, downtown: 15, esnaf: 12, gecekondu: 7, site: 7, gece: 5, cami: 7, stadyum: 2, hastane: 4, okul: 5, spor: 6, golet: 4, park: 2, pazar: 3, industrial: 3 },
+    templates: { mahalle: 26, downtown: 13, esnaf: 10, gecekondu: 6, site: 6, gece: 4, cami: 6, stadyum: 2, hastane: 3, okul: 4, spor: 5, golet: 3, park: 2, pazar: 2, industrial: 2, donel: 8, viraj: 14 },
     // Yoğunluk: alleys ara sokak sayısı (dikey, yatay), maxB en büyük parsel, wide iki karo sokak olasılığı,
     // detached ayrık bina olasılığı, stub çıkmaz sokak olasılığı
     profiles: {
-      mahalle: { alleys: [1, 1], maxB: 7, wide: 0.15, detached: 0.14, stub: 0.5 },
-      downtown: { alleys: [1, 1], maxB: 11, wide: 0.35, detached: 0.2, stub: 0.1 },
-      esnaf: { alleys: [1, 1], maxB: 5, wide: 0.2, detached: 0.05, stub: 0.4 },
-      gecekondu: { alleys: [1, 1], maxB: 3, wide: 0, detached: 0.3, stub: 0.7 },
-      gece: { alleys: [1, 1], maxB: 6, wide: 0.3, detached: 0.1, stub: 0.2 },
+      mahalle: { alleys: [4, 3], maxB: 6, wide: 0.72, detached: 0.14, stub: 0.3 },
+      downtown: { alleys: [3, 3], maxB: 9, wide: 0.9, detached: 0.2, stub: 0.1 },
+      esnaf: { alleys: [4, 3], maxB: 5, wide: 0.7, detached: 0.05, stub: 0.25 },
+      gecekondu: { alleys: [4, 3], maxB: 3, wide: 0.4, detached: 0.3, stub: 0.5 },
+      gece: { alleys: [3, 3], maxB: 6, wide: 0.8, detached: 0.1, stub: 0.2 },
     },
-    sistemRing: [4, 9], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
+    sistemRing: [4, 9],
+    // Otoban: her satırı doğudan batıya kesen geniş yol. every: kaç chunk'ta bir, y0: bant başlangıç karosu
+    // half: bir yönün karo sayısı, lanes: yön başına şerit
+    highway: { every: 10, offset: 2, y0: 10, half: 5, lanes: 4 },
+    // Yol tonları: yalnızca üç aile, araçlar net ayrılsın
+    roadTones: ['#3f4249', '#5b5f66', '#a4a7a9'], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
     bigSites: [
       { name: 'Natura Park Sitesi', color: '#7fa86b', ring: [5, 11], layout: 0 },
       { name: 'Doğa Şehir Sitesi', color: '#c98a5a', ring: [8, 15], layout: 1 },
@@ -98,6 +103,7 @@ const CONFIG = {
     { grip: 0.6, speed: 0.66, drag: 0.55, name: 'shallow' },
     { grip: 0.72, speed: 0.9, drag: 0.22, name: 'field' },
     { grip: 0.97, speed: 0.98, drag: 0.02, name: 'alley' },
+    { grip: 1, speed: 1, drag: 0, name: 'track' },
   ],
 
   // En az 5 araba. durability hasarı böler, mass polis çarpışmalarını etkiler.
@@ -261,7 +267,7 @@ const CONFIG = {
     max: 50, spawnEvery: 0.09, waiterEvery: 0.7, despawn: 1300,
     walkSpeed: 26, runSpeed: 82, fearDist: 130, hitSpeed: 45,
     launch: 190, launchUp: 330, gravity: 900, downTime: 2.2,
-    density: [0.12, 0, 1, 1, 0, 0.55, 0.15, 0.3, 0.1, 0.8],
+    density: [0.12, 0, 1, 1, 0, 0.55, 0.15, 0.3, 0.1, 0.8, 0],
     kinds: {
       man: { weight: 5, speed: 1, voice: 'man' },
       woman: { weight: 5, speed: 1, voice: 'woman' },
@@ -326,6 +332,9 @@ const CONFIG = {
       truck: { weight: 0.8, accent: '#2a6db0', len: 108, wid: 32, mass: 8, cruise: 155, turnRate: 1.6, grip: 8, horn: 'truck', colors: ['#d9534f', '#3e7cb1', '#e8833a', '#2f7a4f'] },
     },
   },
+
+  // Otoban trafiği: hafif kinematik araçlar, fizik maliyeti yok
+  highwayTraffic: { count: 46, speed: [290, 400], truckSpeed: [240, 290], spawnEvery: 0.05, near: 1400, range: 1500, safeGap: 46, brake: 620, accel: 240, hitScale: 0.5, maxHit: 14, mix: { car: 66, taxi: 10, minibus: 9, bus: 6, truck: 9 }, hornDist: 170 },
 
   // Trafik ışığı süreleri (saniye)
   traffic: { green: 6, yellow: 1.2, allRed: 0.8, stopLine: 94, brake: 520, hornAfter: 2.5, hornRate: 0.5 },
@@ -548,6 +557,10 @@ const PROP_INFO = [
 const POWER_KINDS = ['blast', 'ghost', 'heal', 'giant'];
 const isPower = (kind) => kind >= PROP.POWER_BLAST && kind <= PROP.POWER_GIANT;
 const powerName = (kind) => POWER_KINDS[kind - PROP.POWER_BLAST];
+const HW = W.highway;
+// Otoban satırı: bu chunk sırasını doğudan batıya kesen bant
+const isHighwayRow = (cy) => ((cy - HW.offset) % HW.every + HW.every) % HW.every === 0;
+const HIGHWAY = { top: HW.y0 * TILE, mid: (HW.y0 + HW.half + 0.5) * TILE, bottom: (HW.y0 + HW.half * 2 + 1) * TILE };
 const isWaterRect = (rect) => rect.kind === 'water' || rect.kind === 'sea';
 // Havuz ve şadırvan duvar gibidir; göl, gölet ve denize araba düşer
 const isDeep = (rect) => rect.kind === 'sea' || (rect.kind === 'water' && rect.deep);
@@ -578,7 +591,7 @@ const HOUSE_ROOFS = ['#c8553d', '#b5523b', '#d9822b', '#8c5a3c', '#a44a3f', '#5f
 // Karoları bitişik dizilen şehir için yardımcı
 function newChunk() {
   return {
-    pads: [], padCount: 0, road: 0, alley: 0,
+    pads: [], padCount: 0, road: 0, alley: 0, paths: [], hw: false,
     cx: 0, cy: 0, x: 0, y: 0,
     ground: new Uint8Array(CELLS),
     cost: new Uint8Array(CELLS), // 0 = geçilmez
@@ -791,6 +804,8 @@ class World {
     c.streetCount = 0;
     c.lightCount = 0;
     c.padCount = 0;
+    c.paths.length = 0;
+    c.hw = isHighwayRow(cy);
     c.siteName = '';
     c.dirty = true;
     seedRng(cx, cy, this.seed);
@@ -808,8 +823,8 @@ class World {
     this.biomeAt(cx, cy, biomeOut);
     seedRng(cx, cy, this.seed);
     c.biome = biomeOut.biome;
-    c.road = rint(0, 3); // Yol malzemesi: koyu asfalt, beton, parke taşı, kırık asfalt
-    c.alley = rint(0, 2);
+    c.road = rint(0, 2); // Yol tonu: koyu asfalt, gri asfalt, açık beton
+    c.alley = rint(0, 1);
     const home = Math.abs(cx) <= 1 && Math.abs(cy) <= 1;
     let t = home ? 'mahalle' : 'city';
     if (cx === sis.cx && cy === sis.cy) {
@@ -835,6 +850,8 @@ class World {
     else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: 'Atatürk İlkokulu' });
     else if (t === 'spor') this.fillDense(c, 'mahalle', { sport: true });
     else if (t === 'golet') this.fillDense(c, 'mahalle', { pond: true });
+    else if (t === 'donel') this.fillRoundabout(c);
+    else if (t === 'viraj') this.fillCurvy(c);
     else if (t === 'pazar') this.fillPazar(c);
     else if (t === 'sistem') this.fillSistem(c);
     else if (t === 'sea') this.fillSea(c);
@@ -847,6 +864,7 @@ class World {
     else if (t === 'industrial') this.fillIndustrial(c);
     else this.fillPlaza(c);
 
+    if (c.hw) this.carveHighway(c);
     this.arterialDetails(c);
     this.finishCost(c);
     c.baseProps = c.propCount;
@@ -887,8 +905,10 @@ class World {
     this.P = P;
     this.profile = profile;
     this.setGround(c, ART, ART, CT, CT, GROUND.WALK);
-    this.cutAlleys(c, true, P.alleys[0], P.wide, xsBuf);
-    this.cutAlleys(c, false, P.alleys[1], P.wide, ysBuf);
+    // Özel yapı büyük blok ister: sokak sayısı azalır
+    const big = mark && (mark.sport || mark.style === BUILD.STADIUM);
+    this.cutAlleys(c, true, mark ? (big ? 1 : 2) : P.alleys[0], P.wide, xsBuf);
+    this.cutAlleys(c, false, mark ? 1 : P.alleys[1], P.wide, ysBuf);
     // En büyük blok özel yapıya ayrılır
     let bi = -1; let bj = -1; let best = 0;
     for (let j = 0; j < ysBuf.length; j += 2) {
@@ -909,6 +929,133 @@ class World {
     else { this.scatter(c, PROP.CRATE, 5, [GROUND.ALLEY, GROUND.WALK]); this.scatter(c, PROP.UNCLES, 4, [GROUND.WALK]); }
   }
 
+  // Boş kaldırım karolarını parsellere böler: kıvrımlı yolun çevresi gibi düzensiz alanlar için
+  fillGreedy(c, maxB, y0 = ART, y1 = CT) {
+    const free = (x, y) => {
+      if (x >= CT || y >= y1) return false;
+      const i = y * CT + x;
+      if (c.rectAt[i] || c.ground[i] !== GROUND.WALK) return false;
+      for (const [rx, ry] of RESERVED) if (rx === x && ry === y) return false;
+      return true;
+    };
+    for (let y = y0; y < y1; y++) {
+      for (let x = ART; x < CT; x++) {
+        if (!free(x, y)) continue;
+        const mw = rint(2, maxB); const mh = rint(2, maxB);
+        let w = 1;
+        while (w < mw && free(x + w, y)) w++;
+        let h = 1;
+        for (; h < mh; h++) {
+          let ok = true;
+          for (let k = 0; k < w; k++) if (!free(x + k, y + h)) { ok = false; break; }
+          if (!ok) break;
+        }
+        this.building2(c, x, y, x + w, y + h); // Tek karo da dolar: kapalı cep kalmasın
+      }
+    }
+  }
+
+  // Yol izi: yumuşak eğriyle karolar açılır, çizim tarafı aynı eğriyi çizer
+  carve(c, pts, rad, ring) {
+    const r2 = rad * rad;
+    const stamp = (px, py) => {
+      for (let y = Math.floor(py - rad); y <= Math.ceil(py + rad); y++) {
+        for (let x = Math.floor(px - rad); x <= Math.ceil(px + rad); x++) {
+          if (x < ART || y < ART || x >= CT || y >= CT) continue;
+          const dx = x + 0.5 - px; const dy = y + 0.5 - py;
+          if (dx * dx + dy * dy <= r2 && c.ground[y * CT + x] === GROUND.WALK) c.ground[y * CT + x] = GROUND.TRACK;
+        }
+      }
+    };
+    const dense = sampleCurve(pts, ring);
+    for (let i = 0; i < dense.length; i += 2) stamp(dense[i], dense[i + 1]);
+    c.paths.push({ pts: dense, w: rad * 2 * 0.8, ring: !!ring });
+  }
+
+  // Kıvrımlı yol, U dönüşü ya da Y ayrımı; çevresi yine parsellere bölünür
+  fillCurvy(c) {
+    const P = W.profiles.mahalle;
+    this.P = P; this.profile = 'mahalle';
+    this.setGround(c, ART, ART, CT, CT, GROUND.WALK);
+    const kind = rint(0, 2);
+    const v = rint(0, 3);
+    // Virajın yanında düz sokaklar da olsun
+    this.addStreet(c, true, rint(11, 13) + v, 2, GROUND.ROAD);
+    this.addStreet(c, true, rint(23, 26), 1, GROUND.ALLEY);
+    if (kind === 0) { // S virajı
+      const a = rint(7, 11); const b = rint(21, 26);
+      this.carve(c, [[ART, a], [11, a], [16, (a + b) / 2], [21, b], [CT, b]], 1.5);
+      this.carve(c, [[v + 7, ART], [v + 7, 13]], 1);
+      this.carve(c, [[26 - v, b], [26 - v, CT]], 1);
+    } else if (kind === 1) { // U dönüşü: iki paralel yol yarım daireyle birleşir
+      const y0 = rint(7, 9); const y1 = y0 + 10;
+      this.carve(c, [[ART, y0], [22, y0], [28, y0 + 1], [29.5, (y0 + y1) / 2], [28, y1 - 1], [22, y1], [ART, y1]], 1.5);
+      this.carve(c, [[ART, y1 + 7], [CT, y1 + 7]], 1.4);
+      this.carve(c, [[14, y0], [14, ART]], 1);
+    } else { // Y ayrımı: tek yol ikiye ayrılır
+      const m = rint(14, 18);
+      this.carve(c, [[ART, m], [13, m], [20, m - 3], [CT, rint(6, 8)]], 1.5);
+      this.carve(c, [[13, m], [20, m + 3], [CT, rint(25, 28)]], 1.5);
+      this.carve(c, [[8, m], [8, CT]], 1);
+    }
+    this.fillGreedy(c, P.maxB);
+    this.alleyLife(c);
+  }
+
+  // Dönel kavşak: dört kol, ortada ada
+  fillRoundabout(c) {
+    const P = W.profiles.mahalle;
+    this.P = P; this.profile = 'mahalle';
+    this.setGround(c, ART, ART, CT, CT, GROUND.WALK);
+    const m = rint(15, 19);
+    this.addStreet(c, true, m - 1, 2, GROUND.ROAD);
+    this.addStreet(c, false, m - 1, 2, GROUND.ROAD);
+    const n = 28;
+    const ring = [];
+    for (let i = 0; i <= n; i++) { const a = (i / n) * 6.2832; ring.push([m + Math.cos(a) * 5.2, m + Math.sin(a) * 5.2]); }
+    this.carve(c, ring, 1.9, true);
+    this.setGround(c, m - 3, m - 3, m + 3, m + 3, GROUND.GRASS);
+    const r = this.addRect(c, 'island', m - 3, m - 3, m + 3, m + 3, 18, 0, '#6fae3e');
+    r.cx = c.x + m * TILE; r.cy = c.y + m * TILE;
+    const r2 = rint(5, 8);
+    for (let k = 0; k < 2; k++) { const a = rint(5, 26); const horizontal = k === 0; if (Math.abs(a - m) < 9) continue; this.addStreet(c, !horizontal, a, 2, GROUND.ROAD); }
+    void r2;
+    this.fillGreedy(c, P.maxB);
+    this.alleyLife(c);
+  }
+
+  // Otoban bandı: içindeki her şey kalkar, kuzeye ve güneye şerit, ortada beton bariyer
+  carveHighway(c) {
+    const y0 = HW.y0; const y1 = HW.y0 + HW.half * 2 + 1;
+    const top = c.y + y0 * TILE; const bot = c.y + y1 * TILE;
+    for (let i = 0; i < c.rectCount; i++) {
+      const r = c.rects[i];
+      if (r.kind === 'gone' || r.y + r.h <= top || r.y >= bot) continue;
+      for (let k = 0; k < CELLS; k++) if (c.rectAt[k] === i + 1) c.rectAt[k] = 0;
+      r.kind = 'gone'; r.w = 0; r.h = 0; r.sign = '';
+    }
+    for (let j = 0; j < c.padCount; j++) {
+      const p = c.pads[j];
+      if (p.ty < y1 && p.ty + p.h > y0) { p.w = 0; p.h = 0; }
+    }
+    let n = 0;
+    for (let i = 0; i < c.propCount; i++) {
+      const p = c.props[i];
+      if (p.y >= top - 30 && p.y <= bot + 30) continue;
+      if (n !== i) { const t = c.props[n]; c.props[n] = p; c.props[i] = t; }
+      n++;
+    }
+    c.propCount = n;
+    this.setGround(c, ART, y0, CT, y1, GROUND.ROAD);
+    this.setGround(c, ART, y0 + HW.half, CT, y0 + HW.half + 1, GROUND.PLAZA);
+    const b = this.addRect(c, 'barrier', ART, y0 + HW.half, CT, y0 + HW.half + 1, 0, 0, '#c9ccd0');
+    b.y += 15; b.h = 10;
+    if (c.biome === 'city' && c.template !== 'site' && c.template !== 'bigsite') {
+      this.P = W.profiles.mahalle; this.profile = 'mahalle';
+      this.fillGreedy(c, 5, Math.max(ART, y0 - 6), Math.min(CT, y1 + 6));
+    }
+  }
+
   // n ara sokak: kenardan kenara, iki ucu da ana yola bağlanır
   cutAlleys(c, vertical, n, wide, out) {
     out.length = 0;
@@ -916,8 +1063,9 @@ class World {
     const span = CT - ART;
     for (let i = 1; i <= n; i++) {
       const w = chance(wide) ? 2 : 1;
-      const p = ART + Math.round((span * i) / (n + 1)) + rint(-3, 3);
-      this.addStreet(c, vertical, p, w, GROUND.ALLEY);
+      const p = ART + Math.round((span * i) / (n + 1)) + rint(-1, 1);
+      // İki karo sokak gerçek yol, bir karo dar ara sokak
+      this.addStreet(c, vertical, p, w, w >= 2 ? GROUND.ROAD : GROUND.ALLEY);
       out.push(p, p + w);
     }
     out.push(CT);
@@ -994,7 +1142,7 @@ class World {
     const bw = x1 - x0;
     const bh = y1 - y0;
     if (m.sport) {
-      const fw = Math.min(bw - 2, 14); const fh = Math.min(bh - 2, 9);
+      const fw = Math.min(bw - 6, 12); const fh = Math.min(bh - 2, 9);
       this.setGround(c, x0, y0, x0 + fw, y0 + fh, GROUND.PLAZA);
       this.addPad(c, 'foot', x0, y0, fw, fh);
       const hx = x0 + fw;
@@ -1176,7 +1324,7 @@ class World {
           this.biomeAt(ax, ay, out);
           const sis = this.sistem;
           const clash = this.sites.some((o) => Math.abs(o.cx - ax) < 3 && Math.abs(o.cy - ay) < 3) || (Math.abs(sis.cx - ax) < 3 && Math.abs(sis.cy - ay) < 3);
-          if (out.biome === 'city' && !clash && Math.max(Math.abs(ax), Math.abs(ay)) > 3) {
+          if (out.biome === 'city' && !clash && !isHighwayRow(ay) && !isHighwayRow(ay + 1) && Math.max(Math.abs(ax), Math.abs(ay)) > 3) {
             this.sites.push({ ...s, cx: ax, cy: ay });
             break;
           }
@@ -1243,7 +1391,7 @@ class World {
       const cx = Math.round(Math.cos(t) * r);
       const cy = Math.round(Math.sin(t) * r);
       this.biomeAt(cx, cy, out);
-      if (out.biome === 'city' && Math.max(Math.abs(cx), Math.abs(cy)) > 1) found = { cx, cy };
+      if (out.biome === 'city' && !isHighwayRow(cy) && Math.max(Math.abs(cx), Math.abs(cy)) > 1) found = { cx, cy };
     }
     this.sistem = found || { cx: a, cy: a };
     return this.sistem;
@@ -1579,7 +1727,7 @@ class World {
   }
 
   finishCost(c) {
-    const COST = [3, 1, 2, 1, 0, 3, 2, 3, 3, 1];
+    const COST = [3, 1, 2, 1, 0, 3, 2, 3, 3, 1, 1];
     for (let i = 0; i < CELLS; i++) c.cost[i] = c.rectAt[i] ? 0 : COST[c.ground[i]];
     // Binaya bitişik karolar pahalı: polisler köşeye sürtmesin
     for (let y = 1; y < CT - 1; y++) {
@@ -1600,6 +1748,31 @@ const PASTELS = ['#7fa8c9', '#c9a27f', '#a0a8b8', '#8fb59a', '#c98f8f', '#b0a080
 const RESERVED = [[CT - 1, ART], [ART, CT - 1], [ART, ART]];
 const xsBuf = [];
 const ysBuf = [];
+
+// Köşeli noktalardan yumuşak eğri: düz dizi [x, y, x, y...] döner
+function sampleCurve(pts, ring) {
+  const out = [];
+  const n = pts.length;
+  if (ring || n < 3) {
+    for (let i = 0; i < n - 1; i++) {
+      const steps = ring ? 3 : Math.ceil(Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]) * 2);
+      for (let k = 0; k < steps; k++) { const t = k / steps; out.push(pts[i][0] + (pts[i + 1][0] - pts[i][0]) * t, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * t); }
+    }
+    out.push(pts[n - 1][0], pts[n - 1][1]);
+    return out;
+  }
+  // Catmull-Rom
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = pts[Math.max(0, i - 1)]; const p1 = pts[i]; const p2 = pts[i + 1]; const p3 = pts[Math.min(n - 1, i + 2)];
+    const steps = Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) * 2);
+    for (let k = 0; k < steps; k++) {
+      const t = k / steps; const t2 = t * t; const t3 = t2 * t;
+      for (let d = 0; d < 2; d++) out.push(0.5 * (2 * p1[d] + (p2[d] - p0[d]) * t + (2 * p0[d] - 5 * p1[d] + 4 * p2[d] - p3[d]) * t2 + (3 * p1[d] - p0[d] - 3 * p2[d] + p3[d]) * t3));
+    }
+  }
+  out.push(pts[n - 1][0], pts[n - 1][1]);
+  return out;
+}
 
 function pickTemplate() {
   return pickFrom(W.templates);
@@ -2037,6 +2210,8 @@ function driveCop(cop, g, dt) {
 const PD = CONFIG.peds;
 const NP = CONFIG.npc;
 const TL = CONFIG.traffic;
+const HT = CONFIG.highwayTraffic;
+const HWC = CONFIG.world.highway;
 const ROAD_W = CONFIG.world.arterial * TILE;
 const ART_MID = ROAD_W / 2;
 const PED_WALK = 0;
@@ -2053,6 +2228,7 @@ const DY = [0, 1, 0, -1];
 const LANE = [1, -1, -1, 1];
 
 const PED_KIND_NAMES = Object.keys(PD.kinds);
+const HW_CARS = ['tofas', 'murat', 'tog', 'bavyera', 'halka', 'yildiz', 'golf', 'focus', 'kore', 'megane', 'linea', 'pickup', 'clio', 'duster', 'grandland', 'egea'];
 let pedWeight = 0;
 for (const k of PED_KIND_NAMES) pedWeight += PD.kinds[k].weight;
 let npcWeight = 0;
@@ -2087,6 +2263,11 @@ class Crowd {
       b.drive = { maxSpeed: 0, accel: 0, turnRate: 0, grip: 0, driftGrip: 0 };
       this.npcs.push(b);
     }
+    // Otoban: hafif araç havuzu
+    this.hw = [];
+    for (let i = 0; i < HT.count; i++) this.hw.push({ alive: false, x: 0, y: 0, a: 0, vx: 0, vy: 0, speed: 0, cruise: 0, dir: 1, lane: 0, row: 0, kind: 'taxi', color: 0, spec: null, len: 0, wid: 0, mass: 1, hitT: 0, hornT: 0 });
+    this.hwT = 0;
+    this.hwCount = 0;
     this.pedT = 0;
     this.npcT = 0;
     this.waitT = 0;
@@ -2101,6 +2282,8 @@ class Crowd {
   clear() {
     for (const p of this.peds) p.alive = false;
     for (const n of this.npcs) n.alive = false;
+    for (const h of this.hw) h.alive = false;
+    this.hwCount = 0;
     this.pedCount = 0;
     this.npcCount = 0;
   }
@@ -2131,6 +2314,115 @@ class Crowd {
       this.updateNpc(n, dt, g);
     }
     this.npcCount = npcs;
+    this.updateHighway(dt, g);
+  }
+
+  // --- Otoban trafiği ---
+  spawnHighway(g) {
+    const p = g.player;
+    const cy = Math.floor(p.y / CHUNK);
+    let row = null;
+    for (const k of [cy, cy - 1, cy + 1]) if (isHighwayRow(k)) row = k;
+    if (row === null) return;
+    const mid = row * CHUNK + HIGHWAY.mid;
+    if (Math.abs(p.y - mid) > HT.near) return;
+    const h = this.hw.find((k) => !k.alive);
+    if (!h) return;
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const lane = Math.floor(Math.random() * HWC.lanes);
+    const laneW = (HWC.half * TILE - 24) / HWC.lanes;
+    const y = mid + dir * (HIGHWAY.mid - HIGHWAY.top - 12 - laneW * (lane + 0.5));
+    const R = g.viewRadius() + 90 + Math.random() * 700;
+    const x = p.x + (Math.random() < 0.5 ? -R : R);
+    if (g.onScreen(x, y, 90)) return;
+    for (const o of this.hw) if (o.alive && o.y === y && Math.abs(o.x - x) < 130) return;
+    const m = HT.mix;
+    let r = Math.random() * (m.car + m.taxi + m.minibus + m.bus + m.truck);
+    let kind;
+    if ((r -= m.taxi) < 0) kind = 'taxi';
+    else if ((r -= m.minibus) < 0) kind = 'minibus';
+    else if ((r -= m.bus) < 0) kind = 'bus';
+    else if ((r -= m.truck) < 0) kind = 'truck';
+    else kind = HW_CARS[Math.floor(Math.random() * HW_CARS.length)];
+    const spec = NP.types[kind];
+    const heavy = kind === 'truck' || kind === 'bus';
+    const [a, b] = heavy ? HT.truckSpeed : HT.speed;
+    h.alive = true; h.x = x; h.y = y; h.dir = dir; h.lane = lane; h.row = row;
+    h.kind = kind; h.spec = spec; h.color = Math.floor(Math.random() * spec.colors.length);
+    h.len = spec.len; h.wid = spec.wid; h.mass = spec.mass;
+    h.a = dir > 0 ? 0 : Math.PI;
+    // İç şerit daha hızlı akar
+    h.cruise = a + (b - a) * ((HWC.lanes - lane) / HWC.lanes) * (0.8 + Math.random() * 0.2);
+    h.speed = h.cruise; h.hitT = 0; h.hornT = 0;
+    h.vx = dir * h.speed; h.vy = 0;
+  }
+
+  updateHighway(dt, g) {
+    this.hwT -= dt;
+    if (this.hwT <= 0) {
+      this.hwT = HT.spawnEvery;
+      if (this.hwCount < HT.count * this.limit) this.spawnHighway(g);
+    }
+    const p = g.player;
+    const hw = this.hw;
+    const tick = g.tickCount;
+    let n = 0;
+    for (let i = 0; i < hw.length; i++) {
+      const h = hw[i];
+      if (!h.alive) continue;
+      n++;
+      if (Math.abs(h.x - p.x) > HT.range || Math.abs(h.y - p.y) > HT.range) { h.alive = false; continue; }
+      // Öndeki aracı sırayla kontrol eder: her kare hepsi değil
+      if ((tick + i) % 5 === 0) {
+        let gap = 1e9; let lead = 0;
+        for (let j = 0; j < hw.length; j++) {
+          const o = hw[j];
+          if (!o.alive || o.y !== h.y || j === i) continue;
+          const d = (o.x - h.x) * h.dir;
+          if (d > 0 && d < gap) { gap = d; lead = o.speed; }
+        }
+        const pd = (p.x - h.x) * h.dir;
+        if (Math.abs(p.y - h.y) < 26 && pd > 0 && pd < gap) {
+          gap = pd; lead = Math.max(0, (p.vx || 0) * h.dir);
+          if (pd < HT.hornDist && h.hornT <= 0 && g.state === 'play') { h.hornT = 3; g.emit('horn', h.spec.horn); }
+        }
+        h.limit = gap < (h.len + 40) / 2 + HT.safeGap + h.speed * 0.28 ? lead : 1e9;
+      }
+      if (h.hornT > 0) h.hornT -= dt;
+      const want = h.hitT > 0 ? 0 : Math.min(h.cruise, h.limit ?? 1e9);
+      if (h.hitT > 0) h.hitT -= dt;
+      h.speed += Math.max(-HT.brake * dt, Math.min(HT.accel * dt, want - h.speed));
+      if (h.speed < 0) h.speed = 0;
+      h.vx = h.dir * h.speed;
+      h.x += h.vx * dt;
+      const dx = h.x - p.x;
+      const dy = h.y - p.y;
+      const reach = (h.len + p.len) * 0.62;
+      if (g.state === 'play' && dx * dx + dy * dy < reach * reach) {
+        const y = h.y;
+        const rv = g.collideCars(p, h);
+        h.y = y; h.vy = 0;
+        if (rv > 30) {
+          h.hitT = 2.5;
+          g.fx.sparks((h.x + p.x) / 2, (h.y + p.y) / 2, 8);
+          g.npcHits++;
+          g.playerImpact(rv + 30, HT.hitScale * Math.min(2, Math.sqrt(h.mass)), true, HT.maxHit);
+        }
+      }
+      if ((tick + i) % 3 === 0 && h.y > p.y - 1000 && h.y < p.y + 1000) {
+        for (const c of g.cops) {
+          if (c.flying) continue;
+          const ax = c.x - h.x; const ay = c.y - h.y;
+          const r2 = (c.len + h.len) * 0.55;
+          if (ax * ax + ay * ay > r2 * r2) continue;
+          const y = h.y;
+          const rv = g.collideCars(c, h);
+          h.y = y; h.vy = 0;
+          if (rv > 50) { c.hp -= rv * 0.04; h.hitT = 2; }
+        }
+      }
+    }
+    this.hwCount = n;
   }
 
   // --- Yayalar ---
@@ -2447,6 +2739,12 @@ class Crowd {
     const x = horizontal ? p.x + back : line + LANE[dir] * NP.laneOffset;
     const y = horizontal ? line + LANE[dir] * NP.laneOffset : p.y + back;
     if (g.onScreen(x, y, 100)) return;
+    // Dikey ana yol otoban bandına araç bırakmaz
+    if (!horizontal) {
+      const row = Math.floor(y / CHUNK);
+      const ly = y - row * CHUNK;
+      if (isHighwayRow(row) && ly > HIGHWAY.top - 60) return;
+    }
     for (const o of this.npcs) if (o.alive && Math.hypot(o.x - x, o.y - y) < 180) return;
 
     let r = Math.random() * npcWeight;
@@ -2489,7 +2787,9 @@ class Crowd {
     const ahead = (center - pos) * (forward ? 1 : -1);
     if (ahead < 70 && n.lastCross !== k) {
       n.lastCross = k;
-      if (Math.random() < NP.turnChance) {
+      // Otobana inen kol yok: dikey trafik bandın önünde döner
+      const hwAhead = !horizontal && (forward ? isHighwayRow(k) : isHighwayRow(k - 1));
+      if (hwAhead || Math.random() < NP.turnChance) {
         n.dir = (n.dir + (Math.random() < 0.5 ? 1 : 3)) % 4;
         n.line = center;
         n.lastCross = 1e9;
@@ -7588,51 +7888,22 @@ class Renderer {
       return c;
     });
     const noise = (g, n, a, b, s = 3) => { for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? a : b; g.fillRect(Math.random() * T, Math.random() * T, s, s); } };
-    this.roads = [
-      mk((g, v) => { // Koyu asfalt
-        g.fillStyle = '#34373e'; g.fillRect(0, 0, T, T);
-        noise(g, 26, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.14)', 2);
-        if (v === 1) { g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(6, 10, 20, 9); }
-      }),
-      mk((g, v) => { // Açık beton: derzli plakalar
-        g.fillStyle = v % 2 ? '#aeb0ad' : '#a6a8a6'; g.fillRect(0, 0, T, T);
-        noise(g, 14, 'rgba(255,255,255,.1)', 'rgba(0,0,0,.08)', 2);
-        g.fillStyle = 'rgba(40,40,40,.35)'; g.fillRect(0, 0, T, 1.5); g.fillRect(0, 0, 1.5, T);
-      }),
-      mk((g, v) => { // Parke taşı
-        g.fillStyle = '#6d645b'; g.fillRect(0, 0, T, T);
-        const cols = ['#8b8074', '#7f7468', '#94897b', '#766c60'];
-        for (let y = 0; y < 4; y++) for (let x = -1; x < 5; x++) { g.fillStyle = cols[(x * 3 + y + v) & 3]; g.fillRect(x * 10 + (y % 2) * 5 + 0.6, y * 10 + 0.6, 8.8, 8.8); }
-      }),
-      mk((g, v) => { // Kırık asfalt: çatlak ve yama
-        g.fillStyle = '#44474c'; g.fillRect(0, 0, T, T);
-        noise(g, 22, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.14)', 2);
-        g.strokeStyle = 'rgba(10,10,12,.7)'; g.lineWidth = 1.2;
-        g.beginPath(); g.moveTo(Math.random() * T, 0);
-        for (let i = 1; i <= 4; i++) g.lineTo(Math.random() * T, (i / 4) * T);
-        g.stroke();
-        if (v === 2) { g.fillStyle = '#2b2d31'; g.fillRect(4, 8, 22, 17); }
-        if (v === 3) { g.fillStyle = 'rgba(20,18,16,.8)'; g.beginPath(); g.ellipse(20, 22, 7, 5, 0.4, 0, 7); g.fill(); }
-      }),
-    ];
-    this.alleys = [
-      mk((g, v) => { // Arnavut kaldırımı
-        g.fillStyle = '#5b554d'; g.fillRect(0, 0, T, T);
-        for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) { g.fillStyle = ['#8e8578', '#7a7267', '#9c9385'][(x + y * 2 + v) % 3]; g.beginPath(); g.arc(x * 8 + 4 + (y % 2) * 2, y * 8 + 4, 3.5, 0, 7); g.fill(); }
-      }),
-      mk(() => { // Yamalı beton
-        return;
-      }),
-      mk((g, v) => { // Tuğla döşeme
-        g.fillStyle = '#6e4a3c'; g.fillRect(0, 0, T, T);
-        for (let y = 0; y < 5; y++) for (let x = -1; x < 4; x++) { g.fillStyle = ['#a56a4e', '#96604a', '#b0745a'][(x + y + v) & 1]; g.fillRect(x * 14 + (y % 2) * 7 + 0.6, y * 8 + 0.6, 12.8, 6.8); }
-      }),
-    ];
-    this.alleys[1] = mk((g, v) => {
-      g.fillStyle = v === 2 ? '#7c7f82' : '#8b8e8f'; g.fillRect(0, 0, T, T);
-      noise(g, 16, 'rgba(255,255,255,.08)', 'rgba(0,0,0,.12)', 2);
-      if (v === 1) { g.fillStyle = '#6a6d70'; g.fillRect(8, 6, 18, 22); }
+    // Üç yol tonu: ince doku farkıyla, araçlar net ayrılsın
+    const tone = (col) => mk((g, v) => {
+      g.fillStyle = col; g.fillRect(0, 0, T, T);
+      noise(g, 22, 'rgba(255,255,255,.035)', 'rgba(0,0,0,.05)', 2);
+      if (v === 1) { g.fillStyle = 'rgba(0,0,0,.05)'; g.fillRect(6, 10, 22, 12); }
+      if (v === 3) { g.fillStyle = 'rgba(255,255,255,.03)'; g.fillRect(14, 4, 20, 26); }
     });
+    const RT = CONFIG.world.roadTones;
+    this.roads = RT.map(tone);
+    this.roads[2] = mk((g, v) => {
+      g.fillStyle = RT[2]; g.fillRect(0, 0, T, T);
+      noise(g, 14, 'rgba(255,255,255,.04)', 'rgba(0,0,0,.05)', 2);
+      g.fillStyle = 'rgba(40,40,40,.16)'; g.fillRect(0, 0, T, 1); g.fillRect(0, 0, 1, T);
+      if (v === 2) { g.fillStyle = 'rgba(0,0,0,.03)'; g.fillRect(0, 0, T, T); }
+    });
+    this.alleys = [this.roads[1], tone('#70747a')];
   }
 
   makeSprites() {
@@ -7967,8 +8238,8 @@ class Renderer {
     const urban = c.biome === 'city';
     const sea = c.template === 'sea';
     const shore = sea ? '#1f8fd6' : c.template === 'lake' ? pal.sand : c.template === 'plaza' ? '#e5d7bf' : pal.grass;
-    const colors = [pal.grass, pal.road, '#cdd2d6', '#e5d7bf', shore, pal.sand, pal.dirt, '#5fd3e6', '#c9ae4c', '#8b8e8f'];
-    const roads = this.roads[urban ? c.road : 0];
+    const colors = [pal.grass, pal.road, '#cdd2d6', '#e5d7bf', shore, pal.sand, pal.dirt, '#5fd3e6', '#c9ae4c', '#70747a', '#cdd2d6'];
+    const roads = this.roads[urban ? c.road : 1];
     const alleys = this.alleys[c.alley];
     const fieldGreen = (c.cx + c.cy) & 1;
     for (let y = 0; y < CT; y++) {
@@ -8043,7 +8314,7 @@ class Renderer {
     const K = 11;
     const stone = urban || sea ? '#c6cace' : 'rgba(0,0,0,.2)';
     const lip = urban || sea ? '#eef1f4' : 'rgba(0,0,0,.25)';
-    const open = (t) => t !== GROUND.ROAD && t !== GROUND.ALLEY;
+    const open = (t) => t !== GROUND.ROAD && t !== GROUND.ALLEY && t !== GROUND.TRACK;
     const edge = (px, py, dx, dy) => {
       g.fillStyle = stone;
       if (dx > 0) g.fillRect(px + TILE - K, py, K, TILE);
@@ -8096,6 +8367,87 @@ class Renderer {
       g.fillRect(c.x - 22, c.y + i, 18, 9);
     }
     this.bakePads(g, c);
+    this.bakePaths(g, c);
+    if (c.hw) this.bakeHighway(g, c);
+  }
+
+  // Kıvrımlı yollar, U dönüşü, Y ayrımı ve dönel kavşak: yumuşak eğri olarak çizilir
+  bakePaths(g, c) {
+    if (!c.paths.length) return;
+    const tones = CONFIG.world.roadTones;
+    const col = tones[c.road];
+    const stroke = (p) => {
+      g.beginPath();
+      for (let i = 0; i < p.pts.length; i += 2) {
+        const x = c.x + p.pts[i] * TILE; const y = c.y + p.pts[i + 1] * TILE;
+        if (i) g.lineTo(x, y); else g.moveTo(x, y);
+      }
+      if (p.ring) g.closePath();
+    };
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    for (const p of c.paths) { stroke(p); g.strokeStyle = '#eef1f4'; g.lineWidth = p.w * TILE + 8; g.stroke(); }
+    for (const p of c.paths) { stroke(p); g.strokeStyle = col; g.lineWidth = p.w * TILE; g.stroke(); }
+    const light = c.road === 2;
+    g.strokeStyle = light ? '#6d7076' : '#ffd23f'; g.lineWidth = 3; g.setLineDash([22, 18]);
+    for (const p of c.paths) { stroke(p); g.stroke(); }
+    g.setLineDash([]);
+    for (let i = 0; i < c.rectCount; i++) {
+      const r = c.rects[i];
+      if (r.kind !== 'island') continue;
+      const R0 = r.w / 2 + 6;
+      g.fillStyle = '#eef1f4'; g.beginPath(); g.arc(r.cx, r.cy, R0 + 5, 0, 7); g.fill();
+      g.fillStyle = '#6fae3e'; g.beginPath(); g.arc(r.cx, r.cy, R0, 0, 7); g.fill();
+      g.fillStyle = '#4f9a3a'; for (let k = 0; k < 8; k++) { const a = (k / 8) * 6.283; g.beginPath(); g.arc(r.cx + Math.cos(a) * R0 * 0.68, r.cy + Math.sin(a) * R0 * 0.68, 11, 0, 7); g.fill(); }
+      g.fillStyle = '#e30a17'; g.beginPath(); g.arc(r.cx, r.cy, 13, 0, 7); g.fill();
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(r.cx, r.cy, 5, 0, 7); g.fill();
+      g.fillStyle = 'rgba(255,255,255,.8)';
+      for (let k = 0; k < 4; k++) { const a = (k / 4) * 6.283 + 0.4; const q = R0 + 66; g.save(); g.translate(r.cx + Math.cos(a) * q, r.cy + Math.sin(a) * q); g.rotate(a + 1.57); g.fillRect(-12, -2, 16, 4); g.beginPath(); g.moveTo(4, -7); g.lineTo(15, 0); g.lineTo(4, 7); g.closePath(); g.fill(); g.restore(); }
+    }
+  }
+
+  // Otoban: asfalt, şerit, emniyet şeridi, beton bariyer, yeşil tabela köprüsü
+  bakeHighway(g, c) {
+    const H = CONFIG.world.highway;
+    const top = c.y + H.y0 * TILE; const bot = top + (H.half * 2 + 1) * TILE;
+    const x0 = c.x + ART_W; const x1 = c.x + CHUNK;
+    g.fillStyle = CONFIG.world.roadTones[0]; g.fillRect(x0, top, x1 - x0, bot - top);
+    const side = H.half * TILE;
+    const laneW = (side - 24) / H.lanes;
+    g.fillStyle = '#fff'; g.fillRect(x0, top + 6, x1 - x0, 4); g.fillRect(x0, bot - 10, x1 - x0, 4);
+    g.fillStyle = '#ffd23f'; g.fillRect(x0, top + side - 8, x1 - x0, 3); g.fillRect(x0, bot - side + 5, x1 - x0, 3);
+    g.fillStyle = 'rgba(255,255,255,.85)';
+    for (let k = 1; k < H.lanes; k++) {
+      for (let x = x0 + 16; x < x1; x += 58) {
+        g.fillRect(x, top + 12 + k * laneW, 32, 3);
+        g.fillRect(x, bot - 12 - k * laneW, 32, 3);
+      }
+    }
+    // Beton bariyer
+    const by = top + side + 15;
+    g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(x0, by + 4, x1 - x0, 12);
+    g.fillStyle = '#d4d7da'; g.fillRect(x0, by, x1 - x0, 10);
+    g.fillStyle = '#9ea2a6'; for (let x = x0; x < x1; x += 40) g.fillRect(x, by, 2, 10);
+    g.fillStyle = '#fff'; g.fillRect(x0, by + 3, x1 - x0, 2);
+    // Tabela köprüsü
+    const gx = c.x + CHUNK * 0.62;
+    g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(gx + 8, top + 8, 10, bot - top);
+    g.fillStyle = '#7e8690'; g.fillRect(gx, top - 6, 7, bot - top + 12);
+    const pan = (y, t) => {
+      g.font = '900 15px Nunito, sans-serif';
+      const w = g.measureText(t).width + 18;
+      g.fillStyle = '#0d6b3c'; g.fillRect(gx - w / 2 + 3, y - 15, w, 30);
+      g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.strokeRect(gx - w / 2 + 6, y - 12, w - 6, 24);
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, gx + 3, y + 1);
+    };
+    const h = (Math.imul(c.cx, 73856093) >>> 0) % 4;
+    pan(top + side * 0.5, ['← EDİRNE O-3', '← SARAY O-3', '← GEBZE O-4', '← ÇORLU O-3'][h]);
+    pan(bot - side * 0.5, ['ANKARA O-4 →', 'İZMİT O-4 →', 'BOLU O-4 →', 'BURSA O-5 →'][h]);
+    // Hız tabelası
+    for (const [y, t] of [[top + 2, '120'], [bot - 2, '120']]) {
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(c.x + CHUNK * 0.3, y, 11, 0, 7); g.fill();
+      g.strokeStyle = '#d0121b'; g.lineWidth = 3; g.stroke();
+      g.fillStyle = '#111'; g.font = '900 10px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, c.x + CHUNK * 0.3, y + 1);
+    }
   }
 
   // Trafik levhaları: pişirilir, oyun sırasında maliyeti yoktur
@@ -8140,17 +8492,25 @@ class Renderer {
     // Ara sokak ağzı: tek yön ya da çıkmaz uyarısı
     for (let i = 0; i < c.streetCount; i++) {
       const s = c.streets[i];
-      if (s.ground !== GROUND.ALLEY) continue;
+      if (s.ground !== GROUND.ALLEY && s.ground !== GROUND.ROAD) continue;
       const at = (s.pos + s.width / 2) * TILE;
+      // Geniş sokakta kesik orta çizgi
+      if (s.width >= 2) {
+        g.fillStyle = c.road === 2 ? '#6d7076' : 'rgba(255,255,255,.75)';
+        for (let d = ART_W + 40; d < CHUNK - 30; d += 46) {
+          if (s.vertical) g.fillRect(c.x + at - 1.5, c.y + d, 3, 24);
+          else g.fillRect(c.x + d, c.y + at - 1.5, 24, 3);
+        }
+      }
       const sign = i % 2 ? round('#2a6fd6', '#fff', '⇧') : tri('Y');
       if (s.vertical) post(c.x + at + 13, c.y + ART_W - 5, sign);
       else post(c.x + ART_W - 5, c.y + at + 13, sign);
     }
     // Yaya geçitleri ara sokak ağızlarında
-    g.fillStyle = 'rgba(255,255,255,.7)';
+    g.fillStyle = 'rgba(255,255,255,.82)';
     for (let i = 0; i < c.streetCount; i++) {
       const s = c.streets[i];
-      if (s.ground !== GROUND.ALLEY) continue;
+      if (s.ground !== GROUND.ALLEY && s.ground !== GROUND.ROAD) continue;
       const a = s.pos * TILE + 4;
       const b = (s.pos + s.width) * TILE - 4;
       for (let k = a; k < b; k += 12) {
@@ -8445,6 +8805,7 @@ class Renderer {
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, false);
     this.drawPeds(game, vx0, vx1, vy0, vy1, false);
     this.drawNpcs(game, vx0, vx1, vy0, vy1);
+    this.drawHighway(game, vx0, vx1, vy0, vy1);
     this.drawCops(game, now, vx0, vx1, vy0, vy1);
     if (game.state !== 'dying' && game.state !== 'over') this.drawPlayer(game);
     this.drawUfos(game, now, vx0, vx1, vy0, vy1);
@@ -8661,6 +9022,13 @@ class Renderer {
         ctx.drawImage(ew, c.x + ART_W + 10, c.y + ART_W + 8, 12, 26);
         ctx.drawImage(ns, c.x + ART_W + 10, c.y - 34, 12, 26);
         ctx.drawImage(ns, c.x - 22, c.y + ART_W + 8, 12, 26);
+        for (let i = 0; i < c.streetCount; i++) {
+          const s = c.streets[i];
+          if (s.width < 2) continue;
+          const at = (s.pos + s.width) * TILE + 6;
+          if (s.vertical) ctx.drawImage(ns, c.x + at, c.y + ART_W - 34, 10, 22);
+          else ctx.drawImage(ew, c.x + ART_W - 18, c.y + at, 10, 22);
+        }
       }
     }
   }
@@ -8729,9 +9097,27 @@ class Renderer {
     if (game.state === 'play') head(game.player);
     for (const c of game.cops) if (c.type !== 'tank' && !c.flying) head(c);
     for (const n of game.crowd.npcs) if (n.alive && n.state === 'drive') head(n);
+    for (const n of game.crowd.hw) if (n.alive) head(n);
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
+  drawHighway(game, x0, x1, y0, y1) {
+    const sp = this.sprites.npc;
+    const list = game.crowd.hw;
+    for (const h of list) {
+      if (!h.alive || h.x < x0 - 80 || h.x > x1 + 80 || h.y < y0 - 60 || h.y > y1 + 60) continue;
+      const key = `${h.kind}${h.color}`;
+      let img = sp[key];
+      if (!img) {
+        img = sheetSprite(`npc:${h.kind}:${h.color}`, h.spec.len);
+        if (!img) continue;
+        sp[key] = img;
+      }
+      this.drawBody(img, h);
+    }
+    this.ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
   drawNpcs(game, x0, x1, y0, y1) {

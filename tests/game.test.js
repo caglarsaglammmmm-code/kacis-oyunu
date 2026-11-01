@@ -518,3 +518,18 @@ test('polis sirenleri çakışmaz: on polise kadar her biri ayrı ses', () => {
   for (let i = 0; i < 10; i++) g.spawnCop('car', 'chaser', i * 100, 0, 0);
   assert.equal(new Set(g.cops.map((c) => c.sirenId)).size, 10);
 });
+
+test('otoban trafiği: yakınken yoğun akar, ters yönler ayrı, havuz sınırı aşılmaz', () => {
+  const g = game({ god: true });
+  const H = CONFIG.world.highway;
+  const p = g.player;
+  p.x = 700; p.y = H.offset * 1280 + 620; p.vx = 0; p.vy = 0;
+  g.cam.x = p.x; g.cam.y = p.y;
+  for (let i = 0; i < 60 * 8; i++) { p.x = 700; p.y = H.offset * 1280 + 620; p.vx = 0; p.vy = 0; g.tick(dt, 0, false); }
+  const live = g.crowd.hw.filter((h) => h.alive);
+  assert.ok(live.length >= 25, 'araç ' + live.length);
+  assert.ok(live.length <= CONFIG.highwayTraffic.count);
+  assert.ok(new Set(live.map((h) => h.dir)).size === 2);
+  const kinds = new Set(live.map((h) => h.kind));
+  assert.ok(kinds.size >= 5, [...kinds].join());
+});
