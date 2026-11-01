@@ -51,8 +51,8 @@ export const CONFIG = {
     sistemRing: [4, 9],
     // Bina yüksekliği: share yüksek bina oranı, height kameraya uzanma payı
     // ruin ve work: sıradan mahallede harabe ve inşaat, fire: yangın olasılığı
-    tall: { share: 0.14, height: [0.1, 0.24], maxPerChunk: 14 },
-    ruin: 0.035, work: 0.04, fire: 0.008, ruinFire: 0.2,
+    tall: { share: 0.62, height: [0.16, 0.42], maxPerChunk: 16 },
+    ruin: 0.035, work: 0.04, fire: 0.008, ruinFire: 0.07,
     // Otoban: her satırı doğudan batıya kesen geniş yol. every: kaç chunk'ta bir, y0: bant başlangıç karosu
     // half: bir yönün karo sayısı, lanes: yön başına şerit
     highway: { every: 10, offset: 2, y0: 10, half: 5, lanes: 4 },
@@ -200,6 +200,9 @@ export const CONFIG = {
     beamPull: 300, // Oyuncuyu merkeze çekme
     beamSlow: 0.55, // Işın altında hız kaybı (saniyede oran)
   },
+
+  // Oyuncu aracının altındaki ışık: NPC'lerden ayrılır
+  playerGlow: { alpha: 0.34, scale: 1.5 },
 
   // Derin su: sahil, göl, gölet. Sığ suya girilir, derine düşen araç batar
   water: { sinkTime: 2.3, bubbleEvery: 0.06, shrink: 0.5, spin: 1.5, deepProbe: 6 },

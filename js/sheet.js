@@ -32,7 +32,7 @@ export function sheetSprite(key, len) {
   g.shadowColor = 'rgba(0,0,0,.95)'; g.shadowBlur = 3.6 * q;
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
-  g.shadowColor = 'rgba(255,255,255,.8)'; g.shadowBlur = 1 * q;
+  g.shadowColor = 'rgba(255,255,255,.9)'; g.shadowBlur = 1.2 * q;
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
   g.shadowColor = 'transparent'; g.shadowBlur = 0;
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);

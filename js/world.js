@@ -873,7 +873,7 @@ export class World {
       // Tohumdan türetilir: rastgele sayı dizisini bozmaz
       const h = ((r.seed * 2654435761) >>> 0) / 4294967296;
       if ((tower || (plain && h < T.share)) && c.talls.length < T.maxPerChunk) {
-        r.tall = T.height[0] + (T.height[1] - T.height[0]) * (tower ? 0.45 + 0.55 * h : h / T.share * 0.55);
+        r.tall = T.height[0] + (T.height[1] - T.height[0]) * (tower ? 0.5 + 0.5 * h : (h / T.share) * 0.6);
         if (r.style === S.SKYSCRAPER) r.tall = T.height[1];
         c.talls.push(r);
       }

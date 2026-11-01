@@ -55,8 +55,8 @@ const CONFIG = {
     sistemRing: [4, 9],
     // Bina yüksekliği: share yüksek bina oranı, height kameraya uzanma payı
     // ruin ve work: sıradan mahallede harabe ve inşaat, fire: yangın olasılığı
-    tall: { share: 0.14, height: [0.1, 0.24], maxPerChunk: 14 },
-    ruin: 0.035, work: 0.04, fire: 0.008, ruinFire: 0.2,
+    tall: { share: 0.62, height: [0.16, 0.42], maxPerChunk: 16 },
+    ruin: 0.035, work: 0.04, fire: 0.008, ruinFire: 0.07,
     // Otoban: her satırı doğudan batıya kesen geniş yol. every: kaç chunk'ta bir, y0: bant başlangıç karosu
     // half: bir yönün karo sayısı, lanes: yön başına şerit
     highway: { every: 10, offset: 2, y0: 10, half: 5, lanes: 4 },
@@ -204,6 +204,9 @@ const CONFIG = {
     beamPull: 300, // Oyuncuyu merkeze çekme
     beamSlow: 0.55, // Işın altında hız kaybı (saniyede oran)
   },
+
+  // Oyuncu aracının altındaki ışık: NPC'lerden ayrılır
+  playerGlow: { alpha: 0.34, scale: 1.5 },
 
   // Derin su: sahil, göl, gölet. Sığ suya girilir, derine düşen araç batar
   water: { sinkTime: 2.3, bubbleEvery: 0.06, shrink: 0.5, spin: 1.5, deepProbe: 6 },
@@ -1385,7 +1388,7 @@ class World {
       // Tohumdan türetilir: rastgele sayı dizisini bozmaz
       const h = ((r.seed * 2654435761) >>> 0) / 4294967296;
       if ((tower || (plain && h < T.share)) && c.talls.length < T.maxPerChunk) {
-        r.tall = T.height[0] + (T.height[1] - T.height[0]) * (tower ? 0.45 + 0.55 * h : h / T.share * 0.55);
+        r.tall = T.height[0] + (T.height[1] - T.height[0]) * (tower ? 0.5 + 0.5 * h : (h / T.share) * 0.6);
         if (r.style === S.SKYSCRAPER) r.tall = T.height[1];
         c.talls.push(r);
       }
@@ -6569,7 +6572,7 @@ function sheetSprite(key, len) {
   g.shadowColor = 'rgba(0,0,0,.95)'; g.shadowBlur = 3.6 * q;
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
-  g.shadowColor = 'rgba(255,255,255,.8)'; g.shadowBlur = 1 * q;
+  g.shadowColor = 'rgba(255,255,255,.9)'; g.shadowBlur = 1.2 * q;
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
   g.shadowColor = 'transparent'; g.shadowBlur = 0;
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
@@ -6724,8 +6727,8 @@ const CAR_MODELS = {
     win: [[0.37, 0.56], [0.57, 0.77]], seams: [0.27, 0.565, 0.78], handles: [0.54, 0.75], hood: 0.27, trunk: 0.88,
     top: [{ s0: 0.035, s1: 0.085, a: 0.48, b: 0.9, b1: 0.97, a1: 0.8, c: LED, glow: 1 }, { s0: 0.93, s1: 0.99, a: 0.42, b: 0.92, c: RED, glow: 1 }],
     front(d) {
-      d.poly([[-0.42, 0.72], [0.42, 0.72], [0.34, 0.54], [-0.34, 0.54]], BLK);
-      d.polyLine([[-0.42, 0.72], [0.42, 0.72], [0.34, 0.54], [-0.34, 0.54]], CRM, 0.02);
+      d.poly([[-0.5, 0.74], [0.5, 0.74], [0.38, 0.52], [-0.38, 0.52]], BLK);
+      d.polyLine([[-0.5, 0.74], [0.5, 0.74], [0.38, 0.52], [-0.38, 0.52]], CRM, 0.028);
       for (let z = 0.58; z < 0.7; z += 0.04) d.box(0, z, 0.68, 0.012, CRM);
       d.polyB([[0.46, 0.76], [0.86, 0.84], [0.8, 0.72], [0.48, 0.68]], LED);
       d.box(0, 0.32, 1.1, 0.12, BLK, 0.03);
@@ -6794,8 +6797,8 @@ const CAR_MODELS = {
     features: ['Uzun kaput, kabin geride, sportif sedan', 'İkiz böbrek ızgara', 'Köşeli çift halkalı far', 'C direğinde geriye kıvrılan cam ucu', 'L biçimli yatay stoplar'],
     plan: [[0, 0.78], [0.03, 0.92], [0.12, 0.98], [0.5, 1], [0.93, 0.98], [1, 0.86]],
     deck: [[0, 0.58], [0.03, 0.74], [0.3, 0.92], [0.4, 0.96], [0.82, 1.0], [0.97, 0.99], [1, 0.76]],
-    roof: [[0.3, 0.92], [0.46, 1.38], [0.6, 1.44], [0.76, 1.38], [0.88, 1.02], [0.9, 1.0]],
-    win: [[0.41, 0.59], [0.6, 0.79]], seams: [0.33, 0.6, 0.8], handles: [0.57, 0.77], hood: 0.33, trunk: 0.89,
+    roof: [[0.34, 0.94], [0.49, 1.38], [0.62, 1.44], [0.78, 1.38], [0.9, 1.02], [0.92, 1.0]],
+    win: [[0.44, 0.61], [0.62, 0.8]], seams: [0.33, 0.6, 0.8], handles: [0.57, 0.77], hood: 0.33, trunk: 0.89,
     top: [{ s0: 0.035, s1: 0.085, a: 0.5, b: 0.92, c: LED, glow: 1 }, { s0: 0.955, s1: 0.99, a: 0.45, b: 0.92, c: RED, glow: 1 }, { s0: 0.0, s1: 0.035, a: 0.03, b: 0.3, c: BLK }],
     front(d) {
       for (const s of [-1, 1]) { d.round(s * 0.17, 0.62, 0.3, 0.2, CRM, 0.05); d.round(s * 0.17, 0.62, 0.26, 0.17, BLK, 0.04); for (let y = -0.1; y <= 0.1; y += 0.04) d.box(s * 0.17 + y, 0.62, 0.012, 0.15, '#6a727c'); }
@@ -6811,7 +6814,7 @@ const CAR_MODELS = {
     features: ['Keskin omuz çizgili, yatay duruşlu sedan', 'Tek parça altıgen dev ızgara', 'Dar yatay LED far', 'Düz bagaj kapağı', 'Boydan boya ışık bandı'],
     plan: [[0, 0.8], [0.025, 0.93], [0.1, 0.99], [0.5, 1], [0.95, 0.99], [1, 0.88]],
     deck: [[0, 0.6], [0.03, 0.76], [0.26, 0.93], [0.34, 0.97], [0.82, 1.03], [0.975, 1.03], [1, 0.8]],
-    roof: [[0.26, 0.93], [0.43, 1.37], [0.58, 1.43], [0.75, 1.37], [0.875, 1.05], [0.89, 1.03]],
+    roof: [[0.26, 0.93], [0.42, 1.38], [0.5, 1.43], [0.7, 1.43], [0.8, 1.32], [0.88, 1.05], [0.895, 1.03]],
     win: [[0.38, 0.57], [0.58, 0.77]], seams: [0.3, 0.58, 0.79], handles: [0.55, 0.75], hood: 0.3, trunk: 0.885,
     top: [{ s0: 0.03, s1: 0.09, a: 0.46, b: 0.94, c: LED, glow: 1 }, { s0: 0.965, s1: 0.992, a: 0, b: 0.93, c: RED, glow: 1 }, { s0: 0, s1: 0.03, a: 0.05, b: 0.42, c: BLK }],
     front(d) {
@@ -6829,7 +6832,7 @@ const CAR_MODELS = {
     features: ['Yumuşak kavisli lüks sedan, yay çizen tavan', 'Ortada iki yatay barlı krom ızgara', 'Kaput ucunda dik amblem', 'Geriye uzanan oval farlar', 'Yuvarlak omuzlu bagaj, oval stop'],
     plan: [[0, 0.76], [0.03, 0.9], [0.12, 0.98], [0.5, 1], [0.92, 0.97], [1, 0.82]],
     deck: [[0, 0.6], [0.03, 0.76], [0.28, 0.93], [0.38, 0.97], [0.8, 1.02], [0.96, 1.0], [1, 0.78]],
-    roof: [[0.28, 0.93], [0.44, 1.38], [0.58, 1.45], [0.74, 1.38], [0.89, 1.04], [0.91, 1.02]],
+    roof: [[0.28, 0.93], [0.42, 1.36], [0.54, 1.45], [0.66, 1.44], [0.78, 1.32], [0.9, 1.04], [0.92, 1.02]],
     win: [[0.4, 0.59], [0.6, 0.79]], seams: [0.31, 0.6, 0.8], handles: [0.57, 0.77], hood: 0.31, trunk: 0.9, hoodStar: 1,
     top: [{ s0: 0.04, s1: 0.11, a: 0.5, b: 0.86, b1: 0.95, a1: 0.8, c: LED, glow: 1 }, { s0: 0.95, s1: 0.99, a: 0.45, b: 0.9, c: RED, glow: 1 }, { s0: 0, s1: 0.035, a: 0.03, b: 0.4, c: CRM }],
     front(d) {
@@ -6847,7 +6850,7 @@ const CAR_MODELS = {
     plan: [[0, 0.82], [0.025, 0.94], [0.1, 0.99], [0.5, 1], [0.94, 0.99], [1, 0.9]],
     deck: [[0, 0.62], [0.03, 0.8], [0.26, 0.97], [0.32, 1.0], [0.8, 1.04], [0.97, 1.05], [1, 0.82]],
     roof: [[0.26, 0.97], [0.41, 1.4], [0.58, 1.45], [0.87, 1.4], [0.965, 1.1], [0.98, 1.05]],
-    win: [[0.38, 0.58], [0.59, 0.76]], seams: [0.3, 0.585, 0.8], handles: [0.56, 0.75], hood: 0.3, trunk: 0.96,
+    win: [[0.38, 0.58], [0.59, 0.72]], seams: [0.3, 0.585, 0.8], handles: [0.56, 0.72], hood: 0.3, trunk: 0.96,
     top: [{ s0: 0.025, s1: 0.08, a: 0.48, b: 0.94, c: LED, glow: 1 }, { s0: 0.96, s1: 0.992, a: 0.5, b: 0.94, c: RED, glow: 1 }],
     front(d) {
       d.box(0, 0.72, 1.56, 0.1, BLK, 0.02); d.box(0, 0.74, 1.58, 0.015, CRM);
@@ -7101,8 +7104,11 @@ function wheelTexture(THREE, style, premium, caliper) {
   const g = c.getContext('2d');
   g.translate(128, 128);
   g.fillStyle = '#0a0b0e'; g.beginPath(); g.arc(0, 0, 128, 0, 7); g.fill();
+  g.strokeStyle = '#26282d'; g.lineWidth = 5; g.beginPath(); g.arc(0, 0, 113, 0, 7); g.stroke();
   const rimC = premium ? '#eef2f6' : '#b9c2cc';
-  g.fillStyle = '#20242a'; g.beginPath(); g.arc(0, 0, 96, 0, 7); g.fill();
+  const deep = g.createRadialGradient(0, 0, 20, 0, 0, 96);
+  deep.addColorStop(0, '#34383f'); deep.addColorStop(1, '#0e1014');
+  g.fillStyle = deep; g.beginPath(); g.arc(0, 0, 96, 0, 7); g.fill();
   if (premium && caliper) { g.fillStyle = caliper; g.fillRect(40, -30, 34, 60); }
   g.strokeStyle = rimC; g.fillStyle = rimC; g.lineCap = 'round';
   g.lineWidth = 7; g.beginPath(); g.arc(0, 0, 96, 0, 7); g.stroke();
@@ -7121,6 +7127,9 @@ function wheelTexture(THREE, style, premium, caliper) {
     g.beginPath(); g.arc(0, 0, 26, 0, 7); g.fill();
   }
   g.fillStyle = '#2a2e35'; g.beginPath(); g.arc(0, 0, 12, 0, 7); g.fill();
+  g.fillStyle = '#9aa3ad';
+  for (let i = 0; i < 5; i++) { const a = (i / 5) * 6.283 + 0.3; g.beginPath(); g.arc(Math.cos(a) * 20, Math.sin(a) * 20, 3.4, 0, 7); g.fill(); }
+  g.strokeStyle = premium ? '#ffffff' : '#dfe4e9'; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, 99, 0, 7); g.stroke();
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
@@ -7371,8 +7380,14 @@ function buildCar(THREE, id, paint) {
   }
   if (m.roofSpoiler) addBox(THREE, group, 0.34, 0.05, W * 0.74, (m.roof[m.roof.length - 2][0] - 0.1) * L, roofF(m.roof[m.roof.length - 2][0] - 0.1) + 0.02, 0, plastic);
   if (m.hoodStar) { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.02, 0.09, 6), chromeMat); st.position.set(0.05, deckF(0.02) + 0.09, 0); group.add(st); }
-  if (m.chromeBelt) {
-    const a = 0.3; const bd = 0.8;
+  if (paint.premium && paint.sprite) {
+    const roofA = m.win[0][0] + 0.06; const roofB = m.win[m.win.length - 1][1] - 0.08;
+    if (!m.roofBlack && !paint.roof) patch(roofA + 0.03, roofA + 0.16, 0, 0.52, 0, 0.52, '#0b1016', 0);
+    patch(0.08, Math.max(0.1, m.hood - 0.03), 0.56, 0.62, 0.5, 0.56, '#' + new THREE.Color(paint.color).lerp(new THREE.Color('#ffffff'), 0.5).getHexString(), 0);
+    patch(roofB - 0.14, roofB, 0.6, 0.66, 0.6, 0.66, '#' + new THREE.Color(paint.color).lerp(new THREE.Color('#ffffff'), 0.35).getHexString(), 0);
+  }
+  if (m.chromeBelt || paint.premium) {
+    const a = m.win[0][0]; const bd = m.win[m.win.length - 1][1];
     for (let i = 0; i < 20; i++) {
       const s = a + ((bd - a) * (i + 0.5)) / 20;
       for (const sg of [1, -1]) addBox(THREE, group, ((bd - a) * L) / 20 + 0.02, 0.025, 0.02, s * L, deckF(s) + 0.05, sg * (beltY(s) + 0.012), chromeMat);
@@ -7443,7 +7458,7 @@ function addCap(THREE, group, m, rear, tex, paintMat, halfW, bow, bottomAt, deck
     }
     if (i) { const a = (i - 1) * 2; if (rear) quad(panel, a, a + 2, a + 3, a + 1); else quad(panel, a, a + 1, a + 3, a + 2); }
   }
-  const mat = new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.04, roughness: 0.32, metalness: 0.15, emissive: '#ffffff', emissiveMap: tex, emissiveIntensity: 0.35 });
+  const mat = new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: 0.04, roughness: 0.32, metalness: 0.15, emissive: '#ffffff', emissiveMap: tex, emissiveIntensity: 0.16 });
   group.add(mesh(THREE, panel, mat));
 }
 
@@ -7469,6 +7484,11 @@ function sideTexture(THREE, m, paint) {
   g.strokeStyle = 'rgba(0,0,0,.25)';
   g.lineWidth = 2;
   g.beginPath(); g.moveTo(0, Y(belt - 0.05)); g.lineTo(1024, Y(belt - 0.05)); g.stroke();
+  const ao = g.createLinearGradient(0, Y(belt * 0.62), 0, Y(0.1));
+  ao.addColorStop(0, 'rgba(0,0,0,0)'); ao.addColorStop(1, 'rgba(0,0,0,.42)');
+  g.fillStyle = ao; g.fillRect(0, Y(belt * 0.62), 1024, 256);
+  // Omuz kırımı: üstü aydınlık, altı gölge
+  g.fillStyle = 'rgba(0,0,0,.14)'; g.fillRect(0, Y(belt - 0.1), 1024, 5);
   if (m.clad) { g.fillStyle = '#1b1e23'; g.fillRect(0, Y(m.clad), 1024, 256 - Y(m.clad)); }
   if (m.skirt) { g.fillStyle = paint.accent || '#ffd23f'; g.fillRect(0, Y(0.3), 1024, 8); }
   if (m.sideStripe) { g.fillStyle = paint.accent || '#f6efe0'; g.fillRect(0, Y(m.sideStripe), 1024, 6); }
@@ -7507,7 +7527,9 @@ function buildMoto(THREE, paint) {
   tyre(0.32); tyre(1.78);
   ell(0.3, 0.13, 0.13, 0.86, 0.9, 0, pm); // Depo
   ell(0.24, 0.14, 0.11, 0.38, 0.88, 0, pm); // Kaporta
-  ell(0.16, 0.05, 0.13, 0.22, 0.98, 0, acc);
+  const shield = ell(0.04, 0.16, 0.09, 0.24, 1.04, 0, new THREE.MeshPhysicalMaterial({ color: '#10161d', metalness: 0.4, roughness: 0.08, clearcoat: 1 })); shield.rotation.z = 0.5;
+  ell(0.42, 0.06, 0.09, 0.82, 0.68, 0, acc); // Kaporta altı
+  for (const [a, b, c2, d] of [[0.45, 0.8, 1.2, 0.8], [0.45, 0.72, 1.2, 0.52], [0.9, 0.5, 1.5, 0.84]]) { const fr = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, Math.hypot(c2 - a, d - b), 6), chrome); fr.position.set((a + c2) / 2, (b + d) / 2, 0); fr.rotation.z = Math.atan2(d - b, c2 - a) - Math.PI / 2; g.add(fr); }
   ell(0.4, 0.09, 0.13, 1.34, 0.86, 0, dark); // Sele
   const tail = ell(0.3, 0.07, 0.1, 1.68, 0.96, 0, pm); tail.rotation.z = -0.3;
   ell(0.2, 0.14, 0.11, 0.95, 0.5, 0, dark); // Motor
@@ -9531,6 +9553,15 @@ class Renderer {
       ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
       return;
     }
+    // Oyuncu aracının altında boya rengine yakın ışık
+    const PG = CONFIG.playerGlow;
+    this.place(p.x, p.y, p.a);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = PG.alpha * (game.ghostT > 0 ? 0.5 : 1);
+    const gw = p.len * PG.scale; const gh = p.wid * PG.scale * 1.3;
+    ctx.drawImage(this.sprites.auras[3], -gw / 2, -gh / 2, gw, gh);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = game.ghostT > 0 ? 0.5 : 1;
     this.drawBody(this.playerSprite, p, k, k);
     ctx.globalAlpha = 1;
     if (game.stage >= 2) {

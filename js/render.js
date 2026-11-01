@@ -1587,6 +1587,15 @@ export class Renderer {
       ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
       return;
     }
+    // Oyuncu aracının altında boya rengine yakın ışık
+    const PG = CONFIG.playerGlow;
+    this.place(p.x, p.y, p.a);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = PG.alpha * (game.ghostT > 0 ? 0.5 : 1);
+    const gw = p.len * PG.scale; const gh = p.wid * PG.scale * 1.3;
+    ctx.drawImage(this.sprites.auras[3], -gw / 2, -gh / 2, gw, gh);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = game.ghostT > 0 ? 0.5 : 1;
     this.drawBody(this.playerSprite, p, k, k);
     ctx.globalAlpha = 1;
     if (game.stage >= 2) {
