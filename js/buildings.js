@@ -530,6 +530,126 @@ function apartment2(g, r) {
   void sub;
 }
 
+// Cephe süsleri: tohumdan seçilir, hiçbir bina aynı düzende olmaz
+function facadeBits(g, r) {
+  if (r.h < 56 || r.w < 44) return;
+  const s = r.seed;
+  const y = r.y + r.h - Math.min(r.h * 0.34, 34);
+  const step = 15 + (s % 9);
+  let k = s % 11;
+  for (let px = r.x + 6; px < r.x + r.w - 14; px += step) {
+    k = (k * 7 + 3) % 11;
+    const py = y + (k % 3) * 8;
+    if (k < 3) { // Çamaşır
+      g.strokeStyle = 'rgba(255,255,255,.8)'; g.lineWidth = 0.7; g.beginPath(); g.moveTo(px, py); g.lineTo(px + 12, py); g.stroke();
+      for (let i = 0; i < 3; i++) { g.fillStyle = ['#f4f6f8', '#e8533f', '#3e7cb1', '#f2c14e', '#d94f9c'][(s + i + k) % 5]; g.fillRect(px + 1 + i * 4, py, 3, 4 + (i % 2) * 2); }
+    } else if (k < 5) { // Klima
+      g.fillStyle = '#dfe3e8'; g.fillRect(px, py, 9, 6); g.fillStyle = '#6d7680'; g.beginPath(); g.arc(px + 4.5, py + 3, 2, 0, 7); g.fill();
+    } else if (k < 7) { // Çiçekli balkon
+      g.fillStyle = '#8a5a3a'; g.fillRect(px, py + 3, 12, 2.4);
+      for (let i = 0; i < 4; i++) { g.fillStyle = i % 2 ? '#4f9a3a' : ['#ff5a8a', '#ffd23f', '#e8352e'][(s + k) % 3]; g.beginPath(); g.arc(px + 1.6 + i * 3, py + 2, 1.7, 0, 7); g.fill(); }
+    } else if (k < 9) { // Tente
+      for (let i = 0; i < 4; i++) { g.fillStyle = i % 2 ? '#fff' : ['#c8261e', '#1d6fb8', '#178a4d'][s % 3]; g.fillRect(px + i * 3, py, 3, 4); }
+    } else { // Uydu çanağı
+      g.fillStyle = '#eceff2'; g.beginPath(); g.ellipse(px + 4, py + 3, 4, 3.4, 0.5, 0, 7); g.fill();
+      g.strokeStyle = '#7d8590'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(px + 4, py + 3); g.lineTo(px + 7, py + 7); g.stroke();
+    }
+  }
+}
+
+// Harabe: çöken çatı, kırık duvar, çatlaklar, moloz
+function ruin(g, r) {
+  const { x, y, w, h, seed: s } = r;
+  g.fillStyle = '#8b8378'; g.fillRect(x, y, w, h);
+  g.fillStyle = '#2a2622'; // İç boşluk
+  g.beginPath();
+  // Delik her harabede farklı yerde ve boyda
+  const hx = 0.1 + ((s % 7) / 7) * 0.34; const hw = 0.34 + ((s % 5) / 5) * 0.36;
+  const hy = 0.12 + ((s % 3) / 3) * 0.3; const hh = 0.3 + ((s % 4) / 4) * 0.34;
+  g.moveTo(x + w * hx, y + h * hy);
+  for (let i = 0; i <= 7; i++) { const t = i / 7; g.lineTo(x + w * (hx + hw * t), y + h * (hy + (((s * (i + 3)) % 13) / 13) * 0.2)); }
+  for (let i = 7; i >= 0; i--) { const t = i / 7; g.lineTo(x + w * (hx + hw * t), y + h * (hy + hh + (((s * (i + 7)) % 11) / 11) * 0.2)); }
+  g.closePath(); g.fill();
+  g.strokeStyle = '#5b544b'; g.lineWidth = 1.2;
+  for (let i = 0; i < 7; i++) {
+    let px = x + ((s * (i + 2) * 37) % 100) / 100 * w; let py = y + ((s * (i + 5) * 53) % 100) / 100 * h;
+    g.beginPath(); g.moveTo(px, py);
+    for (let k = 0; k < 4; k++) { px += ((s + k * 17 + i) % 19) - 9; py += ((s + k * 23 + i) % 17) - 6; g.lineTo(px, py); }
+    g.stroke();
+  }
+  // Duvar kalıntısı ve kırık kenar
+  g.fillStyle = '#a79c8d';
+  for (let px = x; px < x + w; px += 11) { const hh = 4 + ((s + px) % 13); g.fillRect(px, y, 8, hh); g.fillRect(px, y + h - hh, 8, hh); }
+  for (let i = 0; i < 16; i++) {
+    g.fillStyle = ['#786a56', '#9b8a72', '#b5482f', '#5e564b'][(s + i) % 4];
+    const u = ((s * (i + 3) * 41) % 97) / 97; const v = ((s * (i + 9) * 59) % 89) / 89;
+    g.beginPath(); g.moveTo(x + u * w, y + v * h); g.lineTo(x + u * w + 9, y + v * h + 2); g.lineTo(x + u * w + 4, y + v * h + 8); g.closePath(); g.fill();
+  }
+  // Açıkta kalan kiriş
+  g.strokeStyle = '#3f3a33'; g.lineWidth = 3; g.beginPath(); g.moveTo(x + w * 0.2, y + h * 0.3); g.lineTo(x + w * 0.74, y + h * 0.62); g.stroke();
+}
+
+// İnşaat: iskele, açık kat döşemesi, kum yığını, iş makinesi, vinç, bariyer
+function sitework(g, r) {
+  const { x, y, w, h, seed: s } = r;
+  g.fillStyle = '#b79c6c'; g.fillRect(x, y, w, h);
+  const bw = w * 0.66; const bh = h * 0.62;
+  g.fillStyle = '#b7bbbf'; g.fillRect(x + 6, y + 6, bw, bh);
+  g.fillStyle = '#8d9196'; for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) g.fillRect(x + 10 + (i * bw) / 4, y + 10 + (j * bh) / 3, 5, 5);
+  g.strokeStyle = '#c4c9ce'; g.lineWidth = 1;
+  for (let px = x + 2; px < x + bw + 12; px += 9) { g.beginPath(); g.moveTo(px, y + 2); g.lineTo(px, y + bh + 11); g.stroke(); }
+  for (let py = y + 2; py < y + bh + 12; py += 9) { g.beginPath(); g.moveTo(x + 2, py); g.lineTo(x + bw + 11, py); g.stroke(); }
+  g.strokeStyle = 'rgba(30,110,60,.55)'; g.lineWidth = 2.5; g.strokeRect(x + 2, y + 2, bw + 9, bh + 9);
+  // Kum yığını
+  const sx = x + w * 0.84; const sy = y + h * 0.28;
+  const gr = g.createRadialGradient(sx - 3, sy - 3, 2, sx, sy, 17);
+  gr.addColorStop(0, '#f0d9a0'); gr.addColorStop(1, '#c9a860');
+  g.fillStyle = gr; g.beginPath(); g.arc(sx, sy, 15, 0, 7); g.fill();
+  // İş makinesi
+  const mx = x + w * 0.22 + (s % 30); const my = y + h - 22;
+  g.fillStyle = '#23262b'; g.fillRect(mx - 2, my + 9, 30, 4); g.fillRect(mx - 2, my - 2, 30, 4);
+  g.fillStyle = '#ffb020'; g.fillRect(mx, my, 26, 11);
+  g.fillStyle = '#23303a'; g.fillRect(mx + 15, my + 2, 8, 7);
+  g.strokeStyle = '#e8a010'; g.lineWidth = 3.4; g.beginPath(); g.moveTo(mx + 3, my + 5); g.lineTo(mx - 18, my - 10); g.lineTo(mx - 28, my + 2); g.stroke();
+  // Vinç: kol şantiyeyi aşar
+  const cx = x + w * 0.72; const cy = y + h * 0.7; const a = ((s % 8) / 8) * 6.283;
+  g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 5; g.beginPath(); g.moveTo(cx + 8, cy + 10); g.lineTo(cx + 8 + Math.cos(a) * 80, cy + 10 + Math.sin(a) * 80); g.stroke();
+  g.strokeStyle = '#ffd23f'; g.lineWidth = 4.5; g.beginPath(); g.moveTo(cx - Math.cos(a) * 20, cy - Math.sin(a) * 20); g.lineTo(cx + Math.cos(a) * 80, cy + Math.sin(a) * 80); g.stroke();
+  g.strokeStyle = '#a87a10'; g.lineWidth = 1; for (let k = -2; k < 8; k++) { const q = k * 10; g.beginPath(); g.moveTo(cx + Math.cos(a) * q - Math.sin(a) * 2, cy + Math.sin(a) * q + Math.cos(a) * 2); g.lineTo(cx + Math.cos(a) * (q + 8) + Math.sin(a) * 2, cy + Math.sin(a) * (q + 8) - Math.cos(a) * 2); g.stroke(); }
+  g.fillStyle = '#d0121b'; g.fillRect(cx - 5, cy - 5, 10, 10);
+  // Bariyer
+  for (let px = x; px < x + w - 6; px += 16) { g.fillStyle = (px - x) % 32 ? '#fff' : '#e8352e'; g.fillRect(px, y + h - 5, 16, 5); }
+}
+
+// Eski sanayi: testere dişi paslı çatı, baca, boru, sarnıç
+function factory(g, r) {
+  const { x, y, w, h, seed: s } = r;
+  const rust = ['#8a5a3a', '#7a6650', '#6d6a60', '#94603f'][s % 4];
+  const wall = Math.min(26, h * 0.3);
+  g.fillStyle = '#5a5148'; g.fillRect(x, y + h - wall, w, wall);
+  g.fillStyle = 'rgba(150,190,200,.45)'; for (let px = x + 5; px < x + w - 12; px += 15) g.fillRect(px, y + h - wall + 4, 11, 10);
+  const rh = h - wall;
+  const n = Math.max(2, Math.floor(rh / 20));
+  for (let i = 0; i < n; i++) {
+    const py = y + (i * rh) / n; const ph = rh / n;
+    const gr = g.createLinearGradient(0, py, 0, py + ph);
+    gr.addColorStop(0, shade(rust, 0.3)); gr.addColorStop(0.6, rust); gr.addColorStop(1, shade(rust, -0.45));
+    g.fillStyle = gr; g.fillRect(x, py, w, ph);
+    g.fillStyle = 'rgba(170,215,230,.5)'; g.fillRect(x + 4, py + ph - 4, w - 8, 3);
+  }
+  for (let i = 0; i < 12; i++) { g.fillStyle = 'rgba(50,25,10,.3)'; g.fillRect(x + ((s * (i + 3) * 31) % 100) / 100 * w, y + ((s * (i + 7) * 43) % 100) / 100 * rh, 10, 5); }
+  // Bacalar
+  const m = 1 + (s % 3);
+  for (let i = 0; i < m; i++) {
+    const cx = x + w * (0.2 + i * 0.3); const cy = y + rh * 0.3;
+    g.fillStyle = 'rgba(0,0,0,.3)'; g.beginPath(); g.moveTo(cx - 5, cy); g.lineTo(cx + 44, cy + 54); g.lineTo(cx + 50, cy + 48); g.lineTo(cx + 5, cy - 3); g.closePath(); g.fill();
+    g.fillStyle = '#a8553a'; g.beginPath(); g.arc(cx, cy, 9, 0, 7); g.fill();
+    g.fillStyle = '#e8e4d8'; g.beginPath(); g.arc(cx, cy, 6.6, 0, 7); g.fill();
+    g.fillStyle = '#1b1a18'; g.beginPath(); g.arc(cx, cy, 4.6, 0, 7); g.fill();
+  }
+  g.strokeStyle = '#5f6972'; g.lineWidth = 4; g.beginPath(); g.moveTo(x + 8, y + rh * 0.76); g.lineTo(x + w - 8, y + rh * 0.76); g.stroke();
+}
+
 export function paintBuilding2(g, r) {
   const S = BUILD;
   switch (r.style) {
@@ -537,6 +657,9 @@ export function paintBuilding2(g, r) {
     case S.SISTEM: sistem(g, r); break;
     case S.CHAIN: (CHAINS[r.brand] || CHAINS.Migros)(g, r); break;
     case S.BANK: bank2(g, r); break;
+    case S.RUIN: ruin(g, r); return true;
+    case S.SITEWORK: sitework(g, r); return true;
+    case S.FACTORY: factory(g, r); return true;
     case S.SHOP: shop(g, r); break;
     case S.SKYSCRAPER: skyscraper(g, r); break;
     case S.RESIDENCE: residence2(g, r); break;
@@ -554,12 +677,14 @@ export function paintBuilding2(g, r) {
     case S.CLUB: club(g, r); break;
     default: return false;
   }
+  if (r.style === S.APARTMENT || r.style === S.SITE_BLOCK || r.style === S.RESIDENCE || r.style === S.HOTEL || r.style === S.ISHANI || r.style === S.SHOPROW) facadeBits(g, r);
   return true;
 }
 
 // Gölge boyu: bina yüksekliğine göre
 export function shadowOf(r) {
   const S = BUILD;
+  if (r.tall) return 1.4 + r.tall * 16;
   switch (r.style) {
     case S.SKYSCRAPER: return 4.6;
     case S.RESIDENCE: case S.OFFICE: return 3.2;

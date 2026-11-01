@@ -86,7 +86,7 @@ const HOUSE_ROOFS = ['#c8553d', '#b5523b', '#d9822b', '#8c5a3c', '#a44a3f', '#5f
 // Karoları bitişik dizilen şehir için yardımcı
 function newChunk() {
   return {
-    pads: [], padCount: 0, road: 0, alley: 0, paths: [], hw: false,
+    pads: [], padCount: 0, road: 0, alley: 0, paths: [], hw: false, talls: [], fires: [],
     cx: 0, cy: 0, x: 0, y: 0,
     ground: new Uint8Array(CELLS),
     cost: new Uint8Array(CELLS), // 0 = geçilmez
@@ -300,6 +300,8 @@ export class World {
     c.lightCount = 0;
     c.padCount = 0;
     c.paths.length = 0;
+    c.talls.length = 0;
+    c.fires.length = 0;
     c.hw = isHighwayRow(cy);
     c.siteName = '';
     c.dirty = true;
@@ -345,6 +347,7 @@ export class World {
     else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: 'Atatürk İlkokulu' });
     else if (t === 'spor') this.fillDense(c, 'mahalle', { sport: true });
     else if (t === 'golet') this.fillDense(c, 'mahalle', { pond: true });
+    else if (t === 'insaat' || t === 'harabe' || t === 'sanayi') this.fillZone(c, t);
     else if (t === 'donel') this.fillRoundabout(c);
     else if (t === 'viraj') this.fillCurvy(c);
     else if (t === 'pazar') this.fillPazar(c);
@@ -363,6 +366,7 @@ export class World {
     this.arterialDetails(c);
     this.finishCost(c);
     c.baseProps = c.propCount;
+    this.collectTalls(c);
     this.applyChanges(c);
     this.collectLights(c);
   }
@@ -376,7 +380,7 @@ export class World {
     if (!r) { r = { kind: '', x: 0, y: 0, w: 0, h: 0, style: 0, color: '', alive: true, seed: 0 }; c.rects[c.rectCount] = r; }
     c.rectCount++;
     r.kind = kind; r.style = style; r.color = color; r.alive = true; r.seed = rint(0, 999);
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0;
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -683,17 +687,37 @@ export class World {
     this.split2(c, x0, y0 + h + padH, x0 + w, y1, this.P.maxB);
   }
 
+  // Küçük bölgeler: inşaat alanı, harabe mahalle, eski sanayi
+  fillZone(c, kind) {
+    this.fillDense(c, kind, null);
+    for (let i = ART * CT; i < CELLS; i++) if (c.ground[i] === GROUND.WALK && i % CT >= ART) c.ground[i] = GROUND.DIRT;
+    const G = [GROUND.DIRT, GROUND.ALLEY];
+    if (kind === 'insaat') { this.scatter(c, PROP.CONE, 14, G); this.scatter(c, PROP.BARRIER, 8, G); this.scatter(c, PROP.CRATE, 7, G); }
+    else if (kind === 'harabe') { this.scatter(c, PROP.CRATE, 8, G); this.scatter(c, PROP.BARREL, 8, G); }
+    else { this.scatter(c, PROP.BARREL, 12, G); this.scatter(c, PROP.CRATE, 10, G); }
+  }
+
   building2(c, x0, y0, x1, y1) {
     const w = x1 - x0;
     const h = y1 - y0;
     const area = w * h;
     const P = this.P;
     const ins = chance(P.detached) ? 6 : 1; // Çoğu bitişik, bazıları ayrık
+    const pz = this.profile;
+    if (pz === 'insaat' || pz === 'harabe' || pz === 'sanayi' || (pz !== 'gecekondu' && area >= 6 && chance(W.ruin + W.work))) {
+      let style = pz === 'sanayi' ? BUILD.FACTORY : pz === 'harabe' ? BUILD.RUIN : pz === 'insaat' ? BUILD.SITEWORK : chance(W.ruin / (W.ruin + W.work)) ? BUILD.RUIN : BUILD.SITEWORK;
+      if (pz === 'harabe' && chance(0.22)) style = BUILD.GECEKONDU;
+      if (pz === 'insaat' && chance(0.2)) style = BUILD.RUIN;
+      const r = this.addRect(c, 'building', x0, y0, x1, y1, ins, style, '#8a8378');
+      if (style === BUILD.RUIN && chance(W.ruinFire)) r.fire = true;
+      return;
+    }
     const SG = CONFIG.signs;
     const pick = (o) => o[rint(0, o.length - 1)];
     const keys = (o) => Object.keys(o);
     const add = (style, color, sign, signColor, size) => {
       const r = this.addRect(c, 'building', x0, y0, x1, y1, ins, style, color);
+      if (style === BUILD.APARTMENT && chance(W.fire)) r.fire = true;
       if (sign) { r.sign = sign; r.signColor = signColor || pick(SG.colors); r.signSize = size ?? rint(0, 2); }
       return r;
     };
@@ -835,6 +859,26 @@ export class World {
     if (!l) { l = { kind: 0, x: 0, y: 0, w: 0, h: 0, rect: null }; c.lights[c.lightCount] = l; }
     c.lightCount++;
     l.kind = kind; l.x = x; l.y = y; l.w = w; l.h = h; l.rect = rect;
+  }
+
+  // Yüksek binalar ve yangınlar: çizim tarafı yalnızca bu listelere bakar
+  collectTalls(c) {
+    const S = BUILD;
+    const T = W.tall;
+    for (let i = 0; i < c.rectCount; i++) {
+      const r = c.rects[i];
+      if (r.kind !== 'building') continue;
+      const tower = r.style === S.SKYSCRAPER || r.style === S.RESIDENCE || r.style === S.OFFICE || (r.style >= S.TOWER_GLASS && r.style <= S.TOWER_STEP);
+      const plain = r.style === S.APARTMENT || r.style === S.HOTEL || r.style === S.ISHANI || r.style === S.SITE_BLOCK;
+      // Tohumdan türetilir: rastgele sayı dizisini bozmaz
+      const h = ((r.seed * 2654435761) >>> 0) / 4294967296;
+      if ((tower || (plain && h < T.share)) && c.talls.length < T.maxPerChunk) {
+        r.tall = T.height[0] + (T.height[1] - T.height[0]) * (tower ? 0.45 + 0.55 * h : h / T.share * 0.55);
+        if (r.style === S.SKYSCRAPER) r.tall = T.height[1];
+        c.talls.push(r);
+      }
+      if (r.fire) c.fires.push(r);
+    }
   }
 
   // Gece ışıkları: 0 sokak lambası, 1 pencere, 2 neon, 3 tabela

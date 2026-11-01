@@ -340,3 +340,26 @@ test('dönel kavşak, U dönüşü, Y ayrımı ve kıvrımlı yollar üretilir, 
   assert.ok(ring >= 3, 'dönel ' + ring);
   assert.ok(curve >= 10, 'viraj ' + curve);
 });
+
+test('binaların yaklaşık %15-20 si yüksek; harabe, inşaat, sanayi ve yangın var', () => {
+  const w = new World(13);
+  let all = 0; let tall = 0; let fire = 0; const st = new Set(); const zones = new Set();
+  for (let cy = -24; cy < 24; cy++) {
+    for (let cx = -24; cx < 24; cx++) {
+      const c = w.chunk(cx, cy);
+      zones.add(c.template);
+      fire += c.fires.length;
+      for (let i = 0; i < c.rectCount; i++) {
+        const r = c.rects[i];
+        if (r.kind !== 'building') continue;
+        all++; st.add(r.style);
+        if (r.tall) tall++;
+      }
+    }
+  }
+  const k = tall / all;
+  assert.ok(k > 0.13 && k < 0.22, 'yüksek oranı ' + k);
+  for (const s of [BUILD.RUIN, BUILD.SITEWORK, BUILD.FACTORY]) assert.ok(st.has(s), s);
+  for (const z of ['insaat', 'harabe', 'sanayi']) assert.ok(zones.has(z), z);
+  assert.ok(fire >= 3 && fire < all * 0.02, 'yangın ' + fire);
+});

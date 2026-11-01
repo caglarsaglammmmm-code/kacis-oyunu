@@ -29,9 +29,10 @@ export function sheetSprite(key, len) {
   const g = c.getContext('2d');
   // Çift kontur: koyu dış hale açık yolda, ince açık hat koyu yolda aracı ayırır
   const q = w / 96;
-  g.shadowColor = 'rgba(0,0,0,.8)'; g.shadowBlur = 3.4 * q;
+  g.shadowColor = 'rgba(0,0,0,.95)'; g.shadowBlur = 3.6 * q;
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
-  g.shadowColor = 'rgba(255,255,255,.7)'; g.shadowBlur = 1.2 * q;
+  g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
+  g.shadowColor = 'rgba(255,255,255,.8)'; g.shadowBlur = 1 * q;
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
   g.shadowColor = 'transparent'; g.shadowBlur = 0;
   g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);

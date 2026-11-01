@@ -147,10 +147,169 @@ export class Renderer {
     this.alleys = [this.roads[1], tone('#70747a')];
   }
 
+  // Yüksek bina dokuları: duvarda pencere, balkon, çamaşır, klima, çanak, çiçek. Çatılar ayrı
+  makeTallArt() {
+    const W0 = 96; const H0 = 192;
+    const tones = [['#6f93b5', '#c8e4f4'], ['#c9c0ae', '#9fd2ee'], ['#d8b890', '#a8d4e8'], ['#7fb0a8', '#d0f0ea'], ['#b5705a', '#ffe2b0'], ['#e4e6e8', '#8fc0dc'], ['#858b93', '#c4d8e4'], ['#3d4a5c', '#8fd0f4']];
+    this.walls = [];
+    tones.forEach(([wall, glass], t) => {
+      for (let d = 0; d < 3; d++) {
+        const c = makeCanvas(W0, H0);
+        const g = c.getContext('2d');
+        g.fillStyle = wall; g.fillRect(0, 0, W0, H0);
+        const glassy = t === 0 || t === 7;
+        for (let row = 0; row < 11; row++) {
+          const y = 4 + row * 17;
+          g.fillStyle = 'rgba(0,0,0,.14)'; g.fillRect(0, y + 13, W0, 2);
+          for (let col = 0; col < 5; col++) {
+            const x = 3 + col * 19;
+            const h = (row * 31 + col * 17 + t * 7 + d * 13) % 23;
+            g.fillStyle = h % 6 === 0 ? '#ffe9a8' : glass;
+            g.fillRect(x, y, glassy ? 17 : 13, glassy ? 13 : 10);
+            if (glassy) continue;
+            if (d === 1 && h % 4 === 0) { // Balkon, çamaşır
+              g.fillStyle = 'rgba(255,255,255,.8)'; g.fillRect(x - 1, y + 10, 15, 2);
+              for (let k = 0; k < 3; k++) { g.fillStyle = ['#f4f6f8', '#e8533f', '#3e7cb1', '#f2c14e'][(h + k) % 4]; g.fillRect(x + 1 + k * 4, y + 3, 3, 7); }
+            } else if (d === 2 && h % 5 === 0) { // Klima
+              g.fillStyle = '#e6e9ec'; g.fillRect(x + 1, y + 7, 10, 6); g.fillStyle = '#7d8590'; g.beginPath(); g.arc(x + 6, y + 10, 2, 0, 7); g.fill();
+            } else if (h % 7 === 1) { // Çiçek
+              g.fillStyle = '#8a5a3a'; g.fillRect(x - 1, y + 10, 15, 2.4);
+              for (let k = 0; k < 5; k++) { g.fillStyle = k % 2 ? '#4f9a3a' : '#ff5a8a'; g.beginPath(); g.arc(x + k * 3, y + 9, 2, 0, 7); g.fill(); }
+            } else if (h % 9 === 2) { // Uydu çanağı
+              g.fillStyle = '#f0f2f4'; g.beginPath(); g.ellipse(x + 11, y + 9, 4, 3, 0.5, 0, 7); g.fill();
+            }
+          }
+        }
+        // Yan kenar için döndürülmüş kopya
+        const rot = makeCanvas(H0, W0);
+        const q = rot.getContext('2d');
+        q.translate(H0 / 2, W0 / 2); q.rotate(Math.PI / 2); q.drawImage(c, -W0 / 2, -H0 / 2);
+        this.walls.push({ n: c, e: rot });
+      }
+    });
+    this.roofs = [0, 1, 2, 3, 4, 5, 6, 7].map((k) => {
+      const c = makeCanvas(128, 128);
+      const g = c.getContext('2d');
+      const base = ['#c5c9cc', '#8fa6b8', '#b0a690', '#d8d4cc', '#7a8a96', '#a8b8a8', '#b09a8a', '#c0c8d0'][k];
+      g.fillStyle = base; g.fillRect(0, 0, 128, 128);
+      g.strokeStyle = 'rgba(0,0,0,.28)'; g.lineWidth = 5; g.strokeRect(3, 3, 122, 122);
+      g.fillStyle = 'rgba(255,255,255,.16)'; g.fillRect(8, 8, 112, 7);
+      if (k % 3 === 0) { g.fillStyle = '#3d444e'; g.beginPath(); g.arc(64, 64, 34, 0, 7); g.fill(); g.strokeStyle = '#ffd23f'; g.lineWidth = 4; g.stroke(); g.fillStyle = '#fff'; g.font = '900 38px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('H', 64, 66); }
+      else if (k % 3 === 1) { g.fillStyle = '#1f3f77'; for (let y = 18; y < 104; y += 19) for (let x = 18; x < 100; x += 25) g.fillRect(x, y, 21, 15); }
+      else { g.fillStyle = '#7fb56a'; g.fillRect(20, 20, 60, 50); g.fillStyle = '#4f9a3a'; for (let i = 0; i < 5; i++) { g.beginPath(); g.arc(30 + i * 11, 34 + (i % 2) * 18, 8, 0, 7); g.fill(); } g.fillStyle = '#57c1f0'; g.fillRect(88, 62, 26, 44); }
+      for (let i = 0; i < 3; i++) { const x = 16 + ((k + 1) * (i + 2) * 23) % 90; const y = 88 + (i * 11) % 24; g.fillStyle = '#dfe3e8'; g.fillRect(x, y, 15, 11); g.fillStyle = '#6d7680'; g.beginPath(); g.arc(x + 7, y + 5, 3.4, 0, 7); g.fill(); }
+      g.fillStyle = '#eceff2'; g.beginPath(); g.ellipse(106, 22, 8, 7, 0.5, 0, 7); g.fill();
+      return c;
+    });
+    // Yangın: üç kare alev, tek kare duman
+    this.flames = [0, 1, 2].map((v) => sprite(44, 60, (g) => {
+      for (const [r, col] of [[1, '#ff3a10'], [0.72, '#ff9a1a'], [0.42, '#ffe98a']]) {
+        g.fillStyle = col;
+        g.beginPath(); g.moveTo(-17 * r, 24);
+        g.quadraticCurveTo(-21 * r, 2, -9 * r + v, -6 * r);
+        g.quadraticCurveTo(-10 * r, -18 * r, 0 + v * 2 - 2, -28 * r);
+        g.quadraticCurveTo(10 * r, -15 * r, 9 * r, -4 * r);
+        g.quadraticCurveTo(21 * r, 4, 17 * r, 24);
+        g.closePath(); g.fill();
+      }
+    }));
+  }
+
+  // Kameraya göre yukarı uzanan binalar: taban sabit, çatı kameradan dışa kayar ve büyür
+  drawTalls(game, c0x, c1x, c0y, c1y) {
+    const ctx = this.ctx;
+    const cam = game.cam;
+    const cx = cam.x; const cy = cam.y;
+    const N = 6;
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+    const mx = cam.halfW + 120; const my = cam.halfH + 120;
+    for (let gy = c0y - 1; gy <= c1y + 1; gy++) {
+      for (let gx = c0x - 1; gx <= c1x + 1; gx++) {
+        const key = (gx + 32768) * 65536 + (gy + 32768);
+        const c = game.world.chunks.get(key);
+        if (!c) continue;
+        for (const r of c.talls) {
+          if (!r.alive) continue;
+          const k = r.tall;
+          if (r.x + r.w < cx - mx || r.x > cx + mx || r.y + r.h < cy - my || r.y > cy + my) continue;
+          const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
+          const X0 = x0 + (x0 - cx) * k; const X1 = x1 + (x1 - cx) * k;
+          const Y0 = y0 + (y0 - cy) * k; const Y1 = y1 + (y1 - cy) * k;
+          const tex = this.walls[r.seed % this.walls.length];
+          // Güney ve kuzey duvarları
+          for (const south of [cy > y1, cy < y0]) {
+            if (!south) continue;
+            const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
+            ctx.globalAlpha = 1;
+            for (let t = 0; t < N; t++) {
+              const a = t / N; const b = (t + 1) / N;
+              const xa = x0 + (X0 - x0) * b; const xb = x1 + (X1 - x1) * b;
+              const ya = fromY + (toY - fromY) * a; const yb = fromY + (toY - fromY) * b;
+              ctx.drawImage(tex.n, 0, 192 * (1 - b), Math.min(96, r.w), 192 / N, xa, Math.min(ya, yb) - 0.4, xb - xa, Math.abs(yb - ya) + 0.8);
+            }
+            if (cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
+          }
+          // Doğu ve batı duvarları
+          for (const east of [cx > x1, cx < x0]) {
+            if (!east) continue;
+            const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
+            for (let t = 0; t < N; t++) {
+              const a = t / N; const b = (t + 1) / N;
+              const ya = y0 + (Y0 - y0) * b; const yb = y1 + (Y1 - y1) * b;
+              const xa = fromX + (toX - fromX) * a; const xc = fromX + (toX - fromX) * b;
+              ctx.drawImage(tex.e, 192 * (1 - b), 0, 192 / N, Math.min(96, r.h), Math.min(xa, xc) - 0.4, ya, Math.abs(xc - xa) + 0.8, yb - ya);
+            }
+            ctx.fillStyle = 'rgba(0,0,20,.16)';
+            ctx.beginPath(); ctx.moveTo(fromX, y0); ctx.lineTo(toX, Y0); ctx.lineTo(toX, Y1); ctx.lineTo(fromX, y1); ctx.closePath(); ctx.fill();
+          }
+          ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
+          if (r.sign) {
+            const img = signCanvas(r.sign, r.signColor, r.seed);
+            const w = Math.min((X1 - X0) * 0.86, (img.width / img.height) * 26);
+            const h = (w / img.width) * img.height;
+            ctx.drawImage(img, (X0 + X1) / 2 - w / 2, (Y0 + Y1) / 2 - h / 2, w, h);
+          }
+        }
+      }
+    }
+  }
+
+  // Yangın: en fazla birkaç alev karesi, parçacık harcamaz
+  drawFires(game, now, c0x, c1x, c0y, c1y) {
+    const ctx = this.ctx;
+    const sp = this.sprites;
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+    const fr = Math.floor(now / 110);
+    for (let cy = c0y; cy <= c1y; cy++) {
+      for (let cx = c0x; cx <= c1x; cx++) {
+        const c = game.world.chunk(cx, cy);
+        for (const r of c.fires) {
+          if (!r.alive) continue;
+          for (let i = 0; i < 3; i++) {
+            const x = r.x + r.w * (0.22 + i * 0.28);
+            const y = r.y + r.h * (0.3 + ((r.seed + i * 3) % 4) * 0.13);
+            for (let k = 0; k < 2; k++) {
+              const t = ((now * 0.00035 + k * 0.5 + i * 0.3) % 1);
+              ctx.globalAlpha = 0.5 * (1 - t);
+              const R = 18 + t * 46;
+              ctx.drawImage(sp.dark, x + t * 26 - R, y - 26 - t * 100 - R, R * 2, R * 2);
+            }
+            ctx.globalAlpha = 1;
+            const img = this.flames[(fr + i) % 3];
+            const q = 0.9 + 0.12 * Math.sin(now * 0.012 + i);
+            ctx.drawImage(img, x - 22 * q, y - 42 * q, 44 * q, 60 * q);
+          }
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
   makeSprites() {
     const P = CONFIG.police;
     const s = this.sprites;
     this.makePatterns();
+    this.makeTallArt();
     s.car = sprite(P.car.len + 8, P.car.wid + 8, (g) => paintPolice(g, P.car, false));
     s.fast = sprite(P.fast.len + 10, P.fast.wid + 10, (g) => paintPoliceFast(g, P.fast));
     s.moto = sprite(P.moto.len + 12, P.moto.wid + 14, (g) => paintMoto(g, P.moto));
@@ -437,7 +596,7 @@ export class Renderer {
       for (let i = 0; i < c.rectCount; i++) {
         const r = c.rects[i];
         if (r.alive && r.kind === 'building') {
-          const k2 = TALL_STYLES.has(r.style) ? 2.4 : shadowOf(r);
+          const k2 = r.tall ? shadowOf(r) : TALL_STYLES.has(r.style) ? 2.4 : shadowOf(r);
           g.fillStyle = 'rgba(0,10,30,.26)';
           rr(g, r.x + 12 * k2, r.y + 15 * k2, r.w, r.h, 5);
           g.fill();
@@ -1049,10 +1208,12 @@ export class Renderer {
     this.drawHighway(game, vx0, vx1, vy0, vy1);
     this.drawCops(game, now, vx0, vx1, vy0, vy1);
     if (game.state !== 'dying' && game.state !== 'over') this.drawPlayer(game);
-    this.drawUfos(game, now, vx0, vx1, vy0, vy1);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, true);
     this.drawPeds(game, vx0, vx1, vy0, vy1, true);
     this.drawLights(game, c0x, c1x, c0y, c1y);
+    this.drawFires(game, now, c0x, c1x, c0y, c1y);
+    this.drawTalls(game, c0x, c1x, c0y, c1y);
+    this.drawUfos(game, now, vx0, vx1, vy0, vy1);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawNight(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now);
     this.drawSirens(game, now, vx0, vx1, vy0, vy1);

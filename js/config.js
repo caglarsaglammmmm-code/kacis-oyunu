@@ -8,7 +8,7 @@ export const BUILD = {
   TOWER_GLASS: 7, TOWER_ROUND: 8, TOWER_STEP: 9, HUT: 10, LIFEGUARD: 11, LIGHTHOUSE: 12, CABIN: 13,
   FIRETOWER: 14, ADOBE: 15, MESA: 16, BARN: 17, SILO: 18, WINDMILL: 19, WATERTOWER: 20, GAS: 21,
   APARTMENT: 22, MARKET: 23, SISTEM: 24, BAZAAR: 25, CHAIN: 26, BANK: 27, RESIDENCE: 28, OFFICE: 29, HOTEL: 30,
-  HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CLUB: 40, SHOP: 41, SKYSCRAPER: 42,
+  HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CLUB: 40, SHOP: 41, SKYSCRAPER: 42, RUIN: 43, SITEWORK: 44, FACTORY: 45,
 };
 
 export const CONFIG = {
@@ -35,7 +35,7 @@ export const CONFIG = {
     biomeCell: 8, // Bir biyom bölgesinin chunk cinsinden boyutu (rastgele sınırlı)
     biomes: { city: 62, beach: 22, forest: 6, desert: 4, rural: 6 },
     seaRadius: 0.42, // Sahil bölgesinin ortasındaki denizin biyom hücresine oranı
-    templates: { mahalle: 26, downtown: 13, esnaf: 10, gecekondu: 6, site: 6, gece: 4, cami: 6, stadyum: 2, hastane: 3, okul: 4, spor: 5, golet: 3, park: 2, pazar: 2, industrial: 2, donel: 8, viraj: 14 },
+    templates: { mahalle: 26, downtown: 13, esnaf: 10, gecekondu: 6, site: 6, gece: 4, cami: 6, stadyum: 2, hastane: 3, okul: 4, spor: 5, golet: 3, park: 2, pazar: 2, industrial: 1, donel: 8, viraj: 14, insaat: 3, harabe: 3, sanayi: 3 },
     // Yoğunluk: alleys ara sokak sayısı (dikey, yatay), maxB en büyük parsel, wide iki karo sokak olasılığı,
     // detached ayrık bina olasılığı, stub çıkmaz sokak olasılığı
     profiles: {
@@ -44,8 +44,15 @@ export const CONFIG = {
       esnaf: { alleys: [4, 3], maxB: 5, wide: 0.7, detached: 0.05, stub: 0.25 },
       gecekondu: { alleys: [4, 3], maxB: 3, wide: 0.4, detached: 0.3, stub: 0.5 },
       gece: { alleys: [3, 3], maxB: 6, wide: 0.8, detached: 0.1, stub: 0.2 },
+      insaat: { alleys: [3, 3], maxB: 7, wide: 0.8, detached: 0.5, stub: 0.1 },
+      harabe: { alleys: [4, 3], maxB: 5, wide: 0.5, detached: 0.4, stub: 0.4 },
+      sanayi: { alleys: [3, 2], maxB: 8, wide: 0.8, detached: 0.3, stub: 0.2 },
     },
     sistemRing: [4, 9],
+    // Bina yüksekliği: share yüksek bina oranı, height kameraya uzanma payı
+    // ruin ve work: sıradan mahallede harabe ve inşaat, fire: yangın olasılığı
+    tall: { share: 0.14, height: [0.1, 0.24], maxPerChunk: 14 },
+    ruin: 0.035, work: 0.04, fire: 0.008, ruinFire: 0.2,
     // Otoban: her satırı doğudan batıya kesen geniş yol. every: kaç chunk'ta bir, y0: bant başlangıç karosu
     // half: bir yönün karo sayısı, lanes: yön başına şerit
     highway: { every: 10, offset: 2, y0: 10, half: 5, lanes: 4 },
