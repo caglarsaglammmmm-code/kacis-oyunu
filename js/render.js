@@ -91,7 +91,7 @@ export class Renderer {
       if (img) s[k] = img;
     }
     const list = [];
-    for (const [k, n] of [['egea', 4], ['clio', 4], ['tofas', 5], ['golf', 5], ['focus', 4], ['megane', 4], ['linea', 4], ['bavyera', 5], ['kore', 4], ['murat', 4]]) {
+    for (const [k, n] of [['marmara', 4], ['liva', 4], ['klasik', 5], ['volta', 5], ['pusula', 4], ['lale', 4], ['vadi', 4], ['bavar', 5], ['dalga', 4], ['efe', 4]]) {
       for (let i = 0; i < n; i++) { const img = sheetSprite(`npc:${k}:${i}`, 44); if (img) list.push(img); }
     }
     if (list.length) s.parked = list;

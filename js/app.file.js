@@ -11,14 +11,14 @@ const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 
 const BUILD = {
   TOWER_GLASS: 7, TOWER_ROUND: 8, TOWER_STEP: 9, HUT: 10, LIFEGUARD: 11, LIGHTHOUSE: 12, CABIN: 13,
   FIRETOWER: 14, ADOBE: 15, MESA: 16, BARN: 17, SILO: 18, WINDMILL: 19, WATERTOWER: 20, GAS: 21,
-  APARTMENT: 22, MARKET: 23, SISTEM: 24, BAZAAR: 25, CHAIN: 26, BANK: 27, RESIDENCE: 28, OFFICE: 29, HOTEL: 30,
-  HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CLUB: 40, SHOP: 41, SKYSCRAPER: 42, RUIN: 43, SITEWORK: 44, FACTORY: 45,
+  APARTMENT: 22, MARKET: 23, KOLEJ: 24, BAZAAR: 25, CHAIN: 26, BANK: 27, RESIDENCE: 28, OFFICE: 29, HOTEL: 30,
+  HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CAFE: 40, SHOP: 41, SKYSCRAPER: 42, RUIN: 43, SITEWORK: 44, FACTORY: 45,
 };
 
 const CONFIG = {
-  name: 'Penci Zorn',
+  name: 'Drift Lab',
   version: '7.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk',
+  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v7.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -44,7 +44,7 @@ const CONFIG = {
     biomeCell: 8, // Bir biyom bölgesinin chunk cinsinden boyutu (rastgele sınırlı)
     biomes: { city: 62, beach: 22, forest: 6, desert: 4, rural: 6 },
     seaRadius: 0.42, // Sahil bölgesinin ortasındaki denizin biyom hücresine oranı
-    templates: { mahalle: 26, downtown: 13, esnaf: 10, gecekondu: 6, site: 6, gece: 4, cami: 6, stadyum: 2, hastane: 3, okul: 4, spor: 5, golet: 3, park: 2, pazar: 2, industrial: 1, donel: 8, viraj: 14, insaat: 3, harabe: 3, sanayi: 3 },
+    templates: { mahalle: 26, downtown: 13, esnaf: 10, gecekondu: 6, site: 6, keyif: 4, cami: 6, stadyum: 2, hastane: 3, okul: 4, spor: 5, golet: 3, park: 2, pazar: 2, industrial: 1, donel: 8, viraj: 14, insaat: 3, harabe: 3, sanayi: 3 },
     // Yoğunluk: alleys ara sokak sayısı (dikey, yatay), maxB en büyük parsel, wide iki karo sokak olasılığı,
     // detached ayrık bina olasılığı, stub çıkmaz sokak olasılığı
     profiles: {
@@ -52,7 +52,7 @@ const CONFIG = {
       downtown: { alleys: [3, 3], maxB: 9, wide: 0.9, detached: 0.2, stub: 0.1 },
       esnaf: { alleys: [4, 3], maxB: 5, wide: 0.7, detached: 0.05, stub: 0.25 },
       gecekondu: { alleys: [4, 3], maxB: 3, wide: 0.4, detached: 0.3, stub: 0.5 },
-      gece: { alleys: [3, 3], maxB: 6, wide: 0.8, detached: 0.1, stub: 0.2 },
+      keyif: { alleys: [3, 3], maxB: 6, wide: 0.8, detached: 0.1, stub: 0.2 },
       insaat: { alleys: [3, 3], maxB: 7, wide: 0.8, detached: 0.5, stub: 0.1 },
       harabe: { alleys: [4, 3], maxB: 5, wide: 0.5, detached: 0.4, stub: 0.4 },
       sanayi: { alleys: [3, 2], maxB: 8, wide: 0.8, detached: 0.3, stub: 0.2 },
@@ -69,10 +69,10 @@ const CONFIG = {
     // Sokak geometrisi. setback: binaların sokağa bakan cephesi karodan bu kadar içeride, yani bir karoluk
     // sokak 40 + 2 * setback genişliğindedir. cornerRadius: açık bina köşelerinin çarpışma yuvarlaması
     street: { setback: 7, cornerRadius: 16 },
-    roadTones: ['#3f4249', '#5b5f66', '#a4a7a9'], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
+    roadTones: ['#3f4249', '#5b5f66', '#a4a7a9'], // Tek Kolej Koleji başlangıçtan bu kadar chunk uzakta
     bigSites: [
-      { name: 'Natura Park Sitesi', color: '#7fa86b', ring: [5, 11], layout: 0 },
-      { name: 'Doğa Şehir Sitesi', color: '#c98a5a', ring: [8, 15], layout: 1 },
+      { name: 'Yeşilvadi Sitesi', color: '#7fa86b', ring: [5, 11], layout: 0 },
+      { name: 'Mavi Orman Sitesi', color: '#c98a5a', ring: [8, 15], layout: 1 },
     ],
   },
 
@@ -139,16 +139,16 @@ const CONFIG = {
   // En az 5 araba. durability hasarı böler, mass polis çarpışmalarını etkiler.
   // Sıra önemli: pahalılaştıkça hız, kayma ve dayanıklılık artar. engine: motor sesi
   cars: [
-    { id: 'dogan', paints: [{ name: 'Mahalle Beji', color: '#d9d4c7', finish: 'gloss' }, { name: 'Şarap Kırmızı', color: '#8e1b24', finish: 'metal' }, { name: 'Mat Asker Yeşili', color: '#4d5a3a', finish: 'matte' }, { name: 'Çift Ton Krem-Bordo', color: '#e6dcc2', finish: 'gloss', roof: '#6d1620' }], finish: 'gloss', name: 'Tofaş Doğan', cost: 0, desc: 'Her mahallenin emektarı', shape: 'dogan', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { base: 46, range: 150, wave: 'sawtooth', sub: 1.5, gain: 1 } },
+    { id: 'atmaca', paints: [{ name: 'Mahalle Beji', color: '#d9d4c7', finish: 'gloss' }, { name: 'Şarap Kırmızı', color: '#8e1b24', finish: 'metal' }, { name: 'Mat Asker Yeşili', color: '#4d5a3a', finish: 'matte' }, { name: 'Çift Ton Krem-Bordo', color: '#e6dcc2', finish: 'gloss', roof: '#6d1620' }], finish: 'gloss', name: 'Atmaca', cost: 0, desc: 'Her mahallenin emektarı', shape: 'atmaca', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { base: 46, range: 150, wave: 'sawtooth', sub: 1.5, gain: 1 } },
     { id: 'motor', paints: [{ name: 'Yarış Kırmızı', color: '#e8352e', finish: 'gloss', accent: '#ffe14d' }, { name: 'Elektrik Mavi', color: '#0a7cff', finish: 'metal', accent: '#ffffff' }, { name: 'Mat Siyah', color: '#1b1d22', finish: 'matte', accent: '#ff7a00' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl', accent: '#e8352e' }], finish: 'gloss', name: 'Motosiklet', cost: 100, desc: 'Dar sokakların kralı', shape: 'moto', maxSpeed: 445, accel: 610, turnRate: 3.3, grip: 4.5, driftGrip: 1.1, durability: 1.05, mass: 0.9, len: 36, wid: 16, color: '#e8352e', accent: '#ffe14d', engine: { base: 88, range: 270, wave: 'square', sub: 2, gain: 0.8 } },
-    { id: 'grandland', paints: [{ name: 'Gece Mavisi', color: '#1f3a68', finish: 'metal' }, { name: 'Kor Turuncu', color: '#e8551e', finish: 'metal' }, { name: 'Mat Gümüş', color: '#a7aeb7', finish: 'matte' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl' }], finish: 'metal', name: 'Grandland', cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'grandland', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { base: 42, range: 125, wave: 'sawtooth', sub: 1.33, gain: 1 } },
-    { id: 'tog', paints: [{ name: 'Anadolu Kırmızı', color: '#b3122a', finish: 'metal' }, { name: 'Fırtına Grisi', color: '#4a5560', finish: 'metal' }, { name: 'Mat Toprak', color: '#8a6a4a', finish: 'matte' }, { name: 'Buz Mavisi', color: '#bcd9e6', finish: 'pearl' }], finish: 'metal', name: 'TOG', cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'tog', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { base: 240, range: 620, wave: 'sine', sub: 1.5, gain: 0.45 } },
-    { id: 'sahin', paints: [{ name: 'Mat Siyah Sarı Şerit', color: '#111318', finish: 'matte', accent: '#ffd23f' }, { name: 'Ateş Turuncu', color: '#ff5a12', finish: 'gloss', accent: '#111318' }, { name: 'Neon Yeşil', color: '#39d353', finish: 'gloss', accent: '#111318' }, { name: 'Mor Metalik', color: '#6a2bd9', finish: 'metal', accent: '#21d4fd' }], finish: 'matte', name: 'Tofaş Şahin', cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'sahin', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { base: 50, range: 175, wave: 'sawtooth', sub: 1.5, gain: 1.15 } },
-    { id: 'anadol', paints: [{ name: 'Efsane Turuncu', color: '#e8782a', finish: 'gloss', accent: '#f6efe0' }, { name: 'Bebek Mavisi', color: '#7ec6e8', finish: 'gloss', accent: '#f6efe0' }, { name: 'Çift Ton Krem-Vişne', color: '#ead9b0', finish: 'gloss', roof: '#8a1f2f' }, { name: 'Mat Zeytin', color: '#6b6b3a', finish: 'matte', accent: '#f6efe0' }], finish: 'gloss', name: 'Anadol', cost: 680, desc: 'Fiberglas efsane', shape: 'anadol', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { base: 40, range: 140, wave: 'square', sub: 1.5, gain: 0.9 } },
-    { id: 'murat', paints: [{ name: 'Boğaz Mavisi', color: '#2f6fb0', finish: 'gloss' }, { name: 'Haki', color: '#75805a', finish: 'matte' }, { name: 'Gümüş', color: '#b9c1ca', finish: 'metal' }, { name: 'Çift Ton Bej-Kahve', color: '#dcc9a4', finish: 'gloss', roof: '#5c3a22' }], finish: 'gloss', name: 'Murat 131', cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'murat', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { base: 38, range: 150, wave: 'sawtooth', sub: 1.26, gain: 1.1 } },
-    { id: 'egea', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: 'Fiat Egea', cost: 1200, desc: 'Filo arabası, sürprizli', shape: 'egea', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { base: 52, range: 165, wave: 'triangle', sub: 1.5, gain: 1.2 } },
-    { id: 'clio', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: 'Renault Clio', cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'clio', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { base: 56, range: 185, wave: 'triangle', sub: 2, gain: 1.15 } },
-    { id: 'duster', paints: [{ name: 'Atacama Turuncu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: 'Dacia Duster', cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'duster', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { base: 44, range: 160, wave: 'sawtooth', sub: 1.5, gain: 1.25 } },
+    { id: 'granit', paints: [{ name: 'Gece Mavisi', color: '#1f3a68', finish: 'metal' }, { name: 'Kor Turuncu', color: '#e8551e', finish: 'metal' }, { name: 'Mat Gümüş', color: '#a7aeb7', finish: 'matte' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl' }], finish: 'metal', name: 'Granit SUV', cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'granit', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { base: 42, range: 125, wave: 'sawtooth', sub: 1.33, gain: 1 } },
+    { id: 'elektra', paints: [{ name: 'Anadolu Kırmızı', color: '#b3122a', finish: 'metal' }, { name: 'Fırtına Grisi', color: '#4a5560', finish: 'metal' }, { name: 'Mat Toprak', color: '#8a6a4a', finish: 'matte' }, { name: 'Buz Mavisi', color: '#bcd9e6', finish: 'pearl' }], finish: 'metal', name: 'Elektra X1', cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'elektra', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { base: 240, range: 620, wave: 'sine', sub: 1.5, gain: 0.45 } },
+    { id: 'simsek', paints: [{ name: 'Mat Siyah Sarı Şerit', color: '#111318', finish: 'matte', accent: '#ffd23f' }, { name: 'Ateş Turuncu', color: '#ff5a12', finish: 'gloss', accent: '#111318' }, { name: 'Neon Yeşil', color: '#39d353', finish: 'gloss', accent: '#111318' }, { name: 'Mor Metalik', color: '#6a2bd9', finish: 'metal', accent: '#21d4fd' }], finish: 'matte', name: 'Şimşek', cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'simsek', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { base: 50, range: 175, wave: 'sawtooth', sub: 1.5, gain: 1.15 } },
+    { id: 'cinar', paints: [{ name: 'Efsane Turuncu', color: '#e8782a', finish: 'gloss', accent: '#f6efe0' }, { name: 'Bebek Mavisi', color: '#7ec6e8', finish: 'gloss', accent: '#f6efe0' }, { name: 'Çift Ton Krem-Vişne', color: '#ead9b0', finish: 'gloss', roof: '#8a1f2f' }, { name: 'Mat Zeytin', color: '#6b6b3a', finish: 'matte', accent: '#f6efe0' }], finish: 'gloss', name: 'Çınar A', cost: 680, desc: 'Klasik efsane', shape: 'cinar', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { base: 40, range: 140, wave: 'square', sub: 1.5, gain: 0.9 } },
+    { id: 'efe', paints: [{ name: 'Boğaz Mavisi', color: '#2f6fb0', finish: 'gloss' }, { name: 'Haki', color: '#75805a', finish: 'matte' }, { name: 'Gümüş', color: '#b9c1ca', finish: 'metal' }, { name: 'Çift Ton Bej-Kahve', color: '#dcc9a4', finish: 'gloss', roof: '#5c3a22' }], finish: 'gloss', name: 'Efe 131', cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'efe', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { base: 38, range: 150, wave: 'sawtooth', sub: 1.26, gain: 1.1 } },
+    { id: 'marmara', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: 'Marmara S', cost: 1200, desc: 'Sade sedan, sürprizli', shape: 'marmara', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { base: 52, range: 165, wave: 'triangle', sub: 1.5, gain: 1.2 } },
+    { id: 'liva', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: 'Liva', cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'liva', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { base: 56, range: 185, wave: 'triangle', sub: 2, gain: 1.15 } },
+    { id: 'bozkir', paints: [{ name: 'Kanyon Turuncusu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: 'Bozkır 4x4', cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'bozkir', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { base: 44, range: 160, wave: 'sawtooth', sub: 1.5, gain: 1.25 } },
   ],
 
   damage: {
@@ -293,7 +293,7 @@ const CONFIG = {
   coin: { magnet: 56, dropChance: 0.3 },
 
   // Sokak insanları. density: zemin başına doğma olasılığı (GROUND sırasıyla)
-  // voice: bağırma sesi, road: yolda gider, dodge: asla çarpılmaz, fx: özel dağılma
+  // voice: bağırma sesi, road: yolda gider, dodge: asla çarpılmaz, safe: araç değmez ve kenara kaçar, fx: özel dağılma
   peds: {
     looks: 36, // Saç, kıyafet, ten, aksesuar birleşimi: yarısı erkek, yarısı kadın
     idleChance: 0.34,
@@ -305,30 +305,27 @@ const CONFIG = {
     kinds: {
       man: { weight: 5, speed: 1, voice: 'man' },
       woman: { weight: 5, speed: 1, voice: 'woman' },
-      child: { weight: 2.6, speed: 1.4, voice: 'child' },
-      elder: { weight: 2.2, speed: 0.6, voice: 'old' },
+      child: { weight: 2.6, speed: 1.4, voice: 'child', safe: true },
+      elder: { weight: 2.2, speed: 0.6, voice: 'old', safe: true },
       simitci: { weight: 1.3, speed: 0.8, voice: 'simit', fx: 'simit', words: ['SİMİTLERİM!', 'SİMİİİT!', 'TEPSİM!'] },
-      stroller: { weight: 1, speed: 0.8, voice: 'mom', words: ['BEBEĞİM!', 'DİKKAT ET!'] },
-      wheelchair: { weight: 0.7, speed: 0.75, voice: 'wheel', words: ['YAVAŞ!', 'SANDALYEM!'] },
+      stroller: { weight: 1, speed: 0.8, voice: 'mom', safe: true },
+      wheelchair: { weight: 0.7, speed: 0.75, voice: 'wheel', safe: true },
       bike: { weight: 1.5, speed: 3, voice: 'bike', words: ['ZİLİM BOZUK!', 'YOLDAN!'] },
       courier: { weight: 1, speed: 5.4, voice: 'courier', road: true, words: ['PAKET GİTTİ!', 'SİPARİŞ!', 'OHA!'] },
       cayci: { weight: 1.1, speed: 1, voice: 'cayci', fx: 'tea', words: ['ÇAYLAR!', 'BARDAKLAR!', 'TAZE DEMLEMİŞTİM!'] },
       esnaf: { weight: 1.5, speed: 0.9, voice: 'man', words: ['DÜKKÂNIM!', 'HOOP!', 'YAVAŞ OĞLUM!'] },
-      student: { weight: 2, speed: 1.2, voice: 'teen', words: ['SINAVIM VARDI!', 'KANKA!', 'YOK ARTIK!'] },
+      student: { weight: 2, speed: 1.2, voice: 'teen', safe: true },
       tourist: { weight: 1, speed: 0.7, voice: 'tourist', words: ['OH NO!', 'MAMMA MIA!', 'WOW!'] },
       jogger: { weight: 1, speed: 3, voice: 'man', words: ['NEFESİM!', 'KOŞTUM YA!'] },
       guard: { weight: 0.7, speed: 0.6, voice: 'man', words: ['DUR ORADA!', 'GİRİŞ YOK!'] },
-      teyze: { weight: 2, speed: 0.65, voice: 'grandma', words: ['VAY BAŞIMA!', 'ÇANTAM!', 'TERBİYESİZ!'] },
+      teyze: { weight: 2, speed: 0.65, voice: 'grandma', safe: true },
       hawker: { weight: 0.9, speed: 0.7, voice: 'man', fx: 'simit', words: ['TEZGÂHIM!', 'MALLAR!'] },
       cat: { weight: 1.7, speed: 1.3, voice: 'cat', dodge: true },
     },
     words: {
       man: ['YANDIM!', 'OHA!', 'HOOP!', 'NOLUYOR YA!'],
       woman: ['AMAN!', 'İMDAT!', 'EYVAH!', 'YAPMA!'],
-      child: ['ANNEE!', 'VIIIU!', 'YİNE!'],
-      old: ['EVLADIM!', 'TÖVBE!', 'GENÇLİK İŞTE!'],
       teen: ['OHA!', 'ABİ YA!'],
-      grandma: ['VAY!', 'ÖLDÜM!'],
       tourist: ['HELP!'],
       cat: ['MİYAV!'],
     },
@@ -339,28 +336,28 @@ const CONFIG = {
     max: 22, spawnEvery: 0.4, despawn: 1700, laneOffset: 30, turnChance: 0.2,
     hitScale: 0.42, maxHit: 12,
     panicDist: 300, panicSpeed: 300, panicTime: 2.4, panicLane: 44, panicBoost: 1.3,
-    // Boyalar: metalik, parlak, mat sırayla atanır. Modeller özgün, gerçek logo yok
+    // Boyalar: metalik, parlak, mat sırayla atanır. Modeller özgün
     finishes: ['metal', 'gloss', 'matte'],
     types: {
-      tofas: { weight: 2.6, shape: 'dogan', model: 'dogan', len: 46, wid: 23, mass: 1.2, cruise: 195, turnRate: 2.4, grip: 7, horn: 'car', colors: ['#d9d4c7', '#8a1f1f', '#3e7cb1', '#2f6b4f', '#e0a020'] },
-      murat: { weight: 1.5, shape: 'murat', len: 47, wid: 24, mass: 1.25, cruise: 175, turnRate: 2.3, grip: 7, horn: 'old', colors: ['#3e8ad0', '#e8e4d8', '#b5352a', '#3a7a55'] },
-      anadol: { weight: 0.9, shape: 'anadol', len: 47, wid: 23, mass: 1.15, cruise: 165, turnRate: 2.3, grip: 7, horn: 'old', colors: ['#e8782a', '#e0c060', '#7a3b9c'] },
-      tog: { weight: 1, shape: 'tog', len: 48, wid: 25, mass: 1.4, cruise: 215, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#3f4a55', '#e8e8e8', '#14506b', '#a01c30'] },
-      taxi: { weight: 2.4, shape: 'egea', model: 'egea', len: 48, wid: 24, mass: 1.25, cruise: 225, turnRate: 2.6, grip: 7, horn: 'taxi', colors: ['#f7c600'] },
-      bavyera: { weight: 1.6, shape: 'bavyera', len: 49, wid: 25, mass: 1.35, cruise: 225, turnRate: 2.6, grip: 7, horn: 'car', colors: ['#14233f', '#e9edf1', '#1a1c20', '#2b6fd6', '#7d8894'] },
-      halka: { weight: 1.5, shape: 'halka', len: 49, wid: 25, mass: 1.35, cruise: 225, turnRate: 2.6, grip: 7, horn: 'car', colors: ['#c2c8cf', '#23262c', '#7c1f2b', '#1f6e5a'] },
-      yildiz: { weight: 1.5, shape: 'yildiz', len: 51, wid: 25, mass: 1.45, cruise: 210, turnRate: 2.4, grip: 7, horn: 'old', colors: ['#111317', '#d8dde3', '#34495e', '#6d6358'] },
-      golf: { weight: 1.7, shape: 'golf', len: 43, wid: 24, mass: 1.15, cruise: 205, turnRate: 2.7, grip: 7, horn: 'car', colors: ['#d62839', '#f4f4f4', '#2e3a4a', '#1e88a8', '#ffd23f'] },
-      focus: { weight: 1.3, shape: 'focus', len: 46, wid: 24, mass: 1.2, cruise: 200, turnRate: 2.6, grip: 7, horn: 'car', colors: ['#2b5fa8', '#e5e7ea', '#e8703a', '#3a3f47'] },
-      kore: { weight: 1.3, shape: 'kore', len: 46, wid: 24, mass: 1.2, cruise: 200, turnRate: 2.6, grip: 7, horn: 'car', colors: ['#4bb5a9', '#d9dde2', '#a01c30', '#222630'] },
-      megane: { weight: 1.3, shape: 'megane', len: 47, wid: 24, mass: 1.2, cruise: 200, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#f2f2f2', '#b0272f', '#3e6a95', '#5b5f66'] },
-      linea: { weight: 1.3, shape: 'linea', len: 47, wid: 24, mass: 1.2, cruise: 190, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#eae6dc', '#8e9299', '#4a6a8a', '#7a2f2f'] },
+      klasik: { weight: 2.6, shape: 'atmaca', model: 'atmaca', len: 46, wid: 23, mass: 1.2, cruise: 195, turnRate: 2.4, grip: 7, horn: 'car', colors: ['#d9d4c7', '#8a1f1f', '#3e7cb1', '#2f6b4f', '#e0a020'] },
+      efe: { weight: 1.5, shape: 'efe', len: 47, wid: 24, mass: 1.25, cruise: 175, turnRate: 2.3, grip: 7, horn: 'old', colors: ['#3e8ad0', '#e8e4d8', '#b5352a', '#3a7a55'] },
+      cinar: { weight: 0.9, shape: 'cinar', len: 47, wid: 23, mass: 1.15, cruise: 165, turnRate: 2.3, grip: 7, horn: 'old', colors: ['#e8782a', '#e0c060', '#7a3b9c'] },
+      elektra: { weight: 1, shape: 'elektra', len: 48, wid: 25, mass: 1.4, cruise: 215, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#3f4a55', '#e8e8e8', '#14506b', '#a01c30'] },
+      taxi: { weight: 2.4, shape: 'marmara', model: 'marmara', len: 48, wid: 24, mass: 1.25, cruise: 225, turnRate: 2.6, grip: 7, horn: 'taxi', colors: ['#f7c600'] },
+      bavar: { weight: 1.6, shape: 'bavar', len: 49, wid: 25, mass: 1.35, cruise: 225, turnRate: 2.6, grip: 7, horn: 'car', colors: ['#14233f', '#e9edf1', '#1a1c20', '#2b6fd6', '#7d8894'] },
+      aurum: { weight: 1.5, shape: 'aurum', len: 49, wid: 25, mass: 1.35, cruise: 225, turnRate: 2.6, grip: 7, horn: 'car', colors: ['#c2c8cf', '#23262c', '#7c1f2b', '#1f6e5a'] },
+      stella: { weight: 1.5, shape: 'stella', len: 51, wid: 25, mass: 1.45, cruise: 210, turnRate: 2.4, grip: 7, horn: 'old', colors: ['#111317', '#d8dde3', '#34495e', '#6d6358'] },
+      volta: { weight: 1.7, shape: 'volta', len: 43, wid: 24, mass: 1.15, cruise: 205, turnRate: 2.7, grip: 7, horn: 'car', colors: ['#d62839', '#f4f4f4', '#2e3a4a', '#1e88a8', '#ffd23f'] },
+      pusula: { weight: 1.3, shape: 'pusula', len: 46, wid: 24, mass: 1.2, cruise: 200, turnRate: 2.6, grip: 7, horn: 'car', colors: ['#2b5fa8', '#e5e7ea', '#e8703a', '#3a3f47'] },
+      dalga: { weight: 1.3, shape: 'dalga', len: 46, wid: 24, mass: 1.2, cruise: 200, turnRate: 2.6, grip: 7, horn: 'car', colors: ['#4bb5a9', '#d9dde2', '#a01c30', '#222630'] },
+      lale: { weight: 1.3, shape: 'lale', len: 47, wid: 24, mass: 1.2, cruise: 200, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#f2f2f2', '#b0272f', '#3e6a95', '#5b5f66'] },
+      vadi: { weight: 1.3, shape: 'vadi', len: 47, wid: 24, mass: 1.2, cruise: 190, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#eae6dc', '#8e9299', '#4a6a8a', '#7a2f2f'] },
       pickup: { weight: 1.2, shape: 'kamyonet', len: 52, wid: 26, mass: 1.9, cruise: 185, turnRate: 2.2, grip: 7, horn: 'truck', colors: ['#e8e8e8', '#3e6a4f', '#b5352a', '#3e6a95'] },
       motosiklet: { weight: 1.1, shape: 'moto', model: 'moto', len: 34, wid: 14, mass: 0.5, cruise: 225, turnRate: 3, grip: 8, horn: 'car', colors: ['#d62839', '#1e88a8', '#23262c', '#e8c547'] },
-      clio: { weight: 1.2, shape: 'clio', len: 42, wid: 24, mass: 1.1, cruise: 205, turnRate: 2.7, grip: 7, horn: 'car', colors: ['#1c9ad6', '#ff6a13', '#e6e8ea', '#d3162b'] },
-      duster: { weight: 1.1, shape: 'duster', len: 48, wid: 26, mass: 1.5, cruise: 195, turnRate: 2.4, grip: 7, horn: 'truck', colors: ['#e8701a', '#2f6b4f', '#c9b48a'] },
-      grandland: { weight: 0.9, shape: 'grandland', len: 49, wid: 26, mass: 1.45, cruise: 205, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#1f3a68', '#a7aeb7', '#e8551e'] },
-      egea: { weight: 1.5, shape: 'egea', len: 48, wid: 24, mass: 1.25, cruise: 205, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#f2f2f2', '#c1121f', '#3a3f47', '#1565c0'] },
+      liva: { weight: 1.2, shape: 'liva', len: 42, wid: 24, mass: 1.1, cruise: 205, turnRate: 2.7, grip: 7, horn: 'car', colors: ['#1c9ad6', '#ff6a13', '#e6e8ea', '#d3162b'] },
+      bozkir: { weight: 1.1, shape: 'bozkir', len: 48, wid: 26, mass: 1.5, cruise: 195, turnRate: 2.4, grip: 7, horn: 'truck', colors: ['#e8701a', '#2f6b4f', '#c9b48a'] },
+      granit: { weight: 0.9, shape: 'granit', len: 49, wid: 26, mass: 1.45, cruise: 205, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#1f3a68', '#a7aeb7', '#e8551e'] },
+      marmara: { weight: 1.5, shape: 'marmara', len: 48, wid: 24, mass: 1.25, cruise: 205, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#f2f2f2', '#c1121f', '#3a3f47', '#1565c0'] },
       minibus: { weight: 1.6, model: 'minibus', len: 64, wid: 28, mass: 3, cruise: 190, turnRate: 2, grip: 8, horn: 'dolmus', colors: ['#f4f6f8'] },
       bus: { weight: 1.1, len: 96, wid: 30, mass: 7, cruise: 150, turnRate: 1.7, grip: 8, horn: 'bus', colors: ['#2a7fc1', '#2c9e8f', '#e8732a'] },
       truck: { weight: 0.8, accent: '#2a6db0', len: 108, wid: 32, mass: 8, cruise: 155, turnRate: 1.6, grip: 8, horn: 'truck', colors: ['#d9534f', '#3e7cb1', '#e8833a', '#2f7a4f'] },
@@ -373,15 +370,16 @@ const CONFIG = {
   // Trafik ışığı süreleri (saniye)
   traffic: { green: 6, yellow: 1.2, allRed: 0.8, stopLine: 94, brake: 520, hornAfter: 2.5, hornRate: 0.5 },
 
-  // Tabela adları. Marketler uydurmadır, gerçek marka değildir
+  // Tabela adları. Tüm adlar uydurmadır
   signs: {
-    bigshops: ['Grand Bazaar İş Hanı', 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
-    hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', 'Pera Palas Oteli', 'Otel Saray', 'Mavi Otel'],
-    shops: ['Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Tekel Bayii', 'Maydanoz Döner', 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Tekel', 'Çay Ocağı', 'Kuaför', 'Nargile Cafe', 'Bakkal', 'Kahveci', 'Nevada Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Baba Pide', 'Kardeşler Bakkal', 'Tekel 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Nevada Kafe'],
-    chains: { Migros: '#ff7a00', 'BİM': '#d0121b', 'ŞOK': '#e6a800', A101: '#0088b0', CarrefourSA: '#0a4ea2', 'İtopya': '#ff2a6d', 'Koçtaş': '#f59300', 'CZN Burak': '#16a34a' },
-    banks: { Akbank: '#d0121b', 'İş Bankası': '#0a4ea2', 'Ziraat Bankası': '#c8102e', Garanti: '#0f7a45', 'Yapı Kredi': '#1b2f6b' },
-    sites: ['Yeşil Vadi Sitesi', 'Boğaz Evleri', 'Mavi Konak Sitesi', 'Çamlık Sitesi', 'Güneş Sitesi', 'Lale Evleri', 'Marmara Konutları', 'Park Evleri'],
-    clubs: ['Pavyon Yıldız', 'Gece Kuşu', 'Neon Bar', 'Mavi Club', 'Saz Evi', 'Kırmızı Kapı'],
+    bigshops: ['Merkez Çarşı İş Hanı', 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
+    hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', 'Sahil Palas Oteli', 'Otel Saray', 'Mavi Otel'],
+    shops: ['Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Nane Döner', 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Çınar Kafe'],
+    chains: { 'Pazarcık Market': '#3f8f5b', Ucuzlar: '#7b3fa0', 'Sepet Market': '#1f9e9e', 'Yıldız Mağazaları': '#c23b6b', 'Dörtyol Market': '#6a7f2a', 'Teknoloji Durağı': '#2b3a67', 'Yapı Dünyası': '#8a5a2b', 'Köşe Bakkal': '#b5651d' },
+    banks: { 'Yıldız Bankası': '#3b3f8f', 'Anadolu Tasarruf': '#8a6d1f', 'Bereket Bankası': '#6b8e23', 'Güven Kredi': '#5b2a86', 'Marmara Yatırım': '#0f6e84' },
+    sites: ['Yeşil Tepe Sitesi', 'Boğaz Evleri', 'Mavi Konak Sitesi', 'Çamlık Sitesi', 'Güneş Sitesi', 'Lale Evleri', 'Marmara Konutları', 'Park Evleri'],
+    cafes: ['Melodi Kafe', 'Akustik Kafe', 'Sahne Kafe', 'Çınaraltı Çay Bahçesi', 'Bahçe Çay Evi', 'Çay Bahçesi', 'Demir Spor Salonu', 'Kondisyon Spor Salonu'],
+    cafeColors: ['#c9773b', '#3f8f6b', '#8a5fb0', '#d1a03c'],
     neon: ['#ff2a6d', '#21d4fd', '#b967ff', '#05ffa1', '#fffb96'],
     markets: ['Ucuzluk Market', 'Bereket Gross', 'Komşu Market', 'Anadolu Gross', 'Yıldız Gross', 'Hesaplı Market', 'Doyuran Gross', 'Tasarruf Market'],
     colors: ['#c8261e', '#1d6fb8', '#178a4d', '#d97706', '#6d28a8', '#0f766e', '#be185d', '#1f2937'],
@@ -632,11 +630,11 @@ const PROP_INFO = [
   { r: 18, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#2fd872' },
   { r: 18, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#ffd23f' },
   { r: 13, brk: 20, drag: 0.03, dmg: 0, coin: true, chip: '#d9281e', snd: 'chairs' },
-  { r: 14, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#5c6b7a', snd: 'uncles' },
+  { r: 14, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#5c6b7a', safe: true }, // Yaşlı amcaların masası: araç değmez
   { r: 13, brk: 30, drag: 0.05, dmg: 0.3, coin: true, chip: '#d9a441', snd: 'simit' },
   { r: 15, brk: 25, drag: 0.05, dmg: 0.3, coin: true, chip: '#5bb04a', snd: 'chairs' },
   { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true },
-  { r: 15, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#2a1f3a', snd: 'uncles' },
+  { r: 15, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#2a1f3a', safe: true },
 ];
 
 const POWER_KINDS = ['blast', 'ghost', 'heal', 'giant'];
@@ -692,7 +690,7 @@ function newChunk() {
 class World {
   constructor(seed = 12345) {
     this.seed = seed | 0;
-    this.sistem = null;
+    this.kolej = null;
     this.sites = null;
     this.chunks = new Map();
     this.free = [];
@@ -712,7 +710,7 @@ class World {
     this.lastChunk = null;
     this.lastKey = -1;
     this.seed = seed | 0;
-    this.sistem = null;
+    this.kolej = null;
     this.sites = null;
   }
 
@@ -815,6 +813,15 @@ class World {
     return true;
   }
 
+  // Bu noktada korunan yapı var mı (cami)
+  sacredAt(x, y) {
+    const tx = Math.floor(x / TILE); const ty = Math.floor(y / TILE);
+    const cx = Math.floor(tx / CT); const cy = Math.floor(ty / CT);
+    const c = this.chunk(cx, cy);
+    const id = c.rectAt[(ty - cy * CT) * CT + (tx - cx * CT)];
+    return id > 0 && c.rects[id - 1].sacred;
+  }
+
   // Dairenin en derin temasını bulur; out: nx, ny, depth, rect, chunk
   circleHit(x, y, r, out) {
     const t0x = Math.floor((x - r) / TILE);
@@ -850,7 +857,7 @@ class World {
 
   // Tank binayı ezer ya da top mermisi yıkar
   crush(chunk, rect) {
-    if (!rect.alive) return;
+    if (!rect.alive || rect.sacred) return;
     rect.alive = false;
     const id = chunk.rects.indexOf(rect) + 1;
     for (let i = 0; i < CELLS; i++) {
@@ -916,7 +923,7 @@ class World {
     const home = Math.abs(cx) <= 1 && Math.abs(cy) <= 1;
     let t = home ? 'mahalle' : 'city';
     if (cx === sis.cx && cy === sis.cy) {
-      t = 'sistem';
+      t = 'kolej';
     } else if (big) {
       t = 'bigsite';
     } else if (!home) {
@@ -929,20 +936,20 @@ class World {
     else if (t === 'downtown') this.fillDense(c, 'downtown', null);
     else if (t === 'esnaf') this.fillDense(c, 'esnaf', null);
     else if (t === 'gecekondu') this.fillDense(c, 'gecekondu', null);
-    else if (t === 'gece') this.fillDense(c, 'gece', null);
+    else if (t === 'keyif') this.fillDense(c, 'keyif', null);
     else if (t === 'site') this.fillSite(c, SITE_NAMES[rint(0, SITE_NAMES.length - 1)], PASTELS[rint(0, PASTELS.length - 1)], rint(0, 1), true);
     else if (t === 'bigsite') this.fillSite(c, big.name, big.color, big.layout, c.cx === big.cx && c.cy === big.cy);
     else if (t === 'cami') this.fillDense(c, 'mahalle', { style: BUILD.MOSQUE, w: 12, h: 12, color: '#c7cdd3', pad: 'courtyard', sign: '' });
     else if (t === 'stadyum') this.fillDense(c, 'mahalle', { style: BUILD.STADIUM, w: 18, h: 16, color: '#58606b', sign: '' });
-    else if (t === 'hastane') this.fillDense(c, 'mahalle', { style: BUILD.HOSPITAL, w: 13, h: 10, color: '#f1f5f8', pad: 'ambulance', sign: 'Devlet Hastanesi' });
-    else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: 'Atatürk İlkokulu' });
+    else if (t === 'hastane') this.fillDense(c, 'mahalle', { style: BUILD.HOSPITAL, w: 13, h: 10, color: '#f1f5f8', pad: 'ambulance', sign: 'Şehir Hastanesi' });
+    else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: 'Cumhuriyet İlkokulu' });
     else if (t === 'spor') this.fillDense(c, 'mahalle', { sport: true });
     else if (t === 'golet') this.fillDense(c, 'mahalle', { pond: true });
     else if (t === 'insaat' || t === 'harabe' || t === 'sanayi') this.fillZone(c, t);
     else if (t === 'donel') this.fillRoundabout(c);
     else if (t === 'viraj') this.fillCurvy(c);
     else if (t === 'pazar') this.fillPazar(c);
-    else if (t === 'sistem') this.fillSistem(c);
+    else if (t === 'kolej') this.fillSistem(c);
     else if (t === 'sea') this.fillSea(c);
     else if (t === 'beach') this.fillBeach(c);
     else if (t === 'forest') this.fillForest(c);
@@ -972,7 +979,7 @@ class World {
     if (!r) { r = { kind: '', x: 0, y: 0, w: 0, h: 0, style: 0, color: '', alive: true, seed: 0 }; c.rects[c.rectCount] = r; }
     c.rectCount++;
     r.kind = kind; r.style = style; r.color = color; r.alive = true; r.seed = rint(0, 999);
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0;
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -1274,6 +1281,7 @@ class World {
     const h = Math.min(bh, m.h);
     const padH = m.pad === 'yard' ? Math.min(bh - h, 7) : m.pad === 'ambulance' ? Math.min(bh - h, 4) : 0;
     const r = this.addRect(c, 'building', x0, y0, x0 + w, y0 + h, 2, m.style, m.color);
+    r.sacred = m.style === BUILD.MOSQUE; // Saygı: hiçbir şey yıkamaz
     if (m.sign) { r.sign = m.sign; r.signColor = m.style === BUILD.HOSPITAL ? '#d0121b' : '#23422f'; r.signSize = 3; }
     if (padH > 0) {
       this.setGround(c, x0, y0 + h, x0 + w, y0 + h + padH, GROUND.PLAZA);
@@ -1323,11 +1331,10 @@ class World {
       add(BUILD.GECEKONDU, '#b08a5a', chance(0.12) ? pick(SG.shops) : '', '', 0);
       return;
     }
-    if (pf === 'gece') {
+    if (pf === 'keyif') {
       if (area >= 6 && chance(0.7)) {
-        const r = add(BUILD.CLUB, pick(SG.neon), pick(SG.clubs), '#1b1426', rint(1, 3));
-        r.neon = true;
-        this.addProp(c, PROP.QUEUE, r.x + r.w / 2, r.y + r.h + 24);
+        const color = pick(SG.cafeColors);
+        add(BUILD.CAFE, color, pick(SG.cafes), color, rint(1, 3));
         return;
       }
       const shop = area <= 6 ? BUILD.SHOP : BUILD.APARTMENT;
@@ -1437,7 +1444,7 @@ class World {
           const ax = Math.round(Math.cos(t) * r);
           const ay = Math.round(Math.sin(t) * r);
           this.biomeAt(ax, ay, out);
-          const sis = this.sistem;
+          const sis = this.kolej;
           const clash = this.sites.some((o) => Math.abs(o.cx - ax) < 3 && Math.abs(o.cy - ay) < 3) || (Math.abs(sis.cx - ax) < 3 && Math.abs(sis.cy - ay) < 3);
           if (out.biome === 'city' && !clash && !isHighwayRow(ay) && !isHighwayRow(ay + 1) && Math.max(Math.abs(ax), Math.abs(ay)) > 3) {
             this.sites.push({ ...s, cx: ax, cy: ay });
@@ -1513,9 +1520,9 @@ class World {
     this.scatter(c, PROP.SIMITCART, 4, [GROUND.PLAZA]);
   }
 
-  // Haritanın tek Sistem Koleji chunk'ı: tohuma bağlı, başlangıca yakın bir şehir bölgesinde
+  // Haritanın tek Kolej Koleji chunk'ı: tohuma bağlı, başlangıca yakın bir şehir bölgesinde
   sistemChunk() {
-    if (this.sistem) return this.sistem;
+    if (this.kolej) return this.kolej;
     const [a, b] = W.sistemRing;
     const out = { biome: '', sea: false };
     let found = null;
@@ -1528,14 +1535,14 @@ class World {
       this.biomeAt(cx, cy, out);
       if (out.biome === 'city' && !isHighwayRow(cy) && Math.max(Math.abs(cx), Math.abs(cy)) > 1) found = { cx, cy };
     }
-    this.sistem = found || { cx: a, cy: a };
-    return this.sistem;
+    this.kolej = found || { cx: a, cy: a };
+    return this.kolej;
   }
 
   fillSistem(c) {
     this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
     // Haritanın en büyük binası: chunk'ın neredeyse tamamı
-    this.addRect(c, 'building', 5, 5, 30, 27, 3, BUILD.SISTEM, '#ff7a00');
+    this.addRect(c, 'building', 5, 5, 30, 27, 3, BUILD.KOLEJ, '#ff7a00');
     for (let k = 6; k < 29; k += 3) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 28.6 * TILE);
     this.scatter(c, PROP.SIMITCART, 3, [GROUND.PLAZA]);
   }
@@ -1986,7 +1993,7 @@ class Effects {
     this.cursor = 0;
     this.colors = ['#888888'];
 
-    // Lastik izleri halka tampon: x1,y1,x2,y2,yaş
+    // Lastik izleri aurum tampon: x1,y1,x2,y2,yaş
     this.skidMax = FXP.maxSkids;
     this.skid = new Float32Array(this.skidMax * 5);
     this.skidCursor = 0;
@@ -2350,7 +2357,8 @@ function driveTank(cop, g, dt) {
   target.x = g.ghostT > 0 ? cop.x + Math.cos(cop.a) * 200 : p.x;
   target.y = g.ghostT > 0 ? cop.y + Math.sin(cop.a) * 200 : p.y;
   const ahead = g.world.groundAt(cop.x + Math.cos(cop.a) * 110, cop.y + Math.sin(cop.a) * 110);
-  if (ahead === GROUND.WATER && g.flowReady) g.flow.sample(cop.x, cop.y, target, 6);
+  const sacred = g.world.sacredAt(cop.x + Math.cos(cop.a) * 110, cop.y + Math.sin(cop.a) * 110);
+  if ((ahead === GROUND.WATER || sacred) && g.flowReady) g.flow.sample(cop.x, cop.y, target, 6);
   const err = wrapAngle(Math.atan2(target.y - cop.y, target.x - cop.x) - cop.a);
   cop.ctlS = Math.max(-1, Math.min(1, err * 2));
   cop.ctlT = Math.abs(err) > 1.4 ? 0.3 : 1;
@@ -2397,7 +2405,7 @@ const DY = [0, 1, 0, -1];
 const LANE = [1, -1, -1, 1];
 
 const PED_KIND_NAMES = Object.keys(PD.kinds);
-const HW_CARS = ['tofas', 'murat', 'tog', 'bavyera', 'halka', 'yildiz', 'golf', 'focus', 'kore', 'megane', 'linea', 'pickup', 'clio', 'duster', 'grandland', 'egea'];
+const HW_CARS = ['klasik', 'efe', 'elektra', 'bavar', 'aurum', 'stella', 'volta', 'pusula', 'dalga', 'lale', 'vadi', 'pickup', 'liva', 'bozkir', 'granit', 'marmara'];
 let pedWeight = 0;
 for (const k of PED_KIND_NAMES) pedWeight += PD.kinds[k].weight;
 let npcWeight = 0;
@@ -2426,7 +2434,7 @@ class Crowd {
     this.npcs = [];
     for (let i = 0; i < NP.max; i++) {
       const b = makeBody();
-      b.alive = false; b.kind = 'tofas'; b.spec = null; b.state = 'drive'; b.color = 0; b.t = 0;
+      b.alive = false; b.kind = 'klasik'; b.spec = null; b.state = 'drive'; b.color = 0; b.t = 0;
       b.dir = 0; b.line = 0; b.lastCross = 1e9; b.hornT = 0; b.ctlS = 0; b.ctlT = 1; b.breaker = true;
       b.panicT = 0; b.waitT = 0;
       b.drive = { maxSpeed: 0, accel: 0, turnRate: 0, grip: 0, driftGrip: 0 };
@@ -2687,7 +2695,7 @@ class Crowd {
     const ty = c.y + (vertical ? along : toS);
     if (g.onScreen(x, y, 40) || g.world.blockedAt(x, y) || g.world.blockedAt(tx, ty)) return;
     let kind = this.pickKind();
-    if (PD.kinds[kind].road || PD.kinds[kind].dodge) kind = 'man';
+    if (PD.kinds[kind].road || PD.kinds[kind].dodge || PD.kinds[kind].safe) kind = 'man'; // Korunanlar yola inmez
     this.setupPed(p, kind, x, y, Math.atan2(ty - y, tx - x));
     p.state = PED_WAIT;
     p.tx = tx; p.ty = ty;
@@ -2845,6 +2853,16 @@ class Crowd {
     const dy = p.y - b.y;
     if (dx * dx + dy * dy >= r * r) return false;
     const speed = Math.hypot(b.vx, b.vy);
+    // Çocuk, yaşlı, bebek arabası ve tekerlekli sandalye: araç asla değmez, kenara çekilirler
+    if (p.info.safe) {
+      const d = Math.hypot(dx, dy) || 1;
+      p.x += (dx / d) * 34;
+      p.y += (dy / d) * 34;
+      p.a = Math.atan2(dy, dx);
+      p.state = PED_RUN;
+      p.turnT = 1.4;
+      return false;
+    }
     // Kedi ezilmez: son anda sıçrar
     if (p.info.dodge) {
       const d = Math.hypot(dx, dy) || 1;
@@ -2873,7 +2891,7 @@ class Crowd {
 
   blast(x, y, R) {
     for (const p of this.peds) {
-      if (!p.alive || p.state === PED_FLY || p.info.dodge) continue;
+      if (!p.alive || p.state === PED_FLY || p.info.dodge || p.info.safe) continue;
       if (Math.hypot(p.x - x, p.y - y) < R * 0.6) this.launch(p, { x, y, vx: 0, vy: 0 }, true);
     }
     const g = this.g;
@@ -2917,7 +2935,7 @@ class Crowd {
     for (const o of this.npcs) if (o.alive && Math.hypot(o.x - x, o.y - y) < 180) return;
 
     let r = Math.random() * npcWeight;
-    let kind = 'tofas';
+    let kind = 'klasik';
     for (const k in NP.types) {
       r -= NP.types[k].weight;
       if (r < 0) { kind = k; break; }
@@ -3622,7 +3640,7 @@ class Game {
       const cy = b.y + Math.sin(b.a) * off * sign;
       if (!this.world.circleHit(cx, cy, r, hit)) continue;
       const rect = hit.rect;
-      if (b.crusher && !isWaterRect(rect)) {
+      if (b.crusher && !isWaterRect(rect) && !rect.sacred) {
         this.crushRect(hit.chunk, rect);
         continue;
       }
@@ -3697,7 +3715,7 @@ class Game {
           const d2 = dx * dx + dy * dy;
           if (d2 >= rr * rr) continue;
           const speed = Math.hypot(b.vx, b.vy);
-          if (speed >= info.brk || b.crusher || b.breaker || (isPlayer && this.giantT > 0)) {
+          if (!info.safe && (speed >= info.brk || b.crusher || b.breaker || (isPlayer && this.giantT > 0))) {
             this.breakProp(b, pr, info, isPlayer);
           } else {
             // Yavaş temas: katı engel gibi it
@@ -3728,11 +3746,6 @@ class Game {
     if (info.snd) {
       this.emit(info.snd);
       if (pr.kind === PROP.SIMITCART) this.fx.burst(FX.SIMIT, pr.x, pr.y, 10, 210, 1.2, 7);
-      if (pr.kind === PROP.UNCLES) {
-        this.lastVoice = 'old';
-        this.emit('scream', 0.8);
-        this.fx.float(pr.x, pr.y - 16, 'HAYIRDIR EVLADIM!', '#ffffff');
-      }
     }
     if (info.coin && Math.random() < CONFIG.coin.dropChance) {
       this.world.dropCoin(pr.x + (Math.random() - 0.5) * 30, pr.y + (Math.random() - 0.5) * 30);
@@ -4244,7 +4257,7 @@ class Game {
       // Düştüğü bina yıkılır
       const tx = Math.floor(s.x / TILE);
       const ty = Math.floor(s.y / TILE);
-      if (this.world.costAtTile(tx, ty) === 0 && this.world.circleHit(s.x, s.y, 8, hit) && !isWaterRect(hit.rect)) {
+      if (this.world.costAtTile(tx, ty) === 0 && this.world.circleHit(s.x, s.y, 8, hit) && !isWaterRect(hit.rect) && !hit.rect.sacred) {
         this.crushRect(hit.chunk, hit.rect);
       }
     }
@@ -5125,7 +5138,7 @@ function paintSpecial(g, r) {
       g.fillRect(x, y + h - 17, w, 17);
       break;
     }
-    case S.SISTEM: {
+    case S.KOLEJ: {
       // Haritanın tek turuncu binası
       g.fillStyle = '#b84f00';
       rr(g, x, y, w, h, 5); g.fill();
@@ -5523,29 +5536,24 @@ function lamps(g, x, ys, w, h, color) {
   for (const y of ys) { g.fillRect(x, y - h / 2, w, h); g.fillRect(x, -y - h / 2, w, h); }
 }
 
-function emblem(g, x, kind) {
+// Drift Lab rozeti: küçük altıgen
+function emblem(g, x) {
   g.save();
   g.translate(x, 0);
   g.strokeStyle = '#eef2f6';
-  g.fillStyle = '#eef2f6';
   g.lineWidth = 0.6;
-  if (kind === 'ring') { for (let i = -1; i <= 1; i++) { g.beginPath(); g.arc(0, i * 1.5, 1, 0, 7); g.stroke(); } }
-  else if (kind === 'star') {
-    g.beginPath(); g.arc(0, 0, 2, 0, 7); g.stroke();
-    g.beginPath(); for (let i = 0; i < 3; i++) { const a = (i / 3) * 6.283 + 1.57; g.moveTo(0, 0); g.lineTo(Math.cos(a) * 2, Math.sin(a) * 2); } g.stroke();
-  } else if (kind === 'wheel') {
-    g.beginPath(); g.arc(0, 0, 2.1, 0, 7); g.stroke();
-    g.beginPath(); g.moveTo(-2, 0); g.lineTo(2, 0); g.moveTo(0, -2); g.lineTo(0, 2); g.stroke();
-  } else if (kind === 'oval') { g.beginPath(); g.ellipse(0, 0, 1.4, 2.6, 0, 0, 7); g.stroke(); }
-  else { g.beginPath(); g.moveTo(1.8, 0); g.lineTo(0, -2); g.lineTo(-1.8, 0); g.lineTo(0, 2); g.closePath(); g.stroke(); }
+  g.beginPath();
+  for (let i = 0; i < 6; i++) { const a = (i * Math.PI) / 3; g[i ? 'lineTo' : 'moveTo'](Math.cos(a) * 2, Math.sin(a) * 2); }
+  g.closePath();
+  g.stroke();
   g.restore();
 }
 
 // --- Oyuncu modelleri ---
-function dogan(g, l, w, c, a, fin) {
+function atmaca(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.56, H - 0.6, 9, 4, '#9aa3ad');
-  // Doğan: uzun düz kaput, kare bagaj, üç kutulu sedan
+// Klasik sedan
   hull(g, [[L, H * 0.84], [L - 1.5, H * 0.96], [-L + 1.5, H * 0.96], [-L, H * 0.84]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.2, -L * 0.54, H * 0.8, H * 0.76, L * 0.04, -L * 0.42, H * 0.64, coat(g, H, c, fin));
@@ -5560,12 +5568,12 @@ function dogan(g, l, w, c, a, fin) {
   mirrors(g, L * 0.16, H * 0.92, '#2a2d33');
 }
 
-function sahin(g, l, w, c, a, fin) {
+function simsek(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.56, H - 0.2, 10, 5, '#e8c547');
   hull(g, [[L, H * 0.8], [L - 2, H * 0.97], [-L + 2, H * 0.97], [-L, H * 0.82]]);
   fillHull(g, coat(g, H, c, fin));
-  // Şahin: daha kısa arka, ön dörtlü far, kalın şeritler, koca spoyler
+// Tuning sedan
   cabin(g, L * 0.24, -L * 0.48, H * 0.8, H * 0.74, L * 0.06, -L * 0.34, H * 0.62, coat(g, H, c, fin), '#07090d');
   g.fillStyle = a;
   g.fillRect(-L + 1, -H * 0.36, l - 2, H * 0.2);
@@ -5579,10 +5587,10 @@ function sahin(g, l, w, c, a, fin) {
   mirrors(g, L * 0.2, H * 0.92, '#0a0a0d');
 }
 
-function murat(g, l, w, c, a, fin) {
+function efe(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.58, H - 0.8, 9, 4, '#dfe4e9');
-  // Murat 131: dik köşeler, dörtlü yuvarlak far, büyük bagaj
+// Köşeli 70ler sedanı
   hull(g, [[L, H * 0.88], [L - 1, H * 0.94], [-L + 1, H * 0.94], [-L, H * 0.88]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.16, -L * 0.5, H * 0.8, H * 0.8, 0, -L * 0.4, H * 0.68, coat(g, H, c, fin));
@@ -5597,10 +5605,10 @@ function murat(g, l, w, c, a, fin) {
   mirrors(g, L * 0.12, H * 0.94, '#c9ced4');
 }
 
-function anadol(g, l, w, c, a, fin) {
+function cinar(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.62, -L * 0.56, H - 0.8, 9, 4, '#c9ced4');
-  // Anadol: yuvarlak fiberglas gövde, uzun kaput, kısa arka, kuyruk yüzgeci
+// Yuvarlak klasik
   smooth(g, [[L + 1, 0], [L, H * 0.7], [L * 0.7, H], [0, H * 0.94], [-L * 0.7, H * 0.96], [-L - 1, H * 0.86], [-L - 1, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.08, -L * 0.56, H * 0.76, H * 0.66, -L * 0.1, -L * 0.42, H * 0.56, coat(g, H, c, fin), '#1a2c38');
@@ -5614,15 +5622,15 @@ function anadol(g, l, w, c, a, fin) {
   mirrors(g, L * 0.1, H * 0.9, '#d0d5da');
 }
 
-function egea(g, l, w, c, a, fin) {
+function marmara(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.56, H - 0.2, 10, 4.6, '#d7dde4');
-  // Egea: akıcı sedan, kısa kaput, sivri LED far, çıkıntılı bagaj
+// Modern aile sedanı
   smooth(g, [[L, 0], [L, H * 0.58], [L * 0.78, H * 0.96], [0, H], [-L * 0.8, H * 0.96], [-L, H * 0.7], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.34, -L * 0.6, H * 0.8, H * 0.7, L * 0.08, -L * 0.36, H * 0.6, coat(g, H, c, fin));
   g.fillStyle = '#23272e'; g.fillRect(L - 1.4, -H * 0.36, 1.4, H * 0.72);
-  emblem(g, L - 3.6, 'oval');
+  emblem(g, L - 3.6);
   g.fillStyle = '#e8fbff';
   hull(g, [[L - 0.4, H * 0.42], [L * 0.8, H * 0.86]]); g.fill();
   lamps(g, -L, [H * 0.66], 2.6, H * 0.5, '#e01c2b');
@@ -5630,16 +5638,16 @@ function egea(g, l, w, c, a, fin) {
   mirrors(g, L * 0.3, H * 0.96, shade(c, -0.2));
 }
 
-function clio(g, l, w, c, a, fin) {
+function liva(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.62, -L * 0.58, H - 0.2, 10, 4.8, '#e7eaee');
-  // Clio: kısa hatchback, kavisli omuz, C biçimli LED far, bagajsız arka
+// Şehir hatchbacki
   smooth(g, [[L, 0], [L, H * 0.6], [L * 0.72, H * 1.0], [0, H * 0.9], [-L * 0.68, H * 1.02], [-L, H * 0.74], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.3, -L * 0.82, H * 0.76, H * 0.66, L * 0.06, -L * 0.68, H * 0.6, '#14171c');
   g.strokeStyle = '#eefaff'; g.lineWidth = 1.3;
   for (const s of [-1, 1]) { g.beginPath(); g.arc(L * 0.82, s * H * 0.7, 3.2, s > 0 ? 0.2 : -2.6, s > 0 ? 2.6 : -0.2); g.stroke(); }
-  emblem(g, L - 3.4, 'diamond');
+  emblem(g, L - 3.4);
   g.fillStyle = '#e01c2b';
   for (const s of [-1, 1]) { g.beginPath(); g.moveTo(-L * 0.78, s * H * 0.94); g.lineTo(-L, s * H * 0.66); g.lineTo(-L, s * H * 0.34); g.lineTo(-L + 2.6, s * H * 0.56); g.closePath(); g.fill(); }
   mirrors(g, L * 0.28, H * 0.9, a);
@@ -5648,23 +5656,23 @@ function clio(g, l, w, c, a, fin) {
 function suv(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.58, H + 0.2, 12, 5.4, '#3a3f47');
-  // Grandland: kompakt SUV, çift tonlu tavan, ince far, geniş siyah ızgara
+  // Kompakt SUV, çift tonlu tavan, ince far, geniş siyah ızgara
   smooth(g, [[L, 0], [L, H * 0.76], [L * 0.86, H], [-L * 0.82, H], [-L, H * 0.8], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.3, -L * 0.8, H * 0.8, H * 0.74, L * 0.12, -L * 0.68, H * 0.66, '#101317');
   g.fillStyle = '#c6ccd4'; g.fillRect(-L * 0.66, -H * 0.76, L * 0.76, 1.1); g.fillRect(-L * 0.66, H * 0.76 - 1.1, L * 0.76, 1.1);
   g.fillStyle = '#0c0e12'; g.fillRect(L - 2.6, -H * 0.8, 2.6, H * 1.6);
   g.fillStyle = '#e8fbff'; g.fillRect(L - 2, -H * 0.82, 1.6, H * 0.34); g.fillRect(L - 2, H * 0.48, 1.6, H * 0.34);
-  emblem(g, L - 1.4, 'wheel');
+  emblem(g, L - 1.4);
   lamps(g, -L, [H * 0.7], 1.6, H * 0.4, '#e01c2b');
   g.fillStyle = '#23272e'; g.fillRect(-L, -H * 0.42, 1.2, H * 0.84);
   mirrors(g, L * 0.26, H * 0.98, '#101317');
 }
 
-function duster(g, l, w, c, a, fin) {
+function bozkir(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.58, H + 0.6, 13, 6, '#20242a');
-  // Duster: geniş siyah çamurluk kaplamaları, tavan barları, kutu gibi arazi gövdesi
+// Arazi aracı
   g.fillStyle = '#23272e';
   rr(g, -L - 0.5, -H - 1, l + 1, w + 2, 4); g.fill();
   hull(g, [[L - 1, H * 0.72], [L - 3, H * 0.86], [-L + 3, H * 0.86], [-L + 1, H * 0.72]]);
@@ -5680,10 +5688,10 @@ function duster(g, l, w, c, a, fin) {
   mirrors(g, L * 0.26, H * 0.98, '#23272e');
 }
 
-function tog(g, l, w, c, a, fin) {
+function elektra(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.62, -L * 0.62, H + 0.1, 12, 5.2, '#a7b0ba');
-  // TOG T10X: kısa çıkıntılar, geniş gövde, boydan boya ışık çubuğu, siyah cam tavan
+// Elektrikli crossover
   smooth(g, [[L + 0.4, 0], [L, H * 0.8], [L * 0.84, H], [-L * 0.8, H], [-L, H * 0.84], [-L - 0.4, 0]]);
   fillHull(g, coat(g, H, c, fin));
   g.fillStyle = '#070a0e';
@@ -5726,39 +5734,39 @@ function moto(g, l, w, c, a, fin) {
   g.fillStyle = '#ff2733'; g.fillRect(-L - 1, -2, 1.6, 4);
 }
 
-// --- NPC modelleri: marka havası veren özgün tasarımlar, gerçek logo yok ---
-function bavyera(g, l, w, c, a, fin) {
+// --- NPC modelleri: özgün tasarımlar ---
+function bavar(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.58, H, 10, 4.6, '#b6bdc5');
   smooth(g, [[L, 0], [L, H * 0.74], [L * 0.8, H], [-L * 0.8, H * 0.98], [-L, H * 0.76], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.2, -L * 0.6, H * 0.8, H * 0.72, 0, -L * 0.42, H * 0.6, coat(g, H, c, fin));
-  // Çift böbrek ızgara, köşeli far
+  // Alçak tek parça ağız, ince far
   g.fillStyle = '#0d0f12';
-  rr(g, L - 2.4, -H * 0.42, 2.2, H * 0.38, 0.8); g.fill();
-  rr(g, L - 2.4, H * 0.04, 2.2, H * 0.38, 0.8); g.fill();
-  emblem(g, L * 0.74, 'wheel');
+  rr(g, L - 1.8, -H * 0.5, 1.6, H, 0.6); g.fill();
+  emblem(g, L * 0.74);
   lamps(g, L - 3.4, [H * 0.72], 3, H * 0.28, '#eafcff');
   lamps(g, -L, [H * 0.68], 2.2, H * 0.44, '#d8132a');
   mirrors(g, L * 0.16, H * 0.96, shade(c, -0.3));
 }
 
-function halka(g, l, w, c, a, fin) {
+function aurum(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.58, H, 10, 4.6, '#d6dbe1');
   smooth(g, [[L, 0], [L, H * 0.8], [L * 0.86, H], [-L * 0.86, H], [-L, H * 0.8], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.28, -L * 0.66, H * 0.8, H * 0.7, L * 0.04, -L * 0.46, H * 0.6, coat(g, H, c, fin));
-  // Tek parça geniş ızgara, üçgen LED, boydan boya stop
-  g.fillStyle = '#0d0f12'; g.fillRect(L - 2, -H * 0.56, 2, H * 1.12);
-  emblem(g, L - 3.6, 'ring');
+  // Üstte ince şerit, altta ağ panel, çift stop
+  g.fillStyle = '#c4cad2'; g.fillRect(L - 2.6, -H * 0.5, 0.8, H);
+  g.fillStyle = '#0d0f12'; g.fillRect(L - 1.6, -H * 0.5, 1.6, H);
+  emblem(g, L - 3.6);
   g.fillStyle = '#eafcff';
   hull(g, [[L - 0.4, H * 0.58], [L * 0.8, H * 0.92]]); g.fill();
   g.fillStyle = '#d8132a'; g.fillRect(-L, -H * 0.84, 1.4, H * 1.68);
   mirrors(g, L * 0.22, H * 0.98, shade(c, -0.3));
 }
 
-function yildiz(g, l, w, c, a, fin) {
+function stella(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.62, -L * 0.6, H, 10, 4.6, '#e2e6ea');
   smooth(g, [[L + 0.4, 0], [L, H * 0.7], [L * 0.76, H], [-L * 0.76, H], [-L, H * 0.72], [-L - 0.4, 0]]);
@@ -5767,40 +5775,40 @@ function yildiz(g, l, w, c, a, fin) {
   g.fillStyle = '#c9ced4'; g.fillRect(L - 2, -H * 0.4, 2.2, H * 0.8);
   g.strokeStyle = '#0d0f12'; g.lineWidth = 0.5;
   for (const y of [-H * 0.22, 0, H * 0.22]) { g.beginPath(); g.moveTo(L - 2, y); g.lineTo(L, y); g.stroke(); }
-  emblem(g, L * 0.82, 'star');
+  emblem(g, L * 0.82);
   lamps(g, L - 3.6, [H * 0.68], 3.2, H * 0.3, '#eafcff');
   lamps(g, -L, [H * 0.66], 2, H * 0.5, '#c81425');
   g.fillStyle = '#dfe4e9'; g.fillRect(-L * 0.8, -H * 0.36, 0.8, H * 0.72);
   mirrors(g, L * 0.12, H * 0.96, shade(c, -0.3));
 }
 
-function golf(g, l, w, c, a, fin) {
+function volta(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.6, H, 10, 4.6, '#c0c7cf');
   smooth(g, [[L, 0], [L, H * 0.78], [L * 0.8, H], [-L * 0.8, H], [-L, H * 0.84], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.26, -L * 0.86, H * 0.78, H * 0.72, L * 0.04, -L * 0.7, H * 0.62, coat(g, H, c, fin));
   g.fillStyle = '#0d0f12'; g.fillRect(L - 1.4, -H * 0.5, 1.4, H);
-  emblem(g, L - 3, 'wheel');
+  emblem(g, L - 3);
   lamps(g, L - 2.6, [H * 0.72], 2.6, H * 0.26, '#eafcff');
   lamps(g, -L, [H * 0.72], 1.8, H * 0.34, '#d8132a');
   mirrors(g, L * 0.22, H * 0.96, shade(c, -0.3));
 }
 
-function focus(g, l, w, c, a, fin) {
+function pusula(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.58, H, 10, 4.6, '#aeb6bf');
   smooth(g, [[L, 0], [L, H * 0.5], [L * 0.76, H * 0.98], [-L * 0.74, H], [-L, H * 0.8], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.32, -L * 0.8, H * 0.78, H * 0.68, L * 0.06, -L * 0.64, H * 0.6, coat(g, H, c, fin));
   g.fillStyle = '#0d0f12'; g.fillRect(L - 2.2, -H * 0.5, 2.2, H);
-  emblem(g, L - 3.6, 'oval');
+  emblem(g, L - 3.6);
   g.fillStyle = '#eafcff'; hull(g, [[L - 0.4, H * 0.5], [L * 0.76, H * 0.9]]); g.fill();
   g.fillStyle = '#d8132a'; g.fillRect(-L, -H * 0.76, 1.6, H * 0.5); g.fillRect(-L, H * 0.26, 1.6, H * 0.5);
   mirrors(g, L * 0.26, H * 0.96, shade(c, -0.3));
 }
 
-function kore(g, l, w, c, a, fin) {
+function dalga(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.58, H, 10, 4.6, '#c7ced6');
   smooth(g, [[L + 0.5, 0], [L, H * 0.62], [L * 0.8, H], [-L * 0.8, H], [-L, H * 0.68], [-L - 0.5, 0]]);
@@ -5809,33 +5817,33 @@ function kore(g, l, w, c, a, fin) {
   g.fillStyle = '#0d0f12'; rr(g, L - 2.6, -H * 0.5, 2.8, H, 1); g.fill();
   g.strokeStyle = '#8a929b'; g.lineWidth = 0.4;
   for (let y = -H * 0.4; y < H * 0.45; y += 1.6) { g.beginPath(); g.moveTo(L - 2.4, y); g.lineTo(L, y); g.stroke(); }
-  emblem(g, L - 3.8, 'oval');
+  emblem(g, L - 3.8);
   g.fillStyle = '#eafcff'; g.fillRect(L * 0.76, -H * 0.9, L * 0.22, 1.1); g.fillRect(L * 0.76, H * 0.9 - 1.1, L * 0.22, 1.1);
   g.fillStyle = '#d8132a'; g.fillRect(-L, -H * 0.78, 1.2, H * 1.56);
   mirrors(g, L * 0.26, H * 0.96, shade(c, -0.3));
 }
 
-function megane(g, l, w, c, a, fin) {
+function lale(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.58, H, 10, 4.6, '#bcc4cc');
   smooth(g, [[L, 0], [L, H * 0.66], [L * 0.76, H * 0.98], [-L * 0.8, H], [-L, H * 0.7], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.28, -L * 0.6, H * 0.78, H * 0.7, L * 0.04, -L * 0.42, H * 0.6, coat(g, H, c, fin));
   g.fillStyle = '#16181c'; g.fillRect(L - 1.6, -H * 0.42, 1.6, H * 0.84);
-  emblem(g, L - 3.2, 'diamond');
+  emblem(g, L - 3.2);
   lamps(g, L - 3, [H * 0.7], 2.8, H * 0.3, '#eafcff');
   lamps(g, -L, [H * 0.68], 2.2, H * 0.42, '#d8132a');
   mirrors(g, L * 0.24, H * 0.96, shade(c, -0.3));
 }
 
-function linea(g, l, w, c, a, fin) {
+function vadi(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.58, H, 9.6, 4.4, '#a9b2bb');
   smooth(g, [[L, 0], [L, H * 0.74], [L * 0.84, H * 0.96], [-L * 0.84, H * 0.96], [-L, H * 0.74], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.26, -L * 0.54, H * 0.78, H * 0.72, L * 0.04, -L * 0.36, H * 0.6, coat(g, H, c, fin));
   g.fillStyle = '#c9ced4'; g.fillRect(L - 1.4, -H * 0.3, 1.4, H * 0.6);
-  emblem(g, L - 3, 'oval');
+  emblem(g, L - 3);
   lamps(g, L - 2.6, [H * 0.68], 2.6, H * 0.34, '#fff5c4');
   lamps(g, -L, [H * 0.66], 2, H * 0.4, '#d8132a');
   mirrors(g, L * 0.22, H * 0.94, shade(c, -0.3));
@@ -5858,8 +5866,8 @@ function kamyonet(g, l, w, c, a, fin) {
 }
 
 const MODELS = {
-  dogan, motor: moto, moto, sahin, murat, anadol, egea, clio, suv, grandland: suv, duster, tog,
-  bavyera, halka, yildiz, golf, focus, kore, megane, linea, kamyonet,
+  atmaca, motor: moto, moto, simsek, efe, cinar, marmara, liva, suv, granit: suv, bozkir, elektra,
+  bavar, aurum, stella, volta, pusula, dalga, lale, vadi, kamyonet,
 };
 
 const MODEL_NAMES = Object.keys(MODELS);
@@ -5871,16 +5879,16 @@ function paintTr(g, len, wid, body, accent, shape, finish = 'gloss') {
 // Garaj için yandan profil: tanınmayı asıl bu sağlar.
 // body: gövde hattı, glass: cam, w: tekerlek konumları (0-1), h: göreli yükseklik
 const SIDE = {
-  dogan: { body: [[0, 62], [3, 50], [30, 46], [39, 18], [68, 18], [80, 44], [100, 48], [100, 64]], glass: [[37, 44], [44, 23], [57, 23], [57, 44]], glass2: [[60, 44], [60, 23], [67, 23], [76, 44]], w: [20, 79] },
+  atmaca: { body: [[0, 62], [3, 50], [30, 46], [39, 18], [68, 18], [80, 44], [100, 48], [100, 64]], glass: [[37, 44], [44, 23], [57, 23], [57, 44]], glass2: [[60, 44], [60, 23], [67, 23], [76, 44]], w: [20, 79] },
   motor: null,
-  grandland: { body: [[0, 60], [2, 44], [24, 34], [36, 12], [82, 10], [96, 30], [100, 38], [100, 66]], glass: [[35, 34], [44, 17], [60, 17], [60, 34]], glass2: [[63, 34], [63, 17], [80, 15], [90, 32]], w: [20, 80], tall: 1 },
-  tog: { body: [[0, 62], [1, 46], [18, 36], [36, 10], [80, 10], [98, 30], [100, 42], [100, 66]], glass: [[30, 35], [42, 14], [62, 14], [62, 35]], glass2: [[65, 35], [65, 14], [79, 14], [92, 32]], w: [18, 82], tall: 1 },
-  sahin: { body: [[0, 62], [3, 50], [30, 46], [40, 19], [66, 19], [78, 42], [100, 46], [100, 64]], glass: [[38, 44], [45, 24], [57, 24], [57, 44]], glass2: [[60, 44], [60, 24], [66, 24], [74, 44]], w: [20, 79], wing: 1 },
-  anadol: { body: [[0, 60], [2, 50], [36, 44], [46, 22], [66, 22], [84, 44], [100, 46], [100, 62]], glass: [[44, 42], [50, 26], [60, 26], [60, 42]], glass2: [[63, 42], [63, 26], [68, 26], [78, 42]], w: [20, 81] },
-  murat: { body: [[0, 64], [1, 48], [29, 45], [37, 16], [69, 16], [79, 43], [100, 46], [100, 66]], glass: [[35, 43], [41, 21], [56, 21], [56, 43]], glass2: [[59, 43], [59, 21], [67, 21], [75, 43]], w: [20, 79] },
-  egea: { body: [[0, 60], [2, 46], [26, 40], [40, 15], [70, 15], [86, 38], [100, 40], [100, 64]], glass: [[36, 38], [45, 19], [57, 19], [57, 38]], glass2: [[60, 38], [60, 19], [69, 19], [80, 38]], w: [20, 80] },
-  clio: { body: [[0, 60], [2, 44], [24, 37], [40, 12], [78, 13], [97, 36], [100, 42], [100, 64]], glass: [[34, 36], [45, 16], [60, 16], [60, 36]], glass2: [[63, 36], [63, 16], [77, 17], [90, 34]], w: [20, 80] },
-  duster: { body: [[0, 60], [1, 40], [22, 34], [33, 10], [85, 9], [98, 30], [100, 38], [100, 62]], glass: [[31, 33], [39, 15], [57, 15], [57, 33]], glass2: [[60, 33], [60, 15], [83, 14], [92, 32]], w: [19, 81], tall: 1, rails: 1, clad: 1 },
+  granit: { body: [[0, 60], [2, 44], [24, 34], [36, 12], [82, 10], [96, 30], [100, 38], [100, 66]], glass: [[35, 34], [44, 17], [60, 17], [60, 34]], glass2: [[63, 34], [63, 17], [80, 15], [90, 32]], w: [20, 80], tall: 1 },
+  elektra: { body: [[0, 62], [1, 46], [18, 36], [36, 10], [80, 10], [98, 30], [100, 42], [100, 66]], glass: [[30, 35], [42, 14], [62, 14], [62, 35]], glass2: [[65, 35], [65, 14], [79, 14], [92, 32]], w: [18, 82], tall: 1 },
+  simsek: { body: [[0, 62], [3, 50], [30, 46], [40, 19], [66, 19], [78, 42], [100, 46], [100, 64]], glass: [[38, 44], [45, 24], [57, 24], [57, 44]], glass2: [[60, 44], [60, 24], [66, 24], [74, 44]], w: [20, 79], wing: 1 },
+  cinar: { body: [[0, 60], [2, 50], [36, 44], [46, 22], [66, 22], [84, 44], [100, 46], [100, 62]], glass: [[44, 42], [50, 26], [60, 26], [60, 42]], glass2: [[63, 42], [63, 26], [68, 26], [78, 42]], w: [20, 81] },
+  efe: { body: [[0, 64], [1, 48], [29, 45], [37, 16], [69, 16], [79, 43], [100, 46], [100, 66]], glass: [[35, 43], [41, 21], [56, 21], [56, 43]], glass2: [[59, 43], [59, 21], [67, 21], [75, 43]], w: [20, 79] },
+  marmara: { body: [[0, 60], [2, 46], [26, 40], [40, 15], [70, 15], [86, 38], [100, 40], [100, 64]], glass: [[36, 38], [45, 19], [57, 19], [57, 38]], glass2: [[60, 38], [60, 19], [69, 19], [80, 38]], w: [20, 80] },
+  liva: { body: [[0, 60], [2, 44], [24, 37], [40, 12], [78, 13], [97, 36], [100, 42], [100, 64]], glass: [[34, 36], [45, 16], [60, 16], [60, 36]], glass2: [[63, 36], [63, 16], [77, 17], [90, 34]], w: [20, 80] },
+  bozkir: { body: [[0, 60], [1, 40], [22, 34], [33, 10], [85, 9], [98, 30], [100, 38], [100, 62]], glass: [[31, 33], [39, 15], [57, 15], [57, 33]], glass2: [[60, 33], [60, 15], [83, 14], [92, 32]], w: [19, 81], tall: 1, rails: 1, clad: 1 },
 };
 
 function paintSide(g, W, H, spec) {
@@ -5933,7 +5941,7 @@ function paintSide(g, W, H, spec) {
   g.beginPath(); g.moveTo(px(0), py(52)); g.lineTo(px(100), py(52)); g.stroke();
   if (s.rails) { g.strokeStyle = '#d7dde4'; g.lineWidth = 2.4; g.beginPath(); g.moveTo(px(36), py(s.body[3][1] - 3)); g.lineTo(px(84), py(s.body[3][1] - 3)); g.stroke(); }
   if (s.wing) { g.fillStyle = spec.accent; g.fillRect(px(98), py(36), px(84) - px(98), 5); g.fillRect(px(94), py(36), 3, py(46) - py(36)); }
-  g.fillStyle = spec.shape === 'tog' ? '#e4fbff' : '#fff5c4';
+  g.fillStyle = spec.shape === 'elektra' ? '#e4fbff' : '#fff5c4';
   g.fillRect(px(3) - 7, py(49), 7, 5);
   g.fillStyle = '#e01c2b';
   g.fillRect(px(100), py(47), 6, 6);
@@ -6169,36 +6177,51 @@ function siteBlock(g, r) {
   label(g, String.fromCharCode(65 + (r.block || 0)), x + w / 2, y + rh / 2 + 1, 15, '#fff');
 }
 
-function club(g, r) {
-  // Pavyon: koyu cephe, kırmızı halı, neon çerçeve (neon gece ayrıca parlar)
+// Sokak keyfi: müzikli kafe, çay bahçesi ya da spor salonu. Çatıdan ne olduğu anlaşılır
+function cafe(g, r) {
   const { x, y, w, h } = r;
-  g.fillStyle = '#1b1426'; rr(g, x, y, w, h, 4); g.fill();
-  g.fillStyle = '#2a1f3a'; rr(g, x + 3, y + 3, w - 6, h - 22, 3); g.fill();
-  g.strokeStyle = r.color; g.lineWidth = 2.5; rr(g, x + 6, y + 6, w - 12, h - 28, 3); g.stroke();
-  g.fillStyle = '#c62828'; g.fillRect(x + w / 2 - 9, y + h - 18, 18, 18);
-  g.fillStyle = '#e8c547'; g.fillRect(x + w / 2 - 13, y + h - 4, 3, 4); g.fillRect(x + w / 2 + 10, y + h - 4, 3, 4);
+  const gym = r.sign.includes('Spor');
+  const tea = r.sign.includes('Çay');
+  g.fillStyle = gym ? '#39424e' : tea ? '#6f9a5a' : '#e9d9bf'; rr(g, x, y, w, h, 4); g.fill();
+  g.fillStyle = 'rgba(0,0,0,.12)'; g.fillRect(x + 3, y + h - 22, w - 6, 4);
+  g.strokeStyle = r.color; g.lineWidth = 3; rr(g, x + 5, y + 5, w - 10, h - 30, 3); g.stroke();
+  const cx = x + w / 2; const cy = y + (h - 26) / 2;
+  if (gym) {
+    g.fillStyle = '#d7dde2'; g.fillRect(cx - 18, cy - 2, 36, 4);
+    for (const s of [-1, 1]) { g.fillRect(cx + s * 18 - 3, cy - 9, 6, 18); g.fillRect(cx + s * 12 - 2, cy - 7, 4, 14); }
+  } else if (tea) {
+    for (const [dx, dy] of [[-16, -6], [14, -8], [0, 8]]) { g.fillStyle = '#f4ead2'; g.beginPath(); g.arc(cx + dx, cy + dy, 7, 0, 7); g.fill(); g.fillStyle = '#b5482f'; g.beginPath(); g.arc(cx + dx, cy + dy, 2.5, 0, 7); g.fill(); }
+  } else {
+    g.fillStyle = '#6a3f28';
+    g.beginPath(); g.ellipse(cx - 9, cy + 8, 6, 4.5, -0.3, 0, 7); g.ellipse(cx + 9, cy + 5, 6, 4.5, -0.3, 0, 7); g.fill();
+    g.fillRect(cx - 4, cy - 12, 2.5, 20); g.fillRect(cx + 14, cy - 15, 2.5, 20); g.fillRect(cx - 4, cy - 15, 20.5, 4);
+  }
+  g.fillStyle = r.color;
+  for (let px = x + 2; px < x + w - 6; px += 10) g.fillRect(px, y + h - 18, 5, 8);
+  g.fillStyle = '#d7dde2'; g.fillRect(x + 3, y + h - 18, w - 6, 1.5);
 }
 
 // Her zincirin kendi cephesi: renk, biçim, tente ve otopark
 const CHAINS = {
-  Migros: (g, r) => { box(g, r, '#ff7a00', '#ffffff'); stripe(g, r, '#ff7a00', '#fff'); },
-  'BİM': (g, r) => { box(g, r, '#d0121b', '#1b4fa8'); g.fillStyle = '#1b4fa8'; g.fillRect(r.x, r.y + r.h - 27, r.w, 4); },
-  'ŞOK': (g, r) => { box(g, r, '#ffd400', '#d0121b'); g.fillStyle = '#d0121b'; g.fillRect(r.x, r.y + 4, r.w, 5); },
-  A101: (g, r) => { box(g, r, '#00a6c8', '#0a4f8a'); g.fillStyle = '#fff'; g.fillRect(r.x, r.y + r.h - 26, r.w, 3); },
-  CarrefourSA: (g, r) => { box(g, r, '#ffffff', '#0a4ea2'); g.fillStyle = '#d0121b'; g.fillRect(r.x, r.y + r.h - 25, r.w / 2, 5); g.fillStyle = '#0a4ea2'; g.fillRect(r.x + r.w / 2, r.y + r.h - 25, r.w / 2, 5); },
-  'İtopya': (g, r) => {
-    box(g, r, '#10131a', '#ff2a6d');
-    g.strokeStyle = '#21d4fd'; g.lineWidth = 2; g.strokeRect(r.x + 6, r.y + 6, r.w - 12, r.h - 34);
-    g.strokeStyle = 'rgba(33,212,253,.4)'; g.lineWidth = 1;
-    for (let px = r.x + 16; px < r.x + r.w - 10; px += 18) { g.beginPath(); g.moveTo(px, r.y + 6); g.lineTo(px, r.y + 16); g.lineTo(px + 8, r.y + 22); g.stroke(); }
+  // Tenteli küçük market: çizgili sundurma
+  'Pazarcık Market': (g, r) => { box(g, r, '#3f8f5b', '#f4ead2'); for (let px = r.x; px < r.x + r.w; px += 16) { g.fillStyle = (px - r.x) % 32 ? '#f4ead2' : '#3f8f5b'; g.fillRect(px, r.y + r.h - 22, 16, 7); } },
+  // İndirim marketi: büyük yıldız çatı yaması
+  Ucuzlar: (g, r) => { box(g, r, '#7b3fa0', '#ffd23f'); g.fillStyle = '#ffd23f'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -1.57 + i * 0.628; const q = i % 2 ? 9 : 20; g[i ? 'lineTo' : 'moveTo'](r.x + r.w * 0.78 + Math.cos(a) * q, r.y + 24 + Math.sin(a) * q); } g.closePath(); g.fill(); },
+  'Sepet Market': (g, r) => { box(g, r, '#1f9e9e', '#e9f6f4'); g.strokeStyle = '#e9f6f4'; g.lineWidth = 3; g.strokeRect(r.x + r.w * 0.7, r.y + 16, 26, 14); g.beginPath(); g.arc(r.x + r.w * 0.7 + 13, r.y + 16, 11, 3.14, 0); g.stroke(); },
+  'Yıldız Mağazaları': (g, r) => { box(g, r, '#c23b6b', '#fff0d8'); g.fillStyle = '#fff0d8'; for (const k of [0.2, 0.5, 0.8]) { g.beginPath(); g.arc(r.x + r.w * k, r.y + 18, 5, 0, 7); g.fill(); } },
+  'Dörtyol Market': (g, r) => { box(g, r, '#6a7f2a', '#f7f3e3'); g.fillStyle = '#f7f3e3'; g.fillRect(r.x + r.w * 0.5 - 2, r.y + 8, 4, r.h - 34); g.fillRect(r.x + 8, r.y + (r.h - 26) * 0.5, r.w - 16, 4); },
+  'Teknoloji Durağı': (g, r) => {
+    box(g, r, '#2b3a67', '#b7f34a');
+    g.strokeStyle = '#b7f34a'; g.lineWidth = 2;
+    for (let px = r.x + 14; px < r.x + r.w - 16; px += 22) { g.beginPath(); g.arc(px, r.y + 16, 5, 0, 7); g.stroke(); }
   },
-  'Koçtaş': (g, r) => {
-    box(g, r, '#f59300', '#1f3a68');
-    g.fillStyle = '#d8dce0'; g.fillRect(r.x + r.w * 0.68, r.y, r.w * 0.32, r.h - 18); // Bahçe bölümü
-    g.strokeStyle = '#8a9198'; g.lineWidth = 1;
-    for (let px = r.x + r.w * 0.68; px < r.x + r.w; px += 7) { g.beginPath(); g.moveTo(px, r.y); g.lineTo(px, r.y + r.h - 18); g.stroke(); }
+  'Yapı Dünyası': (g, r) => {
+    box(g, r, '#8a5a2b', '#f2e6d0');
+    g.fillStyle = '#6f8f55'; g.fillRect(r.x + r.w * 0.7, r.y, r.w * 0.3, r.h - 18); // Bahçe bölümü
+    g.fillStyle = 'rgba(255,255,255,.25)';
+    for (let px = r.x + r.w * 0.7; px < r.x + r.w; px += 12) g.fillRect(px, r.y, 2, r.h - 18);
   },
-  'CZN Burak': (g, r) => { box(g, r, '#16a34a', '#fff'); stripe(g, r, '#ffd400', '#16a34a'); },
+  'Köşe Bakkal': (g, r) => { box(g, r, '#b5651d', '#fff4d8'); stripe(g, r, '#fff4d8', '#b5651d'); },
 };
 
 function box(g, r, roof, band) {
@@ -6217,7 +6240,7 @@ function stripe(g, r, a, b) {
   for (let i = 0; i * 10 < r.w; i++) { g.fillStyle = i % 2 ? a : b; g.fillRect(r.x + i * 10, r.y + r.h - 30, Math.min(10, r.w - i * 10), 6); }
 }
 
-function sistem(g, r) {
+function kolej(g, r) {
   // Haritanın en büyük binası: turuncu, beyaz, siyah
   const { x, y, w, h } = r;
   g.fillStyle = '#17181b'; rr(g, x, y, w, h, 6); g.fill();
@@ -6226,16 +6249,16 @@ function sistem(g, r) {
   g.fillStyle = '#ff7a00'; g.fillRect(x + 44, y + 44, w - 88, h - 128);
   g.fillStyle = '#17181b'; g.fillRect(x, y + (h - 40) / 2 - 3, 22, 6); g.fillRect(x + w - 22, y + (h - 40) / 2 - 3, 22, 6);
   // Yazı: turuncu üstüne beyaz, siyah gölgeli
-  const size = Math.floor(w / 8.6);
+  const size = Math.floor(w / 11);
   const cx = x + w / 2; const cy = y + (h - 40) / 2;
   g.font = `900 ${size}px Bungee, Nunito, sans-serif`;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.fillStyle = '#17181b';
-  g.fillText('SİSTEM', cx + 4, cy - size * 0.55 + 4);
+  g.fillText('MANDALİNA', cx + 4, cy - size * 0.55 + 4);
   g.fillText('KOLEJİ', cx + 4, cy + size * 0.55 + 4);
   g.fillStyle = '#ffffff';
-  g.fillText('SİSTEM', cx, cy - size * 0.55);
+  g.fillText('MANDALİNA', cx, cy - size * 0.55);
   g.fillText('KOLEJİ', cx, cy + size * 0.55);
   // Cephe: beyaz sütunlar, siyah camlar, turuncu giriş
   for (let px = x + 10; px < x + w - 12; px += 24) {
@@ -6243,8 +6266,8 @@ function sistem(g, r) {
     g.fillStyle = '#23262b'; g.fillRect(px + 6, y + h - 36, 16, 12);
     g.fillStyle = '#ff9a3c'; g.fillRect(px + 6, y + h - 20, 16, 12);
   }
-  g.fillStyle = '#ff7a00'; g.fillRect(x + w / 2 - 36, y + h - 40, 72, 40);
-  label(g, 'SİSTEM KOLEJİ', x + w / 2, y + h - 22, 11, '#ffffff', 900);
+  g.fillStyle = '#ff7a00'; g.fillRect(x + w / 2 - 58, y + h - 40, 116, 40);
+  label(g, 'MANDALİNA KOLEJİ', x + w / 2, y + h - 22, 8.5, '#ffffff', 900);
 }
 
 
@@ -6254,8 +6277,8 @@ const SHOP_LOOK = [
   [/pide|lahmacun|börek|fırın|ekmek/i, { wall: '#a8733f', awn: ['#d97706', '#fff4d8'], fx: 'oven' }],
   [/eczane/i, { wall: '#f4f6f4', awn: ['#d0121b', '#ffffff'], fx: 'cross' }],
   [/kuaför|berber/i, { wall: '#2d3a55', awn: ['#1d6fb8', '#ffffff'], fx: 'pole' }],
-  [/çay|kahve|kafe|nevada|nargile/i, { wall: '#5a3a24', awn: ['#178a4d', '#f4e7c8'], fx: 'tables' }],
-  [/büfe|tekel|bakkal|market/i, { wall: '#30536e', awn: ['#ffd23f', '#1d6fb8'], fx: 'crates' }],
+  [/çay|kahve|kafe|tost/i, { wall: '#5a3a24', awn: ['#178a4d', '#f4e7c8'], fx: 'tables' }],
+  [/büfe|bayii|bakkal|market/i, { wall: '#30536e', awn: ['#ffd23f', '#1d6fb8'], fx: 'crates' }],
   [/kasap|manav|tatlı|lokanta/i, { wall: '#6d3b2a', awn: ['#178a4d', '#ffffff'], fx: 'crates' }],
 ];
 
@@ -6605,8 +6628,8 @@ function paintBuilding2(g, r) {
   const S = BUILD;
   switch (r.style) {
     case S.APARTMENT: apartment2(g, r); break;
-    case S.SISTEM: sistem(g, r); break;
-    case S.CHAIN: (CHAINS[r.brand] || CHAINS.Migros)(g, r); break;
+    case S.KOLEJ: kolej(g, r); break;
+    case S.CHAIN: (CHAINS[r.brand] || CHAINS['Pazarcık Market'])(g, r); break;
     case S.BANK: bank2(g, r); break;
     case S.RUIN: ruin(g, r); return true;
     case S.SITEWORK: sitework(g, r); return true;
@@ -6625,7 +6648,7 @@ function paintBuilding2(g, r) {
     case S.VILLA: villa(g, r); break;
     case S.ISHANI: ishani(g, r); break;
     case S.SHOPROW: shoprow(g, r); break;
-    case S.CLUB: club(g, r); break;
+    case S.CAFE: cafe(g, r); break;
     default: return false;
   }
   if (r.style === S.APARTMENT || r.style === S.SITE_BLOCK || r.style === S.RESIDENCE || r.style === S.HOTEL || r.style === S.ISHANI || r.style === S.SHOPROW) facadeBits(g, r);
@@ -6639,7 +6662,7 @@ function shadowOf(r) {
   switch (r.style) {
     case S.SKYSCRAPER: return 4.6;
     case S.RESIDENCE: case S.OFFICE: return 3.2;
-    case S.HOTEL: case S.SISTEM: case S.HOSPITAL: return 2;
+    case S.HOTEL: case S.KOLEJ: case S.HOSPITAL: return 2;
     case S.SITE_BLOCK: return 1.5 + (r.seed % 3) * 0.3;
     case S.APARTMENT: return 0.9 + (r.seed % 4) * 0.3;
     case S.GECEKONDU: case S.VILLA: case S.SHOP: return 0.45;
@@ -6652,7 +6675,7 @@ const NIGHT_LIGHTS = CONFIG.day;
 
 // --- carsheet.js ---
 // Üretilmiş dosya: node tools/bake-cars.mjs
-const CAR_SHEET = {"w":2048,"h":1675,"cells":{"p:dogan:0":[0,0,288,144],"p:dogan:1":[290,0,288,144],"p:dogan:2":[580,0,288,144],"p:dogan:3":[870,0,288,144],"p:motor:0":[1160,0,288,162],"p:motor:1":[1450,0,288,162],"p:motor:2":[1740,0,288,162],"p:motor:3":[0,164,288,162],"p:grandland:0":[290,164,288,144],"p:grandland:1":[580,164,288,144],"p:grandland:2":[870,164,288,144],"p:grandland:3":[1160,164,288,144],"p:tog:0":[1450,164,288,144],"p:tog:1":[1740,164,288,144],"p:tog:2":[0,328,288,144],"p:tog:3":[290,328,288,144],"p:sahin:0":[580,328,288,144],"p:sahin:1":[870,328,288,144],"p:sahin:2":[1160,328,288,144],"p:sahin:3":[1450,328,288,144],"p:anadol:0":[1740,328,288,144],"p:anadol:1":[0,474,288,144],"p:anadol:2":[290,474,288,144],"p:anadol:3":[580,474,288,144],"p:murat:0":[870,474,288,144],"p:murat:1":[1160,474,288,144],"p:murat:2":[1450,474,288,144],"p:murat:3":[1740,474,288,144],"p:egea:0":[0,620,288,144],"p:egea:1":[290,620,288,144],"p:egea:2":[580,620,288,144],"p:egea:3":[870,620,288,144],"p:clio:0":[1160,620,288,144],"p:clio:1":[1450,620,288,144],"p:clio:2":[1740,620,288,144],"p:clio:3":[0,766,288,144],"p:duster:0":[290,766,288,144],"p:duster:1":[580,766,288,144],"p:duster:2":[870,766,288,144],"p:duster:3":[1160,766,288,144],"npc:tofas:0":[1450,766,168,84],"npc:tofas:1":[1620,766,168,84],"npc:tofas:2":[1790,766,168,84],"npc:tofas:3":[0,912,168,84],"npc:tofas:4":[170,912,168,84],"npc:murat:0":[340,912,168,84],"npc:murat:1":[510,912,168,84],"npc:murat:2":[680,912,168,84],"npc:murat:3":[850,912,168,84],"npc:anadol:0":[1020,912,168,84],"npc:anadol:1":[1190,912,168,84],"npc:anadol:2":[1360,912,168,84],"npc:tog:0":[1530,912,168,84],"npc:tog:1":[1700,912,168,84],"npc:tog:2":[1870,912,168,84],"npc:tog:3":[0,998,168,84],"npc:taxi:0":[170,998,168,84],"npc:bavyera:0":[340,998,168,84],"npc:bavyera:1":[510,998,168,84],"npc:bavyera:2":[680,998,168,84],"npc:bavyera:3":[850,998,168,84],"npc:bavyera:4":[1020,998,168,84],"npc:halka:0":[1190,998,168,84],"npc:halka:1":[1360,998,168,84],"npc:halka:2":[1530,998,168,84],"npc:halka:3":[1700,998,168,84],"npc:yildiz:0":[1870,998,168,84],"npc:yildiz:1":[0,1084,168,84],"npc:yildiz:2":[170,1084,168,84],"npc:yildiz:3":[340,1084,168,84],"npc:golf:0":[510,1084,168,84],"npc:golf:1":[680,1084,168,84],"npc:golf:2":[850,1084,168,84],"npc:golf:3":[1020,1084,168,84],"npc:golf:4":[1190,1084,168,84],"npc:focus:0":[1360,1084,168,84],"npc:focus:1":[1530,1084,168,84],"npc:focus:2":[1700,1084,168,84],"npc:focus:3":[1870,1084,168,84],"npc:kore:0":[0,1170,168,84],"npc:kore:1":[170,1170,168,84],"npc:kore:2":[340,1170,168,84],"npc:kore:3":[510,1170,168,84],"npc:megane:0":[680,1170,168,84],"npc:megane:1":[850,1170,168,84],"npc:megane:2":[1020,1170,168,84],"npc:megane:3":[1190,1170,168,84],"npc:linea:0":[1360,1170,168,84],"npc:linea:1":[1530,1170,168,84],"npc:linea:2":[1700,1170,168,84],"npc:linea:3":[1870,1170,168,84],"npc:pickup:0":[0,1256,168,84],"npc:pickup:1":[170,1256,168,84],"npc:pickup:2":[340,1256,168,84],"npc:pickup:3":[510,1256,168,84],"npc:motosiklet:0":[680,1256,168,84],"npc:motosiklet:1":[850,1256,168,84],"npc:motosiklet:2":[1020,1256,168,84],"npc:motosiklet:3":[1190,1256,168,84],"npc:clio:0":[1360,1256,168,84],"npc:clio:1":[1530,1256,168,84],"npc:clio:2":[1700,1256,168,84],"npc:clio:3":[1870,1256,168,84],"npc:duster:0":[0,1342,168,84],"npc:duster:1":[170,1342,168,84],"npc:duster:2":[340,1342,168,84],"npc:grandland:0":[510,1342,168,84],"npc:grandland:1":[680,1342,168,84],"npc:grandland:2":[850,1342,168,84],"npc:egea:0":[1020,1342,168,84],"npc:egea:1":[1190,1342,168,84],"npc:egea:2":[1360,1342,168,84],"npc:egea:3":[1530,1342,168,84],"npc:minibus:0":[1700,1342,300,108],"npc:bus:0":[0,1452,300,108],"npc:bus:1":[302,1452,300,108],"npc:bus:2":[604,1452,300,108],"npc:truck:0":[906,1452,300,108],"npc:truck:1":[1208,1452,300,108],"npc:truck:2":[1510,1452,300,108],"npc:truck:3":[0,1562,300,108],"cop:car":[302,1562,200,100],"cop:fast":[504,1562,200,100],"cop:advanced":[706,1562,200,100],"cop:swat":[908,1562,200,88],"cop:moto":[1110,1562,200,113]}};
+const CAR_SHEET = {"w":2048,"h":1675,"cells":{"p:atmaca:0":[0,0,288,144],"p:atmaca:1":[290,0,288,144],"p:atmaca:2":[580,0,288,144],"p:atmaca:3":[870,0,288,144],"p:motor:0":[1160,0,288,162],"p:motor:1":[1450,0,288,162],"p:motor:2":[1740,0,288,162],"p:motor:3":[0,164,288,162],"p:granit:0":[290,164,288,144],"p:granit:1":[580,164,288,144],"p:granit:2":[870,164,288,144],"p:granit:3":[1160,164,288,144],"p:elektra:0":[1450,164,288,144],"p:elektra:1":[1740,164,288,144],"p:elektra:2":[0,328,288,144],"p:elektra:3":[290,328,288,144],"p:simsek:0":[580,328,288,144],"p:simsek:1":[870,328,288,144],"p:simsek:2":[1160,328,288,144],"p:simsek:3":[1450,328,288,144],"p:cinar:0":[1740,328,288,144],"p:cinar:1":[0,474,288,144],"p:cinar:2":[290,474,288,144],"p:cinar:3":[580,474,288,144],"p:efe:0":[870,474,288,144],"p:efe:1":[1160,474,288,144],"p:efe:2":[1450,474,288,144],"p:efe:3":[1740,474,288,144],"p:marmara:0":[0,620,288,144],"p:marmara:1":[290,620,288,144],"p:marmara:2":[580,620,288,144],"p:marmara:3":[870,620,288,144],"p:liva:0":[1160,620,288,144],"p:liva:1":[1450,620,288,144],"p:liva:2":[1740,620,288,144],"p:liva:3":[0,766,288,144],"p:bozkir:0":[290,766,288,144],"p:bozkir:1":[580,766,288,144],"p:bozkir:2":[870,766,288,144],"p:bozkir:3":[1160,766,288,144],"npc:klasik:0":[1450,766,168,84],"npc:klasik:1":[1620,766,168,84],"npc:klasik:2":[1790,766,168,84],"npc:klasik:3":[0,912,168,84],"npc:klasik:4":[170,912,168,84],"npc:efe:0":[340,912,168,84],"npc:efe:1":[510,912,168,84],"npc:efe:2":[680,912,168,84],"npc:efe:3":[850,912,168,84],"npc:cinar:0":[1020,912,168,84],"npc:cinar:1":[1190,912,168,84],"npc:cinar:2":[1360,912,168,84],"npc:elektra:0":[1530,912,168,84],"npc:elektra:1":[1700,912,168,84],"npc:elektra:2":[1870,912,168,84],"npc:elektra:3":[0,998,168,84],"npc:taxi:0":[170,998,168,84],"npc:bavar:0":[340,998,168,84],"npc:bavar:1":[510,998,168,84],"npc:bavar:2":[680,998,168,84],"npc:bavar:3":[850,998,168,84],"npc:bavar:4":[1020,998,168,84],"npc:aurum:0":[1190,998,168,84],"npc:aurum:1":[1360,998,168,84],"npc:aurum:2":[1530,998,168,84],"npc:aurum:3":[1700,998,168,84],"npc:stella:0":[1870,998,168,84],"npc:stella:1":[0,1084,168,84],"npc:stella:2":[170,1084,168,84],"npc:stella:3":[340,1084,168,84],"npc:volta:0":[510,1084,168,84],"npc:volta:1":[680,1084,168,84],"npc:volta:2":[850,1084,168,84],"npc:volta:3":[1020,1084,168,84],"npc:volta:4":[1190,1084,168,84],"npc:pusula:0":[1360,1084,168,84],"npc:pusula:1":[1530,1084,168,84],"npc:pusula:2":[1700,1084,168,84],"npc:pusula:3":[1870,1084,168,84],"npc:dalga:0":[0,1170,168,84],"npc:dalga:1":[170,1170,168,84],"npc:dalga:2":[340,1170,168,84],"npc:dalga:3":[510,1170,168,84],"npc:lale:0":[680,1170,168,84],"npc:lale:1":[850,1170,168,84],"npc:lale:2":[1020,1170,168,84],"npc:lale:3":[1190,1170,168,84],"npc:vadi:0":[1360,1170,168,84],"npc:vadi:1":[1530,1170,168,84],"npc:vadi:2":[1700,1170,168,84],"npc:vadi:3":[1870,1170,168,84],"npc:pickup:0":[0,1256,168,84],"npc:pickup:1":[170,1256,168,84],"npc:pickup:2":[340,1256,168,84],"npc:pickup:3":[510,1256,168,84],"npc:motosiklet:0":[680,1256,168,84],"npc:motosiklet:1":[850,1256,168,84],"npc:motosiklet:2":[1020,1256,168,84],"npc:motosiklet:3":[1190,1256,168,84],"npc:liva:0":[1360,1256,168,84],"npc:liva:1":[1530,1256,168,84],"npc:liva:2":[1700,1256,168,84],"npc:liva:3":[1870,1256,168,84],"npc:bozkir:0":[0,1342,168,84],"npc:bozkir:1":[170,1342,168,84],"npc:bozkir:2":[340,1342,168,84],"npc:granit:0":[510,1342,168,84],"npc:granit:1":[680,1342,168,84],"npc:granit:2":[850,1342,168,84],"npc:marmara:0":[1020,1342,168,84],"npc:marmara:1":[1190,1342,168,84],"npc:marmara:2":[1360,1342,168,84],"npc:marmara:3":[1530,1342,168,84],"npc:minibus:0":[1700,1342,300,108],"npc:bus:0":[0,1452,300,108],"npc:bus:1":[302,1452,300,108],"npc:bus:2":[604,1452,300,108],"npc:truck:0":[906,1452,300,108],"npc:truck:1":[1208,1452,300,108],"npc:truck:2":[1510,1452,300,108],"npc:truck:3":[0,1562,300,108],"cop:car":[302,1562,200,100],"cop:fast":[504,1562,200,100],"cop:advanced":[706,1562,200,100],"cop:swat":[908,1562,200,88],"cop:moto":[1110,1562,200,113]}};
 
 // --- sheet.js ---
 // 3B modellerden üretilmiş araç atlası. Atlas yüklenemezse çizim kodlu yedek sprite'lar kullanılır.
@@ -6716,9 +6739,9 @@ function spriteList(cfg) {
     }));
   }
   const cops = {
-    car: ['egea', { color: '#f2f4f7', finish: 'gloss', band: '#1c4fb0', roof: '#f2f4f7', police: 1, text: 'POLİS', textColor: '#1c4fb0' }],
-    fast: ['bavyera', { color: '#16305f', finish: 'metal', police: 1, band: '#ffffff', text: 'POLİS' }],
-    advanced: ['tog', { color: '#14161b', finish: 'metal', police: 1, band: '#ff2a3c' }],
+    car: ['marmara', { color: '#f2f4f7', finish: 'gloss', band: '#1c4fb0', roof: '#f2f4f7', police: 1, text: 'POLİS', textColor: '#1c4fb0' }],
+    fast: ['bavar', { color: '#16305f', finish: 'metal', police: 1, band: '#ffffff', text: 'POLİS' }],
+    advanced: ['elektra', { color: '#14161b', finish: 'metal', police: 1, band: '#ff2a3c' }],
     swat: ['minibus', { color: '#23272e', finish: 'matte', police: 1, band: '#ffd23f', text: 'ÖZEL HAREKAT' }],
     moto: ['moto', { color: '#1c4fb0', finish: 'gloss', accent: '#ffffff' }],
   };
@@ -6727,9 +6750,9 @@ function spriteList(cfg) {
 }
 
 // --- carmodels.js ---
-// Araç tanımları. Her model önce gerçek aracın özellik listesiyle (features) başlar, geometri bu listeye göre verilir.
+// Araç tanımları: tamamı özgün, tanıdık gövde tiplerinde. features tasarım notudur.
 // Ölçüler metredir. s: burundan kuyruğa 0-1 konum. deck: kaput/omuz/bagaj hattı, roof: tavan hattı, plan: üstten yarı genişlik oranı.
-// Gerçek logo yoktur: emblemler marka havası veren özgün çizimlerdir.
+// Tüm araçlar aynı özgün Drift Lab rozetini taşır.
 
 const LED = '#eafcff';
 const AMB = '#ff9a1f';
@@ -6740,305 +6763,294 @@ const GRY = '#2a2e35';
 
 // d: fascia çizim yardımcısı. Koordinat metre: y sola/sağa merkezden, z yerden yukarı
 const CAR_MODELS = {
-  dogan: {
-    name: 'Tofaş Doğan', L: 4.25, W: 1.65, H: 1.38, wb: 2.49, fo: 0.8, r: 0.29, sill: 0.2, crown: 0.03, tumble: 0.85, bowF: 0.03, bowR: 0.03, rim: 'hub',
-    features: ['Üç kutulu köşeli sedan, uzun düz kaput', 'Dikdörtgen tek parça far, araya yatay siyah ızgara', 'Siyah plastik tamponlar', 'Dik ön cam ve geniş kare yan camlar', 'Geniş dikdörtgen stop grubu, kırmızı-turuncu-beyaz'],
+  atmaca: {
+    name: 'Atmaca', L: 4.378, W: 1.683, H: 1.421, wb: 2.49, fo: 0.8, r: 0.29, sill: 0.2, crown: 0.03, tumble: 0.85, bowF: 0.03, bowR: 0.03, rim: 'hub',
+    features: ['Üç kutulu klasik mahalle sedanı', 'Yumuşak köşeli ayrık farlar', 'Gövde renginde panel, üç ince yarık', 'Dik cam, geniş yan pencere', 'Üç parçalı ince stop'],
     plan: [[0, 0.93], [0.03, 0.98], [0.5, 1], [0.97, 0.98], [1, 0.94]],
-    deck: [[0, 0.7], [0.025, 0.77], [0.3, 0.86], [0.36, 0.88], [0.78, 0.9], [0.97, 0.87], [1, 0.76]],
-    roof: [[0.31, 0.86], [0.44, 1.36], [0.7, 1.38], [0.8, 0.93], [0.82, 0.9]],
+    deck: [[0, 0.721], [0.025, 0.793], [0.3, 0.886], [0.36, 0.906], [0.78, 0.927], [0.97, 0.896], [1, 0.783]],
+    roof: [[0.325, 0.886], [0.455, 1.401], [0.715, 1.421], [0.815, 0.958], [0.835, 0.927]],
     win: [[0.4, 0.545], [0.56, 0.74]], seams: [0.345, 0.55, 0.76], handles: [0.53, 0.735], hood: 0.3, trunk: 0.82,
     bumper: { c: GRY, z: 0.44, h: 0.12, d: 0.08 },
     top: [{ s0: 0.002, s1: 0.03, a: 0.52, b: 0.93, c: LED, glow: 1 }, { s0: 0.975, s1: 0.999, a: 0.34, b: 0.93, c: RED, glow: 1 }],
     front(d) {
-      d.box(0, 0.68, 1.5, 0.22, BLK, 0.02);
-      d.both(0.57, 0.68, 0.33, 0.17, LED, 0.02); d.both(0.57, 0.68, 0.33, 0.17, '#fff5c4', 0.02);
-      d.both(0.72, 0.68, 0.06, 0.15, AMB, 0.01);
-      for (let z = 0.61; z < 0.76; z += 0.05) d.box(0, z, 0.72, 0.02, '#555b63');
-      d.emblem(0, 0.68, 'shield');
+      d.round(0, 0.68, 0.62, 0.14, BLK, 0.04);
+      for (const z of [0.64, 0.68, 0.72]) d.box(0, z, 0.56, 0.012, '#8d95a0');
+      d.both(0.58, 0.69, 0.3, 0.13, LED, 0.05); d.both(0.74, 0.54, 0.1, 0.05, AMB, 0.02);
+      d.emblem(0, 0.68, 'lab');
     },
     rear(d) {
-      d.both(0.55, 0.72, 0.5, 0.2, RED, 0.02); d.both(0.42, 0.72, 0.13, 0.18, AMB); d.both(0.3, 0.72, 0.1, 0.18, '#f1f3f5');
-      d.box(0, 0.58, 0.46, 0.13, '#f0f2f4', 0.01); d.text('DOĞAN', 0.25, 0.8);
+      for (const y of [0.38, 0.54, 0.7]) { d.box(y, 0.74, 0.14, 0.09, RED, 0.02); d.box(-y, 0.74, 0.14, 0.09, RED, 0.02); }
+      d.box(0, 0.58, 0.46, 0.13, '#f0f2f4', 0.01); d.text('ATMACA', 0.17, 0.82);
     },
   },
-  sahin: {
-    name: 'Tofaş Şahin', L: 4.23, W: 1.65, H: 1.36, wb: 2.49, fo: 0.8, r: 0.31, sill: 0.15, crown: 0.03, tumble: 0.85, bowF: 0.03, bowR: 0.03, rim: 'five',
-    features: ['Doğan gövdesi, alçaltılmış sokak tuning', 'Dev bagaj spoyleri, kaputta çift şerit', 'Kararmış cam, geniş jant', 'Yan etek ve kalın egzoz', 'Kare far, siyah ızgara'],
+  simsek: {
+    name: 'Şimşek', L: 4.315, W: 1.683, H: 1.346, wb: 2.49, fo: 0.8, r: 0.31, sill: 0.15, crown: 0.03, tumble: 0.85, bowF: 0.03, bowR: 0.03, rim: 'five',
+    features: ['Alçak sokak tuning sedan', 'Ok ucu desenli ön panel', 'Yüksek bagaj spoyleri, kaputta çift şerit', 'Yan etek, kalın egzoz', 'Kararmış cam, geniş jant'],
     plan: [[0, 0.93], [0.03, 0.98], [0.5, 1], [0.97, 0.98], [1, 0.94]],
-    deck: [[0, 0.66], [0.025, 0.73], [0.3, 0.82], [0.36, 0.84], [0.78, 0.86], [0.97, 0.83], [1, 0.72]],
-    roof: [[0.31, 0.82], [0.44, 1.32], [0.7, 1.34], [0.8, 0.89], [0.82, 0.86]],
+    deck: [[0, 0.653], [0.025, 0.723], [0.3, 0.812], [0.36, 0.832], [0.78, 0.851], [0.97, 0.822], [1, 0.713]],
+    roof: [[0.32, 0.812], [0.45, 1.307], [0.71, 1.327], [0.81, 0.881], [0.83, 0.851]],
     win: [[0.4, 0.545], [0.56, 0.74]], seams: [0.345, 0.55, 0.76], handles: [0.53, 0.735], hood: 0.3, trunk: 0.82, darkGlass: 1,
     wing: { s: 0.965, z: 1.12, span: 1.6, chord: 0.3 }, skirt: 1, exhaust: 1,
     bumper: { c: BLK, z: 0.38, h: 0.15, d: 0.1 },
     stripes: [{ s0: 0, s1: 1, a: 0.12, b: 0.3 }],
     top: [{ s0: 0.002, s1: 0.03, a: 0.5, b: 0.93, c: LED, glow: 1 }, { s0: 0.975, s1: 0.999, a: 0.34, b: 0.93, c: RED, glow: 1 }],
     front(d) {
-      d.box(0, 0.64, 1.52, 0.23, BLK, 0.02);
-      d.both(0.57, 0.64, 0.33, 0.18, '#fff8d8', 0.02);
-      d.both(0.57, 0.44, 0.17, 0.08, '#ffe9a0', 0.03);
-      d.box(0, 0.37, 0.7, 0.1, '#050608', 0.02);
-      d.emblem(0, 0.64, 'shield');
+      d.round(0, 0.62, 1.1, 0.2, BLK, 0.05);
+      for (let y = -0.42; y <= 0.42; y += 0.14) d.polyLine([[y - 0.05, 0.68], [y + 0.03, 0.62], [y - 0.05, 0.56]], '#ffd23f', 0.016);
+      d.both(0.64, 0.68, 0.26, 0.09, '#fff8d8', 0.04);
+      d.box(0, 0.36, 0.8, 0.1, '#050608', 0.02);
+      d.emblem(0, 0.76, 'lab');
     },
-    rear(d) { d.both(0.55, 0.68, 0.5, 0.21, RED, 0.02); d.box(0, 0.68, 0.56, 0.17, BLK); d.text('ŞAHİN', 0.24, 0.68, '#ffd23f'); d.both(0.52, 0.3, 0.1, 0.1, '#7d858f', 0.05); },
+    rear(d) { d.both(0.6, 0.7, 0.4, 0.1, RED, 0.03); d.box(0, 0.7, 0.62, 0.15, BLK); d.text('ŞİMŞEK', 0.15, 0.7, '#ffd23f'); d.both(0.52, 0.3, 0.1, 0.1, '#7d858f', 0.05); },
   },
-  murat: {
-    name: 'Murat 131', L: 4.26, W: 1.65, H: 1.4, wb: 2.49, fo: 0.78, r: 0.28, sill: 0.22, crown: 0.02, tumble: 0.88, bowF: 0.0, bowR: 0.0, rim: 'steel',
-    features: ['1970ler Fiat 131 çizgisi, çok dik köşeler', 'Dörtlü yuvarlak far, far arası krom ızgara', 'Parlak krom tamponlar, tampon lastikleri', 'İnce direkler, kocaman camlar', 'Uzun bagaj, dikey dikdörtgen stoplar'],
+  efe: {
+    name: 'Efe 131', L: 4.388, W: 1.666, H: 1.428, wb: 2.49, fo: 0.78, r: 0.28, sill: 0.22, crown: 0.02, tumble: 0.88, bowF: 0.0, bowR: 0.0, rim: 'steel',
+    features: ['1970ler ruhunda köşeli aile sedanı', 'Tek yuvarlak far, ağ desenli geniş panel', 'Parlak krom tamponlar', 'İnce direkler, büyük camlar', 'Uzun bagaj, yatay stoplar'],
     plan: [[0, 0.95], [0.012, 0.99], [0.5, 1], [0.988, 0.99], [1, 0.96]],
-    deck: [[0, 0.74], [0.015, 0.82], [0.3, 0.88], [0.36, 0.9], [0.78, 0.92], [0.985, 0.9], [1, 0.8]],
-    roof: [[0.32, 0.88], [0.43, 1.38], [0.71, 1.4], [0.79, 0.95], [0.81, 0.92]],
+    deck: [[0, 0.755], [0.015, 0.836], [0.3, 0.898], [0.36, 0.918], [0.78, 0.938], [0.985, 0.918], [1, 0.816]],
+    roof: [[0.335, 0.898], [0.445, 1.408], [0.725, 1.428], [0.805, 0.969], [0.825, 0.938]],
     win: [[0.395, 0.54], [0.555, 0.745]], seams: [0.345, 0.545, 0.76], handles: [0.525, 0.735], hood: 0.31, trunk: 0.81, roofStrip: 1,
     bumper: { c: CRM, z: 0.48, h: 0.1, d: 0.09 },
     top: [{ s0: 0, s1: 0.016, a: 0.2, b: 0.92, c: BLK }, { s0: 0.984, s1: 1, a: 0.5, b: 0.93, c: RED, glow: 1 }],
     front(d) {
-      d.box(0, 0.7, 1.5, 0.22, CRM, 0.01); d.box(0, 0.7, 1.46, 0.18, BLK, 0.01);
-      for (const y of [0.36, 0.6]) { d.circ(y, 0.7, 0.095, CRM); d.circ(-y, 0.7, 0.095, CRM); d.circ(y, 0.7, 0.078, '#fff8d8'); d.circ(-y, 0.7, 0.078, '#fff8d8'); }
-      for (let y = -0.2; y <= 0.2; y += 0.05) d.box(y, 0.7, 0.012, 0.14, CRM);
-      d.both(0.62, 0.55, 0.12, 0.05, AMB, 0.01);
-      d.emblem(0, 0.7, 'bars');
+      d.box(0, 0.7, 1.46, 0.2, BLK, 0.02);
+      for (let y = -0.4; y <= 0.4; y += 0.08) for (let z = 0.64; z <= 0.76; z += 0.06) d.diamond(y, z, 0.018, '#7b828c');
+      for (const s of [-1, 1]) { d.circ(s * 0.6, 0.7, 0.115, CRM); d.circ(s * 0.6, 0.7, 0.095, '#fff8d8'); }
+      d.both(0.62, 0.53, 0.14, 0.05, AMB, 0.01);
+      d.emblem(0, 0.7, 'lab');
     },
-    rear(d) { d.both(0.62, 0.76, 0.2, 0.24, RED, 0.01); d.both(0.46, 0.76, 0.1, 0.24, AMB); d.box(0, 0.62, 0.44, 0.13, '#f0f2f4', 0.01); d.box(0, 0.76, 0.6, 0.02, CRM); d.text('131', 0.2, 0.84, CRM); },
+    rear(d) { d.both(0.58, 0.76, 0.42, 0.13, RED, 0.02); d.both(0.74, 0.76, 0.12, 0.13, AMB); d.box(0, 0.62, 0.44, 0.13, '#f0f2f4', 0.01); d.text('EFE', 0.13, 0.84, CRM); },
   },
-  anadol: {
-    name: 'Anadol A1', L: 4.2, W: 1.61, H: 1.43, wb: 2.47, fo: 0.72, r: 0.3, sill: 0.2, crown: 0.07, tumble: 0.78, bowF: 0.2, bowR: 0.16, rim: 'steel', smooth: 7,
-    features: ['Fiberglas gövde, kavisli çamurluklar', 'İki kapılı 60\'lar sedanı, yuvarlak tavan', 'Oval ızgara içinde yuvarlak tek far', 'Krom tampon, küçük yuvarlak stoplar', 'Kısa kabin, uzun kaput'],
+  cinar: {
+    name: 'Çınar A', L: 4.368, W: 1.658, H: 1.43, wb: 2.47, fo: 0.72, r: 0.3, sill: 0.2, crown: 0.07, tumble: 0.78, bowF: 0.2, bowR: 0.16, rim: 'steel', smooth: 7,
+    features: ['Yuvarlak hatlı 60lar klasiği', 'İki kapı, kubbe tavan', 'Dikey ince çubuklu kalkan panel', 'Krom tampon, küçük stoplar', 'Kısa kabin, uzun kaput'],
     plan: [[0, 0.72], [0.03, 0.88], [0.12, 0.97], [0.3, 1], [0.7, 0.98], [0.92, 0.92], [1, 0.76]],
     deck: [[0, 0.68], [0.04, 0.78], [0.2, 0.86], [0.42, 0.88], [0.7, 0.86], [0.92, 0.8], [1, 0.68]],
-    roof: [[0.4, 0.88], [0.5, 1.36], [0.62, 1.42], [0.72, 1.36], [0.88, 0.9], [0.92, 0.82]],
+    roof: [[0.42, 0.88], [0.52, 1.36], [0.64, 1.42], [0.74, 1.36], [0.9, 0.9], [0.94, 0.82]],
     win: [[0.48, 0.66], [0.675, 0.77]], seams: [0.43, 0.68], handles: [0.65], hood: 0.36, trunk: 0.86, sideStripe: 0.7,
     bumper: { c: CRM, z: 0.46, h: 0.09, d: 0.09 },
     top: [{ s0: 0.01, s1: 0.06, a: 0.42, b: 0.82, c: '#fff8d8', glow: 1 }, { s0: 0.96, s1: 0.995, a: 0.4, b: 0.76, c: RED, glow: 1 }],
     front(d) {
-      d.oval(0, 0.66, 1.2, 0.2, BLK);
-      for (let y = -0.48; y <= 0.48; y += 0.08) d.box(y, 0.66, 0.015, 0.16, CRM);
-      d.circ(0.56, 0.68, 0.11, CRM); d.circ(-0.56, 0.68, 0.11, CRM); d.circ(0.56, 0.68, 0.09, '#fff8d8'); d.circ(-0.56, 0.68, 0.09, '#fff8d8');
-      d.emblem(0, 0.68, 'bars');
+      d.poly([[-0.34, 0.76], [0.34, 0.76], [0.26, 0.54], [-0.26, 0.54]], BLK);
+      for (let y = -0.24; y <= 0.24; y += 0.08) d.box(y, 0.65, 0.014, 0.18, CRM);
+      for (const s of [-1, 1]) { d.circ(s * 0.58, 0.68, 0.12, CRM); d.circ(s * 0.58, 0.68, 0.1, '#fff8d8'); d.circ(s * 0.4, 0.62, 0.035, AMB); }
+      d.emblem(0, 0.8, 'lab');
     },
-    rear(d) { d.circ(0.52, 0.7, 0.085, RED); d.circ(-0.52, 0.7, 0.085, RED); d.circ(0.36, 0.7, 0.05, AMB); d.circ(-0.36, 0.7, 0.05, AMB); d.box(0, 0.6, 0.4, 0.12, '#f0f2f4', 0.01); },
+    rear(d) { d.both(0.5, 0.72, 0.2, 0.09, RED, 0.04); d.both(0.5, 0.6, 0.12, 0.05, AMB, 0.02); d.box(0, 0.6, 0.4, 0.12, '#f0f2f4', 0.01); },
   },
-  tog: {
-    name: 'TOG T10X', L: 4.6, W: 1.89, H: 1.68, wb: 2.89, fo: 0.8, r: 0.38, sill: 0.3, crown: 0.05, tumble: 0.8, bowF: 0.14, bowR: 0.1, rim: 'turbine', smooth: 5,
-    features: ['C-SUV, çok kısa çıkıntılar, uzun aks', 'Boydan boya ince LED çubuğu', 'Lale motifli altıgen desenli ön panel', 'Yüzen siyah tavan, yukarı kıvrılan krom cam hattı', 'Boydan boya arka stop, 20 inç turbin jant'],
+  elektra: {
+    name: 'Elektra X1', L: 4.508, W: 1.852, H: 1.63, wb: 2.89, fo: 0.8, r: 0.38, sill: 0.3, crown: 0.05, tumble: 0.8, bowF: 0.14, bowR: 0.1, rim: 'turbine', smooth: 5,
+    features: ['Elektrikli kompakt crossover', 'Kapalı ön panel, ok desenli yüzey', 'İkiye bölünmüş ince gündüz farı', 'Kısa çıkıntılar, uzun aks', 'Köşeli çift arka ışık, turbin jant'],
     plan: [[0, 0.82], [0.03, 0.93], [0.1, 0.98], [0.5, 1], [0.9, 0.98], [0.98, 0.92], [1, 0.84]],
-    deck: [[0, 0.72], [0.03, 0.9], [0.2, 1.06], [0.3, 1.12], [0.8, 1.18], [0.95, 1.1], [1, 0.88]],
-    roof: [[0.2, 1.06], [0.38, 1.62], [0.56, 1.68], [0.87, 1.58], [0.965, 1.16], [0.98, 1.1]],
+    deck: [[0, 0.698], [0.03, 0.873], [0.2, 1.028], [0.3, 1.086], [0.8, 1.145], [0.95, 1.067], [1, 0.854]],
+    roof: [[0.19, 1.028], [0.37, 1.571], [0.55, 1.63], [0.86, 1.533], [0.955, 1.125], [0.97, 1.067]],
     win: [[0.33, 0.56], [0.57, 0.8]], seams: [0.27, 0.56, 0.8], handles: [], hood: 0.22, trunk: 0.94, roofBlack: 1, chromeBelt: 1, clad: 0.48,
     top: [{ s0: 0.012, s1: 0.042, a: 0, b: 0.92, c: LED, glow: 1 }, { s0: 0.955, s1: 0.985, a: 0, b: 0.92, c: RED, glow: 1 }],
     front(d) {
-      d.box(0, 0.86, 1.62, 0.03, LED, 0.01);
-      d.box(0, 0.68, 1.5, 0.3, '#10141a', 0.04);
-      for (let y = -0.66; y <= 0.66; y += 0.13) for (let z = 0.58; z <= 0.78; z += 0.1) d.diamond(y + ((Math.round(z * 10) % 2) ? 0.065 : 0), z, 0.05, '#39424e');
-      d.both(0.7, 0.72, 0.16, 0.05, LED, 0.02);
-      d.box(0, 0.38, 1.1, 0.12, '#10141a', 0.03);
-      d.emblem(0, 0.86, 'tulip');
+      d.round(0, 0.68, 1.42, 0.34, '#161b22', 0.08);
+      for (let y = -0.56; y <= 0.56; y += 0.16) d.polyLine([[y - 0.06, 0.6], [y, 0.68], [y + 0.06, 0.6]], '#3f6d7a', 0.012);
+      d.both(0.56, 0.84, 0.44, 0.035, LED, 0.015); d.both(0.76, 0.76, 0.05, 0.11, LED, 0.015);
+      d.box(0, 0.38, 0.9, 0.1, '#10141a', 0.03);
+      d.emblem(0, 0.76, 'lab');
     },
-    rear(d) { d.box(0, 1.0, 1.66, 0.05, RED, 0.02); d.box(0, 0.82, 1.4, 0.26, '#10141a', 0.03); d.text('T10X', 0.16, 0.84, '#dfe6ee'); d.box(0, 0.38, 1.2, 0.12, '#10141a', 0.03); },
+    rear(d) { d.both(0.66, 1.0, 0.36, 0.05, RED, 0.02); d.both(0.82, 0.92, 0.05, 0.14, RED, 0.02); d.box(0, 0.82, 1.2, 0.2, '#10141a', 0.03); d.text('X1', 0.14, 0.82, '#dfe6ee'); d.box(0, 0.38, 1.2, 0.12, '#10141a', 0.03); },
   },
-  egea: {
-    name: 'Fiat Egea', L: 4.53, W: 1.79, H: 1.5, wb: 2.64, fo: 0.87, r: 0.32, sill: 0.2, crown: 0.05, tumble: 0.8, bowF: 0.16, bowR: 0.08, rim: 'multi', smooth: 4,
-    features: ['Modern dört kapılı sedan, yüksek bagaj', 'Geriye süpürülmüş sivri farlar', 'Yamuk krom çerçeveli ızgara', 'Kavisli tavan, kısa kaput', 'Geniş yatay LED stop, bagajda krom bant'],
+  marmara: {
+    name: 'Marmara S', L: 4.439, W: 1.772, H: 1.53, wb: 2.64, fo: 0.87, r: 0.32, sill: 0.2, crown: 0.05, tumble: 0.8, bowF: 0.16, bowR: 0.08, rim: 'multi', smooth: 4,
+    features: ['Yüksek bagajlı modern aile sedanı', 'Dikdörtgen ağ panel, köşeli far', 'Kısa kaput, kavisli tavan', 'Geniş yan ayna', 'İnce L stoplar, bagajda düz bant'],
     plan: [[0, 0.76], [0.03, 0.9], [0.12, 0.98], [0.5, 1], [0.9, 0.98], [0.99, 0.88], [1, 0.84]],
-    deck: [[0, 0.62], [0.03, 0.78], [0.24, 0.96], [0.3, 1.0], [0.72, 1.06], [0.93, 1.06], [0.99, 1.0], [1, 0.82]],
-    roof: [[0.24, 0.96], [0.42, 1.44], [0.56, 1.5], [0.72, 1.44], [0.87, 1.08], [0.89, 1.06]],
+    deck: [[0, 0.632], [0.03, 0.796], [0.24, 0.979], [0.3, 1.02], [0.72, 1.081], [0.93, 1.081], [0.99, 1.02], [1, 0.836]],
+    roof: [[0.23, 0.979], [0.41, 1.469], [0.55, 1.53], [0.71, 1.469], [0.86, 1.102], [0.88, 1.081]],
     win: [[0.37, 0.56], [0.57, 0.77]], seams: [0.27, 0.565, 0.78], handles: [0.54, 0.75], hood: 0.27, trunk: 0.88,
     top: [{ s0: 0.035, s1: 0.085, a: 0.48, b: 0.9, b1: 0.97, a1: 0.8, c: LED, glow: 1 }, { s0: 0.93, s1: 0.99, a: 0.42, b: 0.92, c: RED, glow: 1 }],
     front(d) {
-      d.poly([[-0.5, 0.74], [0.5, 0.74], [0.38, 0.52], [-0.38, 0.52]], BLK);
-      d.polyLine([[-0.5, 0.74], [0.5, 0.74], [0.38, 0.52], [-0.38, 0.52]], CRM, 0.028);
-      for (let z = 0.58; z < 0.7; z += 0.04) d.box(0, z, 0.68, 0.012, CRM);
-      d.polyB([[0.46, 0.76], [0.86, 0.84], [0.8, 0.72], [0.48, 0.68]], LED);
+      d.round(0, 0.62, 0.86, 0.22, BLK, 0.03);
+      for (let y = -0.36; y <= 0.36; y += 0.09) for (let z = 0.55; z <= 0.69; z += 0.07) d.diamond(y, z, 0.022, '#59616b');
+      d.both(0.64, 0.74, 0.3, 0.09, LED, 0.02);
       d.box(0, 0.32, 1.1, 0.12, BLK, 0.03);
-      d.both(0.66, 0.38, 0.14, 0.05, '#c9d2dc', 0.02);
-      d.emblem(0, 0.64, 'oval');
+      d.emblem(0, 0.8, 'lab');
     },
-    rear(d) { d.polyB([[0.3, 1.0], [0.86, 0.98], [0.82, 0.86], [0.34, 0.9]], RED); d.box(0, 0.92, 0.6, 0.02, CRM); d.box(0, 0.76, 0.5, 0.13, '#f0f2f4', 0.01); d.text('EGEA', 0.2, 0.86, CRM); },
+    rear(d) { d.both(0.66, 0.94, 0.34, 0.07, RED, 0.02); d.both(0.8, 0.88, 0.06, 0.12, RED, 0.02); d.box(0, 0.92, 0.7, 0.03, BLK); d.box(0, 0.76, 0.5, 0.13, '#f0f2f4', 0.01); d.text('MARMARA', 0.12, 0.84, CRM); },
   },
-  clio: {
-    name: 'Renault Clio', L: 4.05, W: 1.8, H: 1.44, wb: 2.58, fo: 0.82, r: 0.33, sill: 0.2, crown: 0.07, tumble: 0.76, bowF: 0.2, bowR: 0.08, rim: 'five', smooth: 6,
-    features: ['Beş kapılı kısa hatchback, şişkin omuz', 'C biçimli gündüz LED\'i', 'Kaputta iki kabartma, baklava ızgara', 'Arka kapı kolu C direğinde gizli', 'Kavisli C biçimli stoplar, siyah tavan seçeneği'],
+  liva: {
+    name: 'Liva', L: 4.01, W: 1.764, H: 1.483, wb: 2.58, fo: 0.82, r: 0.33, sill: 0.2, crown: 0.07, tumble: 0.76, bowF: 0.2, bowR: 0.08, rim: 'five', smooth: 6,
+    features: ['Kısa şehir hatchbacki', 'Yuvarlak halka gündüz farı', 'Küçük bal peteği ağız', 'Yüksek tavan, kısa kuyruk', 'Dikey çubuk stoplar'],
     plan: [[0, 0.72], [0.04, 0.9], [0.14, 0.98], [0.32, 0.96], [0.72, 1], [0.92, 0.96], [1, 0.82]],
-    deck: [[0, 0.62], [0.04, 0.8], [0.22, 0.94], [0.3, 0.98], [0.75, 1.02], [0.95, 1.02], [1, 0.72]],
-    roof: [[0.22, 0.94], [0.4, 1.38], [0.54, 1.44], [0.84, 1.39], [0.965, 1.08], [0.98, 1.02]],
+    deck: [[0, 0.639], [0.04, 0.824], [0.22, 0.968], [0.3, 1.009], [0.75, 1.051], [0.95, 1.051], [1, 0.742]],
+    roof: [[0.215, 0.968], [0.395, 1.421], [0.535, 1.483], [0.835, 1.432], [0.96, 1.112], [0.975, 1.051]],
     win: [[0.36, 0.56], [0.57, 0.78]], seams: [0.27, 0.565, 0.8], handles: [0.54], hood: 0.27, trunk: 0.95, hoodRibs: 1,
     top: [{ s0: 0.045, s1: 0.1, a: 0.56, b: 0.9, c: LED, glow: 1 }, { s0: 0.93, s1: 0.995, a: 0.55, b: 0.93, c: RED, glow: 1 }],
     front(d) {
-      d.poly([[-0.34, 0.68], [0.34, 0.68], [0.28, 0.52], [-0.28, 0.52]], BLK);
-      for (let y = -0.24; y <= 0.24; y += 0.08) d.diamond(y, 0.6, 0.03, '#59616b');
-      d.polyB([[0.42, 0.72], [0.8, 0.76], [0.8, 0.66], [0.46, 0.64]], '#141a20');
-      d.arcB(0.68, 0.56, 0.17, LED);
-      d.box(0, 0.32, 1.16, 0.13, BLK, 0.04);
-      d.emblem(0, 0.62, 'rhomb');
+      d.round(0, 0.56, 0.6, 0.14, BLK, 0.05);
+      for (const s of [-1, 1]) { d.circ(s * 0.62, 0.72, 0.13, '#141a20'); d.ring(s * 0.62, 0.72, 0.09, LED); }
+      d.box(0, 0.32, 1.1, 0.13, BLK, 0.04);
+      d.emblem(0, 0.72, 'lab');
     },
-    rear(d) { d.arcR(0.68, 0.88, 0.17, RED); d.box(0, 0.5, 1.2, 0.13, BLK, 0.03); d.box(0, 0.68, 0.46, 0.12, '#f0f2f4', 0.01); d.text('CLIO', 0.17, 0.84); d.emblem(0, 0.92, 'rhomb'); },
+    rear(d) { d.both(0.68, 0.9, 0.1, 0.3, RED, 0.03); d.box(0, 0.5, 1.2, 0.13, BLK, 0.03); d.box(0, 0.68, 0.46, 0.12, '#f0f2f4', 0.01); d.text('LIVA', 0.14, 0.86); },
   },
-  grandland: {
-    name: 'Opel Grandland', L: 4.48, W: 1.86, H: 1.61, wb: 2.68, fo: 0.9, r: 0.36, sill: 0.25, crown: 0.05, tumble: 0.8, bowF: 0.14, bowR: 0.08, rim: 'multi', smooth: 5,
-    features: ['Kompakt SUV, yüksek kaput', 'Boydan boya siyah "vizör" ön yüz, ince LED', 'Çift tonlu siyah yüzen tavan', 'Kısa arka çıkıntı, tavan rayı', 'Yatay ince stoplar, ortada dikey çizgi motifi'],
+  granit: {
+    name: 'Granit SUV', L: 4.57, W: 1.841, H: 1.642, wb: 2.68, fo: 0.9, r: 0.36, sill: 0.25, crown: 0.05, tumble: 0.8, bowF: 0.14, bowR: 0.08, rim: 'multi', smooth: 5,
+    features: ['Kompakt aile SUVsi', 'İki katlı far, ortada kalın yatay bant', 'Çift tonlu tavan, tavan rayı', 'Kalın çamurluk kaplaması', 'Yatay kare stoplar'],
     plan: [[0, 0.8], [0.03, 0.92], [0.12, 0.98], [0.5, 1], [0.92, 0.98], [1, 0.84]],
-    deck: [[0, 0.72], [0.03, 0.9], [0.24, 1.06], [0.3, 1.1], [0.8, 1.12], [0.96, 1.1], [1, 0.84]],
-    roof: [[0.24, 1.06], [0.4, 1.56], [0.6, 1.61], [0.86, 1.54], [0.965, 1.16], [0.98, 1.1]],
+    deck: [[0, 0.734], [0.03, 0.918], [0.24, 1.081], [0.3, 1.122], [0.8, 1.142], [0.96, 1.122], [1, 0.857]],
+    roof: [[0.25, 1.081], [0.41, 1.591], [0.61, 1.642], [0.87, 1.571], [0.975, 1.183], [0.99, 1.122]],
     win: [[0.36, 0.56], [0.57, 0.82]], seams: [0.27, 0.565, 0.82], handles: [0.54, 0.79], hood: 0.27, trunk: 0.95, roofBlack: 1, rails: 1, clad: 0.46,
     top: [{ s0: 0, s1: 0.1, a: 0, b: 0.94, c: '#0d1014' }, { s0: 0.02, s1: 0.07, a: 0.56, b: 0.94, c: LED, glow: 1 }, { s0: 0.96, s1: 0.99, a: 0.4, b: 0.92, c: RED, glow: 1 }],
     front(d) {
-      d.box(0, 0.84, 1.66, 0.2, '#0d1014', 0.05);
-      d.both(0.62, 0.86, 0.38, 0.05, LED, 0.02);
-      d.box(0, 0.84, 0.012, 0.18, CRM);
-      d.box(0, 0.42, 1.2, 0.14, '#14181e', 0.03);
-      d.both(0.66, 0.54, 0.18, 0.04, LED, 0.02);
-      d.emblem(0, 0.84, 'bolt');
+      d.both(0.62, 0.9, 0.34, 0.05, LED, 0.02); d.both(0.62, 0.72, 0.26, 0.12, LED, 0.04);
+      d.box(0, 0.8, 0.78, 0.16, '#20252c', 0.04); d.box(0, 0.8, 0.72, 0.03, '#8f97a2');
+      d.box(0, 0.42, 1.3, 0.16, '#14181e', 0.03);
+      d.emblem(0, 0.92, 'lab');
     },
-    rear(d) { d.both(0.55, 0.98, 0.56, 0.06, RED, 0.02); d.box(0, 0.98, 0.5, 0.02, RED); d.box(0, 0.78, 0.012, 0.3, CRM); d.box(0, 0.42, 1.2, 0.14, '#14181e', 0.03); d.emblem(0, 0.96, 'bolt'); },
+    rear(d) { d.both(0.62, 0.98, 0.34, 0.12, RED, 0.03); d.box(0, 0.98, 0.72, 0.05, '#20252c'); d.box(0, 0.42, 1.2, 0.14, '#14181e', 0.03); d.text('GRANİT', 0.13, 0.8, CRM); },
   },
-  duster: {
-    name: 'Dacia Duster', L: 4.34, W: 1.8, H: 1.69, wb: 2.67, fo: 0.84, r: 0.37, sill: 0.34, crown: 0.03, tumble: 0.86, bowF: 0.08, bowR: 0.03, rim: 'hub',
-    features: ['Kutu gibi arazi gövdesi, yüksek tavan', 'Üç yatay çubuklu krom ızgara, kare far', 'Kalın siyah çamurluk kaplamaları', 'Gümüş ön-arka koruma, tavan barları', 'Dört kareli haç biçimli stoplar'],
+  bozkir: {
+    name: 'Bozkır 4x4', L: 4.427, W: 1.8, H: 1.656, wb: 2.67, fo: 0.84, r: 0.37, sill: 0.34, crown: 0.03, tumble: 0.86, bowF: 0.08, bowR: 0.03, rim: 'hub',
+    features: ['Kutu gibi arazi aracı', 'Yuvarlak köşeli büyük far, ağ panel', 'Kalın çamurluk kaplaması', 'Ön ve arka koruma plakası', 'Dikey üçlü stoplar, tavan barları'],
     plan: [[0, 0.84], [0.025, 0.95], [0.1, 0.99], [0.5, 1], [0.95, 0.99], [1, 0.9]],
-    deck: [[0, 0.82], [0.03, 0.98], [0.26, 1.1], [0.32, 1.13], [0.82, 1.15], [0.975, 1.12], [1, 0.92]],
-    roof: [[0.27, 1.1], [0.41, 1.62], [0.6, 1.66], [0.86, 1.62], [0.965, 1.18], [0.975, 1.13]],
+    deck: [[0, 0.804], [0.03, 0.96], [0.26, 1.078], [0.32, 1.107], [0.82, 1.127], [0.975, 1.098], [1, 0.902]],
+    roof: [[0.28, 1.078], [0.42, 1.588], [0.61, 1.627], [0.87, 1.588], [0.975, 1.156], [0.985, 1.107]],
     win: [[0.375, 0.57], [0.58, 0.77], [0.78, 0.89]], seams: [0.29, 0.575, 0.8], handles: [0.555, 0.775], hood: 0.29, trunk: 0.97, rails: 1, clad: 0.6, roofColor: 0,
     top: [{ s0: 0.01, s1: 0.05, a: 0.56, b: 0.94, c: LED, glow: 1 }, { s0: 0.97, s1: 0.995, a: 0.56, b: 0.94, c: RED, glow: 1 }, { s0: 0, s1: 0.014, a: 0, b: 0.5, c: '#b8bec6' }],
     front(d) {
-      d.both(0.62, 0.92, 0.38, 0.17, '#141a20', 0.03);
-      d.both(0.62, 0.92, 0.3, 0.1, LED, 0.02);
-      d.box(0, 0.92, 0.84, 0.2, BLK, 0.02);
-      for (const z of [0.86, 0.92, 0.98]) d.box(0, z, 0.8, 0.02, CRM);
-      d.box(0, 0.44, 1.5, 0.22, '#23272e', 0.03);
-      d.box(0, 0.38, 0.9, 0.1, '#c2c8cf', 0.02);
-      d.emblem(0, 0.92, 'link');
+      d.round(0, 0.92, 0.76, 0.24, BLK, 0.04);
+      for (let y = -0.3; y <= 0.3; y += 0.1) d.box(y, 0.92, 0.04, 0.16, '#59616b', 0.01);
+      for (const s of [-1, 1]) { d.circ(s * 0.66, 0.92, 0.13, '#141a20'); d.circ(s * 0.66, 0.92, 0.095, LED); }
+      d.box(0, 0.44, 1.5, 0.22, '#23272e', 0.03); d.box(0, 0.38, 0.9, 0.1, '#c2c8cf', 0.02);
+      d.emblem(0, 1.08, 'lab');
     },
-    rear(d) { for (const y of [0.55, 0.72]) for (const z of [0.98, 1.1]) { d.box(y, z, 0.14, 0.09, RED, 0.01); d.box(-y, z, 0.14, 0.09, RED, 0.01); } d.box(0, 0.74, 0.46, 0.13, '#f0f2f4', 0.01); d.box(0, 0.42, 1.5, 0.24, '#23272e', 0.03); d.box(0, 0.38, 0.84, 0.1, '#c2c8cf', 0.02); d.text('DUSTER', 0.22, 1.0, CRM); },
+    rear(d) { for (const z of [0.9, 1.02, 1.14]) d.both(0.72, z, 0.16, 0.09, RED, 0.01); d.box(0, 0.74, 0.46, 0.13, '#f0f2f4', 0.01); d.box(0, 0.42, 1.5, 0.24, '#23272e', 0.03); d.box(0, 0.38, 0.84, 0.1, '#c2c8cf', 0.02); d.text('BOZKIR', 0.14, 1.0, CRM); },
   },
-  bavyera: {
-    name: 'Bavyera sedan', L: 4.71, W: 1.83, H: 1.44, wb: 2.85, fo: 0.79, r: 0.33, sill: 0.17, crown: 0.05, tumble: 0.77, bowF: 0.15, bowR: 0.1, rim: 'star', smooth: 4,
-    features: ['Uzun kaput, kabin geride, sportif sedan', 'İkiz böbrek ızgara', 'Köşeli çift halkalı far', 'C direğinde geriye kıvrılan cam ucu', 'L biçimli yatay stoplar'],
+  bavar: {
+    name: 'Bavar sedan', L: 4.804, W: 1.812, H: 1.44, wb: 2.85, fo: 0.79, r: 0.33, sill: 0.17, crown: 0.05, tumble: 0.77, bowF: 0.15, bowR: 0.1, rim: 'star', smooth: 4,
+    features: ['Uzun kaputlu sportif sedan', 'Alçak tek parça geniş ağız', 'İnce keskin far', 'Akıcı tavan', 'Yatay ince stoplar'],
     plan: [[0, 0.78], [0.03, 0.92], [0.12, 0.98], [0.5, 1], [0.93, 0.98], [1, 0.86]],
-    deck: [[0, 0.58], [0.03, 0.74], [0.3, 0.92], [0.4, 0.96], [0.82, 1.0], [0.97, 0.99], [1, 0.76]],
-    roof: [[0.34, 0.94], [0.49, 1.38], [0.62, 1.44], [0.78, 1.38], [0.9, 1.02], [0.92, 1.0]],
+    deck: [[0, 0.58], [0.03, 0.74], [0.3, 0.92], [0.4, 0.96], [0.82, 1], [0.97, 0.99], [1, 0.76]],
+    roof: [[0.35, 0.94], [0.5, 1.38], [0.63, 1.44], [0.79, 1.38], [0.91, 1.02], [0.93, 1]],
     win: [[0.44, 0.61], [0.62, 0.8]], seams: [0.33, 0.6, 0.8], handles: [0.57, 0.77], hood: 0.33, trunk: 0.89,
     top: [{ s0: 0.035, s1: 0.085, a: 0.5, b: 0.92, c: LED, glow: 1 }, { s0: 0.955, s1: 0.99, a: 0.45, b: 0.92, c: RED, glow: 1 }, { s0: 0.0, s1: 0.035, a: 0.03, b: 0.3, c: BLK }],
     front(d) {
-      for (const s of [-1, 1]) { d.round(s * 0.17, 0.62, 0.3, 0.2, CRM, 0.05); d.round(s * 0.17, 0.62, 0.26, 0.17, BLK, 0.04); for (let y = -0.1; y <= 0.1; y += 0.04) d.box(s * 0.17 + y, 0.62, 0.012, 0.15, '#6a727c'); }
-      d.polyB([[0.36, 0.7], [0.82, 0.78], [0.8, 0.64], [0.38, 0.6]], '#141a20');
-      for (const y of [0.52, 0.7]) { d.ring(y, 0.68, 0.06, LED); d.ring(-y, 0.68, 0.06, LED); }
-      d.box(0, 0.32, 1.2, 0.12, BLK, 0.03);
-      d.emblem(0, 0.8, 'propeller');
+      d.round(0, 0.46, 1.16, 0.18, BLK, 0.06);
+      for (let z = 0.4; z <= 0.52; z += 0.04) d.box(0, z, 1.06, 0.012, '#6a727c');
+      d.polyB([[0.34, 0.74], [0.84, 0.76], [0.82, 0.68], [0.38, 0.68]], LED);
+      d.emblem(0, 0.68, 'lab');
     },
-    rear(d) { d.polyB([[0.3, 0.94], [0.88, 0.92], [0.86, 0.82], [0.52, 0.84], [0.5, 0.88], [0.32, 0.88]], RED); d.box(0, 0.7, 0.5, 0.13, '#f0f2f4', 0.01); d.box(0, 0.32, 1.2, 0.12, BLK, 0.03); d.both(0.5, 0.3, 0.1, 0.08, '#8c949e', 0.04); },
+    rear(d) { d.both(0.6, 0.9, 0.5, 0.06, RED, 0.02); d.box(0, 0.72, 0.5, 0.13, '#f0f2f4', 0.01); d.box(0, 0.32, 1.2, 0.12, BLK, 0.03); d.both(0.5, 0.3, 0.1, 0.08, '#8c949e', 0.04); },
   },
-  halka: {
-    name: 'Halka sedan', L: 4.76, W: 1.84, H: 1.43, wb: 2.82, fo: 0.9, r: 0.33, sill: 0.17, crown: 0.04, tumble: 0.78, bowF: 0.12, bowR: 0.08, rim: 'multi', smooth: 4,
-    features: ['Keskin omuz çizgili, yatay duruşlu sedan', 'Tek parça altıgen dev ızgara', 'Dar yatay LED far', 'Düz bagaj kapağı', 'Boydan boya ışık bandı'],
+  aurum: {
+    name: 'Aurum sedan', L: 4.665, W: 1.84, H: 1.459, wb: 2.82, fo: 0.9, r: 0.33, sill: 0.17, crown: 0.04, tumble: 0.78, bowF: 0.12, bowR: 0.08, rim: 'multi', smooth: 4,
+    features: ['Düz omuz çizgili ağır sedan', 'Üstte ince şerit, altta geniş ağ panel', 'Köşeli far', 'Düz bagaj kapağı', 'Çift çubuk stop'],
     plan: [[0, 0.8], [0.025, 0.93], [0.1, 0.99], [0.5, 1], [0.95, 0.99], [1, 0.88]],
-    deck: [[0, 0.6], [0.03, 0.76], [0.26, 0.93], [0.34, 0.97], [0.82, 1.03], [0.975, 1.03], [1, 0.8]],
-    roof: [[0.26, 0.93], [0.42, 1.38], [0.5, 1.43], [0.7, 1.43], [0.8, 1.32], [0.88, 1.05], [0.895, 1.03]],
+    deck: [[0, 0.612], [0.03, 0.775], [0.26, 0.949], [0.34, 0.989], [0.82, 1.051], [0.975, 1.051], [1, 0.816]],
+    roof: [[0.25, 0.949], [0.41, 1.408], [0.49, 1.459], [0.69, 1.459], [0.79, 1.346], [0.87, 1.071], [0.885, 1.051]],
     win: [[0.38, 0.57], [0.58, 0.77]], seams: [0.3, 0.58, 0.79], handles: [0.55, 0.75], hood: 0.3, trunk: 0.885,
     top: [{ s0: 0.03, s1: 0.09, a: 0.46, b: 0.94, c: LED, glow: 1 }, { s0: 0.965, s1: 0.992, a: 0, b: 0.93, c: RED, glow: 1 }, { s0: 0, s1: 0.03, a: 0.05, b: 0.42, c: BLK }],
     front(d) {
-      d.poly([[-0.4, 0.74], [0.4, 0.74], [0.5, 0.6], [0.36, 0.34], [-0.36, 0.34], [-0.5, 0.6]], BLK);
-      d.polyLine([[-0.4, 0.74], [0.4, 0.74], [0.5, 0.6], [0.36, 0.34], [-0.36, 0.34], [-0.5, 0.6]], '#7d8590', 0.02);
-      for (let z = 0.4; z < 0.72; z += 0.05) d.box(0, z, 0.76, 0.012, '#4a515a');
-      d.polyB([[0.52, 0.76], [0.86, 0.8], [0.84, 0.7], [0.56, 0.68]], LED);
-      d.both(0.74, 0.38, 0.2, 0.14, BLK, 0.03);
-      d.emblem(0, 0.66, 'rings3');
+      d.box(0, 0.74, 0.86, 0.035, CRM, 0.01);
+      d.round(0, 0.5, 1.0, 0.24, BLK, 0.03);
+      for (let y = -0.42; y <= 0.42; y += 0.12) d.box(y, 0.5, 0.02, 0.2, '#4a515a');
+      d.both(0.66, 0.72, 0.32, 0.1, LED, 0.02);
+      d.emblem(0, 0.66, 'lab');
     },
-    rear(d) { d.box(0, 0.97, 1.64, 0.05, RED, 0.01); d.both(0.6, 0.93, 0.44, 0.08, RED, 0.01); d.box(0, 0.74, 0.5, 0.13, '#f0f2f4', 0.01); d.box(0, 0.34, 1.3, 0.1, BLK, 0.03); d.emblem(0, 0.9, 'rings3'); },
+    rear(d) { d.both(0.6, 0.96, 0.46, 0.04, RED, 0.01); d.both(0.6, 0.88, 0.46, 0.04, RED, 0.01); d.box(0, 0.74, 0.5, 0.13, '#f0f2f4', 0.01); d.box(0, 0.34, 1.3, 0.1, BLK, 0.03); },
   },
-  yildiz: {
-    name: 'Yıldız sedan', L: 4.69, W: 1.82, H: 1.45, wb: 2.84, fo: 0.81, r: 0.33, sill: 0.17, crown: 0.06, tumble: 0.76, bowF: 0.18, bowR: 0.12, rim: 'five', smooth: 6,
-    features: ['Yumuşak kavisli lüks sedan, yay çizen tavan', 'Ortada iki yatay barlı krom ızgara', 'Kaput ucunda dik amblem', 'Geriye uzanan oval farlar', 'Yuvarlak omuzlu bagaj, oval stop'],
+  stella: {
+    name: 'Stella sedan', L: 4.69, W: 1.784, H: 1.479, wb: 2.84, fo: 0.81, r: 0.33, sill: 0.17, crown: 0.06, tumble: 0.76, bowF: 0.18, bowR: 0.12, rim: 'five', smooth: 6,
+    features: ['Yumuşak kavisli konfor sedanı', 'Dalga çizgili alçak panel', 'Kısa oval far', 'Yuvarlak bagaj', 'Yuvarlak köşeli stop'],
     plan: [[0, 0.76], [0.03, 0.9], [0.12, 0.98], [0.5, 1], [0.92, 0.97], [1, 0.82]],
-    deck: [[0, 0.6], [0.03, 0.76], [0.28, 0.93], [0.38, 0.97], [0.8, 1.02], [0.96, 1.0], [1, 0.78]],
-    roof: [[0.28, 0.93], [0.42, 1.36], [0.54, 1.45], [0.66, 1.44], [0.78, 1.32], [0.9, 1.04], [0.92, 1.02]],
-    win: [[0.4, 0.59], [0.6, 0.79]], seams: [0.31, 0.6, 0.8], handles: [0.57, 0.77], hood: 0.31, trunk: 0.9, hoodStar: 1,
+    deck: [[0, 0.612], [0.03, 0.775], [0.28, 0.949], [0.38, 0.989], [0.8, 1.04], [0.96, 1.02], [1, 0.796]],
+    roof: [[0.28, 0.949], [0.42, 1.387], [0.54, 1.479], [0.66, 1.469], [0.78, 1.346], [0.9, 1.061], [0.92, 1.04]],
+    win: [[0.4, 0.59], [0.6, 0.79]], seams: [0.31, 0.6, 0.8], handles: [0.57, 0.77], hood: 0.31, trunk: 0.9,
     top: [{ s0: 0.04, s1: 0.11, a: 0.5, b: 0.86, b1: 0.95, a1: 0.8, c: LED, glow: 1 }, { s0: 0.95, s1: 0.99, a: 0.45, b: 0.9, c: RED, glow: 1 }, { s0: 0, s1: 0.035, a: 0.03, b: 0.4, c: CRM }],
     front(d) {
-      d.round(0, 0.62, 0.8, 0.25, '#14171c', 0.05);
-      d.box(0, 0.65, 0.76, 0.03, CRM); d.box(0, 0.58, 0.76, 0.03, CRM);
-      d.polyB([[0.44, 0.74], [0.84, 0.82], [0.86, 0.72], [0.48, 0.64]], LED);
+      d.round(0, 0.56, 0.9, 0.2, '#14171c', 0.08);
+      for (const z of [0.52, 0.58]) d.polyLine([[-0.36, z], [-0.18, z + 0.03], [0, z], [0.18, z + 0.03], [0.36, z]], CRM, 0.014);
+      d.both(0.66, 0.74, 0.3, 0.1, LED, 0.05);
       d.box(0, 0.3, 1.2, 0.11, BLK, 0.03);
-      d.emblem(0, 0.62, 'star3', 0.09);
+      d.emblem(0, 0.72, 'lab');
     },
-    rear(d) { d.polyB([[0.32, 0.92], [0.86, 0.94], [0.86, 0.82], [0.4, 0.84]], RED); d.box(0, 0.86, 0.6, 0.015, CRM); d.box(0, 0.72, 0.5, 0.13, '#f0f2f4', 0.01); d.emblem(0, 0.92, 'star3'); },
+    rear(d) { d.both(0.62, 0.9, 0.42, 0.1, RED, 0.05); d.box(0, 0.72, 0.5, 0.13, '#f0f2f4', 0.01); },
   },
-  golf: {
-    name: 'Halk hatchback', L: 4.28, W: 1.79, H: 1.45, wb: 2.62, fo: 0.87, r: 0.32, sill: 0.17, crown: 0.04, tumble: 0.8, bowF: 0.1, bowR: 0.05, rim: 'multi', smooth: 3,
-    features: ['Klasik hatchback, kalın eğik C direği', 'İnce yatay ızgara, boydan boya krom çizgi', 'Yatay dar far', 'Kısa kuyruk, dik arka cam', 'Yatay yuvarlak köşeli stop'],
+  volta: {
+    name: 'Volta hatchback', L: 4.194, W: 1.808, H: 1.479, wb: 2.62, fo: 0.87, r: 0.32, sill: 0.17, crown: 0.04, tumble: 0.8, bowF: 0.1, bowR: 0.05, rim: 'multi', smooth: 3,
+    features: ['Aile hatchbacki', 'Kısa kare ağ panel', 'Ayrık köşeli far', 'Kısa kuyruk, dik arka cam', 'Köşeli çift stop'],
     plan: [[0, 0.82], [0.025, 0.94], [0.1, 0.99], [0.5, 1], [0.94, 0.99], [1, 0.9]],
-    deck: [[0, 0.62], [0.03, 0.8], [0.26, 0.97], [0.32, 1.0], [0.8, 1.04], [0.97, 1.05], [1, 0.82]],
-    roof: [[0.26, 0.97], [0.41, 1.4], [0.58, 1.45], [0.87, 1.4], [0.965, 1.1], [0.98, 1.05]],
+    deck: [[0, 0.632], [0.03, 0.816], [0.26, 0.989], [0.32, 1.02], [0.8, 1.061], [0.97, 1.071], [1, 0.836]],
+    roof: [[0.25, 0.989], [0.4, 1.428], [0.57, 1.479], [0.86, 1.428], [0.955, 1.122], [0.97, 1.071]],
     win: [[0.38, 0.58], [0.59, 0.72]], seams: [0.3, 0.585, 0.8], handles: [0.56, 0.72], hood: 0.3, trunk: 0.96,
     top: [{ s0: 0.025, s1: 0.08, a: 0.48, b: 0.94, c: LED, glow: 1 }, { s0: 0.96, s1: 0.992, a: 0.5, b: 0.94, c: RED, glow: 1 }],
     front(d) {
-      d.box(0, 0.72, 1.56, 0.1, BLK, 0.02); d.box(0, 0.74, 1.58, 0.015, CRM);
-      d.both(0.6, 0.72, 0.34, 0.09, LED, 0.02);
+      d.round(0, 0.62, 0.7, 0.16, BLK, 0.03);
+      for (let y = -0.28; y <= 0.28; y += 0.07) d.box(y, 0.62, 0.012, 0.13, '#59616b');
+      d.both(0.6, 0.72, 0.28, 0.11, LED, 0.03);
       d.box(0, 0.38, 1.1, 0.15, BLK, 0.03);
-      d.emblem(0, 0.72, 'vw2');
+      d.emblem(0, 0.78, 'lab');
     },
-    rear(d) { d.both(0.58, 0.96, 0.44, 0.12, RED, 0.05); d.box(0, 0.74, 0.46, 0.12, '#f0f2f4', 0.01); d.box(0, 0.34, 1.2, 0.1, BLK, 0.03); d.emblem(0, 0.94, 'vw2'); },
+    rear(d) { d.both(0.66, 0.98, 0.26, 0.12, RED, 0.03); d.both(0.66, 0.86, 0.26, 0.05, AMB, 0.02); d.box(0, 0.74, 0.46, 0.12, '#f0f2f4', 0.01); d.box(0, 0.34, 1.2, 0.1, BLK, 0.03); },
   },
-  focus: {
-    name: 'Oval hatchback', L: 4.38, W: 1.83, H: 1.47, wb: 2.7, fo: 0.87, r: 0.33, sill: 0.17, crown: 0.05, tumble: 0.78, bowF: 0.14, bowR: 0.08, rim: 'five', smooth: 5,
-    features: ['Eğik tavanlı hatchback', 'Altıgen geniş alt ızgara', 'Yukarı kıvrılan sivri far', 'Kısa bagaj, çatı spoyleri', 'İkiye bölünmüş yatay stop'],
+  pusula: {
+    name: 'Pusula hatchback', L: 4.468, W: 1.812, H: 1.455, wb: 2.7, fo: 0.87, r: 0.33, sill: 0.17, crown: 0.05, tumble: 0.78, bowF: 0.14, bowR: 0.08, rim: 'five', smooth: 5,
+    features: ['Eğik tavanlı hatchback', 'Üçgen yan girişli alt panel', 'Dar yukarı bakan far', 'Çatı spoyleri', 'Bir bütün yatay stop'],
     plan: [[0, 0.76], [0.03, 0.9], [0.12, 0.98], [0.5, 1], [0.93, 0.98], [1, 0.84]],
-    deck: [[0, 0.62], [0.03, 0.82], [0.24, 0.97], [0.3, 1.0], [0.8, 1.06], [0.965, 1.06], [1, 0.8]],
-    roof: [[0.24, 0.97], [0.41, 1.42], [0.56, 1.47], [0.85, 1.39], [0.96, 1.1], [0.975, 1.06]],
+    deck: [[0, 0.614], [0.03, 0.812], [0.24, 0.96], [0.3, 0.99], [0.8, 1.049], [0.965, 1.049], [1, 0.792]],
+    roof: [[0.25, 0.96], [0.42, 1.406], [0.57, 1.455], [0.86, 1.376], [0.97, 1.089], [0.985, 1.049]],
     win: [[0.37, 0.57], [0.58, 0.75]], seams: [0.29, 0.575, 0.79], handles: [0.55, 0.74], hood: 0.29, trunk: 0.955, roofSpoiler: 1,
     top: [{ s0: 0.035, s1: 0.085, a: 0.5, b: 0.9, b1: 0.97, a1: 0.84, c: LED, glow: 1 }, { s0: 0.955, s1: 0.992, a: 0.52, b: 0.92, c: RED, glow: 1 }],
     front(d) {
-      d.poly([[-0.56, 0.62], [0.56, 0.62], [0.42, 0.34], [-0.42, 0.34]], BLK);
-      for (let y = -0.4; y <= 0.4; y += 0.08) for (let z = 0.4; z < 0.6; z += 0.08) d.diamond(y, z, 0.025, '#3a4048');
-      d.polyB([[0.5, 0.78], [0.86, 0.9], [0.84, 0.76], [0.54, 0.7]], LED);
-      d.emblem(0, 0.74, 'oval');
+      d.round(0, 0.46, 0.72, 0.18, BLK, 0.04);
+      d.both(0.72, 0.44, 0.14, 0.12, '#14181e', 0.02);
+      d.polyB([[0.46, 0.78], [0.86, 0.84], [0.84, 0.76], [0.5, 0.72]], LED);
+      d.emblem(0, 0.7, 'lab');
     },
-    rear(d) { d.both(0.62, 1.0, 0.36, 0.1, RED, 0.03); d.box(0, 1.0, 0.8, 0.02, CRM); d.box(0, 0.74, 0.46, 0.12, '#f0f2f4', 0.01); d.box(0, 0.34, 1.3, 0.12, BLK, 0.03); d.emblem(0, 0.86, 'oval'); },
+    rear(d) { d.box(0, 1.0, 1.3, 0.09, RED, 0.03); d.box(0, 0.74, 0.46, 0.12, '#f0f2f4', 0.01); d.box(0, 0.34, 1.3, 0.12, BLK, 0.03); },
   },
-  kore: {
-    name: 'Kore sedan', L: 4.5, W: 1.8, H: 1.45, wb: 2.67, fo: 0.87, r: 0.32, sill: 0.17, crown: 0.05, tumble: 0.78, bowF: 0.15, bowR: 0.08, rim: 'turbine', smooth: 5,
-    features: ['Coupe çizgili akıcı sedan', 'Geniş şelale ızgara', 'İnce uzun far, ayrı gündüz LED\'i', 'C direğine akan tavan', 'Boydan boya ince stop'],
+  dalga: {
+    name: 'Dalga sedan', L: 4.59, W: 1.8, H: 1.421, wb: 2.67, fo: 0.87, r: 0.32, sill: 0.17, crown: 0.05, tumble: 0.78, bowF: 0.15, bowR: 0.08, rim: 'turbine', smooth: 5,
+    features: ['Alçak akıcı sedan', 'Yatay çift bant panel', 'Yuvarlak uçlu far', 'C direğine akan tavan', 'Ortası ayrık stop'],
     plan: [[0, 0.8], [0.03, 0.92], [0.12, 0.98], [0.5, 1], [0.93, 0.98], [1, 0.86]],
-    deck: [[0, 0.6], [0.03, 0.8], [0.26, 0.95], [0.34, 0.98], [0.8, 1.04], [0.97, 1.03], [1, 0.8]],
-    roof: [[0.26, 0.95], [0.43, 1.39], [0.56, 1.45], [0.72, 1.37], [0.88, 1.06], [0.9, 1.04]],
+    deck: [[0, 0.588], [0.03, 0.784], [0.26, 0.931], [0.34, 0.96], [0.8, 1.019], [0.97, 1.009], [1, 0.784]],
+    roof: [[0.27, 0.931], [0.44, 1.362], [0.57, 1.421], [0.73, 1.343], [0.89, 1.039], [0.91, 1.019]],
     win: [[0.38, 0.56], [0.57, 0.77]], seams: [0.3, 0.57, 0.79], handles: [0.54, 0.74], hood: 0.3, trunk: 0.89,
     top: [{ s0: 0.035, s1: 0.085, a: 0.52, b: 0.93, c: LED, glow: 1 }, { s0: 0.965, s1: 0.992, a: 0, b: 0.92, c: RED, glow: 1 }],
     front(d) {
-      d.poly([[-0.5, 0.7], [0.5, 0.7], [0.6, 0.36], [-0.6, 0.36]], BLK);
-      for (let y = -0.5; y <= 0.5; y += 0.08) d.box(y, 0.53, 0.014, 0.32, '#59616b');
-      d.both(0.66, 0.78, 0.36, 0.05, LED, 0.02);
-      d.emblem(0, 0.76, 'oval');
+      d.round(0, 0.6, 1.0, 0.1, BLK, 0.04); d.round(0, 0.44, 0.8, 0.1, BLK, 0.04);
+      d.both(0.68, 0.76, 0.3, 0.07, LED, 0.03);
+      d.emblem(0, 0.6, 'lab');
     },
-    rear(d) { d.box(0, 0.96, 1.6, 0.04, RED, 0.02); d.box(0, 0.74, 0.46, 0.12, '#f0f2f4', 0.01); d.box(0, 0.34, 1.3, 0.1, BLK, 0.03); },
+    rear(d) { d.both(0.56, 0.96, 0.54, 0.05, RED, 0.02); d.box(0, 0.74, 0.46, 0.12, '#f0f2f4', 0.01); d.box(0, 0.34, 1.3, 0.1, BLK, 0.03); },
   },
-  megane: {
-    name: 'Baklava sedan', L: 4.63, W: 1.81, H: 1.46, wb: 2.71, fo: 0.9, r: 0.32, sill: 0.17, crown: 0.05, tumble: 0.78, bowF: 0.16, bowR: 0.09, rim: 'five', smooth: 5,
-    features: ['Bombeli omuzlu aile sedanı', 'Baklava amblemli geniş krom kanat ızgara', 'C biçimli LED gündüz farı', 'Yüksek ve kısa bagaj', 'Yatay uzun stop, krom bant'],
+  lale: {
+    name: 'Lale sedan', L: 4.537, W: 1.792, H: 1.489, wb: 2.71, fo: 0.9, r: 0.32, sill: 0.17, crown: 0.05, tumble: 0.78, bowF: 0.16, bowR: 0.09, rim: 'five', smooth: 5,
+    features: ['Bombeli omuzlu aile sedanı', 'İnce üst çizgi, küçük orta ağ', 'Köşesi kesik far', 'Yüksek kısa bagaj', 'Uzun yatay stop'],
     plan: [[0, 0.76], [0.03, 0.9], [0.12, 0.98], [0.5, 1], [0.93, 0.98], [1, 0.85]],
-    deck: [[0, 0.6], [0.03, 0.8], [0.26, 0.96], [0.32, 1.0], [0.78, 1.05], [0.965, 1.05], [1, 0.8]],
-    roof: [[0.26, 0.96], [0.42, 1.4], [0.56, 1.46], [0.72, 1.4], [0.87, 1.07], [0.89, 1.05]],
+    deck: [[0, 0.612], [0.03, 0.816], [0.26, 0.979], [0.32, 1.02], [0.78, 1.071], [0.965, 1.071], [1, 0.816]],
+    roof: [[0.25, 0.979], [0.41, 1.428], [0.55, 1.489], [0.71, 1.428], [0.86, 1.091], [0.88, 1.071]],
     win: [[0.38, 0.56], [0.57, 0.76]], seams: [0.29, 0.57, 0.78], handles: [0.54, 0.74], hood: 0.29, trunk: 0.885,
     top: [{ s0: 0.035, s1: 0.085, a: 0.5, b: 0.91, c: LED, glow: 1 }, { s0: 0.95, s1: 0.99, a: 0.44, b: 0.92, c: RED, glow: 1 }],
     front(d) {
-      d.box(0, 0.7, 1.0, 0.03, CRM, 0.01);
-      d.box(0, 0.62, 0.6, 0.12, BLK, 0.02);
-      d.both(0.66, 0.74, 0.38, 0.1, '#141a20', 0.03); d.arcB(0.68, 0.68, 0.11, LED);
+      d.box(0, 0.72, 0.8, 0.02, CRM, 0.01);
+      d.round(0, 0.6, 0.5, 0.14, BLK, 0.03);
+      d.polyB([[0.44, 0.78], [0.84, 0.76], [0.82, 0.66], [0.52, 0.66]], LED);
       d.box(0, 0.34, 1.2, 0.12, BLK, 0.03);
-      d.emblem(0, 0.66, 'rhomb', 0.08);
+      d.emblem(0, 0.6, 'lab');
     },
-    rear(d) { d.both(0.58, 0.96, 0.5, 0.1, RED, 0.02); d.box(0, 0.96, 0.66, 0.018, CRM); d.box(0, 0.74, 0.5, 0.13, '#f0f2f4', 0.01); d.emblem(0, 0.9, 'rhomb'); },
+    rear(d) { d.both(0.58, 0.96, 0.5, 0.08, RED, 0.02); d.box(0, 0.74, 0.5, 0.13, '#f0f2f4', 0.01); },
   },
-  linea: {
-    name: 'Linea sedan', L: 4.56, W: 1.73, H: 1.49, wb: 2.6, fo: 0.92, r: 0.3, sill: 0.19, crown: 0.05, tumble: 0.8, bowF: 0.14, bowR: 0.08, rim: 'steel', smooth: 4,
-    features: ['Dar yüksek filo sedanı', 'Damla biçimli far', 'İnce krom ızgara bandı', 'Uzun arka çıkıntı', 'Köşeli yüksek stop'],
+  vadi: {
+    name: 'Vadi sedan', L: 4.651, W: 1.765, H: 1.49, wb: 2.6, fo: 0.92, r: 0.3, sill: 0.19, crown: 0.05, tumble: 0.8, bowF: 0.14, bowR: 0.08, rim: 'steel', smooth: 4,
+    features: ['Dar yüksek sade sedan', 'Damla olmayan yuvarlak köşeli far', 'Üç yatay ince yarık', 'Uzun arka çıkıntı', 'Kare yüksek stop'],
     plan: [[0, 0.76], [0.03, 0.9], [0.12, 0.98], [0.5, 1], [0.93, 0.98], [1, 0.86]],
-    deck: [[0, 0.62], [0.03, 0.8], [0.27, 0.96], [0.33, 1.0], [0.75, 1.04], [0.97, 1.03], [1, 0.82]],
-    roof: [[0.27, 0.96], [0.43, 1.42], [0.56, 1.49], [0.71, 1.42], [0.85, 1.06], [0.87, 1.04]],
+    deck: [[0, 0.62], [0.03, 0.8], [0.27, 0.96], [0.33, 1], [0.75, 1.04], [0.97, 1.03], [1, 0.82]],
+    roof: [[0.28, 0.96], [0.44, 1.42], [0.57, 1.49], [0.72, 1.42], [0.86, 1.06], [0.88, 1.04]],
     win: [[0.39, 0.56], [0.57, 0.75]], seams: [0.3, 0.57, 0.77], handles: [0.54, 0.73], hood: 0.3, trunk: 0.865,
     top: [{ s0: 0.035, s1: 0.085, a: 0.5, b: 0.9, c: '#fff5c4', glow: 1 }, { s0: 0.95, s1: 0.99, a: 0.5, b: 0.94, c: RED, glow: 1 }],
     front(d) {
-      d.polyB([[0.4, 0.74], [0.8, 0.8], [0.78, 0.66], [0.46, 0.62]], '#fff5c4');
-      d.box(0, 0.7, 0.66, 0.04, CRM, 0.02); d.box(0, 0.36, 1.0, 0.1, BLK, 0.03);
-      d.emblem(0, 0.7, 'oval');
+      d.both(0.6, 0.72, 0.34, 0.12, '#fff5c4', 0.05);
+      for (const z of [0.66, 0.7, 0.74]) d.box(0, z, 0.56, 0.015, BLK);
+      d.box(0, 0.36, 1.0, 0.1, BLK, 0.03);
+      d.emblem(0, 0.8, 'lab');
     },
-    rear(d) { d.both(0.6, 0.96, 0.36, 0.17, RED, 0.03); d.box(0, 0.74, 0.46, 0.12, '#f0f2f4', 0.01); d.box(0, 0.86, 0.5, 0.015, CRM); },
+    rear(d) { d.both(0.64, 0.96, 0.26, 0.16, RED, 0.04); d.box(0, 0.74, 0.46, 0.12, '#f0f2f4', 0.01); },
   },
   pickup: {
     name: 'Kamyonet', L: 5.28, W: 1.86, H: 1.81, wb: 3.09, fo: 0.92, r: 0.38, sill: 0.34, crown: 0.03, tumble: 0.85, bowF: 0.08, bowR: 0.0, rim: 'steel',
@@ -7052,7 +7064,7 @@ const CAR_MODELS = {
     front(d) {
       d.box(0, 0.94, 1.1, 0.3, BLK, 0.03); for (const z of [0.86, 0.94, 1.02]) d.box(0, z, 1.06, 0.03, CRM);
       d.both(0.72, 0.98, 0.3, 0.2, LED, 0.03); d.box(0, 0.54, 1.6, 0.2, '#30353c', 0.03);
-      d.emblem(0, 0.94, 'bars', 0.1);
+      d.emblem(0, 0.94, 'lab', 0.1);
     },
     rear(d) { d.both(0.78, 1.0, 0.13, 0.4, RED, 0.02); d.box(0, 1.0, 1.3, 0.34, '#d8d8d8', 0.01); d.text('PİKAP', 0.2, 1.0, '#444'); },
   },
@@ -7065,19 +7077,19 @@ const CAR_MODELS = {
     win: [[0.25, 0.36], [0.37, 0.53], [0.54, 0.7], [0.71, 0.87]], seams: [0.2, 0.37, 0.53, 0.88], handles: [0.35], hood: 0.15, trunk: 2, band: { z: 1.1, h: 0.1, c: '#1565c0' },
     roofSign: { text: 'DOLMUŞ', c: '#ffd23f' },
     top: [{ s0: 0.035, s1: 0.085, a: 0.56, b: 0.92, c: LED, glow: 1 }, { s0: 0.985, s1: 1, a: 0.74, b: 0.96, c: RED, glow: 1 }],
-    front(d) { d.box(0, 0.92, 1.1, 0.2, BLK, 0.03); d.both(0.74, 0.98, 0.34, 0.24, LED, 0.03); d.box(0, 0.52, 1.7, 0.2, '#30353c', 0.03); d.emblem(0, 0.92, 'oval'); },
+    front(d) { d.box(0, 0.92, 1.1, 0.2, BLK, 0.03); d.both(0.74, 0.98, 0.34, 0.24, LED, 0.03); d.box(0, 0.52, 1.7, 0.2, '#30353c', 0.03); d.emblem(0, 0.92, 'lab'); },
     rear(d) { d.both(0.86, 1.3, 0.12, 0.5, RED, 0.02); d.box(0, 1.8, 1.4, 0.7, '#0f1a22', 0.03); d.box(0, 1.4, 0.012, 1.8, '#5a6068'); },
   },
   bus: {
-    name: 'Belediye otobüsü', L: 12, W: 2.55, H: 3.1, wb: 5.9, fo: 2.7, r: 0.5, sill: 0.34, crown: 0.05, tumble: 0.94, bowF: 0.12, bowR: 0.05, rim: 'steel', tall: 1, flatFront: 1,
-    features: ['12 metre alçak tabanlı şehir otobüsü', 'Tek parça dev ön cam, üstte hat göstergesi', 'Üç çift kapı, uzun bant camlar', 'Tavanda klima kutuları', 'Belediye renkleri, numara panosu'],
+    name: 'Şehir otobüsü', L: 12, W: 2.55, H: 3.1, wb: 5.9, fo: 2.7, r: 0.5, sill: 0.34, crown: 0.05, tumble: 0.94, bowF: 0.12, bowR: 0.05, rim: 'steel', tall: 1, flatFront: 1,
+    features: ['12 metre alçak tabanlı şehir otobüsü', 'Tek parça dev ön cam, üstte hat göstergesi', 'Üç çift kapı, uzun bant camlar', 'Tavanda klima kutuları', 'Şehir hattı renkleri, numara panosu'],
     plan: [[0, 0.93], [0.012, 0.99], [0.03, 1], [1, 0.97]],
     deck: [[0, 0.72], [0.015, 1.1], [0.05, 1.18], [0.98, 1.2], [1, 1.0]],
     roof: [[0.008, 1.1], [0.024, 2.9], [0.05, 3.08], [0.975, 3.08], [1, 1.2]],
     win: [[0.04, 0.07], [0.12, 0.3], [0.31, 0.46], [0.53, 0.7], [0.71, 0.86], [0.87, 0.96]], seams: [0.07, 0.12, 0.46, 0.53, 0.86], handles: [], hood: 2, trunk: 2,
     band: { z: 0.92, h: 0.16, c: '#ffffff' }, roofPods: 2, doors: [[0.07, 0.12], [0.46, 0.53]],
     top: [{ s0: 0.008, s1: 0.025, a: 0.5, b: 0.94, c: LED, glow: 1 }, { s0: 0.99, s1: 0.999, a: 0.7, b: 0.94, c: RED, glow: 1 }],
-    front(d) { d.box(0, 3.02, 1.8, 0.2, '#101214', 0.02); d.text('34 KADIKÖY', 0.15, 3.02, '#ffa726'); d.both(0.95, 0.7, 0.34, 0.14, LED, 0.03); d.box(0, 0.4, 2.2, 0.2, '#30353c', 0.03); },
+    front(d) { d.box(0, 3.02, 1.8, 0.2, '#101214', 0.02); d.text('12 MERKEZ', 0.15, 3.02, '#ffa726'); d.both(0.95, 0.7, 0.34, 0.14, LED, 0.03); d.box(0, 0.4, 2.2, 0.2, '#30353c', 0.03); },
     rear(d) { d.both(1.05, 1.2, 0.2, 0.6, RED, 0.02); d.box(0, 2.2, 1.9, 1.3, '#0f1a22', 0.03); d.box(0, 0.5, 2.2, 0.3, '#30353c', 0.03); },
   },
   truck: {
@@ -7089,7 +7101,7 @@ const CAR_MODELS = {
     win: [[0.05, 0.16]], seams: [0.03, 0.18, 0.21], handles: [0.15], hood: 2, trunk: 2,
     cargo: { s0: 0.235, s1: 0.995, z0: 1.25, z1: 3.45 }, wind: 1,
     top: [{ s0: 0.006, s1: 0.02, a: 0.6, b: 0.94, c: LED, glow: 1 }],
-    front(d) { d.box(0, 1.3, 1.6, 0.5, BLK, 0.03); for (let z = 1.1; z < 1.52; z += 0.08) d.box(0, z, 1.56, 0.03, '#59616b'); d.both(1.0, 0.9, 0.3, 0.2, LED, 0.04); d.box(0, 0.74, 2.3, 0.3, '#30353c', 0.03); d.emblem(0, 1.3, 'bars', 0.12); },
+    front(d) { d.box(0, 1.3, 1.6, 0.5, BLK, 0.03); for (let z = 1.1; z < 1.52; z += 0.08) d.box(0, z, 1.56, 0.03, '#59616b'); d.both(1.0, 0.9, 0.3, 0.2, LED, 0.04); d.box(0, 0.74, 2.3, 0.3, '#30353c', 0.03); d.emblem(0, 1.3, 'lab', 0.12); },
     rear(d) { d.both(1.0, 1.0, 0.24, 0.12, RED, 0.01); },
   },
 };
@@ -7165,20 +7177,14 @@ function fascia(THREE, W, Z, draw, px = 512) {
     arcB(y, z, r, col) { for (const s of [-1, 1]) { g.strokeStyle = col; g.lineWidth = r * k * 0.3; g.lineCap = 'round'; g.beginPath(); g.arc(X(s * y), Y(z), r * k, s > 0 ? 0.5 : 3.14 - 2.6, s > 0 ? 3.14 + 0.1 + 0.9 : 3.14 - 0.5); g.stroke(); } },
     arcR(y, z, r, col) { d.arcB(y, z, r, col); },
     text(t, h, z, col = '#23262b', y = 0) { g.fillStyle = col; g.font = `900 ${h * k * 0.8}px Nunito, Arial, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, X(y), Y(z)); },
+    // Drift Lab rozeti: altıgen içinde deney şişesi çizgisi
     emblem(y, z, kind, r = 0.055) {
-      const cx = X(y); const cy = Y(z); const q = r * k;
-      g.save(); g.translate(cx, cy); g.strokeStyle = '#eef2f6'; g.fillStyle = '#eef2f6'; g.lineWidth = q * 0.2;
-      if (kind === 'rings3') { for (let i = -1; i <= 1; i++) { g.beginPath(); g.arc(i * q * 1.1, 0, q * 0.8, 0, 7); g.stroke(); } }
-      else if (kind === 'star3') { g.beginPath(); g.arc(0, 0, q, 0, 7); g.stroke(); for (let i = 0; i < 3; i++) { const a = -1.57 + (i * 6.283) / 3; g.beginPath(); g.moveTo(Math.cos(a + 2) * q * 0.12, Math.sin(a + 2) * q * 0.12); g.lineTo(Math.cos(a) * q, Math.sin(a) * q); g.lineTo(Math.cos(a - 2) * q * 0.12, Math.sin(a - 2) * q * 0.12); g.fill(); } }
-      else if (kind === 'propeller') { g.beginPath(); g.arc(0, 0, q, 0, 7); g.stroke(); g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, q * 0.8, -1.57, 0); g.closePath(); g.fill(); g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, q * 0.8, 1.57, 3.14); g.closePath(); g.fill(); }
-      else if (kind === 'rhomb') { g.beginPath(); g.moveTo(0, -q * 1.2); g.lineTo(q * 0.8, 0); g.lineTo(0, q * 1.2); g.lineTo(-q * 0.8, 0); g.closePath(); g.stroke(); }
-      else if (kind === 'oval') { g.beginPath(); g.ellipse(0, 0, q * 1.3, q * 0.8, 0, 0, 7); g.stroke(); }
-      else if (kind === 'bolt') { g.beginPath(); g.arc(0, 0, q, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-q * 0.9, q * 0.1); g.lineTo(q * 0.9, -q * 0.1); g.stroke(); }
-      else if (kind === 'tulip') { g.beginPath(); g.moveTo(0, q * 0.9); g.quadraticCurveTo(-q * 1.2, q * 0.1, -q * 0.7, -q); g.lineTo(0, -q * 0.3); g.lineTo(q * 0.7, -q); g.quadraticCurveTo(q * 1.2, q * 0.1, 0, q * 0.9); g.stroke(); }
-      else if (kind === 'vw2') { g.beginPath(); g.arc(0, 0, q, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-q * 0.6, -q * 0.3); g.lineTo(0, q * 0.5); g.lineTo(q * 0.6, -q * 0.3); g.stroke(); }
-      else if (kind === 'link') { g.beginPath(); g.moveTo(-q, -q * 0.4); g.lineTo(0, q * 0.4); g.lineTo(q, -q * 0.4); g.stroke(); }
-      else if (kind === 'shield') { g.beginPath(); g.moveTo(-q, -q); g.lineTo(q, -q); g.lineTo(q * 0.8, q * 0.4); g.lineTo(0, q); g.lineTo(-q * 0.8, q * 0.4); g.closePath(); g.stroke(); }
-      else { g.fillRect(-q, -q * 0.5, q * 2, q * 0.28); g.fillRect(-q, q * 0.2, q * 2, q * 0.28); }
+      const q = r * k;
+      g.save(); g.translate(X(y), Y(z)); g.strokeStyle = '#eef2f6'; g.lineWidth = q * 0.2; g.lineJoin = 'round';
+      g.beginPath();
+      for (let i = 0; i < 6; i++) { const a = 0.5236 + (i * Math.PI) / 3; g[i ? 'lineTo' : 'moveTo'](Math.cos(a) * q * 1.15, Math.sin(a) * q * 1.15); }
+      g.closePath(); g.stroke();
+      g.beginPath(); g.moveTo(-q * 0.2, -q * 0.6); g.lineTo(-q * 0.2, -q * 0.1); g.lineTo(-q * 0.55, q * 0.5); g.lineTo(q * 0.55, q * 0.5); g.lineTo(q * 0.2, -q * 0.1); g.lineTo(q * 0.2, -q * 0.6); g.stroke();
       g.restore();
     },
   };
@@ -7495,7 +7501,6 @@ function buildCar(THREE, id, paint) {
     for (const sg of [1, -1]) addBox(THREE, group, b - a, 0.04, 0.05, (a + b) / 2, roofF((a + b) / 2 / L) + 0.05, sg * (W / 2) * m.tumble * 0.86, chromeMat);
   }
   if (m.roofSpoiler) addBox(THREE, group, 0.34, 0.05, W * 0.74, (m.roof[m.roof.length - 2][0] - 0.1) * L, roofF(m.roof[m.roof.length - 2][0] - 0.1) + 0.02, 0, plastic);
-  if (m.hoodStar) { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.02, 0.09, 6), chromeMat); st.position.set(0.05, deckF(0.02) + 0.09, 0); group.add(st); }
   if (paint.premium && paint.sprite) {
     const roofA = m.win[0][0] + 0.06; const roofB = m.win[m.win.length - 1][1] - 0.08;
     if (!m.roofBlack && !paint.roof) patch(roofA + 0.03, roofA + 0.16, 0, 0.52, 0, 0.52, '#0b1016', 0);
@@ -8173,7 +8178,7 @@ class Renderer {
       if (img) s[k] = img;
     }
     const list = [];
-    for (const [k, n] of [['egea', 4], ['clio', 4], ['tofas', 5], ['golf', 5], ['focus', 4], ['megane', 4], ['linea', 4], ['bavyera', 5], ['kore', 4], ['murat', 4]]) {
+    for (const [k, n] of [['marmara', 4], ['liva', 4], ['klasik', 5], ['volta', 5], ['pusula', 4], ['lale', 4], ['vadi', 4], ['bavar', 5], ['dalga', 4], ['efe', 4]]) {
       for (let i = 0; i < n; i++) { const img = sheetSprite(`npc:${k}:${i}`, 44); if (img) list.push(img); }
     }
     if (list.length) s.parked = list;
@@ -10012,7 +10017,7 @@ class Input {
 // --- storage.js ---
 // En yüksek skor, coin, arabalar ve ayarlar localStorage'da.
 
-const KEY = 'kac-kacabilirsen-v1'; // Eski adla kalır: mevcut coin ve rekorlar kaybolmasın
+const KEY = 'drift-lab-v1';
 
 function defaultSave() {
   return {
@@ -11242,7 +11247,7 @@ function handleBack() {
   showStage('menu');
   return false;
 }
-globalThis.__kacisBack = handleBack;
+globalThis.__gameBack = handleBack;
 
 function boot() {
   const native = !!(globalThis.Capacitor && globalThis.Capacitor.isNativePlatform && globalThis.Capacitor.isNativePlatform());
@@ -11289,7 +11294,7 @@ function boot() {
 }
 
 // Test ve geliştirici erişimi
-globalThis.__kacis = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, get stage() { return stage; } };
+globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, get stage() { return stage; } };
 
 boot();
 

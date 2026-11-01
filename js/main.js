@@ -268,7 +268,7 @@ function handleBack() {
   showStage('menu');
   return false;
 }
-globalThis.__kacisBack = handleBack;
+globalThis.__gameBack = handleBack;
 
 function boot() {
   const native = !!(globalThis.Capacitor && globalThis.Capacitor.isNativePlatform && globalThis.Capacitor.isNativePlatform());
@@ -315,6 +315,6 @@ function boot() {
 }
 
 // Test ve geliştirici erişimi
-globalThis.__kacis = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, get stage() { return stage; } };
+globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, get stage() { return stage; } };
 
 boot();

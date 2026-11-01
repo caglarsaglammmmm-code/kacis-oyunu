@@ -42,11 +42,11 @@ export const PROP_INFO = [
   { r: 18, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#2fd872' },
   { r: 18, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#ffd23f' },
   { r: 13, brk: 20, drag: 0.03, dmg: 0, coin: true, chip: '#d9281e', snd: 'chairs' },
-  { r: 14, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#5c6b7a', snd: 'uncles' },
+  { r: 14, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#5c6b7a', safe: true }, // Yaşlı amcaların masası: araç değmez
   { r: 13, brk: 30, drag: 0.05, dmg: 0.3, coin: true, chip: '#d9a441', snd: 'simit' },
   { r: 15, brk: 25, drag: 0.05, dmg: 0.3, coin: true, chip: '#5bb04a', snd: 'chairs' },
   { r: 0, brk: 0, drag: 0, dmg: 0, coin: false, chip: '#fff', pass: true },
-  { r: 15, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#2a1f3a', snd: 'uncles' },
+  { r: 15, brk: 20, drag: 0.04, dmg: 0, coin: false, chip: '#2a1f3a', safe: true },
 ];
 
 export const POWER_KINDS = ['blast', 'ghost', 'heal', 'giant'];
@@ -102,7 +102,7 @@ function newChunk() {
 export class World {
   constructor(seed = 12345) {
     this.seed = seed | 0;
-    this.sistem = null;
+    this.kolej = null;
     this.sites = null;
     this.chunks = new Map();
     this.free = [];
@@ -122,7 +122,7 @@ export class World {
     this.lastChunk = null;
     this.lastKey = -1;
     this.seed = seed | 0;
-    this.sistem = null;
+    this.kolej = null;
     this.sites = null;
   }
 
@@ -225,6 +225,15 @@ export class World {
     return true;
   }
 
+  // Bu noktada korunan yapı var mı (cami)
+  sacredAt(x, y) {
+    const tx = Math.floor(x / TILE); const ty = Math.floor(y / TILE);
+    const cx = Math.floor(tx / CT); const cy = Math.floor(ty / CT);
+    const c = this.chunk(cx, cy);
+    const id = c.rectAt[(ty - cy * CT) * CT + (tx - cx * CT)];
+    return id > 0 && c.rects[id - 1].sacred;
+  }
+
   // Dairenin en derin temasını bulur; out: nx, ny, depth, rect, chunk
   circleHit(x, y, r, out) {
     const t0x = Math.floor((x - r) / TILE);
@@ -260,7 +269,7 @@ export class World {
 
   // Tank binayı ezer ya da top mermisi yıkar
   crush(chunk, rect) {
-    if (!rect.alive) return;
+    if (!rect.alive || rect.sacred) return;
     rect.alive = false;
     const id = chunk.rects.indexOf(rect) + 1;
     for (let i = 0; i < CELLS; i++) {
@@ -326,7 +335,7 @@ export class World {
     const home = Math.abs(cx) <= 1 && Math.abs(cy) <= 1;
     let t = home ? 'mahalle' : 'city';
     if (cx === sis.cx && cy === sis.cy) {
-      t = 'sistem';
+      t = 'kolej';
     } else if (big) {
       t = 'bigsite';
     } else if (!home) {
@@ -339,20 +348,20 @@ export class World {
     else if (t === 'downtown') this.fillDense(c, 'downtown', null);
     else if (t === 'esnaf') this.fillDense(c, 'esnaf', null);
     else if (t === 'gecekondu') this.fillDense(c, 'gecekondu', null);
-    else if (t === 'gece') this.fillDense(c, 'gece', null);
+    else if (t === 'keyif') this.fillDense(c, 'keyif', null);
     else if (t === 'site') this.fillSite(c, SITE_NAMES[rint(0, SITE_NAMES.length - 1)], PASTELS[rint(0, PASTELS.length - 1)], rint(0, 1), true);
     else if (t === 'bigsite') this.fillSite(c, big.name, big.color, big.layout, c.cx === big.cx && c.cy === big.cy);
     else if (t === 'cami') this.fillDense(c, 'mahalle', { style: BUILD.MOSQUE, w: 12, h: 12, color: '#c7cdd3', pad: 'courtyard', sign: '' });
     else if (t === 'stadyum') this.fillDense(c, 'mahalle', { style: BUILD.STADIUM, w: 18, h: 16, color: '#58606b', sign: '' });
-    else if (t === 'hastane') this.fillDense(c, 'mahalle', { style: BUILD.HOSPITAL, w: 13, h: 10, color: '#f1f5f8', pad: 'ambulance', sign: 'Devlet Hastanesi' });
-    else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: 'Atatürk İlkokulu' });
+    else if (t === 'hastane') this.fillDense(c, 'mahalle', { style: BUILD.HOSPITAL, w: 13, h: 10, color: '#f1f5f8', pad: 'ambulance', sign: 'Şehir Hastanesi' });
+    else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: 'Cumhuriyet İlkokulu' });
     else if (t === 'spor') this.fillDense(c, 'mahalle', { sport: true });
     else if (t === 'golet') this.fillDense(c, 'mahalle', { pond: true });
     else if (t === 'insaat' || t === 'harabe' || t === 'sanayi') this.fillZone(c, t);
     else if (t === 'donel') this.fillRoundabout(c);
     else if (t === 'viraj') this.fillCurvy(c);
     else if (t === 'pazar') this.fillPazar(c);
-    else if (t === 'sistem') this.fillSistem(c);
+    else if (t === 'kolej') this.fillSistem(c);
     else if (t === 'sea') this.fillSea(c);
     else if (t === 'beach') this.fillBeach(c);
     else if (t === 'forest') this.fillForest(c);
@@ -382,7 +391,7 @@ export class World {
     if (!r) { r = { kind: '', x: 0, y: 0, w: 0, h: 0, style: 0, color: '', alive: true, seed: 0 }; c.rects[c.rectCount] = r; }
     c.rectCount++;
     r.kind = kind; r.style = style; r.color = color; r.alive = true; r.seed = rint(0, 999);
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0;
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -684,6 +693,7 @@ export class World {
     const h = Math.min(bh, m.h);
     const padH = m.pad === 'yard' ? Math.min(bh - h, 7) : m.pad === 'ambulance' ? Math.min(bh - h, 4) : 0;
     const r = this.addRect(c, 'building', x0, y0, x0 + w, y0 + h, 2, m.style, m.color);
+    r.sacred = m.style === BUILD.MOSQUE; // Saygı: hiçbir şey yıkamaz
     if (m.sign) { r.sign = m.sign; r.signColor = m.style === BUILD.HOSPITAL ? '#d0121b' : '#23422f'; r.signSize = 3; }
     if (padH > 0) {
       this.setGround(c, x0, y0 + h, x0 + w, y0 + h + padH, GROUND.PLAZA);
@@ -733,11 +743,10 @@ export class World {
       add(BUILD.GECEKONDU, '#b08a5a', chance(0.12) ? pick(SG.shops) : '', '', 0);
       return;
     }
-    if (pf === 'gece') {
+    if (pf === 'keyif') {
       if (area >= 6 && chance(0.7)) {
-        const r = add(BUILD.CLUB, pick(SG.neon), pick(SG.clubs), '#1b1426', rint(1, 3));
-        r.neon = true;
-        this.addProp(c, PROP.QUEUE, r.x + r.w / 2, r.y + r.h + 24);
+        const color = pick(SG.cafeColors);
+        add(BUILD.CAFE, color, pick(SG.cafes), color, rint(1, 3));
         return;
       }
       const shop = area <= 6 ? BUILD.SHOP : BUILD.APARTMENT;
@@ -847,7 +856,7 @@ export class World {
           const ax = Math.round(Math.cos(t) * r);
           const ay = Math.round(Math.sin(t) * r);
           this.biomeAt(ax, ay, out);
-          const sis = this.sistem;
+          const sis = this.kolej;
           const clash = this.sites.some((o) => Math.abs(o.cx - ax) < 3 && Math.abs(o.cy - ay) < 3) || (Math.abs(sis.cx - ax) < 3 && Math.abs(sis.cy - ay) < 3);
           if (out.biome === 'city' && !clash && !isHighwayRow(ay) && !isHighwayRow(ay + 1) && Math.max(Math.abs(ax), Math.abs(ay)) > 3) {
             this.sites.push({ ...s, cx: ax, cy: ay });
@@ -923,9 +932,9 @@ export class World {
     this.scatter(c, PROP.SIMITCART, 4, [GROUND.PLAZA]);
   }
 
-  // Haritanın tek Sistem Koleji chunk'ı: tohuma bağlı, başlangıca yakın bir şehir bölgesinde
+  // Haritanın tek Kolej Koleji chunk'ı: tohuma bağlı, başlangıca yakın bir şehir bölgesinde
   sistemChunk() {
-    if (this.sistem) return this.sistem;
+    if (this.kolej) return this.kolej;
     const [a, b] = W.sistemRing;
     const out = { biome: '', sea: false };
     let found = null;
@@ -938,14 +947,14 @@ export class World {
       this.biomeAt(cx, cy, out);
       if (out.biome === 'city' && !isHighwayRow(cy) && Math.max(Math.abs(cx), Math.abs(cy)) > 1) found = { cx, cy };
     }
-    this.sistem = found || { cx: a, cy: a };
-    return this.sistem;
+    this.kolej = found || { cx: a, cy: a };
+    return this.kolej;
   }
 
   fillSistem(c) {
     this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
     // Haritanın en büyük binası: chunk'ın neredeyse tamamı
-    this.addRect(c, 'building', 5, 5, 30, 27, 3, BUILD.SISTEM, '#ff7a00');
+    this.addRect(c, 'building', 5, 5, 30, 27, 3, BUILD.KOLEJ, '#ff7a00');
     for (let k = 6; k < 29; k += 3) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 28.6 * TILE);
     this.scatter(c, PROP.SIMITCART, 3, [GROUND.PLAZA]);
   }

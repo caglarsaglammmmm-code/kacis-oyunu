@@ -3,7 +3,7 @@ import puppeteer from 'puppeteer-core';
 const rate = Number(process.argv[2] || 6);
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: 'new', args: ['--enable-gpu-rasterization', '--ignore-gpu-blocklist', '--use-angle=d3d11'], protocolTimeout: 180000 });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const place = (test, x, y, ang) => `(()=>{const g=__kacis.game;const p=g.player;g.god=true;for(let r=1;r<70;r++)for(let cy=-r;cy<=r;cy++)for(let cx=-r;cx<=r;cx++){if(Math.max(Math.abs(cx),Math.abs(cy))!==r)continue;const c=g.world.chunk(cx,cy);if(!(${test}))continue;p.x=c.x+${x};p.y=c.y+${y};p.a=${ang};p.vx=p.vy=0;g.cam.x=p.x;g.cam.y=p.y;g.cam.lvx=g.cam.lvy=0;return 'ok'}return 'yok'})()`;
+const place = (test, x, y, ang) => `(()=>{const g=__drift.game;const p=g.player;g.god=true;for(let r=1;r<70;r++)for(let cy=-r;cy<=r;cy++)for(let cx=-r;cx<=r;cx++){if(Math.max(Math.abs(cx),Math.abs(cy))!==r)continue;const c=g.world.chunk(cx,cy);if(!(${test}))continue;p.x=c.x+${x};p.y=c.y+${y};p.a=${ang};p.vx=p.vy=0;g.cam.x=p.x;g.cam.y=p.y;g.cam.lvx=g.cam.lvy=0;return 'ok'}return 'yok'})()`;
 const S = { otoban: place('c.hw&&c.biome==="city"', 200, 700, 0), kule: place('c.template==="downtown"', 60, 200, 1.57) };
 for (const n of Object.keys(S)) {
   const page = await b.newPage();
@@ -18,11 +18,11 @@ for (const n of Object.keys(S)) {
   const cdp = await page.createCDPSession();
   await cdp.send('Emulation.setCPUThrottlingRate', { rate });
   await sleep(3000);
-  await page.evaluate(() => { const p = __kacis.perf; p.i = 0; p.count = 0; });
+  await page.evaluate(() => { const p = __drift.perf; p.i = 0; p.count = 0; });
   // Otoban için kaydırma sürüşü: sağ-sol dokunuş yerine doğrudan girdi
   await sleep(18000);
   const r = await page.evaluate(() => {
-    const k = __kacis; const p = k.perf; const n = Math.min(p.count, p.frames.length);
+    const k = __drift; const p = k.perf; const n = Math.min(p.count, p.frames.length);
     const f = Array.from(p.frames.slice(0, n)).sort((a, c) => a - c);
     const w = Array.from(p.work.slice(0, n)).sort((a, c) => a - c);
     const q = (a, x) => +a[Math.floor(a.length * x)].toFixed(1);

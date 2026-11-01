@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Penci Zorn</string>
-    <string name="title_activity_main">Penci Zorn</string>
-    <string name="package_name">com.caglarsaglam.kackacabilirsen</string>
-    <string name="custom_url_scheme">com.caglarsaglam.kackacabilirsen</string>
+    <string name="app_name">Drift Lab</string>
+    <string name="title_activity_main">Drift Lab</string>
+    <string name="package_name">com.driftlab.game</string>
+    <string name="custom_url_scheme">com.driftlab.game</string>
 </resources>

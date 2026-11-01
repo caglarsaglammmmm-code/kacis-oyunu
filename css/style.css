@@ -243,6 +243,12 @@ h2 { font: 400 26px/1.1 Bungee, sans-serif; text-transform: uppercase; }
 .logo { position: absolute; left: 0; right: 0; top: calc(var(--safe-t) + 3.4vh); text-align: center; pointer-events: none !important; font-family: Bungee, sans-serif; font-weight: 400; line-height: .86; transform: skewX(-8deg); filter: drop-shadow(0 8px 18px rgba(0,0,0,.55)); }
 .logo span { display: block; font-size: clamp(58px, 19vw, 112px); background: linear-gradient(180deg, #fff6c8 8%, #ffd23f 42%, #ff8a1f 58%, #d42a1c 92%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 1px rgba(255,235,180,.5); }
 .logo em { display: block; margin-top: 2px; font-style: normal; font-size: clamp(40px, 13.4vw, 80px); letter-spacing: .14em; padding-left: .14em; background: linear-gradient(180deg, #ffffff 30%, #a9c8ff 60%, #4a7ce0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.logo-mark { display: block; width: clamp(64px, 18vw, 96px); margin: 0 auto -2px; filter: drop-shadow(0 3px 0 rgba(0,0,0,.45)); }
+.logo-mark path, .logo-mark circle { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.lm-flask { stroke: #eafcff; stroke-width: 6; }
+.lm-skid { stroke: #ffd23f; stroke-width: 5; stroke-dasharray: 9 7; }
+.logo-mark .lm-liquid { fill: #21d4a0; }
+.logo-mark .lm-bub { fill: #eafcff; }
 .logo::after { content: ''; display: block; height: 3px; width: min(62%, 340px); margin: 10px auto 0; background: linear-gradient(90deg, transparent, var(--hot), #fff, var(--hot), transparent); animation: logoLine 3.4s ease-in-out infinite; }
 @keyframes logoLine { 50% { filter: brightness(1.6); transform: scaleX(1.12); } }
 
@@ -334,6 +340,7 @@ body:not(.has3d) .garage3d { background: linear-gradient(160deg, #15183a, #0a0c1
   .logo { left: calc(var(--safe-l) + 20px); right: auto; top: calc(var(--safe-t) + 8px); text-align: left; }
   .logo span { font-size: 52px; }
   .logo em { font-size: 36px; }
+  .logo-mark { display: none; }
   .logo::after { margin: 6px 0 0; }
   .car-tag { left: 26%; bottom: calc(var(--safe-b) + 8px); }
   .menu-panel { left: auto; top: 0; right: 0; width: 44%; justify-content: center; background: linear-gradient(90deg, transparent, rgba(8,8,26,.78) 20%); padding-top: calc(var(--safe-t) + 6px); padding-bottom: calc(var(--safe-b) + 6px); }

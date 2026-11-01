@@ -103,29 +103,24 @@ function lamps(g, x, ys, w, h, color) {
   for (const y of ys) { g.fillRect(x, y - h / 2, w, h); g.fillRect(x, -y - h / 2, w, h); }
 }
 
-function emblem(g, x, kind) {
+// Drift Lab rozeti: küçük altıgen
+function emblem(g, x) {
   g.save();
   g.translate(x, 0);
   g.strokeStyle = '#eef2f6';
-  g.fillStyle = '#eef2f6';
   g.lineWidth = 0.6;
-  if (kind === 'ring') { for (let i = -1; i <= 1; i++) { g.beginPath(); g.arc(0, i * 1.5, 1, 0, 7); g.stroke(); } }
-  else if (kind === 'star') {
-    g.beginPath(); g.arc(0, 0, 2, 0, 7); g.stroke();
-    g.beginPath(); for (let i = 0; i < 3; i++) { const a = (i / 3) * 6.283 + 1.57; g.moveTo(0, 0); g.lineTo(Math.cos(a) * 2, Math.sin(a) * 2); } g.stroke();
-  } else if (kind === 'wheel') {
-    g.beginPath(); g.arc(0, 0, 2.1, 0, 7); g.stroke();
-    g.beginPath(); g.moveTo(-2, 0); g.lineTo(2, 0); g.moveTo(0, -2); g.lineTo(0, 2); g.stroke();
-  } else if (kind === 'oval') { g.beginPath(); g.ellipse(0, 0, 1.4, 2.6, 0, 0, 7); g.stroke(); }
-  else { g.beginPath(); g.moveTo(1.8, 0); g.lineTo(0, -2); g.lineTo(-1.8, 0); g.lineTo(0, 2); g.closePath(); g.stroke(); }
+  g.beginPath();
+  for (let i = 0; i < 6; i++) { const a = (i * Math.PI) / 3; g[i ? 'lineTo' : 'moveTo'](Math.cos(a) * 2, Math.sin(a) * 2); }
+  g.closePath();
+  g.stroke();
   g.restore();
 }
 
 // --- Oyuncu modelleri ---
-function dogan(g, l, w, c, a, fin) {
+function atmaca(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.56, H - 0.6, 9, 4, '#9aa3ad');
-  // Doğan: uzun düz kaput, kare bagaj, üç kutulu sedan
+// Klasik sedan
   hull(g, [[L, H * 0.84], [L - 1.5, H * 0.96], [-L + 1.5, H * 0.96], [-L, H * 0.84]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.2, -L * 0.54, H * 0.8, H * 0.76, L * 0.04, -L * 0.42, H * 0.64, coat(g, H, c, fin));
@@ -140,12 +135,12 @@ function dogan(g, l, w, c, a, fin) {
   mirrors(g, L * 0.16, H * 0.92, '#2a2d33');
 }
 
-function sahin(g, l, w, c, a, fin) {
+function simsek(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.56, H - 0.2, 10, 5, '#e8c547');
   hull(g, [[L, H * 0.8], [L - 2, H * 0.97], [-L + 2, H * 0.97], [-L, H * 0.82]]);
   fillHull(g, coat(g, H, c, fin));
-  // Şahin: daha kısa arka, ön dörtlü far, kalın şeritler, koca spoyler
+// Tuning sedan
   cabin(g, L * 0.24, -L * 0.48, H * 0.8, H * 0.74, L * 0.06, -L * 0.34, H * 0.62, coat(g, H, c, fin), '#07090d');
   g.fillStyle = a;
   g.fillRect(-L + 1, -H * 0.36, l - 2, H * 0.2);
@@ -159,10 +154,10 @@ function sahin(g, l, w, c, a, fin) {
   mirrors(g, L * 0.2, H * 0.92, '#0a0a0d');
 }
 
-function murat(g, l, w, c, a, fin) {
+function efe(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.58, H - 0.8, 9, 4, '#dfe4e9');
-  // Murat 131: dik köşeler, dörtlü yuvarlak far, büyük bagaj
+// Köşeli 70ler sedanı
   hull(g, [[L, H * 0.88], [L - 1, H * 0.94], [-L + 1, H * 0.94], [-L, H * 0.88]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.16, -L * 0.5, H * 0.8, H * 0.8, 0, -L * 0.4, H * 0.68, coat(g, H, c, fin));
@@ -177,10 +172,10 @@ function murat(g, l, w, c, a, fin) {
   mirrors(g, L * 0.12, H * 0.94, '#c9ced4');
 }
 
-function anadol(g, l, w, c, a, fin) {
+function cinar(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.62, -L * 0.56, H - 0.8, 9, 4, '#c9ced4');
-  // Anadol: yuvarlak fiberglas gövde, uzun kaput, kısa arka, kuyruk yüzgeci
+// Yuvarlak klasik
   smooth(g, [[L + 1, 0], [L, H * 0.7], [L * 0.7, H], [0, H * 0.94], [-L * 0.7, H * 0.96], [-L - 1, H * 0.86], [-L - 1, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.08, -L * 0.56, H * 0.76, H * 0.66, -L * 0.1, -L * 0.42, H * 0.56, coat(g, H, c, fin), '#1a2c38');
@@ -194,15 +189,15 @@ function anadol(g, l, w, c, a, fin) {
   mirrors(g, L * 0.1, H * 0.9, '#d0d5da');
 }
 
-function egea(g, l, w, c, a, fin) {
+function marmara(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.56, H - 0.2, 10, 4.6, '#d7dde4');
-  // Egea: akıcı sedan, kısa kaput, sivri LED far, çıkıntılı bagaj
+// Modern aile sedanı
   smooth(g, [[L, 0], [L, H * 0.58], [L * 0.78, H * 0.96], [0, H], [-L * 0.8, H * 0.96], [-L, H * 0.7], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.34, -L * 0.6, H * 0.8, H * 0.7, L * 0.08, -L * 0.36, H * 0.6, coat(g, H, c, fin));
   g.fillStyle = '#23272e'; g.fillRect(L - 1.4, -H * 0.36, 1.4, H * 0.72);
-  emblem(g, L - 3.6, 'oval');
+  emblem(g, L - 3.6);
   g.fillStyle = '#e8fbff';
   hull(g, [[L - 0.4, H * 0.42], [L * 0.8, H * 0.86]]); g.fill();
   lamps(g, -L, [H * 0.66], 2.6, H * 0.5, '#e01c2b');
@@ -210,16 +205,16 @@ function egea(g, l, w, c, a, fin) {
   mirrors(g, L * 0.3, H * 0.96, shade(c, -0.2));
 }
 
-function clio(g, l, w, c, a, fin) {
+function liva(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.62, -L * 0.58, H - 0.2, 10, 4.8, '#e7eaee');
-  // Clio: kısa hatchback, kavisli omuz, C biçimli LED far, bagajsız arka
+// Şehir hatchbacki
   smooth(g, [[L, 0], [L, H * 0.6], [L * 0.72, H * 1.0], [0, H * 0.9], [-L * 0.68, H * 1.02], [-L, H * 0.74], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.3, -L * 0.82, H * 0.76, H * 0.66, L * 0.06, -L * 0.68, H * 0.6, '#14171c');
   g.strokeStyle = '#eefaff'; g.lineWidth = 1.3;
   for (const s of [-1, 1]) { g.beginPath(); g.arc(L * 0.82, s * H * 0.7, 3.2, s > 0 ? 0.2 : -2.6, s > 0 ? 2.6 : -0.2); g.stroke(); }
-  emblem(g, L - 3.4, 'diamond');
+  emblem(g, L - 3.4);
   g.fillStyle = '#e01c2b';
   for (const s of [-1, 1]) { g.beginPath(); g.moveTo(-L * 0.78, s * H * 0.94); g.lineTo(-L, s * H * 0.66); g.lineTo(-L, s * H * 0.34); g.lineTo(-L + 2.6, s * H * 0.56); g.closePath(); g.fill(); }
   mirrors(g, L * 0.28, H * 0.9, a);
@@ -228,23 +223,23 @@ function clio(g, l, w, c, a, fin) {
 function suv(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.58, H + 0.2, 12, 5.4, '#3a3f47');
-  // Grandland: kompakt SUV, çift tonlu tavan, ince far, geniş siyah ızgara
+  // Kompakt SUV, çift tonlu tavan, ince far, geniş siyah ızgara
   smooth(g, [[L, 0], [L, H * 0.76], [L * 0.86, H], [-L * 0.82, H], [-L, H * 0.8], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.3, -L * 0.8, H * 0.8, H * 0.74, L * 0.12, -L * 0.68, H * 0.66, '#101317');
   g.fillStyle = '#c6ccd4'; g.fillRect(-L * 0.66, -H * 0.76, L * 0.76, 1.1); g.fillRect(-L * 0.66, H * 0.76 - 1.1, L * 0.76, 1.1);
   g.fillStyle = '#0c0e12'; g.fillRect(L - 2.6, -H * 0.8, 2.6, H * 1.6);
   g.fillStyle = '#e8fbff'; g.fillRect(L - 2, -H * 0.82, 1.6, H * 0.34); g.fillRect(L - 2, H * 0.48, 1.6, H * 0.34);
-  emblem(g, L - 1.4, 'wheel');
+  emblem(g, L - 1.4);
   lamps(g, -L, [H * 0.7], 1.6, H * 0.4, '#e01c2b');
   g.fillStyle = '#23272e'; g.fillRect(-L, -H * 0.42, 1.2, H * 0.84);
   mirrors(g, L * 0.26, H * 0.98, '#101317');
 }
 
-function duster(g, l, w, c, a, fin) {
+function bozkir(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.58, H + 0.6, 13, 6, '#20242a');
-  // Duster: geniş siyah çamurluk kaplamaları, tavan barları, kutu gibi arazi gövdesi
+// Arazi aracı
   g.fillStyle = '#23272e';
   rr(g, -L - 0.5, -H - 1, l + 1, w + 2, 4); g.fill();
   hull(g, [[L - 1, H * 0.72], [L - 3, H * 0.86], [-L + 3, H * 0.86], [-L + 1, H * 0.72]]);
@@ -260,10 +255,10 @@ function duster(g, l, w, c, a, fin) {
   mirrors(g, L * 0.26, H * 0.98, '#23272e');
 }
 
-function tog(g, l, w, c, a, fin) {
+function elektra(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.62, -L * 0.62, H + 0.1, 12, 5.2, '#a7b0ba');
-  // TOG T10X: kısa çıkıntılar, geniş gövde, boydan boya ışık çubuğu, siyah cam tavan
+// Elektrikli crossover
   smooth(g, [[L + 0.4, 0], [L, H * 0.8], [L * 0.84, H], [-L * 0.8, H], [-L, H * 0.84], [-L - 0.4, 0]]);
   fillHull(g, coat(g, H, c, fin));
   g.fillStyle = '#070a0e';
@@ -306,39 +301,39 @@ function moto(g, l, w, c, a, fin) {
   g.fillStyle = '#ff2733'; g.fillRect(-L - 1, -2, 1.6, 4);
 }
 
-// --- NPC modelleri: marka havası veren özgün tasarımlar, gerçek logo yok ---
-function bavyera(g, l, w, c, a, fin) {
+// --- NPC modelleri: özgün tasarımlar ---
+function bavar(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.58, H, 10, 4.6, '#b6bdc5');
   smooth(g, [[L, 0], [L, H * 0.74], [L * 0.8, H], [-L * 0.8, H * 0.98], [-L, H * 0.76], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.2, -L * 0.6, H * 0.8, H * 0.72, 0, -L * 0.42, H * 0.6, coat(g, H, c, fin));
-  // Çift böbrek ızgara, köşeli far
+  // Alçak tek parça ağız, ince far
   g.fillStyle = '#0d0f12';
-  rr(g, L - 2.4, -H * 0.42, 2.2, H * 0.38, 0.8); g.fill();
-  rr(g, L - 2.4, H * 0.04, 2.2, H * 0.38, 0.8); g.fill();
-  emblem(g, L * 0.74, 'wheel');
+  rr(g, L - 1.8, -H * 0.5, 1.6, H, 0.6); g.fill();
+  emblem(g, L * 0.74);
   lamps(g, L - 3.4, [H * 0.72], 3, H * 0.28, '#eafcff');
   lamps(g, -L, [H * 0.68], 2.2, H * 0.44, '#d8132a');
   mirrors(g, L * 0.16, H * 0.96, shade(c, -0.3));
 }
 
-function halka(g, l, w, c, a, fin) {
+function aurum(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.58, H, 10, 4.6, '#d6dbe1');
   smooth(g, [[L, 0], [L, H * 0.8], [L * 0.86, H], [-L * 0.86, H], [-L, H * 0.8], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.28, -L * 0.66, H * 0.8, H * 0.7, L * 0.04, -L * 0.46, H * 0.6, coat(g, H, c, fin));
-  // Tek parça geniş ızgara, üçgen LED, boydan boya stop
-  g.fillStyle = '#0d0f12'; g.fillRect(L - 2, -H * 0.56, 2, H * 1.12);
-  emblem(g, L - 3.6, 'ring');
+  // Üstte ince şerit, altta ağ panel, çift stop
+  g.fillStyle = '#c4cad2'; g.fillRect(L - 2.6, -H * 0.5, 0.8, H);
+  g.fillStyle = '#0d0f12'; g.fillRect(L - 1.6, -H * 0.5, 1.6, H);
+  emblem(g, L - 3.6);
   g.fillStyle = '#eafcff';
   hull(g, [[L - 0.4, H * 0.58], [L * 0.8, H * 0.92]]); g.fill();
   g.fillStyle = '#d8132a'; g.fillRect(-L, -H * 0.84, 1.4, H * 1.68);
   mirrors(g, L * 0.22, H * 0.98, shade(c, -0.3));
 }
 
-function yildiz(g, l, w, c, a, fin) {
+function stella(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.62, -L * 0.6, H, 10, 4.6, '#e2e6ea');
   smooth(g, [[L + 0.4, 0], [L, H * 0.7], [L * 0.76, H], [-L * 0.76, H], [-L, H * 0.72], [-L - 0.4, 0]]);
@@ -347,40 +342,40 @@ function yildiz(g, l, w, c, a, fin) {
   g.fillStyle = '#c9ced4'; g.fillRect(L - 2, -H * 0.4, 2.2, H * 0.8);
   g.strokeStyle = '#0d0f12'; g.lineWidth = 0.5;
   for (const y of [-H * 0.22, 0, H * 0.22]) { g.beginPath(); g.moveTo(L - 2, y); g.lineTo(L, y); g.stroke(); }
-  emblem(g, L * 0.82, 'star');
+  emblem(g, L * 0.82);
   lamps(g, L - 3.6, [H * 0.68], 3.2, H * 0.3, '#eafcff');
   lamps(g, -L, [H * 0.66], 2, H * 0.5, '#c81425');
   g.fillStyle = '#dfe4e9'; g.fillRect(-L * 0.8, -H * 0.36, 0.8, H * 0.72);
   mirrors(g, L * 0.12, H * 0.96, shade(c, -0.3));
 }
 
-function golf(g, l, w, c, a, fin) {
+function volta(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.6, H, 10, 4.6, '#c0c7cf');
   smooth(g, [[L, 0], [L, H * 0.78], [L * 0.8, H], [-L * 0.8, H], [-L, H * 0.84], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.26, -L * 0.86, H * 0.78, H * 0.72, L * 0.04, -L * 0.7, H * 0.62, coat(g, H, c, fin));
   g.fillStyle = '#0d0f12'; g.fillRect(L - 1.4, -H * 0.5, 1.4, H);
-  emblem(g, L - 3, 'wheel');
+  emblem(g, L - 3);
   lamps(g, L - 2.6, [H * 0.72], 2.6, H * 0.26, '#eafcff');
   lamps(g, -L, [H * 0.72], 1.8, H * 0.34, '#d8132a');
   mirrors(g, L * 0.22, H * 0.96, shade(c, -0.3));
 }
 
-function focus(g, l, w, c, a, fin) {
+function pusula(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.58, H, 10, 4.6, '#aeb6bf');
   smooth(g, [[L, 0], [L, H * 0.5], [L * 0.76, H * 0.98], [-L * 0.74, H], [-L, H * 0.8], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.32, -L * 0.8, H * 0.78, H * 0.68, L * 0.06, -L * 0.64, H * 0.6, coat(g, H, c, fin));
   g.fillStyle = '#0d0f12'; g.fillRect(L - 2.2, -H * 0.5, 2.2, H);
-  emblem(g, L - 3.6, 'oval');
+  emblem(g, L - 3.6);
   g.fillStyle = '#eafcff'; hull(g, [[L - 0.4, H * 0.5], [L * 0.76, H * 0.9]]); g.fill();
   g.fillStyle = '#d8132a'; g.fillRect(-L, -H * 0.76, 1.6, H * 0.5); g.fillRect(-L, H * 0.26, 1.6, H * 0.5);
   mirrors(g, L * 0.26, H * 0.96, shade(c, -0.3));
 }
 
-function kore(g, l, w, c, a, fin) {
+function dalga(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.58, H, 10, 4.6, '#c7ced6');
   smooth(g, [[L + 0.5, 0], [L, H * 0.62], [L * 0.8, H], [-L * 0.8, H], [-L, H * 0.68], [-L - 0.5, 0]]);
@@ -389,33 +384,33 @@ function kore(g, l, w, c, a, fin) {
   g.fillStyle = '#0d0f12'; rr(g, L - 2.6, -H * 0.5, 2.8, H, 1); g.fill();
   g.strokeStyle = '#8a929b'; g.lineWidth = 0.4;
   for (let y = -H * 0.4; y < H * 0.45; y += 1.6) { g.beginPath(); g.moveTo(L - 2.4, y); g.lineTo(L, y); g.stroke(); }
-  emblem(g, L - 3.8, 'oval');
+  emblem(g, L - 3.8);
   g.fillStyle = '#eafcff'; g.fillRect(L * 0.76, -H * 0.9, L * 0.22, 1.1); g.fillRect(L * 0.76, H * 0.9 - 1.1, L * 0.22, 1.1);
   g.fillStyle = '#d8132a'; g.fillRect(-L, -H * 0.78, 1.2, H * 1.56);
   mirrors(g, L * 0.26, H * 0.96, shade(c, -0.3));
 }
 
-function megane(g, l, w, c, a, fin) {
+function lale(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.6, -L * 0.58, H, 10, 4.6, '#bcc4cc');
   smooth(g, [[L, 0], [L, H * 0.66], [L * 0.76, H * 0.98], [-L * 0.8, H], [-L, H * 0.7], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.28, -L * 0.6, H * 0.78, H * 0.7, L * 0.04, -L * 0.42, H * 0.6, coat(g, H, c, fin));
   g.fillStyle = '#16181c'; g.fillRect(L - 1.6, -H * 0.42, 1.6, H * 0.84);
-  emblem(g, L - 3.2, 'diamond');
+  emblem(g, L - 3.2);
   lamps(g, L - 3, [H * 0.7], 2.8, H * 0.3, '#eafcff');
   lamps(g, -L, [H * 0.68], 2.2, H * 0.42, '#d8132a');
   mirrors(g, L * 0.24, H * 0.96, shade(c, -0.3));
 }
 
-function linea(g, l, w, c, a, fin) {
+function vadi(g, l, w, c, a, fin) {
   const L = l / 2; const H = w / 2;
   tyres(g, L * 0.58, -L * 0.58, H, 9.6, 4.4, '#a9b2bb');
   smooth(g, [[L, 0], [L, H * 0.74], [L * 0.84, H * 0.96], [-L * 0.84, H * 0.96], [-L, H * 0.74], [-L, 0]]);
   fillHull(g, coat(g, H, c, fin));
   cabin(g, L * 0.26, -L * 0.54, H * 0.78, H * 0.72, L * 0.04, -L * 0.36, H * 0.6, coat(g, H, c, fin));
   g.fillStyle = '#c9ced4'; g.fillRect(L - 1.4, -H * 0.3, 1.4, H * 0.6);
-  emblem(g, L - 3, 'oval');
+  emblem(g, L - 3);
   lamps(g, L - 2.6, [H * 0.68], 2.6, H * 0.34, '#fff5c4');
   lamps(g, -L, [H * 0.66], 2, H * 0.4, '#d8132a');
   mirrors(g, L * 0.22, H * 0.94, shade(c, -0.3));
@@ -438,8 +433,8 @@ function kamyonet(g, l, w, c, a, fin) {
 }
 
 const MODELS = {
-  dogan, motor: moto, moto, sahin, murat, anadol, egea, clio, suv, grandland: suv, duster, tog,
-  bavyera, halka, yildiz, golf, focus, kore, megane, linea, kamyonet,
+  atmaca, motor: moto, moto, simsek, efe, cinar, marmara, liva, suv, granit: suv, bozkir, elektra,
+  bavar, aurum, stella, volta, pusula, dalga, lale, vadi, kamyonet,
 };
 
 export const MODEL_NAMES = Object.keys(MODELS);
@@ -451,16 +446,16 @@ export function paintTr(g, len, wid, body, accent, shape, finish = 'gloss') {
 // Garaj için yandan profil: tanınmayı asıl bu sağlar.
 // body: gövde hattı, glass: cam, w: tekerlek konumları (0-1), h: göreli yükseklik
 const SIDE = {
-  dogan: { body: [[0, 62], [3, 50], [30, 46], [39, 18], [68, 18], [80, 44], [100, 48], [100, 64]], glass: [[37, 44], [44, 23], [57, 23], [57, 44]], glass2: [[60, 44], [60, 23], [67, 23], [76, 44]], w: [20, 79] },
+  atmaca: { body: [[0, 62], [3, 50], [30, 46], [39, 18], [68, 18], [80, 44], [100, 48], [100, 64]], glass: [[37, 44], [44, 23], [57, 23], [57, 44]], glass2: [[60, 44], [60, 23], [67, 23], [76, 44]], w: [20, 79] },
   motor: null,
-  grandland: { body: [[0, 60], [2, 44], [24, 34], [36, 12], [82, 10], [96, 30], [100, 38], [100, 66]], glass: [[35, 34], [44, 17], [60, 17], [60, 34]], glass2: [[63, 34], [63, 17], [80, 15], [90, 32]], w: [20, 80], tall: 1 },
-  tog: { body: [[0, 62], [1, 46], [18, 36], [36, 10], [80, 10], [98, 30], [100, 42], [100, 66]], glass: [[30, 35], [42, 14], [62, 14], [62, 35]], glass2: [[65, 35], [65, 14], [79, 14], [92, 32]], w: [18, 82], tall: 1 },
-  sahin: { body: [[0, 62], [3, 50], [30, 46], [40, 19], [66, 19], [78, 42], [100, 46], [100, 64]], glass: [[38, 44], [45, 24], [57, 24], [57, 44]], glass2: [[60, 44], [60, 24], [66, 24], [74, 44]], w: [20, 79], wing: 1 },
-  anadol: { body: [[0, 60], [2, 50], [36, 44], [46, 22], [66, 22], [84, 44], [100, 46], [100, 62]], glass: [[44, 42], [50, 26], [60, 26], [60, 42]], glass2: [[63, 42], [63, 26], [68, 26], [78, 42]], w: [20, 81] },
-  murat: { body: [[0, 64], [1, 48], [29, 45], [37, 16], [69, 16], [79, 43], [100, 46], [100, 66]], glass: [[35, 43], [41, 21], [56, 21], [56, 43]], glass2: [[59, 43], [59, 21], [67, 21], [75, 43]], w: [20, 79] },
-  egea: { body: [[0, 60], [2, 46], [26, 40], [40, 15], [70, 15], [86, 38], [100, 40], [100, 64]], glass: [[36, 38], [45, 19], [57, 19], [57, 38]], glass2: [[60, 38], [60, 19], [69, 19], [80, 38]], w: [20, 80] },
-  clio: { body: [[0, 60], [2, 44], [24, 37], [40, 12], [78, 13], [97, 36], [100, 42], [100, 64]], glass: [[34, 36], [45, 16], [60, 16], [60, 36]], glass2: [[63, 36], [63, 16], [77, 17], [90, 34]], w: [20, 80] },
-  duster: { body: [[0, 60], [1, 40], [22, 34], [33, 10], [85, 9], [98, 30], [100, 38], [100, 62]], glass: [[31, 33], [39, 15], [57, 15], [57, 33]], glass2: [[60, 33], [60, 15], [83, 14], [92, 32]], w: [19, 81], tall: 1, rails: 1, clad: 1 },
+  granit: { body: [[0, 60], [2, 44], [24, 34], [36, 12], [82, 10], [96, 30], [100, 38], [100, 66]], glass: [[35, 34], [44, 17], [60, 17], [60, 34]], glass2: [[63, 34], [63, 17], [80, 15], [90, 32]], w: [20, 80], tall: 1 },
+  elektra: { body: [[0, 62], [1, 46], [18, 36], [36, 10], [80, 10], [98, 30], [100, 42], [100, 66]], glass: [[30, 35], [42, 14], [62, 14], [62, 35]], glass2: [[65, 35], [65, 14], [79, 14], [92, 32]], w: [18, 82], tall: 1 },
+  simsek: { body: [[0, 62], [3, 50], [30, 46], [40, 19], [66, 19], [78, 42], [100, 46], [100, 64]], glass: [[38, 44], [45, 24], [57, 24], [57, 44]], glass2: [[60, 44], [60, 24], [66, 24], [74, 44]], w: [20, 79], wing: 1 },
+  cinar: { body: [[0, 60], [2, 50], [36, 44], [46, 22], [66, 22], [84, 44], [100, 46], [100, 62]], glass: [[44, 42], [50, 26], [60, 26], [60, 42]], glass2: [[63, 42], [63, 26], [68, 26], [78, 42]], w: [20, 81] },
+  efe: { body: [[0, 64], [1, 48], [29, 45], [37, 16], [69, 16], [79, 43], [100, 46], [100, 66]], glass: [[35, 43], [41, 21], [56, 21], [56, 43]], glass2: [[59, 43], [59, 21], [67, 21], [75, 43]], w: [20, 79] },
+  marmara: { body: [[0, 60], [2, 46], [26, 40], [40, 15], [70, 15], [86, 38], [100, 40], [100, 64]], glass: [[36, 38], [45, 19], [57, 19], [57, 38]], glass2: [[60, 38], [60, 19], [69, 19], [80, 38]], w: [20, 80] },
+  liva: { body: [[0, 60], [2, 44], [24, 37], [40, 12], [78, 13], [97, 36], [100, 42], [100, 64]], glass: [[34, 36], [45, 16], [60, 16], [60, 36]], glass2: [[63, 36], [63, 16], [77, 17], [90, 34]], w: [20, 80] },
+  bozkir: { body: [[0, 60], [1, 40], [22, 34], [33, 10], [85, 9], [98, 30], [100, 38], [100, 62]], glass: [[31, 33], [39, 15], [57, 15], [57, 33]], glass2: [[60, 33], [60, 15], [83, 14], [92, 32]], w: [19, 81], tall: 1, rails: 1, clad: 1 },
 };
 
 export function paintSide(g, W, H, spec) {
@@ -513,7 +508,7 @@ export function paintSide(g, W, H, spec) {
   g.beginPath(); g.moveTo(px(0), py(52)); g.lineTo(px(100), py(52)); g.stroke();
   if (s.rails) { g.strokeStyle = '#d7dde4'; g.lineWidth = 2.4; g.beginPath(); g.moveTo(px(36), py(s.body[3][1] - 3)); g.lineTo(px(84), py(s.body[3][1] - 3)); g.stroke(); }
   if (s.wing) { g.fillStyle = spec.accent; g.fillRect(px(98), py(36), px(84) - px(98), 5); g.fillRect(px(94), py(36), 3, py(46) - py(36)); }
-  g.fillStyle = spec.shape === 'tog' ? '#e4fbff' : '#fff5c4';
+  g.fillStyle = spec.shape === 'elektra' ? '#e4fbff' : '#fff5c4';
   g.fillRect(px(3) - 7, py(49), 7, 5);
   g.fillStyle = '#e01c2b';
   g.fillRect(px(100), py(47), 6, 6);

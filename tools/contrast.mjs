@@ -4,11 +4,11 @@ const b = await puppeteer.launch({ executablePath: 'C:/Program Files (x86)/Micro
 const p = await b.newPage();
 p.on('pageerror', (e) => console.log('HATA', e.message));
 await p.goto('http://localhost:8080/?god=1', { timeout: 0 });
-await p.waitForFunction(() => globalThis.__kacis && __kacis.renderer.sprites.parked.length > 6, { timeout: 30000 });
+await p.waitForFunction(() => globalThis.__drift && __drift.renderer.sprites.parked.length > 6, { timeout: 30000 });
 const r = await p.evaluate(async () => {
   const { sheetSprite } = await import('/js/sheet.js');
   const { CAR_SHEET } = await import('/js/carsheet.js');
-  const tones = __kacis.cfg.world.roadTones;
+  const tones = __drift.cfg.world.roadTones;
   const lum = (d, i) => { const f = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(d[i]) + 0.7152 * f(d[i + 1]) + 0.0722 * f(d[i + 2]); };
   const star = (y) => (y > 0.008856 ? Math.cbrt(y) * 116 - 16 : y * 903.3);
   const out = [];

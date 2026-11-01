@@ -33,7 +33,7 @@ async function touch(page, cdp, points) {
 
 async function statsOf(page) {
   return page.evaluate(() => {
-    const k = globalThis.__kacis;
+    const k = globalThis.__drift;
     const p = k.perf;
     const n = Math.min(p.count, p.frames.length);
     const f = Array.from(p.frames.slice(0, n)).sort((a, b) => a - b);
@@ -51,7 +51,7 @@ async function drive(page, cdp, seconds) {
   const H = page.viewport().height;
   while (Date.now() < end) {
     const steer = await page.evaluate(() => {
-      const { game: g } = globalThis.__kacis;
+      const { game: g } = globalThis.__drift;
       const p = g.player;
       // Önündeki engele göre yön: 3 ışın
       const look = (a, d) => g.world.blockedAt(p.x + Math.cos(a) * d, p.y + Math.sin(a) * d);
@@ -129,13 +129,13 @@ await page.close();
   await sleep(600);
   await p2.keyboard.down('ArrowLeft');
   await sleep(600);
-  const keyTurn = await p2.evaluate(() => globalThis.__kacis.input.steer);
+  const keyTurn = await p2.evaluate(() => globalThis.__drift.input.steer);
   await p2.keyboard.down('ArrowRight');
   await sleep(1000);
-  const rev = await p2.evaluate(() => ({ reverse: globalThis.__kacis.input.reverse, forward: globalThis.__kacis.game.player.forward }));
+  const rev = await p2.evaluate(() => ({ reverse: globalThis.__drift.input.reverse, forward: globalThis.__drift.game.player.forward }));
   await p2.keyboard.up('ArrowRight');
   await p2.keyboard.up('ArrowLeft');
-  await p2.evaluate(() => { const g = globalThis.__kacis.game; g.hurt(100); });
+  await p2.evaluate(() => { const g = globalThis.__drift.game; g.hurt(100); });
   await sleep(700);
   await p2.screenshot({ path: path.join(OUT, 'patlama.png') });
   await p2.waitForFunction(() => !document.getElementById('over').hidden, { timeout: 5000 });
@@ -143,7 +143,7 @@ await page.close();
   await p2.screenshot({ path: path.join(OUT, 'yatay-5-bitis.png') });
   await p2.click('#btn-retry');
   await sleep(500);
-  const again = await p2.evaluate(() => globalThis.__kacis.game.state);
+  const again = await p2.evaluate(() => globalThis.__drift.game.state);
   report.klavye = { keyTurn, rev, again, errors: e2 };
   await p2.close();
 }
@@ -156,14 +156,14 @@ await page.close();
   await p6.click('#btn-play');
   await sleep(500);
   const seq = [];
-  const st = () => p6.evaluate(() => ({ state: globalThis.__kacis.game.state, pause: !document.getElementById('pause').hidden, menu: !document.getElementById('menu').hidden }));
-  seq.push(await p6.evaluate(() => globalThis.__kacisBack()), await st());
-  seq.push(await p6.evaluate(() => globalThis.__kacisBack()), await st());
-  await p6.evaluate(() => globalThis.__kacis.pause());
+  const st = () => p6.evaluate(() => ({ state: globalThis.__drift.game.state, pause: !document.getElementById('pause').hidden, menu: !document.getElementById('menu').hidden }));
+  seq.push(await p6.evaluate(() => globalThis.__gameBack()), await st());
+  seq.push(await p6.evaluate(() => globalThis.__gameBack()), await st());
+  await p6.evaluate(() => globalThis.__drift.pause());
   await p6.click('#btn-pause-menu');
   await sleep(200);
-  const first = await p6.evaluate(() => globalThis.__kacisBack());
-  const second = await p6.evaluate(() => globalThis.__kacisBack());
+  const first = await p6.evaluate(() => globalThis.__gameBack());
+  const second = await p6.evaluate(() => globalThis.__gameBack());
   report.geri = { apk, seq, menuBirinci: first, menuIkinci: second, errors: e6 };
   await p6.close();
 }
@@ -198,7 +198,7 @@ await page.close();
   await p4.waitForFunction(() => !document.getElementById('menu').hidden, { timeout: 8000 });
   await p4.click('#btn-play');
   await sleep(1000);
-  report.cevrimdisi = { state: await p4.evaluate(() => globalThis.__kacis.game.state), controller: await p4.evaluate(() => !!navigator.serviceWorker.controller), errors: e4 };
+  report.cevrimdisi = { state: await p4.evaluate(() => globalThis.__drift.game.state), controller: await p4.evaluate(() => !!navigator.serviceWorker.controller), errors: e4 };
   await p4.close();
 }
 
@@ -212,7 +212,7 @@ await page.close();
   await p5.waitForFunction(() => !document.getElementById('menu').hidden, { timeout: 8000 });
   await p5.click('#btn-play');
   await sleep(1000);
-  report.dosya = { state: await p5.evaluate(() => globalThis.__kacis.game.state), errors: e5 };
+  report.dosya = { state: await p5.evaluate(() => globalThis.__drift.game.state), errors: e5 };
   await p5.close();
 }
 

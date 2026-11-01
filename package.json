@@ -1,5 +1,5 @@
 {
-  "name": "penci-zorn",
+  "name": "drift-lab",
   "version": "7.0.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "serve": "node tools/serve.mjs",
     "e2e": "node tools/e2e.mjs",
     "icons": "node tools/make-icons.mjs",
-    "android:build": "node tools/build-apk.mjs"
+    "android:build": "node tools/build-android.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",

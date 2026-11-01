@@ -8,7 +8,7 @@ await p.goto('http://localhost:8080/?god=1', { timeout: 0 });
 await p.waitForFunction(() => !document.getElementById('menu').hidden, { timeout: 30000 });
 const r = await p.evaluate(async () => {
   const { World } = await import('/js/world.js');
-  const k = globalThis.__kacis;
+  const k = globalThis.__drift;
   const R = k.renderer;
   const fail = {};
   const seen = {};

@@ -1,7 +1,7 @@
 // En yüksek skor, coin, arabalar ve ayarlar localStorage'da.
 import { CONFIG } from './config.js';
 
-const KEY = 'kac-kacabilirsen-v1'; // Eski adla kalır: mevcut coin ve rekorlar kaybolmasın
+const KEY = 'drift-lab-v1';
 
 export function defaultSave() {
   return {

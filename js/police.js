@@ -229,7 +229,8 @@ function driveTank(cop, g, dt) {
   target.x = g.ghostT > 0 ? cop.x + Math.cos(cop.a) * 200 : p.x;
   target.y = g.ghostT > 0 ? cop.y + Math.sin(cop.a) * 200 : p.y;
   const ahead = g.world.groundAt(cop.x + Math.cos(cop.a) * 110, cop.y + Math.sin(cop.a) * 110);
-  if (ahead === GROUND.WATER && g.flowReady) g.flow.sample(cop.x, cop.y, target, 6);
+  const sacred = g.world.sacredAt(cop.x + Math.cos(cop.a) * 110, cop.y + Math.sin(cop.a) * 110);
+  if ((ahead === GROUND.WATER || sacred) && g.flowReady) g.flow.sample(cop.x, cop.y, target, 6);
   const err = wrapAngle(Math.atan2(target.y - cop.y, target.x - cop.x) - cop.a);
   cop.ctlS = Math.max(-1, Math.min(1, err * 2));
   cop.ctlT = Math.abs(err) > 1.4 ? 0.3 : 1;

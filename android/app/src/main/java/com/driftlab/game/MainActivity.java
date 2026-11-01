@@ -1,4 +1,4 @@
-package com.caglarsaglam.kackacabilirsen;
+package com.driftlab.game;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -21,7 +21,7 @@ public class MainActivity extends BridgeActivity {
             @Override
             public void handleOnBackPressed() {
                 getBridge().getWebView().evaluateJavascript(
-                    "window.__kacisBack ? window.__kacisBack() : true",
+                    "window.__gameBack ? window.__gameBack() : true",
                     value -> {
                         if ("true".equals(value)) finish();
                     });

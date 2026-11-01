@@ -16,8 +16,8 @@ const scene = new T.Scene(); scene.environment = env;
 scene.add(new T.HemisphereLight('#ffffff', '#444455', 0.55));
 const sun = new T.DirectionalLight('#ffffff', 1.1); sun.position.set(-3, 8, 4); scene.add(sun);
 const list = [...CONFIG.cars.map((c) => ({ id: c.shape, name: c.name, paint: { color: c.paints[0].color, finish: c.paints[0].finish, roof: c.paints[0].roof, accent: c.paints[0].accent, premium: 1 } })), { id: 'moto', name: 'Motosiklet', paint: { color: '#e8352e', accent: '#ffe14d', finish: 'gloss' } }];
-for (const k of Object.keys(CONFIG.npc.types)) { const t = CONFIG.npc.types[k]; if (!list.some((o) => o.id === (t.model || k))) list.push({ id: t.model || k, name: t.model || k, paint: { color: t.colors[0], finish: 'gloss', accent: t.colors[1], sign: k === 'taxi' ? { text: 'TAKSİ', c: '#ffd23f' } : null } }); }
-list.push({ id: 'egea', name: 'Taksi (Egea)', paint: { color: '#f7c600', finish: 'gloss', sign: { text: 'TAKSİ', c: '#ffd23f' } } });
+for (const k of Object.keys(CONFIG.npc.types)) { const t = CONFIG.npc.types[k]; if (!list.some((o) => o.id === (t.model || k))) list.push({ id: t.model || k, name: CAR_MODELS[t.model || k]?.name || k, paint: { color: t.colors[0], finish: 'gloss', accent: t.colors[1], sign: k === 'taxi' ? { text: 'TAKSİ', c: '#ffd23f' } : null } }); }
+list.push({ id: 'marmara', name: 'Taksi', paint: { color: '#f7c600', finish: 'gloss', sign: { text: 'TAKSİ', c: '#ffd23f' } } });
 const box = document.getElementById('g');
 const shot = (cam) => { r.render(scene, cam); return r.domElement.toDataURL('image/png'); };
 for (const it of list) {

@@ -22,7 +22,7 @@ export class Effects {
     this.cursor = 0;
     this.colors = ['#888888'];
 
-    // Lastik izleri halka tampon: x1,y1,x2,y2,yaş
+    // Lastik izleri aurum tampon: x1,y1,x2,y2,yaş
     this.skidMax = FXP.maxSkids;
     this.skid = new Float32Array(this.skidMax * 5);
     this.skidCursor = 0;

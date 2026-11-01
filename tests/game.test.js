@@ -1,7 +1,7 @@
 import { isDeep } from '../js/world.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CONFIG } from '../js/config.js';
+import { BUILD, CONFIG } from '../js/config.js';
 import { Game, difficultyAt, damageStage, impactDamage, interp, dayState } from '../js/game.js';
 import { lightState } from '../js/crowd.js';
 import { resetBody } from '../js/physics.js';
@@ -267,7 +267,7 @@ test('en az 8 siren; aynı anda gelen polisler farklı siren çalar', () => {
 
 test('yeni sokak insanları ve sesleri; dükkân önünde durur, tehlikede kaçar', () => {
   for (const k of ['student', 'tourist', 'jogger', 'guard', 'teyze', 'hawker']) assert.ok(CONFIG.peds.kinds[k], k);
-  for (const v of ['teen', 'grandma', 'tourist']) assert.ok(CONFIG.peds.words[v], v);
+  for (const v of ['teen', 'tourist']) assert.ok(CONFIG.peds.words[v], v);
   const g = game();
   const p = g.crowd.peds[0];
   g.crowd.setupPed(p, 'teyze', g.player.x + 100, g.player.y, 0);
@@ -354,7 +354,7 @@ test('sivil Türk trafiği: oyuncudan zayıf, çarpılınca savrulur', () => {
     assert.ok(t.colors.length >= 1);
   }
   assert.ok(CONFIG.npc.types.taxi.colors[0] === '#f7c600', 'taksi sarı');
-  for (const k of ['tog', 'tofas', 'anadol', 'murat', 'minibus', 'bus', 'taxi', 'bavyera', 'halka', 'yildiz', 'golf', 'megane', 'linea', 'focus', 'kore', 'truck', 'pickup', 'motosiklet']) assert.ok(CONFIG.npc.types[k], k);
+  for (const k of ['elektra', 'klasik', 'cinar', 'efe', 'minibus', 'bus', 'taxi', 'bavar', 'aurum', 'stella', 'volta', 'lale', 'vadi', 'pusula', 'dalga', 'truck', 'pickup', 'motosiklet']) assert.ok(CONFIG.npc.types[k], k);
   const g = game({ god: true });
   g.player.vy = 0;
   for (let i = 0; i < 60 * 14; i++) g.tick(dt, 0, true);
@@ -390,12 +390,12 @@ test('NPC kırmızıda durur, yeşilde gider', () => {
   c.npcT = 1e9;
   const n = c.npcs[0];
   const center = jx * 1280 + 60;
-  const spec = CONFIG.npc.types.tofas;
-  // Yakın olan kırmızıyı garanti et
+  const spec = CONFIG.npc.types.klasik;
+  // Yakın olan kırmızıyı sağla
   c.clock = 0;
   while (lightState(c.clock, jx, 2, 0) !== 'r' || lightState(c.clock + 4, jx, 2, 0) !== 'r') c.clock += 0.1;
   resetBody(n, center - 330, 2 * 1280 + 90, 0, spec);
-  Object.assign(n, { alive: true, kind: 'tofas', spec, state: 'drive', dir: 0, line: 2 * 1280 + 60, color: 0, t: 0, lastCross: 1e9, hornT: 9, panicT: 0, waitT: 0 });
+  Object.assign(n, { alive: true, kind: 'klasik', spec, state: 'drive', dir: 0, line: 2 * 1280 + 60, color: 0, t: 0, lastCross: 1e9, hornT: 9, panicT: 0, waitT: 0 });
   n.drive.maxSpeed = 195; n.drive.accel = 260; n.drive.turnRate = 2.4; n.drive.grip = 7; n.drive.driftGrip = 7;
   n.vx = 195;
   p.x = center - 900;
@@ -532,4 +532,37 @@ test('otoban trafiği: yakınken yoğun akar, ters yönler ayrı, havuz sınır�
   assert.ok(new Set(live.map((h) => h.dir)).size === 2);
   const kinds = new Set(live.map((h) => h.kind));
   assert.ok(kinds.size >= 5, [...kinds].join());
+});
+
+test('içerik uyumu: korunan yayalara ve yaşlı masalarına araç değmez, cami yıkılamaz', () => {
+  const g = new Game(5);
+  g.start(CONFIG.cars[0], { seed: 5, god: true });
+  const p = g.player;
+  p.vx = 300; p.vy = 0; p.speed = 300;
+  for (const kind of ['child', 'elder', 'stroller', 'wheelchair', 'teyze', 'student']) {
+    assert.equal(CONFIG.peds.kinds[kind].safe, true, kind);
+    const ped = g.crowd.peds[0];
+    ped.alive = true; ped.kind = kind; ped.info = CONFIG.peds.kinds[kind]; ped.state = 0;
+    ped.x = p.x + 5; ped.y = p.y; ped.z = 0;
+    const hit = g.crowd.checkHit(ped, p, true);
+    assert.equal(hit, false, kind);
+    assert.notEqual(ped.state, 2, 'fırlamaz');
+  }
+  g.crowd.blast(p.x, p.y, 400);
+  assert.notEqual(g.crowd.peds[0].state, 2, 'patlamada da fırlamaz');
+  assert.ok(!CONFIG.signs.clubs, 'kulüp listesi yok');
+  // Cami: tank ezemez, top mermisi yıkamaz
+  const w = g.world;
+  let rect = null; let chunk = null;
+  for (let r = 0; r < 40 && !rect; r++) for (let cy = -r; cy <= r && !rect; cy++) for (let cx = -r; cx <= r && !rect; cx++) {
+    const c = w.chunk(cx, cy);
+    for (let i = 0; i < c.rectCount; i++) if (c.rects[i].style === BUILD.MOSQUE && c.rects[i].kind === 'building') { rect = c.rects[i]; chunk = c; }
+  }
+  assert.ok(rect, 'cami bulundu');
+  w.crush(chunk, rect);
+  assert.equal(rect.alive, true);
+  const tank = g.spawnCop('tank', 'chaser', rect.x - 20, rect.y + 40, 0);
+  tank.vx = 200;
+  g.collideWorld(tank, false);
+  assert.equal(rect.alive, true, 'tank ezemez');
 });

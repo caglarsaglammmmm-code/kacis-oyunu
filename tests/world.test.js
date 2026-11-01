@@ -171,7 +171,7 @@ test('sahile gidilebilir: kum ve sığ suya araba girer, derin deniz kapalı', (
   assert.ok(seen > 0, 'deniz bulunamadı');
 });
 
-test('Natura Park ve Doğa Şehir büyük siteleri tek ve çok bloklu; Sistem Koleji çok büyük', () => {
+test('Yeşilvadi ve Mavi Orman büyük siteleri tek ve çok bloklu; Mandalina Koleji çok büyük', () => {
   const w = new World(6);
   const seen = {};
   for (let cy = -30; cy < 30; cy++) {
@@ -183,14 +183,14 @@ test('Natura Park ve Doğa Şehir büyük siteleri tek ve çok bloklu; Sistem Ko
         for (let i = 0; i < c.rectCount; i++) if (c.rects[i].style === BUILD.SITE_BLOCK) blocks++;
         assert.ok(blocks >= 5, `blok ${blocks}`);
       }
-      if (c.template === 'sistem') {
+      if (c.template === 'kolej') {
         const r = c.rects[0];
         assert.ok(r.w >= 600 && r.h >= 560, 'en büyük bina');
       }
     }
   }
-  assert.equal(seen['Natura Park Sitesi'].length, 4);
-  assert.equal(seen['Doğa Şehir Sitesi'].length, 4);
+  assert.equal(seen['Yeşilvadi Sitesi'].length, 4);
+  assert.equal(seen['Mavi Orman Sitesi'].length, 4);
 });
 
 test('çıkmaz sokaklar var ama her yere ulaşılır; apartmanlar çeşitli', () => {
@@ -221,14 +221,14 @@ test('ilk üretilen chunk ile yeniden üretilen chunk birebir aynı', () => {
   }
 });
 
-test('tüm haritada tek bir turuncu Sistem Koleji var', () => {
+test('tüm haritada tek bir turuncu Mandalina Koleji var', () => {
   for (const seed of [1, 2, 3]) {
     const w = new World(seed);
     let count = 0;
     for (let cy = -40; cy < 40; cy++) {
       for (let cx = -40; cx < 40; cx++) {
         const c = w.chunk(cx, cy);
-        for (let i = 0; i < c.rectCount; i++) if (c.rects[i].style === BUILD.SISTEM) { count++; assert.equal(c.rects[i].color, '#ff7a00'); }
+        for (let i = 0; i < c.rectCount; i++) if (c.rects[i].style === BUILD.KOLEJ) { count++; assert.equal(c.rects[i].color, '#ff7a00'); }
       }
       for (const c of w.list.splice(0)) w.chunks.delete((c.cx + 32768) * 65536 + (c.cy + 32768)); // Bellek şişmesin
       w.lastKey = -1;
@@ -237,7 +237,7 @@ test('tüm haritada tek bir turuncu Sistem Koleji var', () => {
   }
 });
 
-test('Türkiye teması: tabelalar, market, çay ocağı, Nevada, amcalar, pazar, dar sokak', () => {
+test('Türkiye teması: tabelalar, market, çay ocağı, Çınar Kafe, amcalar, pazar, dar sokak', () => {
   const w = new World(4);
   const signs = new Set();
   const props = new Set();
@@ -252,11 +252,11 @@ test('Türkiye teması: tabelalar, market, çay ocağı, Nevada, amcalar, pazar,
       for (let i = 0; i < c.streetCount; i++) if (c.streets[i].width === 2) narrow++;
     }
   }
-  for (const s of ['Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Tekel', 'Çay Ocağı', 'Kuaför', 'Nargile Cafe', 'Nevada Kafe', 'Bakkal', 'Kahveci']) assert.ok(signs.has(s), s);
-  for (const s of ['Migros', 'BİM', 'ŞOK', 'A101', 'CarrefourSA', 'İtopya', 'Koçtaş', 'CZN Burak', 'Akbank', 'Garanti', 'Maydanoz Döner', 'Soslu Döner', 'Eczane', 'Fırın']) assert.ok(signs.has(s), s);
+  for (const s of ['Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Çınar Kafe', 'Bakkal', 'Kahveci']) assert.ok(signs.has(s), s);
+  for (const s of ['Pazarcık Market', 'Ucuzlar', 'Sepet Market', 'Yıldız Mağazaları', 'Dörtyol Market', 'Teknoloji Durağı', 'Yapı Dünyası', 'Köşe Bakkal', 'Yıldız Bankası', 'Güven Kredi', 'Nane Döner', 'Soslu Döner', 'Eczane', 'Fırın']) assert.ok(signs.has(s), s);
   assert.ok(![...signs].some((s) => /AVM/.test(s)), 'AVM yok');
   for (const p of ['CHAIRS', 'UNCLES', 'SIMITCART', 'STALL', 'LAUNDRY']) assert.ok(props.has(PROP[p]), p);
-  for (const t of ['mahalle', 'pazar', 'gecekondu', 'site', 'gece', 'cami', 'stadyum', 'hastane', 'okul']) assert.ok(tpl.has(t), t);
+  for (const t of ['mahalle', 'pazar', 'gecekondu', 'site', 'keyif', 'cami', 'stadyum', 'hastane', 'okul']) assert.ok(tpl.has(t), t);
   assert.ok(narrow > 20);
 });
 
@@ -273,7 +273,7 @@ test('şehir dengesi: yol ve bina yaklaşık yarı yarıya, dar sokaklar var', (
   for (let cy = -14; cy < 14; cy++) {
     for (let cx = -14; cx < 14; cx++) {
       const c = w.chunk(cx, cy);
-      if (!['mahalle', 'downtown', 'esnaf', 'gecekondu', 'gece'].includes(c.template)) continue;
+      if (!['mahalle', 'downtown', 'esnaf', 'gecekondu', 'keyif'].includes(c.template)) continue;
       let b = 0;
       for (let i = 0; i < CT * CT; i++) if (c.rectAt[i] && c.rects[c.rectAt[i] - 1].kind === 'building') b++;
       sum += b / (CT * CT); n++;
@@ -304,7 +304,7 @@ test('yol malzemeleri, spor sahaları, derin göletler ve her tür bina üretili
   }
   assert.equal(roads.size, 3);
   for (const k of ['foot', 'basket', 'hali', 'yard', 'ambulance', 'parking']) assert.ok(pads.has(k), k);
-  for (const s of [BUILD.HOSPITAL, BUILD.BANK, BUILD.SCHOOL, BUILD.MOSQUE, BUILD.RESIDENCE, BUILD.SKYSCRAPER, BUILD.HOTEL, BUILD.ISHANI, BUILD.APARTMENT, BUILD.VILLA, BUILD.GECEKONDU, BUILD.SHOP, BUILD.CLUB]) assert.ok(styles.has(s), s);
+  for (const s of [BUILD.HOSPITAL, BUILD.BANK, BUILD.SCHOOL, BUILD.MOSQUE, BUILD.RESIDENCE, BUILD.SKYSCRAPER, BUILD.HOTEL, BUILD.ISHANI, BUILD.APARTMENT, BUILD.VILLA, BUILD.GECEKONDU, BUILD.SHOP, BUILD.CAFE]) assert.ok(styles.has(s), s);
   assert.ok(deep > 3);
   assert.ok(huge > 3, 'dev tabela');
 });

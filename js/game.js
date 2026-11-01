@@ -517,7 +517,7 @@ export class Game {
       const cy = b.y + Math.sin(b.a) * off * sign;
       if (!this.world.circleHit(cx, cy, r, hit)) continue;
       const rect = hit.rect;
-      if (b.crusher && !isWaterRect(rect)) {
+      if (b.crusher && !isWaterRect(rect) && !rect.sacred) {
         this.crushRect(hit.chunk, rect);
         continue;
       }
@@ -592,7 +592,7 @@ export class Game {
           const d2 = dx * dx + dy * dy;
           if (d2 >= rr * rr) continue;
           const speed = Math.hypot(b.vx, b.vy);
-          if (speed >= info.brk || b.crusher || b.breaker || (isPlayer && this.giantT > 0)) {
+          if (!info.safe && (speed >= info.brk || b.crusher || b.breaker || (isPlayer && this.giantT > 0))) {
             this.breakProp(b, pr, info, isPlayer);
           } else {
             // Yavaş temas: katı engel gibi it
@@ -623,11 +623,6 @@ export class Game {
     if (info.snd) {
       this.emit(info.snd);
       if (pr.kind === PROP.SIMITCART) this.fx.burst(FX.SIMIT, pr.x, pr.y, 10, 210, 1.2, 7);
-      if (pr.kind === PROP.UNCLES) {
-        this.lastVoice = 'old';
-        this.emit('scream', 0.8);
-        this.fx.float(pr.x, pr.y - 16, 'HAYIRDIR EVLADIM!', '#ffffff');
-      }
     }
     if (info.coin && Math.random() < CONFIG.coin.dropChance) {
       this.world.dropCoin(pr.x + (Math.random() - 0.5) * 30, pr.y + (Math.random() - 0.5) * 30);
@@ -1139,7 +1134,7 @@ export class Game {
       // Düştüğü bina yıkılır
       const tx = Math.floor(s.x / TILE);
       const ty = Math.floor(s.y / TILE);
-      if (this.world.costAtTile(tx, ty) === 0 && this.world.circleHit(s.x, s.y, 8, hit) && !isWaterRect(hit.rect)) {
+      if (this.world.costAtTile(tx, ty) === 0 && this.world.circleHit(s.x, s.y, 8, hit) && !isWaterRect(hit.rect) && !hit.rect.sacred) {
         this.crushRect(hit.chunk, hit.rect);
       }
     }

@@ -1,45 +1,44 @@
-# Penci Zorn
+# Drift Lab
 
-Mobil öncelikli, Türk sokaklarında geçen kuşbakışı polis kaçış ve drift oyunu. Saf HTML, CSS, JavaScript ve Canvas; çerçeve ve derleme adımı yok. Yatay ve dikey ekranda oynanır, çevrimdışı çalışır. Tüm görseller ve sesler koddan üretilir.
+Mobil öncelikli, Türkiye sokaklarını andıran bir şehirde geçen kuşbakışı polis kaçış ve drift oyunu. Saf HTML, CSS, JavaScript ve Canvas; çerçeve ve derleme adımı yok. Yatay ve dikey ekranda oynanır, çevrimdışı çalışır. Tüm görseller ve sesler koddan üretilir; oyundaki araç, mağaza, banka ve mekân adlarının tamamı kurgudur.
 
-**Oyna:** https://caglarsaglammmmm-code.github.io/kacis-oyunu/
+**Oyna:** https://caglarsaglammmmm-code.github.io/kacis-oyunu/drift-lab/
 
-**Android APK indir (hep en güncel sürüm):** https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk
+**Android APK indir:** https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v7.0.0/DriftLab.apk
+
+**Gizlilik politikası:** https://caglarsaglammmmm-code.github.io/kacis-oyunu/drift-lab/privacy.html
 
 ## Oyunda neler var
 
-- **Biyomlar:** şehir (gökdelenli merkez dahil), sahil (kum, sığ su, deniz, köprüler), orman, çöl, kırsal. Zemin, nesne ve bina biyoma göre değişir.
-- **Özel güçler:** Patlama, Görünmezlik (15 sn), Can, Dev mod (15 sn).
-- **Garaj:** Tofaş Doğan ile başlarsın; coinlerle motosiklet, Grandland, TOG, Şahin, Anadol, Murat 131, Egea, Clio ve Duster açılır.
-- **Polisler:** normal, hızlı, motosiklet, SWAT, gelişmiş, tank. Sekiz farklı siren var, aynı anda gelen polisler farklı çalar.
-- **Gece-gündüz:** sokak lambaları, pencereler, tabelalar, neon mekânlar ve araç farları gece yanar.
-- **Türk sokakları:** tabelalı dükkânlar, marketler, çay ocakları, Nevada Kafe, kapalı pazar, kediler, simitçiler, trafik ışıkları, dolmuş, taksi ve belediye otobüsü. Haritada tek bir turuncu Sistem Koleji vardır.
+- **Biyomlar:** şehir, sahil, orman, çöl, kırsal. Zemin, nesne ve bina biyoma göre değişir.
+- **Özel güçler:** Patlama, Görünmezlik, Can, Dev mod.
+- **Garaj:** Atmaca ile başlarsın; coinlerle motosiklet, Granit SUV, Elektra X1, Şimşek, Çınar A, Efe 131, Marmara S, Liva ve Bozkır 4x4 açılır.
+- **Polisler:** normal, hızlı, motosiklet, SWAT, gelişmiş, tank; 225. saniyeden sonra uzaylılar.
+- **Gece-gündüz:** sokak lambaları, pencereler, tabelalar ve araç farları gece yanar.
+- **Şehir:** tabelalı dükkânlar, marketler, çay ocakları, müzikli kafeler, çay bahçeleri, spor salonları, kapalı pazar, kediler, trafik ışıkları, dolmuş, taksi ve şehir otobüsü. Haritada tek bir turuncu Mandalina Koleji vardır.
 
-## v4 yenilikleri
+## İçerik kuralları
 
-Her model için ayrı araç çizimi ve garajda yandan profil, marka havalı özgün NPC araçlar, yeni menü, garaj ve HUD, zincir mağazalar, bankalar, rezidans ve iş merkezleri, cami, stadyum, hastane, okul, gecekondu, çıkmaz sokaklar, pavyonlar, Natura Park ve Doğa Şehir siteleri, çok büyük tek Sistem Koleji. Tabelalardaki mağaza ve banka adları yalnızca yazıdır, gerçek logo kullanılmaz.
-
-## v3 oyun hissi iyileştirmeleri
-
-Coin kazancı yeniden dengelendi, sert darbede kısa duraksama ve kamera itmesi eklendi, kamera drift sırasında daha sakin takip ediyor, duvara saplanan araba kendiliğinden geri çıkıyor, baş parmak geçişi yanlışlıkla geri vites sayılmıyor, oyuncu polisten çok açılınca kovalama kopmuyor.
+- Çocuk, yaşlı, öğrenci, bebek arabalı ve tekerlekli sandalyeli yayalara araç değmez; kenara çekilirler.
+- Yetişkin yaya teması çizgi film tarzındadır, kan veya yaralanma yoktur.
+- Cami çarpılamaz ve hiçbir şeyle yıkılamaz.
 
 ## Kontroller
 
 | Girdi | Sonuç |
 |---|---|
-| Sağ yarıya basılı tut (veya sağ ok / D) | Sağa döner, drift atar |
-| Sol yarıya basılı tut (veya sol ok / A) | Sola döner, drift atar |
+| Sağ yarıya basılı tut (veya sağ ok / D) | Sağa döner, hızlıysa drift atar |
+| Sol yarıya basılı tut (veya sol ok / A) | Sola döner, hızlıysa drift atar |
 | İkisine birden bas | Durur, geri gider |
 
-Araba kendi gider. Bırakınca kayarak toparlar.
+Araba kendi gider. Direksiyonu sonuna kadar kırınca hız keser, bırakınca kayarak toparlar.
 
 ## Açma
 
-- **Çift tıklama:** `index.html`. Tarayıcılar `file://` üzerinde ES modül yüklemediği için `js/app.file.js` kopyası kullanılır. `js/` altında değişiklik yaparsanız `npm run bundle` çalıştırın; `npm test` kopya eskiyse hata verir.
-- **Yerel sunucu:** `npm run serve`, sonra `http://localhost:8080`. Aynı Wi-Fi'daki telefon için ekranda yazan adresi açın.
-- **Telefona kurma (PWA):** yukarıdaki adresi açın. Android Chrome: menü > *Ana ekrana ekle*. iPhone Safari: Paylaş > *Ana Ekrana Ekle*. İlk açılıştan sonra internetsiz çalışır.
+- **Çift tıklama:** `index.html`. `js/` altında değişiklik yaparsanız `npm run bundle` çalıştırın; `npm test` kopya eskiyse hata verir.
+- **Yerel sunucu:** `npm run serve`, sonra `http://localhost:8080`.
 
-## Android APK
+## Android
 
 Gereksinim: JDK 21 ve Android SDK 36. `JAVA_HOME` ve `ANDROID_HOME` tanımlı değilse `%LOCALAPPDATA%\Android\jdk-21` ve `%LOCALAPPDATA%\Android\Sdk` kullanılır.
 
@@ -48,47 +47,32 @@ npm install
 npm run android:build
 ```
 
-Sonuç: `dist/PenciZorn.apk`. Debug imzalıdır: telefona kurulur, Google Play'e yüklenemez. Telefonda indirip açın ve bilinmeyen kaynaktan yükleme iznini verin.
+Sonuç: `dist/DriftLab.apk` ve `dist/DriftLab.aab`. Uygulama kimliği `com.driftlab.game`. İmza anahtarı depoda değildir; yolu ve parolası `~/.driftlab/keystore.properties` dosyasından okunur. Anahtar kaybolursa mağazadaki sürüm güncellenemez, yedekleyin.
 
-Yeni sürüm yayınlamak için `android/app/build.gradle` içindeki sürümü artırın, sonra APK'yı bu adla Release'e ekleyin:
+Yeni sürümde `android/app/build.gradle` içindeki `versionCode` değerini artırın.
 
-```
-gh release create vX.Y.Z dist/PenciZorn.apk --title "vX.Y.Z"
-```
+## Mağaza dosyaları
 
-Dosya adı sabit kaldığı için oyundaki **APK İndir** düğmesi kendiliğinden en güncel sürüme gider.
+`store/` klasöründe Türkçe ve İngilizce mağaza metinleri ile Play Veri güvenliği formu yanıtları vardır. Gizlilik politikası `privacy.html`.
 
 ## Ayarlar ve test kısayolları
 
-Tüm denge değerleri tek dosyada: `js/config.js` (zaman eşikleri, polis gücü ve sayısı, hasar, arabalar, skor). Tüm araç hızları tek yerden, `speedScale` ile ayarlanır. Değiştirince `npm run bundle` çalıştırın.
+Tüm denge değerleri tek dosyada: `js/config.js`. Tüm araç hızları tek yerden, `speedScale` ile ayarlanır. Değiştirince `npm run bundle` çalıştırın.
 
 - **Başlangıç süresi:** `config.js` içinde `dev.startTime` veya adres çubuğunda `?t=280`.
-- **Ölümsüzlük:** `dev.godMode` veya `?god=1`. Ayrıca Ayarlar ekranında sürüm yazısına 7 kez dokununca gizli geliştirici bölümü açılır.
-
-Örnek: `http://localhost:8080/?t=280&god=1` tanklarla başlar.
+- **Ölümsüzlük:** `dev.godMode` veya `?god=1`.
 
 ## Komutlar
 
 | Komut | İş |
 |---|---|
 | `npm test` | Birim testleri |
-| `npm run e2e` | Sunucu açıkken Edge'de uçtan uca deneme (dokunma, ekranlar, çevrimdışı, kare süresi). `E2E_SECONDS`, `E2E_THROTTLE` |
-| `node tools/balance.mjs 40 0` | Botlarla denge ölçümü. İkinci sayı başlangıç saniyesi |
-| `node tools/turnbot.mjs 40 150` | Dönüş botu: sokak dönüşü, kavşak, U dönüşü ve çıkmaz sokak dener, takılanları sayar |
-| `npm run icons` | Simgeleri yeniden üretir |
+| `npm run e2e` | Sunucu açıkken Edge'de uçtan uca deneme |
+| `node tools/balance.mjs 40 0` | Botlarla denge ölçümü |
+| `node tools/turnbot.mjs 40 150` | Dönüş botu: sokak dönüşü, kavşak, U dönüşü ve çıkmaz sokak dener |
+| `node tools/name-scan.mjs` | Eski isim taraması |
+| `npm run icons` | Simge ve açılış görsellerini yeniden üretir |
 
-Dosyalar değişince `sw.js` içindeki `CACHE` sürümünü artırın, yoksa telefonlar eski kopyayı kullanır.
+Dosyalar değişince `sw.js` içindeki `CACHE` sürümünü artırın.
 
-## Yapı
-
-```
-js/config.js   tüm ayarlar            js/police.js   polis yapay zekâsı, akış alanı, barikat
-js/physics.js  araba fiziği, drift    js/render.js   Canvas çizimi, sprite üretimi
-js/world.js    sonsuz şehir üretimi   js/input.js    dokunma ve klavye
-js/game.js     oyun mantığı           js/audio.js    Web Audio sesleri
-js/effects.js  parçacık havuzları     js/storage.js  localStorage kaydı
-js/ui.js       menüler ve gösterge    js/main.js     döngü ve bağlantılar
-js/crowd.js    yayalar, sivil trafik  js/art.js      araba, bina ve güç çizimleri
-```
-
-Fontlar (Bungee, Nunito, Playfair Display) SIL Open Font License ile dağıtılır; lisanslar `fonts/` içindedir.
+Fontlar SIL Open Font License ile dağıtılır; lisanslar `fonts/` içindedir.

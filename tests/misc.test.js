@@ -73,11 +73,11 @@ test('kayıt: satın alma ve seçim kuralları', () => {
 
 test('kayıt: bozuk veri güvenli', () => {
   assert.deepEqual(sanitize(null), defaultSave());
-  const d = sanitize({ coins: -5, bestScore: 'x', owned: ['yok', 'motor', 'motor', 'pars'], selected: 'duster', settings: { sound: false } });
+  const d = sanitize({ coins: -5, bestScore: 'x', owned: ['yok', 'motor', 'motor', 'pars'], selected: 'bozkir', settings: { sound: false } });
   assert.equal(d.coins, 0);
   assert.equal(d.bestScore, 0);
-  assert.deepEqual(d.owned, ['dogan', 'motor']);
-  assert.equal(d.selected, 'dogan');
+  assert.deepEqual(d.owned, ['atmaca', 'motor']);
+  assert.equal(d.selected, 'atmaca');
   assert.equal(d.settings.sound, false);
   const b = { getItem: () => '{bozuk', setItem() { throw new Error('dolu'); } };
   const s = new Storage(b);
@@ -95,11 +95,11 @@ test('efekt havuzu taşmaz, süresi biteni temizler', () => {
   assert.ok(e.skidCursor < e.skidMax);
 });
 
-test('başlangıç aracı Tofaş Doğan; sırayla pahalılaşır, hızlanır, kayar, dayanır', () => {
+test('başlangıç aracı Atmaca; sırayla pahalılaşır, hızlanır, kayar, dayanır', () => {
   const cars = CONFIG.cars;
-  assert.equal(cars[0].id, 'dogan');
+  assert.equal(cars[0].id, 'atmaca');
   assert.equal(cars[0].cost, 0);
-  assert.deepEqual(cars.map((c) => c.id), ['dogan', 'motor', 'grandland', 'tog', 'sahin', 'anadol', 'murat', 'egea', 'clio', 'duster']);
+  assert.deepEqual(cars.map((c) => c.id), ['atmaca', 'motor', 'granit', 'elektra', 'simsek', 'cinar', 'efe', 'marmara', 'liva', 'bozkir']);
   for (let i = 1; i < cars.length; i++) {
     assert.ok(cars[i].cost > cars[i - 1].cost, 'fiyat');
     assert.ok(cars[i].maxSpeed > cars[i - 1].maxSpeed, 'hız');
@@ -112,13 +112,15 @@ test('başlangıç aracı Tofaş Doğan; sırayla pahalılaşır, hızlanır, ka
   assert.equal(new Set(cars.map((c) => c.color)).size, cars.length, 'her aracın rengi ayrı');
 });
 
-test('oyun adı her yerde Penci Zorn', () => {
-  assert.equal(CONFIG.name, 'Penci Zorn');
-  assert.ok(fs.readFileSync('index.html', 'utf8').includes('<title>Penci Zorn</title>'));
-  assert.equal(JSON.parse(fs.readFileSync('manifest.json', 'utf8')).name, 'Penci Zorn');
-  assert.equal(JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8')).appName, 'Penci Zorn');
-  assert.ok(fs.readFileSync('android/app/src/main/res/values/strings.xml', 'utf8').includes('Penci Zorn'));
-  assert.ok(CONFIG.apkUrl.endsWith('/PenciZorn.apk'));
+test('oyun adı her yerde Drift Lab', () => {
+  assert.equal(CONFIG.name, 'Drift Lab');
+  assert.ok(fs.readFileSync('index.html', 'utf8').includes('<title>Drift Lab</title>'));
+  assert.equal(JSON.parse(fs.readFileSync('manifest.json', 'utf8')).name, 'Drift Lab');
+  const cap = JSON.parse(fs.readFileSync('capacitor.config.json', 'utf8'));
+  assert.equal(cap.appName, 'Drift Lab');
+  assert.equal(cap.appId, 'com.driftlab.game');
+  assert.ok(fs.readFileSync('android/app/src/main/res/values/strings.xml', 'utf8').includes('Drift Lab'));
+  assert.ok(CONFIG.apkUrl.endsWith('/DriftLab.apk'));
 });
 
 test('js/app.file.js güncel (değilse: npm run bundle)', () => {
@@ -136,7 +138,7 @@ test('sw.js önbellek listesi eksiksiz', () => {
 
 test('açılış yazısı tam olarak istenen metin', () => {
   const html = fs.readFileSync('index.html', 'utf8');
-  assert.ok(html.includes('Çağlar Sağlam bu oyuna şaplağını vurdu'));
+  assert.ok(html.includes('<div id="splash" hidden><p>Drift Lab</p></div>'));
 });
 
 test('tek dosyalık paket geçerli JavaScript (modüller arası ad çakışması yok)', () => {

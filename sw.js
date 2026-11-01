@@ -1,8 +1,9 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'penci-zorn-v7';
+const CACHE = 'drift-lab-v7';
 const ASSETS = [
   './',
   'index.html',
+  'privacy.html',
   'manifest.json',
   'css/style.css',
   'js/config.js',
@@ -62,7 +63,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k.startsWith('drift-lab-')).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });

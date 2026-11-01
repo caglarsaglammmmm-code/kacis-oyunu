@@ -14,7 +14,7 @@ const jsonOut = args.includes('--json') ? args[args.indexOf('--json') + 1] : '';
 const showFails = args.includes('--fails');
 const dt = 1 / 60;
 const DIRS = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-const CARS = ['dogan', 'motor', 'clio', 'duster'].map((id) => CONFIG.cars.find((c) => c.id === id)).filter(Boolean);
+const CARS = ['atmaca', 'motor', 'liva', 'bozkir'].map((id) => CONFIG.cars.find((c) => c.id === id)).filter(Boolean);
 const SPEED = { dusuk: 110, orta: 220, yuksek: 0.95 }; // yuksek: arabanın son hızına oran
 
 let rs = 1;

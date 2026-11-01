@@ -2,7 +2,7 @@
 import puppeteer from 'puppeteer-core';
 const b = await puppeteer.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: 'new', args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'], protocolTimeout: 180000 });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const find = (test, off) => `(()=>{const g=__kacis.game;for(const k of g.cops)k.x+=1e5;g.god=true;const p=g.player;for(let r=1;r<70;r++)for(let cy=-r;cy<=r;cy++)for(let cx=-r;cx<=r;cx++){if(Math.max(Math.abs(cx),Math.abs(cy))!==r)continue;const c=g.world.chunk(cx,cy);if(!(${test}))continue;p.x=c.x+${off[0]};p.y=c.y+${off[1]};p.vx=p.vy=0;p.a=0;g.cam.x=p.x;g.cam.y=p.y;g.cam.lvx=g.cam.lvy=0;return 'ok'}return 'yok'})()`;
+const find = (test, off) => `(()=>{const g=__drift.game;for(const k of g.cops)k.x+=1e5;g.god=true;const p=g.player;for(let r=1;r<70;r++)for(let cy=-r;cy<=r;cy++)for(let cx=-r;cx<=r;cx++){if(Math.max(Math.abs(cx),Math.abs(cy))!==r)continue;const c=g.world.chunk(cx,cy);if(!(${test}))continue;p.x=c.x+${off[0]};p.y=c.y+${off[1]};p.vx=p.vy=0;p.a=0;g.cam.x=p.x;g.cam.y=p.y;g.cam.lvx=g.cam.lvy=0;return 'ok'}return 'yok'})()`;
 const S = {
   otoban: [find('c.hw&&c.biome==="city"', [700, 520]), 3500],
   donel: [find('c.template==="donel"', [640, 640]), 700],
@@ -13,6 +13,9 @@ const S = {
   harabe: [find('c.template==="harabe"', [640, 640]), 700],
   sanayi: [find('c.template==="sanayi"', [640, 640]), 700],
   downtown: [find('c.template==="downtown"', [640, 640]), 700],
+  kolej: [find('c.template==="kolej"', [640, 1180]), 900],
+  keyif: [find('c.template==="keyif"', [640, 640]), 900],
+  zincir: [find('c.rects.some(r=>r.style===26)', [640, 640]), 900],
   yangin: [find('c.fires&&c.fires.length', [640, 640]), 900],
 };
 for (const n of process.argv.slice(2)) {

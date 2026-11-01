@@ -726,7 +726,7 @@ export function paintSpecial(g, r) {
       g.fillRect(x, y + h - 17, w, 17);
       break;
     }
-    case S.SISTEM: {
+    case S.KOLEJ: {
       // Haritanın tek turuncu binası
       g.fillStyle = '#b84f00';
       rr(g, x, y, w, h, 5); g.fill();
