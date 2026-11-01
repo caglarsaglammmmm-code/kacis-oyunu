@@ -240,7 +240,7 @@ export class Stage {
     scene.add(this.ring);
     const glowT = tex(T, 256, 256, (g, w) => {
       const c = g.createRadialGradient(w / 2, w / 2, w * 0.2, w / 2, w / 2, w / 2);
-      c.addColorStop(0, 'rgba(255,160,70,.5)'); c.addColorStop(1, 'rgba(255,120,40,0)');
+      c.addColorStop(0, 'rgba(255,160,70,.16)'); c.addColorStop(1, 'rgba(255,120,40,0)');
       g.fillStyle = c; g.fillRect(0, 0, w, w);
     });
     const glow = new T.Mesh(new T.PlaneGeometry(10, 10), new T.MeshBasicMaterial({ map: glowT, transparent: true, blending: T.AdditiveBlending, depthWrite: false }));
@@ -285,8 +285,27 @@ export class Stage {
     this.dust = new T.Points(dg, new T.PointsMaterial({ color: '#ffcf90', size: 0.05, transparent: true, opacity: 0.8, blending: T.AdditiveBlending, depthWrite: false }));
     scene.add(this.dust);
 
+    // Temas gölgesi ve neon taban ışığı
+    const blob = (inner, outer) => tex(T, 256, 256, (g, w) => {
+      const c = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
+      c.addColorStop(0, inner); c.addColorStop(0.55, inner); c.addColorStop(1, outer);
+      g.fillStyle = c; g.fillRect(0, 0, w, w);
+    });
+    const shadow = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ map: blob('rgba(0,0,0,.92)', 'rgba(0,0,0,0)'), transparent: true, depthWrite: false }));
+    shadow.rotation.x = -Math.PI / 2; shadow.position.y = 0.045; shadow.scale.set(6.2, 3.3, 1);
+    this.neonA = new T.Mesh(new T.PlaneGeometry(1, 1), new T.MeshBasicMaterial({ map: blob('rgba(255,255,255,.75)', 'rgba(255,255,255,0)'), transparent: true, blending: T.AdditiveBlending, depthWrite: false, color: '#21d4fd' }));
+    this.neonA.rotation.x = -Math.PI / 2; this.neonA.position.y = 0.05; this.neonA.scale.set(7.2, 3.9, 1);
+    this.shadow = shadow;
     this.turn = new T.Group();
     scene.add(this.turn);
+    this.turn.add(this.neonA, shadow);
+    this.body = new T.Group();
+    this.turn.add(this.body);
+    this.flareMap = tex(T, 128, 128, (g, w) => {
+      const c = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
+      c.addColorStop(0, 'rgba(255,255,255,1)'); c.addColorStop(0.18, 'rgba(225,245,255,.75)'); c.addColorStop(1, 'rgba(160,210,255,0)');
+      g.fillStyle = c; g.fillRect(0, 0, w, w);
+    });
   }
 
   // shape: model, paint: boya
@@ -294,24 +313,45 @@ export class Stage {
     const key = `${shape}|${paint.color}|${paint.finish}|${paint.roof || ''}|${paint.accent || ''}`;
     if (key === this.carKey || !this.ok) return;
     this.carKey = key;
-    const { T, turn } = this;
+    const { T, body: turn } = this;
     while (turn.children.length) {
       const o = turn.children.pop();
       o.traverse((m) => { if (m.geometry) m.geometry.dispose(); if (m.material) { if (m.material.map) m.material.map.dispose(); m.material.dispose(); } });
     }
     const car = buildCar(T, shape, { ...paint, premium: 1, caliper: '#ff3a2a' });
-    const { L } = car.userData;
+    const { L, W } = car.userData;
     const k = 4.6 / Math.max(L, 2.4);
     const pivot = new T.Group();
     car.position.x = -L / 2;
     pivot.add(car);
+    // Yanan farlar: burun tarafında parlayan iki nokta
+    if (shape !== 'moto') {
+      for (const s of [-1, 1]) {
+        const f = new T.Sprite(new T.SpriteMaterial({ map: this.flareMap, color: '#eaf6ff', transparent: true, blending: T.AdditiveBlending, depthWrite: false, opacity: 0.7 }));
+        f.position.set(-L / 2 - 0.02, 0.72, s * W * 0.36);
+        f.scale.setScalar(0.4);
+        f.userData.flare = true;
+        pivot.add(f);
+      }
+    }
     pivot.scale.setScalar(shape === 'moto' ? 1.5 : k);
     turn.add(pivot);
     // Yerde yansıma: ters çevrilmiş kopya
     const mirror = pivot.clone();
+    mirror.traverse((o) => { if (o.userData.flare) o.visible = false; });
     mirror.scale.y *= -1;
     mirror.position.y = -0.01;
     turn.add(mirror);
+  }
+
+  // Seçili aracın rengine yakın neon: çok koyu boyada camgöbeği kalır
+  setGlow(color) {
+    if (!this.ok) return;
+    const c = new this.T.Color(color);
+    const hsl = {};
+    c.getHSL(hsl);
+    if (hsl.s < 0.25 || hsl.l < 0.16) this.neonHue = 0.52;
+    else this.neonHue = hsl.h;
   }
 
   setMode(mode) {
@@ -335,14 +375,20 @@ export class Stage {
     if (this.spinHold > 0) this.spinHold -= dt;
     else if (this.drag === null) this.angle += this.spin * dt;
     this.turn.rotation.y = this.angle;
+    // Hafif süspansiyon sallanması ve nabız gibi neon
+    this.body.position.y = 0.016 * Math.sin(t * 1.7);
+    this.body.rotation.x = 0.006 * Math.sin(t * 1.3);
+    this.body.rotation.z = 0.005 * Math.sin(t * 1.1 + 1);
+    this.neonA.material.opacity = 0.8 + 0.2 * Math.sin(t * 2.4);
+    this.neonA.material.color.setHSL(((this.neonHue ?? 0.52) + 0.04 * Math.sin(t * 0.5) + 1) % 1, 0.95, 0.58);
 
     const asp = this.cam.aspect;
     const portrait = asp < 1;
     const garage = this.mode === 'garage';
     // Araç genişliğe sığsın: kamera uzaklığı en boy oranından gelir
     const dist = Math.max(11, 11 / asp) * (garage ? 0.92 : 1);
-    const lift = portrait ? (garage ? -2.1 : -0.55) : 0;
-    const lateral = !portrait ? (garage ? 2.2 : -1.4) : 0;
+    const lift = portrait ? (garage ? -1.75 : -1.05) : 0;
+    const lateral = !portrait ? 2.2 : 0;
     const orbit = Math.sin(t * 0.14) * 0.07;
     const ease = Math.min(1, dt * 3);
     this.cx = this.cx === undefined ? dist : this.cx + (dist - this.cx) * ease;

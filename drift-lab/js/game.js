@@ -58,13 +58,14 @@ export function dayState(t, out = {}) {
   if (p >= Y.duskFrom && p < Y.nightFrom) k = (p - Y.duskFrom) / (Y.nightFrom - Y.duskFrom);
   else if (p >= Y.nightFrom && p < Y.dawnFrom) k = 1;
   else if (p >= Y.dawnFrom) k = 1 - (p - Y.dawnFrom) / (1 - Y.dawnFrom);
-  k = k * k * (3 - 2 * k);
-  const warm = Math.sin(Math.min(1, k * 1.15) * Math.PI); // Geçişte turuncu
+  k = k * k * k * (k * (k * 6 - 15) + 10);
+  // Gün doğumu gün batımından daha hafif: göz almayan sıcak turuncu
+  const warm = Math.sin(Math.min(1, k * 1.1) * Math.PI) * (p >= Y.dawnFrom || p < Y.duskFrom ? 0.65 : 1);
   out.k = k;
-  out.a = +(k * Y.darkness + warm * 0.14).toFixed(3);
-  out.r = Math.round(8 + warm * 190);
-  out.g = Math.round(12 + warm * 70);
-  out.b = Math.round(46 - warm * 20);
+  out.a = +(k * Y.darkness + warm * 0.1).toFixed(3);
+  out.r = Math.round(10 + warm * 150);
+  out.g = Math.round(14 + warm * 62);
+  out.b = Math.round(46 - warm * 16);
   return out;
 }
 
@@ -357,6 +358,7 @@ export class Game {
       this.stuckT = 0;
     }
     stepCar(p, steer, reverse ? -1 : 1, this.carSpec, surf, dt);
+    p.gas = reverse ? 0 : Math.abs(p.steer) > CONFIG.physics.cornerSteer ? 0.45 : 1; // Motor sesi gazı buradan okur
     if (this.hitCd > 0) this.hitCd -= dt;
 
     // Derin suya düştü: ölümsüzlükte duvar gibi davranır, testler ve geliştirici için

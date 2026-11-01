@@ -804,28 +804,33 @@ export function roofClutter(g, r) {
 
 // Tabelalar önbelleğe alınır: bina çizimi telefonda ucuz kalsın
 const signCache = new Map();
-// Tabela: on farklı yazı tarzı. Aynı ad farklı tohumda farklı görünür
-const SIGN_FONTS = [
-  ['800 30px Nunito, sans-serif', 'panel'],
-  ['400 34px Anton, Impact, sans-serif', 'panel'],
-  ['500 30px Oswald, sans-serif', 'dark'],
-  ['400 34px Lobster, cursive', 'bare'],
-  ['400 30px Pacifico, cursive', 'board'],
-  ['400 34px "Tilt Neon", sans-serif', 'neon'],
-  ['400 32px Monoton, sans-serif', 'neon'],
-  ['400 32px Righteous, sans-serif', 'two'],
-  ['400 30px Bungee, sans-serif', 'bare'],
-  ['italic 400 30px Playfair, Georgia, serif', 'brass'],
-];
+// Tabela türü adından anlaşılır; her türün kendi fontu ve zemini vardır
+const SIGN_STYLES = {
+  corp: [['500 30px Oswald, sans-serif', 'corp'], ['800 30px Nunito, sans-serif', 'corp']],
+  vivid: [['400 34px Anton, Impact, sans-serif', 'vivid'], ['400 32px Righteous, sans-serif', 'vivid']],
+  led: [['400 34px "Tilt Neon", sans-serif', 'led'], ['400 32px Monoton, sans-serif', 'led']],
+  wood: [['400 30px Pacifico, cursive', 'wood'], ['400 34px Lobster, cursive', 'wood']],
+  lux: [['italic 400 30px Playfair, Georgia, serif', 'brass']],
+  box: [['400 30px Bungee, sans-serif', 'box'], ['800 30px Nunito, sans-serif', 'box']],
+};
+export function signKind(text) {
+  if (/bank|kredi|tasarruf|yatırım|hastane|ilkokul|kolej/i.test(text)) return 'corp';
+  if (/teknoloji|oyun|piksel|bilgisayar|telefon/i.test(text)) return 'led';
+  if (/market|bakkal|manav|gross|mağaza|ucuzlar|büfe|bayii|dünyası/i.test(text)) return 'vivid';
+  if (/döner|kebap|pide|lahmacun|iskender|ciğer|börek|lokanta|kafe|çay|kahve|tost|tatlı|fırın|ocağı|köfte/i.test(text)) return 'wood';
+  if (/otel|hotel|rezidans|residence|palas|sitesi/i.test(text)) return 'lux';
+  return 'box';
+}
 
 export function signCanvas(text, color, seed = 0) {
-  const v = seed % SIGN_FONTS.length;
+  const list = SIGN_STYLES[signKind(text)];
+  const v = seed % list.length;
   const key = text + color + v;
   let c = signCache.get(key);
   if (c) return c;
   if (signCache.size > 400) signCache.clear();
-  const [font, kind] = SIGN_FONTS[v];
-  const shown = v === 1 || v === 8 ? text.toLocaleUpperCase('tr') : text;
+  const [font, kind] = list[v];
+  const shown = kind === 'vivid' || font.includes('Bungee') ? text.toLocaleUpperCase('tr') : text;
   c = document.createElement('canvas');
   const g0 = c.getContext('2d');
   g0.font = font;
@@ -837,7 +842,44 @@ export function signCanvas(text, color, seed = 0) {
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   const cy = 29;
-  if (kind === 'panel') {
+  if (kind === 'corp') {
+    g.fillStyle = color; g.fillRect(1, 5, w - 2, 46);
+    g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(1, 5, w - 2, 3);
+    g.fillStyle = '#fff'; g.fillText(shown, w / 2, cy + 1);
+  } else if (kind === 'vivid') {
+    g.fillStyle = color; rr(g, 2, 3, w - 4, 50, 9); g.fill();
+    g.save(); g.globalAlpha = 0.16; g.fillStyle = '#fff';
+    for (let px = -40; px < w; px += 26) { g.beginPath(); g.moveTo(px, 53); g.lineTo(px + 12, 53); g.lineTo(px + 44, 3); g.lineTo(px + 32, 3); g.fill(); }
+    g.restore();
+    g.lineWidth = 3; g.strokeStyle = '#ffd23f'; rr(g, 2, 3, w - 4, 50, 9); g.stroke();
+    g.lineWidth = 6; g.lineJoin = 'round'; g.strokeStyle = '#1a1420'; g.strokeText(shown, w / 2, cy);
+    g.fillStyle = '#ffe14d'; g.fillText(shown, w / 2, cy);
+  } else if (kind === 'led') {
+    g.fillStyle = '#07080e'; rr(g, 2, 4, w - 4, 48, 5); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.05)';
+    for (let py = 7; py < 50; py += 4) for (let px = 5; px < w - 4; px += 4) g.fillRect(px, py, 1.6, 1.6);
+    const glow = shade(color, 0.55);
+    g.lineWidth = 2; g.strokeStyle = glow; rr(g, 3, 5, w - 6, 46, 5); g.stroke();
+    g.shadowColor = glow; g.shadowBlur = 16;
+    g.fillStyle = glow; g.fillText(shown, w / 2, cy); g.fillText(shown, w / 2, cy);
+    g.shadowBlur = 0;
+    g.fillStyle = 'rgba(255,255,255,.6)'; g.fillText(shown, w / 2, cy);
+  } else if (kind === 'wood') {
+    g.fillStyle = '#6f4522'; rr(g, 2, 3, w - 4, 50, 6); g.fill();
+    for (let py = 3; py < 52; py += 12) {
+      g.fillStyle = py % 2 ? '#7c4f28' : '#855730'; g.fillRect(4, py + 1, w - 8, 11);
+      g.fillStyle = 'rgba(30,14,4,.35)'; g.fillRect(4, py, w - 8, 1.2);
+    }
+    g.fillStyle = '#2a1608';
+    for (const [px, py] of [[9, 9], [w - 9, 9], [9, 47], [w - 9, 47]]) { g.beginPath(); g.arc(px, py, 2, 0, 7); g.fill(); }
+    g.fillStyle = 'rgba(30,14,4,.8)'; g.fillText(shown, w / 2 + 1.5, cy + 1.5);
+    g.fillStyle = '#ffeec8'; g.fillText(shown, w / 2, cy);
+  } else if (kind === 'box') {
+    g.fillStyle = '#20242c'; rr(g, 1, 3, w - 2, 50, 4); g.fill();
+    g.fillStyle = '#fbfbf4'; rr(g, 4, 6, w - 8, 44, 2); g.fill();
+    g.fillStyle = color; g.fillRect(4, 44, w - 8, 6);
+    g.fillStyle = shade(color, -0.15); g.fillText(shown, w / 2, cy - 2);
+  } else if (kind === 'panel') {
     g.fillStyle = color; rr(g, 2, 4, w - 4, 48, 7); g.fill();
     g.lineWidth = 3; g.strokeStyle = '#fff'; g.stroke();
     g.fillStyle = '#fff'; g.fillText(shown, w / 2, cy);
@@ -1016,5 +1058,131 @@ export function paintPedKind(g, kind, step) {
       g.fillStyle = '#fff';
       g.fillRect(-3, -0.8, 3, 1.6);
     }
+  }
+}
+
+// --- Dükkân önü ---
+export function paintDoner(g, f) {
+  g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(-7, 9, 14, 3);
+  g.fillStyle = '#8b939c'; g.fillRect(-1, -12, 2, 23);
+  g.fillStyle = '#4a4f55'; g.fillRect(-6, 8, 12, 3);
+  // Koni et: bantlar kare kare kayar, dönüyormuş gibi görünür
+  g.beginPath(); g.moveTo(-6.5, -9); g.lineTo(6.5, -9); g.lineTo(3.8, 7); g.lineTo(-3.8, 7); g.closePath();
+  g.save(); g.clip();
+  g.fillStyle = '#8c4f22'; g.fillRect(-8, -10, 16, 18);
+  for (let i = 0; i < 6; i++) {
+    const x = -9 + ((i * 3.6 + f * 0.9) % 18);
+    g.fillStyle = i % 2 ? '#b8722f' : '#6f3a18';
+    g.fillRect(x, -10, 1.8, 18);
+  }
+  g.fillStyle = 'rgba(255,190,110,.32)'; g.fillRect(-2, -10, 3, 18);
+  g.restore();
+  g.fillStyle = '#d6dbe1'; g.fillRect(-7, -11, 14, 2);
+}
+
+export function paintPromo(g, text, i) {
+  const bg = ['#e8352e', '#ffd23f', '#16a34a', '#7b3fa0', '#ff6a13', '#0a84d6', '#e11d74', '#111827'][i % 8];
+  const fg = i % 8 === 1 ? '#7a1408' : '#ffffff';
+  g.fillStyle = 'rgba(0,0,0,.28)'; g.fillRect(-19, 10, 40, 3);
+  g.fillStyle = '#3c4148'; g.fillRect(-17, 7, 2, 6); g.fillRect(15, 7, 2, 6);
+  g.fillStyle = bg; rr(g, -21, -11, 42, 20, 2); g.fill();
+  g.lineWidth = 1.2; g.strokeStyle = 'rgba(255,255,255,.85)'; g.setLineDash([3, 2]); rr(g, -19.5, -9.5, 39, 17, 1.5); g.stroke(); g.setLineDash([]);
+  g.fillStyle = fg;
+  g.font = '400 8px Anton, Impact, sans-serif';
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(text, 0, -1, 37);
+}
+
+// Şişme hava dansçısı: gövde dalgalanır, kollar savrulur. Yerde üfleyici
+export function paintDancer(g, col, f) {
+  const ph = (f / 6) * Math.PI * 2;
+  g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(0, 33, 9, 3, 0, 0, 7); g.fill();
+  g.fillStyle = '#2f343c'; g.fillRect(-6, 27, 12, 6);
+  const pts = [];
+  for (let i = 0; i <= 8; i++) {
+    const t = i / 8;
+    pts.push([Math.sin(ph + t * 4) * (1 + t * 7), 28 - t * 52]);
+  }
+  g.strokeStyle = col; g.lineWidth = 8.5; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.beginPath(); pts.forEach(([x, y], i) => g[i ? 'lineTo' : 'moveTo'](x, y)); g.stroke();
+  g.strokeStyle = shade(col, 0.3); g.lineWidth = 2.5;
+  g.beginPath(); pts.forEach(([x, y], i) => g[i ? 'lineTo' : 'moveTo'](x - 1.6, y)); g.stroke();
+  const [sx, sy] = pts[6];
+  g.strokeStyle = col; g.lineWidth = 4;
+  for (const s of [-1, 1]) {
+    const a = ph * (s > 0 ? 1 : -1) + s * 0.6;
+    const ex = sx + s * (9 + 5 * Math.cos(a));
+    const ey = sy - 7 + 9 * Math.sin(a);
+    g.beginPath(); g.moveTo(sx, sy); g.quadraticCurveTo(sx + s * 8, sy - 5, ex, ey); g.lineTo(ex + s * 7 * Math.cos(a + ph), ey - 7); g.stroke();
+  }
+  const [hx, hy] = pts[8];
+  g.fillStyle = shade(col, 0.15); g.beginPath(); g.arc(hx, hy - 4, 6.2, 0, 7); g.fill();
+  g.fillStyle = '#fff'; for (const s of [-1, 1]) { g.beginPath(); g.arc(hx + s * 2.4, hy - 5, 1.9, 0, 7); g.fill(); }
+  g.fillStyle = '#141414'; for (const s of [-1, 1]) { g.beginPath(); g.arc(hx + s * 2.4, hy - 5, 0.9, 0, 7); g.fill(); }
+  g.strokeStyle = '#141414'; g.lineWidth = 1; g.beginPath(); g.arc(hx, hy - 3.4, 2.8, 0.3, 2.84); g.stroke();
+  g.strokeStyle = '#111'; g.lineWidth = 1.2; for (let i = -2; i <= 2; i++) { g.beginPath(); g.moveTo(hx + i * 2, hy - 9.5); g.lineTo(hx + i * 2.6, hy - 13 - (i & 1)); g.stroke(); }
+}
+
+// --- Balkon hayatı: gövde, baş, eylem, önünde korkuluk ---
+export function paintBalcony(g, act, f, shirt) {
+  const skin = '#e0a878';
+  g.fillStyle = 'rgba(30,40,55,.75)'; g.fillRect(-9, -11, 18, 21); // Balkon gölgesi
+  g.fillStyle = shirt; g.beginPath(); g.roundRect(-3.5, -3, 7, 9, 2); g.fill();
+  g.fillStyle = skin; g.beginPath(); g.arc(0, -6, 2.8, 0, 7); g.fill();
+  g.fillStyle = '#3b2a1e'; g.beginPath(); g.arc(0, -7, 2.9, 3.14, 0); g.fill();
+  g.strokeStyle = skin; g.lineWidth = 1.5; g.lineCap = 'round';
+  if (act === 'tea') {
+    const up = f ? -5 : -1;
+    g.beginPath(); g.moveTo(3, -1); g.lineTo(5, up + 2); g.stroke();
+    g.fillStyle = '#f4ead2'; g.fillRect(4.4, up - 1, 2.4, 3);
+    g.fillStyle = '#b5482f'; g.fillRect(4.6, up - 1, 2, 1);
+  } else if (act === 'wave') {
+    g.beginPath(); g.moveTo(3, -2); g.lineTo(f ? 7 : 4, -8); g.stroke();
+    g.beginPath(); g.arc(f ? 7 : 4, -9, 1.1, 0, 7); g.fillStyle = skin; g.fill();
+  } else if (act === 'water') {
+    g.beginPath(); g.moveTo(3, -1); g.lineTo(6, 0); g.stroke();
+    g.fillStyle = '#3f8f5b'; g.fillRect(5, -1.5, 4, 3);
+    g.fillStyle = '#9fd8ff'; for (let i = 0; i < 3; i++) g.fillRect(8.4, 1.5 + ((i * 2 + f * 2) % 6), 0.9, 1.3);
+    g.fillStyle = '#b5482f'; g.fillRect(4.5, 5, 5, 2.4);
+    g.fillStyle = '#e8533f'; g.beginPath(); g.arc(7, 4.4, 1.6, 0, 7); g.fill();
+  } else {
+    g.strokeStyle = '#dfe4ea'; g.lineWidth = 0.7; g.beginPath(); g.moveTo(-9, -9); g.lineTo(9, -9); g.stroke();
+    g.strokeStyle = skin; g.lineWidth = 1.5; g.beginPath(); g.moveTo(3, -2); g.lineTo(5, f ? -9 : -7); g.stroke();
+    g.fillStyle = '#f4f6f8'; g.fillRect(4, f ? -9 : -8.6, 4, 6);
+  }
+  g.fillStyle = 'rgba(245,247,250,.95)'; g.fillRect(-10, 4, 20, 1.3);
+  g.fillStyle = 'rgba(245,247,250,.75)'; for (let x = -9.4; x < 10; x += 2.6) g.fillRect(x, 4, 0.7, 6);
+  g.fillStyle = 'rgba(200,205,212,.95)'; g.fillRect(-10, 9.6, 20, 1);
+}
+
+export function paintWashing(g, f) {
+  g.strokeStyle = '#dfe4ea'; g.lineWidth = 0.7;
+  g.beginPath(); g.moveTo(-14, -6); g.quadraticCurveTo(0, -3.8, 14, -6); g.stroke();
+  const cols = ['#f4f6f8', '#e8533f', '#3e7cb1', '#f2c14e', '#7a5ea8'];
+  const sway = [-1.3, 0, 1.3][f];
+  for (let i = 0; i < 4; i++) {
+    const x = -12 + i * 6.2;
+    g.fillStyle = cols[i];
+    g.beginPath(); g.moveTo(x, -5); g.lineTo(x + 4.6, -5); g.lineTo(x + 4.6 + sway * (1 + i * 0.1), 4); g.lineTo(x + sway * (1 + i * 0.1), 4); g.closePath(); g.fill();
+  }
+}
+
+export function paintMoon(g) {
+  const gr = g.createRadialGradient(0, 0, 8, 0, 0, 22);
+  gr.addColorStop(0, 'rgba(255,245,210,.5)'); gr.addColorStop(1, 'rgba(255,240,200,0)');
+  g.fillStyle = gr; g.fillRect(-22, -22, 44, 44);
+  g.fillStyle = '#fff4d0'; g.beginPath(); g.arc(0, 0, 10, 0, 7); g.fill();
+  g.globalCompositeOperation = 'destination-out';
+  g.beginPath(); g.arc(4.5, -2.5, 8.6, 0, 7); g.fill();
+  g.globalCompositeOperation = 'source-over';
+}
+
+export function paintStars(g, seed) {
+  let s = seed;
+  const r = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+  for (let i = 0; i < 34; i++) {
+    g.fillStyle = r() < 0.2 ? '#ffe9b0' : '#ffffff';
+    const q = 0.7 + r() * 1;
+    g.fillRect(-160 + r() * 320, -45 + r() * r() * 90, q, q);
   }
 }

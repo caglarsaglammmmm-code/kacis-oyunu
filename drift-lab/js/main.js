@@ -8,6 +8,7 @@ import { Storage } from './storage.js';
 import { UI } from './ui.js';
 import { Stage } from './menu3d.js';
 import { loadAtlas } from './sheet.js';
+import { warp } from './transition.js';
 
 const STEP = 1 / 60;
 const canvas = document.getElementById('game');
@@ -38,6 +39,8 @@ function vibrate(ms) {
 
 function applySettings() {
   audio.setEnabled(storage.data.settings.sound);
+  audio.setVolume(storage.data.settings.volume / 100);
+  ui.syncMute();
   audio.setAmbient(storage.data.settings.ambient);
 }
 
@@ -75,6 +78,22 @@ function play() {
   keepAwake(true);
 }
 
+// BAŞLA: motor marşı ve sinematik geçiş. Otomatik testler ve hareket azaltma tercihinde doğrudan başlar
+let starting = false;
+function start() {
+  if (starting) return;
+  const quick = (navigator.webdriver && !params.has('fx')) || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  audio.unlock();
+  if (quick) { play(); return; }
+  starting = true;
+  audio.preview(storage.selectedCar().engine, 'start');
+  document.body.classList.add('warping');
+  warp(document.getElementById('warp'), () => {
+    document.body.classList.remove('warping');
+    play();
+  }, () => { starting = false; });
+}
+
 function toMenu() {
   paused = false;
   ui.setHud(false);
@@ -83,6 +102,7 @@ function toMenu() {
   game.startAttract();
   ui.refreshMenu();
   ui.show('menu');
+  ui.intro();
   showStage('menu');
   keepAwake(false);
 }
@@ -98,6 +118,7 @@ function syncStage(car = storage.selectedCar(), paintIdx = storage.paintIndex(ca
   if (!stage || !stage.ok) return;
   const paint = car.paints[paintIdx] || car.paints[0];
   stage.setCar(car.shape, { ...paint, accent: paint.accent || car.accent });
+  stage.setGlow(paint.color);
 }
 
 function loadThree() {
@@ -135,7 +156,8 @@ function resume() {
 
 const ui = new UI(storage, {
   tap() { audio.unlock(); },
-  play, toMenu, pause, resume, applySettings,
+  play, start, toMenu, pause, resume, applySettings,
+  preview(car) { audio.unlock(); audio.preview(car.engine, 'rev'); },
   carChanged() { game.carSpec = storage.selectedCar(); game.paint = storage.paintIndex(game.carSpec.id); },
   previewCar(car, paintIdx) { syncStage(car, paintIdx); },
   stage(mode) { showStage(mode); },
