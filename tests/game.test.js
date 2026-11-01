@@ -1,3 +1,4 @@
+import { isDeep } from '../js/world.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CONFIG } from '../js/config.js';
@@ -381,18 +382,18 @@ test('NPC kırmızıda durur, yeşilde gider', () => {
   let jx = 2; // Şehir kavşağı bul
   while (g.world.chunk(jx, 2).biome !== 'city') jx++;
   const p = g.player;
-  p.x = (jx - 1) * 960 + 100; p.y = 2 * 960 - 300; p.vx = 0; p.vy = 0;
+  p.x = (jx - 1) * 1280 + 60; p.y = 2 * 1280 - 300; p.vx = 0; p.vy = 0;
   g.cops.length = 0;
   c.clear();
   c.npcT = 1e9;
   const n = c.npcs[0];
-  const center = jx * 960 + 100;
+  const center = jx * 1280 + 60;
   const spec = CONFIG.npc.types.tofas;
   // Yakın olan kırmızıyı garanti et
   c.clock = 0;
   while (lightState(c.clock, jx, 2, 0) !== 'r' || lightState(c.clock + 4, jx, 2, 0) !== 'r') c.clock += 0.1;
-  resetBody(n, center - 330, 2 * 960 + 150, 0, spec);
-  Object.assign(n, { alive: true, kind: 'tofas', spec, state: 'drive', dir: 0, line: 2 * 960 + 100, color: 0, t: 0, lastCross: 1e9, hornT: 9, panicT: 0, waitT: 0 });
+  resetBody(n, center - 330, 2 * 1280 + 90, 0, spec);
+  Object.assign(n, { alive: true, kind: 'tofas', spec, state: 'drive', dir: 0, line: 2 * 1280 + 60, color: 0, t: 0, lastCross: 1e9, hornT: 9, panicT: 0, waitT: 0 });
   n.drive.maxSpeed = 195; n.drive.accel = 260; n.drive.turnRate = 2.4; n.drive.grip = 7; n.drive.driftGrip = 7;
   n.vx = 195;
   p.x = center - 900;
@@ -454,4 +455,62 @@ test('uzun simülasyon: tüm süreler boyunca hata yok, polis sınırı aşılma
   assert.ok(g.kills > 0 || g.broken > 0);
   assert.ok(g.world.chunks.size <= 100);
   assert.ok(g.copPool.length + g.cops.length < 80, 'havuz büyümez');
+});
+
+test('derin suya giren araç batar, oyuncu ölür; sığ suda bir şey olmaz', () => {
+  const g = game();
+  const ev = [];
+  g.onEvent = (n) => ev.push(n);
+  const w = g.world;
+  let spot = null;
+  for (let cy = -40; cy < 40 && !spot; cy++) {
+    for (let cx = -40; cx < 40 && !spot; cx++) {
+      const c = w.chunk(cx, cy);
+      if (c.template !== 'sea') continue;
+      for (let i = 0; i < c.rectCount; i++) if (c.rects[i].kind === 'sea' && c.rects[i].w > 80) { spot = c.rects[i]; break; }
+    }
+  }
+  assert.ok(spot, 'deniz yok');
+  const p = g.player;
+  p.x = spot.x + spot.w / 2; p.y = spot.y + spot.h / 2; p.vx = 200; p.vy = 0;
+  g.tick(dt, 0, false);
+  assert.equal(g.state, 'sinking');
+  assert.ok(ev.includes('sink'));
+  for (let i = 0; i < 60 * 3; i++) g.tick(dt, 0, false);
+  assert.equal(g.state, 'over');
+  assert.equal(g.result.cause, 'water');
+});
+
+test('havuz duvar gibidir, araç içine düşmez', () => {
+  const r = { kind: 'water', deep: false };
+  assert.equal(isDeep(r), false);
+  assert.equal(isDeep({ kind: 'sea' }), true);
+  assert.equal(isDeep({ kind: 'water', deep: true }), true);
+});
+
+test('uzaylılar eşikte gelir, oyuncudan hızlıdır, ışın hasar verir', () => {
+  const A = CONFIG.aliens;
+  assert.ok(CONFIG.difficulty.aliensAt >= 200 && CONFIG.difficulty.aliensAt <= 250);
+  assert.ok(A.ufo.speed > 1 && A.rover.speed > 1, 'kaçmak zor olmalı');
+  assert.equal(difficultyAt(224).ufos, 0);
+  assert.ok(difficultyAt(230).ufos >= 1 && difficultyAt(230).rovers >= 2);
+  const g = game({ startTime: 224.9 });
+  const ev = [];
+  g.onEvent = (n) => ev.push(n);
+  for (let i = 0; i < 60 * 10; i++) g.tick(dt, 0, false);
+  assert.ok(ev.includes('aliens'));
+  assert.ok(g.cops.some((c) => c.type === 'ufo' || c.type === 'rover'), 'uzaylı doğmadı');
+  const u = g.spawnCop('ufo', 'chaser', g.player.x + 5, g.player.y, 0);
+  g.damage = 0; g.god = false; g.giantT = 0;
+  const before = g.damage;
+  g.updateUfo(u, 0.5, true);
+  assert.equal(u.beam, 1);
+  assert.ok(g.damage > before);
+});
+
+test('polis sirenleri çakışmaz: on polise kadar her biri ayrı ses', () => {
+  const g = game();
+  g.cops.length = 0;
+  for (let i = 0; i < 10; i++) g.spawnCop('car', 'chaser', i * 100, 0, 0);
+  assert.equal(new Set(g.cops.map((c) => c.sirenId)).size, 10);
 });

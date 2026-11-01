@@ -373,7 +373,8 @@ export function paintNpc(g, kind, spec, color, finish) {
 }
 
 // --- Yaya: üstten küçük insan. step: adım evresi ---
-export function paintPed(g, shirt, skin, hair, step) {
+// Her yaya kıyafet, ten, saç ve aksesuarla ayrışır. acc: 0 yok, 1 şapka, 2 başörtüsü, 3 sırt çantası, 4 omuz çantası, 5 uzun saç, 6 kel
+export function paintPed(g, shirt, skin, hair, step, acc = 0) {
   const s = step ? 1 : -1;
   g.fillStyle = '#2b3140';
   g.beginPath(); g.ellipse(2.6 * s, -1.9, 1.9, 1.2, 0, 0, 7); g.fill();
@@ -385,7 +386,42 @@ export function paintPed(g, shirt, skin, hair, step) {
   g.beginPath(); g.arc(1.5 * s, 4.1, 1, 0, 7); g.fill();
   g.beginPath(); g.arc(0, 0, 2.3, 0, 7); g.fill();
   g.fillStyle = hair;
-  g.beginPath(); g.arc(-0.5, 0, 2.2, 1.57, 4.71); g.fill();
+  if (acc === 2) { g.beginPath(); g.arc(0, 0, 2.7, 0, 7); g.fill(); g.fillStyle = shade(hair, 0.25); g.fillRect(-3, -0.6, 1.4, 1.2); }
+  else if (acc === 5) { g.beginPath(); g.arc(-0.9, 0, 2.7, 1.2, 5.1); g.fill(); }
+  else if (acc !== 6) { g.beginPath(); g.arc(-0.5, 0, 2.2, 1.57, 4.71); g.fill(); }
+  if (acc === 1) { g.fillStyle = shade(shirt, -0.3); g.beginPath(); g.arc(0, 0, 2.4, 0, 7); g.fill(); g.fillRect(1.6, -1.6, 2.4, 3.2); }
+  if (acc === 3) { g.fillStyle = '#39414d'; g.fillRect(-4.2, -2.2, 2.2, 4.4); }
+  if (acc === 4) { g.fillStyle = '#7a4e2a'; g.fillRect(-1.5, 3.8, 3.4, 2.4); }
+}
+
+// Uçan daire: üstten yuvarlak gövde, cam kubbe, dönen ışıklar, içinde yeşil pilot
+export function paintUfo(g, spec) {
+  const R = spec.len / 2;
+  const grd = g.createRadialGradient(-R * 0.3, -R * 0.3, 2, 0, 0, R);
+  grd.addColorStop(0, '#d9e4ec'); grd.addColorStop(0.55, '#7f93a6'); grd.addColorStop(1, '#3b4757');
+  g.fillStyle = grd; g.beginPath(); g.arc(0, 0, R, 0, 7); g.fill();
+  g.strokeStyle = '#1c2530'; g.lineWidth = 1.4; g.stroke();
+  g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1; g.beginPath(); g.arc(0, 0, R * 0.74, 0, 7); g.stroke();
+  for (let i = 0; i < 10; i++) { const a = (i / 10) * 6.283; g.fillStyle = i % 2 ? '#39ff9c' : '#ffe14d'; g.beginPath(); g.arc(Math.cos(a) * R * 0.86, Math.sin(a) * R * 0.86, 3.2, 0, 7); g.fill(); }
+  const dome = g.createRadialGradient(-5, -6, 1, 0, 0, R * 0.46);
+  dome.addColorStop(0, '#d8fff0'); dome.addColorStop(1, '#2fb88a');
+  g.fillStyle = dome; g.beginPath(); g.arc(0, 0, R * 0.46, 0, 7); g.fill();
+  g.fillStyle = '#4de08a'; g.beginPath(); g.ellipse(0, 0, 8, 10, 0, 0, 7); g.fill();
+  g.fillStyle = '#10151c'; g.beginPath(); g.ellipse(-3, -2.4, 2.1, 3.2, 0.4, 0, 7); g.ellipse(3, -2.4, 2.1, 3.2, -0.4, 0, 7); g.fill();
+}
+
+// Uzaylı aracı: yerden yüksek, parlak yeşil çizgili, sivri burunlu
+export function paintRover(g, spec) {
+  const L = spec.len / 2; const H = spec.wid / 2;
+  g.fillStyle = 'rgba(57,255,156,.28)'; rr(g, -L - 4, -H - 4, spec.len + 8, spec.wid + 8, 12); g.fill();
+  const c = g.createLinearGradient(0, -H, 0, H);
+  c.addColorStop(0, '#5a3d9a'); c.addColorStop(0.5, '#2c1d58'); c.addColorStop(1, '#170e33');
+  g.fillStyle = c;
+  g.beginPath(); g.moveTo(L + 3, 0); g.quadraticCurveTo(L * 0.4, -H * 1.2, -L * 0.6, -H); g.lineTo(-L, -H * 0.5); g.lineTo(-L, H * 0.5); g.lineTo(-L * 0.6, H); g.quadraticCurveTo(L * 0.4, H * 1.2, L + 3, 0); g.closePath(); g.fill();
+  g.strokeStyle = '#39ff9c'; g.lineWidth = 1.6; g.stroke();
+  g.fillStyle = '#a0ffd8'; g.beginPath(); g.ellipse(L * 0.1, 0, L * 0.34, H * 0.46, 0, 0, 7); g.fill();
+  g.fillStyle = '#39ff9c'; g.fillRect(-L * 0.8, -H * 0.72, L * 0.7, 1.6); g.fillRect(-L * 0.8, H * 0.72 - 1.6, L * 0.7, 1.6);
+  g.fillStyle = '#ff2ad4'; g.beginPath(); g.arc(-L, -H * 0.4, 2.2, 0, 7); g.arc(-L, H * 0.4, 2.2, 0, 7); g.fill();
 }
 
 // --- Güç simgeleri ---
@@ -768,28 +804,73 @@ export function roofClutter(g, r) {
 
 // Tabelalar önbelleğe alınır: bina çizimi telefonda ucuz kalsın
 const signCache = new Map();
-export function signCanvas(text, color) {
-  const key = text + color;
+// Tabela: on farklı yazı tarzı. Aynı ad farklı tohumda farklı görünür
+const SIGN_FONTS = [
+  ['800 30px Nunito, sans-serif', 'panel'],
+  ['400 34px Anton, Impact, sans-serif', 'panel'],
+  ['500 30px Oswald, sans-serif', 'dark'],
+  ['400 34px Lobster, cursive', 'bare'],
+  ['400 30px Pacifico, cursive', 'board'],
+  ['400 34px "Tilt Neon", sans-serif', 'neon'],
+  ['400 32px Monoton, sans-serif', 'neon'],
+  ['400 32px Righteous, sans-serif', 'two'],
+  ['400 30px Bungee, sans-serif', 'bare'],
+  ['italic 400 30px Playfair, Georgia, serif', 'brass'],
+];
+
+export function signCanvas(text, color, seed = 0) {
+  const v = seed % SIGN_FONTS.length;
+  const key = text + color + v;
   let c = signCache.get(key);
   if (c) return c;
+  if (signCache.size > 400) signCache.clear();
+  const [font, kind] = SIGN_FONTS[v];
+  const shown = v === 1 || v === 8 ? text.toLocaleUpperCase('tr') : text;
   c = document.createElement('canvas');
   const g0 = c.getContext('2d');
-  g0.font = '800 30px Nunito, sans-serif';
-  const w = Math.ceil(g0.measureText(text).width) + 30;
+  g0.font = font;
+  const w = Math.ceil(g0.measureText(shown).width) + 34;
   c.width = w;
-  c.height = 46;
+  c.height = 56;
   const g = c.getContext('2d');
-  g.fillStyle = color;
-  rr(g, 1, 1, w - 2, 44, 7);
-  g.fill();
-  g.lineWidth = 3;
-  g.strokeStyle = '#fff';
-  g.stroke();
-  g.fillStyle = '#fff';
-  g.font = '800 30px Nunito, sans-serif';
+  g.font = font;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.fillText(text, w / 2, 24);
+  const cy = 29;
+  if (kind === 'panel') {
+    g.fillStyle = color; rr(g, 2, 4, w - 4, 48, 7); g.fill();
+    g.lineWidth = 3; g.strokeStyle = '#fff'; g.stroke();
+    g.fillStyle = '#fff'; g.fillText(shown, w / 2, cy);
+  } else if (kind === 'dark') {
+    g.fillStyle = '#14161c'; g.fillRect(1, 6, w - 2, 44);
+    g.fillStyle = color; g.fillRect(1, 44, w - 2, 6);
+    g.fillStyle = '#f4f6f8'; g.fillText(shown, w / 2, cy - 2);
+  } else if (kind === 'bare') {
+    g.lineWidth = 7; g.lineJoin = 'round'; g.strokeStyle = 'rgba(10,12,20,.85)'; g.strokeText(shown, w / 2, cy);
+    g.fillStyle = shade(color, 0.32); g.fillText(shown, w / 2, cy);
+  } else if (kind === 'board') {
+    g.fillStyle = '#f4ead2'; rr(g, 2, 4, w - 4, 48, 14); g.fill();
+    g.lineWidth = 2.5; g.strokeStyle = color; g.stroke();
+    g.fillStyle = color; g.fillText(shown, w / 2, cy - 1);
+  } else if (kind === 'neon') {
+    g.fillStyle = '#0d0a18'; rr(g, 2, 4, w - 4, 48, 6); g.fill();
+    const glow = shade(color, 0.5);
+    g.shadowColor = glow; g.shadowBlur = 14;
+    g.fillStyle = glow; g.fillText(shown, w / 2, cy);
+    g.fillText(shown, w / 2, cy);
+    g.shadowBlur = 0;
+    g.fillStyle = '#ffffff'; g.globalAlpha = 0.55; g.fillText(shown, w / 2, cy); g.globalAlpha = 1;
+  } else if (kind === 'two') {
+    g.fillStyle = color; g.fillRect(1, 4, w * 0.5, 48);
+    g.fillStyle = '#fff4d8'; g.fillRect(w * 0.5, 4, w * 0.5 - 1, 48);
+    g.fillStyle = '#16181c'; g.fillText(shown, w / 2 + 1.5, cy + 1.5);
+    g.fillStyle = '#ffd23f'; g.fillText(shown, w / 2, cy);
+  } else {
+    const gr = g.createLinearGradient(0, 4, 0, 52);
+    gr.addColorStop(0, '#e8c97a'); gr.addColorStop(1, '#a5792c');
+    g.fillStyle = gr; rr(g, 2, 6, w - 4, 44, 2); g.fill();
+    g.fillStyle = '#2b1d08'; g.fillText(shown, w / 2, cy);
+  }
   signCache.set(key, c);
   return c;
 }

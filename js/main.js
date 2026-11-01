@@ -171,6 +171,8 @@ game.onEvent = (name, v) => {
     case 'coin': audio.coin(); break;
     case 'nearmiss': audio.nearMiss(); break;
     case 'splash': audio.splash(); break;
+    case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
+    case 'aliens': audio.alert(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
     case 'spike': audio.spike(); vibrate(60); break;
     case 'copdown': audio.explosion(0.55 * v); vibrate(40); break;
     case 'explosion': audio.explosion(1); vibrate([120, 40, 220]); break;
@@ -249,7 +251,7 @@ let lastBack = 0;
 function handleBack() {
   const visible = (id) => !document.getElementById(id).hidden;
   if (visible('splash')) return false;
-  if (game.state === 'play' || game.state === 'dying') {
+  if (game.state === 'play' || game.state === 'dying' || game.state === 'sinking') {
     if (paused) resume(); else pause();
     return false;
   }
@@ -281,7 +283,9 @@ function boot() {
   }
   input.attach(canvas);
   applySettings();
-  if (document.fonts) document.fonts.load('800 30px Nunito', 'ÇŞĞİ').catch(() => {});
+  if (document.fonts) {
+    for (const f of ['800 30px Nunito', '400 30px Bungee', '400 30px Pacifico', '400 30px Anton', '400 30px Righteous', '400 30px Lobster', '400 30px "Tilt Neon"', '400 30px Monoton', '500 30px Oswald', 'italic 400 30px Playfair']) document.fonts.load(f, 'ÇŞĞİçşğı').catch(() => {});
+  }
   resize();
   window.addEventListener('resize', () => { resize(); if (stage) stage.resize(); });
   window.addEventListener('orientationchange', resize);

@@ -246,6 +246,7 @@ export function driveCop(cop, g, dt) {
     if ((d < CONFIG.barricade.wakeDist && g.ghostT <= 0) || cop.wakeT <= 0) cop.state = 'chase';
     return;
   }
+  if (cop.flying) return;
   if (cop.type === 'tank') driveTank(cop, g, dt);
   else drivePatrol(cop, g, dt);
 }

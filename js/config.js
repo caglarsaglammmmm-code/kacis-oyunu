@@ -1,14 +1,14 @@
 // Oyunun TÜM ayarları burada. Denge değiştirmek için yalnızca bu dosyayı düzenleyin,
 // ardından `npm run bundle` çalıştırın (file:// kopyası için).
 
-export const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 6, SHALLOW: 7, FIELD: 8 };
+export const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 6, SHALLOW: 7, FIELD: 8, ALLEY: 9 };
 
 // Bina stilleri. 0-6 şehir çatıları, sonrası js/art.js içinde özel çizilir
 export const BUILD = {
   TOWER_GLASS: 7, TOWER_ROUND: 8, TOWER_STEP: 9, HUT: 10, LIFEGUARD: 11, LIGHTHOUSE: 12, CABIN: 13,
   FIRETOWER: 14, ADOBE: 15, MESA: 16, BARN: 17, SILO: 18, WINDMILL: 19, WATERTOWER: 20, GAS: 21,
   APARTMENT: 22, MARKET: 23, SISTEM: 24, BAZAAR: 25, CHAIN: 26, BANK: 27, RESIDENCE: 28, OFFICE: 29, HOTEL: 30,
-  HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CLUB: 40,
+  HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CLUB: 40, SHOP: 41, SKYSCRAPER: 42,
 };
 
 export const CONFIG = {
@@ -28,18 +28,27 @@ export const CONFIG = {
 
   world: {
     tile: 40,
-    chunkTiles: 24,
-    arterial: 5, // Her chunk'ın batı ve kuzeyindeki ana yolun karo genişliği
-    loadRadius: 3, // Oyuncu çevresinde kaç chunk yüklü kalır
-    unloadRadius: 4, // Bu uzaklığın ötesindeki chunk'lar silinir
-    biomeCell: 11, // Bir biyom bölgesinin chunk cinsinden boyutu (rastgele sınırlı)
-    biomes: { city: 34, beach: 20, forest: 16, desert: 15, rural: 15 },
+    chunkTiles: 32,
+    arterial: 3, // Her chunk'ın batı ve kuzeyindeki ana yolun karo genişliği
+    loadRadius: 2, // Oyuncu çevresinde kaç chunk yüklü kalır
+    unloadRadius: 3, // Bu uzaklığın ötesindeki chunk'lar silinir
+    biomeCell: 8, // Bir biyom bölgesinin chunk cinsinden boyutu (rastgele sınırlı)
+    biomes: { city: 62, beach: 22, forest: 6, desert: 4, rural: 6 },
     seaRadius: 0.42, // Sahil bölgesinin ortasındaki denizin biyom hücresine oranı
-    templates: { mahalle: 30, city: 22, pazar: 7, downtown: 11, suburb: 7, park: 6, lake: 3, industrial: 4, plaza: 3, gecekondu: 8, site: 9, gece: 6, cami: 6, stadyum: 2, hastane: 3, okul: 4 },
-    sistemRing: [5, 12], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
+    templates: { mahalle: 30, downtown: 15, esnaf: 12, gecekondu: 7, site: 7, gece: 5, cami: 7, stadyum: 2, hastane: 4, okul: 5, spor: 6, golet: 4, park: 2, pazar: 3, industrial: 3 },
+    // Yoğunluk: alleys ara sokak sayısı (dikey, yatay), maxB en büyük parsel, wide iki karo sokak olasılığı,
+    // detached ayrık bina olasılığı, stub çıkmaz sokak olasılığı
+    profiles: {
+      mahalle: { alleys: [1, 1], maxB: 7, wide: 0.15, detached: 0.14, stub: 0.5 },
+      downtown: { alleys: [1, 1], maxB: 11, wide: 0.35, detached: 0.2, stub: 0.1 },
+      esnaf: { alleys: [1, 1], maxB: 5, wide: 0.2, detached: 0.05, stub: 0.4 },
+      gecekondu: { alleys: [1, 1], maxB: 3, wide: 0, detached: 0.3, stub: 0.7 },
+      gece: { alleys: [1, 1], maxB: 6, wide: 0.3, detached: 0.1, stub: 0.2 },
+    },
+    sistemRing: [4, 9], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
     bigSites: [
-      { name: 'Natura Park Sitesi', color: '#7fa86b', ring: [6, 14], layout: 0 },
-      { name: 'Doğa Şehir Sitesi', color: '#c98a5a', ring: [10, 20], layout: 1 },
+      { name: 'Natura Park Sitesi', color: '#7fa86b', ring: [5, 11], layout: 0 },
+      { name: 'Doğa Şehir Sitesi', color: '#c98a5a', ring: [8, 15], layout: 1 },
     ],
   },
 
@@ -84,6 +93,7 @@ export const CONFIG = {
     { grip: 0.75, speed: 0.92, drag: 0.15, name: 'dirt' },
     { grip: 0.6, speed: 0.66, drag: 0.55, name: 'shallow' },
     { grip: 0.72, speed: 0.9, drag: 0.22, name: 'field' },
+    { grip: 0.97, speed: 0.98, drag: 0.02, name: 'alley' },
   ],
 
   // En az 5 araba. durability hasarı böler, mass polis çarpışmalarını etkiler.
@@ -130,6 +140,8 @@ export const CONFIG = {
     advancedAt: 200,
     tanksAt: 280,
     alerts: { 50: 'SWAT geliyor!', 200: 'Ağır takviye!', 280: 'TANKLAR!' },
+    aliensAt: 225, // 200-250 sn arası: uzaylı işgali başlar. Oyun burada gerçekten zorlaşır
+    aliensAlert: 'UZAYLILAR GELDİ!',
     firstSpawnAt: 5,
     // [saniye, değer] noktaları arasında doğrusal artar, yani her saniye biraz zorlaşır
     policeCurve: [[0, 1], [15, 2], [30, 3], [50, 5], [120, 8], [200, 12], [280, 16], [420, 20]],
@@ -159,8 +171,24 @@ export const CONFIG = {
     tank: { hp: 700, mass: 22, speed: 0.4, accel: 160, turnRate: 1.2, grip: 14, driftGrip: 14, len: 104, wid: 66, ram: 2.2, smart: 0.3, siren: '' },
   },
 
-  // Sekiz ayrı siren. Her polis o anda en az kullanılan sireni seçer
-  sirens: ['wail', 'yelp', 'hilo', 'chirp', 'euro', 'rumble', 'horn', 'bip'],
+  // On ayrı polis sireni ve iki uzaylı sesi. Her araç o an boşta olan sireni seçer
+  sirens: ['wail', 'yelp', 'hilo', 'chirp', 'euro', 'rumble', 'horn', 'bip', 'pulse', 'warble', 'ufo', 'zap'],
+
+  // Uzaylılar: bu aşamada oyuncudan HIZLIDIR, kaçmak zordur. Eşikler ve güç burada
+  aliens: {
+    ufoCount: [[225, 1], [250, 2], [300, 3], [420, 5]], // [saniye, aynı anda en çok]
+    roverCount: [[225, 2], [250, 4], [300, 6], [420, 9]],
+    spawnEvery: 3.2,
+    ufo: { hp: 240, mass: 9, speed: 1.14, accel: 760, turnRate: 6, grip: 20, driftGrip: 20, len: 74, wid: 74, ram: 0, smart: 1, siren: 'ufo' },
+    rover: { hp: 110, mass: 1.7, speed: 1.05, accel: 860, turnRate: 4.6, grip: 13, driftGrip: 9, len: 46, wid: 28, ram: 1.7, smart: 1, siren: 'zap' },
+    beamRange: 105, // Işın dairesi
+    beamDps: 15, // Işın altında saniyede hasar
+    beamPull: 520, // Oyuncuyu merkeze çekme
+    beamSlow: 1.1, // Işın altında hız kaybı (saniyede oran)
+  },
+
+  // Derin su: sahil, göl, gölet. Sığ suya girilir, derine düşen araç batar
+  water: { sinkTime: 2.3, bubbleEvery: 0.06, shrink: 0.5, spin: 1.5, deepProbe: 6 },
 
   policeAI: {
     despawnDist: 2100,
@@ -222,22 +250,24 @@ export const CONFIG = {
   // Sokak insanları. density: zemin başına doğma olasılığı (GROUND sırasıyla)
   // voice: bağırma sesi, road: yolda gider, dodge: asla çarpılmaz, fx: özel dağılma
   peds: {
-    idleChance: 0.3, // Dükkân önünde duran, sohbet eden yaya oranı
+    looks: 36, // Saç, kıyafet, ten, aksesuar birleşimi: yarısı erkek, yarısı kadın
+    idleChance: 0.34,
+    curbShare: 0.55, // Ana yol kenarı kaldırımında yürüyenlerin oranı // Dükkân önünde duran, sohbet eden yaya oranı
     max: 50, spawnEvery: 0.09, waiterEvery: 0.7, despawn: 1300,
     walkSpeed: 26, runSpeed: 82, fearDist: 130, hitSpeed: 45,
     launch: 190, launchUp: 330, gravity: 900, downTime: 2.2,
-    density: [0.12, 0, 1, 1, 0, 0.55, 0.15, 0.3, 0.1],
+    density: [0.12, 0, 1, 1, 0, 0.55, 0.15, 0.3, 0.1, 0.8],
     kinds: {
       man: { weight: 5, speed: 1, voice: 'man' },
       woman: { weight: 5, speed: 1, voice: 'woman' },
       child: { weight: 2.6, speed: 1.4, voice: 'child' },
       elder: { weight: 2.2, speed: 0.6, voice: 'old' },
-      simitci: { weight: 1.3, speed: 0.8, voice: 'man', fx: 'simit', words: ['SİMİTLERİM!', 'SİMİİİT!', 'TEPSİM!'] },
-      stroller: { weight: 1, speed: 0.8, voice: 'woman' },
-      wheelchair: { weight: 0.7, speed: 0.75, voice: 'old' },
-      bike: { weight: 1.5, speed: 3, voice: 'man' },
-      courier: { weight: 1, speed: 5.4, voice: 'man', road: true, words: ['PAKET GİTTİ!', 'SİPARİŞ!', 'OHA!'] },
-      cayci: { weight: 1.1, speed: 1, voice: 'man', fx: 'tea', words: ['ÇAYLAR!', 'BARDAKLAR!', 'TAZE DEMLEMİŞTİM!'] },
+      simitci: { weight: 1.3, speed: 0.8, voice: 'simit', fx: 'simit', words: ['SİMİTLERİM!', 'SİMİİİT!', 'TEPSİM!'] },
+      stroller: { weight: 1, speed: 0.8, voice: 'mom', words: ['BEBEĞİM!', 'DİKKAT ET!'] },
+      wheelchair: { weight: 0.7, speed: 0.75, voice: 'wheel', words: ['YAVAŞ!', 'SANDALYEM!'] },
+      bike: { weight: 1.5, speed: 3, voice: 'bike', words: ['ZİLİM BOZUK!', 'YOLDAN!'] },
+      courier: { weight: 1, speed: 5.4, voice: 'courier', road: true, words: ['PAKET GİTTİ!', 'SİPARİŞ!', 'OHA!'] },
+      cayci: { weight: 1.1, speed: 1, voice: 'cayci', fx: 'tea', words: ['ÇAYLAR!', 'BARDAKLAR!', 'TAZE DEMLEMİŞTİM!'] },
       esnaf: { weight: 1.5, speed: 0.9, voice: 'man', words: ['DÜKKÂNIM!', 'HOOP!', 'YAVAŞ OĞLUM!'] },
       student: { weight: 2, speed: 1.2, voice: 'teen', words: ['SINAVIM VARDI!', 'KANKA!', 'YOK ARTIK!'] },
       tourist: { weight: 1, speed: 0.7, voice: 'tourist', words: ['OH NO!', 'MAMMA MIA!', 'WOW!'] },
@@ -261,9 +291,9 @@ export const CONFIG = {
 
   // Sivil Türk trafiği: hepsi oyuncu araçlarından yavaş. Ana yollarda sağdan akar
   npc: {
-    max: 22, spawnEvery: 0.4, despawn: 1700, laneOffset: 50, turnChance: 0.28,
+    max: 22, spawnEvery: 0.4, despawn: 1700, laneOffset: 30, turnChance: 0.2,
     hitScale: 0.42, maxHit: 12,
-    panicDist: 300, panicSpeed: 300, panicTime: 2.4, panicLane: 76, panicBoost: 1.3,
+    panicDist: 300, panicSpeed: 300, panicTime: 2.4, panicLane: 44, panicBoost: 1.3,
     // Boyalar: metalik, parlak, mat sırayla atanır. Modeller özgün, gerçek logo yok
     finishes: ['metal', 'gloss', 'matte'],
     types: {
@@ -286,18 +316,20 @@ export const CONFIG = {
       duster: { weight: 1.1, shape: 'duster', len: 48, wid: 26, mass: 1.5, cruise: 195, turnRate: 2.4, grip: 7, horn: 'truck', colors: ['#e8701a', '#2f6b4f', '#c9b48a'] },
       grandland: { weight: 0.9, shape: 'grandland', len: 49, wid: 26, mass: 1.45, cruise: 205, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#1f3a68', '#a7aeb7', '#e8551e'] },
       egea: { weight: 1.5, shape: 'egea', len: 48, wid: 24, mass: 1.25, cruise: 205, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#f2f2f2', '#c1121f', '#3a3f47', '#1565c0'] },
-      minibus: { weight: 1.6, len: 64, wid: 28, mass: 3, cruise: 190, turnRate: 2, grip: 8, horn: 'dolmus', colors: ['#f4f6f8'] },
+      minibus: { weight: 1.6, model: 'minibus', len: 64, wid: 28, mass: 3, cruise: 190, turnRate: 2, grip: 8, horn: 'dolmus', colors: ['#f4f6f8'] },
       bus: { weight: 1.1, len: 96, wid: 30, mass: 7, cruise: 150, turnRate: 1.7, grip: 8, horn: 'bus', colors: ['#2a7fc1', '#2c9e8f', '#e8732a'] },
       truck: { weight: 0.8, accent: '#2a6db0', len: 108, wid: 32, mass: 8, cruise: 155, turnRate: 1.6, grip: 8, horn: 'truck', colors: ['#d9534f', '#3e7cb1', '#e8833a', '#2f7a4f'] },
     },
   },
 
   // Trafik ışığı süreleri (saniye)
-  traffic: { green: 6, yellow: 1.2, allRed: 0.8, stopLine: 128, brake: 520, hornAfter: 2.5, hornRate: 0.5 },
+  traffic: { green: 6, yellow: 1.2, allRed: 0.8, stopLine: 94, brake: 520, hornAfter: 2.5, hornRate: 0.5 },
 
   // Tabela adları. Marketler uydurmadır, gerçek marka değildir
   signs: {
-    shops: ['Maydanoz Döner', 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Tekel', 'Çay Ocağı', 'Kuaför', 'Nargile Cafe', 'Bakkal', 'Kahveci', 'Nevada Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Baba Pide', 'Kardeşler Bakkal', 'Tekel 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Nevada Kafe'],
+    bigshops: ['Grand Bazaar İş Hanı', 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
+    hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', 'Pera Palas Oteli', 'Otel Saray', 'Mavi Otel'],
+    shops: ['Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Tekel Bayii', 'Maydanoz Döner', 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Tekel', 'Çay Ocağı', 'Kuaför', 'Nargile Cafe', 'Bakkal', 'Kahveci', 'Nevada Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Baba Pide', 'Kardeşler Bakkal', 'Tekel 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Nevada Kafe'],
     chains: { Migros: '#ff7a00', 'BİM': '#d0121b', 'ŞOK': '#e6a800', A101: '#0088b0', CarrefourSA: '#0a4ea2', 'İtopya': '#ff2a6d', 'Koçtaş': '#f59300', 'CZN Burak': '#16a34a' },
     banks: { Akbank: '#d0121b', 'İş Bankası': '#0a4ea2', 'Ziraat Bankası': '#c8102e', Garanti: '#0f7a45', 'Yapı Kredi': '#1b2f6b' },
     sites: ['Yeşil Vadi Sitesi', 'Boğaz Evleri', 'Mavi Konak Sitesi', 'Çamlık Sitesi', 'Güneş Sitesi', 'Lale Evleri', 'Marmara Konutları', 'Park Evleri'],
@@ -323,7 +355,7 @@ export const CONFIG = {
     giantCrushTank: 200,
   },
 
-  perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.8, bakePool: 12, slowFrameMs: 21 },
+  perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.72, bakePool: 9, slowFrameMs: 21 },
 };
 
 // Yıldız seviyesi: başlangıçta 1, her eşikte artar

@@ -1,7 +1,7 @@
 // Oyun mantığı. DOM'a dokunmaz; tarayıcısız test edilebilir.
 import { CONFIG, GROUND, MAX_STARS } from './config.js';
 import { makeBody, resetBody, stepCar, bounceOff } from './physics.js';
-import { World, PROP, PROP_INFO, TILE, CHUNK, isWaterRect, isPower, powerName, POWER_KINDS } from './world.js';
+import { World, PROP, PROP_INFO, TILE, CHUNK, isWaterRect, isDeep, isPower, powerName, POWER_KINDS } from './world.js';
 import { Effects, FX } from './effects.js';
 import { FlowField, driveCop, planBarricade, newPlan } from './police.js';
 import { Crowd } from './crowd.js';
@@ -13,6 +13,8 @@ const SC = CONFIG.score;
 const BAR = CONFIG.barricade;
 const TK = CONFIG.tank;
 const PW = CONFIG.powers;
+const AL = CONFIG.aliens;
+const WT = CONFIG.water;
 const tmpSirens = new Float32Array(CONFIG.sirens.length);
 
 export function interp(curve, t) {
@@ -43,6 +45,8 @@ export function difficultyAt(t, out = {}) {
   out.fastShare = t >= D.fastFrom ? interp(D.fastShare, t) : 0;
   out.tanks = t >= D.tanksAt ? Math.round(interp(D.tankCount, t)) : 0;
   out.barricadeEvery = t >= BAR.from ? interp(BAR.intervalCurve, t) : Infinity;
+  out.ufos = t >= D.aliensAt ? Math.round(interp(AL.ufoCount, t)) : 0;
+  out.rovers = t >= D.aliensAt ? Math.round(interp(AL.roverCount, t)) : 0;
   return out;
 }
 
@@ -163,6 +167,11 @@ export class Game {
     this.fireShake = 0;
     this.sirenDist = 1e9;
     this.sirenClosing = 0;
+    this.alienT = 0;
+    this.aliensOn = startTime >= D.aliensAt;
+    this.sinkT = 0;
+    this.bubbleT = 0;
+    this.cause = '';
     while (this.cops.length) this.copPool.push(this.cops.pop());
     for (const s of this.shots) s.alive = false;
     for (const s of this.spikes) s.alive = false;
@@ -229,6 +238,7 @@ export class Game {
     if (this.state === 'attract') this.tickAttract(dt);
     else if (this.state === 'play') this.tickPlay(dt, steer, reverse);
     else if (this.state === 'dying') this.tickDying(dt);
+    else if (this.state === 'sinking') this.tickSinking(dt);
     this.fx.update(dt);
     this.updateCamera(dt);
   }
@@ -255,8 +265,14 @@ export class Game {
       }
       this.lastStage = this.diff.stage;
     }
+    if (!this.aliensOn && this.time >= D.aliensAt) {
+      this.aliensOn = true;
+      this.warnT = 3;
+      this.emit('aliens');
+    }
 
     this.updatePlayer(dt, steer, reverse);
+    if (this.state !== 'play') return;
     this.updateFlow(dt);
     this.updateCops(dt);
     this.crowd.update(dt);
@@ -286,6 +302,42 @@ export class Game {
     if (this.dyingT <= 0) this.finish();
   }
 
+  // Suya düşen araç: çizgi film batışı. Sıçrama, kabarcık, dalga halkaları, sonra skor ekranı
+  startSink() {
+    const p = this.player;
+    this.state = 'sinking';
+    this.sinkT = WT.sinkTime;
+    this.cause = 'water';
+    this.fx.burst(FX.WATER, p.x, p.y, 34, 340, 0.9, 13);
+    this.fx.wave(p.x, p.y, 150);
+    this.cam.shake = Math.max(this.cam.shake, 9);
+    this.emit('sink');
+  }
+
+  tickSinking(dt) {
+    this.sinkT -= dt;
+    const p = this.player;
+    p.vx *= 1 - 2.6 * dt;
+    p.vy *= 1 - 2.6 * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.a += WT.spin * dt;
+    this.bubbleT -= dt;
+    if (this.bubbleT <= 0) {
+      this.bubbleT = WT.bubbleEvery;
+      this.fx.spawn(FX.WATER, p.x + (Math.random() - 0.5) * p.len, p.y + (Math.random() - 0.5) * p.len, 0, -26 - Math.random() * 40, 0.8, 4 + Math.random() * 6);
+      if (Math.random() < 0.09) this.fx.wave(p.x, p.y, 60 + Math.random() * 70);
+    }
+    this.world.update(p.x, p.y);
+    this.updateCops(dt * 0.5);
+    this.crowd.update(dt);
+    if (this.sinkT <= 0) this.finish();
+  }
+
+  sinkProgress() {
+    return this.state === 'sinking' ? 1 - this.sinkT / WT.sinkTime : 0;
+  }
+
   // --- Oyuncu ---
   updatePlayer(dt, steer, reverse) {
     const p = this.player;
@@ -306,6 +358,12 @@ export class Game {
     }
     stepCar(p, steer, reverse ? -1 : 1, this.carSpec, surf, dt);
     if (this.hitCd > 0) this.hitCd -= dt;
+
+    // Derin suya düştü: ölümsüzlükte duvar gibi davranır, testler ve geliştirici için
+    if (g === GROUND.WATER && !this.god && this.world.circleHit(p.x, p.y, WT.deepProbe, hit) && isDeep(hit.rect)) {
+      this.startSink();
+      return;
+    }
 
     const impact = this.collideWorld(p, true);
     if (impact > 0) this.playerImpact(impact, hit.rect && isWaterRect(hit.rect) ? 0.35 : 1, false);
@@ -418,6 +476,7 @@ export class Game {
 
   explodePlayer() {
     if (this.state !== 'play') return;
+    this.cause = 'wreck';
     const p = this.player;
     this.state = 'dying';
     this.dyingT = DMG.dyingTime;
@@ -442,6 +501,7 @@ export class Game {
       broken: this.broken,
       driftTime: this.driftTime,
       nearMisses: this.nearMisses,
+      cause: this.cause,
     };
     this.emit('gameover');
   }
@@ -461,6 +521,7 @@ export class Game {
         this.crushRect(hit.chunk, rect);
         continue;
       }
+      if (isPlayer && !this.god && isDeep(rect)) continue; // Oyuncu suya girer, batış ayrı karar verilir
       b.x += hit.nx * hit.depth;
       b.y += hit.ny * hit.depth;
       const impact = bounceOff(b, hit.nx, hit.ny);
@@ -619,7 +680,7 @@ export class Game {
 
   // --- Polis ---
   spawnCop(type, role, x, y, a) {
-    const spec = CONFIG.police[type];
+    const spec = CONFIG.police[type] || AL[type];
     const c = this.copPool.pop() || makeCop();
     const d = this.diff;
     resetBody(c, x, y, a, { ...spec, grip: spec.grip });
@@ -629,6 +690,8 @@ export class Game {
     c.role = role;
     c.state = 'chase';
     c.crusher = type === 'tank';
+    c.flying = type === 'ufo';
+    c.beam = 0;
     c.sirenId = spec.siren ? this.pickSiren(spec.siren) : -1;
     c.wanderT = 0;
     c.staticBody = false;
@@ -654,11 +717,14 @@ export class Game {
     const n = CONFIG.sirens.length;
     const use = new Array(n).fill(0);
     for (const c of this.cops) if (c.sirenId >= 0) use[c.sirenId]++;
-    const min = Math.min(...use);
     const p = CONFIG.sirens.indexOf(pref);
+    if (pref === 'ufo' || pref === 'zap') return p; // Uzaylıların sesi kendine özgü
+    const police = n - 2;
+    let min = 1e9;
+    for (let i = 0; i < police; i++) if (use[i] < min) min = use[i];
     if (use[p] === min) return p;
     const free = [];
-    for (let i = 0; i < n; i++) if (use[i] === min) free.push(i);
+    for (let i = 0; i < police; i++) if (use[i] === min) free.push(i);
     return free[Math.floor(Math.random() * free.length)];
   }
 
@@ -671,12 +737,12 @@ export class Game {
 
   destroyCop(i, byPlayer) {
     const c = this.cops[i];
-    const size = c.type === 'tank' ? 120 : c.type === 'swat' ? 70 : 52;
+    const size = c.type === 'tank' ? 120 : c.type === 'swat' ? 70 : c.type === 'ufo' ? 110 : 52;
     this.fx.explosion(c.x, c.y, size);
-    this.fx.debris(c.x, c.y, c.type === 'tank' ? '#5d6b3a' : '#2f4c8a', 12, 280);
+    this.fx.debris(c.x, c.y, c.type === 'tank' ? '#5d6b3a' : c.type === 'ufo' || c.type === 'rover' ? '#39ff9c' : '#2f4c8a', 12, 280);
     this.fx.debris(c.x, c.y, '#f4f4f4', 6, 240);
     this.kills++;
-    this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
+    this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.type === 'ufo' ? 6 : c.type === 'rover' ? 3 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
     if (Math.random() < 0.6) this.world.dropCoin(c.x, c.y);
     const near = Math.hypot(c.x - this.player.x, c.y - this.player.y) < 500;
     this.emit('copdown', near ? 1 : 0.4);
@@ -727,7 +793,9 @@ export class Game {
       if (c.nearCd > 0) c.nearCd -= dt;
       c.fxT += dt;
 
-      if (c.state === 'barricade') {
+      if (c.flying) {
+        this.updateUfo(c, dt, playing);
+      } else if (c.state === 'barricade') {
         c.staticBody = true;
       } else {
         c.staticBody = false;
@@ -750,7 +818,7 @@ export class Game {
 
       if (playing) {
         // Oyuncu ile çarpışma
-        if (dist < (c.len + p.len) * 0.75 && this.ghostT <= 0) {
+        if (!c.flying && dist < (c.len + p.len) * 0.75 && this.ghostT <= 0) {
           const rv = this.collideCars(p, c);
           if (rv > 1) this.copContact(c, rv, i);
           if (i >= this.cops.length || this.cops[i] !== c) continue;
@@ -782,6 +850,7 @@ export class Game {
       for (let j = i + 1; j < cops.length; j++) {
         const a = cops[i];
         const b = cops[j];
+        if (a.flying || b.flying) continue;
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const r = (a.len + b.len) * 0.6;
@@ -818,6 +887,38 @@ export class Game {
       const side = (c.x - p.x) * -fy + (c.y - p.y) * fx;
       p.w += (side > 0 ? -1 : 1) * AI.pitYaw;
       p.grip *= 0.5;
+    }
+  }
+
+  // Uçan daire: binaların üstünden düz gelir, üstüne çıkınca ışınla çeker ve hasar verir
+  updateUfo(c, dt, playing) {
+    const p = this.player;
+    const dx = p.x + p.vx * 0.35 - c.x;
+    const dy = p.y + p.vy * 0.35 - c.y;
+    const d = Math.hypot(dx, dy) || 1;
+    const top = c.drive.maxSpeed;
+    const slow = this.ghostT > 0 ? 0.25 : 1;
+    const want = Math.min(top, d * 3.2) * slow;
+    const k = 1 - Math.exp(-3.4 * dt);
+    c.vx += ((dx / d) * want - c.vx) * k;
+    c.vy += ((dy / d) * want - c.vy) * k;
+    c.x += c.vx * dt;
+    c.y += c.vy * dt;
+    c.a += dt * 2;
+    const bx = p.x - c.x;
+    const by = p.y - c.y;
+    const bd = Math.hypot(bx, by);
+    c.beam = playing && this.ghostT <= 0 && bd < AL.beamRange ? 1 : 0;
+    if (c.beam) {
+      p.vx -= (bx / (bd + 1)) * AL.beamPull * dt;
+      p.vy -= (by / (bd + 1)) * AL.beamPull * dt;
+      const keep = 1 - AL.beamSlow * dt;
+      p.vx *= keep;
+      p.vy *= keep;
+      this.hurt((AL.beamDps * dt) / this.carSpec.durability);
+      this.sinceHit = 0;
+      this.hitFlash = Math.max(this.hitFlash, 0.25);
+      if (Math.random() < 0.3) this.fx.spawn(FX.GLINT, p.x + (Math.random() - 0.5) * 60, p.y + (Math.random() - 0.5) * 60, 0, 0, 0.4, 5);
     }
   }
 
@@ -880,6 +981,22 @@ export class Game {
         this.spawnT = d.spawnInterval;
       } else {
         this.spawnT = 0.25;
+      }
+    }
+
+    if (d.ufos > 0 && active < D.maxActive - 1) {
+      this.alienT -= dt;
+      if (this.alienT <= 0) {
+        this.alienT = AL.spawnEvery;
+        const min = this.viewRadius() + 160;
+        const heading = Math.atan2(p.vy, p.vx) + (Math.random() - 0.5) * 2.6;
+        if (this.countType('ufo') < d.ufos) {
+          // Daire binaya takılmaz, önünden gelir
+          this.spawnCop('ufo', 'chaser', p.x + Math.cos(heading) * min, p.y + Math.sin(heading) * min, 0);
+        }
+        if (this.countType('rover') < d.rovers && this.findSpawn(spawnPt, min, min + 300, true)) {
+          this.spawnCop('rover', Math.random() < 0.5 ? 'flanker' : 'chaser', spawnPt.x, spawnPt.y, Math.atan2(p.y - spawnPt.y, p.x - spawnPt.x));
+        }
       }
     }
 

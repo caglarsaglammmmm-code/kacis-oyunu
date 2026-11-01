@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GROUND, BUILD } from '../js/config.js';
+import { CONFIG, GROUND, BUILD } from '../js/config.js';
 import { World, TILE, CT, CHUNK, PROP } from '../js/world.js';
 
 test('aynı tohum aynı chunk, başka tohum başka chunk üretir', () => {
@@ -18,7 +18,7 @@ test('ana yollar kesintisiz ve hiçbir yol karosu engelli değil (200 chunk)', (
     for (let cx = -50; cx < 50; cx += 5) {
       const c = w.chunk(cx, cy);
       for (let i = 0; i < CT; i++) {
-        for (let k = 0; k < 5; k++) {
+        for (let k = 0; k < CONFIG.world.arterial; k++) {
           assert.equal(c.ground[k * CT + i], GROUND.ROAD);
           assert.equal(c.ground[i * CT + k], GROUND.ROAD);
         }
@@ -70,10 +70,10 @@ test('her sokak yol parçası iki uçlu: iç sokak ana yola bağlanır', () => {
       for (let i = 0; i < c.streetCount; i++) {
         const s = c.streets[i];
         streets++;
-        const near = s.vertical ? c.cost[5 * CT + s.pos] : c.cost[s.pos * CT + 5];
+        const near = s.vertical ? c.cost[3 * CT + s.pos] : c.cost[s.pos * CT + 3];
         const far = s.vertical ? c.cost[(CT - 1) * CT + s.pos] : c.cost[s.pos * CT + CT - 1];
         assert.ok(near > 0 && far > 0);
-        assert.ok(s.width >= 2, 'araç geçecek genişlikte');
+        assert.ok(s.width >= 1, 'araç geçecek genişlikte');
       }
     }
   }
@@ -163,7 +163,7 @@ test('sahile gidilebilir: kum ve sığ suya araba girer, derin deniz kapalı', (
       if (c.template !== 'sea') continue;
       seen++;
       for (let i = 0; i < CT * CT; i++) {
-        if (c.ground[i] === GROUND.SAND || c.ground[i] === GROUND.SHALLOW) assert.ok(c.cost[i] > 0);
+        if ((c.ground[i] === GROUND.SAND || c.ground[i] === GROUND.SHALLOW) && !c.rectAt[i]) assert.ok(c.cost[i] > 0);
         if (c.ground[i] === GROUND.WATER) assert.equal(c.cost[i], 0);
       }
     }
@@ -265,4 +265,45 @@ test('negatif koordinatlarda sorgular doğru', () => {
   assert.equal(w.groundAt(-CHUNK + 10, -CHUNK + 10), GROUND.ROAD);
   assert.equal(w.groundAt(-1, 20), w.chunk(-1, 0).ground[0 * CT + CT - 1]);
   assert.ok(TILE > 0);
+});
+
+test('yoğun şehir: bina oranı yüksek, binalar bitişik, ara sokak bir karo', () => {
+  const w = new World(7);
+  let sum = 0; let n = 0; let narrow = 0;
+  for (let cy = -14; cy < 14; cy++) {
+    for (let cx = -14; cx < 14; cx++) {
+      const c = w.chunk(cx, cy);
+      if (!['mahalle', 'downtown', 'esnaf', 'gecekondu', 'gece'].includes(c.template)) continue;
+      let b = 0;
+      for (let i = 0; i < CT * CT; i++) if (c.rectAt[i] && c.rects[c.rectAt[i] - 1].kind === 'building') b++;
+      sum += b / (CT * CT); n++;
+      for (let i = 0; i < c.streetCount; i++) if (c.streets[i].width === 1) narrow++;
+    }
+  }
+  assert.ok(sum / n > 0.7, 'oran ' + sum / n);
+  assert.ok(narrow > n / 2, 'dar sokak ' + narrow);
+});
+
+test('yol malzemeleri, spor sahaları, derin göletler ve her tür bina üretilir', () => {
+  const w = new World(11);
+  const roads = new Set(); const pads = new Set(); const styles = new Set();
+  let deep = 0; let huge = 0;
+  for (let cy = -24; cy < 24; cy++) {
+    for (let cx = -24; cx < 24; cx++) {
+      const c = w.chunk(cx, cy);
+      roads.add(c.road);
+      for (let i = 0; i < c.padCount; i++) pads.add(c.pads[i].kind);
+      for (let i = 0; i < c.rectCount; i++) {
+        const r = c.rects[i];
+        if (r.kind === 'building') styles.add(r.style);
+        if (r.deep) deep++;
+        if (r.signSize === 3) huge++;
+      }
+    }
+  }
+  assert.equal(roads.size, 4);
+  for (const k of ['foot', 'basket', 'hali', 'yard', 'ambulance', 'parking']) assert.ok(pads.has(k), k);
+  for (const s of [BUILD.HOSPITAL, BUILD.BANK, BUILD.SCHOOL, BUILD.MOSQUE, BUILD.RESIDENCE, BUILD.SKYSCRAPER, BUILD.HOTEL, BUILD.ISHANI, BUILD.APARTMENT, BUILD.VILLA, BUILD.GECEKONDU, BUILD.SHOP, BUILD.CLUB]) assert.ok(styles.has(s), s);
+  assert.ok(deep > 3);
+  assert.ok(huge > 3, 'dev tabela');
 });

@@ -122,9 +122,11 @@ export class Crowd {
     p.a = a;
     p.state = PED_WALK;
     p.t = 0; p.turnT = 1 + Math.random() * 3; p.step = Math.random() * 6;
-    p.look = Math.floor(Math.random() * (kind === 'woman' ? 7 : 7)) + (kind === 'woman' ? 7 : 0);
+    const half = PD.looks >> 1;
+    p.look = Math.floor(Math.random() * half) + (kind === 'woman' ? half : 0);
     p.scale = 0.84 + Math.random() * 0.32; // Boy farkı
     p.pace = 0.75 + Math.random() * 0.55; // Yürüyüş hızı farkı
+    p.curb = false;
   }
 
   spawnPed() {
@@ -135,7 +137,9 @@ export class Crowd {
     const pl = g.player;
     const R = g.viewRadius();
     const kind = this.pickKind();
-    for (let i = 0; i < 6; i++) {
+    // Yarısı ana yol kenarındaki kaldırım bandında yürür: bina yoğun, boş alan az
+    if (!PD.kinds[kind].road && kind !== 'cat' && Math.random() < PD.curbShare && this.spawnCurb(p, kind, pl, R)) return;
+    for (let i = 0; i < 14; i++) {
       const a = Math.random() * 6.283;
       const r = R * (0.75 + Math.random() * 0.55);
       const x = pl.x + Math.cos(a) * r;
@@ -146,9 +150,27 @@ export class Crowd {
       if (Math.random() > chance || g.world.blockedAt(x, y)) continue;
       this.setupPed(p, kind, x, y, Math.floor(Math.random() * 4) * 1.5708);
       // Bazıları dükkân önünde durur, sohbet eder
-      if (!PD.kinds[kind].road && kind !== 'cat' && gr === GROUND.WALK && Math.random() < PD.idleChance) p.state = PED_IDLE;
+      if (!PD.kinds[kind].road && kind !== 'cat' && (gr === GROUND.WALK || gr === GROUND.ALLEY) && Math.random() < PD.idleChance) p.state = PED_IDLE;
       return;
     }
+  }
+
+  spawnCurb(p, kind, pl, R) {
+    const g = this.g;
+    const along = (Math.random() < 0.5 ? -1 : 1) * R * (0.75 + Math.random() * 0.5);
+    const vertical = Math.random() < 0.5;
+    const base = Math.floor((vertical ? pl.x : pl.y) / CHUNK) + Math.floor(Math.random() * 3) - 1;
+    const line = base * CHUNK + ROAD_W - 6;
+    const x = vertical ? line : pl.x + along;
+    const y = vertical ? pl.y + along : line;
+    const at = ((vertical ? y : x) % CHUNK + CHUNK) % CHUNK;
+    if (at < ROAD_W + 30 || g.onScreen(x, y, 30)) return false;
+    if (g.world.blockedAt(x, y) || g.world.chunk(Math.floor(x / CHUNK), Math.floor(y / CHUNK)).biome !== 'city') return false;
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    this.setupPed(p, kind, x, y, vertical ? (dir > 0 ? 1.5708 : -1.5708) : (dir > 0 ? 0 : 3.1416));
+    p.curb = true;
+    if (Math.random() < PD.idleChance) p.state = PED_IDLE;
+    return true;
   }
 
   // Kavşakta yaya geçidi önünde bekleyen yaya: arabalara kırmızı yanınca karşıya geçer
@@ -217,7 +239,7 @@ export class Crowd {
 
   blockedForPed(p, x, y) {
     const w = this.g.world;
-    return w.blockedAt(x, y) || (!p.info.road && w.groundAt(x, y) === GROUND.ROAD);
+    return w.blockedAt(x, y) || (!p.info.road && !p.curb && w.groundAt(x, y) === GROUND.ROAD);
   }
 
   updatePed(p, dt) {
@@ -307,18 +329,23 @@ export class Crowd {
     const lookX = p.x + Math.cos(p.a) * 16;
     const lookY = p.y + Math.sin(p.a) * 16;
     if (p.state === PED_WALK ? this.blockedForPed(p, lookX, lookY) : g.world.blockedAt(lookX, lookY)) {
-      p.a += (Math.random() < 0.5 ? 1 : -1) * 1.5708;
+      p.a += p.curb ? 3.1416 : (Math.random() < 0.5 ? 1 : -1) * 1.5708;
       p.turnT = 1 + Math.random() * 3;
     } else {
       p.x = nx;
       p.y = ny;
+    }
+    if (p.curb && p.state === PED_WALK) {
+      // Kavşağa gelince geri döner, kaldırımdan yola inmez
+      const at = ((Math.abs(Math.cos(p.a)) > 0.5 ? p.x : p.y) % CHUNK + CHUNK) % CHUNK;
+      if (at < ROAD_W + 26 && p.turnT < 90) { p.a += 3.1416; p.x += Math.cos(p.a) * 30; p.y += Math.sin(p.a) * 30; }
     }
     p.step += dt * (speed * 0.3);
     p.turnT -= dt;
     if (p.turnT <= 0) {
       p.turnT = 1.5 + Math.random() * 4;
       if (p.state === PED_RUN) p.state = PED_WALK;
-      else p.a += (Math.floor(Math.random() * 3) - 1) * 1.5708;
+      else if (!p.curb) p.a += (Math.floor(Math.random() * 3) - 1) * 1.5708;
     }
   }
 

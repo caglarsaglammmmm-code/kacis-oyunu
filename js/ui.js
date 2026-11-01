@@ -180,6 +180,14 @@ export class UI {
     el.classList.add('run');
   }
 
+  alienAlert() {
+    const el = $('alert');
+    el.textContent = CONFIG.difficulty.aliensAlert;
+    el.classList.remove('run');
+    void el.offsetWidth;
+    el.classList.add('run');
+  }
+
   showHint(on) {
     $('hint').hidden = !on;
   }
@@ -233,7 +241,7 @@ export class UI {
 
   over(result, record) {
     const d = this.storage.data;
-    $('over-title').textContent = record.newScore ? 'YENİ REKOR!' : 'YAKALANDIN!';
+    $('over-title').textContent = record.newScore ? 'YENİ REKOR!' : result.cause === 'water' ? 'BATTIN!' : 'YAKALANDIN!';
     $('over-title').classList.toggle('record', record.newScore);
     $('over-score').textContent = result.score.toLocaleString('tr-TR');
     $('over-time').textContent = formatTime(result.time);

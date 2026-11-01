@@ -6,6 +6,20 @@
 @font-face { font-family: Nunito; font-weight: 800; src: url(../fonts/nunito-latin-ext-800-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
 @font-face { font-family: Playfair; font-style: italic; src: url(../fonts/playfair-display-latin-400-italic.woff2) format('woff2'); font-display: block; unicode-range: U+0000-00FF, U+2000-206F; }
 @font-face { font-family: Playfair; font-style: italic; src: url(../fonts/playfair-display-latin-ext-400-italic.woff2) format('woff2'); font-display: block; unicode-range: U+0100-02BA, U+1E00-1EFF; }
+@font-face { font-family: 'Pacifico'; src: url(../fonts/pacifico-latin-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Pacifico'; src: url(../fonts/pacifico-latin-ext-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
+@font-face { font-family: 'Anton'; src: url(../fonts/anton-latin-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Anton'; src: url(../fonts/anton-latin-ext-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
+@font-face { font-family: 'Righteous'; src: url(../fonts/righteous-latin-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Righteous'; src: url(../fonts/righteous-latin-ext-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
+@font-face { font-family: 'Lobster'; src: url(../fonts/lobster-latin-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Lobster'; src: url(../fonts/lobster-latin-ext-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
+@font-face { font-family: 'Tilt Neon'; src: url(../fonts/tilt-neon-latin-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Tilt Neon'; src: url(../fonts/tilt-neon-latin-ext-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
+@font-face { font-family: 'Monoton'; src: url(../fonts/monoton-latin-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Monoton'; src: url(../fonts/monoton-latin-ext-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
+@font-face { font-family: Oswald; font-weight: 500; src: url(../fonts/oswald-latin-500-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: Oswald; font-weight: 500; src: url(../fonts/oswald-latin-ext-500-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
 
 :root {
   --ink: #14161f;

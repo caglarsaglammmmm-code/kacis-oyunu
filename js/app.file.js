@@ -5,14 +5,14 @@
 // Oyunun TÜM ayarları burada. Denge değiştirmek için yalnızca bu dosyayı düzenleyin,
 // ardından `npm run bundle` çalıştırın (file:// kopyası için).
 
-const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 6, SHALLOW: 7, FIELD: 8 };
+const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 6, SHALLOW: 7, FIELD: 8, ALLEY: 9 };
 
 // Bina stilleri. 0-6 şehir çatıları, sonrası js/art.js içinde özel çizilir
 const BUILD = {
   TOWER_GLASS: 7, TOWER_ROUND: 8, TOWER_STEP: 9, HUT: 10, LIFEGUARD: 11, LIGHTHOUSE: 12, CABIN: 13,
   FIRETOWER: 14, ADOBE: 15, MESA: 16, BARN: 17, SILO: 18, WINDMILL: 19, WATERTOWER: 20, GAS: 21,
   APARTMENT: 22, MARKET: 23, SISTEM: 24, BAZAAR: 25, CHAIN: 26, BANK: 27, RESIDENCE: 28, OFFICE: 29, HOTEL: 30,
-  HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CLUB: 40,
+  HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CLUB: 40, SHOP: 41, SKYSCRAPER: 42,
 };
 
 const CONFIG = {
@@ -32,18 +32,27 @@ const CONFIG = {
 
   world: {
     tile: 40,
-    chunkTiles: 24,
-    arterial: 5, // Her chunk'ın batı ve kuzeyindeki ana yolun karo genişliği
-    loadRadius: 3, // Oyuncu çevresinde kaç chunk yüklü kalır
-    unloadRadius: 4, // Bu uzaklığın ötesindeki chunk'lar silinir
-    biomeCell: 11, // Bir biyom bölgesinin chunk cinsinden boyutu (rastgele sınırlı)
-    biomes: { city: 34, beach: 20, forest: 16, desert: 15, rural: 15 },
+    chunkTiles: 32,
+    arterial: 3, // Her chunk'ın batı ve kuzeyindeki ana yolun karo genişliği
+    loadRadius: 2, // Oyuncu çevresinde kaç chunk yüklü kalır
+    unloadRadius: 3, // Bu uzaklığın ötesindeki chunk'lar silinir
+    biomeCell: 8, // Bir biyom bölgesinin chunk cinsinden boyutu (rastgele sınırlı)
+    biomes: { city: 62, beach: 22, forest: 6, desert: 4, rural: 6 },
     seaRadius: 0.42, // Sahil bölgesinin ortasındaki denizin biyom hücresine oranı
-    templates: { mahalle: 30, city: 22, pazar: 7, downtown: 11, suburb: 7, park: 6, lake: 3, industrial: 4, plaza: 3, gecekondu: 8, site: 9, gece: 6, cami: 6, stadyum: 2, hastane: 3, okul: 4 },
-    sistemRing: [5, 12], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
+    templates: { mahalle: 30, downtown: 15, esnaf: 12, gecekondu: 7, site: 7, gece: 5, cami: 7, stadyum: 2, hastane: 4, okul: 5, spor: 6, golet: 4, park: 2, pazar: 3, industrial: 3 },
+    // Yoğunluk: alleys ara sokak sayısı (dikey, yatay), maxB en büyük parsel, wide iki karo sokak olasılığı,
+    // detached ayrık bina olasılığı, stub çıkmaz sokak olasılığı
+    profiles: {
+      mahalle: { alleys: [1, 1], maxB: 7, wide: 0.15, detached: 0.14, stub: 0.5 },
+      downtown: { alleys: [1, 1], maxB: 11, wide: 0.35, detached: 0.2, stub: 0.1 },
+      esnaf: { alleys: [1, 1], maxB: 5, wide: 0.2, detached: 0.05, stub: 0.4 },
+      gecekondu: { alleys: [1, 1], maxB: 3, wide: 0, detached: 0.3, stub: 0.7 },
+      gece: { alleys: [1, 1], maxB: 6, wide: 0.3, detached: 0.1, stub: 0.2 },
+    },
+    sistemRing: [4, 9], // Tek Sistem Koleji başlangıçtan bu kadar chunk uzakta
     bigSites: [
-      { name: 'Natura Park Sitesi', color: '#7fa86b', ring: [6, 14], layout: 0 },
-      { name: 'Doğa Şehir Sitesi', color: '#c98a5a', ring: [10, 20], layout: 1 },
+      { name: 'Natura Park Sitesi', color: '#7fa86b', ring: [5, 11], layout: 0 },
+      { name: 'Doğa Şehir Sitesi', color: '#c98a5a', ring: [8, 15], layout: 1 },
     ],
   },
 
@@ -88,6 +97,7 @@ const CONFIG = {
     { grip: 0.75, speed: 0.92, drag: 0.15, name: 'dirt' },
     { grip: 0.6, speed: 0.66, drag: 0.55, name: 'shallow' },
     { grip: 0.72, speed: 0.9, drag: 0.22, name: 'field' },
+    { grip: 0.97, speed: 0.98, drag: 0.02, name: 'alley' },
   ],
 
   // En az 5 araba. durability hasarı böler, mass polis çarpışmalarını etkiler.
@@ -134,6 +144,8 @@ const CONFIG = {
     advancedAt: 200,
     tanksAt: 280,
     alerts: { 50: 'SWAT geliyor!', 200: 'Ağır takviye!', 280: 'TANKLAR!' },
+    aliensAt: 225, // 200-250 sn arası: uzaylı işgali başlar. Oyun burada gerçekten zorlaşır
+    aliensAlert: 'UZAYLILAR GELDİ!',
     firstSpawnAt: 5,
     // [saniye, değer] noktaları arasında doğrusal artar, yani her saniye biraz zorlaşır
     policeCurve: [[0, 1], [15, 2], [30, 3], [50, 5], [120, 8], [200, 12], [280, 16], [420, 20]],
@@ -163,8 +175,24 @@ const CONFIG = {
     tank: { hp: 700, mass: 22, speed: 0.4, accel: 160, turnRate: 1.2, grip: 14, driftGrip: 14, len: 104, wid: 66, ram: 2.2, smart: 0.3, siren: '' },
   },
 
-  // Sekiz ayrı siren. Her polis o anda en az kullanılan sireni seçer
-  sirens: ['wail', 'yelp', 'hilo', 'chirp', 'euro', 'rumble', 'horn', 'bip'],
+  // On ayrı polis sireni ve iki uzaylı sesi. Her araç o an boşta olan sireni seçer
+  sirens: ['wail', 'yelp', 'hilo', 'chirp', 'euro', 'rumble', 'horn', 'bip', 'pulse', 'warble', 'ufo', 'zap'],
+
+  // Uzaylılar: bu aşamada oyuncudan HIZLIDIR, kaçmak zordur. Eşikler ve güç burada
+  aliens: {
+    ufoCount: [[225, 1], [250, 2], [300, 3], [420, 5]], // [saniye, aynı anda en çok]
+    roverCount: [[225, 2], [250, 4], [300, 6], [420, 9]],
+    spawnEvery: 3.2,
+    ufo: { hp: 240, mass: 9, speed: 1.14, accel: 760, turnRate: 6, grip: 20, driftGrip: 20, len: 74, wid: 74, ram: 0, smart: 1, siren: 'ufo' },
+    rover: { hp: 110, mass: 1.7, speed: 1.05, accel: 860, turnRate: 4.6, grip: 13, driftGrip: 9, len: 46, wid: 28, ram: 1.7, smart: 1, siren: 'zap' },
+    beamRange: 105, // Işın dairesi
+    beamDps: 15, // Işın altında saniyede hasar
+    beamPull: 520, // Oyuncuyu merkeze çekme
+    beamSlow: 1.1, // Işın altında hız kaybı (saniyede oran)
+  },
+
+  // Derin su: sahil, göl, gölet. Sığ suya girilir, derine düşen araç batar
+  water: { sinkTime: 2.3, bubbleEvery: 0.06, shrink: 0.5, spin: 1.5, deepProbe: 6 },
 
   policeAI: {
     despawnDist: 2100,
@@ -226,22 +254,24 @@ const CONFIG = {
   // Sokak insanları. density: zemin başına doğma olasılığı (GROUND sırasıyla)
   // voice: bağırma sesi, road: yolda gider, dodge: asla çarpılmaz, fx: özel dağılma
   peds: {
-    idleChance: 0.3, // Dükkân önünde duran, sohbet eden yaya oranı
+    looks: 36, // Saç, kıyafet, ten, aksesuar birleşimi: yarısı erkek, yarısı kadın
+    idleChance: 0.34,
+    curbShare: 0.55, // Ana yol kenarı kaldırımında yürüyenlerin oranı // Dükkân önünde duran, sohbet eden yaya oranı
     max: 50, spawnEvery: 0.09, waiterEvery: 0.7, despawn: 1300,
     walkSpeed: 26, runSpeed: 82, fearDist: 130, hitSpeed: 45,
     launch: 190, launchUp: 330, gravity: 900, downTime: 2.2,
-    density: [0.12, 0, 1, 1, 0, 0.55, 0.15, 0.3, 0.1],
+    density: [0.12, 0, 1, 1, 0, 0.55, 0.15, 0.3, 0.1, 0.8],
     kinds: {
       man: { weight: 5, speed: 1, voice: 'man' },
       woman: { weight: 5, speed: 1, voice: 'woman' },
       child: { weight: 2.6, speed: 1.4, voice: 'child' },
       elder: { weight: 2.2, speed: 0.6, voice: 'old' },
-      simitci: { weight: 1.3, speed: 0.8, voice: 'man', fx: 'simit', words: ['SİMİTLERİM!', 'SİMİİİT!', 'TEPSİM!'] },
-      stroller: { weight: 1, speed: 0.8, voice: 'woman' },
-      wheelchair: { weight: 0.7, speed: 0.75, voice: 'old' },
-      bike: { weight: 1.5, speed: 3, voice: 'man' },
-      courier: { weight: 1, speed: 5.4, voice: 'man', road: true, words: ['PAKET GİTTİ!', 'SİPARİŞ!', 'OHA!'] },
-      cayci: { weight: 1.1, speed: 1, voice: 'man', fx: 'tea', words: ['ÇAYLAR!', 'BARDAKLAR!', 'TAZE DEMLEMİŞTİM!'] },
+      simitci: { weight: 1.3, speed: 0.8, voice: 'simit', fx: 'simit', words: ['SİMİTLERİM!', 'SİMİİİT!', 'TEPSİM!'] },
+      stroller: { weight: 1, speed: 0.8, voice: 'mom', words: ['BEBEĞİM!', 'DİKKAT ET!'] },
+      wheelchair: { weight: 0.7, speed: 0.75, voice: 'wheel', words: ['YAVAŞ!', 'SANDALYEM!'] },
+      bike: { weight: 1.5, speed: 3, voice: 'bike', words: ['ZİLİM BOZUK!', 'YOLDAN!'] },
+      courier: { weight: 1, speed: 5.4, voice: 'courier', road: true, words: ['PAKET GİTTİ!', 'SİPARİŞ!', 'OHA!'] },
+      cayci: { weight: 1.1, speed: 1, voice: 'cayci', fx: 'tea', words: ['ÇAYLAR!', 'BARDAKLAR!', 'TAZE DEMLEMİŞTİM!'] },
       esnaf: { weight: 1.5, speed: 0.9, voice: 'man', words: ['DÜKKÂNIM!', 'HOOP!', 'YAVAŞ OĞLUM!'] },
       student: { weight: 2, speed: 1.2, voice: 'teen', words: ['SINAVIM VARDI!', 'KANKA!', 'YOK ARTIK!'] },
       tourist: { weight: 1, speed: 0.7, voice: 'tourist', words: ['OH NO!', 'MAMMA MIA!', 'WOW!'] },
@@ -265,9 +295,9 @@ const CONFIG = {
 
   // Sivil Türk trafiği: hepsi oyuncu araçlarından yavaş. Ana yollarda sağdan akar
   npc: {
-    max: 22, spawnEvery: 0.4, despawn: 1700, laneOffset: 50, turnChance: 0.28,
+    max: 22, spawnEvery: 0.4, despawn: 1700, laneOffset: 30, turnChance: 0.2,
     hitScale: 0.42, maxHit: 12,
-    panicDist: 300, panicSpeed: 300, panicTime: 2.4, panicLane: 76, panicBoost: 1.3,
+    panicDist: 300, panicSpeed: 300, panicTime: 2.4, panicLane: 44, panicBoost: 1.3,
     // Boyalar: metalik, parlak, mat sırayla atanır. Modeller özgün, gerçek logo yok
     finishes: ['metal', 'gloss', 'matte'],
     types: {
@@ -290,18 +320,20 @@ const CONFIG = {
       duster: { weight: 1.1, shape: 'duster', len: 48, wid: 26, mass: 1.5, cruise: 195, turnRate: 2.4, grip: 7, horn: 'truck', colors: ['#e8701a', '#2f6b4f', '#c9b48a'] },
       grandland: { weight: 0.9, shape: 'grandland', len: 49, wid: 26, mass: 1.45, cruise: 205, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#1f3a68', '#a7aeb7', '#e8551e'] },
       egea: { weight: 1.5, shape: 'egea', len: 48, wid: 24, mass: 1.25, cruise: 205, turnRate: 2.5, grip: 7, horn: 'car', colors: ['#f2f2f2', '#c1121f', '#3a3f47', '#1565c0'] },
-      minibus: { weight: 1.6, len: 64, wid: 28, mass: 3, cruise: 190, turnRate: 2, grip: 8, horn: 'dolmus', colors: ['#f4f6f8'] },
+      minibus: { weight: 1.6, model: 'minibus', len: 64, wid: 28, mass: 3, cruise: 190, turnRate: 2, grip: 8, horn: 'dolmus', colors: ['#f4f6f8'] },
       bus: { weight: 1.1, len: 96, wid: 30, mass: 7, cruise: 150, turnRate: 1.7, grip: 8, horn: 'bus', colors: ['#2a7fc1', '#2c9e8f', '#e8732a'] },
       truck: { weight: 0.8, accent: '#2a6db0', len: 108, wid: 32, mass: 8, cruise: 155, turnRate: 1.6, grip: 8, horn: 'truck', colors: ['#d9534f', '#3e7cb1', '#e8833a', '#2f7a4f'] },
     },
   },
 
   // Trafik ışığı süreleri (saniye)
-  traffic: { green: 6, yellow: 1.2, allRed: 0.8, stopLine: 128, brake: 520, hornAfter: 2.5, hornRate: 0.5 },
+  traffic: { green: 6, yellow: 1.2, allRed: 0.8, stopLine: 94, brake: 520, hornAfter: 2.5, hornRate: 0.5 },
 
   // Tabela adları. Marketler uydurmadır, gerçek marka değildir
   signs: {
-    shops: ['Maydanoz Döner', 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Tekel', 'Çay Ocağı', 'Kuaför', 'Nargile Cafe', 'Bakkal', 'Kahveci', 'Nevada Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Baba Pide', 'Kardeşler Bakkal', 'Tekel 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Nevada Kafe'],
+    bigshops: ['Grand Bazaar İş Hanı', 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
+    hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', 'Pera Palas Oteli', 'Otel Saray', 'Mavi Otel'],
+    shops: ['Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Tekel Bayii', 'Maydanoz Döner', 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Tekel', 'Çay Ocağı', 'Kuaför', 'Nargile Cafe', 'Bakkal', 'Kahveci', 'Nevada Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Baba Pide', 'Kardeşler Bakkal', 'Tekel 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Nevada Kafe'],
     chains: { Migros: '#ff7a00', 'BİM': '#d0121b', 'ŞOK': '#e6a800', A101: '#0088b0', CarrefourSA: '#0a4ea2', 'İtopya': '#ff2a6d', 'Koçtaş': '#f59300', 'CZN Burak': '#16a34a' },
     banks: { Akbank: '#d0121b', 'İş Bankası': '#0a4ea2', 'Ziraat Bankası': '#c8102e', Garanti: '#0f7a45', 'Yapı Kredi': '#1b2f6b' },
     sites: ['Yeşil Vadi Sitesi', 'Boğaz Evleri', 'Mavi Konak Sitesi', 'Çamlık Sitesi', 'Güneş Sitesi', 'Lale Evleri', 'Marmara Konutları', 'Park Evleri'],
@@ -327,7 +359,7 @@ const CONFIG = {
     giantCrushTank: 200,
   },
 
-  perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.8, bakePool: 12, slowFrameMs: 21 },
+  perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.72, bakePool: 9, slowFrameMs: 21 },
 };
 
 // Yıldız seviyesi: başlangıçta 1, her eşikte artar
@@ -516,6 +548,8 @@ const POWER_KINDS = ['blast', 'ghost', 'heal', 'giant'];
 const isPower = (kind) => kind >= PROP.POWER_BLAST && kind <= PROP.POWER_GIANT;
 const powerName = (kind) => POWER_KINDS[kind - PROP.POWER_BLAST];
 const isWaterRect = (rect) => rect.kind === 'water' || rect.kind === 'sea';
+// Havuz ve şadırvan duvar gibidir; göl, gölet ve denize araba düşer
+const isDeep = (rect) => rect.kind === 'sea' || (rect.kind === 'water' && rect.deep);
 
 // --- Tekrarlanabilir rastgele sayı (mulberry32) ---
 let rngState = 1;
@@ -540,8 +574,10 @@ const HUT_COLORS = ['#ff6f61', '#3fa7d6', '#ffb400', '#2ec4b6'];
 const ADOBE_COLORS = ['#e0ab74', '#d99c62', '#eabd8c'];
 const HOUSE_ROOFS = ['#c8553d', '#b5523b', '#d9822b', '#8c5a3c', '#a44a3f', '#5f7f95'];
 
+// Karoları bitişik dizilen şehir için yardımcı
 function newChunk() {
   return {
+    pads: [], padCount: 0, road: 0, alley: 0,
     cx: 0, cy: 0, x: 0, y: 0,
     ground: new Uint8Array(CELLS),
     cost: new Uint8Array(CELLS), // 0 = geçilmez
@@ -753,6 +789,7 @@ class World {
     c.propCount = 0;
     c.streetCount = 0;
     c.lightCount = 0;
+    c.padCount = 0;
     c.siteName = '';
     c.dirty = true;
     seedRng(cx, cy, this.seed);
@@ -770,6 +807,8 @@ class World {
     this.biomeAt(cx, cy, biomeOut);
     seedRng(cx, cy, this.seed);
     c.biome = biomeOut.biome;
+    c.road = rint(0, 3); // Yol malzemesi: koyu asfalt, beton, parke taşı, kırık asfalt
+    c.alley = rint(0, 2);
     const home = Math.abs(cx) <= 1 && Math.abs(cy) <= 1;
     let t = home ? 'mahalle' : 'city';
     if (cx === sis.cx && cy === sis.cy) {
@@ -782,16 +821,19 @@ class World {
       else t = c.biome;
     }
     c.template = t;
-    if (t === 'city' || t === 'downtown') this.fillCity(c);
-    else if (t === 'mahalle') this.fillMahalle(c);
-    else if (t === 'gecekondu') this.fillGecekondu(c);
+    if (t === 'city' || t === 'mahalle') this.fillDense(c, 'mahalle', null);
+    else if (t === 'downtown') this.fillDense(c, 'downtown', null);
+    else if (t === 'esnaf') this.fillDense(c, 'esnaf', null);
+    else if (t === 'gecekondu') this.fillDense(c, 'gecekondu', null);
+    else if (t === 'gece') this.fillDense(c, 'gece', null);
     else if (t === 'site') this.fillSite(c, SITE_NAMES[rint(0, SITE_NAMES.length - 1)], PASTELS[rint(0, PASTELS.length - 1)], rint(0, 1), true);
     else if (t === 'bigsite') this.fillSite(c, big.name, big.color, big.layout, c.cx === big.cx && c.cy === big.cy);
-    else if (t === 'gece') this.fillGece(c);
-    else if (t === 'cami') this.fillLandmark(c, BUILD.MOSQUE, 11, 11, '#c7cdd3', GROUND.PLAZA, '');
-    else if (t === 'stadyum') this.fillLandmark(c, BUILD.STADIUM, 16, 16, '#58606b', GROUND.WALK, '');
-    else if (t === 'hastane') this.fillLandmark(c, BUILD.HOSPITAL, 13, 11, '#f1f5f8', GROUND.PLAZA, 'Devlet Hastanesi');
-    else if (t === 'okul') this.fillLandmark(c, BUILD.SCHOOL, 13, 10, '#e8cf9a', GROUND.DIRT, 'Atatürk İlkokulu');
+    else if (t === 'cami') this.fillDense(c, 'mahalle', { style: BUILD.MOSQUE, w: 12, h: 12, color: '#c7cdd3', pad: 'courtyard', sign: '' });
+    else if (t === 'stadyum') this.fillDense(c, 'mahalle', { style: BUILD.STADIUM, w: 18, h: 16, color: '#58606b', sign: '' });
+    else if (t === 'hastane') this.fillDense(c, 'mahalle', { style: BUILD.HOSPITAL, w: 13, h: 10, color: '#f1f5f8', pad: 'ambulance', sign: 'Devlet Hastanesi' });
+    else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: 'Atatürk İlkokulu' });
+    else if (t === 'spor') this.fillDense(c, 'mahalle', { sport: true });
+    else if (t === 'golet') this.fillDense(c, 'mahalle', { pond: true });
     else if (t === 'pazar') this.fillPazar(c);
     else if (t === 'sistem') this.fillSistem(c);
     else if (t === 'sea') this.fillSea(c);
@@ -799,7 +841,6 @@ class World {
     else if (t === 'forest') this.fillForest(c);
     else if (t === 'desert') this.fillDesert(c);
     else if (t === 'rural') this.fillRural(c);
-    else if (t === 'suburb') this.fillSuburb(c);
     else if (t === 'park') this.fillPark(c);
     else if (t === 'lake') this.fillLake(c);
     else if (t === 'industrial') this.fillIndustrial(c);
@@ -821,7 +862,7 @@ class World {
     if (!r) { r = { kind: '', x: 0, y: 0, w: 0, h: 0, style: 0, color: '', alive: true, seed: 0 }; c.rects[c.rectCount] = r; }
     c.rectCount++;
     r.kind = kind; r.style = style; r.color = color; r.alive = true; r.seed = rint(0, 999);
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false;
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -837,6 +878,233 @@ class World {
     s.vertical = vertical; s.pos = pos; s.width = width; s.ground = ground;
     if (vertical) this.setGround(c, pos, ART, pos + width, CT, ground);
     else this.setGround(c, ART, pos, CT, pos + width, ground);
+  }
+
+  // Yoğun şehir: bitişik binalar, aralarında yalnızca bir arabanın geçeceği ara sokaklar
+  fillDense(c, profile, mark) {
+    const P = W.profiles[profile];
+    this.P = P;
+    this.profile = profile;
+    this.setGround(c, ART, ART, CT, CT, GROUND.WALK);
+    this.cutAlleys(c, true, P.alleys[0], P.wide, xsBuf);
+    this.cutAlleys(c, false, P.alleys[1], P.wide, ysBuf);
+    // En büyük blok özel yapıya ayrılır
+    let bi = -1; let bj = -1; let best = 0;
+    for (let j = 0; j < ysBuf.length; j += 2) {
+      for (let i = 0; i < xsBuf.length; i += 2) {
+        const a = (xsBuf[i + 1] - xsBuf[i]) * (ysBuf[j + 1] - ysBuf[j]);
+        if (a > best) { best = a; bi = i; bj = j; }
+      }
+    }
+    for (let j = 0; j < ysBuf.length; j += 2) {
+      for (let i = 0; i < xsBuf.length; i += 2) {
+        const x0 = xsBuf[i]; const x1 = xsBuf[i + 1]; const y0 = ysBuf[j]; const y1 = ysBuf[j + 1];
+        if (mark && i === bi && j === bj) this.markBlock(c, mark, x0, y0, x1, y1);
+        else this.packBlock(c, x0, y0, x1, y1);
+      }
+    }
+    // Sokak hayatı yalnızca kalan boş yerlerde
+    if (profile !== 'gecekondu') this.alleyLife(c);
+    else { this.scatter(c, PROP.CRATE, 5, [GROUND.ALLEY, GROUND.WALK]); this.scatter(c, PROP.UNCLES, 4, [GROUND.WALK]); }
+  }
+
+  // n ara sokak: kenardan kenara, iki ucu da ana yola bağlanır
+  cutAlleys(c, vertical, n, wide, out) {
+    out.length = 0;
+    out.push(ART);
+    const span = CT - ART;
+    for (let i = 1; i <= n; i++) {
+      const w = chance(wide) ? 2 : 1;
+      const p = ART + Math.round((span * i) / (n + 1)) + rint(-3, 3);
+      this.addStreet(c, vertical, p, w, GROUND.ALLEY);
+      out.push(p, p + w);
+    }
+    out.push(CT);
+  }
+
+  packBlock(c, x0, y0, x1, y1) {
+    const P = this.P;
+    const w = x1 - x0;
+    const h = y1 - y0;
+    // Çıkmaz sokak: bloğun kenarından içeri bir karo, ucu binaya dayanır
+    if (w >= 9 && h >= 7 && chance(P.stub)) {
+      const sx = x0 + rint(3, w - 4);
+      const len = rint(3, h - 3);
+      this.setGround(c, sx, y0, sx + 1, y0 + len, GROUND.ALLEY);
+      this.split2(c, x0, y0, sx, y1, P.maxB);
+      this.split2(c, sx + 1, y0, x1, y1, P.maxB);
+      this.split2(c, sx, y0 + len, sx + 1, y1, P.maxB);
+      return;
+    }
+    this.split2(c, x0, y0, x1, y1, P.maxB);
+  }
+
+  split2(c, x0, y0, x1, y1, maxB) {
+    const w = x1 - x0;
+    const h = y1 - y0;
+    if (w < 1 || h < 1) return;
+    if (w <= maxB && h <= maxB && (w <= 2 || h <= 2 || chance(0.55))) { this.lot(c, x0, y0, x1, y1); return; }
+    const vertical = w === h ? chance(0.5) : w > h;
+    const len = vertical ? w : h;
+    if (len < 3) { this.lot(c, x0, y0, x1, y1); return; }
+    const at = rint(1, len - 1) < 2 ? 2 : rint(2, Math.max(2, len - 2));
+    if (vertical) { this.split2(c, x0, y0, x0 + at, y1, maxB); this.split2(c, x0 + at, y0, x1, y1, maxB); }
+    else { this.split2(c, x0, y0, x1, y0 + at, maxB); this.split2(c, x0, y0 + at, x1, y1, maxB); }
+  }
+
+  // Kavşak köşeleri boş kalır: yaya orada bekler
+  lot(c, x0, y0, x1, y1) {
+    for (const [rx, ry] of RESERVED) {
+      if (rx >= x0 && rx < x1 && ry >= y0 && ry < y1) {
+        if (rx === x0) x0++;
+        else if (rx === x1 - 1) x1--;
+        else if (ry === y0) y0++;
+        else y1--;
+      }
+    }
+    if (x1 <= x0 || y1 <= y0) return;
+    this.building2(c, x0, y0, x1, y1);
+  }
+
+  alleyLife(c) {
+    this.scatter(c, PROP.CHAIRS, 2, [GROUND.WALK]);
+    this.scatter(c, PROP.SIMITCART, 1, [GROUND.WALK]);
+    for (let i = 0; i < c.streetCount; i++) {
+      const s = c.streets[i];
+      if (s.ground !== GROUND.ALLEY) continue;
+      for (let k = ART + rint(3, 7); k < CT - 2; k += rint(8, 13)) {
+        const m = (s.pos + s.width / 2) * TILE;
+        const at = (k + 0.5) * TILE;
+        if (s.vertical) this.addProp(c, PROP.LAUNDRY, c.x + m, c.y + at, 0);
+        else this.addProp(c, PROP.LAUNDRY, c.x + at, c.y + m, Math.PI / 2);
+      }
+    }
+  }
+
+  addPad(c, kind, tx, ty, w, h) {
+    let p = c.pads[c.padCount];
+    if (!p) { p = { kind: '', tx: 0, ty: 0, w: 0, h: 0 }; c.pads[c.padCount] = p; }
+    c.padCount++;
+    p.kind = kind; p.tx = tx; p.ty = ty; p.w = w; p.h = h;
+  }
+
+  // Bloğa özel yapı: cami, hastane, okul, stadyum, spor sahaları ya da gölet. Artan yer yine dolar
+  markBlock(c, m, x0, y0, x1, y1) {
+    const bw = x1 - x0;
+    const bh = y1 - y0;
+    if (m.sport) {
+      const fw = Math.min(bw - 2, 14); const fh = Math.min(bh - 2, 9);
+      this.setGround(c, x0, y0, x0 + fw, y0 + fh, GROUND.PLAZA);
+      this.addPad(c, 'foot', x0, y0, fw, fh);
+      const hx = x0 + fw;
+      const rest = bw - fw;
+      if (rest >= 4) {
+        this.setGround(c, hx, y0, x1, y0 + Math.min(5, bh), GROUND.PLAZA);
+        this.addPad(c, 'basket', hx, y0, Math.min(rest, 6), Math.min(5, bh));
+      }
+      const hh = Math.min(bh - fh, 6);
+      if (hh >= 4) {
+        const hw = Math.min(bw, 9);
+        this.setGround(c, x0, y0 + fh, x0 + hw, y0 + fh + hh, GROUND.PLAZA);
+        this.addPad(c, 'hali', x0, y0 + fh, hw, hh);
+        this.split2(c, x0 + hw, y0 + Math.max(fh, 5), x1, y1, this.P.maxB);
+        this.split2(c, x0, y0 + fh + hh, x0 + hw, y1, this.P.maxB);
+      } else {
+        this.split2(c, x0, y0 + fh, x1, y1, this.P.maxB);
+      }
+      return;
+    }
+    if (m.pond) {
+      const pw = Math.min(bw - 2, rint(7, 11)); const ph = Math.min(bh - 2, rint(6, 9));
+      const px = x0 + 1; const py = y0 + 1;
+      this.setGround(c, x0, y0, x0 + pw + 2, y0 + ph + 2, GROUND.GRASS);
+      this.setGround(c, px, py, px + pw, py + ph, GROUND.WATER);
+      const r = this.addRect(c, 'water', px, py, px + pw, py + ph, 4, 0, '#3aa7e8');
+      r.deep = true;
+      for (let i = 0; i < 6; i++) this.addProp(c, chance(0.6) ? PROP.TREE : PROP.BENCH, c.x + (x0 + 0.5 + rnd() * (pw + 1)) * TILE, c.y + (chance(0.5) ? y0 + 0.5 : y0 + ph + 1.5) * TILE);
+      this.split2(c, x0 + pw + 2, y0, x1, y1, this.P.maxB);
+      this.split2(c, x0, y0 + ph + 2, x0 + pw + 2, y1, this.P.maxB);
+      return;
+    }
+    const w = Math.min(bw, m.w);
+    const h = Math.min(bh, m.h);
+    const padH = m.pad === 'yard' ? Math.min(bh - h, 7) : m.pad === 'ambulance' ? Math.min(bh - h, 4) : 0;
+    const r = this.addRect(c, 'building', x0, y0, x0 + w, y0 + h, 2, m.style, m.color);
+    if (m.sign) { r.sign = m.sign; r.signColor = m.style === BUILD.HOSPITAL ? '#d0121b' : '#23422f'; r.signSize = 3; }
+    if (padH > 0) {
+      this.setGround(c, x0, y0 + h, x0 + w, y0 + h + padH, GROUND.PLAZA);
+      this.addPad(c, m.pad, x0, y0 + h, w, padH);
+    }
+    this.split2(c, x0 + w, y0, x1, y1, this.P.maxB);
+    this.split2(c, x0, y0 + h + padH, x0 + w, y1, this.P.maxB);
+  }
+
+  building2(c, x0, y0, x1, y1) {
+    const w = x1 - x0;
+    const h = y1 - y0;
+    const area = w * h;
+    const P = this.P;
+    const ins = chance(P.detached) ? 6 : 1; // Çoğu bitişik, bazıları ayrık
+    const SG = CONFIG.signs;
+    const pick = (o) => o[rint(0, o.length - 1)];
+    const keys = (o) => Object.keys(o);
+    const add = (style, color, sign, signColor, size) => {
+      const r = this.addRect(c, 'building', x0, y0, x1, y1, ins, style, color);
+      if (sign) { r.sign = sign; r.signColor = signColor || pick(SG.colors); r.signSize = size ?? rint(0, 2); }
+      return r;
+    };
+    const pf = this.profile;
+    if (pf === 'gecekondu') {
+      if (area >= 9) { add(BUILD.APARTMENT, ROOFS[rint(0, ROOFS.length - 1)], chance(0.4) ? pick(SG.shops) : ''); return; }
+      add(BUILD.GECEKONDU, '#b08a5a', chance(0.12) ? pick(SG.shops) : '', '', 0);
+      return;
+    }
+    if (pf === 'gece') {
+      if (area >= 6 && chance(0.7)) {
+        const r = add(BUILD.CLUB, pick(SG.neon), pick(SG.clubs), '#1b1426', rint(1, 3));
+        r.neon = true;
+        this.addProp(c, PROP.QUEUE, r.x + r.w / 2, r.y + r.h + 24);
+        return;
+      }
+      const shop = area <= 6 ? BUILD.SHOP : BUILD.APARTMENT;
+      add(shop, ROOFS[rint(0, ROOFS.length - 1)], pick(SG.shops));
+      return;
+    }
+    if (pf === 'esnaf') {
+      if (area <= 9 || chance(0.5)) { add(BUILD.SHOP, ROOFS[rint(0, ROOFS.length - 1)], pick(SG.shops), '', rint(0, 2)); return; }
+      if (w >= 3 && chance(0.6)) { add(BUILD.SHOPROW, '#c8c0b0', pick(SG.shops)); return; }
+    }
+    // Büyük parseller: kuleler, rezidans, ofis, otel, iş hanı
+    if (area >= 36) {
+      const k = pf === 'downtown' ? rint(0, 5) : rint(1, 4);
+      if (k === 0) { add(BUILD.SKYSCRAPER, pick(TOWER_COLORS), pick(SG.bigshops), '#0f2038', 3); return; }
+      if (k === 1) { add(BUILD.RESIDENCE, '#8aa0b8', pick(SG.bigshops), '#1f3a68', 2); return; }
+      if (k === 2) { add(BUILD.OFFICE, '#8aa0b8', chance(0.5) ? pick(SG.bigshops) : ''); return; }
+      if (k === 3) { add(BUILD.HOTEL, '#8aa0b8', pick(SG.hotels), '#7a5a1c', 2); return; }
+      if (k === 4) { add(BUILD.ISHANI, '#b0b4b8', pick(SG.bigshops)); return; }
+      add(rint(BUILD.TOWER_GLASS, BUILD.TOWER_STEP), pick(TOWER_COLORS));
+      return;
+    }
+    if (area >= 12 && chance(0.2)) {
+      const brand = pick(keys(SG.chains));
+      const r = add(BUILD.CHAIN, SG.chains[brand], brand, SG.chains[brand], 2);
+      r.brand = brand;
+      return;
+    }
+    if (area >= 12 && chance(0.08)) { add(BUILD.MARKET, pick(SG.colors), pick(SG.markets)); return; }
+    if (area >= 6 && chance(0.13)) { const n = pick(keys(SG.banks)); add(BUILD.BANK, '#d7dbdf', n, SG.banks[n], 1); return; }
+    if (pf === 'downtown' && area >= 12) {
+      if (chance(0.5)) { add(BUILD.OFFICE, '#8aa0b8', ''); return; }
+      add(BUILD.RESIDENCE, '#8aa0b8', pick(SG.bigshops), '#1f3a68', 1);
+      return;
+    }
+    if (w >= 4 && chance(0.14)) { add(BUILD.SHOPROW, '#c8c0b0', pick(SG.shops)); return; }
+    if (area <= 6) {
+      if (chance(0.65)) { add(BUILD.SHOP, ROOFS[rint(0, ROOFS.length - 1)], pick(SG.shops), '', rint(0, 2)); return; }
+      add(chance(0.5) ? BUILD.VILLA : BUILD.GECEKONDU, '#efe6d4');
+      return;
+    }
+    add(BUILD.APARTMENT, ROOFS[rint(0, ROOFS.length - 1)], chance(0.65) ? pick(SG.shops) : '');
   }
 
   // Kenardan kenara sokak: iki ucu da ana yola bağlanır. Kesim noktaları lots dizisine yazılır.
@@ -858,192 +1126,6 @@ class World {
     out.push(CT);
   }
 
-  fillCity(c) {
-    const nv = rint(0, 2);
-    const nh = nv === 0 ? rint(1, 2) : rint(0, 2);
-    this.cutStreets(c, nv, true, xsBuf);
-    this.cutStreets(c, nh, false, ysBuf);
-    for (let j = 0; j < ysBuf.length; j += 2) {
-      for (let i = 0; i < xsBuf.length; i += 2) {
-        this.cityLot(c, xsBuf[i], ysBuf[j], xsBuf[i + 1], ysBuf[j + 1]);
-      }
-    }
-    this.parkedAlongStreets(c, 0.3);
-  }
-
-  cityLot(c, x0, y0, x1, y1) {
-    this.setGround(c, x0, y0, x1, y1, GROUND.WALK);
-    if (x1 - x0 < 3 || y1 - y0 < 3) return;
-    const big = (x1 - x0) * (y1 - y0) > 110;
-    this.lotY0 = y0 + 1; this.lotY1 = y1 - 1; this.lotX0 = x0 + 1; this.lotX1 = x1 - 1;
-    this.split(c, x0 + 1, y0 + 1, x1 - 1, y1 - 1, big ? 7 : 5);
-    this.sidewalkTrees(c, x0, y0, x1, y1);
-  }
-
-  // Parselleri bölerek binalar.
-  split(c, x0, y0, x1, y1, maxB) {
-    const w = x1 - x0;
-    const h = y1 - y0;
-    if (w < 2 || h < 2) return;
-    if (w <= maxB && h <= maxB && (w <= 3 || h <= 3 || chance(0.55))) {
-      this.building(c, x0, y0, x1, y1);
-      return;
-    }
-    const vertical = w === h ? chance(0.5) : w > h;
-    const len = vertical ? w : h;
-    if (len < 4) { this.building(c, x0, y0, x1, y1); return; }
-    // Ara sokak yalnızca parselin iki kenarına da ulaşıyorsa açılır; yoksa kapalı cep oluşurdu
-    const through = vertical ? y0 === this.lotY0 && y1 === this.lotY1 : x0 === this.lotX0 && x1 === this.lotX1;
-    // Ara sokak bir ya da iki karo: dar ve hissedilir
-    const gap = through && len >= 7 && chance(0.62) ? rint(1, 2) : 0;
-    const at = rint(2, len - 2 - gap);
-    if (vertical) {
-      this.split(c, x0, y0, x0 + at, y1, maxB);
-      this.split(c, x0 + at + gap, y0, x1, y1, maxB);
-    } else {
-      this.split(c, x0, y0, x1, y0 + at, maxB);
-      this.split(c, x0, y0 + at + gap, x1, y1, maxB);
-    }
-  }
-
-  building(c, x0, y0, x1, y1) {
-    const area = (x1 - x0) * (y1 - y0);
-    const downtown = c.template === 'downtown';
-    if (area >= 9 && chance(downtown ? 0.75 : 0.1)) {
-      this.addRect(c, 'building', x0, y0, x1, y1, 3, rint(BUILD.TOWER_GLASS, BUILD.TOWER_STEP), TOWER_COLORS[rint(0, TOWER_COLORS.length - 1)]);
-      return;
-    }
-    const SG = CONFIG.signs;
-    const W2 = x1 - x0;
-    const pick = (o) => Object.keys(o)[rint(0, Object.keys(o).length - 1)];
-    // Zincir market, gross market ve banka: her biri kendi cephesiyle
-    if (area >= 12 && chance(0.34)) {
-      const brand = pick(SG.chains);
-      const r = this.addRect(c, 'building', x0, y0, x1, y1, 3, BUILD.CHAIN, SG.chains[brand]);
-      r.brand = brand; r.sign = brand; r.signColor = SG.chains[brand];
-      return;
-    }
-    if (area >= 12 && chance(0.1)) {
-      const r = this.addRect(c, 'building', x0, y0, x1, y1, 3, BUILD.MARKET, SG.colors[rint(0, SG.colors.length - 1)]);
-      r.sign = SG.markets[rint(0, SG.markets.length - 1)];
-      r.signColor = r.color;
-      return;
-    }
-    if (area >= 6 && chance(0.2)) {
-      const name = pick(SG.banks);
-      const r = this.addRect(c, 'building', x0, y0, x1, y1, 3, BUILD.BANK, '#d7dbdf');
-      r.sign = name; r.signColor = SG.banks[name];
-      return;
-    }
-    if (downtown && area >= 6) {
-      const k = rint(0, 3);
-      const style = [BUILD.RESIDENCE, BUILD.OFFICE, BUILD.HOTEL, BUILD.ISHANI][k];
-      const r = this.addRect(c, 'building', x0, y0, x1, y1, 3, style, '#8aa0b8');
-      if (k === 2) { r.sign = ['Grand Otel', 'Otel Boğaz', 'Park Hotel'][rint(0, 2)]; r.signColor = '#7a5a1c'; }
-      return;
-    }
-    if (W2 >= 3 && chance(0.2)) {
-      const r = this.addRect(c, 'building', x0, y0, x1, y1, 3, BUILD.SHOPROW, '#c8c0b0');
-      r.sign = SG.shops[rint(0, SG.shops.length - 1)];
-      r.signColor = SG.colors[rint(0, SG.colors.length - 1)];
-      return;
-    }
-    if (chance(0.06)) { this.addRect(c, 'building', x0, y0, x1, y1, 3, BUILD.ISHANI, '#b0b4b8'); return; }
-    if (area <= 9 && chance(0.2)) { this.addRect(c, 'building', x0, y0, x1, y1, 4, BUILD.VILLA, '#efe6d4'); return; }
-    const apt = chance(0.72);
-    const style = apt ? BUILD.APARTMENT : area >= 30 ? rint(0, 4) : rint(0, 3);
-    const r = this.addRect(c, 'building', x0, y0, x1, y1, 3, style, ROOFS[rint(0, ROOFS.length - 1)]);
-    if (chance(0.7)) {
-      r.sign = SG.shops[rint(0, SG.shops.length - 1)];
-      r.signColor = SG.colors[rint(0, SG.colors.length - 1)];
-    }
-  }
-
-  sidewalkTrees(c, x0, y0, x1, y1) {
-    for (let x = x0 + 1; x < x1 - 1; x += 2) {
-      if (chance(0.3)) this.addProp(c, this.streetProp(), c.x + (x + 0.5) * TILE, c.y + y0 * TILE + 13);
-      if (chance(0.3)) this.addProp(c, this.streetProp(), c.x + (x + 0.5) * TILE, c.y + y1 * TILE - 13);
-    }
-    for (let y = y0 + 1; y < y1 - 1; y += 2) {
-      if (chance(0.25)) this.addProp(c, PROP.TREE, c.x + x0 * TILE + 13, c.y + (y + 0.5) * TILE);
-      if (chance(0.25)) this.addProp(c, PROP.TREE, c.x + x1 * TILE - 13, c.y + (y + 0.5) * TILE);
-    }
-  }
-
-  // Kaldırım hayatı: ağaç, plastik masa, amcalar, simit arabası
-  streetProp() {
-    const k = rnd();
-    if (k < 0.38) return PROP.TREE;
-    if (k < 0.6) return PROP.CHAIRS;
-    if (k < 0.76) return PROP.UNCLES;
-    if (k < 0.9) return PROP.SIMITCART;
-    return PROP.HYDRANT;
-  }
-
-  // Dar mahalle: 2 karo genişlikte sokaklar, ip ip çamaşır, sıkışık apartmanlar
-  fillMahalle(c) {
-    const cut = (vertical, out) => {
-      out.length = 0;
-      out.push(ART);
-      const n = rint(2, 3);
-      let at = ART + rint(5, 6);
-      for (let i = 0; i < n && at + 2 < CT - 4; i++) {
-        this.addStreet(c, vertical, at, 2);
-        out.push(at, at + 2);
-        at += 2 + rint(5, 6);
-      }
-      out.push(CT);
-    };
-    cut(true, xsBuf);
-    cut(false, ysBuf);
-    let stubs = rint(1, 2);
-    for (let j = 0; j < ysBuf.length; j += 2) {
-      for (let i = 0; i < xsBuf.length; i += 2) {
-        const [a, b, d, e] = [xsBuf[i], ysBuf[j], xsBuf[i + 1], ysBuf[j + 1]];
-        if (stubs > 0 && d - a >= 7 && e - b >= 6 && chance(0.6)) {
-          stubs--;
-          this.deadEndLot(c, a, b, d, e);
-        } else {
-          this.cityLot(c, a, b, d, e);
-        }
-      }
-    }
-    // Sokağın üstünden geçen çamaşır ipleri
-    for (let i = 0; i < c.streetCount; i++) {
-      const s = c.streets[i];
-      for (let k = ART + rint(2, 5); k < CT - 1; k += rint(6, 10)) {
-        const m = (s.pos + s.width / 2) * TILE;
-        const at = (k + 0.5) * TILE;
-        if (s.vertical) this.addProp(c, PROP.LAUNDRY, c.x + m, c.y + at, 0);
-        else this.addProp(c, PROP.LAUNDRY, c.x + at, c.y + m, Math.PI / 2);
-      }
-    }
-  }
-
-  // Çıkmaz sokak: kısa, ucu dönüş cepli; binalar iki yanında
-  deadEndLot(c, x0, y0, x1, y1) {
-    this.setGround(c, x0, y0, x1, y1, GROUND.WALK);
-    const sx = (x0 + x1) >> 1;
-    const end = y1 - 2;
-    this.setGround(c, sx - 1, y0, sx + 1, end - 1, GROUND.ROAD);
-    this.setGround(c, sx - 2, end - 2, sx + 2, end, GROUND.ROAD);
-    this.lotY0 = -1; this.lotX0 = -1; // Yanlardaki parsellerde ara sokak açılmaz
-    this.split(c, x0 + 1, y0 + 1, sx - 2, y1 - 1, 4);
-    this.split(c, sx + 2, y0 + 1, x1 - 1, y1 - 1, 4);
-  }
-
-  // Gecekondu mahallesi: düzensiz, sıkışık, patika yollu
-  fillGecekondu(c) {
-    this.setGround(c, ART, ART, CT, CT, GROUND.DIRT);
-    for (let i = 0; i < 46; i++) {
-      this.place(c, 'building', rint(6, 21), rint(6, 21), rint(1, 2), rint(1, 2), BUILD.GECEKONDU, '#b08a5a', 2);
-    }
-    this.scatter(c, PROP.CRATE, 8, [GROUND.DIRT]);
-    this.scatter(c, PROP.BARREL, 6, [GROUND.DIRT]);
-    this.scatter(c, PROP.UNCLES, 4, [GROUND.DIRT]);
-    this.scatter(c, PROP.BUSH, 6, [GROUND.DIRT]);
-  }
-
   // Site: çok bloklu, ortası havuz ve yeşil alan, kenarda otopark. layout mimariyi değiştirir
   fillSite(c, name, color, layout, withSign) {
     this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
@@ -1052,59 +1134,27 @@ class World {
     this.setGround(c, ART, ART, ART + 1, CT, GROUND.WALK);
     this.setGround(c, CT - 1, ART, CT, CT, GROUND.WALK);
     c.siteName = name;
-    // Ortada havuz
-    const px = 12; const py = 12;
-    this.setGround(c, px, py, px + 5, py + 5, GROUND.WATER);
-    this.addRect(c, 'water', px, py, px + 5, py + 5, 5, 0, '#57c1f0');
+    // Ortada havuz: içine düşülmez, kenarı duvar gibidir
+    const mid = (CT + ART) >> 1;
+    this.setGround(c, mid - 3, mid - 3, mid + 3, mid + 3, GROUND.PLAZA);
+    this.addRect(c, 'water', mid - 3, mid - 3, mid + 3, mid + 3, 6, 0, '#57c1f0');
+    const q = (v) => Math.round((v * CT) / 24);
     const blocks = layout === 0
-      ? [[6, 6], [12, 6], [18, 6], [6, 12], [18, 12], [6, 18], [12, 18], [18, 18]]
-      : [[7, 6], [15, 6], [6, 11], [18, 11], [7, 18], [15, 18]];
-    const bw = layout === 0 ? 4 : 5;
-    const bh = layout === 0 ? 4 : 4;
+      ? [[6, 6], [12, 6], [18, 6], [6, 11], [18, 11], [6, 17], [12, 17], [18, 17]]
+      : [[7, 6], [15, 6], [6, 12], [18, 12], [7, 18], [15, 18]];
+    const bw = q(layout === 0 ? 4 : 5);
+    const bh = q(4);
     for (const [x, y] of blocks) {
-      const r = this.place(c, 'building', x, y, bw, bh, BUILD.SITE_BLOCK, color);
-      if (r && withSign && !c.siteSigned) { r.sign = name; r.signColor = '#23422f'; c.siteSigned = true; }
+      const r = this.place(c, 'building', q(x), q(y), bw, bh, BUILD.SITE_BLOCK, color);
+      if (r && withSign && !c.siteSigned) { r.sign = name; r.signColor = '#23422f'; r.signSize = 2; c.siteSigned = true; }
     }
     c.siteSigned = false;
-    this.scatter(c, PROP.TREE, 26, [GROUND.GRASS]);
-    this.scatter(c, PROP.BENCH, 8, [GROUND.GRASS]);
-    this.scatter(c, PROP.BUSH, 12, [GROUND.GRASS]);
+    this.addPad(c, 'parking', ART + 1, ART + 1, CT - ART - 2, 2);
+    this.scatter(c, PROP.TREE, 34, [GROUND.GRASS]);
+    this.scatter(c, PROP.BENCH, 10, [GROUND.GRASS]);
+    this.scatter(c, PROP.BUSH, 16, [GROUND.GRASS]);
     // Otopark sırası
-    for (let k = 7; k < CT - 2; k += 2) this.addProp(c, PROP.PARKED, c.x + (k + 0.5) * TILE, c.y + (ART + 0.5) * TILE, Math.PI / 2);
-  }
-
-  // Gece hayatı: neon tabelalı mekânlar, kapıda güvenlik ve bekleyen kalabalık
-  fillGece(c) {
-    this.cutStreets(c, 1, chance(0.5), xsBuf);
-    this.setGround(c, ART, ART, CT, CT, GROUND.WALK);
-    for (let i = 0; i < c.streetCount; i++) {
-      const s = c.streets[i];
-      if (s.vertical) this.setGround(c, s.pos, ART, s.pos + s.width, CT, GROUND.ROAD);
-      else this.setGround(c, ART, s.pos, CT, s.pos + s.width, GROUND.ROAD);
-    }
-    const SG = CONFIG.signs;
-    for (let i = 0; i < 30; i++) {
-      const r = this.place(c, 'building', rint(6, 18), rint(6, 18), rint(3, 5), 3, BUILD.CLUB, SG.neon[rint(0, SG.neon.length - 1)]);
-      if (r) {
-        r.sign = SG.clubs[rint(0, SG.clubs.length - 1)];
-        r.signColor = '#1b1426';
-        r.neon = true;
-        const p = this.addProp(c, PROP.QUEUE, r.x + r.w / 2, r.y + r.h + 22);
-        p.rot = 0;
-      }
-    }
-    this.scatter(c, PROP.CHAIRS, 4, [GROUND.WALK]);
-  }
-
-  fillLandmark(c, style, w, h, color, ground, sign) {
-    this.setGround(c, ART, ART, CT, CT, ground);
-    const x = 5 + ((19 - w) >> 1);
-    const y = 5 + ((19 - h) >> 1);
-    const r = this.addRect(c, 'building', x, y, x + w, y + h, 3, style, color);
-    if (sign) { r.sign = sign; r.signColor = '#23422f'; }
-    this.scatter(c, PROP.TREE, 12, [ground]);
-    this.scatter(c, PROP.BENCH, 6, [ground]);
-    this.scatter(c, PROP.SIMITCART, 2, [ground]);
+    for (let k = 7; k < CT - 2; k += 2) this.addProp(c, PROP.PARKED, c.x + (k + 0.5) * TILE, c.y + (ART + 1.6) * TILE, Math.PI / 2);
   }
 
   // Tek seferlik büyük siteler. Bir site 2x2 chunk kaplar
@@ -1151,8 +1201,16 @@ class World {
     }
     if (c.biome === 'city' || c.biome === 'beach') {
       for (let k = ART + 2; k < CT - 1; k += 5) {
-        this.addLight(c, 0, c.x + ART * TILE + 7, c.y + (k + 0.5) * TILE, 0, 0, null);
-        this.addLight(c, 0, c.x + (k + 0.5) * TILE, c.y + ART * TILE + 7, 0, 0, null);
+        this.addLight(c, 0, c.x + ART * TILE - 9, c.y + (k + 0.5) * TILE, 0, 0, null);
+        this.addLight(c, 0, c.x + (k + 0.5) * TILE, c.y + ART * TILE - 9, 0, 0, null);
+      }
+      for (let i = 0; i < c.streetCount; i++) {
+        const s = c.streets[i];
+        const m = (s.pos + s.width / 2) * TILE;
+        for (let k = ART + 4; k < CT - 1; k += 8) {
+          if (s.vertical) this.addLight(c, 0, c.x + m, c.y + (k + 0.5) * TILE, 0, 0, null);
+          else this.addLight(c, 0, c.x + (k + 0.5) * TILE, c.y + m, 0, 0, null);
+        }
       }
     }
   }
@@ -1160,8 +1218,9 @@ class World {
   // Üstü kapalı pazar yeri ve çevresindeki tezgâhlar
   fillPazar(c) {
     this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
-    this.addRect(c, 'building', 9, 9, 20, 13, 3, BUILD.BAZAAR, '#d9281e');
-    this.addRect(c, 'building', 9, 16, 20, 20, 3, BUILD.BAZAAR, '#1d6fb8');
+    this.addRect(c, 'building', 8, 8, 28, 13, 3, BUILD.BAZAAR, '#d9281e');
+    this.addRect(c, 'building', 8, 16, 28, 21, 3, BUILD.BAZAAR, '#1d6fb8');
+    this.addRect(c, 'building', 8, 24, 28, 29, 3, BUILD.BAZAAR, '#178a4d');
     this.scatter(c, PROP.STALL, 22, [GROUND.PLAZA]);
     this.scatter(c, PROP.CHAIRS, 8, [GROUND.PLAZA]);
     this.scatter(c, PROP.UNCLES, 5, [GROUND.PLAZA]);
@@ -1190,65 +1249,9 @@ class World {
   fillSistem(c) {
     this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
     // Haritanın en büyük binası: chunk'ın neredeyse tamamı
-    this.addRect(c, 'building', 6, 6, 23, 22, 3, BUILD.SISTEM, '#ff7a00');
-    for (let k = 7; k < 22; k += 3) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 22.6 * TILE);
+    this.addRect(c, 'building', 5, 5, 30, 27, 3, BUILD.SISTEM, '#ff7a00');
+    for (let k = 6; k < 29; k += 3) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 28.6 * TILE);
     this.scatter(c, PROP.SIMITCART, 3, [GROUND.PLAZA]);
-  }
-
-  // Yol kenarına park etmiş arabalar; kavşak ağızlarına konmaz
-  parkedAlongStreets(c, p) {
-    for (let i = 0; i < c.streetCount; i++) {
-      const s = c.streets[i];
-      if (s.width < 3) continue; // Dar sokak park almaz
-      const a = (s.pos * TILE) + 15;
-      const b = ((s.pos + s.width) * TILE) - 15;
-      for (let k = ART + 1; k < CT - 2; k += 2) {
-        if (!chance(p)) continue;
-        const side = chance(0.5) ? a : b;
-        const ax = s.vertical ? side : (k + 0.5) * TILE;
-        const ay = s.vertical ? (k + 0.5) * TILE : side;
-        const off = side === a ? -TILE : TILE;
-        const nx = s.vertical ? Math.floor((ax + off) / TILE) : k;
-        const ny = s.vertical ? k : Math.floor((ay + off) / TILE);
-        if (nx < 0 || ny < 0 || nx >= CT || ny >= CT) continue;
-        if (c.ground[ny * CT + nx] === GROUND.ROAD) continue;
-        // Çapraz sokakla kesişimde de bırakma
-        const lx = s.vertical ? nx + (off > 0 ? -1 : 1) : k;
-        if (s.vertical ? c.ground[(k + 1) * CT + nx] === GROUND.ROAD || c.ground[(k - 1) * CT + nx] === GROUND.ROAD : lx < 0) continue;
-        if (!s.vertical && (c.ground[ny * CT + k + 1] === GROUND.ROAD || c.ground[ny * CT + k - 1] === GROUND.ROAD)) continue;
-        this.addProp(c, PROP.PARKED, c.x + ax, c.y + ay, s.vertical ? Math.PI / 2 : 0);
-      }
-    }
-  }
-
-  fillSuburb(c) {
-    const vertical = chance(0.5);
-    this.cutStreets(c, 1, vertical, xsBuf);
-    for (let i = 0; i < xsBuf.length; i += 2) {
-      const a = xsBuf[i];
-      const b = xsBuf[i + 1];
-      if (vertical) this.suburbLot(c, a, ART, b, CT);
-      else this.suburbLot(c, ART, a, CT, b);
-    }
-    this.parkedAlongStreets(c, 0.2);
-  }
-
-  suburbLot(c, x0, y0, x1, y1) {
-    this.setGround(c, x0, y0, x1, y0 + 1, GROUND.WALK);
-    this.setGround(c, x0, y1 - 1, x1, y1, GROUND.WALK);
-    this.setGround(c, x0, y0, x0 + 1, y1, GROUND.WALK);
-    this.setGround(c, x1 - 1, y0, x1, y1, GROUND.WALK);
-    for (let y = y0 + 1; y + 4 <= y1 - 1; y += 5) {
-      for (let x = x0 + 1; x + 4 <= x1 - 1; x += 5) {
-        this.addRect(c, 'building', x, y, x + 3, y + 3, 4, 5, HOUSE_ROOFS[rint(0, HOUSE_ROOFS.length - 1)]);
-        // Çit: evin önünde kırılabilir sıra
-        const fy = c.y + (y + 3.5) * TILE;
-        for (let k = 0; k < 3; k++) {
-          if (chance(0.8)) this.addProp(c, PROP.FENCE, c.x + (x + 0.5 + k) * TILE, fy);
-        }
-        if (chance(0.6)) this.addProp(c, chance(0.5) ? PROP.TREE : PROP.BUSH, c.x + (x + 3.5) * TILE, c.y + (y + rnd() * 3) * TILE);
-      }
-    }
   }
 
   fillPark(c) {
@@ -1259,7 +1262,7 @@ class World {
     const px = rint(8, 22 - pw);
     const py = rint(8, 22 - ph);
     this.setGround(c, px, py, px + pw, py + ph, GROUND.WATER);
-    this.addRect(c, 'water', px, py, px + pw, py + ph, 6, 0, '#3aa7e8');
+    this.addRect(c, 'water', px, py, px + pw, py + ph, 6, 0, '#3aa7e8').deep = true;
     // Patikalar
     this.setGround(c, ART, py + (ph >> 1), px, py + (ph >> 1) + 1, GROUND.DIRT);
     this.setGround(c, px + pw, py + (ph >> 1), CT, py + (ph >> 1) + 1, GROUND.DIRT);
@@ -1278,7 +1281,7 @@ class World {
     const a = ART + 2;
     const b = CT - 2;
     this.setGround(c, a, a, b, b, GROUND.WATER);
-    this.addRect(c, 'water', a, a, b, b, 4, 1, '#2f9be0');
+    this.addRect(c, 'water', a, a, b, b, 4, 1, '#2f9be0').deep = true;
     for (let k = ART; k < CT - 1; k += 2) {
       if (chance(0.5)) this.addProp(c, PROP.BUSH, c.x + (k + 0.5) * TILE, c.y + (ART + 0.5) * TILE);
       if (chance(0.5)) this.addProp(c, PROP.TREE, c.x + (ART + 0.5) * TILE, c.y + (k + 0.5) * TILE);
@@ -1427,35 +1430,37 @@ class World {
     }
     this.scatter(c, PROP.UMBRELLA, 8, [GROUND.SAND]);
     this.scatter(c, PROP.PALM, 6, [GROUND.SAND]);
+    if (n) { const r = this.addRect(c, 'wall', ART, ART, CT, ART + 1, 0, 0, '#dfe4ea'); r.h = 7; }
+    if (w) { const r = this.addRect(c, 'wall', ART, ART, ART + 1, CT, 0, 0, '#dfe4ea'); r.w = 7; }
   }
 
   fillBeach(c) {
     this.setGround(c, ART, ART, CT, CT, GROUND.SAND);
     if (chance(0.6)) {
-      this.addStreet(c, chance(0.5), rint(8, 18), 3, GROUND.PLAZA); // Sahil yürüyüş yolu
+      this.addStreet(c, chance(0.5), rint(8, 26), 3, GROUND.PLAZA); // Sahil yürüyüş yolu
     }
     for (let i = 0; i < 5; i++) {
-      this.place(c, 'building', rint(6, 20), rint(6, 20), 2, 2, BUILD.HUT, HUT_COLORS[rint(0, 3)]);
+      this.place(c, 'building', rint(6, 28), rint(6, 28), 2, 2, BUILD.HUT, HUT_COLORS[rint(0, 3)]);
     }
-    this.place(c, 'building', rint(7, 18), rint(7, 18), 2, 2, BUILD.LIFEGUARD, '#e8352e');
-    if (chance(0.35)) this.place(c, 'building', rint(7, 17), rint(7, 17), 3, 3, BUILD.LIGHTHOUSE, '#e8352e');
+    this.place(c, 'building', rint(7, 26), rint(7, 26), 2, 2, BUILD.LIFEGUARD, '#e8352e');
+    if (chance(0.35)) this.place(c, 'building', rint(7, 25), rint(7, 25), 3, 3, BUILD.LIGHTHOUSE, '#e8352e');
     this.scatter(c, PROP.UMBRELLA, 22, [GROUND.SAND]);
     this.scatter(c, PROP.PALM, 16, [GROUND.SAND]);
     this.scatter(c, PROP.BUSH, 4, [GROUND.SAND]);
   }
 
   fillForest(c) {
-    if (chance(0.7)) this.addStreet(c, chance(0.5), rint(9, 17), 3, GROUND.DIRT); // Orman yolu
+    if (chance(0.7)) this.addStreet(c, chance(0.5), rint(9, 25), 3, GROUND.DIRT); // Orman yolu
     if (chance(0.25)) {
-      const px = rint(8, 14);
-      const py = rint(8, 14);
+      const px = rint(8, 22);
+      const py = rint(8, 22);
       if (c.streetCount === 0) {
         this.setGround(c, px, py, px + 6, py + 6, GROUND.WATER);
-        this.addRect(c, 'water', px, py, px + 6, py + 6, 6, 0, '#3aa7e8');
+        this.addRect(c, 'water', px, py, px + 6, py + 6, 6, 0, '#3aa7e8').deep = true;
       }
     }
-    for (let i = 0; i < 2; i++) this.place(c, 'building', rint(6, 19), rint(6, 19), 3, 2, BUILD.CABIN, '#7d5230');
-    if (chance(0.5)) this.place(c, 'building', rint(7, 19), rint(7, 19), 2, 2, BUILD.FIRETOWER, '#8a6a3f');
+    for (let i = 0; i < 2; i++) this.place(c, 'building', rint(6, 27), rint(6, 27), 3, 2, BUILD.CABIN, '#7d5230');
+    if (chance(0.5)) this.place(c, 'building', rint(7, 27), rint(7, 27), 2, 2, BUILD.FIRETOWER, '#8a6a3f');
     this.scatter(c, PROP.PINE, 95, [GROUND.GRASS]);
     this.scatter(c, PROP.TREE, 22, [GROUND.GRASS]);
     this.scatter(c, PROP.BUSH, 22, [GROUND.GRASS, GROUND.DIRT]);
@@ -1464,22 +1469,22 @@ class World {
 
   fillDesert(c) {
     this.setGround(c, ART, ART, CT, CT, GROUND.SAND);
-    if (chance(0.6)) this.addStreet(c, chance(0.5), rint(9, 17), 3, GROUND.DIRT);
-    for (let i = 0; i < 3; i++) this.place(c, 'building', rint(6, 15), rint(6, 15), rint(3, 7), rint(3, 6), BUILD.MESA, '#b36a3c', 2);
-    for (let i = 0; i < 4; i++) this.place(c, 'building', rint(6, 19), rint(6, 19), rint(2, 3), 2, BUILD.ADOBE, ADOBE_COLORS[rint(0, 2)]);
-    if (chance(0.3)) this.place(c, 'building', rint(7, 19), rint(7, 19), 2, 2, BUILD.WATERTOWER, '#9cc6d8');
-    if (chance(0.3)) this.place(c, 'building', rint(6, 18), rint(6, 18), 3, 2, BUILD.GAS, '#efefef');
+    if (chance(0.6)) this.addStreet(c, chance(0.5), rint(9, 25), 3, GROUND.DIRT);
+    for (let i = 0; i < 3; i++) this.place(c, 'building', rint(6, 23), rint(6, 23), rint(3, 7), rint(3, 6), BUILD.MESA, '#b36a3c', 2);
+    for (let i = 0; i < 4; i++) this.place(c, 'building', rint(6, 27), rint(6, 27), rint(2, 3), 2, BUILD.ADOBE, ADOBE_COLORS[rint(0, 2)]);
+    if (chance(0.3)) this.place(c, 'building', rint(7, 27), rint(7, 27), 2, 2, BUILD.WATERTOWER, '#9cc6d8');
+    if (chance(0.3)) this.place(c, 'building', rint(6, 26), rint(6, 26), 3, 2, BUILD.GAS, '#efefef');
     this.scatter(c, PROP.CACTUS, 34, [GROUND.SAND]);
     this.scatter(c, PROP.ROCK, 12, [GROUND.SAND]);
     this.scatter(c, PROP.BARREL, 4, [GROUND.SAND, GROUND.DIRT]);
   }
 
   fillRural(c) {
-    if (chance(0.7)) this.addStreet(c, chance(0.5), rint(9, 17), 3, GROUND.DIRT); // Köy yolu
+    if (chance(0.7)) this.addStreet(c, chance(0.5), rint(9, 25), 3, GROUND.DIRT); // Köy yolu
     // Tarlalar
     for (let i = 0; i < 4; i++) {
-      const x = rint(6, 15);
-      const y = rint(6, 15);
+      const x = rint(6, 23);
+      const y = rint(6, 23);
       const w = rint(5, 8);
       const h = rint(5, 8);
       for (let ty = y; ty < y + h && ty < CT; ty++) {
@@ -1491,10 +1496,10 @@ class World {
         if (chance(0.7) && c.ground[y * CT + tx] === GROUND.FIELD) this.addProp(c, PROP.FENCE, c.x + (tx + 0.5) * TILE, c.y + y * TILE);
       }
     }
-    this.place(c, 'building', rint(6, 18), rint(6, 18), 4, 3, BUILD.BARN, '#b5352a');
-    this.place(c, 'building', rint(6, 19), rint(6, 19), 3, 3, 5, HOUSE_ROOFS[rint(0, HOUSE_ROOFS.length - 1)], 4);
-    for (let i = 0; i < 2; i++) this.place(c, 'building', rint(6, 20), rint(6, 20), 2, 2, BUILD.SILO, '#c3cad2');
-    if (chance(0.45)) this.place(c, 'building', rint(7, 18), rint(7, 18), 3, 3, BUILD.WINDMILL, '#d9d2c2');
+    this.place(c, 'building', rint(6, 26), rint(6, 26), 4, 3, BUILD.BARN, '#b5352a');
+    this.place(c, 'building', rint(6, 27), rint(6, 27), 3, 3, 5, HOUSE_ROOFS[rint(0, HOUSE_ROOFS.length - 1)], 4);
+    for (let i = 0; i < 2; i++) this.place(c, 'building', rint(6, 28), rint(6, 28), 2, 2, BUILD.SILO, '#c3cad2');
+    if (chance(0.45)) this.place(c, 'building', rint(7, 26), rint(7, 26), 3, 3, BUILD.WINDMILL, '#d9d2c2');
     this.scatter(c, PROP.HAY, 16, [GROUND.FIELD, GROUND.GRASS]);
     this.scatter(c, PROP.TREE, 12, [GROUND.GRASS]);
     this.scatter(c, PROP.BUSH, 8, [GROUND.GRASS]);
@@ -1531,14 +1536,14 @@ class World {
 
   // Ana yol üstü: kenarda park, yol çalışması, coin sıraları
   arterialDetails(c) {
-    const edgeFar = ART * TILE - 15;
+    const edgeFar = ART * TILE - 13;
     const urban = c.biome === 'city';
     for (let k = ART + 1; k < CT - 1 && urban; k += 2) {
       // Dikey ana yolun doğu kenarı
-      if (chance(0.16) && c.ground[k * CT + ART] !== GROUND.ROAD && c.ground[(k + 1) * CT + ART] !== GROUND.ROAD && c.ground[(k - 1) * CT + ART] !== GROUND.ROAD) {
+      if (chance(0.05) && c.ground[k * CT + ART] !== GROUND.ROAD && c.ground[(k + 1) * CT + ART] !== GROUND.ROAD && c.ground[(k - 1) * CT + ART] !== GROUND.ROAD) {
         this.addProp(c, PROP.PARKED, c.x + edgeFar, c.y + (k + 0.5) * TILE, Math.PI / 2);
       }
-      if (chance(0.16) && c.ground[ART * CT + k] !== GROUND.ROAD && c.ground[ART * CT + k + 1] !== GROUND.ROAD && c.ground[ART * CT + k - 1] !== GROUND.ROAD) {
+      if (chance(0.05) && c.ground[ART * CT + k] !== GROUND.ROAD && c.ground[ART * CT + k + 1] !== GROUND.ROAD && c.ground[ART * CT + k - 1] !== GROUND.ROAD) {
         this.addProp(c, PROP.PARKED, c.x + (k + 0.5) * TILE, c.y + edgeFar, 0);
       }
     }
@@ -1548,7 +1553,7 @@ class World {
       const s = rint(7, 16);
       for (let i = 0; i < 6; i++) {
         const along = (s + i) * TILE;
-        const across = 26 + (i === 0 || i === 5 ? 0 : 40);
+        const across = 18 + (i === 0 || i === 5 ? 0 : 22);
         const x = vertical ? across : along;
         const y = vertical ? along : across;
         this.addProp(c, i === 0 || i === 5 ? PROP.BARRIER : PROP.CONE, c.x + x, c.y + y, vertical ? 0 : Math.PI / 2);
@@ -1557,7 +1562,7 @@ class World {
     if (chance(0.6)) {
       const vertical = chance(0.5);
       const s = rint(7, 18);
-      const lane = chance(0.5) ? 60 : 140;
+      const lane = chance(0.5) ? 30 : 90;
       for (let i = 0; i < 5; i++) {
         const along = (s + i * 0.9) * TILE;
         this.addProp(c, PROP.COIN, c.x + (vertical ? lane : along), c.y + (vertical ? along : lane));
@@ -1566,12 +1571,12 @@ class World {
     if (chance(CONFIG.powers.chunkChance) && !(Math.abs(c.cx) <= 1 && Math.abs(c.cy) <= 1)) {
       const vertical = chance(0.5);
       const along = rint(7, 20) * TILE;
-      this.addProp(c, PROP.POWER_BLAST + pickPowerIndex(), c.x + (vertical ? 100 : along), c.y + (vertical ? along : 100));
+      this.addProp(c, PROP.POWER_BLAST + pickPowerIndex(), c.x + (vertical ? 60 : along), c.y + (vertical ? along : 60));
     }
   }
 
   finishCost(c) {
-    const COST = [3, 1, 2, 1, 0, 3, 2, 3, 3];
+    const COST = [3, 1, 2, 1, 0, 3, 2, 3, 3, 1];
     for (let i = 0; i < CELLS; i++) c.cost[i] = c.rectAt[i] ? 0 : COST[c.ground[i]];
     // Binaya bitişik karolar pahalı: polisler köşeye sürtmesin
     for (let y = 1; y < CT - 1; y++) {
@@ -1589,6 +1594,7 @@ const biomeOut = { biome: 'city', sea: false };
 const biomeOut2 = { biome: 'city', sea: false };
 const SITE_NAMES = CONFIG.signs.sites;
 const PASTELS = ['#7fa8c9', '#c9a27f', '#a0a8b8', '#8fb59a', '#c98f8f', '#b0a080', '#9a8fc0'];
+const RESERVED = [[CT - 1, ART], [ART, CT - 1], [ART, ART]];
 const xsBuf = [];
 const ysBuf = [];
 
@@ -2016,6 +2022,7 @@ function driveCop(cop, g, dt) {
     if ((d < CONFIG.barricade.wakeDist && g.ghostT <= 0) || cop.wakeT <= 0) cop.state = 'chase';
     return;
   }
+  if (cop.flying) return;
   if (cop.type === 'tank') driveTank(cop, g, dt);
   else drivePatrol(cop, g, dt);
 }
@@ -2141,9 +2148,11 @@ class Crowd {
     p.a = a;
     p.state = PED_WALK;
     p.t = 0; p.turnT = 1 + Math.random() * 3; p.step = Math.random() * 6;
-    p.look = Math.floor(Math.random() * (kind === 'woman' ? 7 : 7)) + (kind === 'woman' ? 7 : 0);
+    const half = PD.looks >> 1;
+    p.look = Math.floor(Math.random() * half) + (kind === 'woman' ? half : 0);
     p.scale = 0.84 + Math.random() * 0.32; // Boy farkı
     p.pace = 0.75 + Math.random() * 0.55; // Yürüyüş hızı farkı
+    p.curb = false;
   }
 
   spawnPed() {
@@ -2154,7 +2163,9 @@ class Crowd {
     const pl = g.player;
     const R = g.viewRadius();
     const kind = this.pickKind();
-    for (let i = 0; i < 6; i++) {
+    // Yarısı ana yol kenarındaki kaldırım bandında yürür: bina yoğun, boş alan az
+    if (!PD.kinds[kind].road && kind !== 'cat' && Math.random() < PD.curbShare && this.spawnCurb(p, kind, pl, R)) return;
+    for (let i = 0; i < 14; i++) {
       const a = Math.random() * 6.283;
       const r = R * (0.75 + Math.random() * 0.55);
       const x = pl.x + Math.cos(a) * r;
@@ -2165,9 +2176,27 @@ class Crowd {
       if (Math.random() > chance || g.world.blockedAt(x, y)) continue;
       this.setupPed(p, kind, x, y, Math.floor(Math.random() * 4) * 1.5708);
       // Bazıları dükkân önünde durur, sohbet eder
-      if (!PD.kinds[kind].road && kind !== 'cat' && gr === GROUND.WALK && Math.random() < PD.idleChance) p.state = PED_IDLE;
+      if (!PD.kinds[kind].road && kind !== 'cat' && (gr === GROUND.WALK || gr === GROUND.ALLEY) && Math.random() < PD.idleChance) p.state = PED_IDLE;
       return;
     }
+  }
+
+  spawnCurb(p, kind, pl, R) {
+    const g = this.g;
+    const along = (Math.random() < 0.5 ? -1 : 1) * R * (0.75 + Math.random() * 0.5);
+    const vertical = Math.random() < 0.5;
+    const base = Math.floor((vertical ? pl.x : pl.y) / CHUNK) + Math.floor(Math.random() * 3) - 1;
+    const line = base * CHUNK + ROAD_W - 6;
+    const x = vertical ? line : pl.x + along;
+    const y = vertical ? pl.y + along : line;
+    const at = ((vertical ? y : x) % CHUNK + CHUNK) % CHUNK;
+    if (at < ROAD_W + 30 || g.onScreen(x, y, 30)) return false;
+    if (g.world.blockedAt(x, y) || g.world.chunk(Math.floor(x / CHUNK), Math.floor(y / CHUNK)).biome !== 'city') return false;
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    this.setupPed(p, kind, x, y, vertical ? (dir > 0 ? 1.5708 : -1.5708) : (dir > 0 ? 0 : 3.1416));
+    p.curb = true;
+    if (Math.random() < PD.idleChance) p.state = PED_IDLE;
+    return true;
   }
 
   // Kavşakta yaya geçidi önünde bekleyen yaya: arabalara kırmızı yanınca karşıya geçer
@@ -2236,7 +2265,7 @@ class Crowd {
 
   blockedForPed(p, x, y) {
     const w = this.g.world;
-    return w.blockedAt(x, y) || (!p.info.road && w.groundAt(x, y) === GROUND.ROAD);
+    return w.blockedAt(x, y) || (!p.info.road && !p.curb && w.groundAt(x, y) === GROUND.ROAD);
   }
 
   updatePed(p, dt) {
@@ -2326,18 +2355,23 @@ class Crowd {
     const lookX = p.x + Math.cos(p.a) * 16;
     const lookY = p.y + Math.sin(p.a) * 16;
     if (p.state === PED_WALK ? this.blockedForPed(p, lookX, lookY) : g.world.blockedAt(lookX, lookY)) {
-      p.a += (Math.random() < 0.5 ? 1 : -1) * 1.5708;
+      p.a += p.curb ? 3.1416 : (Math.random() < 0.5 ? 1 : -1) * 1.5708;
       p.turnT = 1 + Math.random() * 3;
     } else {
       p.x = nx;
       p.y = ny;
+    }
+    if (p.curb && p.state === PED_WALK) {
+      // Kavşağa gelince geri döner, kaldırımdan yola inmez
+      const at = ((Math.abs(Math.cos(p.a)) > 0.5 ? p.x : p.y) % CHUNK + CHUNK) % CHUNK;
+      if (at < ROAD_W + 26 && p.turnT < 90) { p.a += 3.1416; p.x += Math.cos(p.a) * 30; p.y += Math.sin(p.a) * 30; }
     }
     p.step += dt * (speed * 0.3);
     p.turnT -= dt;
     if (p.turnT <= 0) {
       p.turnT = 1.5 + Math.random() * 4;
       if (p.state === PED_RUN) p.state = PED_WALK;
-      else p.a += (Math.floor(Math.random() * 3) - 1) * 1.5708;
+      else if (!p.curb) p.a += (Math.floor(Math.random() * 3) - 1) * 1.5708;
     }
   }
 
@@ -2612,6 +2646,8 @@ const SC = CONFIG.score;
 const BAR = CONFIG.barricade;
 const TK = CONFIG.tank;
 const PW = CONFIG.powers;
+const AL = CONFIG.aliens;
+const WT = CONFIG.water;
 const tmpSirens = new Float32Array(CONFIG.sirens.length);
 
 function interp(curve, t) {
@@ -2642,6 +2678,8 @@ function difficultyAt(t, out = {}) {
   out.fastShare = t >= D.fastFrom ? interp(D.fastShare, t) : 0;
   out.tanks = t >= D.tanksAt ? Math.round(interp(D.tankCount, t)) : 0;
   out.barricadeEvery = t >= BAR.from ? interp(BAR.intervalCurve, t) : Infinity;
+  out.ufos = t >= D.aliensAt ? Math.round(interp(AL.ufoCount, t)) : 0;
+  out.rovers = t >= D.aliensAt ? Math.round(interp(AL.roverCount, t)) : 0;
   return out;
 }
 
@@ -2762,6 +2800,11 @@ class Game {
     this.fireShake = 0;
     this.sirenDist = 1e9;
     this.sirenClosing = 0;
+    this.alienT = 0;
+    this.aliensOn = startTime >= D.aliensAt;
+    this.sinkT = 0;
+    this.bubbleT = 0;
+    this.cause = '';
     while (this.cops.length) this.copPool.push(this.cops.pop());
     for (const s of this.shots) s.alive = false;
     for (const s of this.spikes) s.alive = false;
@@ -2828,6 +2871,7 @@ class Game {
     if (this.state === 'attract') this.tickAttract(dt);
     else if (this.state === 'play') this.tickPlay(dt, steer, reverse);
     else if (this.state === 'dying') this.tickDying(dt);
+    else if (this.state === 'sinking') this.tickSinking(dt);
     this.fx.update(dt);
     this.updateCamera(dt);
   }
@@ -2854,8 +2898,14 @@ class Game {
       }
       this.lastStage = this.diff.stage;
     }
+    if (!this.aliensOn && this.time >= D.aliensAt) {
+      this.aliensOn = true;
+      this.warnT = 3;
+      this.emit('aliens');
+    }
 
     this.updatePlayer(dt, steer, reverse);
+    if (this.state !== 'play') return;
     this.updateFlow(dt);
     this.updateCops(dt);
     this.crowd.update(dt);
@@ -2885,6 +2935,42 @@ class Game {
     if (this.dyingT <= 0) this.finish();
   }
 
+  // Suya düşen araç: çizgi film batışı. Sıçrama, kabarcık, dalga halkaları, sonra skor ekranı
+  startSink() {
+    const p = this.player;
+    this.state = 'sinking';
+    this.sinkT = WT.sinkTime;
+    this.cause = 'water';
+    this.fx.burst(FX.WATER, p.x, p.y, 34, 340, 0.9, 13);
+    this.fx.wave(p.x, p.y, 150);
+    this.cam.shake = Math.max(this.cam.shake, 9);
+    this.emit('sink');
+  }
+
+  tickSinking(dt) {
+    this.sinkT -= dt;
+    const p = this.player;
+    p.vx *= 1 - 2.6 * dt;
+    p.vy *= 1 - 2.6 * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.a += WT.spin * dt;
+    this.bubbleT -= dt;
+    if (this.bubbleT <= 0) {
+      this.bubbleT = WT.bubbleEvery;
+      this.fx.spawn(FX.WATER, p.x + (Math.random() - 0.5) * p.len, p.y + (Math.random() - 0.5) * p.len, 0, -26 - Math.random() * 40, 0.8, 4 + Math.random() * 6);
+      if (Math.random() < 0.09) this.fx.wave(p.x, p.y, 60 + Math.random() * 70);
+    }
+    this.world.update(p.x, p.y);
+    this.updateCops(dt * 0.5);
+    this.crowd.update(dt);
+    if (this.sinkT <= 0) this.finish();
+  }
+
+  sinkProgress() {
+    return this.state === 'sinking' ? 1 - this.sinkT / WT.sinkTime : 0;
+  }
+
   // --- Oyuncu ---
   updatePlayer(dt, steer, reverse) {
     const p = this.player;
@@ -2905,6 +2991,12 @@ class Game {
     }
     stepCar(p, steer, reverse ? -1 : 1, this.carSpec, surf, dt);
     if (this.hitCd > 0) this.hitCd -= dt;
+
+    // Derin suya düştü: ölümsüzlükte duvar gibi davranır, testler ve geliştirici için
+    if (g === GROUND.WATER && !this.god && this.world.circleHit(p.x, p.y, WT.deepProbe, hit) && isDeep(hit.rect)) {
+      this.startSink();
+      return;
+    }
 
     const impact = this.collideWorld(p, true);
     if (impact > 0) this.playerImpact(impact, hit.rect && isWaterRect(hit.rect) ? 0.35 : 1, false);
@@ -3017,6 +3109,7 @@ class Game {
 
   explodePlayer() {
     if (this.state !== 'play') return;
+    this.cause = 'wreck';
     const p = this.player;
     this.state = 'dying';
     this.dyingT = DMG.dyingTime;
@@ -3041,6 +3134,7 @@ class Game {
       broken: this.broken,
       driftTime: this.driftTime,
       nearMisses: this.nearMisses,
+      cause: this.cause,
     };
     this.emit('gameover');
   }
@@ -3060,6 +3154,7 @@ class Game {
         this.crushRect(hit.chunk, rect);
         continue;
       }
+      if (isPlayer && !this.god && isDeep(rect)) continue; // Oyuncu suya girer, batış ayrı karar verilir
       b.x += hit.nx * hit.depth;
       b.y += hit.ny * hit.depth;
       const impact = bounceOff(b, hit.nx, hit.ny);
@@ -3218,7 +3313,7 @@ class Game {
 
   // --- Polis ---
   spawnCop(type, role, x, y, a) {
-    const spec = CONFIG.police[type];
+    const spec = CONFIG.police[type] || AL[type];
     const c = this.copPool.pop() || makeCop();
     const d = this.diff;
     resetBody(c, x, y, a, { ...spec, grip: spec.grip });
@@ -3228,6 +3323,8 @@ class Game {
     c.role = role;
     c.state = 'chase';
     c.crusher = type === 'tank';
+    c.flying = type === 'ufo';
+    c.beam = 0;
     c.sirenId = spec.siren ? this.pickSiren(spec.siren) : -1;
     c.wanderT = 0;
     c.staticBody = false;
@@ -3253,11 +3350,14 @@ class Game {
     const n = CONFIG.sirens.length;
     const use = new Array(n).fill(0);
     for (const c of this.cops) if (c.sirenId >= 0) use[c.sirenId]++;
-    const min = Math.min(...use);
     const p = CONFIG.sirens.indexOf(pref);
+    if (pref === 'ufo' || pref === 'zap') return p; // Uzaylıların sesi kendine özgü
+    const police = n - 2;
+    let min = 1e9;
+    for (let i = 0; i < police; i++) if (use[i] < min) min = use[i];
     if (use[p] === min) return p;
     const free = [];
-    for (let i = 0; i < n; i++) if (use[i] === min) free.push(i);
+    for (let i = 0; i < police; i++) if (use[i] === min) free.push(i);
     return free[Math.floor(Math.random() * free.length)];
   }
 
@@ -3270,12 +3370,12 @@ class Game {
 
   destroyCop(i, byPlayer) {
     const c = this.cops[i];
-    const size = c.type === 'tank' ? 120 : c.type === 'swat' ? 70 : 52;
+    const size = c.type === 'tank' ? 120 : c.type === 'swat' ? 70 : c.type === 'ufo' ? 110 : 52;
     this.fx.explosion(c.x, c.y, size);
-    this.fx.debris(c.x, c.y, c.type === 'tank' ? '#5d6b3a' : '#2f4c8a', 12, 280);
+    this.fx.debris(c.x, c.y, c.type === 'tank' ? '#5d6b3a' : c.type === 'ufo' || c.type === 'rover' ? '#39ff9c' : '#2f4c8a', 12, 280);
     this.fx.debris(c.x, c.y, '#f4f4f4', 6, 240);
     this.kills++;
-    this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
+    this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.type === 'ufo' ? 6 : c.type === 'rover' ? 3 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
     if (Math.random() < 0.6) this.world.dropCoin(c.x, c.y);
     const near = Math.hypot(c.x - this.player.x, c.y - this.player.y) < 500;
     this.emit('copdown', near ? 1 : 0.4);
@@ -3326,7 +3426,9 @@ class Game {
       if (c.nearCd > 0) c.nearCd -= dt;
       c.fxT += dt;
 
-      if (c.state === 'barricade') {
+      if (c.flying) {
+        this.updateUfo(c, dt, playing);
+      } else if (c.state === 'barricade') {
         c.staticBody = true;
       } else {
         c.staticBody = false;
@@ -3349,7 +3451,7 @@ class Game {
 
       if (playing) {
         // Oyuncu ile çarpışma
-        if (dist < (c.len + p.len) * 0.75 && this.ghostT <= 0) {
+        if (!c.flying && dist < (c.len + p.len) * 0.75 && this.ghostT <= 0) {
           const rv = this.collideCars(p, c);
           if (rv > 1) this.copContact(c, rv, i);
           if (i >= this.cops.length || this.cops[i] !== c) continue;
@@ -3381,6 +3483,7 @@ class Game {
       for (let j = i + 1; j < cops.length; j++) {
         const a = cops[i];
         const b = cops[j];
+        if (a.flying || b.flying) continue;
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const r = (a.len + b.len) * 0.6;
@@ -3417,6 +3520,38 @@ class Game {
       const side = (c.x - p.x) * -fy + (c.y - p.y) * fx;
       p.w += (side > 0 ? -1 : 1) * AI.pitYaw;
       p.grip *= 0.5;
+    }
+  }
+
+  // Uçan daire: binaların üstünden düz gelir, üstüne çıkınca ışınla çeker ve hasar verir
+  updateUfo(c, dt, playing) {
+    const p = this.player;
+    const dx = p.x + p.vx * 0.35 - c.x;
+    const dy = p.y + p.vy * 0.35 - c.y;
+    const d = Math.hypot(dx, dy) || 1;
+    const top = c.drive.maxSpeed;
+    const slow = this.ghostT > 0 ? 0.25 : 1;
+    const want = Math.min(top, d * 3.2) * slow;
+    const k = 1 - Math.exp(-3.4 * dt);
+    c.vx += ((dx / d) * want - c.vx) * k;
+    c.vy += ((dy / d) * want - c.vy) * k;
+    c.x += c.vx * dt;
+    c.y += c.vy * dt;
+    c.a += dt * 2;
+    const bx = p.x - c.x;
+    const by = p.y - c.y;
+    const bd = Math.hypot(bx, by);
+    c.beam = playing && this.ghostT <= 0 && bd < AL.beamRange ? 1 : 0;
+    if (c.beam) {
+      p.vx -= (bx / (bd + 1)) * AL.beamPull * dt;
+      p.vy -= (by / (bd + 1)) * AL.beamPull * dt;
+      const keep = 1 - AL.beamSlow * dt;
+      p.vx *= keep;
+      p.vy *= keep;
+      this.hurt((AL.beamDps * dt) / this.carSpec.durability);
+      this.sinceHit = 0;
+      this.hitFlash = Math.max(this.hitFlash, 0.25);
+      if (Math.random() < 0.3) this.fx.spawn(FX.GLINT, p.x + (Math.random() - 0.5) * 60, p.y + (Math.random() - 0.5) * 60, 0, 0, 0.4, 5);
     }
   }
 
@@ -3479,6 +3614,22 @@ class Game {
         this.spawnT = d.spawnInterval;
       } else {
         this.spawnT = 0.25;
+      }
+    }
+
+    if (d.ufos > 0 && active < D.maxActive - 1) {
+      this.alienT -= dt;
+      if (this.alienT <= 0) {
+        this.alienT = AL.spawnEvery;
+        const min = this.viewRadius() + 160;
+        const heading = Math.atan2(p.vy, p.vx) + (Math.random() - 0.5) * 2.6;
+        if (this.countType('ufo') < d.ufos) {
+          // Daire binaya takılmaz, önünden gelir
+          this.spawnCop('ufo', 'chaser', p.x + Math.cos(heading) * min, p.y + Math.sin(heading) * min, 0);
+        }
+        if (this.countType('rover') < d.rovers && this.findSpawn(spawnPt, min, min + 300, true)) {
+          this.spawnCop('rover', Math.random() < 0.5 ? 'flanker' : 'chaser', spawnPt.x, spawnPt.y, Math.atan2(p.y - spawnPt.y, p.x - spawnPt.x));
+        }
       }
     }
 
@@ -4148,7 +4299,8 @@ function paintNpc(g, kind, spec, color, finish) {
 }
 
 // --- Yaya: üstten küçük insan. step: adım evresi ---
-function paintPed(g, shirt, skin, hair, step) {
+// Her yaya kıyafet, ten, saç ve aksesuarla ayrışır. acc: 0 yok, 1 şapka, 2 başörtüsü, 3 sırt çantası, 4 omuz çantası, 5 uzun saç, 6 kel
+function paintPed(g, shirt, skin, hair, step, acc = 0) {
   const s = step ? 1 : -1;
   g.fillStyle = '#2b3140';
   g.beginPath(); g.ellipse(2.6 * s, -1.9, 1.9, 1.2, 0, 0, 7); g.fill();
@@ -4160,7 +4312,42 @@ function paintPed(g, shirt, skin, hair, step) {
   g.beginPath(); g.arc(1.5 * s, 4.1, 1, 0, 7); g.fill();
   g.beginPath(); g.arc(0, 0, 2.3, 0, 7); g.fill();
   g.fillStyle = hair;
-  g.beginPath(); g.arc(-0.5, 0, 2.2, 1.57, 4.71); g.fill();
+  if (acc === 2) { g.beginPath(); g.arc(0, 0, 2.7, 0, 7); g.fill(); g.fillStyle = shade(hair, 0.25); g.fillRect(-3, -0.6, 1.4, 1.2); }
+  else if (acc === 5) { g.beginPath(); g.arc(-0.9, 0, 2.7, 1.2, 5.1); g.fill(); }
+  else if (acc !== 6) { g.beginPath(); g.arc(-0.5, 0, 2.2, 1.57, 4.71); g.fill(); }
+  if (acc === 1) { g.fillStyle = shade(shirt, -0.3); g.beginPath(); g.arc(0, 0, 2.4, 0, 7); g.fill(); g.fillRect(1.6, -1.6, 2.4, 3.2); }
+  if (acc === 3) { g.fillStyle = '#39414d'; g.fillRect(-4.2, -2.2, 2.2, 4.4); }
+  if (acc === 4) { g.fillStyle = '#7a4e2a'; g.fillRect(-1.5, 3.8, 3.4, 2.4); }
+}
+
+// Uçan daire: üstten yuvarlak gövde, cam kubbe, dönen ışıklar, içinde yeşil pilot
+function paintUfo(g, spec) {
+  const R = spec.len / 2;
+  const grd = g.createRadialGradient(-R * 0.3, -R * 0.3, 2, 0, 0, R);
+  grd.addColorStop(0, '#d9e4ec'); grd.addColorStop(0.55, '#7f93a6'); grd.addColorStop(1, '#3b4757');
+  g.fillStyle = grd; g.beginPath(); g.arc(0, 0, R, 0, 7); g.fill();
+  g.strokeStyle = '#1c2530'; g.lineWidth = 1.4; g.stroke();
+  g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1; g.beginPath(); g.arc(0, 0, R * 0.74, 0, 7); g.stroke();
+  for (let i = 0; i < 10; i++) { const a = (i / 10) * 6.283; g.fillStyle = i % 2 ? '#39ff9c' : '#ffe14d'; g.beginPath(); g.arc(Math.cos(a) * R * 0.86, Math.sin(a) * R * 0.86, 3.2, 0, 7); g.fill(); }
+  const dome = g.createRadialGradient(-5, -6, 1, 0, 0, R * 0.46);
+  dome.addColorStop(0, '#d8fff0'); dome.addColorStop(1, '#2fb88a');
+  g.fillStyle = dome; g.beginPath(); g.arc(0, 0, R * 0.46, 0, 7); g.fill();
+  g.fillStyle = '#4de08a'; g.beginPath(); g.ellipse(0, 0, 8, 10, 0, 0, 7); g.fill();
+  g.fillStyle = '#10151c'; g.beginPath(); g.ellipse(-3, -2.4, 2.1, 3.2, 0.4, 0, 7); g.ellipse(3, -2.4, 2.1, 3.2, -0.4, 0, 7); g.fill();
+}
+
+// Uzaylı aracı: yerden yüksek, parlak yeşil çizgili, sivri burunlu
+function paintRover(g, spec) {
+  const L = spec.len / 2; const H = spec.wid / 2;
+  g.fillStyle = 'rgba(57,255,156,.28)'; rr(g, -L - 4, -H - 4, spec.len + 8, spec.wid + 8, 12); g.fill();
+  const c = g.createLinearGradient(0, -H, 0, H);
+  c.addColorStop(0, '#5a3d9a'); c.addColorStop(0.5, '#2c1d58'); c.addColorStop(1, '#170e33');
+  g.fillStyle = c;
+  g.beginPath(); g.moveTo(L + 3, 0); g.quadraticCurveTo(L * 0.4, -H * 1.2, -L * 0.6, -H); g.lineTo(-L, -H * 0.5); g.lineTo(-L, H * 0.5); g.lineTo(-L * 0.6, H); g.quadraticCurveTo(L * 0.4, H * 1.2, L + 3, 0); g.closePath(); g.fill();
+  g.strokeStyle = '#39ff9c'; g.lineWidth = 1.6; g.stroke();
+  g.fillStyle = '#a0ffd8'; g.beginPath(); g.ellipse(L * 0.1, 0, L * 0.34, H * 0.46, 0, 0, 7); g.fill();
+  g.fillStyle = '#39ff9c'; g.fillRect(-L * 0.8, -H * 0.72, L * 0.7, 1.6); g.fillRect(-L * 0.8, H * 0.72 - 1.6, L * 0.7, 1.6);
+  g.fillStyle = '#ff2ad4'; g.beginPath(); g.arc(-L, -H * 0.4, 2.2, 0, 7); g.arc(-L, H * 0.4, 2.2, 0, 7); g.fill();
 }
 
 // --- Güç simgeleri ---
@@ -4543,28 +4730,73 @@ function roofClutter(g, r) {
 
 // Tabelalar önbelleğe alınır: bina çizimi telefonda ucuz kalsın
 const signCache = new Map();
-function signCanvas(text, color) {
-  const key = text + color;
+// Tabela: on farklı yazı tarzı. Aynı ad farklı tohumda farklı görünür
+const SIGN_FONTS = [
+  ['800 30px Nunito, sans-serif', 'panel'],
+  ['400 34px Anton, Impact, sans-serif', 'panel'],
+  ['500 30px Oswald, sans-serif', 'dark'],
+  ['400 34px Lobster, cursive', 'bare'],
+  ['400 30px Pacifico, cursive', 'board'],
+  ['400 34px "Tilt Neon", sans-serif', 'neon'],
+  ['400 32px Monoton, sans-serif', 'neon'],
+  ['400 32px Righteous, sans-serif', 'two'],
+  ['400 30px Bungee, sans-serif', 'bare'],
+  ['italic 400 30px Playfair, Georgia, serif', 'brass'],
+];
+
+function signCanvas(text, color, seed = 0) {
+  const v = seed % SIGN_FONTS.length;
+  const key = text + color + v;
   let c = signCache.get(key);
   if (c) return c;
+  if (signCache.size > 400) signCache.clear();
+  const [font, kind] = SIGN_FONTS[v];
+  const shown = v === 1 || v === 8 ? text.toLocaleUpperCase('tr') : text;
   c = document.createElement('canvas');
   const g0 = c.getContext('2d');
-  g0.font = '800 30px Nunito, sans-serif';
-  const w = Math.ceil(g0.measureText(text).width) + 30;
+  g0.font = font;
+  const w = Math.ceil(g0.measureText(shown).width) + 34;
   c.width = w;
-  c.height = 46;
+  c.height = 56;
   const g = c.getContext('2d');
-  g.fillStyle = color;
-  rr(g, 1, 1, w - 2, 44, 7);
-  g.fill();
-  g.lineWidth = 3;
-  g.strokeStyle = '#fff';
-  g.stroke();
-  g.fillStyle = '#fff';
-  g.font = '800 30px Nunito, sans-serif';
+  g.font = font;
   g.textAlign = 'center';
   g.textBaseline = 'middle';
-  g.fillText(text, w / 2, 24);
+  const cy = 29;
+  if (kind === 'panel') {
+    g.fillStyle = color; rr(g, 2, 4, w - 4, 48, 7); g.fill();
+    g.lineWidth = 3; g.strokeStyle = '#fff'; g.stroke();
+    g.fillStyle = '#fff'; g.fillText(shown, w / 2, cy);
+  } else if (kind === 'dark') {
+    g.fillStyle = '#14161c'; g.fillRect(1, 6, w - 2, 44);
+    g.fillStyle = color; g.fillRect(1, 44, w - 2, 6);
+    g.fillStyle = '#f4f6f8'; g.fillText(shown, w / 2, cy - 2);
+  } else if (kind === 'bare') {
+    g.lineWidth = 7; g.lineJoin = 'round'; g.strokeStyle = 'rgba(10,12,20,.85)'; g.strokeText(shown, w / 2, cy);
+    g.fillStyle = shade(color, 0.32); g.fillText(shown, w / 2, cy);
+  } else if (kind === 'board') {
+    g.fillStyle = '#f4ead2'; rr(g, 2, 4, w - 4, 48, 14); g.fill();
+    g.lineWidth = 2.5; g.strokeStyle = color; g.stroke();
+    g.fillStyle = color; g.fillText(shown, w / 2, cy - 1);
+  } else if (kind === 'neon') {
+    g.fillStyle = '#0d0a18'; rr(g, 2, 4, w - 4, 48, 6); g.fill();
+    const glow = shade(color, 0.5);
+    g.shadowColor = glow; g.shadowBlur = 14;
+    g.fillStyle = glow; g.fillText(shown, w / 2, cy);
+    g.fillText(shown, w / 2, cy);
+    g.shadowBlur = 0;
+    g.fillStyle = '#ffffff'; g.globalAlpha = 0.55; g.fillText(shown, w / 2, cy); g.globalAlpha = 1;
+  } else if (kind === 'two') {
+    g.fillStyle = color; g.fillRect(1, 4, w * 0.5, 48);
+    g.fillStyle = '#fff4d8'; g.fillRect(w * 0.5, 4, w * 0.5 - 1, 48);
+    g.fillStyle = '#16181c'; g.fillText(shown, w / 2 + 1.5, cy + 1.5);
+    g.fillStyle = '#ffd23f'; g.fillText(shown, w / 2, cy);
+  } else {
+    const gr = g.createLinearGradient(0, 4, 0, 52);
+    gr.addColorStop(0, '#e8c97a'); gr.addColorStop(1, '#a5792c');
+    g.fillStyle = gr; rr(g, 2, 6, w - 4, 44, 2); g.fill();
+    g.fillStyle = '#2b1d08'; g.fillText(shown, w / 2, cy);
+  }
   signCache.set(key, c);
   return c;
 }
@@ -5390,22 +5622,6 @@ function ishani(g, r) {
   label(g, 'İŞ HANI', x + w / 2, y + 12 + (s % 3), 9, '#2b3036');
 }
 
-function residence(g, r) {
-  // Rezidans: kavisli köşeli, teraslı, cam kule
-  const { x, y, w, h, seed: s } = r;
-  const c = ['#5fb3d9', '#7a9cc6', '#54c2b0', '#c0ccd8', '#8aa0b8'][s % 5];
-  const low = 18;
-  g.fillStyle = shade(c, -0.55); rr(g, x, y, w, h, 10); g.fill();
-  const gl = g.createLinearGradient(x, y, x + w, y + h - low);
-  gl.addColorStop(0, shade(c, 0.5)); gl.addColorStop(0.6, c); gl.addColorStop(1, shade(c, -0.3));
-  g.fillStyle = gl; rr(g, x, y, w, h - low, 10); g.fill();
-  g.strokeStyle = 'rgba(255,255,255,.4)'; g.lineWidth = 1;
-  for (let i = 1; i < 5; i++) { const m = i * 8; rr(g, x + m, y + m, w - m * 2, h - low - m * 2, 8); g.stroke(); }
-  g.fillStyle = '#bfe7ff'; rr(g, x + w * 0.3, y + (h - low) * 0.3, w * 0.4, (h - low) * 0.4, 5); g.fill();
-  g.fillStyle = 'rgba(255,255,255,.8)';
-  for (let px = x + 8; px < x + w - 8; px += 7) g.fillRect(px, y + h - low + 3, 4, low - 6);
-}
-
 function office(g, r) {
   const { x, y, w, h, seed: s } = r;
   const c = ['#3d5a78', '#4a6a6a', '#55607a', '#2f4a60'][s % 4];
@@ -5431,58 +5647,6 @@ function hotel(g, r) {
   g.fillStyle = '#5a9fd4'; rr(g, x + w * 0.6, y + 12, w * 0.26, 18, 6); g.fill(); // Çatı havuzu
   label(g, '★★★★★', x + w * 0.3, y + 22, 9, '#b78a1c');
   g.fillStyle = '#c62828'; g.fillRect(x + w / 2 - 10, y + h - 16, 20, 16); // Giriş halısı
-}
-
-function hospital(g, r) {
-  const { x, y, w, h } = r;
-  g.fillStyle = '#a8b6c0'; g.fillRect(x, y, w, h);
-  g.fillStyle = '#f1f5f8'; g.fillRect(x, y, w, h - 18);
-  g.fillStyle = '#dfe7ec'; g.fillRect(x + w * 0.1, y + (h - 18) * 0.42, w * 0.8, (h - 18) * 0.3);
-  // Helikopter pisti ve kızıl hilal
-  const cx = x + w * 0.72; const cy = y + (h - 18) * 0.24;
-  g.fillStyle = '#3d444e'; g.beginPath(); g.arc(cx, cy, 24, 0, 7); g.fill();
-  label(g, 'H', cx, cy + 1, 26, '#fff');
-  g.fillStyle = '#e30a17'; g.beginPath(); g.arc(x + w * 0.26, y + 34, 16, 0, 7); g.fill();
-  g.fillStyle = '#f1f5f8'; g.beginPath(); g.arc(x + w * 0.26 + 6, y + 34, 13, 0, 7); g.fill();
-  g.fillStyle = 'rgba(150,200,230,.85)';
-  for (let px = x + 8; px < x + w - 10; px += 12) g.fillRect(px, y + h - 13, 8, 8);
-}
-
-function school(g, r) {
-  const { x, y, w, h } = r;
-  g.fillStyle = '#b5863f'; g.fillRect(x, y, w, h);
-  g.fillStyle = '#e8cf9a'; g.fillRect(x, y, w, h - 16);
-  g.fillStyle = '#7fa35c'; g.fillRect(x + w * 0.24, y + (h - 16) * 0.28, w * 0.52, (h - 16) * 0.44); // Avlu
-  g.strokeStyle = '#fff'; g.lineWidth = 2; g.strokeRect(x + w * 0.3, y + (h - 16) * 0.36, w * 0.4, (h - 16) * 0.28);
-  g.fillStyle = 'rgba(150,200,230,.85)';
-  for (let px = x + 6; px < x + w - 8; px += 11) g.fillRect(px, y + h - 12, 7, 7);
-  g.fillStyle = '#e30a17'; g.fillRect(x + 12, y + 8, 20, 12);
-  label(g, 'İLKOKUL', x + w / 2, y + 16, 12, '#7a4a18');
-}
-
-function mosque(g, r) {
-  const { x, y, w, h } = r;
-  const cx = x + w / 2; const cy = y + h / 2;
-  g.fillStyle = '#c7cdd3'; g.fillRect(x, y, w, h);
-  g.fillStyle = '#e4e7ea'; g.fillRect(x + 8, y + 8, w - 16, h - 16);
-  // Ana kubbe ve yarım kubbeler
-  const d = Math.min(w, h) * 0.32;
-  for (const [a, b] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
-    g.fillStyle = '#8a9aa8';
-    g.beginPath(); g.arc(cx + a * d, cy + b * d, d * 0.5, 0, 7); g.fill();
-  }
-  const gr = g.createRadialGradient(cx - d * 0.3, cy - d * 0.3, 2, cx, cy, d);
-  gr.addColorStop(0, '#c4d0da'); gr.addColorStop(1, '#6f8192');
-  g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, d, 0, 7); g.fill();
-  g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth = 1;
-  for (let i = 0; i < 12; i++) { const t = (i / 12) * 6.283; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(t) * d, cy + Math.sin(t) * d); g.stroke(); }
-  g.fillStyle = '#e8c547'; g.beginPath(); g.arc(cx, cy, 3, 0, 7); g.fill();
-  // Dört minare: gölgeli ince kuleler
-  for (const [px, py] of [[x + 8, y + 8], [x + w - 8, y + 8], [x + 8, y + h - 8], [x + w - 8, y + h - 8]]) {
-    g.fillStyle = 'rgba(0,10,30,.25)'; g.beginPath(); g.moveTo(px, py); g.lineTo(px + 34, py + 44); g.lineTo(px + 38, py + 40); g.lineTo(px + 4, py - 4); g.closePath(); g.fill();
-    g.fillStyle = '#f2f4f6'; g.beginPath(); g.arc(px, py, 6, 0, 7); g.fill();
-    g.fillStyle = '#6f8192'; g.beginPath(); g.arc(px, py, 3.4, 0, 7); g.fill();
-  }
 }
 
 function stadium(g, r) {
@@ -5526,28 +5690,6 @@ function club(g, r) {
   g.strokeStyle = r.color; g.lineWidth = 2.5; rr(g, x + 6, y + 6, w - 12, h - 28, 3); g.stroke();
   g.fillStyle = '#c62828'; g.fillRect(x + w / 2 - 9, y + h - 18, 18, 18);
   g.fillStyle = '#e8c547'; g.fillRect(x + w / 2 - 13, y + h - 4, 3, 4); g.fillRect(x + w / 2 + 10, y + h - 4, 3, 4);
-}
-
-function bank(g, r) {
-  // Banka: cam cephe, büyük sütunlar, ATM'ler
-  const { x, y, w, h } = r;
-  const c = r.signColor;
-  g.fillStyle = '#d7dbdf'; g.fillRect(x, y, w, h);
-  g.fillStyle = '#eef0f2'; g.fillRect(x, y, w, h - 26);
-  g.fillStyle = shade(c, 0.05); g.fillRect(x + 6, y + 6, w - 12, 8);
-  g.fillStyle = 'rgba(0,0,0,.08)'; g.fillRect(x + 12, y + 20, w - 24, h - 56);
-  // Cam giriş ve sütunlar
-  const gl = g.createLinearGradient(0, y + h - 26, 0, y + h);
-  gl.addColorStop(0, '#9fd2ee'); gl.addColorStop(1, '#4a86a8');
-  g.fillStyle = gl; g.fillRect(x + 4, y + h - 26, w - 8, 26);
-  g.fillStyle = '#f7f8f9';
-  for (let px = x + 8; px < x + w - 8; px += 16) g.fillRect(px, y + h - 26, 4, 26);
-  // ATM
-  for (let i = 0; i < 2; i++) {
-    const px = x + w - 30 + i * 12;
-    g.fillStyle = c; g.fillRect(px, y + h - 11, 10, 11);
-    g.fillStyle = '#bfe7ff'; g.fillRect(px + 2, y + h - 9, 6, 4);
-  }
 }
 
 // Her zincirin kendi cephesi: renk, biçim, tente ve otopark
@@ -5618,19 +5760,255 @@ function sistem(g, r) {
   label(g, 'SİSTEM KOLEJİ', x + w / 2, y + h - 22, 11, '#ffffff', 900);
 }
 
+
+// --- v5: tek tek kimlikli binalar ---
+const SHOP_LOOK = [
+  [/döner|dönerci|kebap|iskender|ciğer|çiğköfte/i, { wall: '#7a2a18', awn: ['#c8261e', '#ffd23f'], fx: 'spit' }],
+  [/pide|lahmacun|börek|fırın|ekmek/i, { wall: '#a8733f', awn: ['#d97706', '#fff4d8'], fx: 'oven' }],
+  [/eczane/i, { wall: '#f4f6f4', awn: ['#d0121b', '#ffffff'], fx: 'cross' }],
+  [/kuaför|berber/i, { wall: '#2d3a55', awn: ['#1d6fb8', '#ffffff'], fx: 'pole' }],
+  [/çay|kahve|kafe|nevada|nargile/i, { wall: '#5a3a24', awn: ['#178a4d', '#f4e7c8'], fx: 'tables' }],
+  [/büfe|tekel|bakkal|market/i, { wall: '#30536e', awn: ['#ffd23f', '#1d6fb8'], fx: 'crates' }],
+  [/kasap|manav|tatlı|lokanta/i, { wall: '#6d3b2a', awn: ['#178a4d', '#ffffff'], fx: 'crates' }],
+];
+
+function shop(g, r) {
+  const { x, y, w, h, seed: s } = r;
+  let look = { wall: PASTEL[s % PASTEL.length], awn: ['#6d28a8', '#ffffff'], fx: '' };
+  for (const [re, l] of SHOP_LOOK) if (re.test(r.sign)) { look = l; break; }
+  const front = Math.min(18, h * 0.42);
+  // Küçük dükkân: düz çatı, klima, baca
+  g.fillStyle = shade(baseHex(s + 5), -0.08); g.fillRect(x, y, w, h - front);
+  g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = 1.5; g.strokeRect(x + 2, y + 2, w - 4, h - front - 4);
+  g.fillStyle = '#c9ced3'; g.fillRect(x + 6 + (s % 9), y + 6, 11, 8);
+  g.fillStyle = '#6d7680'; g.beginPath(); g.arc(x + 11.5 + (s % 9), y + 10, 2.6, 0, 7); g.fill();
+  if (look.fx === 'spit' || look.fx === 'oven') { g.fillStyle = '#4a4f55'; g.fillRect(x + w - 15, y + 5, 9, 9); g.fillStyle = 'rgba(255,255,255,.3)'; g.beginPath(); g.arc(x + w - 10, y + 9, 2.4, 0, 7); g.fill(); }
+  // Cephe
+  const fy = y + h - front;
+  g.fillStyle = look.wall; g.fillRect(x, fy, w, front);
+  const gw = w - 8;
+  g.fillStyle = 'rgba(180,225,250,.86)'; g.fillRect(x + 4, fy + 8, gw * 0.62, front - 10);
+  g.fillStyle = '#2a2520'; g.fillRect(x + 6 + gw * 0.66, fy + 7, gw * 0.26, front - 7);
+  // Tente: çizgili
+  const n = Math.max(3, Math.floor(w / 7));
+  for (let i = 0; i < n; i++) { g.fillStyle = look.awn[i % 2]; g.fillRect(x + (i * w) / n, fy + 1, w / n + 0.5, 5); }
+  if (look.fx === 'spit') { g.fillStyle = '#8a4a1e'; g.fillRect(x + 7, fy + 9, 5, front - 12); g.fillStyle = '#e8a04a'; g.fillRect(x + 8, fy + 10, 3, front - 14); }
+  if (look.fx === 'cross') { g.fillStyle = '#d0121b'; g.fillRect(x + w - 11, fy - 9, 8, 3); g.fillRect(x + w - 8.5, fy - 11.5, 3, 8); }
+  if (look.fx === 'pole') { for (let i = 0; i < 4; i++) { g.fillStyle = ['#d0121b', '#fff', '#1d6fb8', '#fff'][i]; g.fillRect(x + w - 6, fy + 6 + i * 3, 3, 3); } }
+  if (look.fx === 'crates') { for (let i = 0; i < 3; i++) { g.fillStyle = ['#e8533f', '#7fc241', '#ffb020'][(s + i) % 3]; g.fillRect(x + 4 + i * 6, y + h - 4, 5, 4); } }
+}
+
+// Uzun bina cephesi: kat sayısı kadar pencere sırası, güneye bakar
+function towerFace(g, x, y, w, wall, frame, glass, s, vertical) {
+  g.fillStyle = frame; g.fillRect(x, y, w, wall);
+  const rows = Math.floor(wall / 6.5);
+  const cw = vertical ? 5 : 8 + (s % 3);
+  for (let j = 0; j < rows; j++) {
+    for (let px = x + 3; px < x + w - cw; px += cw + 2) {
+      g.fillStyle = (s + Math.floor(px) * 3 + j * 7) % 9 === 0 ? '#ffe9a8' : glass;
+      g.fillRect(px, y + 3 + j * 6.5, cw, 4.2);
+    }
+  }
+}
+
+function skyscraper(g, r) {
+  // Gökdelen: kademeli yükselen, çok yüksek cephe, tepede anten ve helikopter pisti
+  const { x, y, w, h, seed: s } = r;
+  const wall = Math.min(h * 0.46, 92);
+  const c = r.color;
+  const kind = s % 4;
+  towerFace(g, x, y + h - wall, w, wall, shade(c, -0.6), shade(c, 0.35), s, kind % 2 === 0);
+  const rh = h - wall;
+  const gl = g.createLinearGradient(x, y, x + w, y + rh);
+  gl.addColorStop(0, shade(c, 0.55)); gl.addColorStop(0.55, c); gl.addColorStop(1, shade(c, -0.3));
+  g.fillStyle = gl;
+  if (kind === 3) { g.beginPath(); g.ellipse(x + w / 2, y + rh / 2, w / 2, rh / 2, 0, 0, 7); g.fill(); }
+  else { rr(g, x, y, w, rh, kind === 1 ? 14 : 3); g.fill(); }
+  g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1;
+  const steps = 3 + (s % 3);
+  for (let i = 1; i < steps; i++) { const m = i * Math.min(w, rh) * 0.07; rr(g, x + m, y + m, w - m * 2, rh - m * 2, 6); g.stroke(); }
+  const cx = x + w / 2; const cy = y + rh / 2; const d = Math.min(w, rh) * 0.2;
+  g.fillStyle = '#3d444e'; g.beginPath(); g.arc(cx, cy, d, 0, 7); g.fill();
+  g.strokeStyle = '#ffd23f'; g.lineWidth = 2; g.stroke();
+  label(g, s % 2 ? 'H' : '✦', cx, cy + 1, d, '#fff');
+}
+
+function residence2(g, r) {
+  // Rezidans: bombeli balkon sıraları, teras bahçesi, çok katlı
+  const { x, y, w, h, seed: s } = r;
+  const c = ['#d9d3c7', '#c7d4dc', '#e2c8b4', '#b9c8c0', '#d5c2d6'][s % 5];
+  const wall = Math.min(h * 0.42, 74);
+  g.fillStyle = shade(c, -0.42); g.fillRect(x, y + h - wall, w, wall);
+  for (let j = 0; j * 9 < wall - 4; j++) {
+    const py = y + h - wall + 3 + j * 9;
+    for (let px = x + 3; px < x + w - 12; px += 14 + (s % 4)) {
+      g.fillStyle = '#9fd2ee'; g.fillRect(px, py, 9, 5);
+      g.fillStyle = 'rgba(255,255,255,.75)'; g.fillRect(px - 1, py + 5, 11, 1.6);
+    }
+  }
+  const rh = h - wall;
+  g.fillStyle = c; rr(g, x, y, w, rh, 12); g.fill();
+  g.fillStyle = '#7fb56a'; rr(g, x + 6, y + 6, w * 0.4, rh * 0.4, 6); g.fill();
+  g.fillStyle = '#4f9a3a'; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(x + 12 + i * 9, y + 12 + (i % 2) * 6, 4, 0, 7); g.fill(); }
+  g.fillStyle = '#57c1f0'; rr(g, x + w * 0.55, y + rh * 0.5, w * 0.34, rh * 0.32, 5); g.fill();
+  g.strokeStyle = '#fff'; g.lineWidth = 1.5; g.stroke();
+}
+
+function bank2(g, r) {
+  // Banka: geniş cam cephe, kurumsal renk bandı, sütun, ATM sırası
+  const { x, y, w, h } = r;
+  const c = r.signColor;
+  const f = Math.min(30, h * 0.46);
+  g.fillStyle = '#d7dbdf'; g.fillRect(x, y, w, h);
+  g.fillStyle = '#eef0f2'; g.fillRect(x, y, w, h - f);
+  g.fillStyle = shade(c, 0.05); g.fillRect(x + 4, y + 4, w - 8, Math.min(8, (h - f) * 0.3));
+  g.fillStyle = 'rgba(0,0,0,.06)'; g.fillRect(x + 10, y + 16, Math.max(2, w - 20), Math.max(2, h - f - 22));
+  const gl = g.createLinearGradient(0, y + h - f, 0, y + h);
+  gl.addColorStop(0, '#a9dcf5'); gl.addColorStop(1, '#3f7ea3');
+  g.fillStyle = gl; g.fillRect(x + 3, y + h - f, w - 6, f);
+  g.fillStyle = '#f7f8f9';
+  for (let px = x + 5; px < x + w - 4; px += 14) g.fillRect(px, y + h - f, 3, f);
+  for (let i = 0; i < 3 && i * 11 < w - 12; i++) {
+    const px = x + w - 14 - i * 11;
+    g.fillStyle = c; g.fillRect(px, y + h - 12, 9, 12);
+    g.fillStyle = '#bfe7ff'; g.fillRect(px + 1.5, y + h - 10, 6, 4);
+    g.fillStyle = '#fff'; g.fillRect(px + 2, y + h - 4.5, 5, 1.4);
+  }
+  label(g, 'ATM', x + w - 22, y + h - f + 6, 7, '#fff');
+}
+
+function hospital2(g, r) {
+  const { x, y, w, h } = r;
+  const wall = 34;
+  // Dört katlı beyaz bloklar, ortada avlu, tepede haç ve helikopter pisti
+  g.fillStyle = '#9fb0bc'; g.fillRect(x, y + h - wall, w, wall);
+  for (let j = 0; j < 4; j++) for (let px = x + 6; px < x + w - 12; px += 13) { g.fillStyle = 'rgba(160,210,240,.95)'; g.fillRect(px, y + h - wall + 3 + j * 7.4, 9, 4.6); }
+  g.fillStyle = '#f4f7f9'; g.fillRect(x, y, w, h - wall);
+  g.fillStyle = '#d7e2e8'; g.fillRect(x + w * 0.34, y + (h - wall) * 0.28, w * 0.32, (h - wall) * 0.44);
+  g.fillStyle = '#7fb56a'; g.fillRect(x + w * 0.37, y + (h - wall) * 0.33, w * 0.26, (h - wall) * 0.34);
+  // Koca kırmızı haç
+  const cx = x + w * 0.17; const cy = y + (h - wall) * 0.5; const q = Math.min(w, h) * 0.14;
+  g.fillStyle = '#fff'; g.beginPath(); g.arc(cx, cy, q * 1.5, 0, 7); g.fill();
+  g.fillStyle = '#e30a17'; g.fillRect(cx - q, cy - q * 0.34, q * 2, q * 0.68); g.fillRect(cx - q * 0.34, cy - q, q * 0.68, q * 2);
+  const hx = x + w * 0.83;
+  g.fillStyle = '#3d444e'; g.beginPath(); g.arc(hx, cy, q * 1.4, 0, 7); g.fill();
+  g.strokeStyle = '#ffd23f'; g.lineWidth = 2.5; g.stroke();
+  label(g, 'H', hx, cy + 1, q * 1.7, '#fff');
+  // Acil girişi
+  g.fillStyle = '#d0121b'; g.fillRect(x + w * 0.4, y + h - 13, w * 0.2, 13);
+  label(g, 'ACİL', x + w * 0.5, y + h - 6.5, 9, '#fff', 900);
+}
+
+function school2(g, r) {
+  const { x, y, w, h } = r;
+  const wall = 22;
+  g.fillStyle = '#a06b34'; g.fillRect(x, y + h - wall, w, wall);
+  for (let j = 0; j < 2; j++) for (let px = x + 6; px < x + w - 10; px += 12) { g.fillStyle = 'rgba(170,215,240,.95)'; g.fillRect(px, y + h - wall + 3 + j * 9, 8, 6); }
+  g.fillStyle = '#e8cf9a'; g.fillRect(x, y, w, h - wall);
+  g.fillStyle = '#c8553d'; g.fillRect(x, y, w, 7);
+  g.fillStyle = '#d9b97a'; g.fillRect(x + 8, y + 12, w - 16, Math.max(2, h - wall - 18));
+  g.fillStyle = '#3a2a1a'; g.fillRect(x + w / 2 - 9, y + h - 15, 18, 15);
+}
+
+function mosque2(g, r) {
+  // Cami: taş avlu, şadırvan, merkezi kubbe, yarım kubbeler, kurşun rengi, dört minare
+  const { x, y, w, h, seed: s } = r;
+  const cx = x + w / 2; const cy = y + h * 0.42;
+  g.fillStyle = '#d9d2c2'; rr(g, x, y, w, h, 6); g.fill();
+  // Avlu revakları
+  const ay = y + h * 0.72;
+  g.fillStyle = '#efe8d8'; g.fillRect(x + 12, ay, w - 24, h * 0.24);
+  g.fillStyle = '#b9b09c';
+  for (let px = x + 18; px < x + w - 18; px += 20) { g.beginPath(); g.arc(px, ay + 5, 6, 0, 7); g.arc(px, ay + h * 0.24 - 5, 6, 0, 7); g.fill(); }
+  g.fillStyle = '#6fb6d0'; g.beginPath(); g.arc(cx, ay + h * 0.12, 11, 0, 7); g.fill();
+  g.strokeStyle = '#fff'; g.lineWidth = 2; g.stroke();
+  // Ana yapı
+  g.fillStyle = '#c9c3b4'; g.fillRect(x + 22, y + 16, w - 44, h * 0.56);
+  const d = Math.min(w, h) * 0.24;
+  for (const [a, b] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+    const gr = g.createRadialGradient(cx + a * d * 0.9 - 3, cy + b * d * 0.9 - 3, 1, cx + a * d * 0.9, cy + b * d * 0.9, d * 0.56);
+    gr.addColorStop(0, '#a8b8c4'); gr.addColorStop(1, '#5f7180');
+    g.fillStyle = gr; g.beginPath(); g.arc(cx + a * d * 0.9, cy + b * d * 0.9, d * 0.56, 0, 7); g.fill();
+  }
+  for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { g.fillStyle = '#7d8f9c'; g.beginPath(); g.arc(cx + a * d * 0.92, cy + b * d * 0.92, d * 0.26, 0, 7); g.fill(); }
+  const gr = g.createRadialGradient(cx - d * 0.35, cy - d * 0.35, 2, cx, cy, d);
+  gr.addColorStop(0, '#d2dde5'); gr.addColorStop(0.6, '#8fa2b0'); gr.addColorStop(1, '#55697a');
+  g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, d, 0, 7); g.fill();
+  g.strokeStyle = 'rgba(255,255,255,.28)'; g.lineWidth = 1;
+  for (let i = 0; i < 16; i++) { const t = (i / 16) * 6.283; g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(t) * d, cy + Math.sin(t) * d); g.stroke(); }
+  g.fillStyle = '#e8c547'; g.beginPath(); g.arc(cx, cy, 3.4, 0, 7); g.fill();
+  // Minareler: gölgesi yere uzanan ince kuleler
+  const n = s % 2 ? 4 : 2;
+  const mins = n === 4 ? [[x + 12, y + 12], [x + w - 12, y + 12], [x + 12, y + h * 0.7], [x + w - 12, y + h * 0.7]] : [[x + 12, y + h * 0.68], [x + w - 12, y + h * 0.68]];
+  for (const [px, py] of mins) {
+    g.fillStyle = 'rgba(0,10,30,.28)'; g.beginPath(); g.moveTo(px - 2, py); g.lineTo(px + 48, py + 60); g.lineTo(px + 53, py + 56); g.lineTo(px + 3, py - 3); g.closePath(); g.fill();
+    g.fillStyle = '#f4f2ea'; g.beginPath(); g.arc(px, py, 7.5, 0, 7); g.fill();
+    g.strokeStyle = '#b9b09c'; g.lineWidth = 1.2; g.stroke();
+    g.fillStyle = '#6f8192'; g.beginPath(); g.moveTo(px, py - 5); g.lineTo(px + 5, py); g.lineTo(px, py + 5); g.lineTo(px - 5, py); g.closePath(); g.fill();
+  }
+}
+
+// Sıradan apartmanda daha fazla kat ve cephe çeşidi
+function apartment2(g, r) {
+  const { x, y, w, h, seed: s } = r;
+  if (h < 90) { apartment(g, r); return; }
+  const floors = 3 + (s % 6);
+  const wall = Math.min(h * 0.5, floors * 8);
+  const col = baseHex(s);
+  const kind = s % 4;
+  g.fillStyle = shade(col, -0.2); g.fillRect(x, y + h - wall, w, wall);
+  for (let j = 0; j < floors; j++) {
+    const py = y + h - wall + 2 + j * 8;
+    for (let px = x + 4; px < x + w - 8; px += 11 + (s % 3)) {
+      g.fillStyle = (s + px + j) % 6 === 0 ? '#ffe9a8' : 'rgba(195,230,255,.9)';
+      g.fillRect(px, py, kind === 1 ? 8 : 5, 4.6);
+      if (kind === 2) { g.fillStyle = 'rgba(255,255,255,.7)'; g.fillRect(px - 1, py + 4.6, 8, 1.2); }
+      if (kind === 3 && (px + j) % 3 === 0) { g.fillStyle = ['#e8533f', '#f2c14e', '#3e7cb1'][(px + j) % 3]; g.fillRect(px, py + 4.6, 5, 2.4); }
+    }
+  }
+  const sub = { ...r, h: h - wall + 12 };
+  const roofY = y;
+  const rh = h - wall;
+  const t = s % 5;
+  if (t <= 1) {
+    g.fillStyle = t ? '#b5482f' : '#a0533a'; g.fillRect(x, roofY, w, rh);
+    g.fillStyle = 'rgba(0,0,0,.15)'; g.fillRect(x, roofY + rh / 2, w, rh / 2);
+    g.strokeStyle = 'rgba(0,0,0,.14)'; g.lineWidth = 1;
+    for (let py = roofY + 5; py < roofY + rh; py += 6) { g.beginPath(); g.moveTo(x, py); g.lineTo(x + w, py); g.stroke(); }
+    g.fillStyle = 'rgba(255,255,255,.28)'; g.fillRect(x, roofY + rh / 2 - 1, w, 2);
+  } else if (t === 2) {
+    g.fillStyle = col; g.fillRect(x, roofY, w, rh);
+    g.strokeStyle = 'rgba(0,0,0,.2)'; g.lineWidth = 2; g.strokeRect(x + 3, roofY + 3, w - 6, rh - 6);
+    g.fillStyle = '#1f3f77';
+    for (let py = roofY + 8; py < roofY + rh - 12; py += 12) for (let px = x + 8; px < x + w - 16; px += 16) g.fillRect(px, py, 13, 9);
+  } else if (t === 3) {
+    g.fillStyle = '#c6b8a0'; g.fillRect(x, roofY, w, rh);
+    g.fillStyle = shade(col, -0.1); g.fillRect(x + w * 0.1, roofY + rh * 0.2, w * 0.3, rh * 0.5);
+    g.fillStyle = '#d7dde2'; g.beginPath(); g.ellipse(x + w * 0.7, roofY + rh * 0.4, 7, 6, 0, 0, 7); g.fill();
+  } else {
+    g.fillStyle = shade(col, 0.12); g.fillRect(x, roofY, w, rh);
+    g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = 1;
+    for (let px = x + 9; px < x + w; px += 9) { g.beginPath(); g.moveTo(px, roofY); g.lineTo(px, roofY + rh); g.stroke(); }
+    g.fillStyle = '#8a4a2a'; g.fillRect(x + w * 0.2, roofY + 8, 14, 11);
+  }
+  void sub;
+}
+
 function paintBuilding2(g, r) {
   const S = BUILD;
   switch (r.style) {
-    case S.APARTMENT: apartment(g, r); break;
+    case S.APARTMENT: apartment2(g, r); break;
     case S.SISTEM: sistem(g, r); break;
     case S.CHAIN: (CHAINS[r.brand] || CHAINS.Migros)(g, r); break;
-    case S.BANK: bank(g, r); break;
-    case S.RESIDENCE: residence(g, r); break;
+    case S.BANK: bank2(g, r); break;
+    case S.SHOP: shop(g, r); break;
+    case S.SKYSCRAPER: skyscraper(g, r); break;
+    case S.RESIDENCE: residence2(g, r); break;
     case S.OFFICE: office(g, r); break;
     case S.HOTEL: hotel(g, r); break;
-    case S.HOSPITAL: hospital(g, r); break;
-    case S.SCHOOL: school(g, r); break;
-    case S.MOSQUE: mosque(g, r); break;
+    case S.HOSPITAL: hospital2(g, r); break;
+    case S.SCHOOL: school2(g, r); break;
+    case S.MOSQUE: mosque2(g, r); break;
     case S.STADIUM: stadium(g, r); break;
     case S.SITE_BLOCK: siteBlock(g, r); break;
     case S.GECEKONDU: gecekondu(g, r); break;
@@ -5647,11 +6025,12 @@ function paintBuilding2(g, r) {
 function shadowOf(r) {
   const S = BUILD;
   switch (r.style) {
-    case S.RESIDENCE: case S.OFFICE: return 2.8;
+    case S.SKYSCRAPER: return 4.6;
+    case S.RESIDENCE: case S.OFFICE: return 3.2;
     case S.HOTEL: case S.SISTEM: case S.HOSPITAL: return 2;
     case S.SITE_BLOCK: return 1.5 + (r.seed % 3) * 0.3;
     case S.APARTMENT: return 0.9 + (r.seed % 4) * 0.3;
-    case S.GECEKONDU: case S.VILLA: return 0.45;
+    case S.GECEKONDU: case S.VILLA: case S.SHOP: return 0.45;
     case S.STADIUM: return 1;
     default: return 1;
   }
@@ -7107,6 +7486,22 @@ function glow(size, stops) {
   return c;
 }
 
+// Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
+const signOut = { x: 0, y: 0, w: 0, h: 0 };
+function signBox(r, img) {
+  const size = r.signSize ?? 1;
+  const hTarget = [10, 16, 24, 40][size] ?? 16;
+  const maxW = size === 3 ? r.w * 0.94 : r.w - 6;
+  const w = Math.min(maxW, (img.width / img.height) * hTarget);
+  const h = (w / img.width) * img.height;
+  signOut.w = w;
+  signOut.h = h;
+  signOut.x = r.x + (r.w - w) / 2;
+  // Dev yazı çatının ortasında, öteki tabelalar cephede
+  signOut.y = size === 3 ? r.y + r.h * 0.26 - h / 2 : r.y + r.h - h - 7;
+  return signOut;
+}
+
 function carSprite(spec, paint = 0) {
   const img = sheetSprite(`p:${spec.id}:${paint}`, spec.len);
   if (img) return img;
@@ -7165,9 +7560,67 @@ class Renderer {
     }
   }
 
+  // Yol ve sokak dokuları: karo başına tek görüntü, pişirme çok hızlanır
+  makePatterns() {
+    const T = TILE;
+    const mk = (paint) => [0, 1, 2, 3].map((v) => {
+      const c = makeCanvas(T, T);
+      const g = c.getContext('2d');
+      paint(g, v);
+      return c;
+    });
+    const noise = (g, n, a, b, s = 3) => { for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? a : b; g.fillRect(Math.random() * T, Math.random() * T, s, s); } };
+    this.roads = [
+      mk((g, v) => { // Koyu asfalt
+        g.fillStyle = '#34373e'; g.fillRect(0, 0, T, T);
+        noise(g, 26, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.14)', 2);
+        if (v === 1) { g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(6, 10, 20, 9); }
+      }),
+      mk((g, v) => { // Açık beton: derzli plakalar
+        g.fillStyle = v % 2 ? '#aeb0ad' : '#a6a8a6'; g.fillRect(0, 0, T, T);
+        noise(g, 14, 'rgba(255,255,255,.1)', 'rgba(0,0,0,.08)', 2);
+        g.fillStyle = 'rgba(40,40,40,.35)'; g.fillRect(0, 0, T, 1.5); g.fillRect(0, 0, 1.5, T);
+      }),
+      mk((g, v) => { // Parke taşı
+        g.fillStyle = '#6d645b'; g.fillRect(0, 0, T, T);
+        const cols = ['#8b8074', '#7f7468', '#94897b', '#766c60'];
+        for (let y = 0; y < 4; y++) for (let x = -1; x < 5; x++) { g.fillStyle = cols[(x * 3 + y + v) & 3]; g.fillRect(x * 10 + (y % 2) * 5 + 0.6, y * 10 + 0.6, 8.8, 8.8); }
+      }),
+      mk((g, v) => { // Kırık asfalt: çatlak ve yama
+        g.fillStyle = '#44474c'; g.fillRect(0, 0, T, T);
+        noise(g, 22, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.14)', 2);
+        g.strokeStyle = 'rgba(10,10,12,.7)'; g.lineWidth = 1.2;
+        g.beginPath(); g.moveTo(Math.random() * T, 0);
+        for (let i = 1; i <= 4; i++) g.lineTo(Math.random() * T, (i / 4) * T);
+        g.stroke();
+        if (v === 2) { g.fillStyle = '#2b2d31'; g.fillRect(4, 8, 22, 17); }
+        if (v === 3) { g.fillStyle = 'rgba(20,18,16,.8)'; g.beginPath(); g.ellipse(20, 22, 7, 5, 0.4, 0, 7); g.fill(); }
+      }),
+    ];
+    this.alleys = [
+      mk((g, v) => { // Arnavut kaldırımı
+        g.fillStyle = '#5b554d'; g.fillRect(0, 0, T, T);
+        for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) { g.fillStyle = ['#8e8578', '#7a7267', '#9c9385'][(x + y * 2 + v) % 3]; g.beginPath(); g.arc(x * 8 + 4 + (y % 2) * 2, y * 8 + 4, 3.5, 0, 7); g.fill(); }
+      }),
+      mk(() => { // Yamalı beton
+        return;
+      }),
+      mk((g, v) => { // Tuğla döşeme
+        g.fillStyle = '#6e4a3c'; g.fillRect(0, 0, T, T);
+        for (let y = 0; y < 5; y++) for (let x = -1; x < 4; x++) { g.fillStyle = ['#a56a4e', '#96604a', '#b0745a'][(x + y + v) & 1]; g.fillRect(x * 14 + (y % 2) * 7 + 0.6, y * 8 + 0.6, 12.8, 6.8); }
+      }),
+    ];
+    this.alleys[1] = mk((g, v) => {
+      g.fillStyle = v === 2 ? '#7c7f82' : '#8b8e8f'; g.fillRect(0, 0, T, T);
+      noise(g, 16, 'rgba(255,255,255,.08)', 'rgba(0,0,0,.12)', 2);
+      if (v === 1) { g.fillStyle = '#6a6d70'; g.fillRect(8, 6, 18, 22); }
+    });
+  }
+
   makeSprites() {
     const P = CONFIG.police;
     const s = this.sprites;
+    this.makePatterns();
     s.car = sprite(P.car.len + 8, P.car.wid + 8, (g) => paintPolice(g, P.car, false));
     s.fast = sprite(P.fast.len + 10, P.fast.wid + 10, (g) => paintPoliceFast(g, P.fast));
     s.moto = sprite(P.moto.len + 12, P.moto.wid + 14, (g) => paintMoto(g, P.moto));
@@ -7175,6 +7628,9 @@ class Renderer {
     s.swat = sprite(P.swat.len + 8, P.swat.wid + 8, (g) => paintSwat(g, P.swat));
     s.tank = sprite(P.tank.len + 8, P.tank.wid + 8, (g) => paintTankHull(g, P.tank));
     s.turret = sprite(150, 50, paintTurret);
+    const AL = CONFIG.aliens;
+    s.ufo = sprite(AL.ufo.len + 10, AL.ufo.len + 10, (g) => paintUfo(g, AL.ufo));
+    s.rover = sprite(AL.rover.len + 16, AL.rover.wid + 16, (g) => paintRover(g, AL.rover));
     s.shadow = sprite(60, 34, (g) => {
       g.fillStyle = 'rgba(0,0,0,1)';
       rr(g, -28, -15, 56, 30, 9);
@@ -7191,10 +7647,20 @@ class Renderer {
 
     const prop = (w, h, paint) => sprite(w, h, paint);
     s.npc = {}; // İlk görüldüğünde çizilir: açılış kısa kalır
-    // 7 erkek + 7 kadın görünüm: kıyafet, ten, saç
-    const LOOKS = [['#e8533f', '#e0a878', '#3b2a1e'], ['#3e7cb1', '#f0c8a0', '#6b4a2b'], ['#f2c14e', '#8d5a3a', '#16131a'], ['#4f9d69', '#e0a878', '#c9a24a'], ['#2f3440', '#f0c8a0', '#2b2b33'], ['#ececec', '#8d5a3a', '#16131a'], ['#8a5a3a', '#d9a06a', '#55595f'],
-      ['#d94f9c', '#f0c8a0', '#7a3b1e'], ['#7a5ea8', '#e0a878', '#16131a'], ['#2fa8a0', '#d9a06a', '#c9a24a'], ['#f08a3c', '#f0c8a0', '#a8552a'], ['#a8c64a', '#8d5a3a', '#16131a'], ['#e84a5f', '#f0c8a0', '#d9d4c7'], ['#4a7ce0', '#e0a878', '#3b2a1e']];
-    s.peds = LOOKS.map(([a, b, c]) => [0, 1].map((step) => sprite(20, 20, (g) => paintPed(g, a, b, c, step))));
+    // Yarısı erkek, yarısı kadın: kıyafet, ten, saç ve aksesuar birleşimi
+    const SHIRT = ['#e8533f', '#3e7cb1', '#f2c14e', '#4f9d69', '#2f3440', '#ececec', '#8a5a3a', '#d94f9c', '#7a5ea8', '#2fa8a0', '#f08a3c', '#a8c64a', '#e84a5f', '#4a7ce0', '#55607a', '#c9b48a'];
+    const SKIN = ['#e0a878', '#f0c8a0', '#8d5a3a', '#d9a06a', '#c08a5e'];
+    const HAIR = ['#3b2a1e', '#6b4a2b', '#16131a', '#c9a24a', '#2b2b33', '#55595f', '#a8552a', '#d9d4c7'];
+    const half = CONFIG.peds.looks >> 1;
+    s.peds = [];
+    for (let i = 0; i < CONFIG.peds.looks; i++) {
+      const woman = i >= half;
+      const shirt = SHIRT[(i * 7 + 3) % SHIRT.length];
+      const skin = SKIN[(i * 3) % SKIN.length];
+      const hair = HAIR[(i * 5 + 1) % HAIR.length];
+      const acc = woman ? [0, 2, 5, 4, 2, 5, 3][i % 7] : [0, 1, 3, 6, 0, 1, 4][i % 7];
+      s.peds.push([0, 1].map((step) => sprite(20, 20, (g) => paintPed(g, shirt, skin, hair, step, acc))));
+    }
     s.pedKinds = {};
     for (const k of Object.keys(CONFIG.peds.kinds)) {
       if (k === 'man' || k === 'woman') continue;
@@ -7453,7 +7919,9 @@ class Renderer {
     const urban = c.biome === 'city';
     const sea = c.template === 'sea';
     const shore = sea ? '#1f8fd6' : c.template === 'lake' ? pal.sand : c.template === 'plaza' ? '#e5d7bf' : pal.grass;
-    const colors = [pal.grass, pal.road, '#cdd2d6', '#e5d7bf', shore, pal.sand, pal.dirt, '#5fd3e6', '#c9ae4c'];
+    const colors = [pal.grass, pal.road, '#cdd2d6', '#e5d7bf', shore, pal.sand, pal.dirt, '#5fd3e6', '#c9ae4c', '#8b8e8f'];
+    const roads = this.roads[urban ? c.road : 0];
+    const alleys = this.alleys[c.alley];
     const fieldGreen = (c.cx + c.cy) & 1;
     for (let y = 0; y < CT; y++) {
       for (let x = 0; x < CT; x++) {
@@ -7463,6 +7931,8 @@ class Renderer {
         const py = c.y + y * TILE;
         g.fillRect(px, py, TILE + 1, TILE + 1);
         const h = ((x * 73856093) ^ (y * 19349663) ^ (c.cx * 83492791) ^ (c.cy * 49979693)) >>> 0;
+        if (t === GROUND.ROAD) { g.drawImage(roads[h & 3], px, py, TILE + 1, TILE + 1); continue; }
+        if (t === GROUND.ALLEY) { g.drawImage(alleys[h & 3], px, py, TILE + 1, TILE + 1); continue; }
         if (t === GROUND.FIELD) {
           // Tarla sıraları
           if (fieldGreen) { g.fillStyle = '#7fae3f'; g.fillRect(px, py, TILE + 1, TILE + 1); }
@@ -7495,19 +7965,16 @@ class Renderer {
           g.fillStyle = 'rgba(120,90,50,.16)';
           g.fillRect(px + (h % 30), py + ((h >>> 8) % 30), 4, 3);
           g.fillRect(px + ((h >>> 4) % 30), py + ((h >>> 12) % 30), 3, 2);
-        } else if (t === GROUND.ROAD && (h & 7) === 0) {
-          g.fillStyle = 'rgba(0,0,0,.06)';
-          g.fillRect(px + (h >>> 8) % 24, py + (h >>> 14) % 24, 14, 10);
         }
       }
     }
     // Kavşak öncesi dur çizgileri
     if (urban) {
       g.fillStyle = 'rgba(255,255,255,.85)';
-      g.fillRect(c.x + 4, c.y + ART_W + 26, ART_W / 2 - 6, 4);
-      g.fillRect(c.x + ART_W + 26, c.y + ART_W / 2 + 2, 4, ART_W / 2 - 6);
-      g.fillRect(c.x + ART_W / 2 + 2, c.y - 30, ART_W / 2 - 6, 4);
-      g.fillRect(c.x - 30, c.y + 4, 4, ART_W / 2 - 6);
+      g.fillRect(c.x + 4, c.y + ART_W + 24, ART_W / 2 - 6, 4);
+      g.fillRect(c.x + ART_W + 24, c.y + ART_W / 2 + 2, 4, ART_W / 2 - 6);
+      g.fillRect(c.x + ART_W / 2 + 2, c.y - 28, ART_W / 2 - 6, 4);
+      g.fillRect(c.x - 28, c.y + 4, 4, ART_W / 2 - 6);
     }
     // Sığ su kıyısında köpük
     if (sea) {
@@ -7524,31 +7991,54 @@ class Renderer {
         }
       }
     }
-    // Kaldırım kenarları: şehirde beyaz, kırda sade, denizde köprü korkuluğu
-    g.fillStyle = urban || sea ? 'rgba(245,247,250,.85)' : 'rgba(0,0,0,.2)';
+    // Yol kenarı: dar taş kaldırım bandı (sürülebilir) ve bordür
+    const K = 11;
+    const stone = urban || sea ? '#c6cace' : 'rgba(0,0,0,.2)';
+    const lip = urban || sea ? '#eef1f4' : 'rgba(0,0,0,.25)';
+    const open = (t) => t !== GROUND.ROAD && t !== GROUND.ALLEY;
+    const edge = (px, py, dx, dy) => {
+      g.fillStyle = stone;
+      if (dx > 0) g.fillRect(px + TILE - K, py, K, TILE);
+      if (dx < 0) g.fillRect(px, py, K, TILE);
+      if (dy > 0) g.fillRect(px, py + TILE - K, TILE, K);
+      if (dy < 0) g.fillRect(px, py, TILE, K);
+      g.fillStyle = lip;
+      if (dx > 0) g.fillRect(px + TILE - K, py, 2, TILE);
+      if (dx < 0) g.fillRect(px + K - 2, py, 2, TILE);
+      if (dy > 0) g.fillRect(px, py + TILE - K, TILE, 2);
+      if (dy < 0) g.fillRect(px, py + K - 2, TILE, 2);
+    };
     for (let y = 0; y < CT; y++) {
       for (let x = 0; x < CT; x++) {
         if (c.ground[y * CT + x] !== GROUND.ROAD) continue;
         const px = c.x + x * TILE;
         const py = c.y + y * TILE;
-        if (x < CT - 1 && c.ground[y * CT + x + 1] !== GROUND.ROAD) g.fillRect(px + TILE - 2, py, 3, TILE);
-        if (y < CT - 1 && c.ground[(y + 1) * CT + x] !== GROUND.ROAD) g.fillRect(px, py + TILE - 2, TILE, 3);
-        if (x > 0 && c.ground[y * CT + x - 1] !== GROUND.ROAD) g.fillRect(px - 1, py, 3, TILE);
-        if (y > 0 && c.ground[(y - 1) * CT + x] !== GROUND.ROAD) g.fillRect(px, py - 1, TILE, 3);
+        if (x < CT - 1 && open(c.ground[y * CT + x + 1])) edge(px, py, 1, 0);
+        if (y < CT - 1 && open(c.ground[(y + 1) * CT + x])) edge(px, py, 0, 1);
       }
     }
-    // Sınırda: komşu chunk'ın ana yoluna bakan kenar
-    for (let i = ART_W / TILE; i < CT; i++) {
-      if (c.ground[i * CT + CT - 1] !== GROUND.ROAD) g.fillRect(c.x + CHUNK - 2, c.y + i * TILE, 2, TILE);
-      if (c.ground[(CT - 1) * CT + i] !== GROUND.ROAD) g.fillRect(c.x + i * TILE, c.y + CHUNK - 2, TILE, 2);
-    }
-
-    // Ana yol çizgileri: sarı orta şerit, beyaz yaya geçidi
+    // Ana yol kenar çizgileri, kesik orta şerit, yön okları
     const mid = ART_W / 2;
-    g.fillStyle = '#ffd23f';
-    for (let d = ART_W + 30; d < CHUNK - 30; d += 56) {
+    const yellow = '#ffd23f';
+    for (let d = ART_W + 30; d < CHUNK - 40; d += 56) {
+      g.fillStyle = yellow;
       g.fillRect(c.x + mid - 2, c.y + d, 4, 30);
       g.fillRect(c.x + d, c.y + mid - 2, 30, 4);
+    }
+    if (urban) {
+      g.fillStyle = 'rgba(255,255,255,.75)';
+      const arrow = (x, y, a) => {
+        g.save(); g.translate(x, y); g.rotate(a);
+        g.fillRect(-14, -2, 18, 4);
+        g.beginPath(); g.moveTo(4, -7); g.lineTo(16, 0); g.lineTo(4, 7); g.closePath(); g.fill();
+        g.restore();
+      };
+      const q = ART_W * 0.25;
+      arrow(c.x + q, c.y + ART_W + 90, Math.PI / 2 * -1);
+      arrow(c.x + ART_W - q, c.y + CHUNK - 90, Math.PI / 2);
+      arrow(c.x + ART_W + 90, c.y + ART_W - q, 0);
+      arrow(c.x + CHUNK - 90, c.y + q, Math.PI);
+      this.bakeSigns(g, c);
     }
     g.fillStyle = 'rgba(255,255,255,.8)';
     for (let i = 8; i < ART_W - 8 && urban; i += 18) {
@@ -7557,18 +8047,131 @@ class Renderer {
       g.fillRect(c.x + i, c.y - 22, 9, 18);
       g.fillRect(c.x - 22, c.y + i, 18, 9);
     }
-    // İç sokak kesik çizgileri
-    g.fillStyle = 'rgba(255,255,255,.65)';
+    this.bakePads(g, c);
+  }
+
+  // Trafik levhaları: pişirilir, oyun sırasında maliyeti yoktur
+  bakeSigns(g, c) {
+    const post = (x, y, draw) => {
+      g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(x + 3, y + 4, 8, 4, 0, 0, 7); g.fill();
+      g.save(); g.translate(x, y); draw(); g.restore();
+    };
+    const round = (bg, ring, text) => () => {
+      g.fillStyle = bg; g.beginPath(); g.arc(0, 0, 8.5, 0, 7); g.fill();
+      g.lineWidth = 2.4; g.strokeStyle = ring; g.stroke();
+      g.fillStyle = '#16181c'; g.font = '900 9px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 0, 0.5);
+    };
+    const tri = (sym) => () => {
+      g.fillStyle = '#fff'; g.beginPath(); g.moveTo(0, -10); g.lineTo(10, 8); g.lineTo(-10, 8); g.closePath(); g.fill();
+      g.lineWidth = 2.4; g.strokeStyle = '#d0121b'; g.stroke();
+      g.fillStyle = '#16181c'; g.font = '900 10px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(sym, 0, 2);
+    };
+    const stop = () => {
+      g.fillStyle = '#d0121b'; g.beginPath();
+      for (let i = 0; i < 8; i++) { const a = 0.39 + (i / 8) * 6.283; g.lineTo(Math.cos(a) * 9.5, Math.sin(a) * 9.5); }
+      g.closePath(); g.fill();
+      g.fillStyle = '#fff'; g.font = '900 7px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('DUR', 0, 0.5);
+    };
+    const panel = (t) => () => {
+      g.font = '800 9px Nunito, sans-serif';
+      const w = g.measureText(t).width + 10;
+      g.fillStyle = '#0a4ea2'; g.fillRect(-w / 2, -7, w, 14);
+      g.strokeStyle = '#fff'; g.lineWidth = 1; g.strokeRect(-w / 2 + 1, -6, w - 2, 12);
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 0, 0.5);
+    };
+    const DIR = ['← KADIKÖY', 'BEŞİKTAŞ →', '↑ TAKSİM', 'ÜSKÜDAR →', '← ŞİŞLİ', 'SARIYER →', '↑ BOĞAZ KÖPRÜSÜ', '← FATİH', 'BAKIRKÖY →'];
+    const h = (Math.imul(c.cx, 73856093) ^ Math.imul(c.cy, 19349663)) >>> 0;
+    const list = [round('#fff', '#d0121b', String(30 + (h % 4) * 10)), tri('!'), tri('⚠'), round('#fff', '#d0121b', '50'), stop];
+    const E = ART_W - 6;
+    post(c.x + E, c.y + ART_W + 44, stop);
+    post(c.x + ART_W + 44, c.y + E, list[h % 5]);
+    post(c.x + E, c.y + CHUNK * 0.55, panel(DIR[h % DIR.length]));
+    post(c.x + CHUNK * 0.55, c.y + E, panel(DIR[(h >>> 4) % DIR.length]));
+    post(c.x + E, c.y + CHUNK * 0.8, list[(h >>> 3) % 5]);
+    post(c.x + CHUNK * 0.8, c.y + E, list[(h >>> 6) % 5]);
+    // Ara sokak ağzı: tek yön ya da çıkmaz uyarısı
     for (let i = 0; i < c.streetCount; i++) {
       const s = c.streets[i];
-      if (s.ground !== GROUND.ROAD) continue;
-      const m = (s.pos + s.width / 2) * TILE;
-      for (let d = ART_W + 26; d < CHUNK - 30; d += 50) {
-        if (s.vertical) {
-          if (c.ground[Math.floor(d / TILE) * CT + s.pos - 1] !== GROUND.ROAD) g.fillRect(c.x + m - 1.5, c.y + d, 3, 24);
-        } else if (c.ground[(s.pos - 1) * CT + Math.floor(d / TILE)] !== GROUND.ROAD) {
-          g.fillRect(c.x + d, c.y + m - 1.5, 24, 3);
+      if (s.ground !== GROUND.ALLEY) continue;
+      const at = (s.pos + s.width / 2) * TILE;
+      const sign = i % 2 ? round('#2a6fd6', '#fff', '⇧') : tri('Y');
+      if (s.vertical) post(c.x + at + 13, c.y + ART_W - 5, sign);
+      else post(c.x + ART_W - 5, c.y + at + 13, sign);
+    }
+    // Yaya geçitleri ara sokak ağızlarında
+    g.fillStyle = 'rgba(255,255,255,.7)';
+    for (let i = 0; i < c.streetCount; i++) {
+      const s = c.streets[i];
+      if (s.ground !== GROUND.ALLEY) continue;
+      const a = s.pos * TILE + 4;
+      const b = (s.pos + s.width) * TILE - 4;
+      for (let k = a; k < b; k += 12) {
+        if (s.vertical) g.fillRect(c.x + k, c.y + ART_W + 3, 6, 15);
+        else g.fillRect(c.x + ART_W + 3, c.y + k, 15, 6);
+      }
+    }
+  }
+
+  // Açık alanlar: spor sahaları, avlu, otopark, ambulans alanı, okul bahçesi
+  bakePads(g, c) {
+    for (let i = 0; i < c.padCount; i++) {
+      const p = c.pads[i];
+      const x = c.x + p.tx * TILE + 3;
+      const y = c.y + p.ty * TILE + 3;
+      const w = p.w * TILE - 6;
+      const h = p.h * TILE - 6;
+      if (p.kind === 'foot' || p.kind === 'hali') {
+        const hali = p.kind === 'hali';
+        const n = hali ? 6 : 10;
+        for (let k = 0; k < n; k++) { g.fillStyle = k % 2 ? (hali ? '#2fa654' : '#46a84a') : (hali ? '#27934a' : '#3e9a44'); g.fillRect(x + (k * w) / n, y, w / n + 0.5, h); }
+        g.strokeStyle = '#fff'; g.lineWidth = 2.5;
+        g.strokeRect(x + 6, y + 6, w - 12, h - 12);
+        g.beginPath(); g.moveTo(x + w / 2, y + 6); g.lineTo(x + w / 2, y + h - 6); g.stroke();
+        g.beginPath(); g.arc(x + w / 2, y + h / 2, h * 0.17, 0, 7); g.stroke();
+        for (const s of [0, 1]) {
+          const bx = s ? x + w - 6 - w * 0.13 : x + 6;
+          g.strokeRect(bx, y + h * 0.24, w * 0.13, h * 0.52);
+          g.fillStyle = '#fff'; g.fillRect(s ? x + w - 6 : x + 2, y + h * 0.42, 4, h * 0.16);
         }
+        if (hali) { g.strokeStyle = 'rgba(240,244,248,.55)'; g.lineWidth = 1; for (let k = 0; k <= w; k += 12) { g.beginPath(); g.moveTo(x + k, y); g.lineTo(x + k, y + h); g.stroke(); } for (let k = 0; k <= h; k += 12) { g.beginPath(); g.moveTo(x, y + k); g.lineTo(x + w, y + k); g.stroke(); } }
+        g.strokeStyle = 'rgba(40,50,60,.8)'; g.lineWidth = 2; g.strokeRect(x, y, w, h);
+      } else if (p.kind === 'basket') {
+        g.fillStyle = '#c8682e'; g.fillRect(x, y, w, h);
+        g.fillStyle = '#2f6fb0'; g.fillRect(x + 8, y + 8, w - 16, h - 16);
+        g.strokeStyle = '#fff'; g.lineWidth = 2;
+        g.strokeRect(x + 8, y + 8, w - 16, h - 16);
+        g.beginPath(); g.moveTo(x + w / 2, y + 8); g.lineTo(x + w / 2, y + h - 8); g.stroke();
+        g.beginPath(); g.arc(x + w / 2, y + h / 2, h * 0.14, 0, 7); g.stroke();
+        for (const s of [0, 1]) {
+          const px = s ? x + w - 8 : x + 8;
+          g.beginPath(); g.arc(px, y + h / 2, h * 0.32, s ? 1.57 : -1.57, s ? 4.71 : 1.57); g.stroke();
+          g.fillStyle = '#ff7a1a'; g.beginPath(); g.arc(px + (s ? -8 : 8), y + h / 2, 3.4, 0, 7); g.fill();
+        }
+      } else if (p.kind === 'yard') {
+        g.fillStyle = '#c9b48a'; g.fillRect(x, y, w, h);
+        g.strokeStyle = '#fff'; g.lineWidth = 2; g.strokeRect(x + w * 0.1, y + h * 0.2, w * 0.5, h * 0.6);
+        g.beginPath(); g.arc(x + w * 0.35, y + h / 2, h * 0.14, 0, 7); g.stroke();
+        // Bayrak direği ve Türk bayrağı
+        const fx = x + w * 0.8; const fy = y + h * 0.3;
+        g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(fx, fy, 30, 2);
+        g.fillStyle = '#dfe3e8'; g.beginPath(); g.arc(fx, fy, 3, 0, 7); g.fill();
+        g.fillStyle = '#e30a17'; g.fillRect(fx + 3, fy - 12, 26, 15);
+        g.fillStyle = '#fff'; g.beginPath(); g.arc(fx + 12, fy - 4.5, 4.6, 0, 7); g.fill();
+        g.fillStyle = '#e30a17'; g.beginPath(); g.arc(fx + 13.4, fy - 4.5, 3.8, 0, 7); g.fill();
+        g.fillStyle = '#fff'; g.fillRect(fx + 17, fy - 6, 3, 3);
+        g.fillStyle = '#4f9a3a'; for (let k = 0; k < 6; k++) { g.beginPath(); g.arc(x + 10 + k * (w / 6), y + h - 7, 6, 0, 7); g.fill(); }
+      } else if (p.kind === 'ambulance') {
+        g.fillStyle = '#b9bec4'; g.fillRect(x, y, w, h);
+        g.strokeStyle = '#fff'; g.lineWidth = 2;
+        for (let k = 0; k < 7; k++) { g.beginPath(); g.moveTo(x + 14 + k * 34, y + 4); g.lineTo(x + 14 + k * 34, y + 40); g.stroke(); }
+        g.fillStyle = '#d0121b'; g.fillRect(x + w * 0.4, y, w * 0.2, h);
+        g.fillStyle = '#fff'; g.font = '900 13px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('AMBULANS', x + w * 0.5, y + h / 2);
+        const am = this.sprites.parked && this.sprites.ambulance;
+        if (am) g.drawImage(am, x + 22, y + 8, 54, 24);
+      } else if (p.kind === 'parking') {
+        g.fillStyle = '#7c7f82'; g.fillRect(x, y, w, h);
+        g.strokeStyle = '#fff'; g.lineWidth = 1.5;
+        for (let k = 0; k < w; k += 40) { g.beginPath(); g.moveTo(x + k, y); g.lineTo(x + k, y + 34); g.stroke(); }
       }
     }
   }
@@ -7723,12 +8326,9 @@ class Renderer {
   bakeSign(g, r) {
     if (r.style === 0 || r.style === 1 || r.style === 2 || r.style === 3 || r.style === 5 || r.style === BUILD.APARTMENT) roofClutter(g, r);
     if (!r.sign) return;
-    const img = signCanvas(r.sign, r.signColor);
-    const maxW = r.w - 6;
-    const h = r.style === BUILD.SISTEM ? 34 : 16;
-    const w = Math.min(maxW, (img.width / img.height) * h);
-    const hh = (w / img.width) * img.height;
-    g.drawImage(img, r.x + (r.w - w) / 2, r.y + r.h - hh - 8, w, hh);
+    const img = signCanvas(r.sign, r.signColor, r.seed);
+    const b = signBox(r, img);
+    g.drawImage(img, b.x, b.y, b.w, b.h);
   }
 
   bakeWall(g, r) {
@@ -7796,6 +8396,7 @@ class Renderer {
     this.drawNpcs(game, vx0, vx1, vy0, vy1);
     this.drawCops(game, now, vx0, vx1, vy0, vy1);
     if (game.state !== 'dying' && game.state !== 'over') this.drawPlayer(game);
+    this.drawUfos(game, now, vx0, vx1, vy0, vy1);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, true);
     this.drawPeds(game, vx0, vx1, vy0, vy1, true);
     this.drawLights(game, c0x, c1x, c0y, c1y);
@@ -8057,10 +8658,9 @@ class Renderer {
           const l = c.lights[i];
           if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1) continue;
           const r = l.rect;
-          const img = signCanvas(r.sign, r.signColor);
-          const w = Math.min(r.w - 6, (img.width / img.height) * 16);
-          const hh = (w / img.width) * img.height;
-          ctx.drawImage(img, r.x + (r.w - w) / 2, r.y + r.h - hh - 8, w, hh);
+          const img = signCanvas(r.sign, r.signColor, r.seed);
+          const b = signBox(r, img);
+          ctx.drawImage(img, b.x, b.y, b.w, b.h);
         }
       }
     }
@@ -8076,7 +8676,7 @@ class Renderer {
       ctx.drawImage(beam, -bw / 2, -bh / 2, bw, bh);
     };
     if (game.state === 'play') head(game.player);
-    for (const c of game.cops) if (c.type !== 'tank') head(c);
+    for (const c of game.cops) if (c.type !== 'tank' && !c.flying) head(c);
     for (const n of game.crowd.npcs) if (n.alive && n.state === 'drive') head(n);
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
@@ -8133,6 +8733,21 @@ class Renderer {
       ctx.globalAlpha = 1;
     }
     if (game.ghostT > 0) ctx.globalAlpha = 0.5;
+    const sink = game.sinkProgress();
+    if (sink > 0) {
+      // Çizgi film batışı: küçülür, maviye gömülür
+      const q = k * (1 - CONFIG.water.shrink * sink);
+      this.place(p.x, p.y, p.a);
+      ctx.globalAlpha = 1 - sink * 0.92;
+      const w = (this.playerSprite.wu || this.playerSprite.width / SPR) * q;
+      const h = (this.playerSprite.hu || this.playerSprite.height / SPR) * q;
+      ctx.drawImage(this.playerSprite, -w / 2, -h / 2, w, h);
+      ctx.globalAlpha = sink * 0.75;
+      ctx.drawImage(this.sprites.water, -w * 0.7, -w * 0.7, w * 1.4, w * 1.4);
+      ctx.globalAlpha = 1;
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      return;
+    }
     this.drawBody(this.playerSprite, p, k, k);
     ctx.globalAlpha = 1;
     if (game.stage >= 2) {
@@ -8143,10 +8758,36 @@ class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
+  // Uçan daireler en üstte: gölgesi yerde, ışını oyuncunun üstünde
+  drawUfos(game, now, x0, x1, y0, y1) {
+    const ctx = this.ctx;
+    const sp = this.sprites;
+    for (const c of game.cops) {
+      if (!c.flying || c.x < x0 - 200 || c.x > x1 + 200 || c.y < y0 - 200 || c.y > y1 + 200) continue;
+      const R = c.len / 2;
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      ctx.globalAlpha = 0.3;
+      ctx.drawImage(sp.dark, c.x + 16, c.y + 44, R * 2.1, R * 1.6);
+      if (c.beam) {
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = 0.5 + 0.2 * Math.sin(now * 0.03);
+        ctx.fillStyle = '#39ff9c';
+        ctx.beginPath(); ctx.moveTo(c.x - 16, c.y); ctx.lineTo(c.x + 16, c.y); ctx.lineTo(game.player.x + 42, game.player.y); ctx.lineTo(game.player.x - 42, game.player.y); ctx.closePath(); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      ctx.globalAlpha = 1;
+      this.place(c.x, c.y - 10, c.a);
+      const w = sp.ufo.width / SPR;
+      ctx.drawImage(sp.ufo, -w / 2, -w / 2, w, w);
+    }
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
   drawCops(game, now, x0, x1, y0, y1) {
     const ctx = this.ctx;
     const sp = this.sprites;
     for (const c of game.cops) {
+      if (c.flying) continue;
       if (c.x < x0 - 80 || c.x > x1 + 80 || c.y < y0 - 80 || c.y > y1 + 80) continue;
       this.drawBody(sp[c.type], c, c.type === 'tank' ? 1.6 : 1);
       if (c.type === 'tank') {
@@ -8227,7 +8868,7 @@ class Renderer {
     const sp = this.sprites;
     ctx.globalCompositeOperation = 'lighter';
     for (const c of game.cops) {
-      if (c.type === 'tank' || game.ghostT > 0) continue;
+      if (c.type === 'tank' || c.flying || c.type === 'rover' || game.ghostT > 0) continue;
       if (c.x < x0 - 90 || c.x > x1 + 90 || c.y < y0 - 90 || c.y > y1 + 90) continue;
       const on = Math.floor(now / 130 + c.id) % 2 === 0;
       const side = c.wid * 0.5;
@@ -8686,6 +9327,10 @@ class AudioEngine {
     makeVoice('rumble', 'sawtooth', 300);
     makeVoice('horn', 'sawtooth', 480);
     makeVoice('bip', 'square', 1700);
+    makeVoice('pulse', 'sawtooth', 900);
+    makeVoice('warble', 'triangle', 1400);
+    makeVoice('ufo', 'sine', 1300);
+    makeVoice('zap', 'sawtooth', 2100);
     this.radioT = 6;
   }
 
@@ -8770,6 +9415,10 @@ class AudioEngine {
     setVoice('rumble', 170 + 130 * Math.abs(Math.sin(sec * 2.2))); // Tok gürültü
     setVoice('horn', 330, Math.floor(sec * 2.6) % 3 === 0 ? 1 : 0); // Hava kornası
     setVoice('bip', 1760, Math.floor(sec * 7) % 4 === 0 ? 1 : 0); // Megafon bip
+    setVoice('pulse', 900, Math.floor(sec * 12) % 2 ? 1 : 0); // Kesik nabız
+    setVoice('warble', 1050 + 340 * Math.sin(sec * 36), Math.floor(sec * 1.6) % 2 ? 1 : 0); // Titrek çift ton
+    setVoice('ufo', 880 + 620 * Math.sin(sec * 5.4) * Math.sin(sec * 0.9)); // Bilim kurgu teremin
+    setVoice('zap', 2600 - 2100 * (sec * 3 - Math.floor(sec * 3))); // Lazer süpürmesi
 
     // Ara sıra polis telsizi ve megafon
     if (on && game.sirenDist < 1000) {
@@ -8821,6 +9470,17 @@ class AudioEngine {
     g.connect(this.master);
     o.start(t);
     o.stop(t + duration + 0.02);
+  }
+
+  // Suya düşüş: gümbürtü, sıçrama ve yükselen kabarcıklar
+  sink() {
+    this.splash();
+    this.tone(95, 0.5, 0.3, 'sine', 45);
+    this.burst(0.8, 1600, 0.4, 'lowpass', 180);
+    for (let i = 0; i < 16; i++) {
+      const f = 240 + Math.random() * 520;
+      this.tone(f, 0.09, 0.05, 'sine', f * 2.1, 0.25 + i * 0.1);
+    }
   }
 
   crash(k) {
@@ -8880,6 +9540,12 @@ class AudioEngine {
       teen: { pitch: [260, 320, 400], form: [800, 1500, 2700], rise: 1.8, vib: 0.05, dur: 0.4 },
       grandma: { pitch: [290, 340, 390], form: [780, 1350, 2500], rise: 1.2, vib: 0.14, dur: 0.8 },
       tourist: { pitch: [230, 300, 480], form: [700, 1800, 2900], rise: 1.05, vib: 0.02, dur: 0.55 },
+      simit: { pitch: [195, 235], form: [600, 1400, 2300], rise: 1.7, vib: 0.08, dur: 0.85 }, // Uzun satıcı nidası
+      mom: { pitch: [420, 500], form: [950, 1500, 3200], rise: 1.9, vib: 0.06, dur: 0.5 },
+      wheel: { pitch: [135, 160], form: [500, 900, 1900], rise: 1.1, vib: 0.16, dur: 0.9 },
+      bike: { pitch: [300, 350], form: [850, 1600, 2600], rise: 1.35, vib: 0.02, dur: 0.3 },
+      courier: { pitch: [225, 275], form: [720, 1300, 2300], rise: 2, vib: 0.01, dur: 0.28 },
+      cayci: { pitch: [190, 240], form: [640, 1050, 2100], rise: 1.45, vib: 0.12, dur: 0.65 },
     }[voice] || { pitch: [200], form: [700, 1200, 2400], rise: 1.3, vib: 0.03, dur: 0.5 };
     const dur = P.dur + Math.random() * 0.25;
     const base = P.pitch[Math.floor(Math.random() * P.pitch.length)];
@@ -9204,6 +9870,14 @@ class UI {
     el.classList.add('run');
   }
 
+  alienAlert() {
+    const el = $('alert');
+    el.textContent = CONFIG.difficulty.aliensAlert;
+    el.classList.remove('run');
+    void el.offsetWidth;
+    el.classList.add('run');
+  }
+
   showHint(on) {
     $('hint').hidden = !on;
   }
@@ -9257,7 +9931,7 @@ class UI {
 
   over(result, record) {
     const d = this.storage.data;
-    $('over-title').textContent = record.newScore ? 'YENİ REKOR!' : 'YAKALANDIN!';
+    $('over-title').textContent = record.newScore ? 'YENİ REKOR!' : result.cause === 'water' ? 'BATTIN!' : 'YAKALANDIN!';
     $('over-title').classList.toggle('record', record.newScore);
     $('over-score').textContent = result.score.toLocaleString('tr-TR');
     $('over-time').textContent = formatTime(result.time);
@@ -9540,6 +10214,8 @@ game.onEvent = (name, v) => {
     case 'coin': audio.coin(); break;
     case 'nearmiss': audio.nearMiss(); break;
     case 'splash': audio.splash(); break;
+    case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
+    case 'aliens': audio.alert(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
     case 'spike': audio.spike(); vibrate(60); break;
     case 'copdown': audio.explosion(0.55 * v); vibrate(40); break;
     case 'explosion': audio.explosion(1); vibrate([120, 40, 220]); break;
@@ -9618,7 +10294,7 @@ let lastBack = 0;
 function handleBack() {
   const visible = (id) => !document.getElementById(id).hidden;
   if (visible('splash')) return false;
-  if (game.state === 'play' || game.state === 'dying') {
+  if (game.state === 'play' || game.state === 'dying' || game.state === 'sinking') {
     if (paused) resume(); else pause();
     return false;
   }
@@ -9650,7 +10326,9 @@ function boot() {
   }
   input.attach(canvas);
   applySettings();
-  if (document.fonts) document.fonts.load('800 30px Nunito', 'ÇŞĞİ').catch(() => {});
+  if (document.fonts) {
+    for (const f of ['800 30px Nunito', '400 30px Bungee', '400 30px Pacifico', '400 30px Anton', '400 30px Righteous', '400 30px Lobster', '400 30px "Tilt Neon"', '400 30px Monoton', '500 30px Oswald', 'italic 400 30px Playfair']) document.fonts.load(f, 'ÇŞĞİçşğı').catch(() => {});
+  }
   resize();
   window.addEventListener('resize', () => { resize(); if (stage) stage.resize(); });
   window.addEventListener('orientationchange', resize);

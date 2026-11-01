@@ -126,6 +126,10 @@ export class AudioEngine {
     makeVoice('rumble', 'sawtooth', 300);
     makeVoice('horn', 'sawtooth', 480);
     makeVoice('bip', 'square', 1700);
+    makeVoice('pulse', 'sawtooth', 900);
+    makeVoice('warble', 'triangle', 1400);
+    makeVoice('ufo', 'sine', 1300);
+    makeVoice('zap', 'sawtooth', 2100);
     this.radioT = 6;
   }
 
@@ -210,6 +214,10 @@ export class AudioEngine {
     setVoice('rumble', 170 + 130 * Math.abs(Math.sin(sec * 2.2))); // Tok gürültü
     setVoice('horn', 330, Math.floor(sec * 2.6) % 3 === 0 ? 1 : 0); // Hava kornası
     setVoice('bip', 1760, Math.floor(sec * 7) % 4 === 0 ? 1 : 0); // Megafon bip
+    setVoice('pulse', 900, Math.floor(sec * 12) % 2 ? 1 : 0); // Kesik nabız
+    setVoice('warble', 1050 + 340 * Math.sin(sec * 36), Math.floor(sec * 1.6) % 2 ? 1 : 0); // Titrek çift ton
+    setVoice('ufo', 880 + 620 * Math.sin(sec * 5.4) * Math.sin(sec * 0.9)); // Bilim kurgu teremin
+    setVoice('zap', 2600 - 2100 * (sec * 3 - Math.floor(sec * 3))); // Lazer süpürmesi
 
     // Ara sıra polis telsizi ve megafon
     if (on && game.sirenDist < 1000) {
@@ -261,6 +269,17 @@ export class AudioEngine {
     g.connect(this.master);
     o.start(t);
     o.stop(t + duration + 0.02);
+  }
+
+  // Suya düşüş: gümbürtü, sıçrama ve yükselen kabarcıklar
+  sink() {
+    this.splash();
+    this.tone(95, 0.5, 0.3, 'sine', 45);
+    this.burst(0.8, 1600, 0.4, 'lowpass', 180);
+    for (let i = 0; i < 16; i++) {
+      const f = 240 + Math.random() * 520;
+      this.tone(f, 0.09, 0.05, 'sine', f * 2.1, 0.25 + i * 0.1);
+    }
   }
 
   crash(k) {
@@ -320,6 +339,12 @@ export class AudioEngine {
       teen: { pitch: [260, 320, 400], form: [800, 1500, 2700], rise: 1.8, vib: 0.05, dur: 0.4 },
       grandma: { pitch: [290, 340, 390], form: [780, 1350, 2500], rise: 1.2, vib: 0.14, dur: 0.8 },
       tourist: { pitch: [230, 300, 480], form: [700, 1800, 2900], rise: 1.05, vib: 0.02, dur: 0.55 },
+      simit: { pitch: [195, 235], form: [600, 1400, 2300], rise: 1.7, vib: 0.08, dur: 0.85 }, // Uzun satıcı nidası
+      mom: { pitch: [420, 500], form: [950, 1500, 3200], rise: 1.9, vib: 0.06, dur: 0.5 },
+      wheel: { pitch: [135, 160], form: [500, 900, 1900], rise: 1.1, vib: 0.16, dur: 0.9 },
+      bike: { pitch: [300, 350], form: [850, 1600, 2600], rise: 1.35, vib: 0.02, dur: 0.3 },
+      courier: { pitch: [225, 275], form: [720, 1300, 2300], rise: 2, vib: 0.01, dur: 0.28 },
+      cayci: { pitch: [190, 240], form: [640, 1050, 2100], rise: 1.45, vib: 0.12, dur: 0.65 },
     }[voice] || { pitch: [200], form: [700, 1200, 2400], rise: 1.3, vib: 0.03, dur: 0.5 };
     const dur = P.dur + Math.random() * 0.25;
     const base = P.pitch[Math.floor(Math.random() * P.pitch.length)];

@@ -6,7 +6,7 @@ import { paintTr } from './cars.js';
 import { sheetSprite } from './sheet.js';
 import { paintBuilding2, shadowOf } from './buildings.js';
 import { FX } from './effects.js';
-import { rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
+import { rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintUfo, paintRover, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
 
 const PF = CONFIG.perf;
 const SPR = 3; // Sprite ölçeği: arabalar yakın çekimde de keskin kalsın
@@ -42,6 +42,22 @@ function glow(size, stops) {
   g.fillStyle = grad;
   g.fillRect(0, 0, size, size);
   return c;
+}
+
+// Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
+const signOut = { x: 0, y: 0, w: 0, h: 0 };
+function signBox(r, img) {
+  const size = r.signSize ?? 1;
+  const hTarget = [10, 16, 24, 40][size] ?? 16;
+  const maxW = size === 3 ? r.w * 0.94 : r.w - 6;
+  const w = Math.min(maxW, (img.width / img.height) * hTarget);
+  const h = (w / img.width) * img.height;
+  signOut.w = w;
+  signOut.h = h;
+  signOut.x = r.x + (r.w - w) / 2;
+  // Dev yazı çatının ortasında, öteki tabelalar cephede
+  signOut.y = size === 3 ? r.y + r.h * 0.26 - h / 2 : r.y + r.h - h - 7;
+  return signOut;
 }
 
 export function carSprite(spec, paint = 0) {
@@ -102,9 +118,67 @@ export class Renderer {
     }
   }
 
+  // Yol ve sokak dokuları: karo başına tek görüntü, pişirme çok hızlanır
+  makePatterns() {
+    const T = TILE;
+    const mk = (paint) => [0, 1, 2, 3].map((v) => {
+      const c = makeCanvas(T, T);
+      const g = c.getContext('2d');
+      paint(g, v);
+      return c;
+    });
+    const noise = (g, n, a, b, s = 3) => { for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? a : b; g.fillRect(Math.random() * T, Math.random() * T, s, s); } };
+    this.roads = [
+      mk((g, v) => { // Koyu asfalt
+        g.fillStyle = '#34373e'; g.fillRect(0, 0, T, T);
+        noise(g, 26, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.14)', 2);
+        if (v === 1) { g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(6, 10, 20, 9); }
+      }),
+      mk((g, v) => { // Açık beton: derzli plakalar
+        g.fillStyle = v % 2 ? '#aeb0ad' : '#a6a8a6'; g.fillRect(0, 0, T, T);
+        noise(g, 14, 'rgba(255,255,255,.1)', 'rgba(0,0,0,.08)', 2);
+        g.fillStyle = 'rgba(40,40,40,.35)'; g.fillRect(0, 0, T, 1.5); g.fillRect(0, 0, 1.5, T);
+      }),
+      mk((g, v) => { // Parke taşı
+        g.fillStyle = '#6d645b'; g.fillRect(0, 0, T, T);
+        const cols = ['#8b8074', '#7f7468', '#94897b', '#766c60'];
+        for (let y = 0; y < 4; y++) for (let x = -1; x < 5; x++) { g.fillStyle = cols[(x * 3 + y + v) & 3]; g.fillRect(x * 10 + (y % 2) * 5 + 0.6, y * 10 + 0.6, 8.8, 8.8); }
+      }),
+      mk((g, v) => { // Kırık asfalt: çatlak ve yama
+        g.fillStyle = '#44474c'; g.fillRect(0, 0, T, T);
+        noise(g, 22, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.14)', 2);
+        g.strokeStyle = 'rgba(10,10,12,.7)'; g.lineWidth = 1.2;
+        g.beginPath(); g.moveTo(Math.random() * T, 0);
+        for (let i = 1; i <= 4; i++) g.lineTo(Math.random() * T, (i / 4) * T);
+        g.stroke();
+        if (v === 2) { g.fillStyle = '#2b2d31'; g.fillRect(4, 8, 22, 17); }
+        if (v === 3) { g.fillStyle = 'rgba(20,18,16,.8)'; g.beginPath(); g.ellipse(20, 22, 7, 5, 0.4, 0, 7); g.fill(); }
+      }),
+    ];
+    this.alleys = [
+      mk((g, v) => { // Arnavut kaldırımı
+        g.fillStyle = '#5b554d'; g.fillRect(0, 0, T, T);
+        for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) { g.fillStyle = ['#8e8578', '#7a7267', '#9c9385'][(x + y * 2 + v) % 3]; g.beginPath(); g.arc(x * 8 + 4 + (y % 2) * 2, y * 8 + 4, 3.5, 0, 7); g.fill(); }
+      }),
+      mk(() => { // Yamalı beton
+        return;
+      }),
+      mk((g, v) => { // Tuğla döşeme
+        g.fillStyle = '#6e4a3c'; g.fillRect(0, 0, T, T);
+        for (let y = 0; y < 5; y++) for (let x = -1; x < 4; x++) { g.fillStyle = ['#a56a4e', '#96604a', '#b0745a'][(x + y + v) & 1]; g.fillRect(x * 14 + (y % 2) * 7 + 0.6, y * 8 + 0.6, 12.8, 6.8); }
+      }),
+    ];
+    this.alleys[1] = mk((g, v) => {
+      g.fillStyle = v === 2 ? '#7c7f82' : '#8b8e8f'; g.fillRect(0, 0, T, T);
+      noise(g, 16, 'rgba(255,255,255,.08)', 'rgba(0,0,0,.12)', 2);
+      if (v === 1) { g.fillStyle = '#6a6d70'; g.fillRect(8, 6, 18, 22); }
+    });
+  }
+
   makeSprites() {
     const P = CONFIG.police;
     const s = this.sprites;
+    this.makePatterns();
     s.car = sprite(P.car.len + 8, P.car.wid + 8, (g) => paintPolice(g, P.car, false));
     s.fast = sprite(P.fast.len + 10, P.fast.wid + 10, (g) => paintPoliceFast(g, P.fast));
     s.moto = sprite(P.moto.len + 12, P.moto.wid + 14, (g) => paintMoto(g, P.moto));
@@ -112,6 +186,9 @@ export class Renderer {
     s.swat = sprite(P.swat.len + 8, P.swat.wid + 8, (g) => paintSwat(g, P.swat));
     s.tank = sprite(P.tank.len + 8, P.tank.wid + 8, (g) => paintTankHull(g, P.tank));
     s.turret = sprite(150, 50, paintTurret);
+    const AL = CONFIG.aliens;
+    s.ufo = sprite(AL.ufo.len + 10, AL.ufo.len + 10, (g) => paintUfo(g, AL.ufo));
+    s.rover = sprite(AL.rover.len + 16, AL.rover.wid + 16, (g) => paintRover(g, AL.rover));
     s.shadow = sprite(60, 34, (g) => {
       g.fillStyle = 'rgba(0,0,0,1)';
       rr(g, -28, -15, 56, 30, 9);
@@ -128,10 +205,20 @@ export class Renderer {
 
     const prop = (w, h, paint) => sprite(w, h, paint);
     s.npc = {}; // İlk görüldüğünde çizilir: açılış kısa kalır
-    // 7 erkek + 7 kadın görünüm: kıyafet, ten, saç
-    const LOOKS = [['#e8533f', '#e0a878', '#3b2a1e'], ['#3e7cb1', '#f0c8a0', '#6b4a2b'], ['#f2c14e', '#8d5a3a', '#16131a'], ['#4f9d69', '#e0a878', '#c9a24a'], ['#2f3440', '#f0c8a0', '#2b2b33'], ['#ececec', '#8d5a3a', '#16131a'], ['#8a5a3a', '#d9a06a', '#55595f'],
-      ['#d94f9c', '#f0c8a0', '#7a3b1e'], ['#7a5ea8', '#e0a878', '#16131a'], ['#2fa8a0', '#d9a06a', '#c9a24a'], ['#f08a3c', '#f0c8a0', '#a8552a'], ['#a8c64a', '#8d5a3a', '#16131a'], ['#e84a5f', '#f0c8a0', '#d9d4c7'], ['#4a7ce0', '#e0a878', '#3b2a1e']];
-    s.peds = LOOKS.map(([a, b, c]) => [0, 1].map((step) => sprite(20, 20, (g) => paintPed(g, a, b, c, step))));
+    // Yarısı erkek, yarısı kadın: kıyafet, ten, saç ve aksesuar birleşimi
+    const SHIRT = ['#e8533f', '#3e7cb1', '#f2c14e', '#4f9d69', '#2f3440', '#ececec', '#8a5a3a', '#d94f9c', '#7a5ea8', '#2fa8a0', '#f08a3c', '#a8c64a', '#e84a5f', '#4a7ce0', '#55607a', '#c9b48a'];
+    const SKIN = ['#e0a878', '#f0c8a0', '#8d5a3a', '#d9a06a', '#c08a5e'];
+    const HAIR = ['#3b2a1e', '#6b4a2b', '#16131a', '#c9a24a', '#2b2b33', '#55595f', '#a8552a', '#d9d4c7'];
+    const half = CONFIG.peds.looks >> 1;
+    s.peds = [];
+    for (let i = 0; i < CONFIG.peds.looks; i++) {
+      const woman = i >= half;
+      const shirt = SHIRT[(i * 7 + 3) % SHIRT.length];
+      const skin = SKIN[(i * 3) % SKIN.length];
+      const hair = HAIR[(i * 5 + 1) % HAIR.length];
+      const acc = woman ? [0, 2, 5, 4, 2, 5, 3][i % 7] : [0, 1, 3, 6, 0, 1, 4][i % 7];
+      s.peds.push([0, 1].map((step) => sprite(20, 20, (g) => paintPed(g, shirt, skin, hair, step, acc))));
+    }
     s.pedKinds = {};
     for (const k of Object.keys(CONFIG.peds.kinds)) {
       if (k === 'man' || k === 'woman') continue;
@@ -390,7 +477,9 @@ export class Renderer {
     const urban = c.biome === 'city';
     const sea = c.template === 'sea';
     const shore = sea ? '#1f8fd6' : c.template === 'lake' ? pal.sand : c.template === 'plaza' ? '#e5d7bf' : pal.grass;
-    const colors = [pal.grass, pal.road, '#cdd2d6', '#e5d7bf', shore, pal.sand, pal.dirt, '#5fd3e6', '#c9ae4c'];
+    const colors = [pal.grass, pal.road, '#cdd2d6', '#e5d7bf', shore, pal.sand, pal.dirt, '#5fd3e6', '#c9ae4c', '#8b8e8f'];
+    const roads = this.roads[urban ? c.road : 0];
+    const alleys = this.alleys[c.alley];
     const fieldGreen = (c.cx + c.cy) & 1;
     for (let y = 0; y < CT; y++) {
       for (let x = 0; x < CT; x++) {
@@ -400,6 +489,8 @@ export class Renderer {
         const py = c.y + y * TILE;
         g.fillRect(px, py, TILE + 1, TILE + 1);
         const h = ((x * 73856093) ^ (y * 19349663) ^ (c.cx * 83492791) ^ (c.cy * 49979693)) >>> 0;
+        if (t === GROUND.ROAD) { g.drawImage(roads[h & 3], px, py, TILE + 1, TILE + 1); continue; }
+        if (t === GROUND.ALLEY) { g.drawImage(alleys[h & 3], px, py, TILE + 1, TILE + 1); continue; }
         if (t === GROUND.FIELD) {
           // Tarla sıraları
           if (fieldGreen) { g.fillStyle = '#7fae3f'; g.fillRect(px, py, TILE + 1, TILE + 1); }
@@ -432,19 +523,16 @@ export class Renderer {
           g.fillStyle = 'rgba(120,90,50,.16)';
           g.fillRect(px + (h % 30), py + ((h >>> 8) % 30), 4, 3);
           g.fillRect(px + ((h >>> 4) % 30), py + ((h >>> 12) % 30), 3, 2);
-        } else if (t === GROUND.ROAD && (h & 7) === 0) {
-          g.fillStyle = 'rgba(0,0,0,.06)';
-          g.fillRect(px + (h >>> 8) % 24, py + (h >>> 14) % 24, 14, 10);
         }
       }
     }
     // Kavşak öncesi dur çizgileri
     if (urban) {
       g.fillStyle = 'rgba(255,255,255,.85)';
-      g.fillRect(c.x + 4, c.y + ART_W + 26, ART_W / 2 - 6, 4);
-      g.fillRect(c.x + ART_W + 26, c.y + ART_W / 2 + 2, 4, ART_W / 2 - 6);
-      g.fillRect(c.x + ART_W / 2 + 2, c.y - 30, ART_W / 2 - 6, 4);
-      g.fillRect(c.x - 30, c.y + 4, 4, ART_W / 2 - 6);
+      g.fillRect(c.x + 4, c.y + ART_W + 24, ART_W / 2 - 6, 4);
+      g.fillRect(c.x + ART_W + 24, c.y + ART_W / 2 + 2, 4, ART_W / 2 - 6);
+      g.fillRect(c.x + ART_W / 2 + 2, c.y - 28, ART_W / 2 - 6, 4);
+      g.fillRect(c.x - 28, c.y + 4, 4, ART_W / 2 - 6);
     }
     // Sığ su kıyısında köpük
     if (sea) {
@@ -461,31 +549,54 @@ export class Renderer {
         }
       }
     }
-    // Kaldırım kenarları: şehirde beyaz, kırda sade, denizde köprü korkuluğu
-    g.fillStyle = urban || sea ? 'rgba(245,247,250,.85)' : 'rgba(0,0,0,.2)';
+    // Yol kenarı: dar taş kaldırım bandı (sürülebilir) ve bordür
+    const K = 11;
+    const stone = urban || sea ? '#c6cace' : 'rgba(0,0,0,.2)';
+    const lip = urban || sea ? '#eef1f4' : 'rgba(0,0,0,.25)';
+    const open = (t) => t !== GROUND.ROAD && t !== GROUND.ALLEY;
+    const edge = (px, py, dx, dy) => {
+      g.fillStyle = stone;
+      if (dx > 0) g.fillRect(px + TILE - K, py, K, TILE);
+      if (dx < 0) g.fillRect(px, py, K, TILE);
+      if (dy > 0) g.fillRect(px, py + TILE - K, TILE, K);
+      if (dy < 0) g.fillRect(px, py, TILE, K);
+      g.fillStyle = lip;
+      if (dx > 0) g.fillRect(px + TILE - K, py, 2, TILE);
+      if (dx < 0) g.fillRect(px + K - 2, py, 2, TILE);
+      if (dy > 0) g.fillRect(px, py + TILE - K, TILE, 2);
+      if (dy < 0) g.fillRect(px, py + K - 2, TILE, 2);
+    };
     for (let y = 0; y < CT; y++) {
       for (let x = 0; x < CT; x++) {
         if (c.ground[y * CT + x] !== GROUND.ROAD) continue;
         const px = c.x + x * TILE;
         const py = c.y + y * TILE;
-        if (x < CT - 1 && c.ground[y * CT + x + 1] !== GROUND.ROAD) g.fillRect(px + TILE - 2, py, 3, TILE);
-        if (y < CT - 1 && c.ground[(y + 1) * CT + x] !== GROUND.ROAD) g.fillRect(px, py + TILE - 2, TILE, 3);
-        if (x > 0 && c.ground[y * CT + x - 1] !== GROUND.ROAD) g.fillRect(px - 1, py, 3, TILE);
-        if (y > 0 && c.ground[(y - 1) * CT + x] !== GROUND.ROAD) g.fillRect(px, py - 1, TILE, 3);
+        if (x < CT - 1 && open(c.ground[y * CT + x + 1])) edge(px, py, 1, 0);
+        if (y < CT - 1 && open(c.ground[(y + 1) * CT + x])) edge(px, py, 0, 1);
       }
     }
-    // Sınırda: komşu chunk'ın ana yoluna bakan kenar
-    for (let i = ART_W / TILE; i < CT; i++) {
-      if (c.ground[i * CT + CT - 1] !== GROUND.ROAD) g.fillRect(c.x + CHUNK - 2, c.y + i * TILE, 2, TILE);
-      if (c.ground[(CT - 1) * CT + i] !== GROUND.ROAD) g.fillRect(c.x + i * TILE, c.y + CHUNK - 2, TILE, 2);
-    }
-
-    // Ana yol çizgileri: sarı orta şerit, beyaz yaya geçidi
+    // Ana yol kenar çizgileri, kesik orta şerit, yön okları
     const mid = ART_W / 2;
-    g.fillStyle = '#ffd23f';
-    for (let d = ART_W + 30; d < CHUNK - 30; d += 56) {
+    const yellow = '#ffd23f';
+    for (let d = ART_W + 30; d < CHUNK - 40; d += 56) {
+      g.fillStyle = yellow;
       g.fillRect(c.x + mid - 2, c.y + d, 4, 30);
       g.fillRect(c.x + d, c.y + mid - 2, 30, 4);
+    }
+    if (urban) {
+      g.fillStyle = 'rgba(255,255,255,.75)';
+      const arrow = (x, y, a) => {
+        g.save(); g.translate(x, y); g.rotate(a);
+        g.fillRect(-14, -2, 18, 4);
+        g.beginPath(); g.moveTo(4, -7); g.lineTo(16, 0); g.lineTo(4, 7); g.closePath(); g.fill();
+        g.restore();
+      };
+      const q = ART_W * 0.25;
+      arrow(c.x + q, c.y + ART_W + 90, Math.PI / 2 * -1);
+      arrow(c.x + ART_W - q, c.y + CHUNK - 90, Math.PI / 2);
+      arrow(c.x + ART_W + 90, c.y + ART_W - q, 0);
+      arrow(c.x + CHUNK - 90, c.y + q, Math.PI);
+      this.bakeSigns(g, c);
     }
     g.fillStyle = 'rgba(255,255,255,.8)';
     for (let i = 8; i < ART_W - 8 && urban; i += 18) {
@@ -494,18 +605,131 @@ export class Renderer {
       g.fillRect(c.x + i, c.y - 22, 9, 18);
       g.fillRect(c.x - 22, c.y + i, 18, 9);
     }
-    // İç sokak kesik çizgileri
-    g.fillStyle = 'rgba(255,255,255,.65)';
+    this.bakePads(g, c);
+  }
+
+  // Trafik levhaları: pişirilir, oyun sırasında maliyeti yoktur
+  bakeSigns(g, c) {
+    const post = (x, y, draw) => {
+      g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(x + 3, y + 4, 8, 4, 0, 0, 7); g.fill();
+      g.save(); g.translate(x, y); draw(); g.restore();
+    };
+    const round = (bg, ring, text) => () => {
+      g.fillStyle = bg; g.beginPath(); g.arc(0, 0, 8.5, 0, 7); g.fill();
+      g.lineWidth = 2.4; g.strokeStyle = ring; g.stroke();
+      g.fillStyle = '#16181c'; g.font = '900 9px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 0, 0.5);
+    };
+    const tri = (sym) => () => {
+      g.fillStyle = '#fff'; g.beginPath(); g.moveTo(0, -10); g.lineTo(10, 8); g.lineTo(-10, 8); g.closePath(); g.fill();
+      g.lineWidth = 2.4; g.strokeStyle = '#d0121b'; g.stroke();
+      g.fillStyle = '#16181c'; g.font = '900 10px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(sym, 0, 2);
+    };
+    const stop = () => {
+      g.fillStyle = '#d0121b'; g.beginPath();
+      for (let i = 0; i < 8; i++) { const a = 0.39 + (i / 8) * 6.283; g.lineTo(Math.cos(a) * 9.5, Math.sin(a) * 9.5); }
+      g.closePath(); g.fill();
+      g.fillStyle = '#fff'; g.font = '900 7px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('DUR', 0, 0.5);
+    };
+    const panel = (t) => () => {
+      g.font = '800 9px Nunito, sans-serif';
+      const w = g.measureText(t).width + 10;
+      g.fillStyle = '#0a4ea2'; g.fillRect(-w / 2, -7, w, 14);
+      g.strokeStyle = '#fff'; g.lineWidth = 1; g.strokeRect(-w / 2 + 1, -6, w - 2, 12);
+      g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 0, 0.5);
+    };
+    const DIR = ['← KADIKÖY', 'BEŞİKTAŞ →', '↑ TAKSİM', 'ÜSKÜDAR →', '← ŞİŞLİ', 'SARIYER →', '↑ BOĞAZ KÖPRÜSÜ', '← FATİH', 'BAKIRKÖY →'];
+    const h = (Math.imul(c.cx, 73856093) ^ Math.imul(c.cy, 19349663)) >>> 0;
+    const list = [round('#fff', '#d0121b', String(30 + (h % 4) * 10)), tri('!'), tri('⚠'), round('#fff', '#d0121b', '50'), stop];
+    const E = ART_W - 6;
+    post(c.x + E, c.y + ART_W + 44, stop);
+    post(c.x + ART_W + 44, c.y + E, list[h % 5]);
+    post(c.x + E, c.y + CHUNK * 0.55, panel(DIR[h % DIR.length]));
+    post(c.x + CHUNK * 0.55, c.y + E, panel(DIR[(h >>> 4) % DIR.length]));
+    post(c.x + E, c.y + CHUNK * 0.8, list[(h >>> 3) % 5]);
+    post(c.x + CHUNK * 0.8, c.y + E, list[(h >>> 6) % 5]);
+    // Ara sokak ağzı: tek yön ya da çıkmaz uyarısı
     for (let i = 0; i < c.streetCount; i++) {
       const s = c.streets[i];
-      if (s.ground !== GROUND.ROAD) continue;
-      const m = (s.pos + s.width / 2) * TILE;
-      for (let d = ART_W + 26; d < CHUNK - 30; d += 50) {
-        if (s.vertical) {
-          if (c.ground[Math.floor(d / TILE) * CT + s.pos - 1] !== GROUND.ROAD) g.fillRect(c.x + m - 1.5, c.y + d, 3, 24);
-        } else if (c.ground[(s.pos - 1) * CT + Math.floor(d / TILE)] !== GROUND.ROAD) {
-          g.fillRect(c.x + d, c.y + m - 1.5, 24, 3);
+      if (s.ground !== GROUND.ALLEY) continue;
+      const at = (s.pos + s.width / 2) * TILE;
+      const sign = i % 2 ? round('#2a6fd6', '#fff', '⇧') : tri('Y');
+      if (s.vertical) post(c.x + at + 13, c.y + ART_W - 5, sign);
+      else post(c.x + ART_W - 5, c.y + at + 13, sign);
+    }
+    // Yaya geçitleri ara sokak ağızlarında
+    g.fillStyle = 'rgba(255,255,255,.7)';
+    for (let i = 0; i < c.streetCount; i++) {
+      const s = c.streets[i];
+      if (s.ground !== GROUND.ALLEY) continue;
+      const a = s.pos * TILE + 4;
+      const b = (s.pos + s.width) * TILE - 4;
+      for (let k = a; k < b; k += 12) {
+        if (s.vertical) g.fillRect(c.x + k, c.y + ART_W + 3, 6, 15);
+        else g.fillRect(c.x + ART_W + 3, c.y + k, 15, 6);
+      }
+    }
+  }
+
+  // Açık alanlar: spor sahaları, avlu, otopark, ambulans alanı, okul bahçesi
+  bakePads(g, c) {
+    for (let i = 0; i < c.padCount; i++) {
+      const p = c.pads[i];
+      const x = c.x + p.tx * TILE + 3;
+      const y = c.y + p.ty * TILE + 3;
+      const w = p.w * TILE - 6;
+      const h = p.h * TILE - 6;
+      if (p.kind === 'foot' || p.kind === 'hali') {
+        const hali = p.kind === 'hali';
+        const n = hali ? 6 : 10;
+        for (let k = 0; k < n; k++) { g.fillStyle = k % 2 ? (hali ? '#2fa654' : '#46a84a') : (hali ? '#27934a' : '#3e9a44'); g.fillRect(x + (k * w) / n, y, w / n + 0.5, h); }
+        g.strokeStyle = '#fff'; g.lineWidth = 2.5;
+        g.strokeRect(x + 6, y + 6, w - 12, h - 12);
+        g.beginPath(); g.moveTo(x + w / 2, y + 6); g.lineTo(x + w / 2, y + h - 6); g.stroke();
+        g.beginPath(); g.arc(x + w / 2, y + h / 2, h * 0.17, 0, 7); g.stroke();
+        for (const s of [0, 1]) {
+          const bx = s ? x + w - 6 - w * 0.13 : x + 6;
+          g.strokeRect(bx, y + h * 0.24, w * 0.13, h * 0.52);
+          g.fillStyle = '#fff'; g.fillRect(s ? x + w - 6 : x + 2, y + h * 0.42, 4, h * 0.16);
         }
+        if (hali) { g.strokeStyle = 'rgba(240,244,248,.55)'; g.lineWidth = 1; for (let k = 0; k <= w; k += 12) { g.beginPath(); g.moveTo(x + k, y); g.lineTo(x + k, y + h); g.stroke(); } for (let k = 0; k <= h; k += 12) { g.beginPath(); g.moveTo(x, y + k); g.lineTo(x + w, y + k); g.stroke(); } }
+        g.strokeStyle = 'rgba(40,50,60,.8)'; g.lineWidth = 2; g.strokeRect(x, y, w, h);
+      } else if (p.kind === 'basket') {
+        g.fillStyle = '#c8682e'; g.fillRect(x, y, w, h);
+        g.fillStyle = '#2f6fb0'; g.fillRect(x + 8, y + 8, w - 16, h - 16);
+        g.strokeStyle = '#fff'; g.lineWidth = 2;
+        g.strokeRect(x + 8, y + 8, w - 16, h - 16);
+        g.beginPath(); g.moveTo(x + w / 2, y + 8); g.lineTo(x + w / 2, y + h - 8); g.stroke();
+        g.beginPath(); g.arc(x + w / 2, y + h / 2, h * 0.14, 0, 7); g.stroke();
+        for (const s of [0, 1]) {
+          const px = s ? x + w - 8 : x + 8;
+          g.beginPath(); g.arc(px, y + h / 2, h * 0.32, s ? 1.57 : -1.57, s ? 4.71 : 1.57); g.stroke();
+          g.fillStyle = '#ff7a1a'; g.beginPath(); g.arc(px + (s ? -8 : 8), y + h / 2, 3.4, 0, 7); g.fill();
+        }
+      } else if (p.kind === 'yard') {
+        g.fillStyle = '#c9b48a'; g.fillRect(x, y, w, h);
+        g.strokeStyle = '#fff'; g.lineWidth = 2; g.strokeRect(x + w * 0.1, y + h * 0.2, w * 0.5, h * 0.6);
+        g.beginPath(); g.arc(x + w * 0.35, y + h / 2, h * 0.14, 0, 7); g.stroke();
+        // Bayrak direği ve Türk bayrağı
+        const fx = x + w * 0.8; const fy = y + h * 0.3;
+        g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(fx, fy, 30, 2);
+        g.fillStyle = '#dfe3e8'; g.beginPath(); g.arc(fx, fy, 3, 0, 7); g.fill();
+        g.fillStyle = '#e30a17'; g.fillRect(fx + 3, fy - 12, 26, 15);
+        g.fillStyle = '#fff'; g.beginPath(); g.arc(fx + 12, fy - 4.5, 4.6, 0, 7); g.fill();
+        g.fillStyle = '#e30a17'; g.beginPath(); g.arc(fx + 13.4, fy - 4.5, 3.8, 0, 7); g.fill();
+        g.fillStyle = '#fff'; g.fillRect(fx + 17, fy - 6, 3, 3);
+        g.fillStyle = '#4f9a3a'; for (let k = 0; k < 6; k++) { g.beginPath(); g.arc(x + 10 + k * (w / 6), y + h - 7, 6, 0, 7); g.fill(); }
+      } else if (p.kind === 'ambulance') {
+        g.fillStyle = '#b9bec4'; g.fillRect(x, y, w, h);
+        g.strokeStyle = '#fff'; g.lineWidth = 2;
+        for (let k = 0; k < 7; k++) { g.beginPath(); g.moveTo(x + 14 + k * 34, y + 4); g.lineTo(x + 14 + k * 34, y + 40); g.stroke(); }
+        g.fillStyle = '#d0121b'; g.fillRect(x + w * 0.4, y, w * 0.2, h);
+        g.fillStyle = '#fff'; g.font = '900 13px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('AMBULANS', x + w * 0.5, y + h / 2);
+        const am = this.sprites.parked && this.sprites.ambulance;
+        if (am) g.drawImage(am, x + 22, y + 8, 54, 24);
+      } else if (p.kind === 'parking') {
+        g.fillStyle = '#7c7f82'; g.fillRect(x, y, w, h);
+        g.strokeStyle = '#fff'; g.lineWidth = 1.5;
+        for (let k = 0; k < w; k += 40) { g.beginPath(); g.moveTo(x + k, y); g.lineTo(x + k, y + 34); g.stroke(); }
       }
     }
   }
@@ -660,12 +884,9 @@ export class Renderer {
   bakeSign(g, r) {
     if (r.style === 0 || r.style === 1 || r.style === 2 || r.style === 3 || r.style === 5 || r.style === BUILD.APARTMENT) roofClutter(g, r);
     if (!r.sign) return;
-    const img = signCanvas(r.sign, r.signColor);
-    const maxW = r.w - 6;
-    const h = r.style === BUILD.SISTEM ? 34 : 16;
-    const w = Math.min(maxW, (img.width / img.height) * h);
-    const hh = (w / img.width) * img.height;
-    g.drawImage(img, r.x + (r.w - w) / 2, r.y + r.h - hh - 8, w, hh);
+    const img = signCanvas(r.sign, r.signColor, r.seed);
+    const b = signBox(r, img);
+    g.drawImage(img, b.x, b.y, b.w, b.h);
   }
 
   bakeWall(g, r) {
@@ -733,6 +954,7 @@ export class Renderer {
     this.drawNpcs(game, vx0, vx1, vy0, vy1);
     this.drawCops(game, now, vx0, vx1, vy0, vy1);
     if (game.state !== 'dying' && game.state !== 'over') this.drawPlayer(game);
+    this.drawUfos(game, now, vx0, vx1, vy0, vy1);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, true);
     this.drawPeds(game, vx0, vx1, vy0, vy1, true);
     this.drawLights(game, c0x, c1x, c0y, c1y);
@@ -994,10 +1216,9 @@ export class Renderer {
           const l = c.lights[i];
           if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1) continue;
           const r = l.rect;
-          const img = signCanvas(r.sign, r.signColor);
-          const w = Math.min(r.w - 6, (img.width / img.height) * 16);
-          const hh = (w / img.width) * img.height;
-          ctx.drawImage(img, r.x + (r.w - w) / 2, r.y + r.h - hh - 8, w, hh);
+          const img = signCanvas(r.sign, r.signColor, r.seed);
+          const b = signBox(r, img);
+          ctx.drawImage(img, b.x, b.y, b.w, b.h);
         }
       }
     }
@@ -1013,7 +1234,7 @@ export class Renderer {
       ctx.drawImage(beam, -bw / 2, -bh / 2, bw, bh);
     };
     if (game.state === 'play') head(game.player);
-    for (const c of game.cops) if (c.type !== 'tank') head(c);
+    for (const c of game.cops) if (c.type !== 'tank' && !c.flying) head(c);
     for (const n of game.crowd.npcs) if (n.alive && n.state === 'drive') head(n);
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
@@ -1070,6 +1291,21 @@ export class Renderer {
       ctx.globalAlpha = 1;
     }
     if (game.ghostT > 0) ctx.globalAlpha = 0.5;
+    const sink = game.sinkProgress();
+    if (sink > 0) {
+      // Çizgi film batışı: küçülür, maviye gömülür
+      const q = k * (1 - CONFIG.water.shrink * sink);
+      this.place(p.x, p.y, p.a);
+      ctx.globalAlpha = 1 - sink * 0.92;
+      const w = (this.playerSprite.wu || this.playerSprite.width / SPR) * q;
+      const h = (this.playerSprite.hu || this.playerSprite.height / SPR) * q;
+      ctx.drawImage(this.playerSprite, -w / 2, -h / 2, w, h);
+      ctx.globalAlpha = sink * 0.75;
+      ctx.drawImage(this.sprites.water, -w * 0.7, -w * 0.7, w * 1.4, w * 1.4);
+      ctx.globalAlpha = 1;
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      return;
+    }
     this.drawBody(this.playerSprite, p, k, k);
     ctx.globalAlpha = 1;
     if (game.stage >= 2) {
@@ -1080,10 +1316,36 @@ export class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
+  // Uçan daireler en üstte: gölgesi yerde, ışını oyuncunun üstünde
+  drawUfos(game, now, x0, x1, y0, y1) {
+    const ctx = this.ctx;
+    const sp = this.sprites;
+    for (const c of game.cops) {
+      if (!c.flying || c.x < x0 - 200 || c.x > x1 + 200 || c.y < y0 - 200 || c.y > y1 + 200) continue;
+      const R = c.len / 2;
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      ctx.globalAlpha = 0.3;
+      ctx.drawImage(sp.dark, c.x + 16, c.y + 44, R * 2.1, R * 1.6);
+      if (c.beam) {
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.globalAlpha = 0.5 + 0.2 * Math.sin(now * 0.03);
+        ctx.fillStyle = '#39ff9c';
+        ctx.beginPath(); ctx.moveTo(c.x - 16, c.y); ctx.lineTo(c.x + 16, c.y); ctx.lineTo(game.player.x + 42, game.player.y); ctx.lineTo(game.player.x - 42, game.player.y); ctx.closePath(); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      ctx.globalAlpha = 1;
+      this.place(c.x, c.y - 10, c.a);
+      const w = sp.ufo.width / SPR;
+      ctx.drawImage(sp.ufo, -w / 2, -w / 2, w, w);
+    }
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
   drawCops(game, now, x0, x1, y0, y1) {
     const ctx = this.ctx;
     const sp = this.sprites;
     for (const c of game.cops) {
+      if (c.flying) continue;
       if (c.x < x0 - 80 || c.x > x1 + 80 || c.y < y0 - 80 || c.y > y1 + 80) continue;
       this.drawBody(sp[c.type], c, c.type === 'tank' ? 1.6 : 1);
       if (c.type === 'tank') {
@@ -1164,7 +1426,7 @@ export class Renderer {
     const sp = this.sprites;
     ctx.globalCompositeOperation = 'lighter';
     for (const c of game.cops) {
-      if (c.type === 'tank' || game.ghostT > 0) continue;
+      if (c.type === 'tank' || c.flying || c.type === 'rover' || game.ghostT > 0) continue;
       if (c.x < x0 - 90 || c.x > x1 + 90 || c.y < y0 - 90 || c.y > y1 + 90) continue;
       const on = Math.floor(now / 130 + c.id) % 2 === 0;
       const side = c.wid * 0.5;
