@@ -147,7 +147,7 @@ function addWheel(THREE, group, x, y, r, w, tex, tyreMat) {
   group.add(rim);
 }
 
-function box(THREE, group, sx, sy, sz, x, y, z, mat) {
+function addBox(THREE, group, sx, sy, sz, x, y, z, mat) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat);
   m.position.set(x, y, z);
   group.add(m);
@@ -342,7 +342,7 @@ export function buildCar(THREE, id, paint) {
   const tw = 0.1 * W + (m.tall ? 0.08 : 0.04);
   const wy = W / 2 * 0.97 - tw / 2 + 0.03;
   for (const s of [sF, sR]) for (const sg of [1, -1]) addWheel(THREE, group, s * L, sg * wy, m.r, tw, tex, tyreMat);
-  box(THREE, group, L * 0.92, 0.1, W * 0.86, L / 2, sill + 0.02, 0, darkMat);
+  addBox(THREE, group, L * 0.92, 0.1, W * 0.86, L / 2, sill + 0.02, 0, darkMat);
 
   // Aynalar
   const mirrorS = m.win[0][0] + 0.005;
@@ -359,58 +359,58 @@ export function buildCar(THREE, id, paint) {
     const bm = m.bumper.c === '#d9dfe6' ? chromeMat : plastic;
     const { z, h, d } = m.bumper;
     if (!m.bumper.rearOnly) {
-      box(THREE, group, d, h, halfW(0) * 2 * 1.02, -0.01 + (m.bowF || 0) * 0.5, z, 0, bm);
-      for (const sg of [1, -1]) box(THREE, group, 0.3, h, 0.05, 0.14 + (m.bowF || 0) * 0.5, z, sg * halfW(0.05) * 0.99, bm);
+      addBox(THREE, group, d, h, halfW(0) * 2 * 1.02, -0.01 + (m.bowF || 0) * 0.5, z, 0, bm);
+      for (const sg of [1, -1]) addBox(THREE, group, 0.3, h, 0.05, 0.14 + (m.bowF || 0) * 0.5, z, sg * halfW(0.05) * 0.99, bm);
     }
-    box(THREE, group, d, h, halfW(1) * 2 * 1.02, L + 0.01 - (m.bowR || 0) * 0.5, z, 0, bm);
-    for (const sg of [1, -1]) box(THREE, group, 0.3, h, 0.05, L - 0.14 - (m.bowR || 0) * 0.5, z, sg * halfW(0.95) * 0.99, bm);
+    addBox(THREE, group, d, h, halfW(1) * 2 * 1.02, L + 0.01 - (m.bowR || 0) * 0.5, z, 0, bm);
+    for (const sg of [1, -1]) addBox(THREE, group, 0.3, h, 0.05, L - 0.14 - (m.bowR || 0) * 0.5, z, sg * halfW(0.95) * 0.99, bm);
   }
   if (m.wing) {
     const w = m.wing;
     const am = new THREE.MeshPhysicalMaterial({ color: accent, ...FINISH.gloss });
-    box(THREE, group, w.chord, 0.05, w.span, w.s * L - 0.03, w.z, 0, am);
+    addBox(THREE, group, w.chord, 0.05, w.span, w.s * L - 0.03, w.z, 0, am);
     for (const sg of [1, -1]) {
-      box(THREE, group, w.chord * 0.9, 0.15, 0.04, w.s * L - 0.03, w.z + 0.04, sg * (w.span / 2), am);
-      box(THREE, group, 0.1, w.z - deckF(w.s), 0.05, w.s * L - 0.03, (w.z + deckF(w.s)) / 2, sg * 0.46, plastic);
+      addBox(THREE, group, w.chord * 0.9, 0.15, 0.04, w.s * L - 0.03, w.z + 0.04, sg * (w.span / 2), am);
+      addBox(THREE, group, 0.1, w.z - deckF(w.s), 0.05, w.s * L - 0.03, (w.z + deckF(w.s)) / 2, sg * 0.46, plastic);
     }
   }
   if (m.rails) {
-    const a = (m.win[0][0] + 0.02) * L;
-    const b = (m.win[m.win.length - 1][1] + 0.03) * L;
-    for (const sg of [1, -1]) box(THREE, group, b - a, 0.04, 0.05, (a + b) / 2, roofF((a + b) / 2 / L) + 0.07, sg * (W / 2) * m.tumble * 0.86, chromeMat);
+    const a = (m.win[0][0] + 0.09) * L;
+    const b = (m.win[m.win.length - 1][1] - 0.03) * L;
+    for (const sg of [1, -1]) addBox(THREE, group, b - a, 0.04, 0.05, (a + b) / 2, roofF((a + b) / 2 / L) + 0.05, sg * (W / 2) * m.tumble * 0.86, chromeMat);
   }
-  if (m.roofSpoiler) box(THREE, group, 0.34, 0.05, W * 0.74, (m.roof[m.roof.length - 2][0] - 0.1) * L, roofF(m.roof[m.roof.length - 2][0] - 0.1) + 0.02, 0, plastic);
+  if (m.roofSpoiler) addBox(THREE, group, 0.34, 0.05, W * 0.74, (m.roof[m.roof.length - 2][0] - 0.1) * L, roofF(m.roof[m.roof.length - 2][0] - 0.1) + 0.02, 0, plastic);
   if (m.hoodStar) { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.02, 0.09, 6), chromeMat); st.position.set(0.05, deckF(0.02) + 0.09, 0); group.add(st); }
   if (m.chromeBelt) {
     const a = 0.3; const bd = 0.8;
     for (let i = 0; i < 20; i++) {
       const s = a + ((bd - a) * (i + 0.5)) / 20;
-      for (const sg of [1, -1]) box(THREE, group, ((bd - a) * L) / 20 + 0.02, 0.025, 0.02, s * L, deckF(s) + 0.05, sg * (beltY(s) + 0.012), chromeMat);
+      for (const sg of [1, -1]) addBox(THREE, group, ((bd - a) * L) / 20 + 0.02, 0.025, 0.02, s * L, deckF(s) + 0.05, sg * (beltY(s) + 0.012), chromeMat);
     }
   }
-  if (m.roofPods) for (const k of [0.3, 0.62]) box(THREE, group, 2.2, 0.26, W * 0.62, k * L, H + 0.06, 0, new THREE.MeshStandardMaterial({ color: '#dfe3e7', roughness: 0.5 }));
+  if (m.roofPods) for (const k of [0.3, 0.62]) addBox(THREE, group, 2.2, 0.26, W * 0.62, k * L, H + 0.06, 0, new THREE.MeshStandardMaterial({ color: '#dfe3e7', roughness: 0.5 }));
   if (m.wind) { const w = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.42, W * 0.86), new THREE.MeshStandardMaterial({ color: paint.accent || '#dfe3e7', roughness: 0.4 })); w.position.set(0.18 * L, roofF(0.12) + 0.26, 0); w.rotation.z = 0.2; group.add(w); }
   if (m.cargo) {
     const q = m.cargo;
     const tarp = new THREE.MeshStandardMaterial({ map: tarpTexture(THREE, paint.accent || '#2a6db0', 'NAKLİYAT'), roughness: 0.7 });
     const x0 = q.s0 * L; const x1 = q.s1 * L;
-    box(THREE, group, x1 - x0, q.z1 - q.z0, W * 0.98, (x0 + x1) / 2, (q.z0 + q.z1) / 2, 0, tarp);
-    box(THREE, group, x1 - x0, 0.14, W, (x0 + x1) / 2, q.z0 - 0.04, 0, plastic);
+    addBox(THREE, group, x1 - x0, q.z1 - q.z0, W * 0.98, (x0 + x1) / 2, (q.z0 + q.z1) / 2, 0, tarp);
+    addBox(THREE, group, x1 - x0, 0.14, W, (x0 + x1) / 2, q.z0 - 0.04, 0, plastic);
     for (const s of [0.74]) for (const sg of [1, -1]) addWheel(THREE, group, s * L, sg * (wy - tw - 0.04), m.r, tw, tex, tyreMat);
   }
   if (m.doors) {
-    for (const [a, b] of m.doors) for (const sg of [1, -1]) box(THREE, group, (b - a) * L, 2.2, 0.03, ((a + b) / 2) * L, 1.6, sg * (W / 2 + 0.002), glassMat);
+    for (const [a, b] of m.doors) for (const sg of [1, -1]) addBox(THREE, group, (b - a) * L, 2.2, 0.03, ((a + b) / 2) * L, 1.6, sg * (W / 2 + 0.002), glassMat);
   }
   const sign = paint.sign || (m.roofSign && m.roofSign);
   if (sign) {
     const t = fascia(THREE, 1.4, 0.3, (d) => { d.box(0, 0.15, 1.4, 0.3, sign.c || '#ffd23f'); d.text(sign.text, 0.26, 0.14, '#111'); }, 256);
     const mat = new THREE.MeshStandardMaterial({ map: t, emissive: '#555', emissiveMap: t, roughness: 0.4 });
-    box(THREE, group, 0.34, 0.2, 0.74, 0.52 * L, roofF(0.52) + 0.14, 0, mat);
+    addBox(THREE, group, 0.34, 0.2, 0.74, 0.52 * L, roofF(0.52) + 0.14, 0, mat);
   }
   if (paint.police) {
     const bar = roofF(0.52) + 0.1;
-    box(THREE, group, 0.26, 0.09, 1.1, 0.5 * L, bar, 0, plastic);
-    for (const [sg, c] of [[1, '#ff2030'], [-1, '#2060ff']]) box(THREE, group, 0.24, 0.1, 0.42, 0.5 * L, bar + 0.02, sg * 0.3, new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 1 }));
+    addBox(THREE, group, 0.26, 0.09, 1.1, 0.5 * L, bar, 0, plastic);
+    for (const [sg, c] of [[1, '#ff2030'], [-1, '#2060ff']]) addBox(THREE, group, 0.24, 0.1, 0.42, 0.5 * L, bar + 0.02, sg * 0.3, new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: 1 }));
   }
   group.userData.L = L;
   group.userData.W = W;
@@ -447,7 +447,7 @@ function addCap(THREE, group, m, rear, tex, paintMat, halfW, bow, bottomAt, deck
     const y = yn * Wc / 2;
     const xb = s * L + bow(s, Math.min(1, Math.abs(y) / b)) + off;
     for (const [j, z] of [[0, 0], [1, H]]) {
-      const u = rear ? 0.5 + y / Wc : 0.5 - y / Wc;
+      const u = rear ? 0.5 - y / Wc : 0.5 + y / Wc;
       const v = z / H;
       vert(panel, `${i}_${j}`, xb, y, z, u, v);
     }
@@ -513,14 +513,14 @@ function buildMoto(THREE, paint) {
   const chrome = new THREE.MeshStandardMaterial({ color: '#d9dfe6', metalness: 1, roughness: 0.2 });
   const acc = new THREE.MeshPhysicalMaterial({ color: paint.accent || '#ffe14d', ...FINISH.gloss });
   const ell = (sx, sy, sz, x, y, z, mat) => { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 12), mat); m.scale.set(sx, sy, sz); m.position.set(x, y, z); g.add(m); return m; };
-  const tyre = (x) => { const t = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.075, 12, 28), dark); t.position.set(x, 0.355, 0); g.add(t); const r = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.03, 16), chrome); r.rotation.x = Math.PI / 2; r.position.set(x, 0.355, 0); g.add(r); };
+  const tyre = (x) => { const t = new THREE.Mesh(new THREE.TorusGeometry(0.27, 0.055, 12, 30), dark); t.position.set(x, 0.325, 0); g.add(t); for (let i = 0; i < 5; i++) { const sp = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.03, 0.03), chrome); sp.position.set(x, 0.325, 0); sp.rotation.z = (i / 5) * Math.PI; g.add(sp); } const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.1, 12), chrome); hub.rotation.x = Math.PI / 2; hub.position.set(x, 0.325, 0); g.add(hub); };
   tyre(0.32); tyre(1.78);
-  ell(0.34, 0.2, 0.17, 0.84, 0.86, 0, pm); // Depo
-  ell(0.26, 0.22, 0.15, 0.36, 0.86, 0, pm); // Kaporta
+  ell(0.3, 0.13, 0.13, 0.86, 0.9, 0, pm); // Depo
+  ell(0.24, 0.14, 0.11, 0.38, 0.88, 0, pm); // Kaporta
   ell(0.16, 0.05, 0.13, 0.22, 0.98, 0, acc);
   ell(0.4, 0.09, 0.13, 1.34, 0.86, 0, dark); // Sele
   const tail = ell(0.3, 0.07, 0.1, 1.68, 0.96, 0, pm); tail.rotation.z = -0.3;
-  ell(0.22, 0.2, 0.13, 0.95, 0.5, 0, dark); // Motor
+  ell(0.2, 0.14, 0.11, 0.95, 0.5, 0, dark); // Motor
   ell(0.26, 0.05, 0.05, 1.5, 0.48, 0.17, chrome); // Egzoz
   const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.74, 8), chrome); bar.rotation.x = Math.PI / 2; bar.position.set(0.5, 1.06, 0); g.add(bar);
   const fork = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.78, 8), chrome); fork.rotation.z = -0.3; fork.position.set(0.4, 0.72, 0); g.add(fork);
@@ -529,9 +529,9 @@ function buildMoto(THREE, paint) {
   ell(0.03, 0.03, 0.08, 1.96, 0.98, 0, new THREE.MeshStandardMaterial({ color: '#ff2733', emissive: '#ff2733', emissiveIntensity: 1 }));
   // Sürücü
   const suit = new THREE.MeshStandardMaterial({ color: '#1b1e24', roughness: 0.6 });
-  const torso = ell(0.17, 0.3, 0.2, 1.08, 1.22, 0, suit); torso.rotation.z = 0.7;
-  ell(0.13, 0.13, 0.13, 0.82, 1.5, 0, pm);
-  ell(0.07, 0.07, 0.1, 0.72, 1.5, 0, new THREE.MeshStandardMaterial({ color: '#0a0f14', metalness: 0.8, roughness: 0.1 }));
+  const torso = ell(0.13, 0.28, 0.15, 1.06, 1.16, 0, suit); torso.rotation.z = 0.95;
+  ell(0.115, 0.115, 0.115, 0.78, 1.36, 0, pm);
+  ell(0.06, 0.06, 0.09, 0.69, 1.36, 0, new THREE.MeshStandardMaterial({ color: '#0a0f14', metalness: 0.8, roughness: 0.1 }));
   for (const s of [1, -1]) { const a = ell(0.28, 0.05, 0.05, 0.74, 1.2, s * 0.24, suit); a.rotation.z = 0.5; ell(0.26, 0.07, 0.07, 1.14, 0.78, s * 0.2, suit); }
   g.userData.L = L;
   g.userData.W = 0.82;

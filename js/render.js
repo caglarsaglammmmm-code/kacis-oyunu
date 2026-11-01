@@ -56,7 +56,7 @@ function signBox(r, img) {
   signOut.h = h;
   signOut.x = r.x + (r.w - w) / 2;
   // Dev yazı çatının ortasında, öteki tabelalar cephede
-  signOut.y = size === 3 ? r.y + r.h * 0.26 - h / 2 : r.y + r.h - h - 7;
+  signOut.y = size === 3 ? r.y + 8 : r.y + r.h - h - 7;
   return signOut;
 }
 
@@ -110,6 +110,7 @@ export class Renderer {
   }
 
   releaseChunk(c) {
+    if (this.job && this.job.c === c) this.job = null;
     if (c.canvas) {
       this.canvasPool.push(c.canvas);
       c.canvas = null;
@@ -439,36 +440,66 @@ export class Renderer {
     return canvas;
   }
 
-  bake(c) {
+  // Chunk çizimi dilimlere bölünür: tek karede donma olmasın
+  startJob(c) {
     if (!c.canvas) {
       c.canvas = this.getBakeCanvas();
       this.baked.push(c);
     }
+    this.job = { c, phase: 0, i: 0 };
+  }
+
+  // Bir birim iş yapar; bitince true döner
+  jobUnit() {
+    const j = this.job;
+    const c = j.c;
     const g = c.canvas.getContext('2d');
     const k = PF.bakeScale;
     g.setTransform(k, 0, 0, k, -c.x * k, -c.y * k);
-    this.bakeGround(g, c);
-    for (let i = 0; i < c.rectCount; i++) if (!c.rects[i].alive) this.bakeRubble(g, c.rects[i]);
-    for (let i = 0; i < c.rectCount; i++) {
-      const r = c.rects[i];
-      if (r.alive && r.kind === 'water') this.bakeWater(g, r);
-    }
-    for (let i = 0; i < c.rectCount; i++) {
-      const r = c.rects[i];
-      if (r.alive && r.kind === 'building') {
-        const k2 = TALL_STYLES.has(r.style) ? 2.4 : shadowOf(r);
-        g.fillStyle = 'rgba(0,10,30,.26)';
-        rr(g, r.x + 12 * k2, r.y + 15 * k2, r.w, r.h, 5);
-        g.fill();
+    if (j.phase === 0) { this.bakeGround(g, c); j.phase = 1; return false; }
+    if (j.phase === 1) {
+      for (let i = 0; i < c.rectCount; i++) if (!c.rects[i].alive) this.bakeRubble(g, c.rects[i]);
+      for (let i = 0; i < c.rectCount; i++) {
+        const r = c.rects[i];
+        if (r.alive && r.kind === 'water') this.bakeWater(g, r);
       }
+      for (let i = 0; i < c.rectCount; i++) {
+        const r = c.rects[i];
+        if (r.alive && r.kind === 'building') {
+          const k2 = TALL_STYLES.has(r.style) ? 2.4 : shadowOf(r);
+          g.fillStyle = 'rgba(0,10,30,.26)';
+          rr(g, r.x + 12 * k2, r.y + 15 * k2, r.w, r.h, 5);
+          g.fill();
+        }
+      }
+      j.phase = 2;
+      return false;
     }
-    for (let i = 0; i < c.rectCount; i++) {
-      const r = c.rects[i];
+    while (j.i < c.rectCount) {
+      const r = c.rects[j.i++];
       if (!r.alive) continue;
-      if (r.kind === 'building') this.bakeBuilding(g, r);
-      else if (r.kind === 'wall') this.bakeWall(g, r);
+      if (r.kind === 'building') { this.bakeBuilding(g, r); return false; }
+      if (r.kind === 'wall') this.bakeWall(g, r);
     }
     c.dirty = false;
+    this.job = null;
+    return true;
+  }
+
+  // Görünen chunk hazır değilse beklenmez: işi hemen bitirir
+  bake(c) {
+    if (!this.job || this.job.c !== c) this.startJob(c);
+    while (!this.jobUnit());
+  }
+
+  // Kare başına bütçe kadar arka plan çizimi
+  stepJob(ms) {
+    const t0 = performance.now();
+    while (this.job) {
+      this.job.c.lastSeen = this.frameId;
+      this.jobUnit();
+      if (performance.now() - t0 >= ms) break;
+    }
   }
 
   bakeGround(g, c) {
@@ -943,7 +974,10 @@ export class Renderer {
     }
     // Görünmeden önce hazırla: kaydırmada takılma olmasın (karede en fazla 1)
     // Telefonda takılma olmasın diye dört karede bir
-    if (game.state === 'play' && this.frameId % 4 === 0) this.prebake(game, c0x, c1x, c0y, c1y);
+    if (game.state === 'play') {
+      if (!this.job) this.prebake(game, c0x, c1x, c0y, c1y);
+      this.stepJob(PF.bakeBudget);
+    }
 
     this.drawDecals(game, vx0, vx1, vy0, vy1);
     this.drawSkids(game, vx0, vx1, vy0, vy1);
@@ -977,11 +1011,11 @@ export class Renderer {
     const cy = dy > 0 ? c1y + 1 : dy < 0 ? c0y - 1 : c0y;
     for (let y = c0y; y <= c1y; y++) {
       const c = game.world.chunk(cx, y);
-      if (!c.canvas) { c.lastSeen = this.frameId; this.bake(c); return; }
+      if (!c.canvas || c.dirty) { c.lastSeen = this.frameId; this.startJob(c); return; }
     }
     for (let x = c0x; x <= c1x; x++) {
       const c = game.world.chunk(x, cy);
-      if (!c.canvas) { c.lastSeen = this.frameId; this.bake(c); return; }
+      if (!c.canvas || c.dirty) { c.lastSeen = this.frameId; this.startJob(c); return; }
     }
   }
 

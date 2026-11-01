@@ -142,12 +142,12 @@ export class World {
     return c;
   }
 
-  // Oyuncunun çevresini yükle, uzaktakileri sil. Kare başına en fazla 2 chunk üretir.
+  // Oyuncunun çevresini yükle, uzaktakileri sil. Kare başına en fazla 1 chunk üretir.
   update(px, py) {
     const pcx = Math.floor(px / CHUNK);
     const pcy = Math.floor(py / CHUNK);
     this.frame++;
-    let budget = 2;
+    let budget = 1; // Kare başına en fazla bir chunk üretilir
     const R = W.loadRadius;
     for (let d = 0; d <= R && budget > 0; d++) {
       for (let y = -d; y <= d && budget > 0; y++) {
@@ -367,7 +367,7 @@ export class World {
     if (!r) { r = { kind: '', x: 0, y: 0, w: 0, h: 0, style: 0, color: '', alive: true, seed: 0 }; c.rects[c.rectCount] = r; }
     c.rectCount++;
     r.kind = kind; r.style = style; r.color = color; r.alive = true; r.seed = rint(0, 999);
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1;
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -649,8 +649,10 @@ export class World {
       : [[7, 6], [15, 6], [6, 12], [18, 12], [7, 18], [15, 18]];
     const bw = q(layout === 0 ? 4 : 5);
     const bh = q(4);
+    let blockNo = 0;
     for (const [x, y] of blocks) {
       const r = this.place(c, 'building', q(x), q(y), bw, bh, BUILD.SITE_BLOCK, color);
+      if (r) r.block = (blockNo++) + (c.cx & 1) * 8 + (c.cy & 1) * 4;
       if (r && withSign && !c.siteSigned) { r.sign = name; r.signColor = '#23422f'; r.signSize = 2; c.siteSigned = true; }
     }
     c.siteSigned = false;

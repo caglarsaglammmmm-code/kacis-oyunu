@@ -366,7 +366,7 @@ export class Game {
     }
 
     const impact = this.collideWorld(p, true);
-    if (impact > 0) this.playerImpact(impact, hit.rect && isWaterRect(hit.rect) ? 0.35 : 1, false);
+    if (impact > 0) this.playerImpact(impact, DMG.wallScale, false);
     this.collideProps(p, true);
     this.driftEffects(dt, g);
 

@@ -191,17 +191,31 @@ function stadium(g, r) {
 }
 
 function siteBlock(g, r) {
-  // Site bloğu: sitenin paleti, her blok kat ve çatı ile ayrışır
+  // Site bloğu: sitenin rengi ortak, kat sayısı, çatı ve balkon düzeni bloktan bloğa değişir
   const { x, y, w, h, seed: s } = r;
   const c = r.color;
-  const wall = 14 + (s % 3) * 4;
-  facade(g, r, wall, c, 'rgba(195,230,255,.85)', 1);
-  g.fillStyle = shade(c, 0.34); rr(g, x, y, w, h - wall, 4); g.fill();
-  g.strokeStyle = 'rgba(0,0,0,.14)'; g.lineWidth = 2; g.strokeRect(x + 3, y + 3, w - 6, h - wall - 6);
-  g.fillStyle = shade(c, 0.1);
-  g.fillRect(x + w * 0.3, y + 8, w * 0.4, Math.max(8, h - wall - 18));
-  g.fillStyle = '#eceff2'; g.beginPath(); g.ellipse(x + 12, y + 12, 4, 3.6, 0, 0, 7); g.fill();
-  label(g, String.fromCharCode(65 + (s % 12)), x + w / 2, y + (h - wall) / 2, 16, 'rgba(255,255,255,.85)');
+  const floors = 6 + (s % 7);
+  const wall = Math.min(h * 0.46, floors * 7);
+  g.fillStyle = shade(c, -0.34); g.fillRect(x, y + h - wall, w, wall);
+  const bal = s % 3;
+  for (let j = 0; j < floors; j++) {
+    const py = y + h - wall + 2 + j * 7;
+    for (let px = x + 4; px < x + w - 8; px += 10 + (s % 3)) {
+      g.fillStyle = (s + px + j * 3) % 7 === 0 ? '#ffe9a8' : 'rgba(195,230,255,.9)';
+      g.fillRect(px, py, bal === 1 ? 7 : 5, 4);
+      if (bal !== 2 && (px + j) % 2 === 0) { g.fillStyle = 'rgba(255,255,255,.75)'; g.fillRect(px - 1, py + 4, 8, 1.2); }
+    }
+  }
+  const rh = h - wall;
+  g.fillStyle = shade(c, 0.3 - (s % 4) * 0.08); rr(g, x, y, w, rh, 3); g.fill();
+  g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 2; g.strokeRect(x + 3, y + 3, w - 6, rh - 6);
+  const t = s % 4;
+  if (t === 0) { g.fillStyle = '#1f3f77'; for (let py = y + 9; py < y + rh - 12; py += 11) for (let px = x + 9; px < x + w - 18; px += 15) g.fillRect(px, py, 12, 8); }
+  else if (t === 1) { g.fillStyle = '#7fb56a'; rr(g, x + 9, y + 9, w - 18, rh - 18, 6); g.fill(); g.fillStyle = '#4f9a3a'; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(x + 18 + i * 13, y + 18 + (i % 2) * 9, 4.5, 0, 7); g.fill(); } }
+  else if (t === 2) { g.fillStyle = shade(c, -0.1); g.fillRect(x + w * 0.2, y + rh * 0.25, w * 0.6, rh * 0.5); g.fillStyle = '#d7dde2'; g.fillRect(x + w * 0.3, y + rh * 0.4, 14, 10); }
+  else { g.fillStyle = '#b5482f'; g.fillRect(x + 6, y + 6, w - 12, rh - 12); g.fillStyle = 'rgba(0,0,0,.16)'; g.fillRect(x + 6, y + rh / 2, w - 12, rh / 2 - 6); }
+  g.fillStyle = 'rgba(0,0,0,.55)'; g.beginPath(); g.arc(x + w / 2, y + rh / 2, 11, 0, 7); g.fill();
+  label(g, String.fromCharCode(65 + (r.block || 0)), x + w / 2, y + rh / 2 + 1, 15, '#fff');
 }
 
 function club(g, r) {

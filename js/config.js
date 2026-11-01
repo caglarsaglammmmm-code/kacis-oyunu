@@ -114,8 +114,9 @@ export const CONFIG = {
   damage: {
     minImpact: 90, // Bunun altındaki darbeler hasar vermez
     perSpeed: 0.072, // Hız birimi başına hasar: 430 hızla kafa kafaya ~24
+    wallScale: 0.5, // Dar sokaklarda duvar darbesi: bina teması oyunu tek başına bitirmesin
     maxSingleHit: 34, // Tek darbe en fazla bu kadar: anlık ölüm yok
-    earlyGraceUntil: 30, // Bu saniyeye kadar hasar azaltılır
+    earlyGraceUntil: 45, // Bu saniyeye kadar hasar azaltılır
     earlyGraceMul: 0.48,
     hitCooldown: 0.28, // Aynı temasın üst üste saymaması için
     hitStop: 0.055, // Sert darbede oyun bir an durur: çarpışma hissi
@@ -176,15 +177,15 @@ export const CONFIG = {
 
   // Uzaylılar: bu aşamada oyuncudan HIZLIDIR, kaçmak zordur. Eşikler ve güç burada
   aliens: {
-    ufoCount: [[225, 1], [250, 2], [300, 3], [420, 5]], // [saniye, aynı anda en çok]
+    ufoCount: [[225, 1], [260, 2], [320, 3], [420, 4]], // [saniye, aynı anda en çok]
     roverCount: [[225, 2], [250, 4], [300, 6], [420, 9]],
-    spawnEvery: 3.2,
-    ufo: { hp: 240, mass: 9, speed: 1.14, accel: 760, turnRate: 6, grip: 20, driftGrip: 20, len: 74, wid: 74, ram: 0, smart: 1, siren: 'ufo' },
-    rover: { hp: 110, mass: 1.7, speed: 1.05, accel: 860, turnRate: 4.6, grip: 13, driftGrip: 9, len: 46, wid: 28, ram: 1.7, smart: 1, siren: 'zap' },
+    spawnEvery: 4.5,
+    ufo: { hp: 240, mass: 9, speed: 1.06, accel: 760, turnRate: 6, grip: 20, driftGrip: 20, len: 74, wid: 74, ram: 0, smart: 1, siren: 'ufo' },
+    rover: { hp: 110, mass: 1.7, speed: 1.02, accel: 860, turnRate: 4.6, grip: 13, driftGrip: 9, len: 46, wid: 28, ram: 0.75, smart: 1, siren: 'zap' },
     beamRange: 105, // Işın dairesi
-    beamDps: 15, // Işın altında saniyede hasar
-    beamPull: 520, // Oyuncuyu merkeze çekme
-    beamSlow: 1.1, // Işın altında hız kaybı (saniyede oran)
+    beamDps: 6, // Işın altında saniyede hasar
+    beamPull: 300, // Oyuncuyu merkeze çekme
+    beamSlow: 0.55, // Işın altında hız kaybı (saniyede oran)
   },
 
   // Derin su: sahil, göl, gölet. Sığ suya girilir, derine düşen araç batar
@@ -355,7 +356,7 @@ export const CONFIG = {
     giantCrushTank: 200,
   },
 
-  perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.72, bakePool: 9, slowFrameMs: 21 },
+  perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.72, bakePool: 9, bakeBudget: 3, slowFrameMs: 21 },
 };
 
 // Yıldız seviyesi: başlangıçta 1, her eşikte artar

@@ -27,19 +27,28 @@ function bot(g, skill, avoid) {
 }
 for (const [skill, avoid] of [[0.35, false], [0.8, true]]) {
   const res = [];
+  const why = { duvar: 0, polis: 0, uzayli: 0, su: 0 };
   let d30 = 0;
   for (let i = 0; i < N; i++) {
     const g = new Game(i);
     g.start(CONFIG.cars[0], { seed: 1000 + i, startTime: start, god: false });
     let t = 0; let s = 0;
+    const hurt = g.hurt.bind(g);
+    let tag = 'polis';
+    const imp = g.playerImpact.bind(g);
+    g.playerImpact = (a, m, cop, cap) => { tag = cop ? 'polis' : 'duvar'; return imp(a, m, cop, cap); };
+    const uf = g.updateUfo.bind(g);
+    g.updateUfo = (c, d, pl) => { tag = 'uzayli'; uf(c, d, pl); };
+    g.hurt = (x) => { why[tag] = (why[tag] || 0) + x; hurt(x); };
     while (g.state !== 'over' && t < 900) {
       if ((t * 60 | 0) % 8 === 0) s = bot(g, skill, avoid);
       g.tick(dt, s, false); t += dt;
     }
     res.push({ t: g.time, kills: g.kills, score: g.score | 0, coins: g.result ? g.result.coins : 0 });
     if (g.time < 30) d30++;
+    if (g.cause === 'water') why.su += 1;
   }
   const ts = res.map((r) => r.t).sort((a, b) => a - b);
   const q = (k) => ts[Math.floor(ts.length * k)].toFixed(0);
-  console.log(`bot ${avoid ? 'polisten kaçan' : 'kör'}: min ${q(0)} p25 ${q(.25)} medyan ${q(.5)} p75 ${q(.75)} max ${ts.at(-1).toFixed(0)} | 30 sn altı ölüm ${d30}/${N} | ort. kill ${(res.reduce((a,r)=>a+r.kills,0)/N).toFixed(1)} | ort. coin ${(res.reduce((a,r)=>a+r.coins,0)/N).toFixed(0)}`);
+  console.log(`bot ${avoid ? 'polisten kaçan' : 'kör'}: min ${q(0)} p25 ${q(.25)} medyan ${q(.5)} p75 ${q(.75)} max ${ts.at(-1).toFixed(0)} | 30 sn altı ölüm ${d30}/${N} | ort. kill ${(res.reduce((a,r)=>a+r.kills,0)/N).toFixed(1)} | ort. coin ${(res.reduce((a,r)=>a+r.coins,0)/N).toFixed(0)} | hasar/oyun duvar ${(why.duvar/N).toFixed(0)} polis ${(why.polis/N).toFixed(0)} uzayli ${(why.uzayli/N).toFixed(0)} | suya dusen ${why.su}`);
 }

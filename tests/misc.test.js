@@ -142,3 +142,15 @@ test('açılış yazısı tam olarak istenen metin', () => {
 test('tek dosyalık paket geçerli JavaScript (modüller arası ad çakışması yok)', () => {
   assert.doesNotThrow(() => new Function(buildBundle()));
 });
+
+test('tek dosyalık pakette üst düzey ad çakışması yok', () => {
+  const mods = fs.readFileSync('tools/bundle-file.mjs', 'utf8').match(/const MODULES = \[([^\]]+)\]/)[1].match(/'[^']+'/g).map((m) => m.slice(1, -1));
+  const seen = new Map();
+  for (const m of mods) {
+    const s = fs.readFileSync(`js/${m}.js`, 'utf8');
+    for (const r of s.matchAll(/^(?:export )?(?:async )?(?:function|const|let|class) ([A-Za-z_$][\w$]*)/gm)) {
+      assert.ok(!seen.has(r[1]), `${r[1]}: ${seen.get(r[1])} ve ${m}`);
+      seen.set(r[1], m);
+    }
+  }
+});

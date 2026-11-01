@@ -332,9 +332,11 @@ test('yayalar doğar, araba çarpınca fırlar ve ses olayı gelir', () => {
   const g = game();
   const ev = [];
   g.onEvent = (n) => ev.push(n);
-  for (let i = 0; i < 60 * 12; i++) g.tick(dt, 0, false);
+  // Araba bu sürede kıyıya varabilir: en kalabalık anı ölçülür
+  let most = 0;
+  for (let i = 0; i < 60 * 6; i++) { g.tick(dt, 0, false); most = Math.max(most, g.crowd.peds.filter((p) => p.alive).length); }
+  assert.ok(most > 3, `yaya ${most}`);
   const live = g.crowd.peds.filter((p) => p.alive);
-  assert.ok(live.length > 3, `yaya ${live.length}`);
   const p = live[0];
   g.crowd.setupPed(p, 'man', g.player.x + 10, g.player.y, 0);
   g.player.vx = 300; g.player.speed = 300;
@@ -426,6 +428,7 @@ test('polis yaklaşınca NPC panikler, kedi ezilmez, simitçi simit saçar', () 
   assert.notEqual(p.state, 2);
   g.crowd.setupPed(p, 'simitci', g.player.x + 8, g.player.y, 0);
   ev.length = 0;
+  g.crowd.screamT = 0;
   g.crowd.checkHit(p, g.player, true);
   assert.equal(p.state, 2);
   assert.ok(ev.includes('simit') && ev.includes('scream'));
@@ -501,9 +504,10 @@ test('uzaylılar eşikte gelir, oyuncudan hızlıdır, ışın hasar verir', () 
   assert.ok(ev.includes('aliens'));
   assert.ok(g.cops.some((c) => c.type === 'ufo' || c.type === 'rover'), 'uzaylı doğmadı');
   const u = g.spawnCop('ufo', 'chaser', g.player.x + 5, g.player.y, 0);
-  g.damage = 0; g.god = false; g.giantT = 0;
+  g.damage = 0; g.god = false; g.giantT = 0; g.ghostT = 0;
+  g.player.vx = 0; g.player.vy = 0;
   const before = g.damage;
-  g.updateUfo(u, 0.5, true);
+  g.updateUfo(u, dt, true);
   assert.equal(u.beam, 1);
   assert.ok(g.damage > before);
 });
