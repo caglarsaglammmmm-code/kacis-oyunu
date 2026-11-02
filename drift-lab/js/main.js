@@ -6,9 +6,9 @@ import { Input } from './input.js';
 import { AudioEngine } from './audio.js';
 import { Storage } from './storage.js';
 import { UI } from './ui.js';
-import { Stage } from './menu3d.js';
+import { PixelMenu } from './pixelmenu.js';
 import { loadAtlas } from './sheet.js';
-import { warp } from './transition.js';
+import { PHASE, FALL_AT, TOTAL, dropCurve } from './transition.js';
 
 const STEP = 1 / 60;
 const canvas = document.getElementById('game');
@@ -21,7 +21,8 @@ game.world.onRelease = (c) => renderer.releaseChunk(c);
 game.carSpec = storage.selectedCar();
 game.paint = storage.paintIndex(game.carSpec.id);
 
-let stage = null;
+const cover = new PixelMenu(document.getElementById('cover'));
+const menuEl = document.getElementById('menu');
 const params = new URLSearchParams(location.search);
 let paused = false;
 let accumulator = 0;
@@ -68,7 +69,7 @@ function play() {
   ui.setHud(true);
   game.paint = storage.paintIndex(storage.selectedCar().id);
   game.start(storage.selectedCar(), { startTime, god });
-  showStage(null);
+  cover.stop();
   audio.setEngine(storage.selectedCar().engine);
   perf.i = 0;
   perf.count = 0;
@@ -78,20 +79,82 @@ function play() {
   keepAwake(true);
 }
 
-// BAŞLA: motor marşı ve sinematik geçiş. Otomatik testler ve hareket azaltma tercihinde doğrudan başlar
-let starting = false;
+// BAŞLA: araba küçülür, kadraj bulanır, küçük araba gökten yola düşer, oyun kesintisiz başlar.
+// Otomatik testler ve hareket azaltma tercihinde doğrudan başlar.
+let film = null;
 function start() {
-  if (starting) return;
+  if (film) return;
   const quick = (navigator.webdriver && !params.has('fx')) || matchMedia('(prefers-reduced-motion: reduce)').matches;
   audio.unlock();
   if (quick) { play(); return; }
-  starting = true;
-  audio.preview(storage.selectedCar().engine, 'start');
-  document.body.classList.add('warping');
-  warp(document.getElementById('warp'), () => {
-    document.body.classList.remove('warping');
-    play();
-  }, () => { starting = false; });
+  film = { t0: performance.now(), left: false, landed: false, released: false };
+  prepareWorld();
+}
+
+// Dünya, menünün arkasında kurulur: 3B sahne örtüyken parça parça hazırlanır, ekran donmaz
+function prepareWorld() {
+  const d = storage.data.dev;
+  const startTime = params.has('t') ? Number(params.get('t')) : (d.startTime || CONFIG.dev.startTime);
+  const god = params.get('god') === '1' || d.god || CONFIG.dev.godMode;
+  game.paint = storage.paintIndex(storage.selectedCar().id);
+  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld });
+  menuWorld = false;
+  game.holdForDrop();
+  input.clear();
+}
+
+// Menü beklerken bir sonraki koşunun haritası sessizce hazırlanır. BAŞLA'ya basınca iş kalmaz.
+let menuWorld = false;
+let warmT = 0;
+let warmDone = false;
+function prewarmWorld() {
+  if (game.state !== 'attract' || film) return;
+  game.start(storage.selectedCar(), { startTime: 0, god: false });
+  game.holdForDrop();
+  game.updateCamera(1 / 60);
+  game.state = 'attract';
+  game.drop = null;
+  menuWorld = true;
+  warmDone = false;
+}
+
+function stepFilm(now) {
+  const f = film;
+  const t = now - f.t0;
+  // Kapak CSS ile küçülüp solar: yalnız dönüşüm, kare bütçesi harcamaz; arkasında yol çizilir
+  if (!f.left && t >= PHASE.press) {
+    f.left = true;
+    document.getElementById('menu').classList.add('leaving');
+    cover.stop();
+    keepAwake(true);
+  }
+  if (!f.cleared && t >= PHASE.press + PHASE.away) {
+    f.cleared = true;
+    ui.hideAll();
+    document.getElementById('menu').classList.remove('leaving');
+    ui.resetHud();
+  }
+  const c = dropCurve(t - FALL_AT);
+  if (game.drop) { game.drop.y = c.drop; game.drop.size = c.size; game.drop.shadow = c.shadow; }
+  if (!f.landed && t >= FALL_AT + PHASE.fall) {
+    f.landed = true;
+    game.landDrop();
+    audio.landing();
+    audio.preview(storage.selectedCar().engine, 'start');
+    vibrate([40, 30, 25]);
+    ui.setHud(true);
+  }
+  if (!f.released && t >= TOTAL - 90) {
+    f.released = true;
+    game.releaseDrop();
+    audio.setEngine(storage.selectedCar().engine);
+    perf.i = 0;
+    perf.count = 0;
+    hintT = storage.data.tutorial ? 0 : 5;
+    ui.showHint(hintT > 0);
+    if (hintT > 0) { storage.data.tutorial = true; storage.save(); }
+  }
+  if (t >= TOTAL) film = null;
 }
 
 function toMenu() {
@@ -103,40 +166,11 @@ function toMenu() {
   ui.refreshMenu();
   ui.show('menu');
   ui.intro();
-  showStage('menu');
+  cover.start();
   keepAwake(false);
-}
-
-// 3B sahne: seçili araç, seçili boya
-function showStage(mode) {
-  if (!stage || !stage.ok) return;
-  stage.setMode(mode);
-  if (mode) syncStage();
-}
-
-function syncStage(car = storage.selectedCar(), paintIdx = storage.paintIndex(car.id)) {
-  if (!stage || !stage.ok) return;
-  const paint = car.paints[paintIdx] || car.paints[0];
-  stage.setCar(car.shape, { ...paint, accent: paint.accent || car.accent });
-  stage.setGlow(paint.color);
-}
-
-function loadThree() {
-  if (!document.getElementById('stage3d')) return;
-  const s = document.createElement('script');
-  s.src = 'vendor/three.min.js';
-  s.onload = () => {
-    try {
-      stage = new Stage(document.getElementById('stage3d'));
-    } catch { stage = null; }
-    if (stage && stage.ok) {
-      document.body.classList.add('has3d');
-      const on = ['menu', 'garage'].find((id) => !document.getElementById(id).hidden);
-      showStage(on || null);
-      if (!on) stage.setMode(null);
-    }
-  };
-  document.body.appendChild(s);
+  menuWorld = false;
+  warmDone = false;
+  setTimeout(prewarmWorld, 1300); // Giriş animasyonu bitsin
 }
 
 function pause() {
@@ -157,10 +191,11 @@ function resume() {
 const ui = new UI(storage, {
   tap() { audio.unlock(); },
   play, start, toMenu, pause, resume, applySettings,
+  press() { audio.unlock(); audio.press(); vibrate(16); },
   preview(car) { audio.unlock(); audio.preview(car.engine, 'rev'); },
   carChanged() { game.carSpec = storage.selectedCar(); game.paint = storage.paintIndex(game.carSpec.id); },
-  previewCar(car, paintIdx) { syncStage(car, paintIdx); },
-  stage(mode) { showStage(mode); },
+  menuShown() { cover.start(); },
+  menuHidden() { cover.stop(); },
   purchased() { audio.purchase(); vibrate([30, 30, 60]); },
 });
 
@@ -218,7 +253,7 @@ function frame(now) {
   const elapsed = Math.min(0.1, (now - last) / 1000);
   last = now;
   const t0 = performance.now();
-  if (stage && stage.mode) stage.frame(now, elapsed);
+  if (!menuEl.hidden) cover.frame(elapsed);
 
   if (!paused) {
     accumulator += elapsed;
@@ -236,7 +271,10 @@ function frame(now) {
       if (hintT <= 0) ui.showHint(false);
     }
   }
-  if (game.state !== 'attract') renderer.draw(game, now);
+  // Menü beklerken dünya parça parça hazırlanır; geçişin ilk karesi hazır parçalarla çizilir
+  if (menuWorld && !warmDone && game.state === 'attract' && ++warmT % 5 === 0) warmDone = renderer.warm(game, 2);
+  else if (game.state !== 'attract') renderer.draw(game, now);
+  if (film) stepFilm(now);
   audio.update(game, !paused, now);
 
   hudT -= elapsed;
@@ -272,7 +310,7 @@ function frame(now) {
 let lastBack = 0;
 function handleBack() {
   const visible = (id) => !document.getElementById(id).hidden;
-  if (visible('splash')) return false;
+  if (visible('splash') || film) return false;
   if (game.state === 'play' || game.state === 'dying' || game.state === 'sinking') {
     if (paused) resume(); else pause();
     return false;
@@ -287,7 +325,7 @@ function handleBack() {
   }
   ui.refreshMenu();
   ui.show('menu');
-  showStage('menu');
+  cover.start();
   return false;
 }
 globalThis.__gameBack = handleBack;
@@ -306,11 +344,11 @@ function boot() {
   input.attach(canvas);
   applySettings();
   if (document.fonts) {
-    for (const f of ['800 30px Nunito', '400 30px Bungee', '400 30px Pacifico', '400 30px Anton', '400 30px Righteous', '400 30px Lobster', '400 30px "Tilt Neon"', '400 30px Monoton', '500 30px Oswald', 'italic 400 30px Playfair']) document.fonts.load(f, 'ÇŞĞİçşğı').catch(() => {});
+    for (const f of ['800 30px Nunito', '400 30px Bungee', '400 30px Pacifico', '400 30px Anton', '400 30px Righteous', '400 30px Lobster', '400 30px "Tilt Neon"', '400 30px Monoton', '500 30px Oswald', 'italic 400 30px Playfair', '400 16px "Press Start"', '400 16px Pixelify', '700 16px Pixelify']) document.fonts.load(f, 'ÇŞĞİçşğı').catch(() => {});
   }
   resize();
-  window.addEventListener('resize', () => { resize(); if (stage) stage.resize(); });
-  window.addEventListener('orientationchange', resize);
+  window.addEventListener('resize', () => { resize(); cover.layout(); });
+  window.addEventListener('orientationchange', () => { resize(); cover.layout(); });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       if (game.state === 'play') pause();
@@ -322,7 +360,6 @@ function boot() {
 
   game.startAttract();
   requestAnimationFrame(frame);
-  loadThree();
   loadAtlas(() => { renderer.useAtlas(); ui.atlasLoaded(); });
   ui.splash(() => { toMenu(); });
 
@@ -337,6 +374,6 @@ function boot() {
 }
 
 // Test ve geliştirici erişimi
-globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, get stage() { return stage; } };
+globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover };
 
 boot();

@@ -183,10 +183,10 @@ export class Game {
     this.result = null;
   }
 
-  start(carSpec, { startTime = CONFIG.dev.startTime, god = CONFIG.dev.godMode, seed = (Math.random() * 1e9) | 0 } = {}) {
+  start(carSpec, { startTime = CONFIG.dev.startTime, god = CONFIG.dev.godMode, seed = (Math.random() * 1e9) | 0, keepWorld = false } = {}) {
     this.carSpec = carSpec;
     this.god = god;
-    this.world.reset(seed);
+    if (!keepWorld) this.world.reset(seed);
     this.resetRun(startTime);
     this.dayT = 0;
     dayState(0, this.daylight);
@@ -194,6 +194,7 @@ export class Game {
     this.player.vy = 120;
     this.player.vx = 0;
     this.state = 'play';
+    this.drop = null;
     this.cam.x = this.player.x;
     this.cam.y = this.player.y;
     this.cam.zoom = 1;
@@ -218,6 +219,49 @@ export class Game {
     this.cam.y = 100;
   }
 
+  // Geçiş: araç gökte bekler. Dünya hazır, zaman akmaz, kamera iniş noktasına kilitlidir
+  holdForDrop() {
+    this.state = 'drop';
+    this.drop = { y: 1, size: 0.22, shadow: 0.1 };
+    const p = this.player;
+    this.cam.y = p.y;
+    this.cam.lvy = 0;
+    this.cam.zoom = CONFIG.camera.dropZoom;
+    p.speed = 0;
+  }
+
+  // Yere değdiği an: iz, toz, sarsıntı
+  landDrop() {
+    const p = this.player;
+    this.cam.shake = 15;
+    this.fx.wave(this.player.x, this.player.y, 90);
+    this.fx.sparks(this.player.x, this.player.y + this.player.wid * 0.5, 22);
+    const c = Math.cos(p.a); const n = Math.sin(p.a);
+    const ww = p.wid * 0.46; const back = p.len * 0.34;
+    for (const sg of [-1, 1]) {
+      const rx = p.x - c * back - n * ww * sg; const ry = p.y - n * back + c * ww * sg;
+      const fx2 = p.x + c * back - n * ww * sg; const fy2 = p.y + n * back + c * ww * sg;
+      // Dalgalı kısa frenle izi: düşüş yönünde
+      this.fx.addSkid(rx, ry - 62, rx + 2 * sg, ry - 6);
+      this.fx.addSkid(fx2, fy2 - 52, fx2 - 2 * sg, fy2 - 6);
+      this.fx.addSkid(rx + 2 * sg, ry - 6, rx, ry + 8);
+      this.fx.addSkid(fx2 - 2 * sg, fy2 - 6, fx2, fy2 + 8);
+    }
+    for (let i = 0; i < 26; i++) {
+      const a = (i / 26) * 6.283;
+      const sp = 70 + (i % 5) * 44;
+      this.fx.spawn(i % 2 ? FX.DUST : FX.SMOKE, p.x + Math.cos(a) * p.len * 0.45, p.y + Math.sin(a) * p.wid * 0.7, Math.cos(a) * sp, Math.sin(a) * sp * 0.75, 0.55 + (i % 4) * 0.1, 14 + (i % 3) * 8);
+    }
+  }
+
+  // Düşüş bitti: araç yolda hareketlenir
+  releaseDrop() {
+    this.drop = null;
+    this.state = 'play';
+    this.player.vy = 120;
+    this.player.speed = 120;
+  }
+
   stopToIdle() {
     this.state = 'idle';
   }
@@ -236,7 +280,8 @@ export class Game {
       this.updateCamera(dt);
       return;
     }
-    if (this.state === 'attract') this.tickAttract(dt);
+    if (this.state === 'drop') { this.world.update(this.player.x, this.player.y); this.player.vy = 0; }
+    else if (this.state === 'attract') this.tickAttract(dt);
     else if (this.state === 'play') this.tickPlay(dt, steer, reverse);
     else if (this.state === 'dying') this.tickDying(dt);
     else if (this.state === 'sinking') this.tickSinking(dt);
@@ -1258,8 +1303,8 @@ export class Game {
     const V = CONFIG.camera;
     const top = this.carSpec.maxSpeed;
     const speedK = Math.min(1, p.speed / top);
-    const z = (1 - V.zoomOut * speedK) * (this.giantT > 0 ? 0.82 : 1);
-    c.zoom += (z - c.zoom) * (1 - Math.exp(-V.zoomRate * dt));
+    const z = this.drop ? V.dropZoom : (1 - V.zoomOut * speedK) * (this.giantT > 0 ? 0.82 : 1);
+    c.zoom += (z - c.zoom) * (1 - Math.exp(-(this.drop ? 40 : V.zoomRate) * dt));
     const base = Math.sqrt(this.view.w * this.view.h) / V.viewArea;
     c.scale = base * c.zoom;
     c.halfW = this.view.w / 2 / c.scale;
