@@ -61,6 +61,11 @@ function signHalo(color) {
   return c;
 }
 
+// Tabela görüntüsü binada saklanır: her karede anahtar metni üretilmez
+function rectSign(r) {
+  return r.signImg || (r.signImg = signCanvas(r.sign, r.signColor, r.seed));
+}
+
 // Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
 const signOut = { x: 0, y: 0, w: 0, h: 0 };
 function signBox(r, img) {
@@ -96,24 +101,53 @@ export class Renderer {
     this.baked = [];
     this.playerSprite = null;
     this.playerId = '';
+    this.lod = { slices: 6, balcony: 1, night: 2, speedLines: true, fireSmoke: true };
+    this.syncBakes = 0; // Görünür parça hazır değilse kare beklemiştir: ölçüm için
+    this.queue = []; // Sprite işleri kare bütçesiyle yapılır
     this.makeSprites();
   }
 
   // Atlas yüklenince polis ve park etmiş araçlar 3B modellerden gelir
+  // Tek karede donmasın diye işler kuyruğa girer; stepQueue kare başına birkaç ms harcar
   useAtlas() {
     const P = CONFIG.police;
     const s = this.sprites;
-    for (const k of ['car', 'fast', 'advanced', 'swat', 'moto']) {
-      const img = sheetSprite(`cop:${k}`, P[k].len);
-      if (img) s[k] = img;
-    }
-    const list = [];
-    for (const [k, n] of [['marmara', 4], ['liva', 4], ['klasik', 5], ['volta', 5], ['pusula', 4], ['lale', 4], ['vadi', 4], ['bavar', 5], ['dalga', 4], ['efe', 4]]) {
-      for (let i = 0; i < n; i++) { const img = sheetSprite(`npc:${k}:${i}`, 44); if (img) list.push(img); }
-    }
-    if (list.length) s.parked = list;
-    s.npc = {};
+    const q = this.queue;
     this.playerId = '';
+    s.npc = {};
+    for (const k of ['car', 'fast', 'advanced', 'swat', 'moto']) {
+      q.push(() => { const img = sheetSprite(`cop:${k}`, P[k].len); if (img) s[k] = img; });
+    }
+    let first = true;
+    for (const [k, n] of [['marmara', 4], ['liva', 4], ['klasik', 5], ['volta', 5], ['pusula', 4], ['lale', 4], ['vadi', 4], ['bavar', 5], ['dalga', 4], ['efe', 4]]) {
+      for (let i = 0; i < n; i++) {
+        q.push(() => {
+          const img = sheetSprite(`npc:${k}:${i}`, 44);
+          if (!img) return;
+          if (first) { s.parked = []; first = false; }
+          s.parked.push(img);
+        });
+      }
+    }
+    // Trafik araçları ilk görüldüğünde üretilmez: oyun ortasında takılma yapıyordu
+    for (const k of Object.keys(CONFIG.npc.types)) {
+      const t = CONFIG.npc.types[k];
+      t.colors.forEach((_, i) => q.push(() => {
+        const key = `${k}${i}`;
+        if (s.npc[key]) return;
+        const img = sheetSprite(`npc:${k}:${i}`, t.len);
+        if (img) s.npc[key] = img;
+      }));
+    }
+  }
+
+  stepQueue(ms) {
+    if (!this.queue.length) return;
+    const t0 = performance.now();
+    while (this.queue.length) {
+      this.queue.shift()();
+      if (performance.now() - t0 >= ms) break;
+    }
   }
 
   resize(w, h, dpr) {
@@ -237,7 +271,7 @@ export class Renderer {
     const ctx = this.ctx;
     const cam = game.cam;
     const cx = cam.x; const cy = cam.y;
-    const N = 6;
+    const N = this.lod.slices;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
     const mx = cam.halfW + 120; const my = cam.halfH + 120;
     for (let gy = c0y - 1; gy <= c1y + 1; gy++) {
@@ -245,7 +279,8 @@ export class Renderer {
         const key = (gx + 32768) * 65536 + (gy + 32768);
         const c = game.world.chunks.get(key);
         if (!c) continue;
-        for (const r of c.talls) {
+        for (let ti = 0; ti < c.talls.length; ti++) {
+          const r = c.talls[ti];
           if (!r.alive) continue;
           const k = r.tall;
           if (r.x + r.w < cx - mx || r.x > cx + mx || r.y + r.h < cy - my || r.y > cy + my) continue;
@@ -254,8 +289,7 @@ export class Renderer {
           const Y0 = y0 + (y0 - cy) * k; const Y1 = y1 + (y1 - cy) * k;
           const tex = this.walls[r.seed % this.walls.length];
           // Güney ve kuzey duvarları
-          for (const south of [cy > y1, cy < y0]) {
-            if (!south) continue;
+          if (cy > y1 || cy < y0) {
             const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
             ctx.globalAlpha = 1;
             for (let t = 0; t < N; t++) {
@@ -267,8 +301,7 @@ export class Renderer {
             if (cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
           }
           // Doğu ve batı duvarları
-          for (const east of [cx > x1, cx < x0]) {
-            if (!east) continue;
+          if (cx > x1 || cx < x0) {
             const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
             for (let t = 0; t < N; t++) {
               const a = t / N; const b = (t + 1) / N;
@@ -281,7 +314,7 @@ export class Renderer {
           }
           ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
           if (r.sign) {
-            const img = signCanvas(r.sign, r.signColor, r.seed);
+            const img = rectSign(r);
             const w = Math.min((X1 - X0) * 0.92, (img.width / img.height) * 38);
             const h = (w / img.width) * img.height;
             ctx.drawImage(img, (X0 + X1) / 2 - w / 2, (Y0 + Y1) / 2 - h / 2, w, h);
@@ -295,7 +328,8 @@ export class Renderer {
   drawBalconies(game, now, c0x, c1x, c0y, c1y, tall) {
     const B = CONFIG.balcony;
     const night = game.daylight.k;
-    if (night > 0.75) return;
+    const maxDrawn = Math.round(B.maxDrawn * this.lod.balcony);
+    if (night > 0.75 || maxDrawn <= 0) return;
     const ctx = this.ctx;
     const sp = this.sprites;
     const p = game.player;
@@ -305,12 +339,13 @@ export class Renderer {
     let drawn = 0;
     const R2 = B.range * B.range;
     const swing = Math.floor(now / 260);
-    for (let cy = c0y; cy <= c1y && drawn < B.maxDrawn; cy++) {
-      for (let cx = c0x; cx <= c1x && drawn < B.maxDrawn; cx++) {
+    for (let cy = c0y; cy <= c1y && drawn < maxDrawn; cy++) {
+      for (let cx = c0x; cx <= c1x && drawn < maxDrawn; cx++) {
         const c = game.world.chunks.get((cx + 32768) * 65536 + (cy + 32768));
         if (!c) continue;
-        for (const r of c.balc) {
-          if (!r.alive || drawn >= B.maxDrawn || (r.tall > 0) !== tall) continue;
+        for (let bi = 0; bi < c.balc.length; bi++) {
+          const r = c.balc[bi];
+          if (!r.alive || drawn >= maxDrawn || (r.tall > 0) !== tall) continue;
           const mx = r.x + r.w / 2; const my = r.y + r.h;
           const dx = mx - p.x; const dy = my - p.y;
           if (dx * dx + dy * dy > R2) continue;
@@ -354,7 +389,7 @@ export class Renderer {
           for (let i = 0; i < 3; i++) {
             const x = r.x + r.w * (0.22 + i * 0.28);
             const y = r.y + r.h * (0.3 + ((r.seed + i * 3) % 4) * 0.13);
-            for (let k = 0; k < 2; k++) {
+            for (let k = 0; this.lod.fireSmoke && k < 2; k++) {
               const t = ((now * 0.00035 + k * 0.5 + i * 0.3) % 1);
               ctx.globalAlpha = 0.5 * (1 - t);
               const R = 18 + t * 46;
@@ -1251,21 +1286,19 @@ export class Renderer {
     const vy1 = cam.y + cam.halfH + 30;
     const world = game.world;
 
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = '#6cc24a';
-    ctx.fillRect(0, 0, w * dpr, h * dpr);
     ctx.setTransform(s, 0, 0, s, ox, oy);
 
-    const c0x = Math.floor(vx0 / CHUNK);
-    const c1x = Math.floor(vx1 / CHUNK);
-    const c0y = Math.floor(vy0 / CHUNK);
-    const c1y = Math.floor(vy1 / CHUNK);
+    // Zemin temizlenmez: sarsıntıda da kadraj parçalarla tam örtülür
+    const c0x = Math.floor((vx0 - 30) / CHUNK);
+    const c1x = Math.floor((vx1 + 30) / CHUNK);
+    const c0y = Math.floor((vy0 - 30) / CHUNK);
+    const c1y = Math.floor((vy1 + 30) / CHUNK);
     this.frameId = (this.frameId || 0) + 1;
     for (let cy = c0y; cy <= c1y; cy++) {
       for (let cx = c0x; cx <= c1x; cx++) {
         const c = world.chunk(cx, cy);
         c.lastSeen = this.frameId;
-        if (!c.canvas || c.dirty) this.bake(c);
+        if (!c.canvas || c.dirty) { this.syncBakes++; this.bake(c); }
         ctx.drawImage(c.canvas, c.x, c.y, CHUNK + 0.6, CHUNK + 0.6);
       }
     }
@@ -1275,6 +1308,7 @@ export class Renderer {
       if (!this.job) this.prebake(game, c0x, c1x, c0y, c1y);
       this.stepJob(PF.bakeBudget);
     }
+    this.stepQueue(2);
 
     this.drawDecals(game, vx0, vx1, vy0, vy1);
     this.drawSkids(game, vx0, vx1, vy0, vy1);
@@ -1306,7 +1340,9 @@ export class Renderer {
   }
 
   // Görünecek parçaları karede en çok birer birer hazırlar: geçişte ekran donmaz
-  warm(game, k = 1) {
+  warm(game, k = 1, ms = 0) {
+    const t0 = performance.now();
+    this.stepQueue(ms || 3);
     const cam = game.cam;
     const hw = cam.halfW * k + 30; const hh = cam.halfH * k + 30;
     const c0x = Math.floor((cam.x - hw) / CHUNK); const c1x = Math.floor((cam.x + hw) / CHUNK);
@@ -1315,7 +1351,11 @@ export class Renderer {
       for (let cx = c0x; cx <= c1x; cx++) {
         const c = game.world.chunk(cx, cy);
         c.lastSeen = this.frameId || 0;
-        if (!c.canvas || c.dirty) { this.bake(c); return false; }
+        for (let i = 0; i < c.talls.length; i++) if (c.talls[i].sign) rectSign(c.talls[i]);
+        if (!c.canvas || c.dirty) {
+          this.bake(c);
+          if (performance.now() - t0 >= ms) return false;
+        }
       }
     }
     return true;
@@ -1590,7 +1630,7 @@ export class Renderer {
           const l = c.lights[i];
           if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1) continue;
           const r = l.rect;
-          const img = signCanvas(r.sign, r.signColor, r.seed);
+          const img = rectSign(r);
           const b = signBox(r, img);
           ctx.drawImage(img, b.x, b.y, b.w, b.h);
         }
@@ -1598,14 +1638,14 @@ export class Renderer {
     }
     // Tabela ışıltısı ve yola düşen yansıması
     ctx.globalCompositeOperation = 'lighter';
-    for (let cy = c0y; cy <= c1y; cy++) {
+    for (let cy = c0y; this.lod.night > 0 && cy <= c1y; cy++) {
       for (let cx = c0x; cx <= c1x; cx++) {
         const c = game.world.chunk(cx, cy);
         for (let i = 0; i < c.lightCount; i++) {
           const l = c.lights[i];
           if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1 + 40) continue;
           const r = l.rect;
-          const img = signCanvas(r.sign, r.signColor, r.seed);
+          const img = rectSign(r);
           const b = signBox(r, img);
           const halo = signHalo(r.signColor);
           const led = signKind(r.sign) === 'led';
@@ -1614,6 +1654,7 @@ export class Renderer {
           ctx.drawImage(img, b.x, b.y, b.w, b.h);
           ctx.globalAlpha = night * 0.5 * flick;
           ctx.drawImage(halo, b.x - 26, b.y - 22, b.w + 52, b.h + 44);
+          if (this.lod.night < 2) continue;
           ctx.globalAlpha = night * 0.3;
           ctx.drawImage(halo, r.x - 6, r.y + r.h - 2, r.w + 12, 40);
         }
@@ -1636,13 +1677,13 @@ export class Renderer {
       ctx.globalAlpha = night;
     };
     if (game.state === 'play') head(game.player);
-    for (const c of game.cops) if (c.type !== 'tank' && !c.flying) head(c);
-    for (const n of game.crowd.npcs) if (n.alive && n.state === 'drive') head(n);
-    for (const n of game.crowd.hw) if (n.alive) head(n);
+    for (let i = 0; i < game.cops.length; i++) { const c = game.cops[i]; if (c.type !== 'tank' && !c.flying) head(c); }
+    for (let i = 0; i < game.crowd.npcs.length; i++) { const n = game.crowd.npcs[i]; if (n.alive && n.state === 'drive') head(n); }
+    for (let i = 0; i < game.crowd.hw.length; i++) { const n = game.crowd.hw[i]; if (n.alive) head(n); }
     ctx.globalCompositeOperation = 'source-over';
     // Gök: üst kenarda ay ve sırayla parıldayan yıldızlar
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    if (night > 0.3) {
+    if (night > 0.3 && this.lod.night > 0) {
       const a = (night - 0.3) / 0.7;
       const W = this.w;
       ctx.globalCompositeOperation = 'lighter';
@@ -1952,7 +1993,7 @@ export class Renderer {
   drawSpeedLines(game, now) {
     const p = game.player;
     const k = (p.speed / game.carSpec.maxSpeed - 0.72) / 0.28;
-    if (k <= 0 || game.state !== 'play') return;
+    if (k <= 0 || game.state !== 'play' || !this.lod.speedLines) return;
     const ctx = this.ctx;
     const { dpr, w, h } = this;
     const a = Math.atan2(p.vy, p.vx);

@@ -13,8 +13,8 @@ export const BUILD = {
 
 export const CONFIG = {
   name: 'Drift Lab',
-  version: '10.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v10.0.0/DriftLab.apk',
+  version: '11.0.0',
+  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v11.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -405,7 +405,7 @@ export const CONFIG = {
   // Balkon canlılığı: yalnızca oyuncunun bu yakınındaki binalarda çizilir
   balcony: { range: 560, maxDrawn: 26 },
 
-  perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.72, bakePool: 9, bakeBudget: 3, slowFrameMs: 21 },
+  perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, bakeScale: 0.72, bakePool: 9, bakeBudget: 3 },
 };
 
 // Hız çarpanlarını uygula: yukarıdaki sayılar temel değerdir, ayar speedScale üzerinden yapılır

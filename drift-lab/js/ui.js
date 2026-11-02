@@ -10,6 +10,9 @@ export function formatTime(t) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
+// Intl nesnesi tek kez kurulur; toLocaleString her çağrıda pahalıdır
+const NUM = new Intl.NumberFormat('tr-TR');
+
 const SCREENS = ['menu', 'garage', 'settings', 'howto', 'over', 'pause'];
 
 export class UI {
@@ -29,9 +32,22 @@ export class UI {
     const a = this.actions;
     const click = (id, fn) => $(id).addEventListener('click', () => { a.tap(); fn(); });
     click('btn-play', () => a.start());
-    // Basınca 3 piksel çöker, 8-bit bip ve kısa titreşim
-    $('btn-play').addEventListener('pointerdown', () => { a.press(); $('btn-play').classList.add('down'); });
-    for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) $('btn-play').addEventListener(ev, () => $('btn-play').classList.remove('down'));
+    // Bütün menü düğmeleri aynı dokunuşu verir: yumuşak ses, kısa titreşim. Oyun içi düğmeler hariç
+    document.addEventListener('pointerdown', (e) => {
+      const b = e.target.closest && e.target.closest('.screen button, .screen a.btn, .screen .toggle');
+      if (!b || b.disabled) return;
+      a.press();
+      // :active dokunmatikte her zaman oluşmaz. Çok kısa dokunuşta da çöküş görünsün
+      b.classList.add('down');
+      const at = performance.now();
+      const up = () => {
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        setTimeout(() => b.classList.remove('down'), Math.max(0, 90 - (performance.now() - at)));
+      };
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    }, true);
     click('btn-mute', () => { const d2 = this.storage.data; d2.settings.sound = !d2.settings.sound; this.storage.save(); this.syncSettings(); a.applySettings(); });
     click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
     click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
@@ -47,10 +63,22 @@ export class UI {
     click('btn-pause', () => a.pause());
     click('btn-resume', () => a.resume());
     click('btn-pause-menu', () => a.toMenu());
-    // Duraklat tuşu sürüş girdisi sayılmasın
+    // Duraklat tuşu sürüş girdisi sayılmasın. Başka parmak basılıyken tarayıcı click üretmez: bırakma yeterli
     $('btn-pause').addEventListener('pointerdown', (e) => e.stopPropagation());
+    $('btn-pause').addEventListener('pointerup', (e) => { e.stopPropagation(); a.tap(); a.pause(); });
 
     const d = this.storage.data;
+    for (const seg of document.querySelectorAll('.seg')) {
+      seg.addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        a.tap();
+        d.settings[seg.dataset.set] = b.dataset.v;
+        this.storage.save();
+        this.syncSettings();
+        a.applySettings();
+      });
+    }
     $('set-sound').addEventListener('change', (e) => { d.settings.sound = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-volume').addEventListener('input', (e) => { d.settings.volume = Number(e.target.value); this.storage.save(); a.applySettings(); });
     $('set-ambient').addEventListener('change', (e) => { d.settings.ambient = e.target.checked; this.storage.save(); a.applySettings(); });
@@ -71,6 +99,13 @@ export class UI {
     this.syncMute();
     $('set-vibrate').checked = d.settings.vibrate;
     $('set-ambient').checked = d.settings.ambient;
+    for (const seg of document.querySelectorAll('.seg')) {
+      for (const b of seg.children) {
+        const on = d.settings[seg.dataset.set] === b.dataset.v;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    }
     $('dev-god').checked = d.dev.god;
     $('dev-start').value = String(d.dev.startTime);
   }
@@ -204,7 +239,13 @@ export class UI {
   }
 
   showHint(on) {
+    if (on) {
+      const m = this.storage.data.settings.control;
+      const T = { zones: ['Sola bas', 'sola drift', 'İkisine bas', 'geri vites', 'Sağa bas', 'sağa drift'], wheel: ['GERİ tut', 'geri vites', 'Direksiyon', 'sağ altta', 'Çevir', 'sağa sola döner'], stick: ['Sol yarı', 'bas ve kaydır', 'Joystick', 'parmağının altında', 'GERİ tut', 'geri vites'] }[m] || [];
+      ['hint-l', 'hint-ls', 'hint-m', 'hint-ms', 'hint-r', 'hint-rs'].forEach((id, i) => { $(id).textContent = T[i]; });
+    }
     $('hint').hidden = !on;
+    $('hint').classList.toggle('up', this.storage.data.settings.control !== 'zones');
   }
 
   resetHud() {
@@ -216,8 +257,8 @@ export class UI {
     const l = this.last;
     const time = formatTime(g.time);
     if (time !== l.time) { l.time = time; $('hud-time').textContent = time; }
-    const score = Math.floor(g.score).toLocaleString('tr-TR');
-    if (score !== l.score) { l.score = score; $('hud-score').textContent = score; }
+    const score = Math.floor(g.score);
+    if (score !== l.score) { l.score = score; $('hud-score').textContent = NUM.format(score); }
     if (g.coins !== l.coins) { l.coins = g.coins; $('hud-coins').textContent = g.coins; }
     const health = Math.max(0, Math.round(100 - g.damage));
     if (health !== l.health) {

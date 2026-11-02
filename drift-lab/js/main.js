@@ -3,12 +3,14 @@ import { CONFIG } from './config.js';
 import { Game } from './game.js';
 import { Renderer } from './render.js';
 import { Input } from './input.js';
+import { ControlView } from './controls.js';
 import { AudioEngine } from './audio.js';
 import { Storage } from './storage.js';
 import { UI } from './ui.js';
 import { PixelMenu } from './pixelmenu.js';
 import { loadAtlas } from './sheet.js';
 import { PHASE, FALL_AT, TOTAL, dropCurve } from './transition.js';
+import { Quality, guessLevel, LEVELS } from './quality.js';
 
 const STEP = 1 / 60;
 const canvas = document.getElementById('game');
@@ -16,12 +18,14 @@ const storage = new Storage();
 const game = new Game();
 const renderer = new Renderer(canvas);
 const input = new Input();
+const controls = new ControlView(input);
 const audio = new AudioEngine();
 game.world.onRelease = (c) => renderer.releaseChunk(c);
 game.carSpec = storage.selectedCar();
 game.paint = storage.paintIndex(game.carSpec.id);
 
 const cover = new PixelMenu(document.getElementById('cover'));
+const curtain = document.getElementById('curtain');
 const menuEl = document.getElementById('menu');
 const params = new URLSearchParams(location.search);
 let paused = false;
@@ -29,8 +33,11 @@ let accumulator = 0;
 let last = 0;
 let hudT = 0;
 let hintT = 0;
-let dprCap = CONFIG.perf.maxDpr;
-const perf = { frames: new Float32Array(20000), work: new Float32Array(20000), i: 0, count: 0, dprDrops: 0 };
+const perf = { frames: new Float32Array(20000), work: new Float32Array(20000), i: 0, count: 0, changes: 0 };
+const startLevel = storage.data.settings.qLevel >= 0 ? storage.data.settings.qLevel : guessLevel(navigator.hardwareConcurrency, navigator.deviceMemory);
+const quality = new Quality(storage.data.settings.quality, startLevel);
+let warming = false; // Perde kapalı: görünür dünya parça parça hazırlanıyor
+let pausedDrawn = false;
 
 function vibrate(ms) {
   if (storage.data.settings.vibrate && navigator.vibrate) {
@@ -43,16 +50,41 @@ function applySettings() {
   audio.setVolume(storage.data.settings.volume / 100);
   ui.syncMute();
   audio.setAmbient(storage.data.settings.ambient);
+  if (input.mode !== storage.data.settings.control) {
+    input.setMode(storage.data.settings.control);
+    controls.setMode(input.mode);
+    ui.showHint(!document.getElementById('hint').hidden);
+  }
+  if (quality.mode !== storage.data.settings.quality) {
+    quality.setMode(storage.data.settings.quality);
+    quality.reset();
+    applyQuality();
+  }
+}
+
+// Tuval yalnız gerçekten değişince yeniden kurulur: kurulum bir karelik iştir
+function fitCanvas(w, h) {
+  const q = quality.settings;
+  const dpr = Math.max(1, Math.min(q.dpr, window.devicePixelRatio || 1, Math.sqrt(q.pixels / (w * h))));
+  if (renderer.w !== w || renderer.h !== h || Math.abs(renderer.dpr - dpr) > 0.01) renderer.resize(w, h, dpr);
+}
+
+function applyQuality() {
+  const q = quality.settings;
+  renderer.lod = q;
+  game.fx.density = q.particles;
+  game.crowd.limit = q.crowd;
+  fitCanvas(window.innerWidth, window.innerHeight);
 }
 
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
-  const dpr = Math.min(dprCap, window.devicePixelRatio || 1);
-  renderer.resize(w, h, dpr);
+  fitCanvas(w, h);
   game.view.w = w;
   game.view.h = h;
   input.width = w;
+  controls.needLayout = true;
   game.updateCamera(1);
 }
 
@@ -68,8 +100,13 @@ function play() {
   ui.resetHud();
   ui.setHud(true);
   game.paint = storage.paintIndex(storage.selectedCar().id);
-  game.start(storage.selectedCar(), { startTime, god });
+  const ready = menuWorld && warmDone;
+  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld });
+  menuWorld = false;
   cover.stop();
+  // Dünya hazır değilse siyah perde arkasında kurulur: ilk kare donmaz
+  if (!ready) { warming = true; curtain.classList.add('on'); }
+  quality.reset();
   audio.setEngine(storage.selectedCar().engine);
   perf.i = 0;
   perf.count = 0;
@@ -87,8 +124,7 @@ function start() {
   const quick = (navigator.webdriver && !params.has('fx')) || matchMedia('(prefers-reduced-motion: reduce)').matches;
   audio.unlock();
   if (quick) { play(); return; }
-  film = { t0: performance.now(), left: false, landed: false, released: false };
-  prepareWorld();
+  film = { t0: performance.now(), left: false, landed: false, released: false, ready: false };
 }
 
 // Dünya, menünün arkasında kurulur: 3B sahne örtüyken parça parça hazırlanır, ekran donmaz
@@ -121,6 +157,13 @@ function prewarmWorld() {
 function stepFilm(now) {
   const f = film;
   const t = now - f.t0;
+  // Ses kurulumu dokunuş görevinde yapılır; dünya bir sonraki karede: ikisi tek uzun göreve yığılmaz
+  if (!f.ready) {
+    f.ready = true;
+    prepareWorld();
+    quality.reset();
+    return;
+  }
   // Kapak CSS ile küçülüp solar: yalnız dönüşüm, kare bütçesi harcamaz; arkasında yol çizilir
   if (!f.left && t >= PHASE.press) {
     f.left = true;
@@ -170,14 +213,16 @@ function toMenu() {
   keepAwake(false);
   menuWorld = false;
   warmDone = false;
-  setTimeout(prewarmWorld, 1300); // Giriş animasyonu bitsin
+  setTimeout(prewarmWorld, 350); // Kapak ilk karesini çizsin
 }
 
 function pause() {
   if (game.state !== 'play' || paused) return;
   paused = true;
+  pausedDrawn = false;
   input.clear();
   audio.suspend();
+  rememberQuality();
   ui.show('pause');
 }
 
@@ -186,6 +231,13 @@ function resume() {
   audio.resume();
   ui.hideAll();
   last = 0;
+  quality.reset(0);
+}
+
+// Öğrenilen seviye sonraki açılışta kasmadan başlamayı sağlar
+function rememberQuality() {
+  const s = storage.data.settings;
+  if (quality.mode === 'auto' && s.qLevel !== quality.level) { s.qLevel = quality.level; storage.save(); }
 }
 
 const ui = new UI(storage, {
@@ -237,6 +289,7 @@ game.onEvent = (name, v) => {
     case 'tankhit': audio.explosion(0.5 + 0.4 * v); vibrate(70); break;
     case 'alert': audio.alert(); ui.alert(v); vibrate([60, 40, 60]); break;
     case 'gameover': {
+      rememberQuality();
       const record = storage.recordRun(game.result);
       ui.setHud(false);
       ui.over(game.result, record);
@@ -250,16 +303,20 @@ game.onEvent = (name, v) => {
 function frame(now) {
   requestAnimationFrame(frame);
   if (!last) last = now;
-  const elapsed = Math.min(0.1, (now - last) / 1000);
+  const raw = now - last;
+  // Ekran yenilemesine oturtulur: 16,6 ms ile 16,7 ms farkı bir adım atlatıp titreme yapmasın
+  let elapsed = Math.min(0.1, raw / 1000);
+  if (Math.abs(elapsed - STEP) < 0.003) elapsed = STEP;
+  else if (Math.abs(elapsed - STEP / 2) < 0.0015) elapsed = STEP / 2;
   last = now;
   const t0 = performance.now();
   if (!menuEl.hidden) cover.frame(elapsed);
 
+  let steps = 0;
   if (!paused) {
     accumulator += elapsed;
-    let steps = 0;
     // Menü kendi sahnesini çizer: arkada oyun dönmez, pil harcanmaz
-    while (game.state !== 'attract' && accumulator >= STEP && steps < 5) {
+    while (game.state !== 'attract' && !warming && accumulator >= STEP && steps < 5) {
       input.tick(STEP);
       game.tick(STEP, input.steer, input.reverse);
       accumulator -= STEP;
@@ -272,10 +329,21 @@ function frame(now) {
     }
   }
   // Menü beklerken dünya parça parça hazırlanır; geçişin ilk karesi hazır parçalarla çizilir
-  if (menuWorld && !warmDone && game.state === 'attract' && ++warmT % 5 === 0) warmDone = renderer.warm(game, 2);
-  else if (game.state !== 'attract') renderer.draw(game, now);
+  if (warming) {
+    accumulator = 0;
+    if (renderer.warm(game, 1, 10)) { warming = false; curtain.classList.remove('on'); quality.reset(); last = 0; }
+  } else if (game.state === 'attract') {
+    if (menuWorld && !warmDone && ++warmT % 3 === 0) warmDone = renderer.warm(game, 2, 6);
+    else renderer.stepQueue(3);
+  } else if (film && !film.left) {
+    renderer.warm(game, 2, 6); // Kapak henüz tam örtüyor: çizmek boşa, hazırlık sürer
+  } else if (paused ? !pausedDrawn : (steps > 0 || game.state !== 'play')) {
+    renderer.draw(game, now); // Durum değişmediyse aynı kare yeniden çizilmez
+    if (paused) pausedDrawn = true;
+  }
   if (film) stepFilm(now);
   audio.update(game, !paused, now);
+  controls.update();
 
   hudT -= elapsed;
   if (hudT <= 0 && game.state === 'play') {
@@ -283,26 +351,15 @@ function frame(now) {
     ui.hud(game);
   }
 
-  // Kare süresi ölçümü ve uyarlanabilir çözünürlük
+  // Kare süresi ölçümü ve otomatik kalite
   const i = perf.i;
   perf.frames[i] = elapsed * 1000;
   perf.work[i] = performance.now() - t0;
   perf.i = (i + 1) % perf.frames.length;
   perf.count++;
-  if (perf.count % 120 === 0 && perf.count >= 120 && game.state === 'play') {
-    let sum = 0;
-    for (let k = 1; k <= 120; k++) sum += perf.frames[(perf.i - k + perf.frames.length) % perf.frames.length];
-    if (sum / 120 > CONFIG.perf.slowFrameMs) {
-      // Önce çözünürlük, sonra kalabalık azalır
-      if (dprCap > 1) {
-        dprCap = Math.max(1, dprCap - 0.25);
-        perf.dprDrops++;
-        resize();
-      } else if (game.crowd.limit > 0.4) {
-        game.crowd.limit -= 0.2;
-        perf.dprDrops++;
-      }
-    }
+  if (!paused && !warming && !document.hidden && (game.state === 'play' || (film && film.left)) && quality.note(raw)) {
+    perf.changes++;
+    applyQuality();
   }
 }
 
@@ -342,7 +399,10 @@ function boot() {
     });
   }
   input.attach(canvas);
+  controls.setMode(input.mode);
   applySettings();
+  audio.prepare();
+  applyQuality();
   if (document.fonts) {
     for (const f of ['800 30px Nunito', '400 30px Bungee', '400 30px Pacifico', '400 30px Anton', '400 30px Righteous', '400 30px Lobster', '400 30px "Tilt Neon"', '400 30px Monoton', '500 30px Oswald', 'italic 400 30px Playfair', '400 16px "Press Start"', '400 16px Pixelify', '700 16px Pixelify']) document.fonts.load(f, 'ÇŞĞİçşğı').catch(() => {});
   }
@@ -351,6 +411,7 @@ function boot() {
   window.addEventListener('orientationchange', () => { resize(); cover.layout(); });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
+      rememberQuality();
       if (game.state === 'play') pause();
       else audio.suspend();
     } else if (game.state !== 'play' || !paused) {
@@ -374,6 +435,6 @@ function boot() {
 }
 
 // Test ve geliştirici erişimi
-globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover };
+globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover, quality, LEVELS, controls, audio };
 
 boot();

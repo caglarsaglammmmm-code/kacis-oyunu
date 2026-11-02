@@ -11,7 +11,9 @@ const ATLAS = { img: null, ready: false };
 export function loadAtlas(done) {
   if (typeof Image === 'undefined') return;
   const img = new Image();
-  img.onload = () => { ATLAS.img = img; ATLAS.ready = true; if (done) done(); };
+  const ready = () => { ATLAS.img = img; ATLAS.ready = true; if (done) done(); };
+  // Görsel, ilk çizimde değil burada çözülür: oyun sırasında takılma yapmaz
+  img.onload = () => { if (img.decode) img.decode().then(ready, ready); else ready(); };
   img.onerror = () => { ATLAS.ready = false; if (done) done(); };
   img.src = 'assets/cars.webp';
 }

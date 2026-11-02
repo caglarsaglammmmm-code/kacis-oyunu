@@ -34,12 +34,15 @@
       <b class="puff p1"></b><b class="puff p2"></b><b class="flame"></b>
     </div>
   </div>
+  <div id="ctl-wheel" class="ctl" hidden><svg id="ctl-rim" viewBox="0 0 120 120" aria-hidden="true"><circle class="rim" cx="60" cy="60" r="50"/><path class="spoke" d="M12 60h96M60 60v48"/><circle class="hub" cx="60" cy="60" r="15"/><path class="mark" d="M54 6h12v12H54z"/></svg></div>
+  <div id="ctl-stick" class="ctl" hidden><i></i><b id="ctl-knob"></b></div>
+  <button id="ctl-rev" class="ctl" hidden aria-label="Geri vites">GERİ</button>
 </div>
 <div id="hud-powers"></div>
 <div id="hint" hidden>
-  <div><b>Sola bas</b><span>sola drift</span></div>
-  <div class="mid"><b>İkisine bas</b><span>geri vites</span></div>
-  <div><b>Sağa bas</b><span>sağa drift</span></div>
+  <div><b id="hint-l">Sola bas</b><span id="hint-ls">sola drift</span></div>
+  <div class="mid"><b id="hint-m">İkisine bas</b><span id="hint-ms">geri vites</span></div>
+  <div><b id="hint-r">Sağa bas</b><span id="hint-rs">sağa drift</span></div>
 </div>
 <div id="alert"></div>
 <div id="toast"></div>
@@ -60,7 +63,7 @@
         <button id="btn-settings" class="tile t-set"><svg viewBox="0 0 24 24"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5zM19.4 13l2-1.5-2-3.4-2.3.9a7 7 0 0 0-1.7-1L15 5h-4l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 1.7 1L11 22h4l.4-2.5a7 7 0 0 0 1.7-1l2.3.9 2-3.4-2-1.5a7 7 0 0 0 0-2z" transform="translate(0 -1.5)"/></svg><span>Ayarlar</span></button>
         <button id="btn-howto" class="tile t-how"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm1 14h-2v-2h2zm2-7c0 2-3 2-3 4h-2c0-3 3-3 3-4.500A1.500 1.500 0 0 0 10 9H8a4 4 0 0 1 7 1z"/></svg><span>Nasıl?</span></button>
       </div>
-      <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v10.0.0/DriftLab.apk" rel="noopener">APK İndir</a>
+      <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v11.0.0/DriftLab.apk" rel="noopener">APK İndir</a>
     </nav>
   </div>
 </section>
@@ -89,6 +92,8 @@
     <label class="volume"><span>Ses düzeyi</span><input id="set-volume" type="range" min="0" max="100" step="5"></label>
     <label class="toggle"><span>Sokak ambiyansı</span><input id="set-ambient" type="checkbox"><i></i></label>
     <label class="toggle"><span>Titreşim</span><input id="set-vibrate" type="checkbox"><i></i></label>
+    <div class="seg-row"><span>Kontrol</span><div class="seg" data-set="control" role="radiogroup" aria-label="Kontrol"><button data-v="zones">Sağ / Sol</button><button data-v="wheel">Direksiyon</button><button data-v="stick">Joystick</button></div></div>
+    <div class="seg-row"><span>Grafik kalitesi</span><div class="seg" data-set="quality" role="radiogroup" aria-label="Grafik kalitesi"><button data-v="auto">Otomatik</button><button data-v="high">Yüksek</button><button data-v="low">Düşük</button></div></div>
     <div id="dev-panel" hidden>
       <h3>Geliştirici</h3>
       <label class="toggle"><span>Ölümsüzlük</span><input id="dev-god" type="checkbox"><i></i></label>
@@ -113,6 +118,7 @@
   <div id="howto-powers"></div>
   <ul class="tips">
     <li>Araba kendi gider. Sen yalnızca yön verirsin.</li>
+    <li>Ayarlar'dan kontrolü seç: Sağ / Sol, Direksiyon ya da Joystick.</li>
     <li>Duvarlar hasar verir: duman, kıvılcım, ateş, patlama.</li>
     <li>Şehirden çık: sahil, orman, çöl ve kırsal seni bekliyor.</li>
     <li>Polise kıl payı yaklaşmak ve drift atmak combo çarpanını büyütür.</li>
@@ -124,6 +130,7 @@
 <section id="pause" class="screen panel center" hidden>
   <h2>Duraklatıldı</h2>
   <button id="btn-resume" class="btn primary">Devam et</button>
+  <div class="seg-row"><span>Kontrol</span><div class="seg" data-set="control" role="radiogroup" aria-label="Kontrol"><button data-v="zones">Sağ / Sol</button><button data-v="wheel">Direksiyon</button><button data-v="stick">Joystick</button></div></div>
   <button id="btn-pause-menu" class="btn">Ana menü</button>
 </section>
 
@@ -145,6 +152,7 @@
   </div>
 </section>
 
+<div id="curtain"></div>
 <div id="splash" hidden><p>Drift Lab</p></div>
 
 <script>
