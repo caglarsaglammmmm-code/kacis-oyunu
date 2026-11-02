@@ -116,7 +116,7 @@ function play() {
   keepAwake(true);
 }
 
-// BAŞLA: araba küçülür, kadraj bulanır, küçük araba gökten yola düşer, oyun kesintisiz başlar.
+// BAŞLA: ana ekran bulanıklaşıp solar, küçük araba gökten yola iner, oyun kesintisiz başlar.
 // Otomatik testler ve hareket azaltma tercihinde doğrudan başlar.
 let film = null;
 function start() {
@@ -164,9 +164,10 @@ function stepFilm(now) {
     quality.reset();
     return;
   }
-  // Kapak CSS ile küçülüp solar: yalnız dönüşüm, kare bütçesi harcamaz; arkasında yol çizilir
+  // Ana ekran yerinde bulanıklaşıp solar: küçülmez, kaymaz. Hazır katman kullanılır, arkasında yol çizilir
   if (!f.left && t >= PHASE.press) {
     f.left = true;
+    cover.snapshot();
     document.getElementById('menu').classList.add('leaving');
     cover.stop();
     keepAwake(true);

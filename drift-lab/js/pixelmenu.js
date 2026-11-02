@@ -89,6 +89,23 @@ export class PixelMenu {
     this.g.imageSmoothingEnabled = false;
   }
 
+  // Geçiş için hazır bulanık kopya: küçük kopya büyütülünce yumuşar, her karede filtre hesaplanmaz
+  snapshot() {
+    const b = document.getElementById('cover-blur');
+    const { c } = this;
+    const k = 5;
+    b.width = Math.ceil(c.width / k);
+    b.height = Math.ceil(c.height / k);
+    const g = b.getContext('2d');
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(c, 0, 0, b.width, b.height);
+    b.style.width = c.style.width;
+    b.style.height = c.style.height;
+    b.style.left = c.style.left;
+    b.style.top = c.style.top;
+  }
+
   start() { this.on = true; this.layout(); }
 
   stop() { this.on = false; }

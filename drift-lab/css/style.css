@@ -507,12 +507,8 @@ body:not(.has3d) .garage3d { background: linear-gradient(160deg, #15183a, #0a0c1
 .maker i.mk { animation: none; opacity: 1; display: inline; font-style: normal; text-shadow: inherit; }
 .logo { display: none; }
 
-/* Geçiş: kapak geri çekilir, panel iner */
-.leaving #cover { transition: transform .86s cubic-bezier(.45, 0, .85, .4), opacity .78s ease-in .1s; transform: scale(.42); opacity: 0; }
+/* Geçiş: v12 katmanında */
 .leaving.menu, .has3d .leaving.menu { background: transparent; }
-.leaving .menu-panel { transition: transform .34s ease-in; transform: translateY(110%); }
-.leaving .mute, .leaving .menu-coins { opacity: 0; }
-.leaving .maker { opacity: 0; }
 
 /* Paneller */
 .panel, #garage { font-family: var(--pxt); }
@@ -652,3 +648,99 @@ body:not(.has3d) .garage3d { background: linear-gradient(160deg, #15183a, #0a0c1
 @media (prefers-reduced-motion: reduce) { .start::before { animation: none; opacity: .6; } }
 #hint.up { bottom: calc(var(--safe-b) + clamp(118px, 36vmin, 190px) + 36px); }
 @media (orientation: landscape) { #hint.up { bottom: calc(var(--safe-b) + 12px); left: calc(var(--safe-l) + 104px); right: calc(var(--safe-r) + clamp(118px, 36vmin, 190px) + 30px); } }
+
+/* v12: BAŞLA dışındaki bütün düğmeler tek sade tasarım: koyu zemin, ince sarı çerçeve, yumuşak köşe.
+   Görsel yalnız BAŞLA'da. Yazılar Pixelify: Türkçe harfleri tam, küçük boyutta net */
+:root { --b-bg: #191b24; --b-bg2: #0f1016; --b-line: #f4b81f; --b-red: #e8391a; --b-text: #fff; }
+.tile, .btn, .btn.apk, .btn.primary, .mute, .back, .nav-arrow, .thumb, .seg button {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box;
+  border: 1.5px solid var(--b-line); border-image: none; border-radius: 12px; padding: 0 8px; min-height: 48px;
+  color: var(--b-text); background: linear-gradient(180deg, var(--b-bg), var(--b-bg2)); image-rendering: auto;
+  font: 700 16px/1.15 var(--pxt); letter-spacing: 0; text-transform: none; text-align: center; text-shadow: none; white-space: nowrap;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, .4), 0 7px 14px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .13);
+  filter: none; clip-path: none;
+}
+.tile::before, .btn::before, .btn.apk::before, .mute::before, .back::before, .nav-arrow::before, .seg button::before {
+  inset: 0; border-radius: 10px; background: linear-gradient(180deg, rgba(255, 255, 255, .1) 0, rgba(255, 255, 255, 0) 46%);
+}
+.tile:active, .btn:active, .btn.apk:active, .btn.primary:active, .mute:active, .back:active, .nav-arrow:active, .seg button:active, .thumb:active,
+.tile.down, .btn.down, .btn.apk.down, .btn.primary.down, .mute.down, .back.down, .nav-arrow.down, .seg button.down, .thumb.down {
+  transform: translateY(3px) scale(.985); filter: brightness(.94);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .45), 0 2px 5px rgba(0, 0, 0, .3), 0 0 12px rgba(244, 184, 31, .2), inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+.tile { height: 52px; font-size: 16px; }
+.btn { height: 56px; min-height: 56px; font-size: 18px; }
+.btn.primary { color: #ffd34d; font: 700 19px/1.15 var(--pxt); box-shadow: 0 2px 2px rgba(0, 0, 0, .4), 0 7px 14px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .13), inset 0 -3px 0 var(--b-red); }
+.btn.primary.buy:not(:disabled) { color: #7dffa8; }
+.btn.apk { width: 100%; height: 48px; min-height: 48px; border-width: 1.5px; font-size: 16px; }
+.btn:disabled, .btn.primary:disabled { color: #b9b4a4; border-color: #6d6a60; background: linear-gradient(180deg, var(--b-bg), var(--b-bg2)); filter: none; box-shadow: none; }
+.mute, .back { width: 48px; height: 48px; padding: 0; }
+.back { font: 700 22px/1 Nunito, sans-serif; }
+.mute { position: absolute; }
+.mute svg { width: 22px; height: 22px; }
+.menu > .menu-coins { padding: 0 12px; height: 48px; display: flex; align-items: center; gap: 6px; border-radius: 12px; border: 1.5px solid var(--b-line); box-shadow: 0 7px 14px rgba(0, 0, 0, .38); background: var(--b-bg2); font: 700 18px/1 var(--pxt); color: #ffd34d; }
+.menu-coins.static { font: 700 18px/1 var(--pxt); color: #ffd34d; }
+.maker { font: 400 14px/1 var(--pxt); color: #efe9cf; }
+.panel h2, .garage3d header h2, #over h2, #pause h2 { font: 700 24px/1.2 var(--pxt); color: #ffd34d; text-shadow: 2px 2px 0 #7a1ea8; }
+.big-score strong { font: 700 34px/1.1 var(--pxt); }
+.summary b { font: 700 18px/1.2 var(--pxt); }
+#btn-pause { width: 48px; height: 48px; top: calc(var(--safe-t) + 8px); clip-path: none; border-radius: 12px; border: 1.5px solid var(--b-line); background: rgba(15, 16, 22, .78); box-shadow: 0 4px 10px rgba(0, 0, 0, .35); font-size: 15px; }
+#btn-pause:active { transform: translateX(-50%) translateY(2px); }
+#ctl-rev { font: 700 15px/1 var(--pxt); }
+
+/* Seçim satırları */
+.seg { gap: 8px; }
+.seg button { min-height: 52px; padding: 0 4px; font: 700 15px/1.1 var(--pxt); color: #e8e3cc; white-space: normal; }
+.seg button.on { color: #ffd34d; border-width: 2px; filter: none; box-shadow: 0 0 10px rgba(244, 184, 31, .35), inset 0 -3px 0 var(--b-red); }
+#pause { gap: 12px; }
+.panel.center .btn { width: min(372px, calc(100vw - 32px)); }
+
+/* Garaj: ölçüye dayalı düzen, oklar araba hizasında ve simetrik */
+#garage.garage3d { display: flex; flex-direction: column; }
+#garage > header { position: relative; flex: none; display: flex; align-items: center; gap: 10px; padding: calc(var(--safe-t) + 8px) calc(var(--safe-r) + 10px) 8px calc(var(--safe-l) + 10px); }
+#garage > header h2 { flex: 1; }
+#px-car-wrap { position: relative; left: auto; right: auto; top: auto; bottom: auto; z-index: 2; flex: 1 1 0; min-height: 96px; display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; gap: 8px; align-items: center; justify-items: center; padding: 0 calc(var(--safe-r) + 10px) 0 calc(var(--safe-l) + 10px); pointer-events: none; }
+#px-car { width: 100%; max-width: 640px; }
+.nav-arrow, #car-prev, #car-next { position: static; left: auto; right: auto; top: auto; bottom: auto; z-index: 3; width: 56px; height: 56px; padding: 0; pointer-events: auto; }
+.nav-arrow svg { width: 30px; height: 30px; fill: none; stroke: #ffd34d; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.gsheet { position: relative; flex: none; left: auto; right: auto; top: auto; bottom: auto; max-height: 66%; overflow-y: auto; touch-action: pan-y; }
+.spec h3 { font: 700 22px/1.15 var(--pxt); color: #ffd34d; text-transform: none; text-shadow: none; }
+.spec p { font: 400 16px/1.2 var(--pxt); color: #efe9cf; }
+.paint-row small { font: 400 15px/1.15 var(--pxt); color: #efe9cf; }
+#garage-paints { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatch { width: 48px; height: 48px; border-radius: 12px; border: 1.5px solid rgba(255, 255, 255, .35); box-shadow: 0 3px 8px rgba(0, 0, 0, .4); }
+.swatch.on { border: 2px solid var(--b-line); box-shadow: 0 0 10px rgba(244, 184, 31, .5); }
+.stat { grid-template-columns: 104px 1fr 40px; font: 400 15px/1.1 var(--pxt); }
+.stat em { font: 700 15px/1 var(--pxt); text-align: right; font-style: normal; }
+.spec .btn { height: 56px; min-height: 56px; font-size: 18px; margin-top: 8px; width: 100%; }
+#garage-list { gap: 8px; }
+.thumb { flex: 0 0 116px; width: 116px; height: 84px; flex-direction: column; gap: 3px; padding: 4px; opacity: 1; }
+.thumb .car-art { width: 90px; height: 36px; }
+.thumb span { font: 700 14px/1.1 var(--pxt); margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; text-shadow: none; }
+.thumb.on { box-shadow: 0 0 12px rgba(244, 184, 31, .55), inset 0 -3px 0 var(--b-red); border-width: 2px; }
+.thumb.selected span { color: #ffd34d; }
+.thumb.locked { color: #e8e3cc; }
+@media (orientation: landscape) and (min-aspect-ratio: 23/20) {
+  #garage.garage3d { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  #garage > header { grid-column: 1; grid-row: 1; }
+  #px-car-wrap { grid-column: 1; grid-row: 2; right: auto; }
+  .gsheet { grid-column: 2; grid-row: 1 / 3; left: auto; top: auto; bottom: auto; max-height: none; }
+  #px-car { width: 100%; }
+}
+@media (orientation: portrait) and (max-height: 700px) {
+  .spec p { display: none; }
+  .gsheet { max-height: 70%; }
+}
+
+/* Geçiş: yerinde bulanıklaşma ve solma. Küçülme, büyüme, kayma yok.
+   Kapakta hazır bulanık katman, panelde küçük alan için kısa filtre: kare bütçesi harcamaz */
+#cover-blur { position: absolute; display: block; opacity: 0; pointer-events: none; }
+.leaving.menu { opacity: 0; transition: opacity 1s ease-in-out; pointer-events: none; }
+.leaving #cover-blur { opacity: 1; transition: opacity .6s ease-in-out; }
+.leaving .menu-panel, .leaving .mute, .leaving .menu-coins, .leaving .maker { filter: blur(3px); transition: filter .6s ease-in-out; }
+.leaving .start::before { animation: none; opacity: 0; }
+.car-tag { display: none; }
+.gsheet, #garage .gsheet { width: auto; max-width: none; margin: 0; justify-self: stretch; box-sizing: border-box; }
+.paint-row { display: flex; align-items: center; gap: 10px; }
+#garage-paints { flex: 0 0 auto; max-width: 74%; }
+.paint-row small { flex: 1 1 0; min-width: 0; }
