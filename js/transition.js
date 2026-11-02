@@ -1,7 +1,7 @@
 // BAŞLA geçişi zaman çizelgesi (ms). Toplam 2 saniyenin altında kalır.
 export const PHASE = {
-  press: 130, // Düğme çöker, bip
-  away: 880, // Kapak küçülüp solar, arkasından yol görünür
+  press: 100, // Düğme çöker, bip
+  away: 1000, // Ana ekran bulanıklaşıp solar, arkasından yol görünür
   fall: 520, // Küçük araba yola düşer; kapak solmadan başlar
   settle: 400, // Çarpma, sarsıntı, gerçek boya dönüş
 };

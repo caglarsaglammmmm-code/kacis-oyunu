@@ -17,8 +17,8 @@ const BUILD = {
 
 const CONFIG = {
   name: 'Drift Lab',
-  version: '11.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v11.0.0/DriftLab.apk',
+  version: '12.0.0',
+  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v12.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -11845,6 +11845,23 @@ class PixelMenu {
     this.g.imageSmoothingEnabled = false;
   }
 
+  // Geçiş için hazır bulanık kopya: küçük kopya büyütülünce yumuşar, her karede filtre hesaplanmaz
+  snapshot() {
+    const b = document.getElementById('cover-blur');
+    const { c } = this;
+    const k = 5;
+    b.width = Math.ceil(c.width / k);
+    b.height = Math.ceil(c.height / k);
+    const g = b.getContext('2d');
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(c, 0, 0, b.width, b.height);
+    b.style.width = c.style.width;
+    b.style.height = c.style.height;
+    b.style.left = c.style.left;
+    b.style.top = c.style.top;
+  }
+
   start() { this.on = true; this.layout(); }
 
   stop() { this.on = false; }
@@ -12335,8 +12352,8 @@ class UI {
 // --- transition.js ---
 // BAŞLA geçişi zaman çizelgesi (ms). Toplam 2 saniyenin altında kalır.
 const PHASE = {
-  press: 130, // Düğme çöker, bip
-  away: 880, // Kapak küçülüp solar, arkasından yol görünür
+  press: 100, // Düğme çöker, bip
+  away: 1000, // Ana ekran bulanıklaşıp solar, arkasından yol görünür
   fall: 520, // Küçük araba yola düşer; kapak solmadan başlar
   settle: 400, // Çarpma, sarsıntı, gerçek boya dönüş
 };
@@ -12548,7 +12565,7 @@ function play() {
   keepAwake(true);
 }
 
-// BAŞLA: araba küçülür, kadraj bulanır, küçük araba gökten yola düşer, oyun kesintisiz başlar.
+// BAŞLA: ana ekran bulanıklaşıp solar, küçük araba gökten yola iner, oyun kesintisiz başlar.
 // Otomatik testler ve hareket azaltma tercihinde doğrudan başlar.
 let film = null;
 function start() {
@@ -12596,9 +12613,10 @@ function stepFilm(now) {
     quality.reset();
     return;
   }
-  // Kapak CSS ile küçülüp solar: yalnız dönüşüm, kare bütçesi harcamaz; arkasında yol çizilir
+  // Ana ekran yerinde bulanıklaşıp solar: küçülmez, kaymaz. Hazır katman kullanılır, arkasında yol çizilir
   if (!f.left && t >= PHASE.press) {
     f.left = true;
+    cover.snapshot();
     document.getElementById('menu').classList.add('leaving');
     cover.stop();
     keepAwake(true);
