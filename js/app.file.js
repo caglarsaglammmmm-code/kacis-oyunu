@@ -17,8 +17,8 @@ const BUILD = {
 
 const CONFIG = {
   name: 'Drift Lab',
-  version: '8.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v8.0.0/DriftLab.apk',
+  version: '10.0.0',
+  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v10.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -77,6 +77,7 @@ const CONFIG = {
   },
 
   camera: {
+    dropZoom: 1.75, // BAŞLA geçişinde iniş yakın çekimi
     viewArea: 740, // Ekran alanının karekökü bu kadar dünya birimine denk gelir
     lookAhead: 0.46, // Hızın önüne kaç saniyelik bakılır
     follow: 5.5,
@@ -3350,10 +3351,10 @@ class Game {
     this.result = null;
   }
 
-  start(carSpec, { startTime = CONFIG.dev.startTime, god = CONFIG.dev.godMode, seed = (Math.random() * 1e9) | 0 } = {}) {
+  start(carSpec, { startTime = CONFIG.dev.startTime, god = CONFIG.dev.godMode, seed = (Math.random() * 1e9) | 0, keepWorld = false } = {}) {
     this.carSpec = carSpec;
     this.god = god;
-    this.world.reset(seed);
+    if (!keepWorld) this.world.reset(seed);
     this.resetRun(startTime);
     this.dayT = 0;
     dayState(0, this.daylight);
@@ -3361,6 +3362,7 @@ class Game {
     this.player.vy = 120;
     this.player.vx = 0;
     this.state = 'play';
+    this.drop = null;
     this.cam.x = this.player.x;
     this.cam.y = this.player.y;
     this.cam.zoom = 1;
@@ -3385,6 +3387,49 @@ class Game {
     this.cam.y = 100;
   }
 
+  // Geçiş: araç gökte bekler. Dünya hazır, zaman akmaz, kamera iniş noktasına kilitlidir
+  holdForDrop() {
+    this.state = 'drop';
+    this.drop = { y: 1, size: 0.22, shadow: 0.1 };
+    const p = this.player;
+    this.cam.y = p.y;
+    this.cam.lvy = 0;
+    this.cam.zoom = CONFIG.camera.dropZoom;
+    p.speed = 0;
+  }
+
+  // Yere değdiği an: iz, toz, sarsıntı
+  landDrop() {
+    const p = this.player;
+    this.cam.shake = 15;
+    this.fx.wave(this.player.x, this.player.y, 90);
+    this.fx.sparks(this.player.x, this.player.y + this.player.wid * 0.5, 22);
+    const c = Math.cos(p.a); const n = Math.sin(p.a);
+    const ww = p.wid * 0.46; const back = p.len * 0.34;
+    for (const sg of [-1, 1]) {
+      const rx = p.x - c * back - n * ww * sg; const ry = p.y - n * back + c * ww * sg;
+      const fx2 = p.x + c * back - n * ww * sg; const fy2 = p.y + n * back + c * ww * sg;
+      // Dalgalı kısa frenle izi: düşüş yönünde
+      this.fx.addSkid(rx, ry - 62, rx + 2 * sg, ry - 6);
+      this.fx.addSkid(fx2, fy2 - 52, fx2 - 2 * sg, fy2 - 6);
+      this.fx.addSkid(rx + 2 * sg, ry - 6, rx, ry + 8);
+      this.fx.addSkid(fx2 - 2 * sg, fy2 - 6, fx2, fy2 + 8);
+    }
+    for (let i = 0; i < 26; i++) {
+      const a = (i / 26) * 6.283;
+      const sp = 70 + (i % 5) * 44;
+      this.fx.spawn(i % 2 ? FX.DUST : FX.SMOKE, p.x + Math.cos(a) * p.len * 0.45, p.y + Math.sin(a) * p.wid * 0.7, Math.cos(a) * sp, Math.sin(a) * sp * 0.75, 0.55 + (i % 4) * 0.1, 14 + (i % 3) * 8);
+    }
+  }
+
+  // Düşüş bitti: araç yolda hareketlenir
+  releaseDrop() {
+    this.drop = null;
+    this.state = 'play';
+    this.player.vy = 120;
+    this.player.speed = 120;
+  }
+
   stopToIdle() {
     this.state = 'idle';
   }
@@ -3403,7 +3448,8 @@ class Game {
       this.updateCamera(dt);
       return;
     }
-    if (this.state === 'attract') this.tickAttract(dt);
+    if (this.state === 'drop') { this.world.update(this.player.x, this.player.y); this.player.vy = 0; }
+    else if (this.state === 'attract') this.tickAttract(dt);
     else if (this.state === 'play') this.tickPlay(dt, steer, reverse);
     else if (this.state === 'dying') this.tickDying(dt);
     else if (this.state === 'sinking') this.tickSinking(dt);
@@ -4425,8 +4471,8 @@ class Game {
     const V = CONFIG.camera;
     const top = this.carSpec.maxSpeed;
     const speedK = Math.min(1, p.speed / top);
-    const z = (1 - V.zoomOut * speedK) * (this.giantT > 0 ? 0.82 : 1);
-    c.zoom += (z - c.zoom) * (1 - Math.exp(-V.zoomRate * dt));
+    const z = this.drop ? V.dropZoom : (1 - V.zoomOut * speedK) * (this.giantT > 0 ? 0.82 : 1);
+    c.zoom += (z - c.zoom) * (1 - Math.exp(-(this.drop ? 40 : V.zoomRate) * dt));
     const base = Math.sqrt(this.view.w * this.view.h) / V.viewArea;
     c.scale = base * c.zoom;
     c.halfW = this.view.w / 2 / c.scale;
@@ -8012,11 +8058,12 @@ class Stage {
     this.scene.environment = makeEnv(T, r, true, true);
     this.cam = new T.PerspectiveCamera(28, 1, 0.1, 400);
     this.mode = 'menu';
-    this.angle = 0.7;
-    this.spin = 0.32;
+    this.angle = 0.62;
+    this.spin = 0.2;
     this.drag = null;
     this.yShift = 0;
     this.fps = { t: 0, n: 0, slow: 0 };
+    this.pull = 0; // 0 normal, 1 araba tamamen uzakta
     this.buildWorld();
     this.resize();
     canvas.addEventListener('pointerdown', (e) => { this.drag = e.clientX; this.spinHold = 2; });
@@ -8036,7 +8083,7 @@ class Stage {
     // Gökyüzü: gün batımı, güneş, yıldız
     const sky = tex(T, 512, 512, (g, w, h) => {
       const c = g.createLinearGradient(0, 0, 0, h);
-      c.addColorStop(0, '#0b0a2a'); c.addColorStop(0.36, '#2b1458'); c.addColorStop(0.6, '#8a2a70'); c.addColorStop(0.78, '#f0603f'); c.addColorStop(0.92, '#ffb45e'); c.addColorStop(1, '#ffd98e');
+      c.addColorStop(0, '#07051f'); c.addColorStop(0.42, '#190a48'); c.addColorStop(0.68, '#5a1272'); c.addColorStop(0.84, '#d11a86'); c.addColorStop(0.94, '#ff5a9a'); c.addColorStop(1, '#ffa07a');
       g.fillStyle = c; g.fillRect(0, 0, w, h);
       for (let i = 0; i < 220; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.8})`; g.fillRect(Math.random() * w, Math.random() * h * 0.5, 1, 1); }
       const sun = g.createRadialGradient(w * 0.62, h * 0.86, 4, w * 0.62, h * 0.86, 150);
@@ -8158,12 +8205,15 @@ class Stage {
 
     // Işıklar
     scene.add(new T.HemisphereLight('#ffc9a0', '#20204a', 0.5));
-    const key = new T.DirectionalLight('#ffd9b0', 2.2);
+    const key = new T.DirectionalLight('#ffe6f4', 2.2);
     key.position.set(4, 7, 6);
     scene.add(key);
-    const rim = new T.DirectionalLight('#7fb0ff', 1.4);
+    const rim = new T.DirectionalLight('#21e6ff', 3.4);
     rim.position.set(-6, 4, -6);
     scene.add(rim);
+    const rim2 = new T.DirectionalLight('#ff2fa0', 2.8);
+    rim2.position.set(7, 2, -3);
+    scene.add(rim2);
     this.copR = new T.PointLight('#ff2a3c', 0, 18, 1.4);
     this.copR.position.set(-5, 1.6, 3);
     this.copB = new T.PointLight('#2a6bff', 0, 18, 1.4);
@@ -8193,6 +8243,35 @@ class Stage {
     dg.setAttribute('position', new T.Float32BufferAttribute(dp, 3));
     this.dust = new T.Points(dg, new T.PointsMaterial({ color: '#ffcf90', size: 0.05, transparent: true, opacity: 0.8, blending: T.AdditiveBlending, depthWrite: false }));
     scene.add(this.dust);
+
+    // Drift izi: zeminde arka tekerlekten kıvrılan iki neon yay
+    const skidT = tex(T, 1024, 1024, (g, w, h) => {
+      g.clearRect(0, 0, w, h);
+      g.lineCap = 'round';
+      for (const [o, c] of [[0, '#21e6ff'], [58, '#ff2fa0']]) {
+        for (const [lw, a] of [[30, 0.18], [9, 0.95]]) {
+          g.strokeStyle = c; g.globalAlpha = a; g.lineWidth = lw;
+          g.beginPath(); g.moveTo(60, 860 + o); g.bezierCurveTo(250, 980 + o, 540, 900 + o, 640, 590 + o * 0.5); g.stroke();
+        }
+      }
+    });
+    this.skid = new T.Mesh(new T.PlaneGeometry(15, 15), new T.MeshBasicMaterial({ map: skidT, transparent: true, blending: T.AdditiveBlending, depthWrite: false, opacity: 0.9 }));
+    this.skid.rotation.x = -Math.PI / 2;
+    this.skid.position.set(-1.6, 0.035, 0.6);
+    scene.add(this.skid);
+
+    // Yanal duman: arka tekerlekten süzülen küçük bulutlar
+    const puffT = tex(T, 128, 128, (g, w) => {
+      const c = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
+      c.addColorStop(0, 'rgba(255,255,255,.55)'); c.addColorStop(0.5, 'rgba(255,255,255,.18)'); c.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = c; g.fillRect(0, 0, w, w);
+    });
+    this.puffs = [];
+    for (let i = 0; i < 14; i++) {
+      const sp = new T.Sprite(new T.SpriteMaterial({ map: puffT, color: ['#ff6ac0', '#6fe9ff', '#f2f4ff'][i % 3], transparent: true, depthWrite: false, opacity: 0 }));
+      scene.add(sp);
+      this.puffs.push({ sp, life: i / 14 });
+    }
 
     // Temas gölgesi ve neon taban ışığı
     const blob = (inner, outer) => tex(T, 256, 256, (g, w) => {
@@ -8296,15 +8375,22 @@ class Stage {
     const garage = this.mode === 'garage';
     // Araç genişliğe sığsın: kamera uzaklığı en boy oranından gelir
     const dist = Math.max(11, 11 / asp) * (garage ? 0.92 : 1);
-    const lift = portrait ? (garage ? -1.75 : -1.05) : 0;
-    const lateral = !portrait ? 2.2 : 0;
+    // Dikeyde dev başlığın altında, yatayda sol alttaki boşlukta durur
+    const lift = portrait ? (garage ? -1.75 : 0.1) : (garage ? 0 : 1.25);
+    const lateral = !portrait ? (garage ? 2.2 : 2.7) : 0;
     const orbit = Math.sin(t * 0.14) * 0.07;
     const ease = Math.min(1, dt * 3);
     this.cx = this.cx === undefined ? dist : this.cx + (dist - this.cx) * ease;
     this.cl = this.cl === undefined ? lift : this.cl + (lift - this.cl) * ease;
     this.ct = this.ct === undefined ? lateral : this.ct + (lateral - this.ct) * ease;
-    this.cam.position.set(Math.sin(orbit) * this.cx + this.ct, 2.5, Math.cos(orbit) * this.cx);
+    // Geçiş: kamera hızla geri çekilip yükselir, araç noktaya dönüşür
+    const P = this.pull;
+    const back = 1 + P * P * 0.5;
+    this.cam.position.set(Math.sin(orbit) * this.cx * back + this.ct, 2.5 + P * P * 1.2, Math.cos(orbit) * this.cx * back);
     this.cam.lookAt(this.ct, 1.0 + this.cl, 0);
+    // Araç kadrajda noktaya iner; zemindeki iz ve duman onunla söner
+    this.turn.scale.setScalar(Math.max(0.04, 1 - P * 0.96));
+    this.skid.material.opacity = 0.9 * (1 - P);
     // Dar ekranda arka plan küçülür: köprü ve silüet kadraja girer
     const k = Math.max(0.36, Math.min(1, asp / 1.45));
     this.bg.scale.set(k, k, 1);
@@ -8339,6 +8425,15 @@ class Stage {
       d.setY(i, y);
     }
     d.needsUpdate = true;
+    // Duman: dünya koordinatında sola süzülür, seçili açıya bağlı kalmaz
+    for (const f of this.puffs) {
+      f.life += dt * 0.42;
+      if (f.life >= 1) f.life -= 1;
+      const u = f.life;
+      f.sp.position.set(-1.9 - u * 4.8, 0.3 + u * 1.5, 1 - u * 1.8 + Math.sin(f.life * 17) * 0.3);
+      f.sp.scale.setScalar(0.7 + u * 3.3);
+      f.sp.material.opacity = Math.min(1, u * 7) * (1 - u) * 0.62 * (1 - this.pull);
+    }
 
     this.r.render(this.scene, this.cam);
 
@@ -9618,7 +9713,7 @@ class Renderer {
     }
     // Görünmeden önce hazırla: kaydırmada takılma olmasın (karede en fazla 1)
     // Telefonda takılma olmasın diye dört karede bir
-    if (game.state === 'play') {
+    if (game.state === 'play' || game.state === 'drop') {
       if (!this.job) this.prebake(game, c0x, c1x, c0y, c1y);
       this.stepJob(PF.bakeBudget);
     }
@@ -9650,6 +9745,22 @@ class Renderer {
     ctx.globalAlpha = 1;
     this.drawSpeedLines(game, now);
     this.drawOverlay(game, now);
+  }
+
+  // Görünecek parçaları karede en çok birer birer hazırlar: geçişte ekran donmaz
+  warm(game, k = 1) {
+    const cam = game.cam;
+    const hw = cam.halfW * k + 30; const hh = cam.halfH * k + 30;
+    const c0x = Math.floor((cam.x - hw) / CHUNK); const c1x = Math.floor((cam.x + hw) / CHUNK);
+    const c0y = Math.floor((cam.y - hh) / CHUNK); const c1y = Math.floor((cam.y + hh) / CHUNK);
+    for (let cy = c0y; cy <= c1y; cy++) {
+      for (let cx = c0x; cx <= c1x; cx++) {
+        const c = game.world.chunk(cx, cy);
+        c.lastSeen = this.frameId || 0;
+        if (!c.canvas || c.dirty) { this.bake(c); return false; }
+      }
+    }
+    return true;
   }
 
   prebake(game, c0x, c1x, c0y, c1y) {
@@ -10047,6 +10158,40 @@ class Renderer {
       this.playerSprite = carSprite(game.carSpec, game.paint || 0);
     }
     const k = p.len / game.carSpec.len;
+    if (game.drop) {
+      // Düşen araç: yerde büyüyen gölge, ekranın üstünden inen gövde
+      const D = game.drop;
+      const fall = D.y * (game.cam.halfH + 120);
+      const q = k * D.size;
+      this.place(p.x, p.y, p.a);
+      ctx.globalAlpha = 0.55 * D.shadow;
+      const sw = p.len * (0.7 + 0.5 * D.y) * D.size; const sh = p.wid * (0.8 + 0.5 * D.y) * D.size;
+      ctx.drawImage(this.sprites.dark, -sw * 0.75, -sh * 0.75, sw * 1.5, sh * 1.5);
+      ctx.globalAlpha = 1;
+      if (D.y > 0.02) {
+        ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+        const tail = 70 + 230 * D.y;
+        const tw = p.wid * D.size * 1.05;
+        const tg = ctx.createLinearGradient(0, p.y - fall - tail, 0, p.y - fall);
+        tg.addColorStop(0, 'rgba(33,230,255,0)'); tg.addColorStop(1, 'rgba(210,250,255,.8)');
+        ctx.fillStyle = tg;
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.beginPath(); ctx.moveTo(p.x - tw * 0.2, p.y - fall - tail); ctx.lineTo(p.x + tw * 0.2, p.y - fall - tail); ctx.lineTo(p.x + tw / 2, p.y - fall); ctx.lineTo(p.x - tw / 2, p.y - fall); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      this.place(p.x, p.y - fall, p.a);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = CONFIG.playerGlow.alpha;
+      const gw = p.len * CONFIG.playerGlow.scale * D.size; const gh = p.wid * CONFIG.playerGlow.scale * 1.3 * D.size;
+      ctx.drawImage(this.sprites.auras[3], -gw / 2, -gh / 2, gw, gh);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      const w = (this.playerSprite.wu || this.playerSprite.width / SPR) * q;
+      const h = (this.playerSprite.hu || this.playerSprite.height / SPR) * q;
+      ctx.drawImage(this.playerSprite, -w / 2, -h / 2, w, h);
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      return;
+    }
     if (game.giantT > 0 || game.ghostT > 0) {
       ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
       const aura = game.giantT > 0 ? this.sprites.auras[3] : this.sprites.auras[1];
@@ -10751,6 +10896,22 @@ class AudioEngine {
     }
   }
 
+  // BAŞLA: iki kısa 8-bit nota
+  press() {
+    if (!this.ctx || !this.enabled) return;
+    this.tone(880, 0.06, 0.16, 'square');
+    this.tone(1320, 0.09, 0.16, 'square', 0, 0.06);
+  }
+
+  // Yola iniş: gövde vuruşu, lastik cıyaklaması
+  landing() {
+    if (!this.ctx || !this.enabled) return;
+    this.tone(95, 0.3, 0.42, 'sine', 34);
+    this.burst(0.18, 700, 0.3, 'lowpass');
+    this.tone(1120, 0.26, 0.05, 'sawtooth', 780, 0.02);
+    this.burst(0.3, 2100, 0.1, 'bandpass', 1200);
+  }
+
   // Ön izleme eğrisi: 0-1 arası ilerlemeden hız oranı ve gaz
   previewState(pv, now) {
     const u = (now - pv.at) / pv.len;
@@ -11153,6 +11314,328 @@ class AudioEngine {
   }
 }
 
+// --- pixelcars.js ---
+// Garaj arabaları: yandan görünüş, kod ile piksel piksel çizilir. Marka rozeti yoktur.
+// Her araç 120x48 mantıksal tuval, CSS ile keskin büyütülür.
+const PXC_W = 120;
+const PXC_H = 48;
+
+// x0-x1 boy, deck bagaj, hood kaput, roof tavan yüksekliği; cr-rr-rf-cf kabin noktaları; w teker
+const PX_SHAPES = {
+  atmaca: { x0: 8, x1: 112, deck: 22, hood: 23, roof: 10, cr: 26, rr: 36, rf: 66, cf: 80, sill: 36, w: [30, 90], r: 8 },
+  granit: { x0: 10, x1: 110, deck: 15, hood: 20, roof: 7, cr: 13, rr: 17, rf: 68, cf: 82, sill: 34, w: [31, 89], r: 9 },
+  elektra: { x0: 9, x1: 111, deck: 19, hood: 23, roof: 9, cr: 18, rr: 32, rf: 64, cf: 84, sill: 35, w: [31, 90], r: 9 },
+  simsek: { x0: 10, x1: 112, deck: 21, hood: 25, roof: 13, cr: 22, rr: 38, rf: 62, cf: 82, sill: 37, w: [31, 91], r: 8, wing: 1 },
+  cinar: { x0: 14, x1: 106, deck: 23, hood: 23, roof: 11, cr: 30, rr: 40, rf: 64, cf: 76, sill: 36, w: [33, 87], r: 7 },
+  efe: { x0: 8, x1: 112, deck: 22, hood: 22, roof: 11, cr: 30, rr: 38, rf: 68, cf: 78, sill: 36, w: [30, 90], r: 8 },
+  marmara: { x0: 9, x1: 111, deck: 21, hood: 23, roof: 11, cr: 24, rr: 38, rf: 66, cf: 82, sill: 36, w: [31, 90], r: 8 },
+  liva: { x0: 16, x1: 106, deck: 16, hood: 23, roof: 9, cr: 18, rr: 24, rf: 62, cf: 78, sill: 36, w: [33, 87], r: 8, wing: 2 },
+  bozkir: { x0: 10, x1: 110, deck: 14, hood: 18, roof: 6, cr: 12, rr: 15, rf: 66, cf: 74, sill: 32, w: [31, 89], r: 10, rack: 1 },
+};
+
+const pxHex = (c) => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+const pxCss = (r, g, b) => `rgb(${r | 0},${b === undefined ? g : g | 0},${(b ?? g) | 0})`;
+const pxTone = (c, k) => { const [r, g, b] = pxHex(c); return k >= 0 ? pxCss(r + (255 - r) * k, g + (255 - g) * k, b + (255 - b) * k) : pxCss(r * (1 + k), g * (1 + k), b * (1 + k)); };
+
+function pxInside(poly, x, y) {
+  let on = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [ax, ay] = poly[i]; const [bx, by] = poly[j];
+    if ((ay > y) !== (by > y) && x < ((bx - ax) * (y - ay)) / (by - ay) + ax) on = !on;
+  }
+  return on;
+}
+
+function pxWheel(g, x, y, r, hub) {
+  const plot = (rad, col) => {
+    g.fillStyle = col;
+    for (let py = -rad; py <= rad; py++) {
+      for (let px = -rad; px <= rad; px++) if (px * px + py * py <= rad * rad + 1) g.fillRect(x + px, y + py, 1, 1);
+    }
+  };
+  plot(r + 1, '#05050a');
+  plot(r, '#15151d');
+  plot(r - 3, '#a8b4c8');
+  plot(r - 4, '#39415a');
+  g.fillStyle = '#e6eef8';
+  for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) for (let k = 1; k <= r - 4; k++) g.fillRect(x + dx * k, y + dy * k, 1, 1);
+  g.fillStyle = hub;
+  g.fillRect(x - 1, y - 1, 2, 2);
+}
+
+function pxMoto(g, paint) {
+  const c = paint.color; const a = paint.accent || '#ffd23f';
+  pxWheel(g, 30, 37, 9, a);
+  pxWheel(g, 92, 37, 9, a);
+  const rect = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+  rect(32, 30, 56, 3, '#39415a');
+  rect(46, 19, 34, 12, c);
+  rect(46, 19, 34, 2, pxTone(c, 0.45));
+  rect(46, 29, 34, 2, pxTone(c, -0.4));
+  rect(28, 16, 24, 5, '#14141c');
+  rect(18, 18, 14, 3, pxTone(c, -0.2));
+  rect(78, 12, 12, 4, c);
+  rect(88, 15, 4, 20, '#a8b4c8');
+  rect(84, 8, 10, 2, '#14141c');
+  rect(90, 17, 6, 4, '#fff7c8');
+  rect(16, 19, 3, 3, '#ff2346');
+  rect(34, 33, 22, 2, '#d6dde8');
+}
+
+function pxDrawCar(g, car, paint) {
+  // Yerde neon
+  for (let x = 12; x < 108; x++) {
+    g.fillStyle = (x + 1) % 4 ? '#ff2fa0' : '#21e6ff';
+    g.fillRect(x, 45, 1, 1);
+    if (x % 2 === 0 && x > 20 && x < 100) { g.fillStyle = '#7a1a7a'; g.fillRect(x, 46, 1, 1); }
+  }
+  if (car.shape === 'moto') { pxMoto(g, paint); return; }
+  const S = PX_SHAPES[car.shape] || PX_SHAPES.atmaca;
+  const body = [[S.x0, S.sill], [S.x0, S.deck + 3], [S.x0 + 3, S.deck], [S.cr, S.deck], [S.rr, S.roof], [S.rf, S.roof], [S.cf, S.hood], [S.x1 - 8, S.hood + 2], [S.x1, S.hood + 6], [S.x1, S.sill]];
+  const belt = Math.max(S.deck, S.hood) + 1;
+  const c = paint.color;
+  const roof = paint.roof || c;
+  const accent = paint.accent || car.accent || '#ffffff';
+  for (let y = 0; y < PXC_H; y++) {
+    for (let x = 0; x < PXC_W; x++) {
+      if (!pxInside(body, x + 0.5, y + 0.5)) continue;
+      const edge = !pxInside(body, x - 0.5, y + 0.5) || !pxInside(body, x + 1.5, y + 0.5) || !pxInside(body, x + 0.5, y - 0.5) || !pxInside(body, x + 0.5, y + 1.5);
+      let col;
+      if (edge) col = '#0a0814';
+      else if (y < belt) col = pxTone(roof, y < S.roof + 2 ? 0.34 : 0.1);
+      else if (y < belt + 2) col = pxTone(c, 0.5);
+      else if (y < S.sill - 5) col = pxTone(c, 0);
+      else if (y < S.sill - 2) col = pxTone(c, -0.35);
+      else col = pxTone(c, -0.62);
+      g.fillStyle = col;
+      g.fillRect(x, y, 1, 1);
+    }
+  }
+  // Camlar
+  const glass = [[S.rr + 2, S.roof + 2], [S.rf - 1, S.roof + 2], [S.cf - 3, belt - 1], [S.cr + 5, belt - 1]];
+  const mid = Math.round((S.rr + S.rf) / 2) + 2;
+  for (let y = S.roof; y < belt; y++) {
+    for (let x = S.cr; x < S.cf; x++) {
+      if (!pxInside(glass, x + 0.5, y + 0.5)) continue;
+      const u = (y - S.roof) / (belt - S.roof);
+      g.fillStyle = x === mid || x === mid + 1 ? '#0a0814' : (x + y) % 11 < 2 ? '#d8fbff' : u < 0.5 ? '#21e6ff' : '#2a4ea8';
+      g.fillRect(x, y, 1, 1);
+    }
+  }
+  // Şerit, kapı, kol
+  g.fillStyle = accent;
+  g.fillRect(S.x0 + 3, belt + 5, S.x1 - S.x0 - 6, 1);
+  g.fillStyle = '#0a0814';
+  g.fillRect(mid, belt, 1, S.sill - belt - 2);
+  g.fillRect(mid + 3, belt + 2, 3, 1);
+  // Farlar
+  g.fillStyle = '#fff7c8'; g.fillRect(S.x1 - 5, S.hood + 6, 5, 3);
+  g.fillStyle = 'rgba(255,240,180,.35)'; g.fillRect(S.x1, S.hood + 5, 7, 5);
+  g.fillStyle = '#ff2346'; g.fillRect(S.x0, S.deck + 4, 3, 4);
+  if (S.wing) {
+    g.fillStyle = '#0a0814';
+    const y0 = S.wing === 1 ? S.deck - 8 : S.deck - 2;
+    g.fillRect(S.x0 - 3, y0, 22, 3);
+    g.fillRect(S.x0 + 5, y0 + 3, 2, S.deck - y0 - 3);
+    g.fillRect(S.x0 + 14, y0 + 3, 2, S.deck - y0 - 3);
+    g.fillStyle = accent; g.fillRect(S.x0 - 3, y0, 22, 1);
+  }
+  if (S.rack) {
+    g.fillStyle = '#0a0814';
+    g.fillRect(S.rr + 2, S.roof - 3, S.rf - S.rr - 4, 2);
+    for (let x = S.rr + 4; x < S.rf - 4; x += 12) g.fillRect(x, S.roof - 2, 2, 3);
+  }
+  // Tavanda neon yansıma
+  g.fillStyle = '#21e6ff'; g.fillRect(S.rr + 1, S.roof, 12, 1);
+  g.fillStyle = '#ff6ac0'; g.fillRect(S.rf - 10, S.roof, 9, 1);
+  pxWheel(g, S.w[0], S.sill + 1, S.r, accent);
+  pxWheel(g, S.w[1], S.sill + 1, S.r, accent);
+}
+
+const pxCache = new Map();
+function pixelCar(car, paintIdx = 0) {
+  const paint = car.paints[paintIdx] || car.paints[0];
+  const key = `${car.id}:${paintIdx}`;
+  if (pxCache.has(key)) return pxCache.get(key);
+  const c = document.createElement('canvas');
+  c.width = PXC_W; c.height = PXC_H;
+  const g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  pxDrawCar(g, car, { ...paint, accent: paint.accent });
+  pxCache.set(key, c);
+  return c;
+}
+
+// Hazır görüntüyü verilen tuvale kopyalar: aynı görsel birden çok yerde kullanılabilir
+function paintPixelCar(target, car, paintIdx = 0) {
+  const src = pixelCar(car, paintIdx);
+  target.width = PXC_W; target.height = PXC_H;
+  const g = target.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.drawImage(src, 0, 0);
+}
+
+// --- pixelmenu.js ---
+// Ana ekran: kapak görseli tek mantıksal tuvalde canlanır. Duman, yıldız ve COVER_Kıvılcım tam piksel ızgarasındadır.
+const COVER_SIZE = 364; // Kapağın mantıksal çözünürlüğü
+const COVER_FPS = 16; // DüşüCOVER_K tempo piksel hissi verir, pil harcamaz
+const COVER_K = COVER_SIZE / 1092;
+const PUFF_TONES = ['#cdbcd8', '#a993c4', '#7f6ca2', '#58487c'];
+const COVER_STARS = [[315, 45], [912, 20], [918, 205], [120, 22], [214, 60], [688, 18], [860, 118], [500, 26], [952, 92], [612, 40], [65, 95], [234, 130]];
+const COVER_SPARKS = [[425, 690], [585, 706], [735, 800], [920, 745]];
+
+// Köşeli COVER_KüçüCOVER_K bulut: yuvarlak COVER_Kümelerden, 3 tonlu
+function coverPuff(seed, r) {
+  const size = r * 2 + 4;
+  const c = document.createElement('canvas');
+  c.width = size; c.height = size;
+  const g = c.getContext('2d');
+  let s = seed;
+  const rnd = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
+  const blobs = [];
+  for (let i = 0; i < 7; i++) blobs.push([size / 2 + (rnd() - 0.5) * r * 1.2, size / 2 + (rnd() - 0.4) * r * 0.9, r * (0.38 + rnd() * 0.3)]);
+  for (let tone = 3; tone >= 0; tone--) {
+    g.fillStyle = PUFF_TONES[tone];
+    for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        for (const [bx, by, br] of blobs) {
+          const dy = y - by + (3 - tone) * 1.6; const dx = x - bx + (3 - tone) * 0.6;
+          const rr = br - (3 - tone) * 0.9;
+          if (rr > 0 && dx * dx + dy * dy < rr * rr) { g.fillRect(x, y, 1, 1); break; }
+        }
+      }
+    }
+  }
+  return c;
+}
+
+class PixelMenu {
+  constructor(canvas) {
+    this.c = canvas;
+    this.g = canvas.getContext('2d');
+    this.g.imageSmoothingEnabled = false;
+    this.img = new Image();
+    this.img.src = 'assets/ui/cover.png';
+    this.ready = false;
+    this.img.onload = () => { this.ready = true; this.layout(); };
+    this.on = false;
+    this.acc = 0;
+    this.t = 0;
+    this.sparks = [];
+    this.top = 0; // Üste eklenen göCOVER_K sırası
+    this.clouds = [];
+    const spots = [[8, 288, 30, 5], [52, 318, 24, 3], [112, 345, 28, -4], [330, 292, 22, -3], [300, 335, 30, 4], [28, 238, 20, 4], [188, 340, 24, 3]];
+    spots.forEach(([x, y, r, drift], i) => this.clouds.push({ x, y, r, drift, ph: i * 1.7, s: coverPuff(1234 + i * 97, r) }));
+    for (let i = 0; i < 20; i++) this.sparks.push({ x: 0, y: 0, vx: 0, vy: 0, life: 0, hot: 0 });
+  }
+
+  // Yerleşim: yazı ve araba hep görünür, ölçek tam sayı katına oturtulur
+  layout() {
+    const vw = window.innerWidth; const vh = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const wide = vw > vh * 1.15;
+    const snap = (css) => Math.max(1, Math.round((css * dpr) / COVER_SIZE)) * COVER_SIZE / dpr;
+    const c = this.c;
+    if (wide) {
+      const S = snap(vh);
+      const scale = S / COVER_SIZE;
+      const rows = Math.max(0, Math.ceil((vh - S) / scale));
+      document.documentElement.style.setProperty('--cover-w', `${S}px`);
+      this.setCanvas(rows, S, scale, 0, 0);
+    } else {
+      const panel = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--px-panel')) || 214;
+      const area = vh - panel;
+      const S = snap(vw / 0.66);
+      const scale = S / COVER_SIZE;
+      const rows = Math.max(0, Math.ceil((area - S) / scale));
+      // Yazının sol ucu ile rüzgârlıCOVER_K aynı kadraja girer
+      const left = -Math.min(S - vw, Math.max(0, S * 0.232 - Math.max(0, (vw - S * 0.66) / 2)));
+      this.setCanvas(rows, S, scale, left, 0);
+    }
+    c.dataset.ready = '1';
+    this.draw();
+  }
+
+  setCanvas(rows, S, scale, left, top) {
+    const c = this.c;
+    this.top = rows;
+    c.width = COVER_SIZE; c.height = COVER_SIZE + rows;
+    c.style.width = `${S}px`;
+    c.style.height = `${(COVER_SIZE + rows) * scale}px`;
+    c.style.left = `${left}px`;
+    c.style.top = `${top}px`;
+    this.g.imageSmoothingEnabled = false;
+  }
+
+  start() { this.on = true; this.layout(); }
+
+  stop() { this.on = false; }
+
+  frame(dt) {
+    if (!this.on || !this.ready) return;
+    this.acc += dt;
+    if (this.acc < 1 / COVER_FPS) return;
+    const step = this.acc;
+    this.acc = 0;
+    this.t += step;
+    this.update(step);
+    this.draw();
+  }
+
+  update(dt) {
+    for (const s of this.sparks) {
+      if (s.life > 0) {
+        s.life -= dt; s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 150 * dt;
+      } else if (Math.random() < 0.34) {
+        const [x, y] = COVER_SPARKS[Math.floor(Math.random() * COVER_SPARKS.length)];
+        s.x = x * COVER_K; s.y = y * COVER_K;
+        s.vx = -14 - Math.random() * 42; s.vy = -24 + Math.random() * 36;
+        s.life = 0.25 + Math.random() * 0.5;
+        s.hot = Math.random();
+      }
+    }
+  }
+
+  draw() {
+    if (!this.ready) return;
+    const { g, img, t } = this;
+    const dy = this.top;
+    if (dy) {
+      // Eklenen göCOVER_K: yalnız en üstteki boş sıralar ileri geri yansır, yazıya ulaşmaz
+      for (let y = 0; y < dy; y++) {
+        const m = y % 16 < 8 ? y % 16 : 15 - (y % 16);
+        g.drawImage(img, 0, m, COVER_SIZE, 1, 0, dy - y - 1, COVER_SIZE, 1);
+      }
+    }
+    g.drawImage(img, 0, dy);
+    for (let i = 0; i < COVER_STARS.length; i++) {
+      const [sx, sy] = COVER_STARS[i];
+      const b = Math.sin(t * (1.3 + (i % 5) * 0.55) + i * 2.1);
+      if (b < 0) continue;
+      const x = Math.round(sx * COVER_K); const y = Math.round(sy * COVER_K) + dy;
+      g.fillStyle = b > 0.7 ? '#ffffff' : '#a9c4ff';
+      g.fillRect(x, y, 1, 1);
+      if (b > 0.7) { g.fillStyle = 'rgba(200,220,255,.75)'; g.fillRect(x - 1, y, 3, 1); g.fillRect(x, y - 1, 1, 3); }
+    }
+    // Far yanıp sönmesi
+    if (Math.sin(t * 9) > 0.1) {
+      g.fillStyle = 'rgba(255,250,200,.85)';
+      g.fillRect(137, 229 + dy, 7, 2);
+      g.fillRect(183, 234 + dy, 8, 2);
+    }
+    for (const f of this.clouds) {
+      const x = Math.round(f.x + Math.sin(t * 0.22 + f.ph) * f.drift * 2.4 + ((t * f.drift * 0.5) % 18) - 9);
+      const y = Math.round(f.y + Math.sin(t * 0.34 + f.ph) * 2) + dy;
+      g.drawImage(f.s, x - f.r, y - f.r);
+    }
+    for (const s of this.sparks) {
+      if (s.life <= 0) continue;
+      g.fillStyle = s.hot > 0.6 ? '#fff4a8' : s.hot > 0.25 ? '#ffb02e' : '#ff6a1f';
+      g.fillRect(Math.round(s.x), Math.round(s.y) + dy, 1, 1);
+    }
+  }
+}
+
 // --- ui.js ---
 // Menüler ve oyun içi gösterge. HUD yalnızca değer değişince DOM'a yazar.
 
@@ -11182,15 +11665,18 @@ class UI {
     const a = this.actions;
     const click = (id, fn) => $(id).addEventListener('click', () => { a.tap(); fn(); });
     click('btn-play', () => a.start());
+    // Basınca 3 piksel çöker, 8-bit bip ve kısa titreşim
+    $('btn-play').addEventListener('pointerdown', () => { a.press(); $('btn-play').classList.add('down'); });
+    for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) $('btn-play').addEventListener(ev, () => $('btn-play').classList.remove('down'));
     click('btn-mute', () => { const d2 = this.storage.data; d2.settings.sound = !d2.settings.sound; this.storage.save(); this.syncSettings(); a.applySettings(); });
-    click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
-    click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
+    click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
+    click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
     click('car-prev', () => { this.stepCar(-1); a.preview(CONFIG.cars[this.gi]); });
     click('car-next', () => { this.stepCar(1); a.preview(CONFIG.cars[this.gi]); });
-    click('btn-settings', () => { this.show('settings'); a.stage(null); });
-    click('btn-howto', () => { this.show('howto'); a.stage(null); });
+    click('btn-settings', () => { this.show('settings'); });
+    click('btn-howto', () => { this.show('howto'); });
     for (const b of document.querySelectorAll('[data-back]')) {
-      b.addEventListener('click', () => { a.tap(); this.refreshMenu(); this.show(b.dataset.back); a.stage(b.dataset.back); a.carChanged(); });
+      b.addEventListener('click', () => { a.tap(); this.refreshMenu(); this.show(b.dataset.back); a.carChanged(); a.menuShown(); });
     }
     click('btn-retry', () => a.play());
     click('btn-over-menu', () => a.toMenu());
@@ -11229,22 +11715,8 @@ class UI {
     $('btn-mute').classList.toggle('muted', !this.storage.data.settings.sound);
   }
 
-  // Yazılar harf harf belirir: her harf kendi gecikmesiyle neon gibi yanar
   intro() {
-    const fill = (id, text, step, start, cls) => {
-      const el = $(id);
-      el.textContent = '';
-      [...text].forEach((ch, i) => {
-        const s = document.createElement('i');
-        s.className = cls;
-        s.setAttribute('aria-hidden', 'true');
-        s.textContent = ch === ' ' ? '\u00a0' : ch;
-        s.style.animationDelay = `${start + i * step}ms`;
-        el.appendChild(s);
-      });
-    };
-    fill('logo', 'DRIFT LAB', 95, 150, 'lt');
-    fill('maker', 'Çağlar Sağlam tarafından yapıldı', 24, 1150, 'mk');
+    $('maker').textContent = 'Çağlar Sağlam tarafından yapıldı';
   }
 
   show(name) {
@@ -11446,7 +11918,7 @@ class UI {
     const owned = d.owned.includes(car.id);
     const selected = d.selected === car.id;
     const paintI = owned ? this.storage.paintIndex(car.id) : (this.gp || 0);
-    this.actions.previewCar(car, paintI);
+    paintPixelCar($('px-car'), car, paintI);
     const swatch = $('garage-paints');
     swatch.textContent = '';
     car.paints.forEach((p, i) => {
@@ -11515,7 +11987,8 @@ class UI {
       const b = document.createElement('button');
       const has = d.owned.includes(c.id);
       b.className = `thumb${i === this.gi ? ' on' : ''}${has ? '' : ' locked'}${d.selected === c.id ? ' selected' : ''}`;
-      const art = carSprite(c, this.storage.paintIndex(c.id));
+      const art = document.createElement('canvas');
+      paintPixelCar(art, c, this.storage.paintIndex(c.id));
       art.className = 'car-art';
       const label = document.createElement('span');
       label.textContent = has ? c.name : `${c.cost}`;
@@ -11541,81 +12014,28 @@ class UI {
 }
 
 // --- transition.js ---
-// BAŞLA geçişi: hız çizgileriyle yakınlaşma, beyaz parlama, sonra oyuna dairesel açılış. Tek tuval, DOM yükü yok.
-const RUSH = 720; // Çizgilerin hızlandığı süre (ms)
-const IRIS = 520; // Dairesel açılış süresi (ms)
+// BAŞLA geçişi zaman çizelgesi (ms). Toplam 2 saniyenin altında kalır.
+const PHASE = {
+  press: 130, // Düğme çöker, bip
+  away: 880, // Kapak küçülüp solar, arkasından yol görünür
+  fall: 520, // Küçük araba yola düşer; kapak solmadan başlar
+  settle: 400, // Çarpma, sarsıntı, gerçek boya dönüş
+};
+const FALL_AT = PHASE.press + PHASE.away - 180;
+const TOTAL = FALL_AT + PHASE.fall + PHASE.settle;
 
-function warp(canvas, midpoint, done) {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const dpr = Math.min(1.5, window.devicePixelRatio || 1);
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
-  canvas.hidden = false;
-  const g = canvas.getContext('2d');
-  g.scale(dpr, dpr);
-  const R = Math.hypot(w, h) * 0.56;
-  const cx = w / 2;
-  const cy = h * 0.46;
-  const lines = [];
-  for (let i = 0; i < 90; i++) {
-    lines.push({ a: Math.random() * 6.283, r: 0.1 + Math.random() * 0.9, sp: 0.6 + Math.random() * 1.2, w: 0.8 + Math.random() * 2.6, hot: Math.random() < 0.3 });
+// t ms: düşüşün başından itibaren. drop: 1 gökte, 0 yolda; size: araç oranı
+function dropCurve(t) {
+  if (t < 0) return { drop: 1, size: 0.22, shadow: 0.1 };
+  if (t < PHASE.fall) {
+    const u = t / PHASE.fall;
+    return { drop: 1 - u * u, size: 0.22 + 0.4 * u * u, shadow: 0.1 + 0.8 * u };
   }
-  const t0 = performance.now();
-  let swapped = false;
-  const step = (now) => {
-    const t = now - t0;
-    g.clearRect(0, 0, w, h);
-    if (t < RUSH) {
-      const k = t / RUSH;
-      const e = k * k;
-      g.fillStyle = `rgba(4,6,16,${e * 0.82})`;
-      g.fillRect(0, 0, w, h);
-      g.lineCap = 'round';
-      for (const l of lines) {
-        const head = ((l.r + e * l.sp * 2.4) % 1) * R * (0.5 + e);
-        const len = 30 + e * R * 0.62 * l.sp;
-        const ca = Math.cos(l.a); const sa = Math.sin(l.a);
-        g.strokeStyle = l.hot ? 'rgba(125,255,207,.9)' : 'rgba(255,255,255,.85)';
-        g.globalAlpha = Math.min(1, k * 2.2);
-        g.lineWidth = l.w * (1 + e * 2);
-        g.beginPath();
-        g.moveTo(cx + ca * head, cy + sa * head);
-        g.lineTo(cx + ca * (head + len), cy + sa * (head + len));
-        g.stroke();
-      }
-      g.globalAlpha = 1;
-      if (k > 0.7) {
-        g.fillStyle = `rgba(255,255,255,${(k - 0.7) / 0.3})`;
-        g.fillRect(0, 0, w, h);
-      }
-      requestAnimationFrame(step);
-      return;
-    }
-    if (!swapped) {
-      swapped = true;
-      midpoint();
-    }
-    const k = Math.min(1, (t - RUSH) / IRIS);
-    const e = 1 - (1 - k) * (1 - k) * (1 - k);
-    g.fillStyle = '#04060f';
-    g.fillRect(0, 0, w, h);
-    g.globalCompositeOperation = 'destination-out';
-    g.beginPath();
-    g.arc(cx, h / 2, e * R * 1.05, 0, 6.283);
-    g.fill();
-    g.globalCompositeOperation = 'source-over';
-    // Açılan dairenin neon kenarı
-    g.strokeStyle = `rgba(125,255,207,${1 - k})`;
-    g.lineWidth = 6;
-    g.beginPath();
-    g.arc(cx, h / 2, e * R * 1.05, 0, 6.283);
-    g.stroke();
-    if (k < 1) { requestAnimationFrame(step); return; }
-    canvas.hidden = true;
-    if (done) done();
-  };
-  requestAnimationFrame(step);
+  const u = Math.min(1, (t - PHASE.fall) / PHASE.settle);
+  // Yere değince şişer, sonra gerçek boyuna oturur
+  const v = u - 1;
+  const back = 1 + 2.4 * v * v * v + 1.4 * v * v;
+  return { drop: 0, size: 0.62 + 0.38 * back, shadow: 1 };
 }
 
 // --- main.js ---
@@ -11632,7 +12052,8 @@ game.world.onRelease = (c) => renderer.releaseChunk(c);
 game.carSpec = storage.selectedCar();
 game.paint = storage.paintIndex(game.carSpec.id);
 
-let stage = null;
+const cover = new PixelMenu(document.getElementById('cover'));
+const menuEl = document.getElementById('menu');
 const params = new URLSearchParams(location.search);
 let paused = false;
 let accumulator = 0;
@@ -11679,7 +12100,7 @@ function play() {
   ui.setHud(true);
   game.paint = storage.paintIndex(storage.selectedCar().id);
   game.start(storage.selectedCar(), { startTime, god });
-  showStage(null);
+  cover.stop();
   audio.setEngine(storage.selectedCar().engine);
   perf.i = 0;
   perf.count = 0;
@@ -11689,20 +12110,82 @@ function play() {
   keepAwake(true);
 }
 
-// BAŞLA: motor marşı ve sinematik geçiş. Otomatik testler ve hareket azaltma tercihinde doğrudan başlar
-let starting = false;
+// BAŞLA: araba küçülür, kadraj bulanır, küçük araba gökten yola düşer, oyun kesintisiz başlar.
+// Otomatik testler ve hareket azaltma tercihinde doğrudan başlar.
+let film = null;
 function start() {
-  if (starting) return;
+  if (film) return;
   const quick = (navigator.webdriver && !params.has('fx')) || matchMedia('(prefers-reduced-motion: reduce)').matches;
   audio.unlock();
   if (quick) { play(); return; }
-  starting = true;
-  audio.preview(storage.selectedCar().engine, 'start');
-  document.body.classList.add('warping');
-  warp(document.getElementById('warp'), () => {
-    document.body.classList.remove('warping');
-    play();
-  }, () => { starting = false; });
+  film = { t0: performance.now(), left: false, landed: false, released: false };
+  prepareWorld();
+}
+
+// Dünya, menünün arkasında kurulur: 3B sahne örtüyken parça parça hazırlanır, ekran donmaz
+function prepareWorld() {
+  const d = storage.data.dev;
+  const startTime = params.has('t') ? Number(params.get('t')) : (d.startTime || CONFIG.dev.startTime);
+  const god = params.get('god') === '1' || d.god || CONFIG.dev.godMode;
+  game.paint = storage.paintIndex(storage.selectedCar().id);
+  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld });
+  menuWorld = false;
+  game.holdForDrop();
+  input.clear();
+}
+
+// Menü beklerken bir sonraki koşunun haritası sessizce hazırlanır. BAŞLA'ya basınca iş kalmaz.
+let menuWorld = false;
+let warmT = 0;
+let warmDone = false;
+function prewarmWorld() {
+  if (game.state !== 'attract' || film) return;
+  game.start(storage.selectedCar(), { startTime: 0, god: false });
+  game.holdForDrop();
+  game.updateCamera(1 / 60);
+  game.state = 'attract';
+  game.drop = null;
+  menuWorld = true;
+  warmDone = false;
+}
+
+function stepFilm(now) {
+  const f = film;
+  const t = now - f.t0;
+  // Kapak CSS ile küçülüp solar: yalnız dönüşüm, kare bütçesi harcamaz; arkasında yol çizilir
+  if (!f.left && t >= PHASE.press) {
+    f.left = true;
+    document.getElementById('menu').classList.add('leaving');
+    cover.stop();
+    keepAwake(true);
+  }
+  if (!f.cleared && t >= PHASE.press + PHASE.away) {
+    f.cleared = true;
+    ui.hideAll();
+    document.getElementById('menu').classList.remove('leaving');
+    ui.resetHud();
+  }
+  const c = dropCurve(t - FALL_AT);
+  if (game.drop) { game.drop.y = c.drop; game.drop.size = c.size; game.drop.shadow = c.shadow; }
+  if (!f.landed && t >= FALL_AT + PHASE.fall) {
+    f.landed = true;
+    game.landDrop();
+    audio.landing();
+    audio.preview(storage.selectedCar().engine, 'start');
+    vibrate([40, 30, 25]);
+    ui.setHud(true);
+  }
+  if (!f.released && t >= TOTAL - 90) {
+    f.released = true;
+    game.releaseDrop();
+    audio.setEngine(storage.selectedCar().engine);
+    perf.i = 0;
+    perf.count = 0;
+    hintT = storage.data.tutorial ? 0 : 5;
+    ui.showHint(hintT > 0);
+    if (hintT > 0) { storage.data.tutorial = true; storage.save(); }
+  }
+  if (t >= TOTAL) film = null;
 }
 
 function toMenu() {
@@ -11714,40 +12197,11 @@ function toMenu() {
   ui.refreshMenu();
   ui.show('menu');
   ui.intro();
-  showStage('menu');
+  cover.start();
   keepAwake(false);
-}
-
-// 3B sahne: seçili araç, seçili boya
-function showStage(mode) {
-  if (!stage || !stage.ok) return;
-  stage.setMode(mode);
-  if (mode) syncStage();
-}
-
-function syncStage(car = storage.selectedCar(), paintIdx = storage.paintIndex(car.id)) {
-  if (!stage || !stage.ok) return;
-  const paint = car.paints[paintIdx] || car.paints[0];
-  stage.setCar(car.shape, { ...paint, accent: paint.accent || car.accent });
-  stage.setGlow(paint.color);
-}
-
-function loadThree() {
-  if (!document.getElementById('stage3d')) return;
-  const s = document.createElement('script');
-  s.src = 'vendor/three.min.js';
-  s.onload = () => {
-    try {
-      stage = new Stage(document.getElementById('stage3d'));
-    } catch { stage = null; }
-    if (stage && stage.ok) {
-      document.body.classList.add('has3d');
-      const on = ['menu', 'garage'].find((id) => !document.getElementById(id).hidden);
-      showStage(on || null);
-      if (!on) stage.setMode(null);
-    }
-  };
-  document.body.appendChild(s);
+  menuWorld = false;
+  warmDone = false;
+  setTimeout(prewarmWorld, 1300); // Giriş animasyonu bitsin
 }
 
 function pause() {
@@ -11768,10 +12222,11 @@ function resume() {
 const ui = new UI(storage, {
   tap() { audio.unlock(); },
   play, start, toMenu, pause, resume, applySettings,
+  press() { audio.unlock(); audio.press(); vibrate(16); },
   preview(car) { audio.unlock(); audio.preview(car.engine, 'rev'); },
   carChanged() { game.carSpec = storage.selectedCar(); game.paint = storage.paintIndex(game.carSpec.id); },
-  previewCar(car, paintIdx) { syncStage(car, paintIdx); },
-  stage(mode) { showStage(mode); },
+  menuShown() { cover.start(); },
+  menuHidden() { cover.stop(); },
   purchased() { audio.purchase(); vibrate([30, 30, 60]); },
 });
 
@@ -11829,7 +12284,7 @@ function frame(now) {
   const elapsed = Math.min(0.1, (now - last) / 1000);
   last = now;
   const t0 = performance.now();
-  if (stage && stage.mode) stage.frame(now, elapsed);
+  if (!menuEl.hidden) cover.frame(elapsed);
 
   if (!paused) {
     accumulator += elapsed;
@@ -11847,7 +12302,10 @@ function frame(now) {
       if (hintT <= 0) ui.showHint(false);
     }
   }
-  if (game.state !== 'attract') renderer.draw(game, now);
+  // Menü beklerken dünya parça parça hazırlanır; geçişin ilk karesi hazır parçalarla çizilir
+  if (menuWorld && !warmDone && game.state === 'attract' && ++warmT % 5 === 0) warmDone = renderer.warm(game, 2);
+  else if (game.state !== 'attract') renderer.draw(game, now);
+  if (film) stepFilm(now);
   audio.update(game, !paused, now);
 
   hudT -= elapsed;
@@ -11883,7 +12341,7 @@ function frame(now) {
 let lastBack = 0;
 function handleBack() {
   const visible = (id) => !document.getElementById(id).hidden;
-  if (visible('splash')) return false;
+  if (visible('splash') || film) return false;
   if (game.state === 'play' || game.state === 'dying' || game.state === 'sinking') {
     if (paused) resume(); else pause();
     return false;
@@ -11898,7 +12356,7 @@ function handleBack() {
   }
   ui.refreshMenu();
   ui.show('menu');
-  showStage('menu');
+  cover.start();
   return false;
 }
 globalThis.__gameBack = handleBack;
@@ -11917,11 +12375,11 @@ function boot() {
   input.attach(canvas);
   applySettings();
   if (document.fonts) {
-    for (const f of ['800 30px Nunito', '400 30px Bungee', '400 30px Pacifico', '400 30px Anton', '400 30px Righteous', '400 30px Lobster', '400 30px "Tilt Neon"', '400 30px Monoton', '500 30px Oswald', 'italic 400 30px Playfair']) document.fonts.load(f, 'ÇŞĞİçşğı').catch(() => {});
+    for (const f of ['800 30px Nunito', '400 30px Bungee', '400 30px Pacifico', '400 30px Anton', '400 30px Righteous', '400 30px Lobster', '400 30px "Tilt Neon"', '400 30px Monoton', '500 30px Oswald', 'italic 400 30px Playfair', '400 16px "Press Start"', '400 16px Pixelify', '700 16px Pixelify']) document.fonts.load(f, 'ÇŞĞİçşğı').catch(() => {});
   }
   resize();
-  window.addEventListener('resize', () => { resize(); if (stage) stage.resize(); });
-  window.addEventListener('orientationchange', resize);
+  window.addEventListener('resize', () => { resize(); cover.layout(); });
+  window.addEventListener('orientationchange', () => { resize(); cover.layout(); });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       if (game.state === 'play') pause();
@@ -11933,7 +12391,6 @@ function boot() {
 
   game.startAttract();
   requestAnimationFrame(frame);
-  loadThree();
   loadAtlas(() => { renderer.useAtlas(); ui.atlasLoaded(); });
   ui.splash(() => { toMenu(); });
 
@@ -11948,7 +12405,7 @@ function boot() {
 }
 
 // Test ve geliştirici erişimi
-globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, get stage() { return stage; } };
+globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover };
 
 boot();
 

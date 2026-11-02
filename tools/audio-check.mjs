@@ -14,6 +14,7 @@ const r = await p.evaluate(async () => {
   await a.ctx.resume();
   const an = a.ctx.createAnalyser();
   an.fftSize = 8192;
+  await new Promise((r2) => setTimeout(r2, 800));
   a.master.connect(an);
   const buf = new Float32Array(an.fftSize);
   const f = new Float32Array(an.frequencyBinCount);

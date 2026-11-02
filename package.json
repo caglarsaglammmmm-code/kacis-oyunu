@@ -1,6 +1,6 @@
 {
   "name": "drift-lab",
-  "version": "8.0.0",
+  "version": "10.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,7 @@
     "bundle": "node tools/bundle-file.mjs",
     "serve": "node tools/serve.mjs",
     "e2e": "node tools/e2e.mjs",
-    "icons": "node tools/make-icons.mjs",
+    "icons": "node tools/make-pixel-assets.mjs",
     "android:build": "node tools/build-android.mjs"
   },
   "dependencies": {
@@ -22,9 +22,12 @@
     "@fontsource/monoton": "^5.3.0",
     "@fontsource/oswald": "^5.3.0",
     "@fontsource/pacifico": "^5.3.0",
+    "@fontsource/pixelify-sans": "^5.3.0",
+    "@fontsource/press-start-2p": "^5.3.0",
     "@fontsource/righteous": "^5.3.0",
     "@fontsource/tilt-neon": "^5.3.0",
     "esbuild": "^0.28.2",
+    "playwright-core": "^1.64.1",
     "puppeteer-core": "^24.0.0",
     "three": "^0.170.0"
   }

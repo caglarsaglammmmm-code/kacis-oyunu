@@ -1271,7 +1271,7 @@ export class Renderer {
     }
     // Görünmeden önce hazırla: kaydırmada takılma olmasın (karede en fazla 1)
     // Telefonda takılma olmasın diye dört karede bir
-    if (game.state === 'play') {
+    if (game.state === 'play' || game.state === 'drop') {
       if (!this.job) this.prebake(game, c0x, c1x, c0y, c1y);
       this.stepJob(PF.bakeBudget);
     }
@@ -1303,6 +1303,22 @@ export class Renderer {
     ctx.globalAlpha = 1;
     this.drawSpeedLines(game, now);
     this.drawOverlay(game, now);
+  }
+
+  // Görünecek parçaları karede en çok birer birer hazırlar: geçişte ekran donmaz
+  warm(game, k = 1) {
+    const cam = game.cam;
+    const hw = cam.halfW * k + 30; const hh = cam.halfH * k + 30;
+    const c0x = Math.floor((cam.x - hw) / CHUNK); const c1x = Math.floor((cam.x + hw) / CHUNK);
+    const c0y = Math.floor((cam.y - hh) / CHUNK); const c1y = Math.floor((cam.y + hh) / CHUNK);
+    for (let cy = c0y; cy <= c1y; cy++) {
+      for (let cx = c0x; cx <= c1x; cx++) {
+        const c = game.world.chunk(cx, cy);
+        c.lastSeen = this.frameId || 0;
+        if (!c.canvas || c.dirty) { this.bake(c); return false; }
+      }
+    }
+    return true;
   }
 
   prebake(game, c0x, c1x, c0y, c1y) {
@@ -1700,6 +1716,40 @@ export class Renderer {
       this.playerSprite = carSprite(game.carSpec, game.paint || 0);
     }
     const k = p.len / game.carSpec.len;
+    if (game.drop) {
+      // Düşen araç: yerde büyüyen gölge, ekranın üstünden inen gövde
+      const D = game.drop;
+      const fall = D.y * (game.cam.halfH + 120);
+      const q = k * D.size;
+      this.place(p.x, p.y, p.a);
+      ctx.globalAlpha = 0.55 * D.shadow;
+      const sw = p.len * (0.7 + 0.5 * D.y) * D.size; const sh = p.wid * (0.8 + 0.5 * D.y) * D.size;
+      ctx.drawImage(this.sprites.dark, -sw * 0.75, -sh * 0.75, sw * 1.5, sh * 1.5);
+      ctx.globalAlpha = 1;
+      if (D.y > 0.02) {
+        ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+        const tail = 70 + 230 * D.y;
+        const tw = p.wid * D.size * 1.05;
+        const tg = ctx.createLinearGradient(0, p.y - fall - tail, 0, p.y - fall);
+        tg.addColorStop(0, 'rgba(33,230,255,0)'); tg.addColorStop(1, 'rgba(210,250,255,.8)');
+        ctx.fillStyle = tg;
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.beginPath(); ctx.moveTo(p.x - tw * 0.2, p.y - fall - tail); ctx.lineTo(p.x + tw * 0.2, p.y - fall - tail); ctx.lineTo(p.x + tw / 2, p.y - fall); ctx.lineTo(p.x - tw / 2, p.y - fall); ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      this.place(p.x, p.y - fall, p.a);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = CONFIG.playerGlow.alpha;
+      const gw = p.len * CONFIG.playerGlow.scale * D.size; const gh = p.wid * CONFIG.playerGlow.scale * 1.3 * D.size;
+      ctx.drawImage(this.sprites.auras[3], -gw / 2, -gh / 2, gw, gh);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      const w = (this.playerSprite.wu || this.playerSprite.width / SPR) * q;
+      const h = (this.playerSprite.hu || this.playerSprite.height / SPR) * q;
+      ctx.drawImage(this.playerSprite, -w / 2, -h / 2, w, h);
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      return;
+    }
     if (game.giantT > 0 || game.ghostT > 0) {
       ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
       const aura = game.giantT > 0 ? this.sprites.auras[3] : this.sprites.auras[1];

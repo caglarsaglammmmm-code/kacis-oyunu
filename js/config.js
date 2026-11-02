@@ -13,8 +13,8 @@ export const BUILD = {
 
 export const CONFIG = {
   name: 'Drift Lab',
-  version: '8.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v8.0.0/DriftLab.apk',
+  version: '10.0.0',
+  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v10.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -73,6 +73,7 @@ export const CONFIG = {
   },
 
   camera: {
+    dropZoom: 1.75, // BAŞLA geçişinde iniş yakın çekimi
     viewArea: 740, // Ekran alanının karekökü bu kadar dünya birimine denk gelir
     lookAhead: 0.46, // Hızın önüne kaç saniyelik bakılır
     follow: 5.5,

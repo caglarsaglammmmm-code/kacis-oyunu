@@ -217,6 +217,22 @@ export class AudioEngine {
     }
   }
 
+  // BAŞLA: iki kısa 8-bit nota
+  press() {
+    if (!this.ctx || !this.enabled) return;
+    this.tone(880, 0.06, 0.16, 'square');
+    this.tone(1320, 0.09, 0.16, 'square', 0, 0.06);
+  }
+
+  // Yola iniş: gövde vuruşu, lastik cıyaklaması
+  landing() {
+    if (!this.ctx || !this.enabled) return;
+    this.tone(95, 0.3, 0.42, 'sine', 34);
+    this.burst(0.18, 700, 0.3, 'lowpass');
+    this.tone(1120, 0.26, 0.05, 'sawtooth', 780, 0.02);
+    this.burst(0.3, 2100, 0.1, 'bandpass', 1200);
+  }
+
   // Ön izleme eğrisi: 0-1 arası ilerlemeden hız oranı ve gaz
   previewState(pv, now) {
     const u = (now - pv.at) / pv.len;

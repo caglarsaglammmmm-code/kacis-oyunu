@@ -1,6 +1,6 @@
 // Menüler ve oyun içi gösterge. HUD yalnızca değer değişince DOM'a yazar.
+import { paintPixelCar } from './pixelcars.js';
 import { CONFIG, MAX_STARS } from './config.js';
-import { carSprite } from './render.js';
 import { paintPower, POWER_LOOK } from './art.js';
 
 const $ = (id) => document.getElementById(id);
@@ -29,15 +29,18 @@ export class UI {
     const a = this.actions;
     const click = (id, fn) => $(id).addEventListener('click', () => { a.tap(); fn(); });
     click('btn-play', () => a.start());
+    // Basınca 3 piksel çöker, 8-bit bip ve kısa titreşim
+    $('btn-play').addEventListener('pointerdown', () => { a.press(); $('btn-play').classList.add('down'); });
+    for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) $('btn-play').addEventListener(ev, () => $('btn-play').classList.remove('down'));
     click('btn-mute', () => { const d2 = this.storage.data; d2.settings.sound = !d2.settings.sound; this.storage.save(); this.syncSettings(); a.applySettings(); });
-    click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
-    click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
+    click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
+    click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
     click('car-prev', () => { this.stepCar(-1); a.preview(CONFIG.cars[this.gi]); });
     click('car-next', () => { this.stepCar(1); a.preview(CONFIG.cars[this.gi]); });
-    click('btn-settings', () => { this.show('settings'); a.stage(null); });
-    click('btn-howto', () => { this.show('howto'); a.stage(null); });
+    click('btn-settings', () => { this.show('settings'); });
+    click('btn-howto', () => { this.show('howto'); });
     for (const b of document.querySelectorAll('[data-back]')) {
-      b.addEventListener('click', () => { a.tap(); this.refreshMenu(); this.show(b.dataset.back); a.stage(b.dataset.back); a.carChanged(); });
+      b.addEventListener('click', () => { a.tap(); this.refreshMenu(); this.show(b.dataset.back); a.carChanged(); a.menuShown(); });
     }
     click('btn-retry', () => a.play());
     click('btn-over-menu', () => a.toMenu());
@@ -76,22 +79,8 @@ export class UI {
     $('btn-mute').classList.toggle('muted', !this.storage.data.settings.sound);
   }
 
-  // Yazılar harf harf belirir: her harf kendi gecikmesiyle neon gibi yanar
   intro() {
-    const fill = (id, text, step, start, cls) => {
-      const el = $(id);
-      el.textContent = '';
-      [...text].forEach((ch, i) => {
-        const s = document.createElement('i');
-        s.className = cls;
-        s.setAttribute('aria-hidden', 'true');
-        s.textContent = ch === ' ' ? '\u00a0' : ch;
-        s.style.animationDelay = `${start + i * step}ms`;
-        el.appendChild(s);
-      });
-    };
-    fill('logo', 'DRIFT LAB', 95, 150, 'lt');
-    fill('maker', 'Çağlar Sağlam tarafından yapıldı', 24, 1150, 'mk');
+    $('maker').textContent = 'Çağlar Sağlam tarafından yapıldı';
   }
 
   show(name) {
@@ -293,7 +282,7 @@ export class UI {
     const owned = d.owned.includes(car.id);
     const selected = d.selected === car.id;
     const paintI = owned ? this.storage.paintIndex(car.id) : (this.gp || 0);
-    this.actions.previewCar(car, paintI);
+    paintPixelCar($('px-car'), car, paintI);
     const swatch = $('garage-paints');
     swatch.textContent = '';
     car.paints.forEach((p, i) => {
@@ -362,7 +351,8 @@ export class UI {
       const b = document.createElement('button');
       const has = d.owned.includes(c.id);
       b.className = `thumb${i === this.gi ? ' on' : ''}${has ? '' : ' locked'}${d.selected === c.id ? ' selected' : ''}`;
-      const art = carSprite(c, this.storage.paintIndex(c.id));
+      const art = document.createElement('canvas');
+      paintPixelCar(art, c, this.storage.paintIndex(c.id));
       art.className = 'car-art';
       const label = document.createElement('span');
       label.textContent = has ? c.name : `${c.cost}`;
