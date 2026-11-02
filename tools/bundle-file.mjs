@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const MODULES = ['config', 'physics', 'world', 'effects', 'police', 'crowd', 'game', 'art', 'cars', 'buildings', 'carsheet', 'sheet', 'carmodels', 'car3d', 'menu3d', 'render', 'input', 'storage', 'audio', 'pixelcars', 'pixelmenu', 'ui', 'transition', 'main'];
+const MODULES = ['config', 'physics', 'world', 'effects', 'police', 'crowd', 'game', 'art', 'cars', 'buildings', 'carsheet', 'sheet', 'carmodels', 'car3d', 'menu3d', 'render', 'input', 'controls', 'storage', 'audio', 'pixelcars', 'pixelmenu', 'ui', 'transition', 'quality', 'main'];
 
 export function buildBundle() {
   const parts = MODULES.map((name) => {

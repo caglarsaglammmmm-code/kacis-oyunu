@@ -44,6 +44,14 @@ export class AudioEngine {
   }
 
   // Tarayıcılar sesi yalnızca kullanıcı dokunuşundan sonra başlatır
+  // Gürültü örnekleri önceden hazırlanır: ilk dokunuşta ana iş parçacığı beklemez
+  prepare() {
+    if (this.noiseData) return;
+    const d = new Float32Array(96000);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    this.noiseData = d;
+  }
+
   unlock() {
     if (this.ctx) {
       if (this.ctx.state === 'suspended') this.ctx.resume();
@@ -62,8 +70,9 @@ export class AudioEngine {
     // Beyaz gürültü tamponu: drift, çarpma, patlama
     const len = ctx.sampleRate * 2;
     this.noise = ctx.createBuffer(1, len, ctx.sampleRate);
+    this.prepare();
     const d = this.noise.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    for (let i = 0; i < len; i += this.noiseData.length) d.set(this.noiseData.subarray(0, Math.min(this.noiseData.length, len - i)), i);
 
     // Motor: ateşleme sesi, yarım perde gövde, çift perde vızıltı ve emiş gürültüsü. Hepsi tırtıl kazancından geçer
     this.engGain = ctx.createGain();
@@ -220,8 +229,8 @@ export class AudioEngine {
   // BAŞLA: iki kısa 8-bit nota
   press() {
     if (!this.ctx || !this.enabled) return;
-    this.tone(880, 0.06, 0.16, 'square');
-    this.tone(1320, 0.09, 0.16, 'square', 0, 0.06);
+    this.tone(620, 0.07, 0.09, 'sine', 470);
+    this.tone(930, 0.08, 0.045, 'triangle', 0, 0.015);
   }
 
   // Yola iniş: gövde vuruşu, lastik cıyaklaması
@@ -272,6 +281,9 @@ export class AudioEngine {
   update(game, active, now) {
     const c = this.ctx;
     if (!c) return;
+    // Saniyede 30 kez yeter: yumuşatma ses iş parçacığında sürer, kare başına onlarca olay yazılmaz
+    if (now - (this.upAt || 0) < 30) return;
+    this.upAt = now;
     const t = c.currentTime;
     const p = game.player;
     const on = active && game.state === 'play';

@@ -17,8 +17,8 @@ const BUILD = {
 
 const CONFIG = {
   name: 'Drift Lab',
-  version: '10.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v10.0.0/DriftLab.apk',
+  version: '11.0.0',
+  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v11.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -409,7 +409,7 @@ const CONFIG = {
   // Balkon canlılığı: yalnızca oyuncunun bu yakınındaki binalarda çizilir
   balcony: { range: 560, maxDrawn: 26 },
 
-  perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, maxDpr: 1.75, bakeScale: 0.72, bakePool: 9, bakeBudget: 3, slowFrameMs: 21 },
+  perf: { maxParticles: 380, maxSkids: 900, maxDecals: 24, bakeScale: 0.72, bakePool: 9, bakeBudget: 3 },
 };
 
 // Hız çarpanlarını uygula: yukarıdaki sayılar temel değerdir, ayar speedScale üzerinden yapılır
@@ -2035,6 +2035,7 @@ class Effects {
     this.kind = new Uint8Array(n);
     this.color = new Uint8Array(n);
     this.cursor = 0;
+    this.density = 1; // Kalite ayarı: 1 hepsi, 0.5 yarısı üretilir
     this.colors = ['#888888'];
 
     // Lastik izleri aurum tampon: x1,y1,x2,y2,yaş
@@ -2070,6 +2071,7 @@ class Effects {
 
   // Havuz doluysa en eskinin üstüne yazar
   spawn(kind, x, y, vx, vy, ttl, size, color = 0) {
+    if (this.density < 1 && Math.random() > this.density) return;
     const i = this.cursor;
     this.cursor = (i + 1) % this.max;
     this.kind[i] = kind;
@@ -2151,13 +2153,15 @@ class Effects {
       vy[i] *= f;
       if (k === FX.DEBRIS) this.rot[i] += dt * 9 * (life[i] / this.ttl[i]);
     }
-    for (const w of this.waves) {
+    for (let i = 0; i < this.waves.length; i++) {
+      const w = this.waves[i];
       if (!w.alive) continue;
       w.t += dt * 2.4;
       w.r = w.max * (1 - (1 - w.t) * (1 - w.t));
       if (w.t >= 1) w.alive = false;
     }
-    for (const f of this.floats) {
+    for (let i = 0; i < this.floats.length; i++) {
+      const f = this.floats[i];
       if (!f.alive) continue;
       f.t += dt;
       f.y -= 46 * dt;
@@ -2817,10 +2821,14 @@ class Crowd {
 
     // Araç tehlikesi: kaç, çarpılırsa uç
     if (this.checkHit(p, pl, g.state === 'play')) return;
-    for (const c of g.cops) {
+    const cops = g.cops;
+    for (let i = 0; i < cops.length; i++) {
+      const c = cops[i];
       if (Math.abs(c.x - p.x) < 60 && Math.abs(c.y - p.y) < 60 && this.checkHit(p, c, false)) return;
     }
-    for (const n of this.npcs) {
+    const npcs = this.npcs;
+    for (let i = 0; i < npcs.length; i++) {
+      const n = npcs[i];
       if (n.alive && Math.abs(n.x - p.x) < 80 && Math.abs(n.y - p.y) < 80 && this.checkHit(p, n, false)) return;
     }
 
@@ -3063,7 +3071,8 @@ class Crowd {
       if (rv > 30) this.hitNpc(n, rv, true);
     }
     // Polislerle çarpışma
-    for (const c of g.cops) {
+    for (let i = 0; i < g.cops.length; i++) {
+      const c = g.cops[i];
       const dx = c.x - n.x;
       const dy = c.y - n.y;
       const r = (c.len + n.len) * 0.6;
@@ -3085,7 +3094,8 @@ class Crowd {
     if (n.panicT > 0) n.panicT -= dt;
     let threat = g.state === 'play' && p.speed > NP.panicSpeed && Math.hypot(p.x - n.x, p.y - n.y) < NP.panicDist;
     if (!threat && g.state === 'play') {
-      for (const c of g.cops) {
+      for (let i = 0; i < g.cops.length; i++) {
+        const c = g.cops[i];
         if (Math.abs(c.x - n.x) < NP.panicDist && Math.abs(c.y - n.y) < NP.panicDist && c.state === 'chase') { threat = true; break; }
       }
     }
@@ -3110,7 +3120,9 @@ class Crowd {
     const fx = Math.cos(n.a);
     const fy = Math.sin(n.a);
     let blocked = false;
-    for (const o of this.npcs) {
+    const npcs = this.npcs;
+    for (let i = 0; i < npcs.length; i++) {
+      const o = npcs[i];
       if (o === n || !o.alive) continue;
       const ax = o.x - n.x;
       const ay = o.y - n.y;
@@ -6950,7 +6962,9 @@ const ATLAS = { img: null, ready: false };
 function loadAtlas(done) {
   if (typeof Image === 'undefined') return;
   const img = new Image();
-  img.onload = () => { ATLAS.img = img; ATLAS.ready = true; if (done) done(); };
+  const ready = () => { ATLAS.img = img; ATLAS.ready = true; if (done) done(); };
+  // Görsel, ilk çizimde değil burada çözülür: oyun sırasında takılma yapmaz
+  img.onload = () => { if (img.decode) img.decode().then(ready, ready); else ready(); };
   img.onerror = () => { ATLAS.ready = false; if (done) done(); };
   img.src = 'assets/cars.webp';
 }
@@ -8503,6 +8517,11 @@ function signHalo(color) {
   return c;
 }
 
+// Tabela görüntüsü binada saklanır: her karede anahtar metni üretilmez
+function rectSign(r) {
+  return r.signImg || (r.signImg = signCanvas(r.sign, r.signColor, r.seed));
+}
+
 // Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
 const signOut = { x: 0, y: 0, w: 0, h: 0 };
 function signBox(r, img) {
@@ -8538,24 +8557,53 @@ class Renderer {
     this.baked = [];
     this.playerSprite = null;
     this.playerId = '';
+    this.lod = { slices: 6, balcony: 1, night: 2, speedLines: true, fireSmoke: true };
+    this.syncBakes = 0; // Görünür parça hazır değilse kare beklemiştir: ölçüm için
+    this.queue = []; // Sprite işleri kare bütçesiyle yapılır
     this.makeSprites();
   }
 
   // Atlas yüklenince polis ve park etmiş araçlar 3B modellerden gelir
+  // Tek karede donmasın diye işler kuyruğa girer; stepQueue kare başına birkaç ms harcar
   useAtlas() {
     const P = CONFIG.police;
     const s = this.sprites;
-    for (const k of ['car', 'fast', 'advanced', 'swat', 'moto']) {
-      const img = sheetSprite(`cop:${k}`, P[k].len);
-      if (img) s[k] = img;
-    }
-    const list = [];
-    for (const [k, n] of [['marmara', 4], ['liva', 4], ['klasik', 5], ['volta', 5], ['pusula', 4], ['lale', 4], ['vadi', 4], ['bavar', 5], ['dalga', 4], ['efe', 4]]) {
-      for (let i = 0; i < n; i++) { const img = sheetSprite(`npc:${k}:${i}`, 44); if (img) list.push(img); }
-    }
-    if (list.length) s.parked = list;
-    s.npc = {};
+    const q = this.queue;
     this.playerId = '';
+    s.npc = {};
+    for (const k of ['car', 'fast', 'advanced', 'swat', 'moto']) {
+      q.push(() => { const img = sheetSprite(`cop:${k}`, P[k].len); if (img) s[k] = img; });
+    }
+    let first = true;
+    for (const [k, n] of [['marmara', 4], ['liva', 4], ['klasik', 5], ['volta', 5], ['pusula', 4], ['lale', 4], ['vadi', 4], ['bavar', 5], ['dalga', 4], ['efe', 4]]) {
+      for (let i = 0; i < n; i++) {
+        q.push(() => {
+          const img = sheetSprite(`npc:${k}:${i}`, 44);
+          if (!img) return;
+          if (first) { s.parked = []; first = false; }
+          s.parked.push(img);
+        });
+      }
+    }
+    // Trafik araçları ilk görüldüğünde üretilmez: oyun ortasında takılma yapıyordu
+    for (const k of Object.keys(CONFIG.npc.types)) {
+      const t = CONFIG.npc.types[k];
+      t.colors.forEach((_, i) => q.push(() => {
+        const key = `${k}${i}`;
+        if (s.npc[key]) return;
+        const img = sheetSprite(`npc:${k}:${i}`, t.len);
+        if (img) s.npc[key] = img;
+      }));
+    }
+  }
+
+  stepQueue(ms) {
+    if (!this.queue.length) return;
+    const t0 = performance.now();
+    while (this.queue.length) {
+      this.queue.shift()();
+      if (performance.now() - t0 >= ms) break;
+    }
   }
 
   resize(w, h, dpr) {
@@ -8679,7 +8727,7 @@ class Renderer {
     const ctx = this.ctx;
     const cam = game.cam;
     const cx = cam.x; const cy = cam.y;
-    const N = 6;
+    const N = this.lod.slices;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
     const mx = cam.halfW + 120; const my = cam.halfH + 120;
     for (let gy = c0y - 1; gy <= c1y + 1; gy++) {
@@ -8687,7 +8735,8 @@ class Renderer {
         const key = (gx + 32768) * 65536 + (gy + 32768);
         const c = game.world.chunks.get(key);
         if (!c) continue;
-        for (const r of c.talls) {
+        for (let ti = 0; ti < c.talls.length; ti++) {
+          const r = c.talls[ti];
           if (!r.alive) continue;
           const k = r.tall;
           if (r.x + r.w < cx - mx || r.x > cx + mx || r.y + r.h < cy - my || r.y > cy + my) continue;
@@ -8696,8 +8745,7 @@ class Renderer {
           const Y0 = y0 + (y0 - cy) * k; const Y1 = y1 + (y1 - cy) * k;
           const tex = this.walls[r.seed % this.walls.length];
           // Güney ve kuzey duvarları
-          for (const south of [cy > y1, cy < y0]) {
-            if (!south) continue;
+          if (cy > y1 || cy < y0) {
             const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
             ctx.globalAlpha = 1;
             for (let t = 0; t < N; t++) {
@@ -8709,8 +8757,7 @@ class Renderer {
             if (cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
           }
           // Doğu ve batı duvarları
-          for (const east of [cx > x1, cx < x0]) {
-            if (!east) continue;
+          if (cx > x1 || cx < x0) {
             const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
             for (let t = 0; t < N; t++) {
               const a = t / N; const b = (t + 1) / N;
@@ -8723,7 +8770,7 @@ class Renderer {
           }
           ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
           if (r.sign) {
-            const img = signCanvas(r.sign, r.signColor, r.seed);
+            const img = rectSign(r);
             const w = Math.min((X1 - X0) * 0.92, (img.width / img.height) * 38);
             const h = (w / img.width) * img.height;
             ctx.drawImage(img, (X0 + X1) / 2 - w / 2, (Y0 + Y1) / 2 - h / 2, w, h);
@@ -8737,7 +8784,8 @@ class Renderer {
   drawBalconies(game, now, c0x, c1x, c0y, c1y, tall) {
     const B = CONFIG.balcony;
     const night = game.daylight.k;
-    if (night > 0.75) return;
+    const maxDrawn = Math.round(B.maxDrawn * this.lod.balcony);
+    if (night > 0.75 || maxDrawn <= 0) return;
     const ctx = this.ctx;
     const sp = this.sprites;
     const p = game.player;
@@ -8747,12 +8795,13 @@ class Renderer {
     let drawn = 0;
     const R2 = B.range * B.range;
     const swing = Math.floor(now / 260);
-    for (let cy = c0y; cy <= c1y && drawn < B.maxDrawn; cy++) {
-      for (let cx = c0x; cx <= c1x && drawn < B.maxDrawn; cx++) {
+    for (let cy = c0y; cy <= c1y && drawn < maxDrawn; cy++) {
+      for (let cx = c0x; cx <= c1x && drawn < maxDrawn; cx++) {
         const c = game.world.chunks.get((cx + 32768) * 65536 + (cy + 32768));
         if (!c) continue;
-        for (const r of c.balc) {
-          if (!r.alive || drawn >= B.maxDrawn || (r.tall > 0) !== tall) continue;
+        for (let bi = 0; bi < c.balc.length; bi++) {
+          const r = c.balc[bi];
+          if (!r.alive || drawn >= maxDrawn || (r.tall > 0) !== tall) continue;
           const mx = r.x + r.w / 2; const my = r.y + r.h;
           const dx = mx - p.x; const dy = my - p.y;
           if (dx * dx + dy * dy > R2) continue;
@@ -8796,7 +8845,7 @@ class Renderer {
           for (let i = 0; i < 3; i++) {
             const x = r.x + r.w * (0.22 + i * 0.28);
             const y = r.y + r.h * (0.3 + ((r.seed + i * 3) % 4) * 0.13);
-            for (let k = 0; k < 2; k++) {
+            for (let k = 0; this.lod.fireSmoke && k < 2; k++) {
               const t = ((now * 0.00035 + k * 0.5 + i * 0.3) % 1);
               ctx.globalAlpha = 0.5 * (1 - t);
               const R = 18 + t * 46;
@@ -9693,21 +9742,19 @@ class Renderer {
     const vy1 = cam.y + cam.halfH + 30;
     const world = game.world;
 
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = '#6cc24a';
-    ctx.fillRect(0, 0, w * dpr, h * dpr);
     ctx.setTransform(s, 0, 0, s, ox, oy);
 
-    const c0x = Math.floor(vx0 / CHUNK);
-    const c1x = Math.floor(vx1 / CHUNK);
-    const c0y = Math.floor(vy0 / CHUNK);
-    const c1y = Math.floor(vy1 / CHUNK);
+    // Zemin temizlenmez: sarsıntıda da kadraj parçalarla tam örtülür
+    const c0x = Math.floor((vx0 - 30) / CHUNK);
+    const c1x = Math.floor((vx1 + 30) / CHUNK);
+    const c0y = Math.floor((vy0 - 30) / CHUNK);
+    const c1y = Math.floor((vy1 + 30) / CHUNK);
     this.frameId = (this.frameId || 0) + 1;
     for (let cy = c0y; cy <= c1y; cy++) {
       for (let cx = c0x; cx <= c1x; cx++) {
         const c = world.chunk(cx, cy);
         c.lastSeen = this.frameId;
-        if (!c.canvas || c.dirty) this.bake(c);
+        if (!c.canvas || c.dirty) { this.syncBakes++; this.bake(c); }
         ctx.drawImage(c.canvas, c.x, c.y, CHUNK + 0.6, CHUNK + 0.6);
       }
     }
@@ -9717,6 +9764,7 @@ class Renderer {
       if (!this.job) this.prebake(game, c0x, c1x, c0y, c1y);
       this.stepJob(PF.bakeBudget);
     }
+    this.stepQueue(2);
 
     this.drawDecals(game, vx0, vx1, vy0, vy1);
     this.drawSkids(game, vx0, vx1, vy0, vy1);
@@ -9748,7 +9796,9 @@ class Renderer {
   }
 
   // Görünecek parçaları karede en çok birer birer hazırlar: geçişte ekran donmaz
-  warm(game, k = 1) {
+  warm(game, k = 1, ms = 0) {
+    const t0 = performance.now();
+    this.stepQueue(ms || 3);
     const cam = game.cam;
     const hw = cam.halfW * k + 30; const hh = cam.halfH * k + 30;
     const c0x = Math.floor((cam.x - hw) / CHUNK); const c1x = Math.floor((cam.x + hw) / CHUNK);
@@ -9757,7 +9807,11 @@ class Renderer {
       for (let cx = c0x; cx <= c1x; cx++) {
         const c = game.world.chunk(cx, cy);
         c.lastSeen = this.frameId || 0;
-        if (!c.canvas || c.dirty) { this.bake(c); return false; }
+        for (let i = 0; i < c.talls.length; i++) if (c.talls[i].sign) rectSign(c.talls[i]);
+        if (!c.canvas || c.dirty) {
+          this.bake(c);
+          if (performance.now() - t0 >= ms) return false;
+        }
       }
     }
     return true;
@@ -10032,7 +10086,7 @@ class Renderer {
           const l = c.lights[i];
           if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1) continue;
           const r = l.rect;
-          const img = signCanvas(r.sign, r.signColor, r.seed);
+          const img = rectSign(r);
           const b = signBox(r, img);
           ctx.drawImage(img, b.x, b.y, b.w, b.h);
         }
@@ -10040,14 +10094,14 @@ class Renderer {
     }
     // Tabela ışıltısı ve yola düşen yansıması
     ctx.globalCompositeOperation = 'lighter';
-    for (let cy = c0y; cy <= c1y; cy++) {
+    for (let cy = c0y; this.lod.night > 0 && cy <= c1y; cy++) {
       for (let cx = c0x; cx <= c1x; cx++) {
         const c = game.world.chunk(cx, cy);
         for (let i = 0; i < c.lightCount; i++) {
           const l = c.lights[i];
           if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1 + 40) continue;
           const r = l.rect;
-          const img = signCanvas(r.sign, r.signColor, r.seed);
+          const img = rectSign(r);
           const b = signBox(r, img);
           const halo = signHalo(r.signColor);
           const led = signKind(r.sign) === 'led';
@@ -10056,6 +10110,7 @@ class Renderer {
           ctx.drawImage(img, b.x, b.y, b.w, b.h);
           ctx.globalAlpha = night * 0.5 * flick;
           ctx.drawImage(halo, b.x - 26, b.y - 22, b.w + 52, b.h + 44);
+          if (this.lod.night < 2) continue;
           ctx.globalAlpha = night * 0.3;
           ctx.drawImage(halo, r.x - 6, r.y + r.h - 2, r.w + 12, 40);
         }
@@ -10078,13 +10133,13 @@ class Renderer {
       ctx.globalAlpha = night;
     };
     if (game.state === 'play') head(game.player);
-    for (const c of game.cops) if (c.type !== 'tank' && !c.flying) head(c);
-    for (const n of game.crowd.npcs) if (n.alive && n.state === 'drive') head(n);
-    for (const n of game.crowd.hw) if (n.alive) head(n);
+    for (let i = 0; i < game.cops.length; i++) { const c = game.cops[i]; if (c.type !== 'tank' && !c.flying) head(c); }
+    for (let i = 0; i < game.crowd.npcs.length; i++) { const n = game.crowd.npcs[i]; if (n.alive && n.state === 'drive') head(n); }
+    for (let i = 0; i < game.crowd.hw.length; i++) { const n = game.crowd.hw[i]; if (n.alive) head(n); }
     ctx.globalCompositeOperation = 'source-over';
     // Gök: üst kenarda ay ve sırayla parıldayan yıldızlar
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    if (night > 0.3) {
+    if (night > 0.3 && this.lod.night > 0) {
       const a = (night - 0.3) / 0.7;
       const W = this.w;
       ctx.globalCompositeOperation = 'lighter';
@@ -10394,7 +10449,7 @@ class Renderer {
   drawSpeedLines(game, now) {
     const p = game.player;
     const k = (p.speed / game.carSpec.maxSpeed - 0.72) / 0.28;
-    if (k <= 0 || game.state !== 'play') return;
+    if (k <= 0 || game.state !== 'play' || !this.lod.speedLines) return;
     const ctx = this.ctx;
     const { dpr, w, h } = this;
     const a = Math.atan2(p.vy, p.vx);
@@ -10465,22 +10520,67 @@ class Renderer {
 
 
 // --- input.js ---
-// Tek parmak kontrol: sağ yarı = sağa drift, sol yarı = sola drift, ikisi birden = geri.
-// Klavye: sol/sağ ok veya A/D, ikisi birden = geri.
+// Üç dokunmatik kontrol tek yerde. Klavye her modda aynı çalışır.
+// zones: sağ yarı = sağa, sol yarı = sola, ikisi birden = geri (eski sistem, aynen).
+// wheel: sağ altta direksiyon, parmağın merkeze göre açısını izler.
+// stick: sol yarıda basılan yerde beliren görünmez joystick.
+// DOM'a dokunmaz: görünüm controls.js'tedir, burası birim testle sınanır.
+
+const CONTROLS = ['zones', 'wheel', 'stick'];
+const WHEEL_MAX = (130 * Math.PI) / 180; // Tam kilit açısı
+const WHEEL_RETURN = 11; // Bırakınca ortaya dönüş hızı
+const WHEEL_HOLE = 0.16; // Merkeze bu orandan yakın parmakta açı kararsızdır
+const WHEEL_DEAD = 0.03;
+const STICK_R = 54; // Joystick yarıçapı, px
+const STICK_DEAD = 8; // Bu kadar kayma titreme sayılır, px
+const STICK_SMOOTH = 24;
+
+const wrap = (a) => {
+  while (a > Math.PI) a -= Math.PI * 2;
+  while (a < -Math.PI) a += Math.PI * 2;
+  return a;
+};
 
 class Input {
   constructor() {
+    this.mode = 'zones';
     this.touches = new Map(); // pointerId -> 'L' | 'R'
     this.keyL = false;
     this.keyR = false;
     this.width = 1;
     this.last = 'R'; // Son basılan yön: iki parmak kısa süre çakışınca bu kazanır
     this.bothT = 0;
+    this.wheel = { cx: 0, cy: 0, r: 0 }; // Görünüm yerleşimden sonra doldurur
+    this.wheelId = null;
+    this.wheelA = 0; // Direksiyon açısı, radyan
+    this.wheelPrev = 0;
+    this.stickId = null;
+    this.stick = { on: false, x: 0, y: 0, dx: 0, dy: 0 };
+    this.axis = 0; // Yumuşatılmış analog direksiyon
+    this.revHeld = false;
+    this.bounds = { l: 0, t: 0, r: 1, b: 1 }; // Joystick halkası bunun dışına taşmaz
+  }
+
+  setMode(mode) {
+    this.clear();
+    this.mode = CONTROLS.includes(mode) ? mode : 'zones';
   }
 
   // Her fizik adımında çağrılır
   tick(dt) {
     this.bothT = this.left && this.right ? this.bothT + dt : 0;
+    if (this.mode === 'wheel') {
+      if (this.wheelId === null) this.wheelA *= Math.exp(-WHEEL_RETURN * dt);
+      if (Math.abs(this.wheelA) < 0.004) this.wheelA = this.wheelId === null ? 0 : this.wheelA;
+      const v = this.wheelA / WHEEL_MAX;
+      this.axis = Math.abs(v) < WHEEL_DEAD ? 0 : v;
+    } else if (this.mode === 'stick') {
+      const s = this.stick;
+      const m = Math.abs(s.dx);
+      const target = !s.on || m <= STICK_DEAD ? 0 : Math.sign(s.dx) * Math.min(1, (m - STICK_DEAD) / (STICK_R - STICK_DEAD));
+      this.axis += (target - this.axis) * (1 - Math.exp(-STICK_SMOOTH * dt));
+      if (Math.abs(this.axis) < 0.005) this.axis = 0;
+    }
   }
 
   get left() {
@@ -10496,13 +10596,13 @@ class Input {
   }
 
   get reverse() {
-    return this.bothT >= CONFIG.input.bothDelay;
+    return this.revHeld || this.bothT >= CONFIG.input.bothDelay;
   }
 
   get steer() {
     const l = this.left;
     const r = this.right;
-    if (!l && !r) return 0;
+    if (!l && !r) return this.axis;
     if (l && r) return this.reverse ? 0 : this.last === 'R' ? 1 : -1;
     return r ? 1 : -1;
   }
@@ -10516,11 +10616,20 @@ class Input {
     this.touches.delete(id);
   }
 
+  // Tüm parmaklar ve tuşlar bırakılır: takılı kalan yön olmaz
   clear() {
     this.touches.clear();
     this.keyL = false;
     this.keyR = false;
     this.bothT = 0;
+    this.wheelId = null;
+    this.wheelA = 0;
+    this.stickId = null;
+    this.stick.on = false;
+    this.stick.dx = 0;
+    this.stick.dy = 0;
+    this.axis = 0;
+    this.revHeld = false;
   }
 
   sideOf(x) {
@@ -10533,25 +10642,179 @@ class Input {
     return false;
   }
 
-  // Dokunma yüzeyine bağlanır. Parmak yarı değiştirirse yön de değişir.
+  // Parmak kendi rolünü basıldığı anda alır. true dönerse bu parmak kontrolü kullanıyor.
+  down(id, x, y) {
+    if (this.mode === 'zones') { this.press(id, this.sideOf(x)); return true; }
+    if (this.mode === 'wheel') {
+      if (this.wheelId !== null) return false;
+      const w = this.wheel;
+      const dx = x - w.cx; const dy = y - w.cy;
+      if (!w.r || dx * dx + dy * dy > w.r * w.r * 1.2) return false; // Dışarıdaki dokunuş direksiyonu etkilemez
+      this.wheelId = id;
+      this.wheelPrev = Math.atan2(dy, dx);
+      return true;
+    }
+    if (this.stickId !== null || x >= this.width / 2) return false;
+    const b = this.bounds;
+    const room = STICK_R + 8;
+    const s = this.stick;
+    this.stickId = id;
+    s.on = true;
+    s.x = Math.max(b.l + room, Math.min(b.r - room, x));
+    s.y = Math.max(b.t + room, Math.min(b.b - room, y));
+    s.dx = 0;
+    s.dy = 0;
+    return true;
+  }
+
+  move(id, x, y) {
+    if (this.mode === 'zones') {
+      if (this.touches.has(id)) this.touches.set(id, this.sideOf(x));
+      return;
+    }
+    if (id === this.wheelId) {
+      const w = this.wheel;
+      const dx = x - w.cx; const dy = y - w.cy;
+      if (dx * dx + dy * dy < w.r * w.r * WHEEL_HOLE * WHEEL_HOLE) return;
+      const a = Math.atan2(dy, dx);
+      this.wheelA = Math.max(-WHEEL_MAX, Math.min(WHEEL_MAX, this.wheelA + wrap(a - this.wheelPrev)));
+      this.wheelPrev = a;
+    } else if (id === this.stickId) {
+      const s = this.stick;
+      s.dx = Math.max(-STICK_R, Math.min(STICK_R, x - s.x));
+      s.dy = Math.max(-STICK_R, Math.min(STICK_R, y - s.y));
+    }
+  }
+
+  up(id) {
+    this.touches.delete(id);
+    if (id === this.wheelId) this.wheelId = null;
+    if (id === this.stickId) {
+      this.stickId = null;
+      this.stick.on = false;
+      this.stick.dx = 0;
+      this.stick.dy = 0;
+    }
+  }
+
+  // Dokunma yüzeyine bağlanır. Duraklat gibi düğmeler kendi olaylarını alır, buraya gelmez.
   attach(el, win = window) {
+    el.style.touchAction = 'none';
     el.addEventListener('pointerdown', (e) => {
       if (e.button > 0) return;
       e.preventDefault();
+      if (!this.down(e.pointerId, e.clientX, e.clientY)) return;
       try { el.setPointerCapture(e.pointerId); } catch { /* bazı tarayıcılar reddeder */ }
-      this.press(e.pointerId, this.sideOf(e.clientX));
     });
     el.addEventListener('pointermove', (e) => {
-      if (this.touches.has(e.pointerId)) this.touches.set(e.pointerId, this.sideOf(e.clientX));
+      // Bırakma olayı kaçtıysa parmak kalkmış demektir: fare için buttons 0 olur
+      if (e.pointerType === 'mouse' && e.buttons === 0) { this.up(e.pointerId); return; }
+      this.move(e.pointerId, e.clientX, e.clientY);
     });
-    const end = (e) => this.release(e.pointerId);
+    const end = (e) => this.up(e.pointerId);
     el.addEventListener('pointerup', end);
     el.addEventListener('pointercancel', end);
     el.addEventListener('lostpointercapture', end);
+    win.addEventListener('pointerup', end);
+    win.addEventListener('pointercancel', end);
     win.addEventListener('keydown', (e) => { if (!e.repeat && this.key(e.code, true)) e.preventDefault(); });
     win.addEventListener('keyup', (e) => { this.key(e.code, false); });
     win.addEventListener('blur', () => this.clear());
+    win.addEventListener('pagehide', () => this.clear());
+    if (win.document) win.document.addEventListener('visibilitychange', () => { if (win.document.hidden) this.clear(); });
     el.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+}
+
+// --- controls.js ---
+// Dokunmatik kontrollerin görünümü. Yalnız dönüşüm yazar, değer değişmedikçe DOM'a dokunmaz.
+const $c = (id) => document.getElementById(id);
+
+class ControlView {
+  constructor(input) {
+    this.input = input;
+    this.wheel = $c('ctl-wheel');
+    this.rim = $c('ctl-rim');
+    this.stick = $c('ctl-stick');
+    this.knob = $c('ctl-knob');
+    this.rev = $c('ctl-rev');
+    this.hud = $c('hud');
+    this.needLayout = true;
+    this.lastA = null;
+    this.lastK = '';
+    this.lastOn = null;
+    const set = (on, e) => {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      input.revHeld = on;
+      this.rev.classList.toggle('down', on);
+    };
+    this.rev.style.touchAction = 'none';
+    this.rev.addEventListener('pointerdown', (e) => {
+      try { this.rev.setPointerCapture(e.pointerId); } catch { /* reddedebilir */ }
+      set(true, e);
+    });
+    for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) this.rev.addEventListener(ev, () => set(false));
+  }
+
+  // Mod değişince eskisi tamamen kapanır
+  setMode(mode) {
+    this.wheel.hidden = mode !== 'wheel';
+    this.stick.hidden = mode !== 'stick';
+    this.rev.hidden = mode === 'zones';
+    this.rev.dataset.side = mode === 'wheel' ? 'left' : 'right';
+    this.rev.classList.remove('down');
+    this.stick.classList.remove('on');
+    this.lastOn = null;
+    this.lastA = null;
+    this.needLayout = true;
+  }
+
+  // Güvenli alan ve boyut CSS'te; gerçek yer buradan okunur
+  layout() {
+    const inp = this.input;
+    const vw = window.innerWidth; const vh = window.innerHeight;
+    inp.width = vw;
+    const pad = this.hud.getBoundingClientRect();
+    inp.bounds = { l: 0, t: 0, r: vw, b: vh };
+    if (pad.width) {
+      const cs = getComputedStyle(this.hud);
+      inp.bounds = { l: parseFloat(cs.getPropertyValue('--ctl-l')) || 0, t: 0, r: vw - (parseFloat(cs.getPropertyValue('--ctl-r')) || 0), b: vh - (parseFloat(cs.getPropertyValue('--ctl-b')) || 0) };
+    }
+    if (!this.wheel.hidden) {
+      const r = this.wheel.getBoundingClientRect();
+      inp.wheel.cx = r.left + r.width / 2;
+      inp.wheel.cy = r.top + r.height / 2;
+      inp.wheel.r = r.width / 2;
+    }
+    this.needLayout = false;
+  }
+
+  // Her kare çağrılır
+  update() {
+    if (this.hud.hidden) { this.needLayout = true; return; }
+    if (this.needLayout) this.layout();
+    const inp = this.input;
+    if (inp.mode === 'wheel') {
+      const a = Math.round(inp.wheelA * 200) / 200;
+      if (a !== this.lastA) {
+        this.lastA = a;
+        this.rim.style.transform = `rotate(${a}rad)`;
+      }
+    } else if (inp.mode === 'stick') {
+      const s = inp.stick;
+      if (s.on !== this.lastOn) {
+        this.lastOn = s.on;
+        this.stick.classList.toggle('on', s.on);
+      }
+      if (s.on) {
+        const k = `${s.x},${s.y},${Math.round(s.dx)},${Math.round(s.dy * 0.4)}`;
+        if (k !== this.lastK) {
+          this.lastK = k;
+          this.stick.style.transform = `translate(${s.x}px,${s.y}px)`;
+          this.knob.style.transform = `translate(${Math.round(s.dx)}px,${Math.round(s.dy * 0.4)}px)`;
+        }
+      }
+    }
   }
 }
 
@@ -10567,7 +10830,7 @@ function defaultSave() {
     coins: 0,
     owned: [CONFIG.cars[0].id],
     selected: CONFIG.cars[0].id,
-    settings: { sound: true, vibrate: true, ambient: true, volume: 80 },
+    settings: { sound: true, vibrate: true, ambient: true, volume: 80, quality: 'auto', qLevel: -1, control: 'zones' },
     dev: { god: false, startTime: 0 },
     tutorial: false,
     paints: {},
@@ -10592,6 +10855,9 @@ function sanitize(data) {
     d.settings.vibrate = data.settings.vibrate !== false;
     d.settings.ambient = data.settings.ambient !== false;
     if (Number.isFinite(data.settings.volume)) d.settings.volume = Math.max(0, Math.min(100, data.settings.volume));
+    if (['auto', 'high', 'low'].includes(data.settings.quality)) d.settings.quality = data.settings.quality;
+    if (Number.isInteger(data.settings.qLevel) && data.settings.qLevel >= -1 && data.settings.qLevel <= 3) d.settings.qLevel = data.settings.qLevel;
+    if (['zones', 'wheel', 'stick'].includes(data.settings.control)) d.settings.control = data.settings.control;
   }
   if (data.dev) {
     d.dev.god = data.dev.god === true;
@@ -10723,6 +10989,14 @@ class AudioEngine {
   }
 
   // Tarayıcılar sesi yalnızca kullanıcı dokunuşundan sonra başlatır
+  // Gürültü örnekleri önceden hazırlanır: ilk dokunuşta ana iş parçacığı beklemez
+  prepare() {
+    if (this.noiseData) return;
+    const d = new Float32Array(96000);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    this.noiseData = d;
+  }
+
   unlock() {
     if (this.ctx) {
       if (this.ctx.state === 'suspended') this.ctx.resume();
@@ -10741,8 +11015,9 @@ class AudioEngine {
     // Beyaz gürültü tamponu: drift, çarpma, patlama
     const len = ctx.sampleRate * 2;
     this.noise = ctx.createBuffer(1, len, ctx.sampleRate);
+    this.prepare();
     const d = this.noise.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    for (let i = 0; i < len; i += this.noiseData.length) d.set(this.noiseData.subarray(0, Math.min(this.noiseData.length, len - i)), i);
 
     // Motor: ateşleme sesi, yarım perde gövde, çift perde vızıltı ve emiş gürültüsü. Hepsi tırtıl kazancından geçer
     this.engGain = ctx.createGain();
@@ -10899,8 +11174,8 @@ class AudioEngine {
   // BAŞLA: iki kısa 8-bit nota
   press() {
     if (!this.ctx || !this.enabled) return;
-    this.tone(880, 0.06, 0.16, 'square');
-    this.tone(1320, 0.09, 0.16, 'square', 0, 0.06);
+    this.tone(620, 0.07, 0.09, 'sine', 470);
+    this.tone(930, 0.08, 0.045, 'triangle', 0, 0.015);
   }
 
   // Yola iniş: gövde vuruşu, lastik cıyaklaması
@@ -10951,6 +11226,9 @@ class AudioEngine {
   update(game, active, now) {
     const c = this.ctx;
     if (!c) return;
+    // Saniyede 30 kez yeter: yumuşatma ses iş parçacığında sürer, kare başına onlarca olay yazılmaz
+    if (now - (this.upAt || 0) < 30) return;
+    this.upAt = now;
     const t = c.currentTime;
     const p = game.player;
     const on = active && game.state === 'play';
@@ -11646,6 +11924,9 @@ function formatTime(t) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
+// Intl nesnesi tek kez kurulur; toLocaleString her çağrıda pahalıdır
+const NUM = new Intl.NumberFormat('tr-TR');
+
 const SCREENS = ['menu', 'garage', 'settings', 'howto', 'over', 'pause'];
 
 class UI {
@@ -11665,9 +11946,22 @@ class UI {
     const a = this.actions;
     const click = (id, fn) => $(id).addEventListener('click', () => { a.tap(); fn(); });
     click('btn-play', () => a.start());
-    // Basınca 3 piksel çöker, 8-bit bip ve kısa titreşim
-    $('btn-play').addEventListener('pointerdown', () => { a.press(); $('btn-play').classList.add('down'); });
-    for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) $('btn-play').addEventListener(ev, () => $('btn-play').classList.remove('down'));
+    // Bütün menü düğmeleri aynı dokunuşu verir: yumuşak ses, kısa titreşim. Oyun içi düğmeler hariç
+    document.addEventListener('pointerdown', (e) => {
+      const b = e.target.closest && e.target.closest('.screen button, .screen a.btn, .screen .toggle');
+      if (!b || b.disabled) return;
+      a.press();
+      // :active dokunmatikte her zaman oluşmaz. Çok kısa dokunuşta da çöküş görünsün
+      b.classList.add('down');
+      const at = performance.now();
+      const up = () => {
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        setTimeout(() => b.classList.remove('down'), Math.max(0, 90 - (performance.now() - at)));
+      };
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    }, true);
     click('btn-mute', () => { const d2 = this.storage.data; d2.settings.sound = !d2.settings.sound; this.storage.save(); this.syncSettings(); a.applySettings(); });
     click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
     click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
@@ -11683,10 +11977,22 @@ class UI {
     click('btn-pause', () => a.pause());
     click('btn-resume', () => a.resume());
     click('btn-pause-menu', () => a.toMenu());
-    // Duraklat tuşu sürüş girdisi sayılmasın
+    // Duraklat tuşu sürüş girdisi sayılmasın. Başka parmak basılıyken tarayıcı click üretmez: bırakma yeterli
     $('btn-pause').addEventListener('pointerdown', (e) => e.stopPropagation());
+    $('btn-pause').addEventListener('pointerup', (e) => { e.stopPropagation(); a.tap(); a.pause(); });
 
     const d = this.storage.data;
+    for (const seg of document.querySelectorAll('.seg')) {
+      seg.addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        a.tap();
+        d.settings[seg.dataset.set] = b.dataset.v;
+        this.storage.save();
+        this.syncSettings();
+        a.applySettings();
+      });
+    }
     $('set-sound').addEventListener('change', (e) => { d.settings.sound = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-volume').addEventListener('input', (e) => { d.settings.volume = Number(e.target.value); this.storage.save(); a.applySettings(); });
     $('set-ambient').addEventListener('change', (e) => { d.settings.ambient = e.target.checked; this.storage.save(); a.applySettings(); });
@@ -11707,6 +12013,13 @@ class UI {
     this.syncMute();
     $('set-vibrate').checked = d.settings.vibrate;
     $('set-ambient').checked = d.settings.ambient;
+    for (const seg of document.querySelectorAll('.seg')) {
+      for (const b of seg.children) {
+        const on = d.settings[seg.dataset.set] === b.dataset.v;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    }
     $('dev-god').checked = d.dev.god;
     $('dev-start').value = String(d.dev.startTime);
   }
@@ -11840,7 +12153,13 @@ class UI {
   }
 
   showHint(on) {
+    if (on) {
+      const m = this.storage.data.settings.control;
+      const T = { zones: ['Sola bas', 'sola drift', 'İkisine bas', 'geri vites', 'Sağa bas', 'sağa drift'], wheel: ['GERİ tut', 'geri vites', 'Direksiyon', 'sağ altta', 'Çevir', 'sağa sola döner'], stick: ['Sol yarı', 'bas ve kaydır', 'Joystick', 'parmağının altında', 'GERİ tut', 'geri vites'] }[m] || [];
+      ['hint-l', 'hint-ls', 'hint-m', 'hint-ms', 'hint-r', 'hint-rs'].forEach((id, i) => { $(id).textContent = T[i]; });
+    }
     $('hint').hidden = !on;
+    $('hint').classList.toggle('up', this.storage.data.settings.control !== 'zones');
   }
 
   resetHud() {
@@ -11852,8 +12171,8 @@ class UI {
     const l = this.last;
     const time = formatTime(g.time);
     if (time !== l.time) { l.time = time; $('hud-time').textContent = time; }
-    const score = Math.floor(g.score).toLocaleString('tr-TR');
-    if (score !== l.score) { l.score = score; $('hud-score').textContent = score; }
+    const score = Math.floor(g.score);
+    if (score !== l.score) { l.score = score; $('hud-score').textContent = NUM.format(score); }
     if (g.coins !== l.coins) { l.coins = g.coins; $('hud-coins').textContent = g.coins; }
     const health = Math.max(0, Math.round(100 - g.damage));
     if (health !== l.health) {
@@ -12038,6 +12357,90 @@ function dropCurve(t) {
   return { drop: 0, size: 0.62 + 0.38 * back, shadow: 1 };
 }
 
+// --- quality.js ---
+// Grafik kalitesi: Otomatik modda FPS'e göre seviye değişir. Oynanış değerlerine dokunmaz,
+// yalnız çizim yükünü ayarlar. Tarayıcıya bağlı değildir, birim testle sınanır.
+// dpr: çözünürlük üst sınırı, pixels: tuval piksel bütçesi (tablet), particles: parçacık oranı,
+// crowd: kalabalık oranı, slices: bina duvar dilimi, balcony: balkon oranı, night: 2 tam gece ışıkları,
+// 1 yansımasız, 0 yalnız temel ışık; speedLines, fireSmoke: küçük süsler.
+const LEVELS = [
+  { name: 'yuksek', dpr: 1.75, pixels: 2600000, particles: 1, crowd: 1, slices: 6, balcony: 1, night: 2, speedLines: true, fireSmoke: true },
+  { name: 'orta', dpr: 1.5, pixels: 1600000, particles: 0.75, crowd: 1, slices: 5, balcony: 0.7, night: 2, speedLines: true, fireSmoke: true },
+  { name: 'dusuk', dpr: 1.25, pixels: 1100000, particles: 0.5, crowd: 0.8, slices: 4, balcony: 0.4, night: 1, speedLines: false, fireSmoke: false },
+  { name: 'en-dusuk', dpr: 1, pixels: 700000, particles: 0.3, crowd: 0.6, slices: 3, balcony: 0, night: 0, speedLines: false, fireSmoke: false },
+];
+
+const QUALITY_MODES = ['auto', 'high', 'low'];
+const MIN_FPS = 45; // Bunun altında kalite düşer
+const UP_FPS = 56; // Bu kadar rahatken kalite yükselmeyi dener
+const MAX_HOLD = 60; // Yükselme denemeleri arasındaki en uzun bekleme, sn
+
+// Cihaz bilgisinden başlangıç tahmini: kasarak başlamak yerine güvenli tarafta başlar
+function guessLevel(cores = 0, memoryGb = 0) {
+  if ((cores && cores <= 4) || (memoryGb && memoryGb <= 3)) return 2;
+  if ((cores && cores <= 6) || (memoryGb && memoryGb <= 4)) return 1;
+  return 0;
+}
+
+class Quality {
+  constructor(mode = 'auto', start = 0) {
+    this.level = Math.max(0, Math.min(LEVELS.length - 1, start | 0));
+    this.setMode(mode);
+    this.reset();
+    this.hold = 8;
+  }
+
+  get settings() { return LEVELS[this.level]; }
+
+  setMode(mode) {
+    this.mode = QUALITY_MODES.includes(mode) ? mode : 'auto';
+    if (this.mode === 'high') this.level = 0;
+    if (this.mode === 'low') this.level = LEVELS.length - 1;
+  }
+
+  // Ölçüm penceresi baştan başlar: duraklatma, sahne değişimi. Hızlı uyum ilk saniyelerde geçerli
+  reset(fast = 3) {
+    this.sum = 0;
+    this.n = 0;
+    this.goodT = 0;
+    this.wait = 0;
+    this.fastT = fast;
+  }
+
+  // Kare süresi (ms) girer. Seviye değiştiyse true döner.
+  note(ms) {
+    if (this.mode !== 'auto' || ms <= 0 || ms > 400) return false; // Çok uzun boşluk arka plandır
+    const sec = ms / 1000;
+    this.fastT -= sec;
+    this.wait -= sec;
+    this.sum += ms;
+    this.n++;
+    const fast = this.fastT > 0;
+    if (this.sum < (fast ? 350 : 750)) return false;
+    const fps = (1000 * this.n) / this.sum;
+    const span = this.sum / 1000;
+    this.sum = 0;
+    this.n = 0;
+    if (fps < MIN_FPS) {
+      this.goodT = 0;
+      if (this.wait > 0 || this.level >= LEVELS.length - 1) return false;
+      // Ağır kasmada tek adım yetmez
+      this.level = Math.min(LEVELS.length - 1, this.level + (fps < 30 ? 2 : 1));
+      this.wait = fast ? 0.35 : 1.2;
+      this.hold = Math.min(MAX_HOLD, this.hold * 2); // Yükseltme tutmadı: sonraki deneme daha geç
+      return true;
+    }
+    this.goodT = fps >= UP_FPS ? this.goodT + span : 0;
+    if (this.goodT >= this.hold && this.level > 0) {
+      this.level--;
+      this.goodT = 0;
+      this.wait = 1.2;
+      return true;
+    }
+    return false;
+  }
+}
+
 // --- main.js ---
 // Giriş noktası: döngü, boyutlandırma, olayların ses ve titreşime bağlanması.
 
@@ -12047,12 +12450,14 @@ const storage = new Storage();
 const game = new Game();
 const renderer = new Renderer(canvas);
 const input = new Input();
+const controls = new ControlView(input);
 const audio = new AudioEngine();
 game.world.onRelease = (c) => renderer.releaseChunk(c);
 game.carSpec = storage.selectedCar();
 game.paint = storage.paintIndex(game.carSpec.id);
 
 const cover = new PixelMenu(document.getElementById('cover'));
+const curtain = document.getElementById('curtain');
 const menuEl = document.getElementById('menu');
 const params = new URLSearchParams(location.search);
 let paused = false;
@@ -12060,8 +12465,11 @@ let accumulator = 0;
 let last = 0;
 let hudT = 0;
 let hintT = 0;
-let dprCap = CONFIG.perf.maxDpr;
-const perf = { frames: new Float32Array(20000), work: new Float32Array(20000), i: 0, count: 0, dprDrops: 0 };
+const perf = { frames: new Float32Array(20000), work: new Float32Array(20000), i: 0, count: 0, changes: 0 };
+const startLevel = storage.data.settings.qLevel >= 0 ? storage.data.settings.qLevel : guessLevel(navigator.hardwareConcurrency, navigator.deviceMemory);
+const quality = new Quality(storage.data.settings.quality, startLevel);
+let warming = false; // Perde kapalı: görünür dünya parça parça hazırlanıyor
+let pausedDrawn = false;
 
 function vibrate(ms) {
   if (storage.data.settings.vibrate && navigator.vibrate) {
@@ -12074,16 +12482,41 @@ function applySettings() {
   audio.setVolume(storage.data.settings.volume / 100);
   ui.syncMute();
   audio.setAmbient(storage.data.settings.ambient);
+  if (input.mode !== storage.data.settings.control) {
+    input.setMode(storage.data.settings.control);
+    controls.setMode(input.mode);
+    ui.showHint(!document.getElementById('hint').hidden);
+  }
+  if (quality.mode !== storage.data.settings.quality) {
+    quality.setMode(storage.data.settings.quality);
+    quality.reset();
+    applyQuality();
+  }
+}
+
+// Tuval yalnız gerçekten değişince yeniden kurulur: kurulum bir karelik iştir
+function fitCanvas(w, h) {
+  const q = quality.settings;
+  const dpr = Math.max(1, Math.min(q.dpr, window.devicePixelRatio || 1, Math.sqrt(q.pixels / (w * h))));
+  if (renderer.w !== w || renderer.h !== h || Math.abs(renderer.dpr - dpr) > 0.01) renderer.resize(w, h, dpr);
+}
+
+function applyQuality() {
+  const q = quality.settings;
+  renderer.lod = q;
+  game.fx.density = q.particles;
+  game.crowd.limit = q.crowd;
+  fitCanvas(window.innerWidth, window.innerHeight);
 }
 
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
-  const dpr = Math.min(dprCap, window.devicePixelRatio || 1);
-  renderer.resize(w, h, dpr);
+  fitCanvas(w, h);
   game.view.w = w;
   game.view.h = h;
   input.width = w;
+  controls.needLayout = true;
   game.updateCamera(1);
 }
 
@@ -12099,8 +12532,13 @@ function play() {
   ui.resetHud();
   ui.setHud(true);
   game.paint = storage.paintIndex(storage.selectedCar().id);
-  game.start(storage.selectedCar(), { startTime, god });
+  const ready = menuWorld && warmDone;
+  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld });
+  menuWorld = false;
   cover.stop();
+  // Dünya hazır değilse siyah perde arkasında kurulur: ilk kare donmaz
+  if (!ready) { warming = true; curtain.classList.add('on'); }
+  quality.reset();
   audio.setEngine(storage.selectedCar().engine);
   perf.i = 0;
   perf.count = 0;
@@ -12118,8 +12556,7 @@ function start() {
   const quick = (navigator.webdriver && !params.has('fx')) || matchMedia('(prefers-reduced-motion: reduce)').matches;
   audio.unlock();
   if (quick) { play(); return; }
-  film = { t0: performance.now(), left: false, landed: false, released: false };
-  prepareWorld();
+  film = { t0: performance.now(), left: false, landed: false, released: false, ready: false };
 }
 
 // Dünya, menünün arkasında kurulur: 3B sahne örtüyken parça parça hazırlanır, ekran donmaz
@@ -12152,6 +12589,13 @@ function prewarmWorld() {
 function stepFilm(now) {
   const f = film;
   const t = now - f.t0;
+  // Ses kurulumu dokunuş görevinde yapılır; dünya bir sonraki karede: ikisi tek uzun göreve yığılmaz
+  if (!f.ready) {
+    f.ready = true;
+    prepareWorld();
+    quality.reset();
+    return;
+  }
   // Kapak CSS ile küçülüp solar: yalnız dönüşüm, kare bütçesi harcamaz; arkasında yol çizilir
   if (!f.left && t >= PHASE.press) {
     f.left = true;
@@ -12201,14 +12645,16 @@ function toMenu() {
   keepAwake(false);
   menuWorld = false;
   warmDone = false;
-  setTimeout(prewarmWorld, 1300); // Giriş animasyonu bitsin
+  setTimeout(prewarmWorld, 350); // Kapak ilk karesini çizsin
 }
 
 function pause() {
   if (game.state !== 'play' || paused) return;
   paused = true;
+  pausedDrawn = false;
   input.clear();
   audio.suspend();
+  rememberQuality();
   ui.show('pause');
 }
 
@@ -12217,6 +12663,13 @@ function resume() {
   audio.resume();
   ui.hideAll();
   last = 0;
+  quality.reset(0);
+}
+
+// Öğrenilen seviye sonraki açılışta kasmadan başlamayı sağlar
+function rememberQuality() {
+  const s = storage.data.settings;
+  if (quality.mode === 'auto' && s.qLevel !== quality.level) { s.qLevel = quality.level; storage.save(); }
 }
 
 const ui = new UI(storage, {
@@ -12268,6 +12721,7 @@ game.onEvent = (name, v) => {
     case 'tankhit': audio.explosion(0.5 + 0.4 * v); vibrate(70); break;
     case 'alert': audio.alert(); ui.alert(v); vibrate([60, 40, 60]); break;
     case 'gameover': {
+      rememberQuality();
       const record = storage.recordRun(game.result);
       ui.setHud(false);
       ui.over(game.result, record);
@@ -12281,16 +12735,20 @@ game.onEvent = (name, v) => {
 function frame(now) {
   requestAnimationFrame(frame);
   if (!last) last = now;
-  const elapsed = Math.min(0.1, (now - last) / 1000);
+  const raw = now - last;
+  // Ekran yenilemesine oturtulur: 16,6 ms ile 16,7 ms farkı bir adım atlatıp titreme yapmasın
+  let elapsed = Math.min(0.1, raw / 1000);
+  if (Math.abs(elapsed - STEP) < 0.003) elapsed = STEP;
+  else if (Math.abs(elapsed - STEP / 2) < 0.0015) elapsed = STEP / 2;
   last = now;
   const t0 = performance.now();
   if (!menuEl.hidden) cover.frame(elapsed);
 
+  let steps = 0;
   if (!paused) {
     accumulator += elapsed;
-    let steps = 0;
     // Menü kendi sahnesini çizer: arkada oyun dönmez, pil harcanmaz
-    while (game.state !== 'attract' && accumulator >= STEP && steps < 5) {
+    while (game.state !== 'attract' && !warming && accumulator >= STEP && steps < 5) {
       input.tick(STEP);
       game.tick(STEP, input.steer, input.reverse);
       accumulator -= STEP;
@@ -12303,10 +12761,21 @@ function frame(now) {
     }
   }
   // Menü beklerken dünya parça parça hazırlanır; geçişin ilk karesi hazır parçalarla çizilir
-  if (menuWorld && !warmDone && game.state === 'attract' && ++warmT % 5 === 0) warmDone = renderer.warm(game, 2);
-  else if (game.state !== 'attract') renderer.draw(game, now);
+  if (warming) {
+    accumulator = 0;
+    if (renderer.warm(game, 1, 10)) { warming = false; curtain.classList.remove('on'); quality.reset(); last = 0; }
+  } else if (game.state === 'attract') {
+    if (menuWorld && !warmDone && ++warmT % 3 === 0) warmDone = renderer.warm(game, 2, 6);
+    else renderer.stepQueue(3);
+  } else if (film && !film.left) {
+    renderer.warm(game, 2, 6); // Kapak henüz tam örtüyor: çizmek boşa, hazırlık sürer
+  } else if (paused ? !pausedDrawn : (steps > 0 || game.state !== 'play')) {
+    renderer.draw(game, now); // Durum değişmediyse aynı kare yeniden çizilmez
+    if (paused) pausedDrawn = true;
+  }
   if (film) stepFilm(now);
   audio.update(game, !paused, now);
+  controls.update();
 
   hudT -= elapsed;
   if (hudT <= 0 && game.state === 'play') {
@@ -12314,26 +12783,15 @@ function frame(now) {
     ui.hud(game);
   }
 
-  // Kare süresi ölçümü ve uyarlanabilir çözünürlük
+  // Kare süresi ölçümü ve otomatik kalite
   const i = perf.i;
   perf.frames[i] = elapsed * 1000;
   perf.work[i] = performance.now() - t0;
   perf.i = (i + 1) % perf.frames.length;
   perf.count++;
-  if (perf.count % 120 === 0 && perf.count >= 120 && game.state === 'play') {
-    let sum = 0;
-    for (let k = 1; k <= 120; k++) sum += perf.frames[(perf.i - k + perf.frames.length) % perf.frames.length];
-    if (sum / 120 > CONFIG.perf.slowFrameMs) {
-      // Önce çözünürlük, sonra kalabalık azalır
-      if (dprCap > 1) {
-        dprCap = Math.max(1, dprCap - 0.25);
-        perf.dprDrops++;
-        resize();
-      } else if (game.crowd.limit > 0.4) {
-        game.crowd.limit -= 0.2;
-        perf.dprDrops++;
-      }
-    }
+  if (!paused && !warming && !document.hidden && (game.state === 'play' || (film && film.left)) && quality.note(raw)) {
+    perf.changes++;
+    applyQuality();
   }
 }
 
@@ -12373,7 +12831,10 @@ function boot() {
     });
   }
   input.attach(canvas);
+  controls.setMode(input.mode);
   applySettings();
+  audio.prepare();
+  applyQuality();
   if (document.fonts) {
     for (const f of ['800 30px Nunito', '400 30px Bungee', '400 30px Pacifico', '400 30px Anton', '400 30px Righteous', '400 30px Lobster', '400 30px "Tilt Neon"', '400 30px Monoton', '500 30px Oswald', 'italic 400 30px Playfair', '400 16px "Press Start"', '400 16px Pixelify', '700 16px Pixelify']) document.fonts.load(f, 'ÇŞĞİçşğı').catch(() => {});
   }
@@ -12382,6 +12843,7 @@ function boot() {
   window.addEventListener('orientationchange', () => { resize(); cover.layout(); });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
+      rememberQuality();
       if (game.state === 'play') pause();
       else audio.suspend();
     } else if (game.state !== 'play' || !paused) {
@@ -12405,7 +12867,7 @@ function boot() {
 }
 
 // Test ve geliştirici erişimi
-globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover };
+globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover, quality, LEVELS, controls, audio };
 
 boot();
 

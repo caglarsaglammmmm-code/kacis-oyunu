@@ -171,3 +171,92 @@ test('motor: devir hızla artar, vites atınca düşer, her aracın sesi ayrı, 
   for (const c of CONFIG.cars) assert.ok(ENGINE_KINDS[c.engine.kind], c.id);
   assert.ok(new Set(CONFIG.cars.map((c) => c.engine.kind)).size >= 6);
 });
+
+test('kalite: FPS düşünce iner, rahatlayınca bekleyip yükselir, sabit modda değişmez', async () => {
+  const { Quality, LEVELS, guessLevel } = await import('../js/quality.js');
+  const feed = (q, ms, secs) => { let ch = 0; for (let t = 0; t < secs * 1000; t += ms) if (q.note(ms)) ch++; return ch; };
+  const q = new Quality('auto', 0);
+  feed(q, 25, 3); // 40 FPS
+  assert.ok(q.level > 0, 'düşük FPS seviyeyi indirmeli');
+  const down = q.level;
+  feed(q, 16.7, 3);
+  assert.equal(q.level, down, 'hemen geri çıkmamalı: gidip gelme olmasın');
+  feed(q, 16.7, 70);
+  assert.ok(q.level < down, 'uzun süre rahatsa yükselmeli');
+  const fixed = new Quality('high', 0);
+  feed(fixed, 50, 5);
+  assert.equal(fixed.level, 0);
+  const low = new Quality('low', 0);
+  assert.equal(low.level, LEVELS.length - 1);
+  assert.equal(new Quality('auto', 99).level, LEVELS.length - 1);
+  const pause = new Quality('auto', 0);
+  assert.equal(pause.note(5000), false, 'arka plan boşluğu sayılmaz');
+  assert.equal(guessLevel(4, 8), 2);
+  assert.equal(guessLevel(8, 4), 1);
+  assert.equal(guessLevel(8, 8), 0);
+  assert.equal(guessLevel(0, 0), 0);
+});
+
+test('kontrol: üç mod sola/sağa çalışır, bırakınca düzelir, dış dokunuş etkilemez', async () => {
+  const { Input, WHEEL_MAX } = await import('../js/input.js');
+  const run = (i, n = 40) => { for (let k = 0; k < n; k++) i.tick(1 / 60); };
+  const a = new Input();
+  a.width = 400;
+  a.down(1, 50, 100); assert.equal(a.steer, -1);
+  a.move(1, 300, 100); assert.equal(a.steer, 1, 'parmak yarı değiştirince yön değişir');
+  a.up(1); assert.equal(a.steer, 0);
+
+  const w = new Input();
+  w.setMode('wheel');
+  w.width = 400;
+  w.wheel = { cx: 300, cy: 700, r: 70 };
+  assert.equal(w.down(9, 50, 100), false, 'direksiyon dışı dokunuş alınmaz');
+  assert.equal(w.steer, 0);
+  assert.equal(w.down(1, 300, 650), true);
+  assert.equal(w.down(2, 310, 650), false, 'ikinci parmak alınmaz');
+  w.move(1, 350, 700); // Saat yönünde 90 derece
+  run(w, 1);
+  assert.ok(Math.abs(w.wheelA - Math.PI / 2) < 0.02);
+  assert.ok(Math.abs(w.steer - (Math.PI / 2) / WHEEL_MAX) < 0.02, 'açı ile orantılı');
+  for (const [x, y] of [[300, 750], [250, 700], [300, 650], [350, 700]]) w.move(1, x, y);
+  assert.equal(w.wheelA, WHEEL_MAX, 'tam kilitten öteye gitmez');
+  w.up(2);
+  assert.equal(w.wheelId, 1, 'başka parmak kalkınca direksiyon bırakılmaz');
+  w.up(1);
+  run(w, 90);
+  assert.equal(w.steer, 0, 'bırakınca ortaya döner');
+
+  const s = new Input();
+  s.setMode('stick');
+  s.width = 400;
+  s.bounds = { l: 0, t: 0, r: 400, b: 800 };
+  assert.equal(s.down(1, 300, 400), false, 'sağ yarıda açılmaz');
+  assert.equal(s.down(1, 100, 400), true);
+  s.move(1, 105, 400); run(s);
+  assert.equal(s.steer, 0, 'ölü bölge');
+  s.move(1, 190, 400); run(s);
+  assert.ok(s.steer > 0.95);
+  s.move(1, 10, 400); run(s);
+  assert.ok(s.steer < -0.95);
+  s.up(1); run(s);
+  assert.equal(s.steer, 0);
+  s.down(1, 2, 2);
+  assert.ok(s.stick.x >= 54 && s.stick.y >= 54, 'halka ekrana taşmaz');
+  s.setMode('wheel');
+  assert.equal(s.stick.on, false, 'mod değişince eskisi kapanır');
+  assert.equal(s.stickId, null);
+  s.revHeld = true; s.clear();
+  assert.equal(s.reverse, false);
+  s.key('ArrowLeft', true);
+  assert.equal(s.steer, -1, 'klavye her modda çalışır');
+});
+
+test('ayarlar: kontrol ve kalite kaydedilir, geçersiz değer varsayılana döner', async () => {
+  const { sanitize, defaultSave } = await import('../js/storage.js');
+  assert.equal(defaultSave().settings.control, 'zones');
+  assert.equal(sanitize({ settings: { control: 'wheel', quality: 'low', qLevel: 2 } }).settings.control, 'wheel');
+  const bad = sanitize({ settings: { control: 'x', quality: 9, qLevel: 44 } });
+  assert.equal(bad.settings.control, 'zones');
+  assert.equal(bad.settings.quality, 'auto');
+  assert.equal(bad.settings.qLevel, -1);
+});

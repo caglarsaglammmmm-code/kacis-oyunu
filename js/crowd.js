@@ -394,10 +394,14 @@ export class Crowd {
 
     // Araç tehlikesi: kaç, çarpılırsa uç
     if (this.checkHit(p, pl, g.state === 'play')) return;
-    for (const c of g.cops) {
+    const cops = g.cops;
+    for (let i = 0; i < cops.length; i++) {
+      const c = cops[i];
       if (Math.abs(c.x - p.x) < 60 && Math.abs(c.y - p.y) < 60 && this.checkHit(p, c, false)) return;
     }
-    for (const n of this.npcs) {
+    const npcs = this.npcs;
+    for (let i = 0; i < npcs.length; i++) {
+      const n = npcs[i];
       if (n.alive && Math.abs(n.x - p.x) < 80 && Math.abs(n.y - p.y) < 80 && this.checkHit(p, n, false)) return;
     }
 
@@ -640,7 +644,8 @@ export class Crowd {
       if (rv > 30) this.hitNpc(n, rv, true);
     }
     // Polislerle çarpışma
-    for (const c of g.cops) {
+    for (let i = 0; i < g.cops.length; i++) {
+      const c = g.cops[i];
       const dx = c.x - n.x;
       const dy = c.y - n.y;
       const r = (c.len + n.len) * 0.6;
@@ -662,7 +667,8 @@ export class Crowd {
     if (n.panicT > 0) n.panicT -= dt;
     let threat = g.state === 'play' && p.speed > NP.panicSpeed && Math.hypot(p.x - n.x, p.y - n.y) < NP.panicDist;
     if (!threat && g.state === 'play') {
-      for (const c of g.cops) {
+      for (let i = 0; i < g.cops.length; i++) {
+        const c = g.cops[i];
         if (Math.abs(c.x - n.x) < NP.panicDist && Math.abs(c.y - n.y) < NP.panicDist && c.state === 'chase') { threat = true; break; }
       }
     }
@@ -687,7 +693,9 @@ export class Crowd {
     const fx = Math.cos(n.a);
     const fy = Math.sin(n.a);
     let blocked = false;
-    for (const o of this.npcs) {
+    const npcs = this.npcs;
+    for (let i = 0; i < npcs.length; i++) {
+      const o = npcs[i];
       if (o === n || !o.alive) continue;
       const ax = o.x - n.x;
       const ay = o.y - n.y;
