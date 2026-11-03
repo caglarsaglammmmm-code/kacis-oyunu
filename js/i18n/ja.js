@@ -60,6 +60,7 @@ export default {
     rev: 'バック',
   },
   alert: { swat: 'SWAT出動！', heavy: '重装増援！', tanks: '戦車だ！', aliens: 'エイリアン襲来！' },
+  escape: { toast: '+{n} ギリギリ回避！', combo: 'コンボ +{n}' },
   cheat: { on: 'やるじゃん！隠しコマンドを見つけたね！', off: 'チート解除', badge: 'チートON' },
   cars: {
     atmaca: { desc: 'どの街にもいるベテラン', paints: ['下町ベージュ', 'ワインレッド', 'マット・アーミーグリーン', '2トーン クリーム／ボルドー'] },

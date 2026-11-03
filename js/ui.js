@@ -295,6 +295,21 @@ export class UI {
     el.classList.add('run');
   }
 
+  // Kıl payı bildirimi: üst üste binmez, art arda gelenler tek bildirimde toplanır
+  escapeToast({ amount, bonus }) {
+    const el = $('escape-msg');
+    const now = performance.now();
+    const merge = now - (this.escAt || -1e9) < 1100;
+    this.escTotal = (merge ? this.escTotal : 0) + amount + bonus;
+    this.escBonus = (merge ? this.escBonus : 0) + bonus;
+    this.escAt = now;
+    el.firstElementChild.textContent = tx('escape.toast', { n: this.escTotal });
+    el.lastElementChild.textContent = this.escBonus ? tx('escape.combo', { n: this.escBonus }) : '';
+    el.classList.remove('run');
+    void el.offsetWidth;
+    el.classList.add('run');
+  }
+
   cheatMessage(on) {
     const el = $('cheat-msg');
     el.firstElementChild.textContent = tx(on ? 'cheat.on' : 'cheat.off');

@@ -17,9 +17,9 @@ export const BUILD = {
 
 export const CONFIG = {
   name: NAMES.oyun,
-  version: '15.0.0',
+  version: '16.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v15.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v16.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -349,9 +349,18 @@ export const CONFIG = {
     coinPerSeconds: 8, // Bitişte her bu kadar saniye için 1 coin
     coinPerNearMisses: 2, // Her bu kadar yakın kaçış için 1 coin
     coinPerKill: 2,
+    earnMul: 1.3, // Koşu sonu kazancı (toplanan, süre, devrilen polis, yakın kaçış) bu kadar artar; fiyatlar aynı
   },
 
   coin: { magnet: 56, dropChance: 0.3 },
+
+  // KIL PAYI KAÇIŞ: polis çok yakından geçip çarpmadan atlatılınca anında para.
+  // distMul: yakınlık eşiği (araç gövdeleri arasındaki boşluk, oyuncu genişliğinin katı),
+  // exitMul: mesafe bu kat açılınca kaçış sayılır, minSpeed: oyuncunun en düşük hızı,
+  // cooldown: aynı polisten tekrar ödül için bekleme (sn), globalGap: iki ödül arası en kısa süre,
+  // maxClose: bundan uzun yakında kalmak sıkışmadır (ödül yok), minTravel: yakında geçerken alınan en kısa yol,
+  // comboEvery / comboBonus / comboWindow: art arda kaçışlarda her N'de bir küçük ek
+  escape: { distMul: 1.5, exitMul: 1.35, minSpeed: 220, min: 5, max: 10, cooldown: 3, globalGap: 0.5, maxClose: 1.6, minTravel: 70, comboEvery: 3, comboBonus: 2, comboWindow: 8 },
 
   // Sokak insanları. density: zemin başına doğma olasılığı (GROUND sırasıyla)
   // voice: bağırma sesi, road: yolda gider, dodge: asla çarpılmaz, safe: araç değmez ve kenara kaçar, fx: özel dağılma

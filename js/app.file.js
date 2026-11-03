@@ -148,9 +148,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '15.0.0',
+  version: '16.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v15.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v16.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -480,9 +480,18 @@ const CONFIG = {
     coinPerSeconds: 8, // Bitişte her bu kadar saniye için 1 coin
     coinPerNearMisses: 2, // Her bu kadar yakın kaçış için 1 coin
     coinPerKill: 2,
+    earnMul: 1.3, // Koşu sonu kazancı (toplanan, süre, devrilen polis, yakın kaçış) bu kadar artar; fiyatlar aynı
   },
 
   coin: { magnet: 56, dropChance: 0.3 },
+
+  // KIL PAYI KAÇIŞ: polis çok yakından geçip çarpmadan atlatılınca anında para.
+  // distMul: yakınlık eşiği (araç gövdeleri arasındaki boşluk, oyuncu genişliğinin katı),
+  // exitMul: mesafe bu kat açılınca kaçış sayılır, minSpeed: oyuncunun en düşük hızı,
+  // cooldown: aynı polisten tekrar ödül için bekleme (sn), globalGap: iki ödül arası en kısa süre,
+  // maxClose: bundan uzun yakında kalmak sıkışmadır (ödül yok), minTravel: yakında geçerken alınan en kısa yol,
+  // comboEvery / comboBonus / comboWindow: art arda kaçışlarda her N'de bir küçük ek
+  escape: { distMul: 1.5, exitMul: 1.35, minSpeed: 220, min: 5, max: 10, cooldown: 3, globalGap: 0.5, maxClose: 1.6, minTravel: 70, comboEvery: 3, comboBonus: 2, comboWindow: 8 },
 
   // Sokak insanları. density: zemin başına doğma olasılığı (GROUND sırasıyla)
   // voice: bağırma sesi, road: yolda gider, dodge: asla çarpılmaz, safe: araç değmez ve kenara kaçar, fx: özel dağılma
@@ -680,6 +689,7 @@ const TR = {
     rev: 'GERİ',
   },
   alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!' },
+  escape: { toast: '+{n} KIL PAYI!', combo: 'KOMBO +{n}' },
   cheat: { on: 'Aferin, hile kodunu buldun la!', off: 'Hile kapatıldı', badge: 'HİLE AÇIK' },
   cars: {
     atmaca: { desc: 'Her mahallenin emektarı', paints: ['Mahalle Beji', 'Şarap Kırmızı', 'Mat Asker Yeşili', 'Çift Ton Krem-Bordo'] },
@@ -758,6 +768,7 @@ const EN = {
     rev: 'REV',
   },
   alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!' },
+  escape: { toast: '+{n} CLOSE CALL!', combo: 'COMBO +{n}' },
   cheat: { on: 'Well, look at you! You found the cheat code!', off: 'Cheat off', badge: 'CHEAT ON' },
   cars: {
     atmaca: { desc: 'Every neighborhood’s old faithful', paints: ['Neighborhood Beige', 'Wine Red', 'Matte Army Green', 'Two-Tone Cream/Burgundy'] },
@@ -836,6 +847,7 @@ const JA = {
     rev: 'バック',
   },
   alert: { swat: 'SWAT出動！', heavy: '重装増援！', tanks: '戦車だ！', aliens: 'エイリアン襲来！' },
+  escape: { toast: '+{n} ギリギリ回避！', combo: 'コンボ +{n}' },
   cheat: { on: 'やるじゃん！隠しコマンドを見つけたね！', off: 'チート解除', badge: 'チートON' },
   cars: {
     atmaca: { desc: 'どの街にもいるベテラン', paints: ['下町ベージュ', 'ワインレッド', 'マット・アーミーグリーン', '2トーン クリーム／ボルドー'] },
@@ -914,6 +926,7 @@ const ZH = {
     rev: '倒车',
   },
   alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！' },
+  escape: { toast: '+{n} 惊险脱身！', combo: '连击 +{n}' },
   cheat: { on: '可以啊，你找到作弊码了！', off: '作弊已关闭', badge: '作弊已开启' },
   cars: {
     atmaca: { desc: '每条街坊的老伙计', paints: ['街坊米色', '酒红', '哑光军绿', '双色 奶白/酒红'] },
@@ -992,6 +1005,7 @@ const ES = {
     rev: 'ATRÁS',
   },
   alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!' },
+  escape: { toast: '+{n} ¡POR LOS PELOS!', combo: 'COMBO +{n}' },
   cheat: { on: '¡Toma ya! ¡Has encontrado el truco secreto!', off: 'Truco desactivado', badge: 'TRUCO ACTIVO' },
   cars: {
     atmaca: { desc: 'El veterano de todos los barrios', paints: ['Beige de barrio', 'Rojo vino', 'Verde militar mate', 'Bicolor crema/burdeos'] },
@@ -1070,6 +1084,7 @@ const DE = {
     rev: 'RÜCK',
   },
   alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!' },
+  escape: { toast: '+{n} HAARSCHARF!', combo: 'COMBO +{n}' },
   cheat: { on: 'Na sieh mal einer an – du hast den Cheatcode gefunden!', off: 'Cheat aus', badge: 'CHEAT AN' },
   cars: {
     atmaca: { desc: 'Der treue Klassiker jeder Nachbarschaft', paints: ['Kiez-Beige', 'Weinrot', 'Mattes Armeegrün', 'Zweifarbig Creme/Bordeaux'] },
@@ -4191,6 +4206,7 @@ const TK = CONFIG.tank;
 const PW = CONFIG.powers;
 const AL = CONFIG.aliens;
 const PU = CONFIG.pursuit;
+const ESC = CONFIG.escape;
 const WT = CONFIG.water;
 const tmpSirens = new Float32Array(CONFIG.sirens.length);
 const byDist = (a, b) => a.pd - b.pd;
@@ -4275,6 +4291,7 @@ function makeCop() {
   b.turret = 0; b.fireT = 0; b.fxT = 0; b.hurtFlash = 0;
   b.wanderT = 0; b.wx = 0; b.wy = 0;
   b.side = 1; b.roleT = 0; b.blockT = 0; b.blockA = 0; b.hold = false; b.far = false; b.pd = 0;
+  b.escIn = false; b.escHit = false; b.escHitAt = -99; b.escEnterT = 0; b.escAt = -99; b.escX = 0; b.escY = 0;
   return b;
 }
 
@@ -4334,6 +4351,10 @@ class Game {
     this.giantT = 0;
     this.heat = 0;
     this.recycleT = 0;
+    this.escapes = 0; // Kıl payı kaçış sayısı ve kazandırdığı para
+    this.escCoins = 0;
+    this.escCombo = 0;
+    this.escLastT = -99;
     this.cheat = false; // Kaydedilmez, her koşu kapalı başlar
     this.cheatUsed = false;
     this.phasing = false;
@@ -4794,7 +4815,9 @@ class Game {
     this.state = 'over';
     if (this.giantT > 0) this.setGiant(false);
     // Hile kullanılan koşu kazandırmaz, rekor saymaz
-    const earned = this.cheatUsed ? 0 : this.coins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
+    // Kıl payı paraları ayrıca eklenir; geri kalan kazanç earnMul ile yumuşatılır
+    const base = this.coins - this.escCoins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
+    const earned = this.cheatUsed ? 0 : Math.round(base * SC.earnMul) + this.escCoins;
     this.result = {
       score: Math.floor(this.score),
       time: this.time,
@@ -5010,6 +5033,7 @@ class Game {
     c.los = false; c.hitCd = 0; c.nearCd = 0; c.wakeT = 0;
     this.flankSide = -this.flankSide;
     c.side = this.flankSide; c.roleT = PU.roleTime; c.blockT = 0; c.hold = false; c.far = false;
+    c.escIn = false; c.escHit = false; c.escHitAt = -99; c.escEnterT = 0; c.escAt = -99;
     c.turret = a; c.fireT = TK.fireEvery * 0.6; c.fxT = Math.random() * 3; c.hurtFlash = 0;
     this.cops.push(c);
     return c;
@@ -5137,6 +5161,7 @@ class Game {
         // Hilede polis görünür ve kovalar ama değemez
         if (!c.flying && dist < (c.len + p.len) * 0.75 && this.ghostT <= 0 && !this.cheat) {
           const rv = this.collideCars(p, c);
+          if (rv > 0) c.escHitAt = this.runTime; // Değdi: bu geçiş kıl payı sayılmaz
           if (rv > 1) this.copContact(c, rv, i);
           if (i >= this.cops.length || this.cops[i] !== c) continue;
         }
@@ -5153,6 +5178,7 @@ class Game {
             this.emit('nearmiss');
           }
         }
+        if (!c.flying) this.checkEscape(c, dist);
         if (dist < nearest) {
           nearest = dist;
           closing = (dx * (c.vx - p.vx) + dy * (c.vy - p.vy)) / (dist || 1);
@@ -5177,6 +5203,50 @@ class Game {
     }
     this.sirenDist = nearest;
     this.sirenClosing = closing;
+  }
+
+  // Kıl payı kaçış: polis yakın bölgeye girer, değmeden çıkarsa ödül. Ödül çıkış anında verilir
+  checkEscape(c, dist) {
+    const p = this.player;
+    const zone = p.wid * ESC.distMul + (p.len + p.wid + c.len + c.wid) / 4;
+    if (!c.escIn) {
+      if (dist < zone && this.escapeEligible(c)) {
+        c.escIn = true; c.escHit = false; c.escEnterT = this.runTime; c.escX = p.x; c.escY = p.y;
+      }
+      return 0;
+    }
+    if (dist < zone * ESC.exitMul) {
+      if (this.runTime - c.escEnterT > ESC.maxClose) c.escHit = true; // Yanında uzun kaldı: sıkışma ya da dönüp durma
+      return 0;
+    }
+    c.escIn = false;
+    // Girişten hemen önceki temas da sayılır: çarpışma aynı karede bölgeye girişten önce işlenir
+    if (c.escHit || c.escHitAt >= c.escEnterT - 0.1 || !this.escapeEligible(c)) return 0;
+    if (this.runTime - c.escAt < ESC.cooldown || this.runTime - this.escLastT < ESC.globalGap) return 0;
+    if (Math.hypot(p.x - c.escX, p.y - c.escY) < ESC.minTravel) return 0;
+    return this.rewardEscape(c);
+  }
+
+  // Yalnız polis gerçekten kovalarken, oyuncu hızla ileri giderken; hile ve görünmezlikte yok
+  escapeEligible(c) {
+    const p = this.player;
+    if (this.state !== 'play' || this.cheat || this.ghostT > 0 || c.flying) return false;
+    if (c.state !== 'chase' && c.state !== 'block' && c.state !== 'barricade') return false;
+    return p.speed >= ESC.minSpeed && p.forward > 0 && this.autoRevT <= 0;
+  }
+
+  rewardEscape(c) {
+    const amount = ESC.min + Math.floor(Math.random() * (ESC.max - ESC.min + 1));
+    this.escCombo = this.runTime - this.escLastT <= ESC.comboWindow ? this.escCombo + 1 : 1;
+    const bonus = this.escCombo % ESC.comboEvery === 0 ? ESC.comboBonus : 0;
+    const total = amount + bonus;
+    this.coins += total;
+    this.escCoins += total;
+    this.escapes++;
+    this.escLastT = this.runTime;
+    c.escAt = this.runTime;
+    this.emit('escape', { amount, bonus });
+    return total;
   }
 
   // Adalet: oyuncunun çevresine aynı anda sınırlı polis girer, önü tamamen kapanmaz. Fazlası gaz keser
@@ -13485,6 +13555,12 @@ class AudioEngine {
 
   crunch() { this.burst(0.12, 1300, 0.22, 'bandpass', 500); }
   // Coin: üst üste toplayınca perde yükselir
+  // Kıl payı kaçış: iki hızlı parlak nota
+  escape() {
+    this.tone(1320, 0.09, 0.16, 'triangle', 1420);
+    this.tone(1760, 0.16, 0.15, 'triangle', 1980, 0.07);
+  }
+
   coin() {
     const c = this.ctx;
     if (!c) return;
@@ -14157,6 +14233,21 @@ class UI {
     el.classList.add('run');
   }
 
+  // Kıl payı bildirimi: üst üste binmez, art arda gelenler tek bildirimde toplanır
+  escapeToast({ amount, bonus }) {
+    const el = $('escape-msg');
+    const now = performance.now();
+    const merge = now - (this.escAt || -1e9) < 1100;
+    this.escTotal = (merge ? this.escTotal : 0) + amount + bonus;
+    this.escBonus = (merge ? this.escBonus : 0) + bonus;
+    this.escAt = now;
+    el.firstElementChild.textContent = tx('escape.toast', { n: this.escTotal });
+    el.lastElementChild.textContent = this.escBonus ? tx('escape.combo', { n: this.escBonus }) : '';
+    el.classList.remove('run');
+    void el.offsetWidth;
+    el.classList.add('run');
+  }
+
   cheatMessage(on) {
     const el = $('cheat-msg');
     el.firstElementChild.textContent = tx(on ? 'cheat.on' : 'cheat.off');
@@ -14749,6 +14840,7 @@ game.onEvent = (name, v) => {
     case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
     case 'aliens': audio.alert(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
     case 'spike': audio.spike(); vibrate(60); break;
+    case 'escape': audio.escape(); ui.escapeToast(v); vibrate(18); break;
     case 'cheat': audio.cheat(v); ui.cheatMessage(v); vibrate(v ? [30, 30, 30, 30, 60] : 40); break;
     case 'copdown': audio.explosion(0.55 * v); vibrate(40); break;
     case 'explosion': audio.explosion(1); vibrate([120, 40, 220]); break;

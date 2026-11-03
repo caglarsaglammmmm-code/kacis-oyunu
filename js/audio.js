@@ -617,6 +617,12 @@ export class AudioEngine {
 
   crunch() { this.burst(0.12, 1300, 0.22, 'bandpass', 500); }
   // Coin: üst üste toplayınca perde yükselir
+  // Kıl payı kaçış: iki hızlı parlak nota
+  escape() {
+    this.tone(1320, 0.09, 0.16, 'triangle', 1420);
+    this.tone(1760, 0.16, 0.15, 'triangle', 1980, 0.07);
+  }
+
   coin() {
     const c = this.ctx;
     if (!c) return;
