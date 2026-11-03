@@ -1,13 +1,28 @@
 // Menüler ve oyun içi gösterge. HUD yalnızca değer değişince DOM'a yazar.
+import { paintPixelCar } from './pixelcars.js';
 import { CONFIG, MAX_STARS } from './config.js';
-import { carSprite } from './render.js';
 import { paintPower, POWER_LOOK } from './art.js';
+import { tx, txNum, getLang, LANGS } from './i18n/index.js';
 
 const $ = (id) => document.getElementById(id);
 
 export function formatTime(t) {
   const s = Math.floor(t);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+// Uzun yazı kutusuna sığmazsa yazı küçülür (özellikle Almanca); tek satırlık metinler
+const FIT = '.start-txt, .tile span, .menu .btn, .panel .btn, .seg button, .screen header h2, #over-title, .car-tag b, .car-tag small, #ctl-rev, .summary span, .big-score span, #hint b, #hint span, .toggle > span, .volume > span, .seg-row > span, #cheat-badge, #garage-action';
+function fitOne(el) {
+  el.style.fontSize = '';
+  if (!el.offsetParent || !el.clientWidth) return;
+  const base = parseFloat(getComputedStyle(el).fontSize);
+  const min = Math.max(9, Math.round(base * 0.55));
+  let s = base;
+  while (s > min && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 2)) {
+    s -= 1;
+    el.style.fontSize = `${s}px`;
+  }
 }
 
 const SCREENS = ['menu', 'garage', 'settings', 'howto', 'over', 'pause'];
@@ -22,38 +37,72 @@ export class UI {
     this.buildStars();
     this.buildPowers();
     this.syncSettings();
-    this.refreshMenu();
+    this.applyLang();
+    // Piksel yazı tipi geç yüklenir: yüklenince yazılar yeniden sığdırılır
+    if (document.fonts) {
+      document.fonts.addEventListener('loadingdone', () => this.fit());
+      document.fonts.ready.then(() => this.fit());
+    }
   }
 
   bind() {
     const a = this.actions;
     const click = (id, fn) => $(id).addEventListener('click', () => { a.tap(); fn(); });
-    click('btn-play', () => a.play());
-    click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
-    click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); a.stage('garage'); });
-    click('car-prev', () => this.stepCar(-1));
-    click('car-next', () => this.stepCar(1));
-    click('btn-settings', () => { this.show('settings'); a.stage(null); });
-    click('btn-howto', () => { this.show('howto'); a.stage(null); });
+    click('btn-play', () => a.start());
+    // Bütün menü düğmeleri aynı dokunuşu verir: yumuşak ses, kısa titreşim. Oyun içi düğmeler hariç
+    document.addEventListener('pointerdown', (e) => {
+      const b = e.target.closest && e.target.closest('.screen button, .screen a.btn, .screen .toggle');
+      if (!b || b.disabled) return;
+      a.press();
+      // :active dokunmatikte her zaman oluşmaz. Çok kısa dokunuşta da çöküş görünsün
+      b.classList.add('down');
+      const at = performance.now();
+      const up = () => {
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        setTimeout(() => b.classList.remove('down'), Math.max(0, 90 - (performance.now() - at)));
+      };
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    }, true);
+    click('btn-mute', () => { const d2 = this.storage.data; d2.settings.sound = !d2.settings.sound; this.storage.save(); this.syncSettings(); a.applySettings(); });
+    click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
+    click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
+    click('car-prev', () => { this.stepCar(-1); a.preview(CONFIG.cars[this.gi]); });
+    click('car-next', () => { this.stepCar(1); a.preview(CONFIG.cars[this.gi]); });
+    click('btn-settings', () => { this.show('settings'); });
+    click('btn-howto', () => { this.show('howto'); });
     for (const b of document.querySelectorAll('[data-back]')) {
-      b.addEventListener('click', () => { a.tap(); this.refreshMenu(); this.show(b.dataset.back); a.stage(b.dataset.back); a.carChanged(); });
+      b.addEventListener('click', () => { a.tap(); this.refreshMenu(); this.show(b.dataset.back); a.carChanged(); a.menuShown(); });
     }
     click('btn-retry', () => a.play());
     click('btn-over-menu', () => a.toMenu());
     click('btn-pause', () => a.pause());
     click('btn-resume', () => a.resume());
     click('btn-pause-menu', () => a.toMenu());
-    // Duraklat tuşu sürüş girdisi sayılmasın
+    // Duraklat tuşu sürüş girdisi sayılmasın. Başka parmak basılıyken tarayıcı click üretmez: bırakma yeterli
     $('btn-pause').addEventListener('pointerdown', (e) => e.stopPropagation());
+    $('btn-pause').addEventListener('pointerup', (e) => { e.stopPropagation(); a.tap(); a.pause(); });
 
     const d = this.storage.data;
+    for (const seg of document.querySelectorAll('.seg')) {
+      seg.addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        a.tap();
+        d.settings[seg.dataset.set] = b.dataset.v;
+        this.storage.save();
+        this.syncSettings();
+        a.applySettings();
+      });
+    }
     $('set-sound').addEventListener('change', (e) => { d.settings.sound = e.target.checked; this.storage.save(); a.applySettings(); });
+    $('set-volume').addEventListener('input', (e) => { d.settings.volume = Number(e.target.value); this.storage.save(); a.applySettings(); });
     $('set-ambient').addEventListener('change', (e) => { d.settings.ambient = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-vibrate').addEventListener('change', (e) => { d.settings.vibrate = e.target.checked; this.storage.save(); a.applySettings(); });
     $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
     $('dev-start').addEventListener('change', (e) => { d.dev.startTime = Number(e.target.value); this.storage.save(); });
     // Gizli geliştirici bölümü: sürüm yazısına 7 kez dokun
-    $('version').textContent = `Sürüm ${CONFIG.version}`;
     $('version').addEventListener('click', () => {
       if (++this.devTaps >= 7) $('dev-panel').hidden = false;
     });
@@ -62,14 +111,67 @@ export class UI {
   syncSettings() {
     const d = this.storage.data;
     $('set-sound').checked = d.settings.sound;
+    $('set-volume').value = String(d.settings.volume);
+    this.syncMute();
     $('set-vibrate').checked = d.settings.vibrate;
     $('set-ambient').checked = d.settings.ambient;
+    for (const seg of document.querySelectorAll('.seg')) {
+      for (const b of seg.children) {
+        const on = d.settings[seg.dataset.set] === b.dataset.v;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+    }
     $('dev-god').checked = d.dev.god;
     $('dev-start').value = String(d.dev.startTime);
   }
 
+  syncMute() {
+    $('btn-mute').classList.toggle('muted', !this.storage.data.settings.sound);
+  }
+
+  intro() {
+    $('maker').textContent = tx('menu.maker');
+  }
+
   show(name) {
     for (const s of SCREENS) $(s).hidden = s !== name;
+    if (name) this.fit($(name));
+  }
+
+  // Görünen ekrandaki yazılar kutularına sığdırılır
+  fit(root = document) {
+    for (const el of root.querySelectorAll(FIT)) fitOne(el);
+  }
+
+  // Dil değişince oyun yeniden başlamadan bütün yazılar yenilenir
+  applyLang() {
+    const code = getLang();
+    // Sayı biçimleri menüdeyken kurulur: oyunun ilk karesinde kurulum takılma yapmasın
+    txNum(0); txNum(0, 1);
+    document.documentElement.lang = code === 'zh' ? 'zh-CN' : code;
+    for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = tx(el.dataset.i18n);
+    for (const el of document.querySelectorAll('[data-i18n-label]')) el.setAttribute('aria-label', tx(`aria.${el.dataset.i18nLabel}`));
+    // BAŞLA: harfler sırayla beyaz ve turuncu
+    const st = $('start-txt');
+    st.textContent = '';
+    for (const ch of tx('start')) { const i = document.createElement('i'); i.textContent = ch; st.appendChild(i); }
+    $('version').textContent = tx('settings.version', { v: CONFIG.version });
+    const tips = $('howto-tips');
+    tips.textContent = '';
+    for (const line of tx('howto.tips')) { const li = document.createElement('li'); li.textContent = line; tips.appendChild(li); }
+    for (const b of document.querySelectorAll('.seg[data-set=lang] button')) b.textContent = LANGS[b.dataset.v];
+    $('cheat-badge').textContent = tx('cheat.badge');
+    $('ctl-rev').textContent = tx('hint.rev');
+    this.buildHowtoPowers();
+    this.refreshMenu();
+    this.intro();
+    if (!$('garage').hidden) this.renderGarage();
+    if (!$('hint').hidden) this.showHint(true);
+    if (!$('over').hidden && this.lastResult) this.over(...this.lastResult);
+    this.last.score = '';
+    this.last.combo = '';
+    this.fit();
   }
 
   hideAll() {
@@ -83,10 +185,16 @@ export class UI {
   refreshMenu() {
     const d = this.storage.data;
     $('menu-coins').textContent = d.coins;
-    $('menu-best').textContent = d.bestScore ? `En iyi: ${d.bestScore.toLocaleString('tr-TR')} puan · ${formatTime(d.bestTime)}` : 'İlk kaçışın seni bekliyor';
+    $('menu-best').textContent = d.bestScore ? tx('menu.best', { score: txNum(d.bestScore), time: formatTime(d.bestTime) }) : tx('menu.first');
     const car = this.storage.selectedCar();
     $('menu-car-name').textContent = car.name;
-    $('menu-car-paint').textContent = (car.paints[this.storage.paintIndex(car.id)] || car.paints[0]).name;
+    $('menu-car-paint').textContent = this.paintName(car, this.storage.paintIndex(car.id));
+    if (!$('menu').hidden) this.fit($('menu'));
+  }
+
+  paintName(car, i) {
+    const names = tx(`cars.${car.id}.paints`);
+    return (Array.isArray(names) && names[i]) || (car.paints[i] || car.paints[0]).name;
   }
 
   splash(done) {
@@ -96,7 +204,7 @@ export class UI {
     setTimeout(() => {
       el.hidden = true;
       done();
-    }, 3000);
+    }, 700);
   }
 
   buildStars() {
@@ -143,14 +251,18 @@ export class UI {
       box.appendChild(el);
       this.pw[kind] = { el, t, fill, last: '' };
     }
+  }
+
+  buildHowtoPowers() {
     const list = $('howto-powers');
-    const info = { blast: 'Yakındaki bütün arabalar patlar', ghost: `${CONFIG.powers.duration} sn polis seni göremez`, heal: 'Hasarı onarır, ateşi söndürür', giant: `${CONFIG.powers.duration} sn devleşirsin, hasar almazsın` };
-    for (const kind of Object.keys(info)) {
+    list.textContent = '';
+    const n = CONFIG.powers.duration;
+    for (const kind of ['blast', 'ghost', 'heal', 'giant']) {
       const row = document.createElement('div');
       const name = document.createElement('b');
-      name.textContent = POWER_LOOK[kind].name;
+      name.textContent = tx(`power.${kind}`);
       const d = document.createElement('span');
-      d.textContent = info[kind];
+      d.textContent = tx(`power.${kind}Info`, { n });
       const text = document.createElement('p');
       text.append(name, d);
       row.append(this.powerCanvas(kind, 20), text);
@@ -168,11 +280,11 @@ export class UI {
   }
 
   powerToast(kind) {
-    this.toast(POWER_LOOK[kind].name, POWER_LOOK[kind].color);
+    this.toast(tx(`power.${kind}`), POWER_LOOK[kind].color);
   }
 
   alert(stage) {
-    const text = CONFIG.difficulty.alerts[[0, CONFIG.difficulty.swatAt, CONFIG.difficulty.advancedAt, CONFIG.difficulty.tanksAt][stage]];
+    const text = tx(`alert.${['', 'swat', 'heavy', 'tanks'][stage] || 'tanks'}`);
     const el = $('alert');
     el.textContent = text;
     el.classList.remove('run');
@@ -180,16 +292,30 @@ export class UI {
     el.classList.add('run');
   }
 
+  cheatMessage(on) {
+    const el = $('cheat-msg');
+    el.firstElementChild.textContent = tx(on ? 'cheat.on' : 'cheat.off');
+    el.classList.remove('run');
+    void el.offsetWidth;
+    el.classList.add('run');
+  }
+
   alienAlert() {
     const el = $('alert');
-    el.textContent = CONFIG.difficulty.aliensAlert;
+    el.textContent = tx('alert.aliens');
     el.classList.remove('run');
     void el.offsetWidth;
     el.classList.add('run');
   }
 
   showHint(on) {
+    if (on) {
+      const m = this.storage.data.settings.control;
+      const T = tx(`hint.${['zones', 'wheel', 'stick'].includes(m) ? m : 'zones'}`);
+      ['hint-l', 'hint-ls', 'hint-m', 'hint-ms', 'hint-r', 'hint-rs'].forEach((id, i) => { $(id).textContent = T[i]; });
+    }
     $('hint').hidden = !on;
+    $('hint').classList.toggle('up', this.storage.data.settings.control !== 'zones');
   }
 
   resetHud() {
@@ -201,8 +327,8 @@ export class UI {
     const l = this.last;
     const time = formatTime(g.time);
     if (time !== l.time) { l.time = time; $('hud-time').textContent = time; }
-    const score = Math.floor(g.score).toLocaleString('tr-TR');
-    if (score !== l.score) { l.score = score; $('hud-score').textContent = score; }
+    const score = Math.floor(g.score);
+    if (score !== l.score) { l.score = score; $('hud-score').textContent = txNum(score); }
     if (g.coins !== l.coins) { l.coins = g.coins; $('hud-coins').textContent = g.coins; }
     const health = Math.max(0, Math.round(100 - g.damage));
     if (health !== l.health) {
@@ -225,7 +351,7 @@ export class UI {
     }
     this.powerChip('ghost', g.ghostT);
     this.powerChip('giant', g.giantT);
-    const combo = g.combo >= 1.25 ? `x${g.combo.toFixed(1).replace('.', ',')}` : '';
+    const combo = g.combo >= 1.25 ? `x${txNum(g.combo, 1)}` : '';
     if (combo !== l.combo) { l.combo = combo; $('hud-combo').textContent = combo; }
   }
 
@@ -241,16 +367,17 @@ export class UI {
 
   over(result, record) {
     const d = this.storage.data;
-    $('over-title').textContent = record.newScore ? 'YENİ REKOR!' : result.cause === 'water' ? 'BATTIN!' : 'YAKALANDIN!';
+    $('over-title').textContent = tx(record.newScore ? 'over.record' : result.cause === 'water' ? 'over.sunk' : 'over.caught');
     $('over-title').classList.toggle('record', record.newScore);
-    $('over-score').textContent = result.score.toLocaleString('tr-TR');
+    $('over-score').textContent = txNum(result.score);
     $('over-time').textContent = formatTime(result.time);
     $('over-coins').textContent = `+${result.coins}`;
     $('over-kills').textContent = result.kills;
     $('over-broken').textContent = result.broken;
     $('over-near').textContent = result.nearMisses;
-    $('over-drift').textContent = `${result.driftTime.toFixed(1).replace('.', ',')} sn`;
-    $('over-best').textContent = `En iyi skor: ${d.bestScore.toLocaleString('tr-TR')} · En uzun süre: ${formatTime(d.bestTime)}`;
+    $('over-drift').textContent = tx('over.seconds', { n: txNum(result.driftTime, 1) });
+    $('over-best').textContent = tx('over.best', { score: txNum(d.bestScore), time: formatTime(d.bestTime) });
+    this.lastResult = [result, record];
     this.show('over');
     // Hâlâ basılı parmak yanlışlıkla düğmeye basmasın
     const btns = $('over-actions');
@@ -267,7 +394,7 @@ export class UI {
     const owned = d.owned.includes(car.id);
     const selected = d.selected === car.id;
     const paintI = owned ? this.storage.paintIndex(car.id) : (this.gp || 0);
-    this.actions.previewCar(car, paintI);
+    paintPixelCar($('px-car'), car, paintI);
     const swatch = $('garage-paints');
     swatch.textContent = '';
     car.paints.forEach((p, i) => {
@@ -275,8 +402,8 @@ export class UI {
       b.className = `swatch ${p.finish}${i === paintI ? ' on' : ''}`;
       b.style.setProperty('--c', p.color);
       b.style.setProperty('--r', p.roof || p.color);
-      b.title = p.name;
-      b.setAttribute('aria-label', p.name);
+      b.title = this.paintName(car, i);
+      b.setAttribute('aria-label', b.title);
       b.addEventListener('click', () => {
         this.actions.tap();
         this.gp = i;
@@ -285,9 +412,10 @@ export class UI {
       });
       swatch.appendChild(b);
     });
-    $('garage-paint-name').textContent = `${car.paints[paintI].name} · ${{ gloss: 'Parlak', metal: 'Metalik', matte: 'Mat', pearl: 'İnci' }[car.paints[paintI].finish]}${car.paints[paintI].roof ? ' · Çift ton' : ''}`;
+    const pt = car.paints[paintI];
+    $('garage-paint-name').textContent = `${this.paintName(car, paintI)} · ${tx(`garage.finish.${pt.finish}`)}${pt.roof ? ` · ${tx('garage.twoTone')}` : ''}`;
     $('garage-name').textContent = car.name;
-    $('garage-desc').textContent = car.desc;
+    $('garage-desc').textContent = tx(`cars.${car.id}.desc`);
 
     const stats = $('garage-stats');
     stats.textContent = '';
@@ -300,7 +428,7 @@ export class UI {
       t.textContent = label;
       const bar = document.createElement('i');
       const fill = document.createElement('b');
-      fill.style.width = `${Math.round(25 + value * 75)}%`;
+      fill.style.setProperty('--w', `${Math.round(25 + value * 75)}%`);
       bar.appendChild(fill);
       const n = document.createElement('em');
       n.textContent = text;
@@ -308,21 +436,23 @@ export class UI {
       stats.appendChild(row);
     };
     const norm = (v, a, b) => (v - a) / (b - a);
-    stat('Hız', norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
-    stat('Kayma', norm(base.driftGrip / car.driftGrip, 1, base.driftGrip / top.driftGrip), String(Math.round((base.driftGrip / car.driftGrip) * 100)));
-    stat('Dayanıklılık', norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
+    const range = (key) => { const v = cars.map((c) => c[key]); return [Math.min(...v), Math.max(...v)]; };
+    stat(tx('garage.speed'), norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
+    stat(tx('garage.accel'), norm(car.accel, ...range('accel')), String(Math.round(car.accel / 7)));
+    stat(tx('garage.grip'), norm(car.grip, ...range('grip')), String(Math.round(car.grip * 20)));
+    stat(tx('garage.durability'), norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
 
     const act = $('garage-action');
     act.classList.toggle('buy', !owned);
-    if (selected) { act.textContent = 'Seçili'; act.disabled = true; }
-    else if (owned) { act.textContent = 'Seç'; act.disabled = false; }
+    if (selected) { act.textContent = tx('garage.selected'); act.disabled = true; }
+    else if (owned) { act.textContent = tx('garage.select'); act.disabled = false; }
     else {
-      act.textContent = d.coins >= car.cost ? `Satın al · ${car.cost}` : `${car.cost} coin`;
+      act.textContent = tx(d.coins >= car.cost ? 'garage.buy' : 'garage.need', { cost: txNum(car.cost) });
       act.disabled = d.coins < car.cost;
     }
     act.onclick = () => {
       this.actions.tap();
-      if (owned) this.storage.select(car.id);
+      if (owned) { this.storage.select(car.id); this.actions.preview(car); }
       else if (this.storage.buy(car.id)) this.actions.purchased();
       this.actions.carChanged();
       this.renderGarage();
@@ -334,16 +464,18 @@ export class UI {
       const b = document.createElement('button');
       const has = d.owned.includes(c.id);
       b.className = `thumb${i === this.gi ? ' on' : ''}${has ? '' : ' locked'}${d.selected === c.id ? ' selected' : ''}`;
-      const art = carSprite(c, this.storage.paintIndex(c.id));
+      const art = document.createElement('canvas');
+      paintPixelCar(art, c, this.storage.paintIndex(c.id));
       art.className = 'car-art';
       const label = document.createElement('span');
       label.textContent = has ? c.name : `${c.cost}`;
       b.append(art, label);
-      b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.gp = 0; this.renderGarage(); });
+      b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.gp = 0; this.renderGarage(); this.actions.preview(c); });
       list.appendChild(b);
     });
     const on = list.children[this.gi];
-    if (on && on.scrollIntoView) on.scrollIntoView({ inline: 'center', block: 'nearest' });
+    if (on) list.scrollLeft = on.offsetLeft - list.clientWidth / 2 + on.offsetWidth / 2;
+    if (!$('garage').hidden) this.fit($('garage'));
   }
 
   stepCar(dir) {

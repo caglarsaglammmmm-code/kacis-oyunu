@@ -2,6 +2,8 @@
 // Her bina seed değerinden kendi kat, çatı, cephe ve renk seçimini türetir.
 import { BUILD, CONFIG } from './config.js';
 import { rr, shade } from './art.js';
+import { NAMES } from './names.js';
+import { paintLandmark } from './landmarks.js';
 
 function hsl(h, s, l) { return `hsl(${h % 360},${s}%,${l}%)`; }
 
@@ -245,24 +247,24 @@ function cafe(g, r) {
 // Her zincirin kendi cephesi: renk, biçim, tente ve otopark
 const CHAINS = {
   // Tenteli küçük market: çizgili sundurma
-  'Pazarcık Market': (g, r) => { box(g, r, '#3f8f5b', '#f4ead2'); for (let px = r.x; px < r.x + r.w; px += 16) { g.fillStyle = (px - r.x) % 32 ? '#f4ead2' : '#3f8f5b'; g.fillRect(px, r.y + r.h - 22, 16, 7); } },
+  pazarcik: (g, r) => { box(g, r, '#3f8f5b', '#f4ead2'); for (let px = r.x; px < r.x + r.w; px += 16) { g.fillStyle = (px - r.x) % 32 ? '#f4ead2' : '#3f8f5b'; g.fillRect(px, r.y + r.h - 22, 16, 7); } },
   // İndirim marketi: büyük yıldız çatı yaması
-  Ucuzlar: (g, r) => { box(g, r, '#7b3fa0', '#ffd23f'); g.fillStyle = '#ffd23f'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -1.57 + i * 0.628; const q = i % 2 ? 9 : 20; g[i ? 'lineTo' : 'moveTo'](r.x + r.w * 0.78 + Math.cos(a) * q, r.y + 24 + Math.sin(a) * q); } g.closePath(); g.fill(); },
-  'Sepet Market': (g, r) => { box(g, r, '#1f9e9e', '#e9f6f4'); g.strokeStyle = '#e9f6f4'; g.lineWidth = 3; g.strokeRect(r.x + r.w * 0.7, r.y + 16, 26, 14); g.beginPath(); g.arc(r.x + r.w * 0.7 + 13, r.y + 16, 11, 3.14, 0); g.stroke(); },
-  'Yıldız Mağazaları': (g, r) => { box(g, r, '#c23b6b', '#fff0d8'); g.fillStyle = '#fff0d8'; for (const k of [0.2, 0.5, 0.8]) { g.beginPath(); g.arc(r.x + r.w * k, r.y + 18, 5, 0, 7); g.fill(); } },
-  'Dörtyol Market': (g, r) => { box(g, r, '#6a7f2a', '#f7f3e3'); g.fillStyle = '#f7f3e3'; g.fillRect(r.x + r.w * 0.5 - 2, r.y + 8, 4, r.h - 34); g.fillRect(r.x + 8, r.y + (r.h - 26) * 0.5, r.w - 16, 4); },
-  'Teknoloji Durağı': (g, r) => {
+  ucuzlar: (g, r) => { box(g, r, '#7b3fa0', '#ffd23f'); g.fillStyle = '#ffd23f'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -1.57 + i * 0.628; const q = i % 2 ? 9 : 20; g[i ? 'lineTo' : 'moveTo'](r.x + r.w * 0.78 + Math.cos(a) * q, r.y + 24 + Math.sin(a) * q); } g.closePath(); g.fill(); },
+  sepet: (g, r) => { box(g, r, '#1f9e9e', '#e9f6f4'); g.strokeStyle = '#e9f6f4'; g.lineWidth = 3; g.strokeRect(r.x + r.w * 0.7, r.y + 16, 26, 14); g.beginPath(); g.arc(r.x + r.w * 0.7 + 13, r.y + 16, 11, 3.14, 0); g.stroke(); },
+  yildiz: (g, r) => { box(g, r, '#c23b6b', '#fff0d8'); g.fillStyle = '#fff0d8'; for (const k of [0.2, 0.5, 0.8]) { g.beginPath(); g.arc(r.x + r.w * k, r.y + 18, 5, 0, 7); g.fill(); } },
+  dortyol: (g, r) => { box(g, r, '#6a7f2a', '#f7f3e3'); g.fillStyle = '#f7f3e3'; g.fillRect(r.x + r.w * 0.5 - 2, r.y + 8, 4, r.h - 34); g.fillRect(r.x + 8, r.y + (r.h - 26) * 0.5, r.w - 16, 4); },
+  teknoloji: (g, r) => {
     box(g, r, '#2b3a67', '#b7f34a');
     g.strokeStyle = '#b7f34a'; g.lineWidth = 2;
     for (let px = r.x + 14; px < r.x + r.w - 16; px += 22) { g.beginPath(); g.arc(px, r.y + 16, 5, 0, 7); g.stroke(); }
   },
-  'Yapı Dünyası': (g, r) => {
+  yapi: (g, r) => {
     box(g, r, '#8a5a2b', '#f2e6d0');
     g.fillStyle = '#6f8f55'; g.fillRect(r.x + r.w * 0.7, r.y, r.w * 0.3, r.h - 18); // Bahçe bölümü
     g.fillStyle = 'rgba(255,255,255,.25)';
     for (let px = r.x + r.w * 0.7; px < r.x + r.w; px += 12) g.fillRect(px, r.y, 2, r.h - 18);
   },
-  'Köşe Bakkal': (g, r) => { box(g, r, '#b5651d', '#fff4d8'); stripe(g, r, '#fff4d8', '#b5651d'); },
+  kose: (g, r) => { box(g, r, '#b5651d', '#fff4d8'); stripe(g, r, '#fff4d8', '#b5651d'); },
 };
 
 function box(g, r, roof, band) {
@@ -296,11 +298,13 @@ function kolej(g, r) {
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.fillStyle = '#17181b';
-  g.fillText('MANDALİNA', cx + 4, cy - size * 0.55 + 4);
-  g.fillText('KOLEJİ', cx + 4, cy + size * 0.55 + 4);
+  const [top, ...rest] = NAMES.kolej.ad.split(' ');
+  const bottom = rest.join(' ');
+  g.fillText(top, cx + 4, cy - size * 0.55 + 4);
+  g.fillText(bottom, cx + 4, cy + size * 0.55 + 4);
   g.fillStyle = '#ffffff';
-  g.fillText('MANDALİNA', cx, cy - size * 0.55);
-  g.fillText('KOLEJİ', cx, cy + size * 0.55);
+  g.fillText(top, cx, cy - size * 0.55);
+  g.fillText(bottom, cx, cy + size * 0.55);
   // Cephe: beyaz sütunlar, siyah camlar, turuncu giriş
   for (let px = x + 10; px < x + w - 12; px += 24) {
     g.fillStyle = '#ffffff'; g.fillRect(px, y + h - 38, 6, 38);
@@ -308,7 +312,7 @@ function kolej(g, r) {
     g.fillStyle = '#ff9a3c'; g.fillRect(px + 6, y + h - 20, 16, 12);
   }
   g.fillStyle = '#ff7a00'; g.fillRect(x + w / 2 - 58, y + h - 40, 116, 40);
-  label(g, 'MANDALİNA KOLEJİ', x + w / 2, y + h - 22, 8.5, '#ffffff', 900);
+  label(g, NAMES.kolej.ad, x + w / 2, y + h - 22, 8.5, '#ffffff', 900);
 }
 
 
@@ -670,7 +674,7 @@ export function paintBuilding2(g, r) {
   switch (r.style) {
     case S.APARTMENT: apartment2(g, r); break;
     case S.KOLEJ: kolej(g, r); break;
-    case S.CHAIN: (CHAINS[r.brand] || CHAINS['Pazarcık Market'])(g, r); break;
+    case S.CHAIN: (CHAINS[r.brand] || CHAINS.pazarcik)(g, r); break;
     case S.BANK: bank2(g, r); break;
     case S.RUIN: ruin(g, r); return true;
     case S.SITEWORK: sitework(g, r); return true;
@@ -690,7 +694,7 @@ export function paintBuilding2(g, r) {
     case S.ISHANI: ishani(g, r); break;
     case S.SHOPROW: shoprow(g, r); break;
     case S.CAFE: cafe(g, r); break;
-    default: return false;
+    default: return paintLandmark(g, r);
   }
   if (r.style === S.APARTMENT || r.style === S.SITE_BLOCK || r.style === S.RESIDENCE || r.style === S.HOTEL || r.style === S.ISHANI || r.style === S.SHOPROW) facadeBits(g, r);
   return true;
@@ -708,6 +712,13 @@ export function shadowOf(r) {
     case S.APARTMENT: return 0.9 + (r.seed % 4) * 0.3;
     case S.GECEKONDU: case S.VILLA: case S.SHOP: return 0.45;
     case S.STADIUM: return 1;
+    case S.MUZE: case S.OZEL_OKUL: return 2.2;
+    case S.ANIT: return 2.6;
+    case S.SELCUK_CAMI: case S.KONGRE: return 1.8;
+    case S.AVM: return 1.5;
+    case S.BEDESTEN: return 1.2;
+    case S.SERVIS: return 0.8;
+    case S.BAGEVI: return 0.6;
     default: return 1;
   }
 }

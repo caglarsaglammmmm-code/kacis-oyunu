@@ -26,7 +26,7 @@ const DY = [0, 1, 0, -1];
 const LANE = [1, -1, -1, 1];
 
 export const PED_KIND_NAMES = Object.keys(PD.kinds);
-const HW_CARS = ['tofas', 'murat', 'tog', 'bavyera', 'halka', 'yildiz', 'golf', 'focus', 'kore', 'megane', 'linea', 'pickup', 'clio', 'duster', 'grandland', 'egea'];
+const HW_CARS = ['klasik', 'efe', 'elektra', 'bavar', 'aurum', 'stella', 'volta', 'pusula', 'dalga', 'lale', 'vadi', 'pickup', 'liva', 'bozkir', 'granit', 'marmara'];
 let pedWeight = 0;
 for (const k of PED_KIND_NAMES) pedWeight += PD.kinds[k].weight;
 let npcWeight = 0;
@@ -55,7 +55,7 @@ export class Crowd {
     this.npcs = [];
     for (let i = 0; i < NP.max; i++) {
       const b = makeBody();
-      b.alive = false; b.kind = 'tofas'; b.spec = null; b.state = 'drive'; b.color = 0; b.t = 0;
+      b.alive = false; b.kind = 'klasik'; b.spec = null; b.state = 'drive'; b.color = 0; b.t = 0;
       b.dir = 0; b.line = 0; b.lastCross = 1e9; b.hornT = 0; b.ctlS = 0; b.ctlT = 1; b.breaker = true;
       b.panicT = 0; b.waitT = 0;
       b.drive = { maxSpeed: 0, accel: 0, turnRate: 0, grip: 0, driftGrip: 0 };
@@ -196,7 +196,7 @@ export class Crowd {
       const dx = h.x - p.x;
       const dy = h.y - p.y;
       const reach = (h.len + p.len) * 0.62;
-      if (g.state === 'play' && dx * dx + dy * dy < reach * reach) {
+      if (g.state === 'play' && !g.cheat && dx * dx + dy * dy < reach * reach) {
         const y = h.y;
         const rv = g.collideCars(p, h);
         h.y = y; h.vy = 0;
@@ -225,6 +225,7 @@ export class Crowd {
 
   // --- Yayalar ---
   pickKind() {
+    if (this.g.daylight.k > 0.5 && Math.random() < 0.22) return 'cat'; // Gece sokak kedilerin
     let r = Math.random() * pedWeight;
     for (const k of PED_KIND_NAMES) {
       r -= PD.kinds[k].weight;
@@ -316,7 +317,7 @@ export class Crowd {
     const ty = c.y + (vertical ? along : toS);
     if (g.onScreen(x, y, 40) || g.world.blockedAt(x, y) || g.world.blockedAt(tx, ty)) return;
     let kind = this.pickKind();
-    if (PD.kinds[kind].road || PD.kinds[kind].dodge) kind = 'man';
+    if (PD.kinds[kind].road || PD.kinds[kind].dodge || PD.kinds[kind].safe) kind = 'man'; // Korunanlar yola inmez
     this.setupPed(p, kind, x, y, Math.atan2(ty - y, tx - x));
     p.state = PED_WAIT;
     p.tx = tx; p.ty = ty;
@@ -393,10 +394,14 @@ export class Crowd {
 
     // Araç tehlikesi: kaç, çarpılırsa uç
     if (this.checkHit(p, pl, g.state === 'play')) return;
-    for (const c of g.cops) {
+    const cops = g.cops;
+    for (let i = 0; i < cops.length; i++) {
+      const c = cops[i];
       if (Math.abs(c.x - p.x) < 60 && Math.abs(c.y - p.y) < 60 && this.checkHit(p, c, false)) return;
     }
-    for (const n of this.npcs) {
+    const npcs = this.npcs;
+    for (let i = 0; i < npcs.length; i++) {
+      const n = npcs[i];
       if (n.alive && Math.abs(n.x - p.x) < 80 && Math.abs(n.y - p.y) < 80 && this.checkHit(p, n, false)) return;
     }
 
@@ -469,11 +474,22 @@ export class Crowd {
   }
 
   checkHit(p, b, isPlayer) {
+    if (isPlayer && this.g.cheat) return false;
     const r = b.len * 0.44 + 7;
     const dx = p.x - b.x;
     const dy = p.y - b.y;
     if (dx * dx + dy * dy >= r * r) return false;
     const speed = Math.hypot(b.vx, b.vy);
+    // Çocuk, yaşlı, bebek arabası ve tekerlekli sandalye: araç asla değmez, kenara çekilirler
+    if (p.info.safe) {
+      const d = Math.hypot(dx, dy) || 1;
+      p.x += (dx / d) * 34;
+      p.y += (dy / d) * 34;
+      p.a = Math.atan2(dy, dx);
+      p.state = PED_RUN;
+      p.turnT = 1.4;
+      return false;
+    }
     // Kedi ezilmez: son anda sıçrar
     if (p.info.dodge) {
       const d = Math.hypot(dx, dy) || 1;
@@ -502,7 +518,7 @@ export class Crowd {
 
   blast(x, y, R) {
     for (const p of this.peds) {
-      if (!p.alive || p.state === PED_FLY || p.info.dodge) continue;
+      if (!p.alive || p.state === PED_FLY || p.info.dodge || p.info.safe) continue;
       if (Math.hypot(p.x - x, p.y - y) < R * 0.6) this.launch(p, { x, y, vx: 0, vy: 0 }, true);
     }
     const g = this.g;
@@ -546,7 +562,7 @@ export class Crowd {
     for (const o of this.npcs) if (o.alive && Math.hypot(o.x - x, o.y - y) < 180) return;
 
     let r = Math.random() * npcWeight;
-    let kind = 'tofas';
+    let kind = 'klasik';
     for (const k in NP.types) {
       r -= NP.types[k].weight;
       if (r < 0) { kind = k; break; }
@@ -625,11 +641,12 @@ export class Crowd {
 
     // Oyuncuyla çarpışma
     if (g.state === 'play' && far < (n.len + p.len) * 0.8) {
-      const rv = g.collideCars(p, n);
+      const rv = g.cheat ? 0 : g.collideCars(p, n);
       if (rv > 30) this.hitNpc(n, rv, true);
     }
     // Polislerle çarpışma
-    for (const c of g.cops) {
+    for (let i = 0; i < g.cops.length; i++) {
+      const c = g.cops[i];
       const dx = c.x - n.x;
       const dy = c.y - n.y;
       const r = (c.len + n.len) * 0.6;
@@ -651,7 +668,8 @@ export class Crowd {
     if (n.panicT > 0) n.panicT -= dt;
     let threat = g.state === 'play' && p.speed > NP.panicSpeed && Math.hypot(p.x - n.x, p.y - n.y) < NP.panicDist;
     if (!threat && g.state === 'play') {
-      for (const c of g.cops) {
+      for (let i = 0; i < g.cops.length; i++) {
+        const c = g.cops[i];
         if (Math.abs(c.x - n.x) < NP.panicDist && Math.abs(c.y - n.y) < NP.panicDist && c.state === 'chase') { threat = true; break; }
       }
     }
@@ -676,7 +694,9 @@ export class Crowd {
     const fx = Math.cos(n.a);
     const fy = Math.sin(n.a);
     let blocked = false;
-    for (const o of this.npcs) {
+    const npcs = this.npcs;
+    for (let i = 0; i < npcs.length; i++) {
+      const o = npcs[i];
       if (o === n || !o.alive) continue;
       const ax = o.x - n.x;
       const ay = o.y - n.y;

@@ -1,0 +1,75 @@
+// Türkçe. Anahtarlar bütün dillerde aynıdır; {ad} biçimindeki yerlere değer konur.
+export default {
+  start: 'BAŞLA',
+  menu: {
+    garage: 'Araba Seç', settings: 'Ayarlar', howto: 'Nasıl?', apk: 'APK İndir',
+    best: 'En iyi: {score} puan · {time}', first: 'İlk kaçışın seni bekliyor',
+    maker: 'Çağlar Sağlam tarafından yapıldı', exit: 'Çıkmak için tekrar bas',
+  },
+  aria: {
+    game: 'Oyun alanı', health: 'Sağlık', pause: 'Duraklat', wanted: 'Arananlık', damage: 'Hasar', reverse: 'Geri vites',
+    mute: 'Sesi aç veya kapat', back: 'Geri', prev: 'Önceki', next: 'Sonraki', start: 'Başla',
+  },
+  garage: {
+    finish: { gloss: 'Parlak', metal: 'Metalik', matte: 'Mat', pearl: 'İnci' }, twoTone: 'Çift ton',
+    title: 'Garaj', selected: 'Seçili', select: 'Seç', buy: 'Satın al · {cost}', need: '{cost} coin',
+    speed: 'Hız', accel: 'İvme', grip: 'Yol tutuş', durability: 'Dayanıklılık',
+  },
+  settings: {
+    title: 'Ayarlar', sound: 'Ses', volume: 'Ses düzeyi', ambient: 'Sokak ambiyansı', vibrate: 'Titreşim',
+    control: 'Kontrol', zones: 'Sağ / Sol', wheel: 'Direksiyon', stick: 'Joystick',
+    quality: 'Grafik kalitesi', auto: 'Otomatik', high: 'Yüksek', low: 'Düşük',
+    language: 'Dil / Language', privacy: 'Gizlilik Politikası', version: 'Sürüm {v}',
+  },
+  dev: {
+    title: 'Geliştirici', god: 'Ölümsüzlük', start: 'Başlangıç süresi',
+    t0: '0 sn', t45: '45 sn (SWAT öncesi)', t195: '195 sn (takviye öncesi)', t275: '275 sn (tank öncesi)', t280: '280 sn (tanklar)',
+  },
+  howto: {
+    title: 'Nasıl Oynanır',
+    rightH: 'Sağ yarıya bas', rightP: 'Sağa döner, drift atar',
+    leftH: 'Sol yarıya bas', leftP: 'Sola döner, drift atar',
+    bothH: 'İkisine birden bas', bothP: 'Durur ve geri gider',
+    tips: [
+      'Araba kendi gider. Sen yalnızca yön verirsin.',
+      "Ayarlar'dan kontrolü seç: Sağ / Sol, Direksiyon ya da Joystick.",
+      'Duvarlar hasar verir: duman, kıvılcım, ateş, patlama.',
+      'Şehirden çık: sahil, orman, çöl ve kırsal seni bekliyor.',
+      'Polise kıl payı yaklaşmak ve drift atmak combo çarpanını büyütür.',
+      'Polisleri duvara bindir ya da çarparak devir.',
+      'Kırmızı daire görürsen hemen çık: tank ateşi geliyor!',
+    ],
+  },
+  power: {
+    blast: 'Patlama', ghost: 'Görünmezlik', heal: 'Can', giant: 'Dev mod',
+    blastInfo: 'Yakındaki bütün arabalar patlar', ghostInfo: '{n} sn polis seni göremez',
+    healInfo: 'Hasarı onarır, ateşi söndürür', giantInfo: '{n} sn devleşirsin, hasar almazsın',
+    healFloat: 'CAN +', ghostFloat: 'GÖRÜNMEZ', giantFloat: 'DEV MOD',
+  },
+  pause: { title: 'Duraklatıldı', resume: 'Devam et', menu: 'Ana menü' },
+  over: {
+    caught: 'YAKALANDIN!', sunk: 'BATTIN!', record: 'YENİ REKOR!',
+    score: 'Skor', time: 'Süre', coins: 'Coin', kills: 'Devrilen polis', broken: 'Kırılan nesne', near: 'Yakın kaçış', drift: 'Drift',
+    seconds: '{n} sn', best: 'En iyi skor: {score} · En uzun süre: {time}', retry: 'Tekrar dene', menu: 'Ana menü',
+  },
+  hint: {
+    zones: ['Sola bas', 'sola drift', 'İkisine bas', 'geri vites', 'Sağa bas', 'sağa drift'],
+    wheel: ['GERİ tut', 'geri vites', 'Direksiyon', 'sağ altta', 'Çevir', 'sağa sola döner'],
+    stick: ['Sol yarı', 'bas ve kaydır', 'Joystick', 'parmağının altında', 'GERİ tut', 'geri vites'],
+    rev: 'GERİ',
+  },
+  alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!' },
+  cheat: { on: 'Aferin, hile kodunu buldun la!', off: 'Hile kapatıldı', badge: 'HİLE AÇIK' },
+  cars: {
+    atmaca: { desc: 'Her mahallenin emektarı', paints: ['Mahalle Beji', 'Şarap Kırmızı', 'Mat Asker Yeşili', 'Çift Ton Krem-Bordo'] },
+    motor: { desc: 'Dar sokakların kralı', paints: ['Yarış Kırmızı', 'Elektrik Mavi', 'Mat Siyah', 'İnci Beyaz'] },
+    granit: { desc: 'Yüksek ve güvenli SUV', paints: ['Gece Mavisi', 'Kor Turuncu', 'Mat Gümüş', 'İnci Beyaz'] },
+    elektra: { desc: 'Sessiz, güçlü, elektrikli', paints: ['Anadolu Kırmızı', 'Fırtına Grisi', 'Mat Toprak', 'Buz Mavisi'] },
+    simsek: { desc: 'Abartılı spoyler, tam tuning', paints: ['Mat Siyah Sarı Şerit', 'Ateş Turuncu', 'Neon Yeşil', 'Mor Metalik'] },
+    cinar: { desc: 'Klasik efsane', paints: ['Efsane Turuncu', 'Bebek Mavisi', 'Çift Ton Krem-Vişne', 'Mat Zeytin'] },
+    efe: { desc: 'Çelik gibi, babadan kalma', paints: ['Boğaz Mavisi', 'Haki', 'Gümüş', 'Çift Ton Bej-Kahve'] },
+    marmara: { desc: 'Sade sedan, sürprizli', paints: ['Kar Beyaz', 'Volkan Kırmızı', 'Mat Antrasit', 'Çift Ton Mavi-Siyah'] },
+    liva: { desc: 'Küçük, çevik, uçan hatchback', paints: ['Okyanus Mavi', 'Alev Turuncu', 'Mat Beyaz', 'Çift Ton Kırmızı-Siyah'] },
+    bozkir: { desc: 'Her yerde gider, hiç durmaz', paints: ['Kanyon Turuncusu', 'Orman Yeşili', 'Kum Beji', 'Çift Ton Gri-Siyah'] },
+  },
+};

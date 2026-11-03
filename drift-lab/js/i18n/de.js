@@ -1,0 +1,75 @@
+// Deutsch
+export default {
+  start: 'START',
+  menu: {
+    garage: 'Autos', settings: 'Optionen', howto: 'Anleitung', apk: 'APK laden',
+    best: 'Bestwert: {score} Pkt. · {time}', first: 'Deine erste Flucht wartet',
+    maker: 'Gemacht von Çağlar Sağlam', exit: 'Zum Beenden erneut drücken',
+  },
+  aria: {
+    game: 'Spielfeld', health: 'Zustand', pause: 'Pause', wanted: 'Fahndungsstufe', damage: 'Schaden', reverse: 'Rückwärtsgang',
+    mute: 'Ton an oder aus', back: 'Zurück', prev: 'Vorheriges', next: 'Nächstes', start: 'Start',
+  },
+  garage: {
+    finish: { gloss: 'Glanz', metal: 'Metallic', matte: 'Matt', pearl: 'Perleffekt' }, twoTone: 'Zweifarbig',
+    title: 'Garage', selected: 'Gewählt', select: 'Wählen', buy: 'Kaufen · {cost}', need: '{cost} Münzen',
+    speed: 'Tempo', accel: 'Beschleunigung', grip: 'Grip', durability: 'Haltbarkeit',
+  },
+  settings: {
+    title: 'Einstellungen', sound: 'Ton', volume: 'Lautstärke', ambient: 'Straßenkulisse', vibrate: 'Vibration',
+    control: 'Steuerung', zones: 'Links / Rechts', wheel: 'Lenkrad', stick: 'Joystick',
+    quality: 'Grafik', auto: 'Auto', high: 'Hoch', low: 'Niedrig',
+    language: 'Sprache / Language', privacy: 'Datenschutz', version: 'Version {v}',
+  },
+  dev: {
+    title: 'Entwickler', god: 'Unbesiegbar', start: 'Startzeit',
+    t0: '0 s', t45: '45 s (vor SWAT)', t195: '195 s (vor Verstärkung)', t275: '275 s (vor Panzern)', t280: '280 s (Panzer)',
+  },
+  howto: {
+    title: 'So wird gespielt',
+    rightH: 'Rechte Hälfte drücken', rightP: 'Lenkt nach rechts und driftet',
+    leftH: 'Linke Hälfte drücken', leftP: 'Lenkt nach links und driftet',
+    bothH: 'Beide gleichzeitig drücken', bothP: 'Bremst und fährt rückwärts',
+    tips: [
+      'Dein Auto fährt von selbst. Du lenkst nur.',
+      'Wähle die Steuerung in den Einstellungen: Links / Rechts, Lenkrad oder Joystick.',
+      'Wände schaden: Rauch, Funken, Feuer – und dann knallt’s.',
+      'Raus aus der Stadt: Strand, Wald, Wüste und Land warten.',
+      'Knappe Manöver an der Polizei vorbei und Drifts erhöhen deine Combo.',
+      'Lass die Polizei gegen Wände krachen oder ramme sie von der Straße.',
+      'Roter Kreis? Sofort weg da: Panzerbeschuss!',
+    ],
+  },
+  power: {
+    blast: 'Explosion', ghost: 'Tarnung', heal: 'Reparatur', giant: 'Riese',
+    blastInfo: 'Sprengt alle Autos in der Nähe', ghostInfo: 'Die Polizei sieht dich {n} s lang nicht',
+    healInfo: 'Repariert Schäden und löscht Feuer', giantInfo: '{n} s lang riesig und unverwundbar',
+    healFloat: 'REPARIERT +', ghostFloat: 'GETARNT', giantFloat: 'RIESE',
+  },
+  pause: { title: 'Pausiert', resume: 'Weiter', menu: 'Hauptmenü' },
+  over: {
+    caught: 'ERWISCHT!', sunk: 'VERSENKT!', record: 'NEUER REKORD!',
+    score: 'Punkte', time: 'Zeit', coins: 'Münzen', kills: 'Polizei erledigt', broken: 'Zerstörte Objekte', near: 'Knappe Manöver', drift: 'Drift',
+    seconds: '{n} s', best: 'Bestwert: {score} · Längste Fahrt: {time}', retry: 'Nochmal', menu: 'Hauptmenü',
+  },
+  hint: {
+    zones: ['Links drücken', 'Drift links', 'Beide drücken', 'Rückwärts', 'Rechts drücken', 'Drift rechts'],
+    wheel: ['RÜCK halten', 'Rückwärts', 'Lenkrad', 'unten rechts', 'Drehen', 'lenkt links oder rechts'],
+    stick: ['Linke Hälfte', 'drücken und ziehen', 'Joystick', 'erscheint unter dem Daumen', 'RÜCK halten', 'Rückwärts'],
+    rev: 'RÜCK',
+  },
+  alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!' },
+  cheat: { on: 'Na sieh mal einer an – du hast den Cheatcode gefunden!', off: 'Cheat aus', badge: 'CHEAT AN' },
+  cars: {
+    atmaca: { desc: 'Der treue Klassiker jeder Nachbarschaft', paints: ['Kiez-Beige', 'Weinrot', 'Mattes Armeegrün', 'Zweifarbig Creme/Bordeaux'] },
+    motor: { desc: 'König der engen Gassen', paints: ['Rennrot', 'Elektroblau', 'Mattschwarz', 'Perlweiß'] },
+    granit: { desc: 'Hoher, sicherer SUV', paints: ['Mitternachtsblau', 'Glutorange', 'Mattsilber', 'Perlweiß'] },
+    elektra: { desc: 'Leise, stark, elektrisch', paints: ['Anatolienrot', 'Sturmgrau', 'Mattes Erdbraun', 'Eisblau'] },
+    simsek: { desc: 'Riesiger Spoiler, voll getunt', paints: ['Mattschwarz mit Gelbstreifen', 'Feuerorange', 'Neongrün', 'Lila Metallic'] },
+    cinar: { desc: 'Eine klassische Legende', paints: ['Legendenorange', 'Babyblau', 'Zweifarbig Creme/Kirsche', 'Matte Olive'] },
+    efe: { desc: 'Stahlhart, von Papa geerbt', paints: ['Bosporusblau', 'Khaki', 'Silber', 'Zweifarbig Beige/Braun'] },
+    marmara: { desc: 'Schlichte Limousine voller Überraschungen', paints: ['Schneeweiß', 'Vulkanrot', 'Mattes Anthrazit', 'Zweifarbig Blau/Schwarz'] },
+    liva: { desc: 'Kleiner, wendiger Flitzer', paints: ['Ozeanblau', 'Flammenorange', 'Mattweiß', 'Zweifarbig Rot/Schwarz'] },
+    bozkir: { desc: 'Fährt überall, hält nie an', paints: ['Canyonorange', 'Waldgrün', 'Sandbeige', 'Zweifarbig Grau/Schwarz'] },
+  },
+};

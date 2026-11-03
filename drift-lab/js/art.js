@@ -426,10 +426,11 @@ export function paintRover(g, spec) {
 
 // --- Güç simgeleri ---
 export const POWER_LOOK = {
-  blast: { color: '#ff7a1a', name: 'Patlama' },
-  ghost: { color: '#a07bff', name: 'Görünmezlik' },
-  heal: { color: '#2fd872', name: 'Can' },
-  giant: { color: '#ffd23f', name: 'Dev mod' },
+  // Adlar dil dosyasında: power.blast, power.ghost ...
+  blast: { color: '#ff7a1a' },
+  ghost: { color: '#a07bff' },
+  heal: { color: '#2fd872' },
+  giant: { color: '#ffd23f' },
 };
 
 export function paintPower(g, kind) {

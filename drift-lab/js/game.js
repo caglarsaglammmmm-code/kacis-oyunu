@@ -5,6 +5,7 @@ import { World, PROP, PROP_INFO, TILE, CHUNK, isWaterRect, isDeep, isPower, powe
 import { Effects, FX } from './effects.js';
 import { FlowField, driveCop, planBarricade, newPlan } from './police.js';
 import { Crowd } from './crowd.js';
+import { tx } from './i18n/index.js';
 
 const D = CONFIG.difficulty;
 const DMG = CONFIG.damage;
@@ -34,7 +35,7 @@ export function interp(curve, t) {
 // Süreye göre zorluk: eğriler doğrusal olduğu için her saniye biraz artar.
 // heat: arananlık. Yalnız polis baskısını öne alır, aşama ve uzaylı eşikleri süreye bağlıdır
 export function difficultyAt(t, out = {}, heat = 0) {
-  const h = t + heat;
+  const h = t + (t >= PU.heat.from ? heat : 0);
   out.stage = t >= D.tanksAt ? 3 : t >= D.advancedAt ? 2 : t >= D.swatAt ? 1 : 0;
   out.stars = Math.min(MAX_STARS, 1 + out.stage);
   out.maxPolice = Math.min(D.maxActive, Math.round(interp(PU.policeCurve, h) * PU.countMul));
@@ -1413,14 +1414,14 @@ export class Game {
       this.burning = false;
       this.burnT = 0;
       this.sinceHit = 0;
-      this.fx.float(p.x, p.y - 34, 'CAN +', '#2fd872');
+      this.fx.float(p.x, p.y - 34, tx('power.healFloat'), '#2fd872');
     } else if (name === 'ghost') {
       this.ghostT = PW.duration;
-      this.fx.float(p.x, p.y - 34, 'GÖRÜNMEZ', '#a07bff');
+      this.fx.float(p.x, p.y - 34, tx('power.ghostFloat'), '#a07bff');
     } else if (name === 'giant') {
       this.giantT = PW.duration;
       this.setGiant(true);
-      this.fx.float(p.x, p.y - 34, 'DEV MOD', '#ffd23f');
+      this.fx.float(p.x, p.y - 34, tx('power.giantFloat'), '#ffd23f');
     }
   }
 

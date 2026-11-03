@@ -1,0 +1,75 @@
+// English
+export default {
+  start: 'START',
+  menu: {
+    garage: 'Cars', settings: 'Settings', howto: 'How to play', apk: 'Get APK',
+    best: 'Best: {score} pts · {time}', first: 'Your first getaway awaits',
+    maker: 'Made by Çağlar Sağlam', exit: 'Press again to exit',
+  },
+  aria: {
+    game: 'Game area', health: 'Health', pause: 'Pause', wanted: 'Wanted level', damage: 'Damage', reverse: 'Reverse',
+    mute: 'Toggle sound', back: 'Back', prev: 'Previous', next: 'Next', start: 'Start',
+  },
+  garage: {
+    finish: { gloss: 'Gloss', metal: 'Metallic', matte: 'Matte', pearl: 'Pearl' }, twoTone: 'Two-tone',
+    title: 'Garage', selected: 'Selected', select: 'Select', buy: 'Buy · {cost}', need: '{cost} coins',
+    speed: 'Speed', accel: 'Acceleration', grip: 'Grip', durability: 'Durability',
+  },
+  settings: {
+    title: 'Settings', sound: 'Sound', volume: 'Volume', ambient: 'Street ambience', vibrate: 'Vibration',
+    control: 'Controls', zones: 'Left / Right', wheel: 'Wheel', stick: 'Joystick',
+    quality: 'Graphics', auto: 'Auto', high: 'High', low: 'Low',
+    language: 'Language', privacy: 'Privacy Policy', version: 'Version {v}',
+  },
+  dev: {
+    title: 'Developer', god: 'Invincible', start: 'Start time',
+    t0: '0 s', t45: '45 s (before SWAT)', t195: '195 s (before backup)', t275: '275 s (before tanks)', t280: '280 s (tanks)',
+  },
+  howto: {
+    title: 'How to Play',
+    rightH: 'Tap the right half', rightP: 'Turns right and drifts',
+    leftH: 'Tap the left half', leftP: 'Turns left and drifts',
+    bothH: 'Tap both at once', bothP: 'Brakes and reverses',
+    tips: [
+      'Your car drives itself. You just steer.',
+      'Pick your controls in Settings: Left / Right, Wheel or Joystick.',
+      'Walls hurt: smoke, sparks, fire, then boom.',
+      'Leave the city: beaches, forests, deserts and countryside await.',
+      'Close calls with the police and long drifts grow your combo.',
+      'Make the police crash into walls, or ram them off the road.',
+      'See a red circle? Get out fast: tank fire incoming!',
+    ],
+  },
+  power: {
+    blast: 'Blast', ghost: 'Ghost', heal: 'Repair', giant: 'Giant',
+    blastInfo: 'Blows up every car nearby', ghostInfo: 'The police can’t see you for {n} s',
+    healInfo: 'Fixes damage and puts out fire', giantInfo: 'Grow huge for {n} s and take no damage',
+    healFloat: 'REPAIR +', ghostFloat: 'GHOST', giantFloat: 'GIANT',
+  },
+  pause: { title: 'Paused', resume: 'Resume', menu: 'Main menu' },
+  over: {
+    caught: 'BUSTED!', sunk: 'SUNK!', record: 'NEW RECORD!',
+    score: 'Score', time: 'Time', coins: 'Coins', kills: 'Police wrecked', broken: 'Objects smashed', near: 'Close calls', drift: 'Drift',
+    seconds: '{n} s', best: 'Best score: {score} · Longest run: {time}', retry: 'Try again', menu: 'Main menu',
+  },
+  hint: {
+    zones: ['Tap left', 'drift left', 'Tap both', 'reverse', 'Tap right', 'drift right'],
+    wheel: ['Hold REV', 'reverse', 'Wheel', 'bottom right', 'Turn it', 'steer left or right'],
+    stick: ['Left half', 'press and slide', 'Joystick', 'appears under your thumb', 'Hold REV', 'reverse'],
+    rev: 'REV',
+  },
+  alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!' },
+  cheat: { on: 'Well, look at you! You found the cheat code!', off: 'Cheat off', badge: 'CHEAT ON' },
+  cars: {
+    atmaca: { desc: 'Every neighborhood’s old faithful', paints: ['Neighborhood Beige', 'Wine Red', 'Matte Army Green', 'Two-Tone Cream/Burgundy'] },
+    motor: { desc: 'King of the narrow streets', paints: ['Racing Red', 'Electric Blue', 'Matte Black', 'Pearl White'] },
+    granit: { desc: 'Tall and safe SUV', paints: ['Midnight Blue', 'Ember Orange', 'Matte Silver', 'Pearl White'] },
+    elektra: { desc: 'Quiet, strong, electric', paints: ['Anatolian Red', 'Storm Gray', 'Matte Earth', 'Ice Blue'] },
+    simsek: { desc: 'Huge spoiler, fully tuned', paints: ['Matte Black, Yellow Stripe', 'Fire Orange', 'Neon Green', 'Metallic Purple'] },
+    cinar: { desc: 'A classic legend', paints: ['Legend Orange', 'Baby Blue', 'Two-Tone Cream/Cherry', 'Matte Olive'] },
+    efe: { desc: 'Tough as steel, handed down from Dad', paints: ['Bosphorus Blue', 'Khaki', 'Silver', 'Two-Tone Beige/Brown'] },
+    marmara: { desc: 'Plain sedan, full of surprises', paints: ['Snow White', 'Volcano Red', 'Matte Anthracite', 'Two-Tone Blue/Black'] },
+    liva: { desc: 'Small, nimble, flying hatchback', paints: ['Ocean Blue', 'Flame Orange', 'Matte White', 'Two-Tone Red/Black'] },
+    bozkir: { desc: 'Goes anywhere, never stops', paints: ['Canyon Orange', 'Forest Green', 'Sand Beige', 'Two-Tone Gray/Black'] },
+  },
+};

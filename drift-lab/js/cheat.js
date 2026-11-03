@@ -16,7 +16,8 @@ export class CheatCode {
 
   // dir: 'L' ya da 'R', now: saniye. Sıra tamamlanınca true döner
   press(dir, now) {
-    if (this.i > 0 && now - this.t > C.gap) this.i = 0;
+    // Sınır dahil değildir: tam 2 sn de geçersizdir. Adım toplamındaki kayan nokta payı yutulur
+    if (this.i > 0 && now - this.t >= C.gap - 1e-6) this.i = 0;
     if (dir === C.sequence[this.i]) this.i++;
     else this.i = dir === C.sequence[0] ? 1 : 0;
     this.t = now;

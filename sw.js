@@ -1,12 +1,25 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'penci-zorn-v7';
+const CACHE = 'penci-zorn-v14';
 const ASSETS = [
   './',
   'index.html',
+  'privacy.html',
   'manifest.json',
   'css/style.css',
+  'js/names.js',
   'js/config.js',
+  'js/i18n/index.js',
+  'js/i18n/tr.js',
+  'js/i18n/en.js',
+  'js/i18n/ja.js',
+  'js/i18n/zh.js',
+  'js/i18n/es.js',
+  'js/i18n/de.js',
+  'assets/ui/btn-start.png',
+  'js/cheat.js',
+  'js/controls.js',
   'js/physics.js',
+  'js/quality.js',
   'js/world.js',
   'js/effects.js',
   'js/police.js',
@@ -17,9 +30,9 @@ const ASSETS = [
   'js/carmodels.js',
   'js/car3d.js',
   'js/menu3d.js',
-  'vendor/three.min.js',
   'assets/cars.webp',
   'js/cars.js',
+  'js/landmarks.js',
   'js/buildings.js',
   'js/game.js',
   'js/render.js',
@@ -27,10 +40,27 @@ const ASSETS = [
   'js/storage.js',
   'js/audio.js',
   'js/ui.js',
+  'js/pixelcars.js',
+  'js/pixelmenu.js',
+  'js/transition.js',
   'js/main.js',
   'icons/icon-192.png',
   'icons/icon-512.png',
+  'icons/icon-maskable-192.png',
   'icons/icon-maskable-512.png',
+  'icons/favicon-32.png',
+  'assets/ui/cover.png',
+  'assets/ui/btn-basla.png',
+  'assets/ui/frame.png',
+  'assets/ui/garage-bg.png',
+  'assets/ui/hazard.png',
+  'assets/ui/plate.png',
+  'fonts/press-start-2p-latin-400-normal.woff2',
+  'fonts/press-start-2p-latin-ext-400-normal.woff2',
+  'fonts/pixelify-sans-latin-400-normal.woff2',
+  'fonts/pixelify-sans-latin-ext-400-normal.woff2',
+  'fonts/pixelify-sans-latin-700-normal.woff2',
+  'fonts/pixelify-sans-latin-ext-700-normal.woff2',
   'fonts/anton-latin-400-normal.woff2',
   'fonts/anton-latin-ext-400-normal.woff2',
   'fonts/lobster-latin-400-normal.woff2',
@@ -62,7 +92,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k.startsWith('drift-lab-')).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });

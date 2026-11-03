@@ -11,7 +11,9 @@ const ATLAS = { img: null, ready: false };
 export function loadAtlas(done) {
   if (typeof Image === 'undefined') return;
   const img = new Image();
-  img.onload = () => { ATLAS.img = img; ATLAS.ready = true; if (done) done(); };
+  const ready = () => { ATLAS.img = img; ATLAS.ready = true; if (done) done(); };
+  // Görsel, ilk çizimde değil burada çözülür: oyun sırasında takılma yapmaz
+  img.onload = () => { if (img.decode) img.decode().then(ready, ready); else ready(); };
   img.onerror = () => { ATLAS.ready = false; if (done) done(); };
   img.src = 'assets/cars.webp';
 }
@@ -60,9 +62,9 @@ export function spriteList(cfg) {
     }));
   }
   const cops = {
-    car: ['egea', { color: '#f2f4f7', finish: 'gloss', band: '#1c4fb0', roof: '#f2f4f7', police: 1, text: 'POLİS', textColor: '#1c4fb0' }],
-    fast: ['bavyera', { color: '#16305f', finish: 'metal', police: 1, band: '#ffffff', text: 'POLİS' }],
-    advanced: ['tog', { color: '#14161b', finish: 'metal', police: 1, band: '#ff2a3c' }],
+    car: ['marmara', { color: '#f2f4f7', finish: 'gloss', band: '#1c4fb0', roof: '#f2f4f7', police: 1, text: 'POLİS', textColor: '#1c4fb0' }],
+    fast: ['bavar', { color: '#16305f', finish: 'metal', police: 1, band: '#ffffff', text: 'POLİS' }],
+    advanced: ['elektra', { color: '#14161b', finish: 'metal', police: 1, band: '#ff2a3c' }],
     swat: ['minibus', { color: '#23272e', finish: 'matte', police: 1, band: '#ffd23f', text: 'ÖZEL HAREKAT' }],
     moto: ['moto', { color: '#1c4fb0', finish: 'gloss', accent: '#ffffff' }],
   };

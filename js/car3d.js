@@ -56,20 +56,14 @@ function fascia(THREE, W, Z, draw, px = 512) {
     arcB(y, z, r, col) { for (const s of [-1, 1]) { g.strokeStyle = col; g.lineWidth = r * k * 0.3; g.lineCap = 'round'; g.beginPath(); g.arc(X(s * y), Y(z), r * k, s > 0 ? 0.5 : 3.14 - 2.6, s > 0 ? 3.14 + 0.1 + 0.9 : 3.14 - 0.5); g.stroke(); } },
     arcR(y, z, r, col) { d.arcB(y, z, r, col); },
     text(t, h, z, col = '#23262b', y = 0) { g.fillStyle = col; g.font = `900 ${h * k * 0.8}px Nunito, Arial, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, X(y), Y(z)); },
+    // Drift Lab rozeti: altıgen içinde deney şişesi çizgisi
     emblem(y, z, kind, r = 0.055) {
-      const cx = X(y); const cy = Y(z); const q = r * k;
-      g.save(); g.translate(cx, cy); g.strokeStyle = '#eef2f6'; g.fillStyle = '#eef2f6'; g.lineWidth = q * 0.2;
-      if (kind === 'rings3') { for (let i = -1; i <= 1; i++) { g.beginPath(); g.arc(i * q * 1.1, 0, q * 0.8, 0, 7); g.stroke(); } }
-      else if (kind === 'star3') { g.beginPath(); g.arc(0, 0, q, 0, 7); g.stroke(); for (let i = 0; i < 3; i++) { const a = -1.57 + (i * 6.283) / 3; g.beginPath(); g.moveTo(Math.cos(a + 2) * q * 0.12, Math.sin(a + 2) * q * 0.12); g.lineTo(Math.cos(a) * q, Math.sin(a) * q); g.lineTo(Math.cos(a - 2) * q * 0.12, Math.sin(a - 2) * q * 0.12); g.fill(); } }
-      else if (kind === 'propeller') { g.beginPath(); g.arc(0, 0, q, 0, 7); g.stroke(); g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, q * 0.8, -1.57, 0); g.closePath(); g.fill(); g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, q * 0.8, 1.57, 3.14); g.closePath(); g.fill(); }
-      else if (kind === 'rhomb') { g.beginPath(); g.moveTo(0, -q * 1.2); g.lineTo(q * 0.8, 0); g.lineTo(0, q * 1.2); g.lineTo(-q * 0.8, 0); g.closePath(); g.stroke(); }
-      else if (kind === 'oval') { g.beginPath(); g.ellipse(0, 0, q * 1.3, q * 0.8, 0, 0, 7); g.stroke(); }
-      else if (kind === 'bolt') { g.beginPath(); g.arc(0, 0, q, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-q * 0.9, q * 0.1); g.lineTo(q * 0.9, -q * 0.1); g.stroke(); }
-      else if (kind === 'tulip') { g.beginPath(); g.moveTo(0, q * 0.9); g.quadraticCurveTo(-q * 1.2, q * 0.1, -q * 0.7, -q); g.lineTo(0, -q * 0.3); g.lineTo(q * 0.7, -q); g.quadraticCurveTo(q * 1.2, q * 0.1, 0, q * 0.9); g.stroke(); }
-      else if (kind === 'vw2') { g.beginPath(); g.arc(0, 0, q, 0, 7); g.stroke(); g.beginPath(); g.moveTo(-q * 0.6, -q * 0.3); g.lineTo(0, q * 0.5); g.lineTo(q * 0.6, -q * 0.3); g.stroke(); }
-      else if (kind === 'link') { g.beginPath(); g.moveTo(-q, -q * 0.4); g.lineTo(0, q * 0.4); g.lineTo(q, -q * 0.4); g.stroke(); }
-      else if (kind === 'shield') { g.beginPath(); g.moveTo(-q, -q); g.lineTo(q, -q); g.lineTo(q * 0.8, q * 0.4); g.lineTo(0, q); g.lineTo(-q * 0.8, q * 0.4); g.closePath(); g.stroke(); }
-      else { g.fillRect(-q, -q * 0.5, q * 2, q * 0.28); g.fillRect(-q, q * 0.2, q * 2, q * 0.28); }
+      const q = r * k;
+      g.save(); g.translate(X(y), Y(z)); g.strokeStyle = '#eef2f6'; g.lineWidth = q * 0.2; g.lineJoin = 'round';
+      g.beginPath();
+      for (let i = 0; i < 6; i++) { const a = 0.5236 + (i * Math.PI) / 3; g[i ? 'lineTo' : 'moveTo'](Math.cos(a) * q * 1.15, Math.sin(a) * q * 1.15); }
+      g.closePath(); g.stroke();
+      g.beginPath(); g.moveTo(-q * 0.2, -q * 0.6); g.lineTo(-q * 0.2, -q * 0.1); g.lineTo(-q * 0.55, q * 0.5); g.lineTo(q * 0.55, q * 0.5); g.lineTo(q * 0.2, -q * 0.1); g.lineTo(q * 0.2, -q * 0.6); g.stroke();
       g.restore();
     },
   };
@@ -386,7 +380,6 @@ export function buildCar(THREE, id, paint) {
     for (const sg of [1, -1]) addBox(THREE, group, b - a, 0.04, 0.05, (a + b) / 2, roofF((a + b) / 2 / L) + 0.05, sg * (W / 2) * m.tumble * 0.86, chromeMat);
   }
   if (m.roofSpoiler) addBox(THREE, group, 0.34, 0.05, W * 0.74, (m.roof[m.roof.length - 2][0] - 0.1) * L, roofF(m.roof[m.roof.length - 2][0] - 0.1) + 0.02, 0, plastic);
-  if (m.hoodStar) { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.02, 0.09, 6), chromeMat); st.position.set(0.05, deckF(0.02) + 0.09, 0); group.add(st); }
   if (paint.premium && paint.sprite) {
     const roofA = m.win[0][0] + 0.06; const roofB = m.win[m.win.length - 1][1] - 0.08;
     if (!m.roofBlack && !paint.roof) patch(roofA + 0.03, roofA + 0.16, 0, 0.52, 0, 0.52, '#0b1016', 0);

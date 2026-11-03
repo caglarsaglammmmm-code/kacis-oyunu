@@ -20,9 +20,10 @@ export class Effects {
     this.kind = new Uint8Array(n);
     this.color = new Uint8Array(n);
     this.cursor = 0;
+    this.density = 1; // Kalite ayarı: 1 hepsi, 0.5 yarısı üretilir
     this.colors = ['#888888'];
 
-    // Lastik izleri halka tampon: x1,y1,x2,y2,yaş
+    // Lastik izleri aurum tampon: x1,y1,x2,y2,yaş
     this.skidMax = FXP.maxSkids;
     this.skid = new Float32Array(this.skidMax * 5);
     this.skidCursor = 0;
@@ -55,6 +56,7 @@ export class Effects {
 
   // Havuz doluysa en eskinin üstüne yazar
   spawn(kind, x, y, vx, vy, ttl, size, color = 0) {
+    if (this.density < 1 && Math.random() > this.density) return;
     const i = this.cursor;
     this.cursor = (i + 1) % this.max;
     this.kind[i] = kind;
@@ -136,13 +138,15 @@ export class Effects {
       vy[i] *= f;
       if (k === FX.DEBRIS) this.rot[i] += dt * 9 * (life[i] / this.ttl[i]);
     }
-    for (const w of this.waves) {
+    for (let i = 0; i < this.waves.length; i++) {
+      const w = this.waves[i];
       if (!w.alive) continue;
       w.t += dt * 2.4;
       w.r = w.max * (1 - (1 - w.t) * (1 - w.t));
       if (w.t >= 1) w.alive = false;
     }
-    for (const f of this.floats) {
+    for (let i = 0; i < this.floats.length; i++) {
+      const f = this.floats[i];
       if (!f.alive) continue;
       f.t += dt;
       f.y -= 46 * dt;

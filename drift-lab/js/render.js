@@ -4,6 +4,7 @@ import { CHUNK, CT, TILE, PROP, isPower, powerName } from './world.js';
 import { PED_FLY, lightState } from './crowd.js';
 import { paintTr } from './cars.js';
 import { sheetSprite } from './sheet.js';
+import { paintPad, tallArt, landmarkSign } from './landmarks.js';
 import { paintBuilding2, shadowOf } from './buildings.js';
 import { FX } from './effects.js';
 import { signKind, paintDoner, paintPromo, paintDancer, paintBalcony, paintWashing, paintMoon, paintStars, rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintUfo, paintRover, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
@@ -63,7 +64,7 @@ function signHalo(color) {
 
 // Tabela görüntüsü binada saklanır: her karede anahtar metni üretilmez
 function rectSign(r) {
-  return r.signImg || (r.signImg = signCanvas(r.sign, r.signColor, r.seed));
+  return r.signImg || (r.signImg = landmarkSign(r) || signCanvas(r.sign, r.signColor, r.seed));
 }
 
 // Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
@@ -72,12 +73,31 @@ const CHUNK_FIT = (CHUNK + 0.6) / CHUNK; // Zemin parçaları ek yeri kapansın 
 
 // Yüksek binada tabela çatının ortasındadır: gündüz, gece ve ışıltı aynı kutuyu kullanır
 function roofSignBox(r, img) {
-  const w = Math.min((r.tX1 - r.tX0) * 0.92, (img.width / img.height) * 38);
+  const w = Math.min((r.tX1 - r.tX0) * 0.92, (img.width / img.height) * (r.roofSignH || 38));
   const h = (w / img.width) * img.height;
   signOut.w = w;
   signOut.h = h;
   signOut.x = (r.tX0 + r.tX1) / 2 - w / 2;
   signOut.y = (r.tY0 + r.tY1) / 2 - h / 2;
+  return signOut;
+}
+
+// Özel yapının güney cephesindeki dev tabela: duvar kameraya bakınca görünür, duvarla birlikte uzar
+function facadeSignBox(r, img, camY) {
+  const y1 = r.y + r.h;
+  if (camY <= y1) return null;
+  const t = 0.56;
+  const wy = y1 + (r.tY1 - y1) * t;
+  const xa = r.x + (r.tX0 - r.x) * t;
+  const xb = r.x + r.w + (r.tX1 - r.x - r.w) * t;
+  const wallH = y1 - r.tY1;
+  let w = (xb - xa) * (r.landmark === 'kule' ? 0.86 : 0.6);
+  let h = (w * img.height) / img.width;
+  if (h > wallH * 0.3) { h = wallH * 0.3; w = (h * img.width) / img.height; }
+  if (h < 5) return null;
+  signOut.w = w; signOut.h = h;
+  signOut.x = (xa + xb) / 2 - w / 2;
+  signOut.y = wy - h / 2;
   return signOut;
 }
 
@@ -339,36 +359,55 @@ export class Renderer {
       const r = list[ti];
       const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
       const X0 = r.tX0; const X1 = r.tX1; const Y0 = r.tY0; const Y1 = r.tY1;
-      const tex = this.walls[r.seed % this.walls.length];
-      // Güney ve kuzey duvarları
-      if (cy > y1 || cy < y0) {
-        const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
-        ctx.globalAlpha = 1;
-        for (let t = 0; t < N; t++) {
-          const a = t / N; const b = (t + 1) / N;
-          const xa = x0 + (X0 - x0) * b; const xb = x1 + (X1 - x1) * b;
-          const ya = fromY + (toY - fromY) * a; const yb = fromY + (toY - fromY) * b;
-          ctx.drawImage(tex.n, 0, 192 * (1 - b), Math.min(96, r.w), 192 / N, xa, Math.min(ya, yb) - 0.4, xb - xa, Math.abs(yb - ya) + 0.8);
-        }
-        if (cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
-      }
-      // Doğu ve batı duvarları
-      if (cx > x1 || cx < x0) {
-        const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
-        for (let t = 0; t < N; t++) {
-          const a = t / N; const b = (t + 1) / N;
-          const ya = y0 + (Y0 - y0) * b; const yb = y1 + (Y1 - y1) * b;
-          const xa = fromX + (toX - fromX) * a; const xc = fromX + (toX - fromX) * b;
-          ctx.drawImage(tex.e, 192 * (1 - b), 0, 192 / N, Math.min(96, r.h), Math.min(xa, xc) - 0.4, ya, Math.abs(xc - xa) + 0.8, yb - ya);
-        }
-        ctx.fillStyle = 'rgba(0,0,20,.16)';
-        ctx.beginPath(); ctx.moveTo(fromX, y0); ctx.lineTo(toX, Y0); ctx.lineTo(toX, Y1); ctx.lineTo(fromX, y1); ctx.closePath(); ctx.fill();
-      }
-      ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
-      if (r.sign) {
+      // Özel yapı (kolej, kule) kendi duvar ve çatı dokusunu getirir
+      const art = r.landmark ? tallArt(r) : null;
+      const tex = art || this.walls[r.seed % this.walls.length];
+      ctx.globalAlpha = 1;
+      this.tallWalls(r, tex, art, cx, cy, N, true);
+      ctx.drawImage(art ? art.roof : this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
+      if (r.sign && !r.noRoofSign) {
         const img = rectSign(r);
         const b = roofSignBox(r, img);
         ctx.drawImage(img, b.x, b.y, b.w, b.h);
+      }
+      if (r.sign && r.landmark) {
+        const img = rectSign(r);
+        const b = facadeSignBox(r, img, cy);
+        if (b) ctx.drawImage(img, b.x, b.y, b.w, b.h);
+      }
+    }
+  }
+
+  // Yüksek binanın kameraya bakan duvarları. tex: { n, e } dokusu. shadeIt: gölge katmanı (gündüz)
+  tallWalls(r, tex, art, cx, cy, N, shadeIt) {
+    const ctx = this.ctx;
+    const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
+    const X0 = r.tX0; const X1 = r.tX1; const Y0 = r.tY0; const Y1 = r.tY1;
+    const nW = art ? tex.n.width : Math.min(96, r.w);
+    const eH = art ? tex.e.height : Math.min(96, r.h);
+    // Güney ve kuzey duvarları
+    if (cy > y1 || cy < y0) {
+      const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
+      for (let t = 0; t < N; t++) {
+        const a = t / N; const b = (t + 1) / N;
+        const xa = x0 + (X0 - x0) * b; const xb = x1 + (X1 - x1) * b;
+        const ya = fromY + (toY - fromY) * a; const yb = fromY + (toY - fromY) * b;
+        ctx.drawImage(tex.n, 0, 192 * (1 - b), nW, 192 / N, xa, Math.min(ya, yb) - 0.4, xb - xa, Math.abs(yb - ya) + 0.8);
+      }
+      if (shadeIt && cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
+    }
+    // Doğu ve batı duvarları
+    if (cx > x1 || cx < x0) {
+      const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
+      for (let t = 0; t < N; t++) {
+        const a = t / N; const b = (t + 1) / N;
+        const ya = y0 + (Y0 - y0) * b; const yb = y1 + (Y1 - y1) * b;
+        const xa = fromX + (toX - fromX) * a; const xc = fromX + (toX - fromX) * b;
+        ctx.drawImage(tex.e, 192 * (1 - b), 0, 192 / N, eH, Math.min(xa, xc) - 0.4, ya, Math.abs(xc - xa) + 0.8, yb - ya);
+      }
+      if (shadeIt) {
+        ctx.fillStyle = 'rgba(0,0,20,.16)';
+        ctx.beginPath(); ctx.moveTo(fromX, y0); ctx.lineTo(toX, Y0); ctx.lineTo(toX, Y1); ctx.lineTo(fromX, y1); ctx.closePath(); ctx.fill();
       }
     }
   }
@@ -1142,6 +1181,8 @@ export class Renderer {
         g.fillStyle = '#7c7f82'; g.fillRect(x, y, w, h);
         g.strokeStyle = '#fff'; g.lineWidth = 1.5;
         for (let k = 0; k < w; k += 40) { g.beginPath(); g.moveTo(x + k, y); g.lineTo(x + k, y + 34); g.stroke(); }
+      } else {
+        paintPad(g, p, x, y, w, h); // Özel yerlerin alanları: merdiven, bayrak, tramvay, tepe, bağ
       }
     }
   }
@@ -1295,8 +1336,8 @@ export class Renderer {
   // Tabela, uydu çanağı, güneş paneli ve balkon çamaşırı
   bakeSign(g, r) {
     if (r.style === 0 || r.style === 1 || r.style === 2 || r.style === 3 || r.style === 5 || r.style === BUILD.APARTMENT) roofClutter(g, r);
-    if (!r.sign) return;
-    const img = signCanvas(r.sign, r.signColor, r.seed);
+    if (!r.sign || r.tall > 0) return; // Yüksek binanın tabelası çatıda, her karede çizilir
+    const img = rectSign(r);
     const b = signBox(r, img);
     g.drawImage(img, b.x, b.y, b.w, b.h);
   }
@@ -1684,11 +1725,18 @@ export class Renderer {
       }
     }
     const talls = this.tallList;
+    const cam = game.cam;
     for (let i = 0; i < talls.length; i++) {
       const r = talls[i];
-      if (!r.sign || r.tX1 < x0 || r.tX0 > x1 || r.tY1 < y0 || r.tY0 > y1) continue;
+      if (r.tX1 < x0 || r.tX0 > x1 || r.tY1 < y0 || r.tY0 > y1) continue;
+      if (r.landmark) this.litLandmark(r, night, now, i + 1, cam);
+      if (!r.sign) continue;
       const img = rectSign(r);
-      this.litSign(r, img, roofSignBox(r, img), night, now, i + 1, game.cam.y > r.y + r.h);
+      if (!r.noRoofSign) this.litSign(r, img, roofSignBox(r, img), night, now, i + 1, cam.y > r.y + r.h);
+      if (r.landmark) {
+        const b = facadeSignBox(r, img, cam.y);
+        if (b) this.litSign(r, img, { x: b.x, y: b.y, w: b.w, h: b.h }, night, now, i + 1, false);
+      }
     }
     // Araç farları
     ctx.globalCompositeOperation = 'lighter';
@@ -1753,6 +1801,27 @@ export class Renderer {
         ctx.drawImage(halo, r.x - 6, r.y + r.h - 2, r.w + 12, 40);
       }
     }
+    if (clipped) ctx.restore();
+  }
+
+  // Özel yapının gece pencereleri ve kulenin ikaz lambası. Öndeki binalar kırpar
+  litLandmark(r, night, now, from, cam) {
+    const art = tallArt(r);
+    if (!art) return;
+    const ctx = this.ctx;
+    const minX = Math.min(r.x, r.tX0); const maxX = Math.max(r.x + r.w, r.tX1);
+    const minY = Math.min(r.y, r.tY0); const maxY = Math.max(r.y + r.h, r.tY1);
+    const clipped = this.clipOccluders(minX, minY, maxX - minX, maxY - minY, from);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = Math.min(1, night * 1.1);
+    this.tallWalls(r, { n: art.litN, e: art.litE }, art, cam.x, cam.y, this.lod.slices, false);
+    if (art.beacon) {
+      const on = Math.floor(now / 700) % 2 === 0;
+      const bx = (r.tX0 + r.tX1) / 2; const by = (r.tY0 + r.tY1) / 2;
+      ctx.globalAlpha = night * (on ? 0.95 : 0.25);
+      ctx.drawImage(this.sprites.red, bx - 40, by - 40, 80, 80);
+    }
+    ctx.globalCompositeOperation = 'source-over';
     if (clipped) ctx.restore();
   }
 

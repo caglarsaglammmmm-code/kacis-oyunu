@@ -752,3 +752,37 @@ body:not(.has3d) .garage3d { background: linear-gradient(160deg, #15183a, #0a0c1
 @keyframes cheatmsg { 0% { opacity: 0; transform: translateY(10px); } 12%, 82% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-6px); } }
 #cheat-badge { position: absolute; left: 50%; top: calc(var(--safe-t) + 56px); transform: translateX(-50%); padding: 2px 8px; border-radius: 8px; background: rgba(10,12,20,.4); color: rgba(255,225,77,.8); font: 700 13px/1.3 Pixelify, sans-serif; letter-spacing: .5px; white-space: nowrap; text-shadow: none; }
 #cheat-badge[hidden] { display: none; }
+
+/* v14: BAŞLA düğmesi. Yazısız görsel (tools/make-start-button.mjs) + seçili dilde yazı.
+   Her ekranda düzenin ortasında; yumuşak gölge, iç ışık, nefes alır gibi hafif hareket.
+   Basınca yumuşakça içeri çöker (ease-out), bırakınca yumuşakça geri gelir. */
+.menu nav > .start { align-self: center; margin-left: auto; margin-right: auto; }
+.start { display: block; width: min(264px, 88%); height: auto; aspect-ratio: 500 / 194; background: none; image-rendering: auto; border-radius: 18px;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .38)) drop-shadow(0 10px 16px rgba(0, 0, 0, .36));
+  transition: transform .3s cubic-bezier(.22, 1, .36, 1), filter .3s ease-out; }
+.start .start-art { display: block; position: absolute; inset: 0; border-radius: 18px; background: url(../assets/ui/btn-start.png) center / 100% 100% no-repeat; animation: startBreath 3.6s ease-in-out infinite; will-change: transform; }
+.start .start-art::after { content: ''; position: absolute; inset: 0; border-radius: 18px; pointer-events: none; background: radial-gradient(110% 70% at 50% 0%, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 62%); transition: background .3s ease-out; }
+.start .start-txt { display: flex; position: absolute; left: 19.5%; right: 19.5%; top: 31%; height: 38%; align-items: center; justify-content: center; gap: 0; overflow: hidden;
+  font: 700 var(--start-fs, 30px)/1 var(--pxt); letter-spacing: .05em; color: #fff; white-space: nowrap; text-shadow: 0 2px 0 #6b1806, 0 0 12px rgba(255, 110, 40, .32); }
+.start .start-txt i { display: inline; font-style: normal; }
+.start .start-txt i:nth-child(even) { color: #ff5a24; }
+@keyframes startBreath { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.016); } }
+.start:active, .start.down { transform: translateY(3px) scale(.965); filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .4)) drop-shadow(0 3px 6px rgba(0, 0, 0, .3)) brightness(1.06); transition: transform .14s ease-out, filter .14s ease-out; }
+.start:active .start-art::after, .start.down .start-art::after { background: radial-gradient(110% 80% at 50% 10%, rgba(255, 236, 150, .34), rgba(255, 220, 120, 0) 66%); }
+@media (orientation: landscape) and (min-aspect-ratio: 23/20) { .start { width: min(264px, 90%); height: auto; } }
+@media (orientation: portrait) and (max-height: 640px) { .start { width: min(220px, 84%); height: auto; } }
+@media (prefers-reduced-motion: reduce) { .start .start-art { animation: none; } }
+
+/* v14: diller. Japonca ve Çince için piksel yazı tipi yerine cihazın okunaklı sistem yazı tipi.
+   Uzun metinler kutudan taşmaz: JS sığdırır (ui.js fit), son çare kırpma. */
+html[lang="ja"] { --pxt: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif; --px: var(--pxt); }
+html[lang="zh-CN"] { --pxt: 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', 'Source Han Sans SC', sans-serif; --px: var(--pxt); }
+html[lang="ja"] body, html[lang="zh-CN"] body { font-family: var(--pxt); }
+html[lang="ja"] .start .start-txt, html[lang="zh-CN"] .start .start-txt { font-weight: 800; letter-spacing: .08em; }
+html[lang="ja"] #alert, html[lang="zh-CN"] #alert, html[lang="ja"] #toast, html[lang="zh-CN"] #toast, html[lang="ja"] #hud-time, html[lang="zh-CN"] #hud-time { font-family: Bungee, var(--pxt); font-weight: 800; }
+.tile span, .toggle > span, .volume > span, .seg-row > span, .summary span, .big-score span, .car-tag b, .car-tag small, #hint b, #hint span { min-width: 0; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: clip; }
+.seg button, .menu .btn, .panel .btn, #garage-action, .screen header h2, #over-title { min-width: 0; overflow: hidden; white-space: nowrap; }
+.seg[data-set="lang"] button { font-size: 14px; }
+.howto .tips li, #howto-powers span, .spec p { overflow-wrap: anywhere; }
+/* Yatay düzende şeritli bant (12 px + 2x2 px kenar) sayılınca iki yanda eşit 10 px boşluk: BAŞLA tam ortada */
+@media (orientation: landscape) and (min-aspect-ratio: 23/20) { .menu > .menu-panel, .menu-panel { padding-left: 26px; } }

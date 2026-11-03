@@ -10,7 +10,7 @@ export function defaultSave() {
     coins: 0,
     owned: [CONFIG.cars[0].id],
     selected: CONFIG.cars[0].id,
-    settings: { sound: true, vibrate: true, ambient: true, volume: 80, quality: 'auto', qLevel: -1, control: 'zones' },
+    settings: { sound: true, vibrate: true, ambient: true, volume: 80, quality: 'auto', qLevel: -1, control: 'zones', lang: '' },
     dev: { god: false, startTime: 0 },
     tutorial: false,
     paints: {},
@@ -38,6 +38,7 @@ export function sanitize(data) {
     if (['auto', 'high', 'low'].includes(data.settings.quality)) d.settings.quality = data.settings.quality;
     if (Number.isInteger(data.settings.qLevel) && data.settings.qLevel >= -1 && data.settings.qLevel <= 3) d.settings.qLevel = data.settings.qLevel;
     if (['zones', 'wheel', 'stick'].includes(data.settings.control)) d.settings.control = data.settings.control;
+    if (['tr', 'en', 'ja', 'zh', 'es', 'de'].includes(data.settings.lang)) d.settings.lang = data.settings.lang;
   }
   if (data.dev) {
     d.dev.god = data.dev.god === true;

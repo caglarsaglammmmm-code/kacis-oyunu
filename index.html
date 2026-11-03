@@ -5,82 +5,79 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Penci Zorn</title>
 <meta name="description" content="Penci Zorn: Türk sokaklarında kuşbakışı polis kaçış ve drift oyunu">
-<meta name="theme-color" content="#14161f">
+<meta name="theme-color" content="#0a0824">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<canvas id="game" aria-label="Oyun alanı"></canvas>
-<canvas id="stage3d" aria-hidden="true" hidden></canvas>
+<canvas id="game" aria-label="Oyun alanı" data-i18n-label="game"></canvas>
 
 <div id="hud" hidden>
   <div class="hud-left">
-    <div class="hud-hp"><b id="hud-hp">100</b><div id="hud-health" aria-label="Sağlık"><i></i></div></div>
+    <div class="hud-hp"><b id="hud-hp">100</b><div id="hud-health" aria-label="Sağlık" data-i18n-label="health"><i></i></div></div>
     <div id="hud-time">0:00</div>
     <div id="hud-combo"></div>
   </div>
-  <button id="btn-pause" aria-label="Duraklat">❚❚</button>
+  <button id="btn-pause" aria-label="Duraklat" data-i18n-label="pause">❚❚</button>
+  <div id="cheat-badge" hidden>HİLE AÇIK</div>
   <div class="hud-right">
     <div class="hud-coins"><i class="coin"></i><span id="hud-coins">0</span></div>
     <div id="hud-score">0</div>
-    <div id="hud-stars" aria-label="Arananlık"></div>
-    <div id="hud-car" data-stage="0" aria-label="Hasar">
+    <div id="hud-stars" aria-label="Arananlık" data-i18n-label="wanted"></div>
+    <div id="hud-car" data-stage="0" aria-label="Hasar" data-i18n-label="damage">
       <svg viewBox="0 0 64 34"><rect x="6" y="5" width="52" height="24" rx="7"/><rect class="glass" x="33" y="9" width="12" height="16" rx="3"/><rect class="glass" x="11" y="10" width="7" height="14" rx="2"/></svg>
       <b class="puff p1"></b><b class="puff p2"></b><b class="flame"></b>
     </div>
   </div>
+  <div id="ctl-wheel" class="ctl" hidden><svg id="ctl-rim" viewBox="0 0 120 120" aria-hidden="true"><circle class="rim" cx="60" cy="60" r="50"/><path class="spoke" d="M12 60h96M60 60v48"/><circle class="hub" cx="60" cy="60" r="15"/><path class="mark" d="M54 6h12v12H54z"/></svg></div>
+  <div id="ctl-stick" class="ctl" hidden><i></i><b id="ctl-knob"></b></div>
+  <button id="ctl-rev" class="ctl" hidden aria-label="Geri vites" data-i18n-label="reverse">GERİ</button>
 </div>
 <div id="hud-powers"></div>
 <div id="hint" hidden>
-  <div><b>Sola bas</b><span>sola drift</span></div>
-  <div class="mid"><b>İkisine bas</b><span>geri vites</span></div>
-  <div><b>Sağa bas</b><span>sağa drift</span></div>
+  <div><b id="hint-l">Sola bas</b><span id="hint-ls">sola drift</span></div>
+  <div class="mid"><b id="hint-m">İkisine bas</b><span id="hint-ms">geri vites</span></div>
+  <div><b id="hint-r">Sağa bas</b><span id="hint-rs">sağa drift</span></div>
 </div>
 <div id="alert"></div>
 <div id="toast"></div>
+<div id="cheat-msg"><span></span></div>
 
 <section id="menu" class="screen menu" hidden>
-  <div class="scene" aria-hidden="true">
-    <div class="sun"></div>
-    <svg class="skyline" viewBox="0 0 800 240" preserveAspectRatio="xMidYMax slice">
-      <path class="far" d="M0 240V160l40-8 60 12 70-22 60 18 90-14 70 20 80-16 90 16 90-10 120 14v70z"/>
-      <!-- Boğaz Köprüsü -->
-      <g class="bridge"><path d="M60 180h300M100 90v100M320 90v100"/><path d="M0 150Q100 80 100 90T210 170T320 90Q330 86 420 150" fill="none"/></g>
-      <!-- Cami: kubbeler ve minareler -->
-      <path class="near" d="M430 240v-60h8v-8q0-34 42-44q42 10 42 44v8h8v60zM408 240V110l4-22 4 22v130zM544 240V110l4-22 4 22v130zM392 240v-40q8-18 22-18v58zM552 240v-58q14 0 22 18v40z"/>
-      <!-- Galata Kulesi -->
-      <path class="near" d="M640 240V110h-4l26-46 26 46h-4v130z"/>
-      <path class="near" d="M0 240v-34h60v-18h50v22h70v30zM700 240v-40h40v-22h60v62z"/>
-      <g class="win"><rect x="652" y="120" width="5" height="8"/><rect x="666" y="120" width="5" height="8"/><rect x="652" y="140" width="5" height="8"/><rect x="666" y="160" width="5" height="8"/><rect x="20" y="214" width="5" height="6"/><rect x="74" y="200" width="5" height="6"/><rect x="760" y="196" width="5" height="6"/></g>
-    </svg>
-    <div class="sea"></div>
-  </div>
+  <canvas id="cover" aria-label="Penci Zorn"></canvas>
+  <canvas id="cover-blur" aria-hidden="true"></canvas>
   <div class="menu-coins"><i class="coin"></i><span id="menu-coins">0</span></div>
-  <h1 class="logo"><span>PENCİ</span><em>ZORN</em></h1>
-  <button id="btn-garage2" class="car-tag"><b id="menu-car-name"></b><small id="menu-car-paint"></small></button>
+  <h1 class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Penci Zorn</h1>
+  <p class="maker" id="maker"></p>
+  <button id="btn-mute" class="mute" aria-label="Sesi aç veya kapat" data-i18n-label="mute"><svg viewBox="0 0 16 16"><path d="M1 6h3V5h1V4h1V3h1v10H6v-1H5v-1H4v-1H1z"/><path class="wave" d="M9 6h1v4H9zM11 4h1v8h-1zM13 2h1v12h-1z"/><path class="off" d="M9 5h2v2h1V5h2v2h-2v2h2v2h-2V9h-1v2H9V9h2V7H9z"/></svg></button>
   <div class="menu-panel">
+    <button id="btn-garage2" class="car-tag"><b id="menu-car-name"></b><small id="menu-car-paint"></small></button>
     <p id="menu-best" class="sub"></p>
     <nav>
-      <button id="btn-play" class="play"><span>OYNA</span><i></i></button>
+      <button id="btn-play" class="start" aria-label="Başla" data-i18n-label="start"><span class="start-art"><b class="start-txt" id="start-txt">BAŞLA</b></span></button>
       <div class="row">
-        <button id="btn-garage" class="tile t-garage"><svg viewBox="0 0 24 24"><path d="M3 11l9-6 9 6v9h-3v-7H6v7H3zM8 15h8v2H8zM8 18h8v2H8z"/></svg><span>Garaj</span></button>
-        <button id="btn-settings" class="tile t-set"><svg viewBox="0 0 24 24"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5zM19.4 13l2-1.5-2-3.4-2.3.9a7 7 0 0 0-1.7-1L15 5h-4l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 1.7 1L11 22h4l.4-2.5a7 7 0 0 0 1.7-1l2.3.9 2-3.4-2-1.5a7 7 0 0 0 0-2z" transform="translate(0 -1.5)"/></svg><span>Ayarlar</span></button>
-        <button id="btn-howto" class="tile t-how"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm1 14h-2v-2h2zm2-7c0 2-3 2-3 4h-2c0-3 3-3 3-4.500A1.500 1.500 0 0 0 10 9H8a4 4 0 0 1 7 1z"/></svg><span>Nasıl?</span></button>
+        <button id="btn-garage" class="tile t-garage"><svg viewBox="0 0 24 24"><path d="M3 11l9-6 9 6v9h-3v-7H6v7H3zM8 15h8v2H8zM8 18h8v2H8z"/></svg><span data-i18n="menu.garage">Araba Seç</span></button>
+        <button id="btn-settings" class="tile t-set"><svg viewBox="0 0 24 24"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5zM19.4 13l2-1.5-2-3.4-2.3.9a7 7 0 0 0-1.7-1L15 5h-4l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 1.7 1L11 22h4l.4-2.5a7 7 0 0 0 1.7-1l2.3.9 2-3.4-2-1.5a7 7 0 0 0 0-2z" transform="translate(0 -1.5)"/></svg><span data-i18n="menu.settings">Ayarlar</span></button>
+        <button id="btn-howto" class="tile t-how"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm1 14h-2v-2h2zm2-7c0 2-3 2-3 4h-2c0-3 3-3 3-4.500A1.500 1.500 0 0 0 10 9H8a4 4 0 0 1 7 1z"/></svg><span data-i18n="menu.howto">Nasıl?</span></button>
       </div>
-      <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk" rel="noopener">APK İndir</a>
+      <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk" rel="noopener" data-i18n="menu.apk">APK İndir</a>
     </nav>
   </div>
 </section>
 
 <section id="garage" class="screen garage3d" hidden>
-  <header><button class="back" data-back="menu" aria-label="Geri">←</button><h2>Garaj</h2><div class="menu-coins static"><i class="coin"></i><span id="garage-coins">0</span></div></header>
-  <button id="car-prev" class="nav-arrow" aria-label="Önceki">‹</button>
-  <button id="car-next" class="nav-arrow" aria-label="Sonraki">›</button>
+  <header><button class="back" data-back="menu" aria-label="Geri" data-i18n-label="back">←</button><h2 data-i18n="garage.title">Garaj</h2><div class="menu-coins static"><i class="coin"></i><span id="garage-coins">0</span></div></header>
+  <div id="px-car-wrap">
+    <button id="car-prev" class="nav-arrow" aria-label="Önceki" data-i18n-label="prev"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg></button>
+    <canvas id="px-car" aria-hidden="true"></canvas>
+    <button id="car-next" class="nav-arrow" aria-label="Sonraki" data-i18n-label="next"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 4 8 8-8 8"/></svg></button>
+  </div>
   <div class="gsheet">
     <div class="spec">
       <h3 id="garage-name"></h3>
@@ -94,67 +91,67 @@
 </section>
 
 <section id="settings" class="screen panel" hidden>
-  <header><button class="back" data-back="menu" aria-label="Geri">←</button><h2>Ayarlar</h2></header>
+  <header><button class="back" data-back="menu" aria-label="Geri" data-i18n-label="back">←</button><h2 data-i18n="settings.title">Ayarlar</h2></header>
   <div class="form">
-    <label class="toggle"><span>Ses</span><input id="set-sound" type="checkbox"><i></i></label>
-    <label class="toggle"><span>Sokak ambiyansı</span><input id="set-ambient" type="checkbox"><i></i></label>
-    <label class="toggle"><span>Titreşim</span><input id="set-vibrate" type="checkbox"><i></i></label>
+    <label class="toggle"><span data-i18n="settings.sound">Ses</span><input id="set-sound" type="checkbox"><i></i></label>
+    <label class="volume"><span data-i18n="settings.volume">Ses düzeyi</span><input id="set-volume" type="range" min="0" max="100" step="5"></label>
+    <label class="toggle"><span data-i18n="settings.ambient">Sokak ambiyansı</span><input id="set-ambient" type="checkbox"><i></i></label>
+    <label class="toggle"><span data-i18n="settings.vibrate">Titreşim</span><input id="set-vibrate" type="checkbox"><i></i></label>
+    <div class="seg-row"><span data-i18n="settings.control">Kontrol</span><div class="seg" data-set="control" role="radiogroup" aria-label="Kontrol"><button data-v="zones" data-i18n="settings.zones">Sağ / Sol</button><button data-v="wheel" data-i18n="settings.wheel">Direksiyon</button><button data-v="stick" data-i18n="settings.stick">Joystick</button></div></div>
+    <div class="seg-row"><span data-i18n="settings.quality">Grafik kalitesi</span><div class="seg" data-set="quality" role="radiogroup" aria-label="Grafik kalitesi"><button data-v="auto" data-i18n="settings.auto">Otomatik</button><button data-v="high" data-i18n="settings.high">Yüksek</button><button data-v="low" data-i18n="settings.low">Düşük</button></div></div>
+    <div class="seg-row lang-row"><span data-i18n="settings.language">Dil / Language</span><div class="seg" data-set="lang" role="radiogroup" aria-label="Dil / Language"><button data-v="tr" lang="tr">Türkçe</button><button data-v="en" lang="en">English</button><button data-v="ja" lang="ja">日本語</button><button data-v="zh" lang="zh-CN">简体中文</button><button data-v="es" lang="es">Español</button><button data-v="de" lang="de">Deutsch</button></div></div>
     <div id="dev-panel" hidden>
-      <h3>Geliştirici</h3>
-      <label class="toggle"><span>Ölümsüzlük</span><input id="dev-god" type="checkbox"><i></i></label>
-      <label class="select"><span>Başlangıç süresi</span>
+      <h3 data-i18n="dev.title">Geliştirici</h3>
+      <label class="toggle"><span data-i18n="dev.god">Ölümsüzlük</span><input id="dev-god" type="checkbox"><i></i></label>
+      <label class="select"><span data-i18n="dev.start">Başlangıç süresi</span>
         <select id="dev-start">
-          <option value="0">0 sn</option><option value="45">45 sn (SWAT öncesi)</option><option value="195">195 sn (takviye öncesi)</option><option value="275">275 sn (tank öncesi)</option><option value="280">280 sn (tanklar)</option>
+          <option value="0" data-i18n="dev.t0">0 sn</option><option value="45" data-i18n="dev.t45">45 sn (SWAT öncesi)</option><option value="195" data-i18n="dev.t195">195 sn (takviye öncesi)</option><option value="275" data-i18n="dev.t275">275 sn (tank öncesi)</option><option value="280" data-i18n="dev.t280">280 sn (tanklar)</option>
         </select>
       </label>
     </div>
+    <p class="version"><a href="privacy.html" style="color:inherit" data-i18n="settings.privacy">Gizlilik Politikası</a></p>
     <p id="version" class="version"></p>
   </div>
 </section>
 
 <section id="howto" class="screen panel" hidden>
-  <header><button class="back" data-back="menu" aria-label="Geri">←</button><h2>Nasıl Oynanır</h2></header>
+  <header><button class="back" data-back="menu" aria-label="Geri" data-i18n-label="back">←</button><h2 data-i18n="howto.title">Nasıl Oynanır</h2></header>
   <div class="howto">
-    <div class="demo right"><div class="phone"><i class="half l"></i><i class="half r"></i><b class="finger f1"></b><b class="toy"></b></div><h3>Sağ yarıya bas</h3><p>Sağa döner, drift atar</p></div>
-    <div class="demo left"><div class="phone"><i class="half l"></i><i class="half r"></i><b class="finger f1"></b><b class="toy"></b></div><h3>Sol yarıya bas</h3><p>Sola döner, drift atar</p></div>
-    <div class="demo both"><div class="phone"><i class="half l"></i><i class="half r"></i><b class="finger f1"></b><b class="finger f2"></b><b class="toy"></b></div><h3>İkisine birden bas</h3><p>Durur ve geri gider</p></div>
+    <div class="demo right"><div class="phone"><i class="half l"></i><i class="half r"></i><b class="finger f1"></b><b class="toy"></b></div><h3 data-i18n="howto.rightH">Sağ yarıya bas</h3><p data-i18n="howto.rightP">Sağa döner, drift atar</p></div>
+    <div class="demo left"><div class="phone"><i class="half l"></i><i class="half r"></i><b class="finger f1"></b><b class="toy"></b></div><h3 data-i18n="howto.leftH">Sol yarıya bas</h3><p data-i18n="howto.leftP">Sola döner, drift atar</p></div>
+    <div class="demo both"><div class="phone"><i class="half l"></i><i class="half r"></i><b class="finger f1"></b><b class="finger f2"></b><b class="toy"></b></div><h3 data-i18n="howto.bothH">İkisine birden bas</h3><p data-i18n="howto.bothP">Durur ve geri gider</p></div>
   </div>
   <div id="howto-powers"></div>
-  <ul class="tips">
-    <li>Araba kendi gider. Sen yalnızca yön verirsin.</li>
-    <li>Duvarlar hasar verir: duman, kıvılcım, ateş, patlama.</li>
-    <li>Şehirden çık: sahil, orman, çöl ve kırsal seni bekliyor.</li>
-    <li>Polise kıl payı yaklaşmak ve drift atmak combo çarpanını büyütür.</li>
-    <li>Polisleri duvara bindir ya da çarparak devir.</li>
-    <li>Kırmızı daire görürsen hemen çık: tank ateşi geliyor!</li>
-  </ul>
+  <ul class="tips" id="howto-tips"></ul>
 </section>
 
 <section id="pause" class="screen panel center" hidden>
-  <h2>Duraklatıldı</h2>
-  <button id="btn-resume" class="btn primary">Devam et</button>
-  <button id="btn-pause-menu" class="btn">Ana menü</button>
+  <h2 data-i18n="pause.title">Duraklatıldı</h2>
+  <button id="btn-resume" class="btn primary" data-i18n="pause.resume">Devam et</button>
+  <div class="seg-row"><span data-i18n="settings.control">Kontrol</span><div class="seg" data-set="control" role="radiogroup" aria-label="Kontrol"><button data-v="zones" data-i18n="settings.zones">Sağ / Sol</button><button data-v="wheel" data-i18n="settings.wheel">Direksiyon</button><button data-v="stick" data-i18n="settings.stick">Joystick</button></div></div>
+  <button id="btn-pause-menu" class="btn" data-i18n="pause.menu">Ana menü</button>
 </section>
 
 <section id="over" class="screen panel center" hidden>
   <h2 id="over-title">YAKALANDIN!</h2>
-  <div class="big-score"><span>Skor</span><strong id="over-score">0</strong></div>
+  <div class="big-score"><span data-i18n="over.score">Skor</span><strong id="over-score">0</strong></div>
   <div class="summary">
-    <div><span>Süre</span><b id="over-time">0:00</b></div>
-    <div><span>Coin</span><b id="over-coins">0</b></div>
-    <div><span>Devrilen polis</span><b id="over-kills">0</b></div>
-    <div><span>Kırılan nesne</span><b id="over-broken">0</b></div>
-    <div><span>Yakın kaçış</span><b id="over-near">0</b></div>
-    <div><span>Drift</span><b id="over-drift">0</b></div>
+    <div><span data-i18n="over.time">Süre</span><b id="over-time">0:00</b></div>
+    <div><span data-i18n="over.coins">Coin</span><b id="over-coins">0</b></div>
+    <div><span data-i18n="over.kills">Devrilen polis</span><b id="over-kills">0</b></div>
+    <div><span data-i18n="over.broken">Kırılan nesne</span><b id="over-broken">0</b></div>
+    <div><span data-i18n="over.near">Yakın kaçış</span><b id="over-near">0</b></div>
+    <div><span data-i18n="over.drift">Drift</span><b id="over-drift">0</b></div>
   </div>
   <p id="over-best" class="sub"></p>
   <div id="over-actions">
-    <button id="btn-retry" class="btn primary">Tekrar dene</button>
-    <button id="btn-over-menu" class="btn">Ana menü</button>
+    <button id="btn-retry" class="btn primary" data-i18n="over.retry">Tekrar dene</button>
+    <button id="btn-over-menu" class="btn" data-i18n="over.menu">Ana menü</button>
   </div>
 </section>
 
-<div id="splash" hidden><p>Çağlar Sağlam bu oyuna şaplağını vurdu</p></div>
+<div id="curtain"></div>
+<div id="splash" hidden><p>Penci Zorn</p></div>
 
 <script>
   // file:// üzerinde ES modül çalışmaz; orada tek dosyalık kopya yüklenir.
