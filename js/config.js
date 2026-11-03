@@ -17,9 +17,9 @@ export const BUILD = {
 
 export const CONFIG = {
   name: NAMES.oyun,
-  version: '16.0.0',
+  version: '17.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v16.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v17.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -162,6 +162,10 @@ export const CONFIG = {
     { id: 'marmara', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: NAMES.arabalar.marmara, cost: 1200, desc: 'Sade sedan, sürprizli', shape: 'marmara', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { kind: 'inline', cyl: 4, idle: 800, red: 6400, gears: 5, gain: 1 } },
     { id: 'liva', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: NAMES.arabalar.liva, cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'liva', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { kind: 'thin', cyl: 3, idle: 950, red: 7200, gears: 5, gain: 0.95 } },
     { id: 'bozkir', paints: [{ name: 'Kanyon Turuncusu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: NAMES.arabalar.bozkir, cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'bozkir', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { kind: 'v8', cyl: 8, idle: 620, red: 5800, gears: 5, gain: 1.15 } },
+    { id: 'tilki', paints: [{ name: 'Tilki Turuncusu', color: '#ff6a1a', finish: 'gloss', accent: '#111318' }, { name: 'Gece Siyahı', color: '#111318', finish: 'gloss', accent: '#ff6a1a' }, { name: 'Mat Gri', color: '#5a6068', finish: 'matte', accent: '#ffd23f' }, { name: 'Buz Beyazı', color: '#eef3f8', finish: 'pearl', accent: '#2b6fd6' }], finish: 'gloss', name: NAMES.arabalar.tilki, cost: 2400, desc: 'Hafif, oynak drift coupe', shape: 'tilki', maxSpeed: 572, accel: 720, turnRate: 3.72, grip: 5.0, driftGrip: 0.68, durability: 1.66, mass: 1.05, len: 46, wid: 24, color: '#ff6a1a', accent: '#111318', engine: { kind: 'turbo', cyl: 4, idle: 1000, red: 8200, gears: 6, gain: 1.05 } },
+    { id: 'kartal', paints: [{ name: 'Yarış Mavisi', color: '#1f5fbf', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Kan Kırmızı', color: '#a3121f', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Mat Siyah', color: '#16181c', finish: 'matte', accent: '#ffd23f' }, { name: 'Çift Ton Krem-Yeşil', color: '#e8dcbc', finish: 'gloss', roof: '#2f5a3a' }], finish: 'gloss', name: NAMES.arabalar.kartal, cost: 3200, desc: 'Uzun kaput, gürleyen V8', shape: 'kartal', maxSpeed: 586, accel: 760, turnRate: 3.6, grip: 5.05, driftGrip: 0.66, durability: 1.74, mass: 1.35, len: 52, wid: 26, color: '#1f5fbf', accent: '#f4f6f8', engine: { kind: 'v8', cyl: 8, idle: 560, red: 5400, gears: 4, gain: 1.25 } },
+    { id: 'volt', paints: [{ name: 'Plazma Mavi', color: '#1fb8e8', finish: 'metal', accent: '#0c0e12' }, { name: 'Grafit', color: '#2e333b', finish: 'metal', accent: '#1fb8e8' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte', accent: '#1fb8e8' }, { name: 'Aurora Mor', color: '#6a3cd9', finish: 'pearl', accent: '#9fe8ff' }], finish: 'metal', name: NAMES.arabalar.volt, cost: 4500, desc: 'Sessiz ama çok hızlı elektrikli GT', shape: 'volt', maxSpeed: 600, accel: 860, turnRate: 3.78, grip: 5.15, driftGrip: 0.63, durability: 1.82, mass: 1.4, len: 52, wid: 26, color: '#1fb8e8', accent: '#0c0e12', engine: { kind: 'ev', cyl: 8, idle: 0, red: 26000, gears: 1, gain: 0.85 } },
+    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, desc: 'Güdümlü enerji toplu süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 } },
   ],
 
   damage: {
@@ -353,6 +357,61 @@ export const CONFIG = {
   },
 
   coin: { magnet: 56, dropChance: 0.3 },
+
+  // HAVA DURUMU: her koşu başında seçilir (ayar: random ya da sabit). grip: lastik tutuşu çarpanı (oyuncu),
+  // copShare: polisler etkinin bu kadarını hisseder (adil kalsın), fade: geçiş süresi (sn),
+  // particles: en yüksek kalitede ekrandaki yağmur çizgisi / kar tanesi sayısı (kalite düştükçe azalır)
+  weather: {
+    types: ['sunny', 'rain', 'snow', 'fog', 'ice'],
+    weights: { sunny: 40, rain: 22, snow: 14, fog: 12, ice: 12 },
+    grip: { sunny: 1, rain: 0.86, snow: 0.8, fog: 1, ice: 0.35 },
+    speed: { sunny: 1, rain: 1, snow: 0.97, fog: 1, ice: 0.98 },
+    copShare: 0.5,
+    fade: 3,
+    particles: { rain: 170, snow: 130 },
+    fogAlpha: 0.6,
+  },
+
+  // ÖZELLEŞTİRME: satın alınan öğe kalıcıdır ve bütün arabalarda ücretsiz seçilir; seçim araba başına kaydedilir.
+  // Fiyatı 0 olan öğe baştan açıktır. finish: gloss parlak, metal metalik, matte mat, pearl inci
+  custom: {
+    paints: [
+      { id: 'gece', color: '#0d0f14', finish: 'gloss', price: 30 }, { id: 'gumus', color: '#c0c6ce', finish: 'metal', price: 30 },
+      { id: 'kiraz', color: '#c8102e', finish: 'gloss', price: 30 }, { id: 'okyanus', color: '#1565c0', finish: 'metal', price: 50 },
+      { id: 'zumrut', color: '#0f8a5f', finish: 'metal', price: 50 }, { id: 'limon', color: '#f4d80c', finish: 'gloss', price: 50 },
+      { id: 'mandalina', color: '#ff7a00', finish: 'gloss', price: 50 }, { id: 'lavanta', color: '#9b7fd6', finish: 'matte', price: 50 },
+      { id: 'pembe', color: '#f49ac1', finish: 'gloss', price: 50 }, { id: 'haki', color: '#6b6f4a', finish: 'matte', price: 80 },
+      { id: 'fume', color: '#4a4f57', finish: 'matte', price: 80 }, { id: 'bakir', color: '#b8683a', finish: 'metal', price: 80 },
+      { id: 'lacivert', color: '#1a2a5a', finish: 'metal', price: 80 }, { id: 'neonyesil', color: '#39ff14', finish: 'gloss', price: 120 },
+      { id: 'neonpembe', color: '#ff2fa0', finish: 'gloss', price: 120 }, { id: 'mor', color: '#7a2cff', finish: 'metal', price: 120 },
+      { id: 'inci', color: '#f2efe8', finish: 'pearl', price: 120 }, { id: 'altin', color: '#d4a017', finish: 'metal', price: 200 },
+      { id: 'krom', color: '#dfe6ee', finish: 'metal', price: 250 }, { id: 'lav', color: '#ff3b1f', finish: 'pearl', price: 200 },
+    ],
+    rims: [
+      { id: 'std', price: 0 }, { id: 'yildiz', price: 60 }, { id: 'cok', price: 90 }, { id: 'spor', price: 120 },
+      { id: 'derin', price: 150 }, { id: 'turbin', price: 180 }, { id: 'karbon', price: 200 }, { id: 'altin', price: 250 },
+    ],
+    // fx: static sabit, breathe nefes alır, rainbow gökkuşağı
+    leds: [
+      { id: 'yok', price: 0, color: '', fx: 'static' }, { id: 'mavi', price: 100, color: '#21d4fd', fx: 'static' },
+      { id: 'pembe', price: 100, color: '#ff2fa0', fx: 'static' }, { id: 'mor', price: 120, color: '#9b5cff', fx: 'static' },
+      { id: 'yesil', price: 120, color: '#39ff7a', fx: 'static' }, { id: 'beyaz', price: 140, color: '#eef6ff', fx: 'static' },
+      { id: 'kirmizi', price: 160, color: '#ff2a3c', fx: 'breathe' }, { id: 'buz', price: 160, color: '#9fe8ff', fx: 'breathe' },
+      { id: 'altin', price: 180, color: '#ffc93c', fx: 'breathe' }, { id: 'gokkusagi', price: 300, color: '#ff2fa0', fx: 'rainbow' },
+    ],
+    ledAlpha: 0.5, ledNight: 0.45, // Gündüz ve gece ek parlaklığı
+  },
+
+  // GÜDÜMLÜ ENERJİ TOPU (yalnız weapon: true olan araba). damage: her isabetin sabit hasarı.
+  // hp: polis türüne göre silah dayanıklılığı; gereken isabet = hp / damage (normal polis 4, SWAT 8, tank 16).
+  // cooldown: atış arası (sn), ammo: en çok cephane, regen: bir cephanenin dolma süresi (sn),
+  // escapeAmmo: kıl payı kaçışta eklenen cephane, maxMissiles: aynı anda en çok mermi,
+  // range/cone: kilit menzili ve önde yarım koni açısı (radyan), turn: güdüm dönüş hızı, life: ömür (sn)
+  weapon: { damage: 25, hp: { car: 100, fast: 100, moto: 75, advanced: 125, swat: 200, tank: 400, rover: 150, ufo: 250 }, cooldown: 1.7, ammo: 6, regen: 9, escapeAmmo: 1, maxMissiles: 4, speed: 760, turn: 5.5, life: 2.4, range: 620, cone: 0.62, hitR: 30, lockEvery: 6 },
+
+  // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
+  // Yeni kod eklemek için satır eklenir. car: açılan araba
+  codes: [{ code: '4266', car: 'kuzgun' }],
 
   // KIL PAYI KAÇIŞ: polis çok yakından geçip çarpmadan atlatılınca anında para.
   // distMul: yakınlık eşiği (araç gövdeleri arasındaki boşluk, oyuncu genişliğinin katı),

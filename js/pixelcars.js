@@ -1,5 +1,6 @@
 // Garaj arabaları: yandan görünüş, kod ile piksel piksel çizilir. Marka rozeti yoktur.
-// Her araç 120x48 mantıksal tuval, CSS ile keskin büyütülür.
+// Her araç 120x48 mantıksal tuval, CSS ile keskin büyütülür. Boya, jant ve alt LED görünüşe uygulanır.
+import { paintOf, ledOf } from './custom.js';
 const PXC_W = 120;
 const PXC_H = 48;
 
@@ -14,6 +15,10 @@ const PX_SHAPES = {
   marmara: { x0: 9, x1: 111, deck: 21, hood: 23, roof: 11, cr: 24, rr: 38, rf: 66, cf: 82, sill: 36, w: [31, 90], r: 8 },
   liva: { x0: 16, x1: 106, deck: 16, hood: 23, roof: 9, cr: 18, rr: 24, rf: 62, cf: 78, sill: 36, w: [33, 87], r: 8, wing: 2 },
   bozkir: { x0: 10, x1: 110, deck: 14, hood: 18, roof: 6, cr: 12, rr: 15, rf: 66, cf: 74, sill: 32, w: [31, 89], r: 10, rack: 1 },
+  tilki: { x0: 12, x1: 110, deck: 24, hood: 26, roof: 14, cr: 32, rr: 42, rf: 62, cf: 80, sill: 37, w: [31, 91], r: 8, wing: 1 },
+  kartal: { x0: 6, x1: 114, deck: 22, hood: 23, roof: 12, cr: 34, rr: 44, rf: 64, cf: 76, sill: 36, w: [28, 92], r: 8 },
+  volt: { x0: 8, x1: 112, deck: 24, hood: 26, roof: 12, cr: 22, rr: 40, rf: 66, cf: 86, sill: 37, w: [30, 92], r: 8 },
+  kuzgun: { x0: 8, x1: 112, deck: 25, hood: 29, roof: 16, cr: 30, rr: 44, rf: 62, cf: 84, sill: 38, w: [30, 92], r: 8, wing: 1, pod: 1 },
 };
 
 const pxHex = (c) => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
@@ -29,7 +34,21 @@ function pxInside(poly, x, y) {
   return on;
 }
 
-function pxWheel(g, x, y, r, hub) {
+// Jant tasarımları: halka, yüz, kol rengi ve sayısı; curve türbin eğriliği, dish derin çanak
+const RIM_LOOK = {
+  std: { ring: '#a8b4c8', face: '#39415a', spoke: '#e6eef8', n: 4 },
+  yildiz: { ring: '#cfd6de', face: '#2a3040', spoke: '#f4f8ff', n: 5 },
+  cok: { ring: '#b8c2cf', face: '#323a4c', spoke: '#dfe7f1', n: 10 },
+  spor: { ring: '#e8eef6', face: '#1d222c', spoke: '#ff3a2a', n: 6 },
+  derin: { ring: '#f2f6fa', face: '#5a6478', spoke: '#c8d2de', n: 8, dish: 2 },
+  turbin: { ring: '#9aa6b6', face: '#20262f', spoke: '#7fd9ff', n: 7, curve: 1.1 },
+  karbon: { ring: '#3a3f48', face: '#0d0f13', spoke: '#6b7280', n: 5 },
+  altin: { ring: '#ffd35a', face: '#7a5a12', spoke: '#ffe9a0', n: 6 },
+};
+export const RIM_IDS = Object.keys(RIM_LOOK);
+
+function pxWheel(g, x, y, r, hub, rim = 'std', ang = 0) {
+  const R = RIM_LOOK[rim] || RIM_LOOK.std;
   const plot = (rad, col) => {
     g.fillStyle = col;
     for (let py = -rad; py <= rad; py++) {
@@ -38,18 +57,23 @@ function pxWheel(g, x, y, r, hub) {
   };
   plot(r + 1, '#05050a');
   plot(r, '#15151d');
-  plot(r - 3, '#a8b4c8');
-  plot(r - 4, '#39415a');
-  g.fillStyle = '#e6eef8';
-  for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) for (let k = 1; k <= r - 4; k++) g.fillRect(x + dx * k, y + dy * k, 1, 1);
+  plot(r - 3, R.ring);
+  plot(r - 4 - (R.dish || 0), R.face);
+  g.fillStyle = R.spoke;
+  for (let s = 0; s < R.n; s++) {
+    for (let k = 1; k <= r - 4; k++) {
+      const a = ang + (s * Math.PI * 2) / R.n + ((R.curve || 0) * k) / r;
+      g.fillRect(Math.round(x + Math.cos(a) * k), Math.round(y + Math.sin(a) * k), 1, 1);
+    }
+  }
   g.fillStyle = hub;
   g.fillRect(x - 1, y - 1, 2, 2);
 }
 
-function pxMoto(g, paint) {
+function pxMoto(g, paint, look) {
   const c = paint.color; const a = paint.accent || '#ffd23f';
-  pxWheel(g, 30, 37, 9, a);
-  pxWheel(g, 92, 37, 9, a);
+  pxWheel(g, 30, 37, 9, a, look.rim, look.ang);
+  pxWheel(g, 92, 37, 9, a, look.rim, look.ang);
   const rect = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
   rect(32, 30, 56, 3, '#39415a');
   rect(46, 19, 34, 12, c);
@@ -65,14 +89,30 @@ function pxMoto(g, paint) {
   rect(34, 33, 22, 2, '#d6dde8');
 }
 
-function pxDrawCar(g, car, paint) {
-  // Yerde neon
-  for (let x = 12; x < 108; x++) {
-    g.fillStyle = (x + 1) % 4 ? '#ff2fa0' : '#21e6ff';
-    g.fillRect(x, 45, 1, 1);
-    if (x % 2 === 0 && x > 20 && x < 100) { g.fillStyle = '#7a1a7a'; g.fillRect(x, 46, 1, 1); }
+// Alt LED rengi: nefes ve gökkuşağı zamanla değişir
+function ledColor(led, t) {
+  if (led.fx === 'rainbow') return `hsl(${Math.round((t * 90) % 360)},100%,62%)`;
+  return led.color;
+}
+
+function pxDrawCar(g, car, paint, look = { rim: 'std', led: 'yok', ang: 0, t: 0 }) {
+  const led = ledOf(look.led);
+  if (led.color) {
+    // Alt LED: yere yansıyan ışık
+    const col = ledColor(led, look.t);
+    const k = led.fx === 'breathe' ? 0.55 + 0.45 * Math.sin(look.t * 3) : 1;
+    g.globalAlpha = 0.35 * k; g.fillStyle = col; g.fillRect(8, 41, 104, 7);
+    g.globalAlpha = 0.85 * k; g.fillRect(14, 44, 92, 2);
+    g.globalAlpha = 1;
+  } else {
+    // Garajın yer neonu
+    for (let x = 12; x < 108; x++) {
+      g.fillStyle = (x + 1) % 4 ? '#ff2fa0' : '#21e6ff';
+      g.fillRect(x, 45, 1, 1);
+      if (x % 2 === 0 && x > 20 && x < 100) { g.fillStyle = '#7a1a7a'; g.fillRect(x, 46, 1, 1); }
+    }
   }
-  if (car.shape === 'moto') { pxMoto(g, paint); return; }
+  if (car.shape === 'moto') { pxMoto(g, paint, look); return; }
   const S = PX_SHAPES[car.shape] || PX_SHAPES.atmaca;
   const body = [[S.x0, S.sill], [S.x0, S.deck + 3], [S.x0 + 3, S.deck], [S.cr, S.deck], [S.rr, S.roof], [S.rf, S.roof], [S.cf, S.hood], [S.x1 - 8, S.hood + 2], [S.x1, S.hood + 6], [S.x1, S.sill]];
   const belt = Math.max(S.deck, S.hood) + 1;
@@ -131,29 +171,54 @@ function pxDrawCar(g, car, paint) {
   // Tavanda neon yansıma
   g.fillStyle = '#21e6ff'; g.fillRect(S.rr + 1, S.roof, 12, 1);
   g.fillStyle = '#ff6ac0'; g.fillRect(S.rf - 10, S.roof, 9, 1);
-  pxWheel(g, S.w[0], S.sill + 1, S.r, accent);
-  pxWheel(g, S.w[1], S.sill + 1, S.r, accent);
+  if (S.pod) {
+    // Tavanda enerji topu fırlatıcısı
+    g.fillStyle = '#0a0814'; g.fillRect(S.rr + 4, S.roof - 4, 18, 4);
+    g.fillStyle = '#2a2f38'; g.fillRect(S.rr + 6, S.roof - 3, 14, 2);
+    g.fillStyle = '#21e6ff'; g.fillRect(S.rr + 20, S.roof - 3, 3, 2);
+  }
+  pxWheel(g, S.w[0], S.sill + 1, S.r, accent, look.rim, look.ang);
+  pxWheel(g, S.w[1], S.sill + 1, S.r, accent, look.rim, look.ang);
 }
 
 const pxCache = new Map();
-export function pixelCar(car, paintIdx = 0) {
-  const paint = car.paints[paintIdx] || car.paints[0];
-  const key = `${car.id}:${paintIdx}`;
+export function pixelCar(car, paintIdx = 0, look = null) {
+  const paint = paintOf(car, paintIdx);
+  const key = `${car.id}:${paintIdx}:${look ? `${look.rim}:${look.led}` : ''}`;
   if (pxCache.has(key)) return pxCache.get(key);
   const c = document.createElement('canvas');
   c.width = PXC_W; c.height = PXC_H;
   const g = c.getContext('2d');
   g.imageSmoothingEnabled = false;
-  pxDrawCar(g, car, { ...paint, accent: paint.accent });
+  pxDrawCar(g, car, { ...paint, accent: paint.accent }, look ? { ...look, ang: 0, t: 0 } : undefined);
   pxCache.set(key, c);
   return c;
 }
 
 // Hazır görüntüyü verilen tuvale kopyalar: aynı görsel birden çok yerde kullanılabilir
-export function paintPixelCar(target, car, paintIdx = 0) {
-  const src = pixelCar(car, paintIdx);
+export function paintPixelCar(target, car, paintIdx = 0, look = null) {
+  const src = pixelCar(car, paintIdx, look);
   target.width = PXC_W; target.height = PXC_H;
   const g = target.getContext('2d');
   g.imageSmoothingEnabled = false;
   g.drawImage(src, 0, 0);
+}
+
+// Garaj önizlemesi: jantlar döner, LED nefes alır. Önbelleğe alınmaz, garaj açıkken saniyede birkaç kez çizilir
+export function animatePixelCar(target, car, paintIdx, look, ang, t) {
+  const paint = paintOf(car, paintIdx);
+  target.width = PXC_W; target.height = PXC_H;
+  const g = target.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  pxDrawCar(g, car, { ...paint, accent: paint.accent }, { rim: look.rim, led: look.led, ang, t });
+}
+
+// Jant simgesi (garaj seçim kutusu): tek tekerlek
+export function rimIcon(rim, ang = 0.3) {
+  const c = document.createElement('canvas');
+  c.width = 24; c.height = 24;
+  const g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  pxWheel(g, 12, 12, 10, '#ffd23f', rim, ang);
+  return c;
 }

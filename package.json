@@ -1,10 +1,10 @@
 {
   "name": "drift-lab",
-  "version": "16.0.0",
+  "version": "17.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/physics.test.js tests/world.test.js tests/game.test.js tests/police.test.js tests/misc.test.js tests/cheat.test.js tests/i18n.test.js tests/escape.test.js",
+    "test": "node --test tests/physics.test.js tests/world.test.js tests/game.test.js tests/police.test.js tests/misc.test.js tests/cheat.test.js tests/i18n.test.js tests/escape.test.js tests/weapon.test.js tests/custom.test.js tests/weather.test.js",
     "bundle": "node tools/bundle-file.mjs",
     "serve": "node tools/serve.mjs",
     "e2e": "node tools/e2e.mjs",

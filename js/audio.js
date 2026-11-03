@@ -13,6 +13,8 @@ export const ENGINE_KINDS = {
   diesel: { harm: [1, 0.9, 0.8, 0.6, 0.4], sub: 0.6, high: 0.06, air: 0.1, rough: 0.34, roughRate: 0.5, lp: [210, 850] },
   moto: { harm: [0.7, 1, 0.85, 0.6, 0.5, 0.4], sub: 0.14, high: 0.3, air: 0.06, rough: 0.12, roughRate: 0.25, lp: [700, 4600] },
   ev: { harm: [1, 0, 0.14, 0, 0.05], sub: 0, high: 0.44, air: 0, rough: 0, roughRate: 0, lp: [1800, 6500] },
+  // Yüksek devirli süper araba: sert, parlak, hızlı tepki
+  super: { harm: [0.8, 0.95, 0.8, 0.62, 0.5, 0.4], sub: 0.32, high: 0.34, air: 0.08, rough: 0.05, roughRate: 0.4, lp: [520, 4400] },
 };
 
 // Hız oranından devir ve vites: vites büyüdükçe devir düşer, tepe devre ulaşınca sıradaki vitese atar
@@ -146,6 +148,21 @@ export class AudioEngine {
     ambSrc.connect(ambF);
     ambF.connect(this.ambGain);
     this.ambGain.connect(this.master);
+    // Yağmur: aynı gürültüden ince, sürekli hışırtı
+    const rainSrc = ctx.createBufferSource();
+    rainSrc.buffer = this.noise;
+    rainSrc.loop = true;
+    rainSrc.playbackRate.value = 1.3;
+    const rainF = ctx.createBiquadFilter();
+    rainF.type = 'bandpass';
+    rainF.frequency.value = 2600;
+    rainF.Q.value = 0.5;
+    this.rainGain = ctx.createGain();
+    this.rainGain.gain.value = 0;
+    rainSrc.connect(rainF);
+    rainF.connect(this.rainGain);
+    this.rainGain.connect(this.master);
+    rainSrc.start();
     ambSrc.start();
     this.setEngine(this.engine);
 
@@ -290,6 +307,12 @@ export class AudioEngine {
     const p = game.player;
     const on = active && game.state === 'play';
     this.nightK = game.daylight ? game.daylight.k : 0;
+    if (this.rainGain) {
+      const rain = on && game.weather === 'rain' ? 0.05 * game.wk : 0;
+      if (rain !== this.rainLast) { this.rainLast = rain; this.rainGain.gain.setTargetAtTime(rain, t, 0.4); }
+      const amb = this.ambientOn ? (game.weather === 'snow' && on ? 0.012 : 0.035) : 0;
+      if (amb !== this.ambLast) { this.ambLast = amb; this.ambGain.gain.setTargetAtTime(amb, t, 0.6); }
+    }
     let k = Math.min(1.1, p.speed / game.carSpec.maxSpeed);
     let gas = on ? (p.gas ?? 1) : 0;
     let vol = on ? 1 : 0;
@@ -617,6 +640,17 @@ export class AudioEngine {
 
   crunch() { this.burst(0.12, 1300, 0.22, 'bandpass', 500); }
   // Coin: üst üste toplayınca perde yükselir
+  // Güdümlü top: yükselen vınlama; isabet: tok patlama
+  fire() {
+    this.tone(420, 0.22, 0.14, 'sawtooth', 1400);
+    this.burst(0.18, 2600, 0.12, 'highpass');
+  }
+
+  missileHit(v) {
+    this.burst(0.25, 900, 0.18 + 0.12 * v, 'lowpass', 200);
+    this.tone(220, 0.16, 0.1, 'square', 90);
+  }
+
   // Kıl payı kaçış: iki hızlı parlak nota
   escape() {
     this.tone(1320, 0.09, 0.16, 'triangle', 1420);

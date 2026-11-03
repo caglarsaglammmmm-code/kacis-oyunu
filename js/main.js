@@ -26,11 +26,39 @@ const audio = new AudioEngine();
 game.world.onRelease = (c) => renderer.releaseChunk(c);
 game.carSpec = storage.selectedCar();
 game.paint = storage.paintIndex(game.carSpec.id);
+game.look = storage.look(game.carSpec.id);
 
 const cover = new PixelMenu(document.getElementById('cover'));
 const curtain = document.getElementById('curtain');
 const menuEl = document.getElementById('menu');
 const cheatBadge = document.getElementById('cheat-badge');
+// Ateş: ekran düğmesi ve Boşluk. Düğme kendi dokunuşunu alır, sürüş girdisine karışmaz
+const fireBtn = document.getElementById('btn-fire');
+input.onFire = (down) => {
+  const armed = !!game.weapon && game.state === 'play' && !paused;
+  if (armed && down) game.fire();
+  return armed;
+};
+fireBtn.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  fireBtn.classList.add('down');
+  if (!paused) game.fire();
+});
+for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) fireBtn.addEventListener(ev, (e) => { e.stopPropagation(); fireBtn.classList.remove('down'); });
+fireBtn.addEventListener('contextmenu', (e) => e.preventDefault());
+let fireShown = false;
+function updateFire() {
+  const w = game.weapon;
+  const show = !!w && game.state === 'play';
+  if (show !== fireShown) { fireShown = show; fireBtn.hidden = !show; }
+  if (!show) return;
+  fireBtn.dataset.mode = input.mode;
+  const ammo = String(w.ammo);
+  if (fireBtn.lastElementChild.textContent !== ammo) fireBtn.lastElementChild.textContent = ammo;
+  fireBtn.style.setProperty('--cd', (w.cd / CONFIG.weapon.cooldown).toFixed(2));
+  fireBtn.classList.toggle('empty', w.ammo <= 0);
+}
 input.onCode = () => { if (game.state === 'play' && !paused) game.toggleCheat(); };
 const params = new URLSearchParams(location.search);
 let paused = false;
@@ -62,6 +90,8 @@ function applySettings() {
     controls.setMode(input.mode);
     ui.showHint(!document.getElementById('hint').hidden);
   }
+  // Hava ayarı menüde değişirse sonraki koşunun dünyası yeni havayla hazırlanır
+  if (game.weatherSetting !== storage.data.settings.weather && game.state === 'attract') { menuWorld = false; warmDone = false; setTimeout(prewarmWorld, 50); }
   if (quality.mode !== storage.data.settings.quality) {
     quality.setMode(storage.data.settings.quality);
     quality.reset();
@@ -109,8 +139,9 @@ function play() {
   ui.resetHud();
   ui.setHud(true);
   game.paint = storage.paintIndex(storage.selectedCar().id);
+  game.look = storage.look(storage.selectedCar().id);
   const ready = menuWorld && warmDone;
-  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld });
+  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld, weather: storage.data.settings.weather });
   menuWorld = false;
   cover.stop();
   // Dünya hazır değilse siyah perde arkasında kurulur: ilk kare donmaz
@@ -142,7 +173,8 @@ function prepareWorld() {
   const startTime = params.has('t') ? Number(params.get('t')) : (d.startTime || CONFIG.dev.startTime);
   const god = params.get('god') === '1' || d.god || CONFIG.dev.godMode;
   game.paint = storage.paintIndex(storage.selectedCar().id);
-  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld });
+  game.look = storage.look(storage.selectedCar().id);
+  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld, weather: storage.data.settings.weather });
   menuWorld = false;
   game.holdForDrop();
   input.clear();
@@ -154,7 +186,7 @@ let warmT = 0;
 let warmDone = false;
 function prewarmWorld() {
   if (game.state !== 'attract' || film) return;
-  game.start(storage.selectedCar(), { startTime: 0, god: false });
+  game.start(storage.selectedCar(), { startTime: 0, god: false, weather: storage.data.settings.weather });
   game.holdForDrop();
   game.updateCamera(1 / 60);
   game.state = 'attract';
@@ -217,6 +249,8 @@ function toMenu() {
   game.carSpec = storage.selectedCar();
   game.startAttract();
   cheatBadge.hidden = true;
+  fireShown = false;
+  fireBtn.hidden = true;
   ui.refreshMenu();
   ui.show('menu');
   ui.intro();
@@ -256,7 +290,7 @@ const ui = new UI(storage, {
   play, start, toMenu, pause, resume, applySettings,
   press() { audio.unlock(); audio.press(); vibrate(16); },
   preview(car) { audio.unlock(); audio.preview(car.engine, 'rev'); },
-  carChanged() { game.carSpec = storage.selectedCar(); game.paint = storage.paintIndex(game.carSpec.id); },
+  carChanged() { game.carSpec = storage.selectedCar(); game.paint = storage.paintIndex(game.carSpec.id); game.look = storage.look(game.carSpec.id); },
   menuShown() { cover.start(); },
   menuHidden() { cover.stop(); },
   purchased() { audio.purchase(); vibrate([30, 30, 60]); },
@@ -294,6 +328,9 @@ game.onEvent = (name, v) => {
     case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
     case 'aliens': audio.alert(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
     case 'spike': audio.spike(); vibrate(60); break;
+    case 'fire': audio.fire(); vibrate(14); break;
+    case 'missilehit': audio.missileHit(v); vibrate(v >= 1 ? 45 : 18); break;
+    case 'weather': if (v === 'ice') ui.toast(tx('weather.iceWarn'), '#9fe8ff'); break;
     case 'escape': audio.escape(); ui.escapeToast(v); vibrate(18); break;
     case 'cheat': audio.cheat(v); ui.cheatMessage(v); vibrate(v ? [30, 30, 30, 30, 60] : 40); break;
     case 'copdown': audio.explosion(0.55 * v); vibrate(40); break;
@@ -363,6 +400,7 @@ function frame(now) {
     hudT = 0.1;
     ui.hud(game);
     if (cheatBadge.hidden === game.cheat) cheatBadge.hidden = !game.cheat;
+    updateFire();
   }
 
   // Kare süresi ölçümü ve otomatik kalite

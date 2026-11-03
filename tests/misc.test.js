@@ -99,7 +99,10 @@ test('başlangıç aracı Atmaca; sırayla pahalılaşır, hızlanır, kayar, da
   const cars = CONFIG.cars;
   assert.equal(cars[0].id, 'atmaca');
   assert.equal(cars[0].cost, 0);
-  assert.deepEqual(cars.map((c) => c.id), ['atmaca', 'motor', 'granit', 'elektra', 'simsek', 'cinar', 'efe', 'marmara', 'liva', 'bozkir']);
+  assert.deepEqual(cars.map((c) => c.id), ['atmaca', 'motor', 'granit', 'elektra', 'simsek', 'cinar', 'efe', 'marmara', 'liva', 'bozkir', 'tilki', 'kartal', 'volt', 'kuzgun']);
+  // Yalnız silahlı süper araba 60.000; diğer bütün arabalar ondan ucuz
+  assert.equal(cars.at(-1).cost, 60000);
+  assert.ok(cars.at(-1).weapon && cars.filter((c) => c.weapon).length === 1);
   for (let i = 1; i < cars.length; i++) {
     assert.ok(cars[i].cost > cars[i - 1].cost, 'fiyat');
     assert.ok(cars[i].maxSpeed > cars[i - 1].maxSpeed, 'hız');

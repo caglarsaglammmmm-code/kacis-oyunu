@@ -48,7 +48,11 @@ export const NAMES = {
   "efe": "Efe 131",
   "marmara": "Marmara S",
   "liva": "Liva",
-  "bozkir": "Bozkır 4x4"
+  "bozkir": "Bozkır 4x4",
+  "tilki": "Tilki RS",
+  "kartal": "Kartal 67",
+  "volt": "Volt GT",
+  "kuzgun": "Kuzgun X"
  },
  "zincirler": [
   {

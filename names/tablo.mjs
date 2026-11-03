@@ -57,6 +57,11 @@ export const TABLO = {
     marmara: { gercek: 'Fiat Egea', uydurma: 'Marmara S' },
     liva: { gercek: 'Renault Clio', uydurma: 'Liva' },
     bozkir: { gercek: 'Dacia Duster', uydurma: 'Bozkır 4x4' },
+    // Yeni arabalar iki sürümde de uydurma adlıdır
+    tilki: both('Tilki RS'),
+    kartal: both('Kartal 67'),
+    volt: both('Volt GT'),
+    kuzgun: both('Kuzgun X'),
   },
 
   // Zincir marketler: kimlik cephe çizimini seçer, ad ve renk tabelaya yazılır

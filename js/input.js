@@ -42,6 +42,7 @@ export class Input {
     this.bounds = { l: 0, t: 0, r: 1, b: 1 }; // Joystick halkası bunun dışına taşmaz
     this.code = new CheatCode();
     this.onCode = null;
+    this.onFire = null; // Boşluk: ateş
     this.clock = 0; // Yalnız oyun adımlarında akar: duraklatma sayılmaz
     this.heldT = 0;
     this.axisReady = true;
@@ -147,6 +148,8 @@ export class Input {
   }
 
   key(code, down) {
+    // Boşluk yalnız silahlı araba oyundayken ateştir; başka zaman tarayıcıya bırakılır
+    if (code === 'Space') return !!this.onFire && this.onFire(down) === true;
     if (code === 'ArrowLeft' || code === 'KeyA') { this.keyL = down; if (down) { this.last = 'L'; this.tap('L'); } return true; }
     if (code === 'ArrowRight' || code === 'KeyD') { this.keyR = down; if (down) { this.last = 'R'; this.tap('R'); } return true; }
     return false;
@@ -227,8 +230,10 @@ export class Input {
     el.addEventListener('lostpointercapture', end);
     win.addEventListener('pointerup', end);
     win.addEventListener('pointercancel', end);
-    win.addEventListener('keydown', (e) => { if (!e.repeat && this.key(e.code, true)) e.preventDefault(); });
-    win.addEventListener('keyup', (e) => { this.key(e.code, false); });
+    // Yazı alanında (kod kutusu) oyun tuşları çalışmaz
+    const typing = (e) => e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
+    win.addEventListener('keydown', (e) => { if (!typing(e) && !e.repeat && this.key(e.code, true)) e.preventDefault(); });
+    win.addEventListener('keyup', (e) => { if (!typing(e)) this.key(e.code, false); });
     win.addEventListener('blur', () => this.clear());
     win.addEventListener('pagehide', () => this.clear());
     if (win.document) win.document.addEventListener('visibilitychange', () => { if (win.document.hidden) this.clear(); });

@@ -8,6 +8,8 @@ export default {
     maker: '制作：Çağlar Sağlam', exit: '再按一次退出',
   },
   aria: {
+    weather: '天气',
+    fire: '开火', code: '代码',
     game: '游戏区域', health: '耐久', pause: '暂停', wanted: '通缉等级', damage: '损伤', reverse: '倒车',
     mute: '开关声音', back: '返回', prev: '上一辆', next: '下一辆', start: '开始',
   },
@@ -61,6 +63,14 @@ export default {
   },
   alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！' },
   escape: { toast: '+{n} 惊险脱身！', combo: '连击 +{n}' },
+  code: { title: '输入代码', apply: '确定', ok: '代码已接受！{car} 已加入你的车库。', owned: '这辆车你已经有了。', invalid: '无效代码。', empty: '请先输入代码。' },
+  custom: {
+    title: '改装', paint: '涂装', rim: '轮毂', led: '底盘灯', buy: '购买 · {cost}', confirm: '确认 · {cost}', poor: '金币不足', bought: '购买成功！', use: '已解锁', ownFirst: '先购买这辆车才能改装。',
+    paints: { gece: '午夜黑', gumus: '亮银', kiraz: '樱桃红', okyanus: '海洋蓝', zumrut: '祖母绿', limon: '柠檬黄', mandalina: '橘橙', lavanta: '哑光薰衣草', pembe: '糖果粉', haki: '哑光卡其', fume: '哑光烟灰', bakir: '古铜', lacivert: '藏青金属', neonyesil: '霓虹绿', neonpembe: '霓虹粉', mor: '电光紫', inci: '珍珠白', altin: '金色', krom: '镜面铬', lav: '熔岩红' },
+    rims: { std: '标准', yildiz: '五辐星形', cok: '多辐', spor: '运动', derin: '深唇', turbin: '涡轮', karbon: '碳纤维', altin: '金色' },
+    leds: { yok: '关闭', mavi: '霓虹蓝', pembe: '霓虹粉', mor: '紫色', yesil: '绿色', beyaz: '白色', kirmizi: '红色呼吸', buz: '冰蓝呼吸', altin: '金色呼吸', gokkusagi: '彩虹' },
+  },
+  weather: { title: '天气', random: '随机', sunny: '晴天', rain: '雨天', snow: '雪天', fog: '雾天', ice: '结冰', iceWarn: '路面结冰！' },
   cheat: { on: '可以啊，你找到作弊码了！', off: '作弊已关闭', badge: '作弊已开启' },
   cars: {
     atmaca: { desc: '每条街坊的老伙计', paints: ['街坊米色', '酒红', '哑光军绿', '双色 奶白/酒红'] },
@@ -73,5 +83,9 @@ export default {
     marmara: { desc: '朴素轿车，暗藏惊喜', paints: ['雪白', '火山红', '哑光炭灰', '双色 蓝/黑'] },
     liva: { desc: '小巧灵活，会飞的两厢车', paints: ['海洋蓝', '火焰橙', '哑光白', '双色 红/黑'] },
     bozkir: { desc: '哪里都能去，从不停下', paints: ['峡谷橙', '森林绿', '沙米色', '双色 灰/黑'] },
+    tilki: { desc: '轻巧灵活的漂移跑车', paints: ['狐狸橙','夜幕黑','哑光灰','冰雪白'] },
+    kartal: { desc: '长车头，轰鸣的 V8', paints: ['赛道蓝','血红','哑光黑','双色 奶白/绿'] },
+    volt: { desc: '安静却极快的电动 GT', paints: ['等离子蓝','石墨灰','哑光白','极光紫'] },
+    kuzgun: { desc: '搭载追踪能量炮的超跑', paints: ['渡鸦黑','霓虹红','哑光钛','双色 白/黑'] },
   },
 };
