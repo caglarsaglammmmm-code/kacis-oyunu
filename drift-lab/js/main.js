@@ -27,6 +27,8 @@ game.paint = storage.paintIndex(game.carSpec.id);
 const cover = new PixelMenu(document.getElementById('cover'));
 const curtain = document.getElementById('curtain');
 const menuEl = document.getElementById('menu');
+const cheatBadge = document.getElementById('cheat-badge');
+input.onCode = () => { if (game.state === 'play' && !paused) game.toggleCheat(); };
 const params = new URLSearchParams(location.search);
 let paused = false;
 let accumulator = 0;
@@ -72,6 +74,7 @@ function fitCanvas(w, h) {
 function applyQuality() {
   const q = quality.settings;
   renderer.lod = q;
+  game.copLimit = Math.min(q.cops, navigator.maxTouchPoints > 0 ? CONFIG.pursuit.phoneCap : q.cops);
   game.fx.density = q.particles;
   game.crowd.limit = q.crowd;
   fitCanvas(window.innerWidth, window.innerHeight);
@@ -207,6 +210,7 @@ function toMenu() {
   ui.showHint(false);
   game.carSpec = storage.selectedCar();
   game.startAttract();
+  cheatBadge.hidden = true;
   ui.refreshMenu();
   ui.show('menu');
   ui.intro();
@@ -284,6 +288,7 @@ game.onEvent = (name, v) => {
     case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
     case 'aliens': audio.alert(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
     case 'spike': audio.spike(); vibrate(60); break;
+    case 'cheat': audio.cheat(v); ui.cheatMessage(v); vibrate(v ? [30, 30, 30, 30, 60] : 40); break;
     case 'copdown': audio.explosion(0.55 * v); vibrate(40); break;
     case 'explosion': audio.explosion(1); vibrate([120, 40, 220]); break;
     case 'tankfire': audio.tankFire(); vibrate(30); break;
@@ -291,7 +296,7 @@ game.onEvent = (name, v) => {
     case 'alert': audio.alert(); ui.alert(v); vibrate([60, 40, 60]); break;
     case 'gameover': {
       rememberQuality();
-      const record = storage.recordRun(game.result);
+      const record = game.result.cheated ? { newScore: false, newTime: false } : storage.recordRun(game.result);
       ui.setHud(false);
       ui.over(game.result, record);
       keepAwake(false);
@@ -350,6 +355,7 @@ function frame(now) {
   if (hudT <= 0 && game.state === 'play') {
     hudT = 0.1;
     ui.hud(game);
+    if (cheatBadge.hidden === game.cheat) cheatBadge.hidden = !game.cheat;
   }
 
   // Kare süresi ölçümü ve otomatik kalite

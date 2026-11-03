@@ -4,6 +4,20 @@ import { TILE } from './world.js';
 import { wrapAngle } from './physics.js';
 
 const COP_AI = CONFIG.policeAI;
+const CHASE = CONFIG.pursuit;
+
+// En yakın k sesi işaretler: siren sesleri üst üste binip bozulmasın
+export function loudest(dists, k, mask) {
+  mask.fill(0);
+  for (let n = 0; n < k; n++) {
+    let best = -1;
+    let d = 1e8;
+    for (let i = 0; i < dists.length; i++) if (!mask[i] && dists[i] < d) { d = dists[i]; best = i; }
+    if (best < 0) break;
+    mask[best] = 1;
+  }
+  return mask;
+}
 
 // Oyuncunun çevresinde 96x96 karoluk en kısa yol alanı. Binalar, su ve çıkmazlar çözülür.
 export class FlowField {
@@ -163,11 +177,35 @@ function drivePatrol(cop, g, dt) {
   if (cop.role === 'flanker' && dist < 520) {
     const fx = Math.cos(p.a);
     const fy = Math.sin(p.a);
-    const side = (dx * -fy + dy * fx) > 0 ? -1 : 1; // Oyuncunun hangi tarafındayız
+    // İki yandan sırayla gelir, erken safhada bulunduğu yandan
+    const side = g.time >= CHASE.pincerFrom ? cop.side : (dx * -fy + dy * fx) > 0 ? -1 : 1;
     const gap = dist < 90 ? 14 : 44;
     const back = cop.type === 'advanced' ? -22 : 8;
     target.x = p.x + p.vx * 0.32 + fx * back - fy * side * gap;
     target.y = p.y + p.vy * 0.32 + fy * back + fx * side * gap;
+  }
+
+  // Önden gelen ve yol kapatan: oyuncunun gidiş çizgisindeki bir noktaya gider
+  let brake = false;
+  if ((cop.role === 'interceptor' || cop.role === 'blocker') && g.ghostT <= 0) {
+    cop.roleT -= dt;
+    const sp = Math.max(1, p.speed);
+    const hx = p.vx / sp;
+    const hy = p.vy / sp;
+    const ahead = -(dx * hx + dy * hy);
+    if (ahead < 60 || cop.roleT <= 0 || p.speed < 60) {
+      cop.role = 'chaser';
+    } else if (cop.role === 'blocker' && ahead < CHASE.blockDist && g.roadWidthAt(cop.x, cop.y, hx, hy) >= CHASE.blockMinRoad) {
+      cop.state = 'block';
+      cop.blockT = CHASE.blockTime;
+      cop.blockA = Math.atan2(hy, hx) + Math.PI / 2;
+    } else {
+      const off = cop.role === 'interceptor' ? cop.side * CHASE.interceptOffset : 0;
+      const k = Math.min(ahead * 0.6, CHASE.interceptAhead);
+      target.x = p.x + hx * k - hy * off;
+      target.y = p.y + hy * k + hx * off;
+      brake = cop.role === 'interceptor' && ahead < CHASE.interceptBrake;
+    }
   }
 
   if (g.ghostT > 0) {
@@ -205,6 +243,8 @@ function drivePatrol(cop, g, dt) {
   const sharp = Math.abs(err) > 1.1;
   if (sharp && cop.speed > 190) throttle = -0.35;
   if ((left && right) && cop.speed > 200) throttle = -0.5;
+  if (brake) throttle = Math.min(throttle, 0.35);
+  if (cop.hold) throttle = dist < 150 ? -1 : cop.speed > 70 ? -0.5 : 0; // Sıra bekler: oyuncunun çevresi tamamen kapanmaz
 
   // Takılma: ışınlanma yok. Geri vitese takar, burnu çevirip yeniden dener.
   if (cop.reverseT > 0) {
@@ -245,6 +285,15 @@ export function driveCop(cop, g, dt) {
     cop.wakeT -= dt;
     const d = Math.hypot(g.player.x - cop.x, g.player.y - cop.y);
     if ((d < CONFIG.barricade.wakeDist && g.ghostT <= 0) || cop.wakeT <= 0) cop.state = 'chase';
+    return;
+  }
+  if (cop.state === 'block') {
+    // Yolun ortasında durup enine döner, oyuncu yaklaşınca ya da süre dolunca kovalamaya geçer
+    cop.blockT -= dt;
+    cop.ctlS = Math.max(-1, Math.min(1, wrapAngle(cop.blockA - cop.a) * 2));
+    cop.ctlT = cop.speed > 60 ? -1 : 0;
+    const d = Math.hypot(g.player.x - cop.x, g.player.y - cop.y);
+    if (d < CONFIG.barricade.wakeDist || cop.blockT <= 0 || g.ghostT > 0) { cop.state = 'chase'; cop.role = 'chaser'; }
     return;
   }
   if (cop.flying) return;

@@ -13,8 +13,8 @@ export const BUILD = {
 
 export const CONFIG = {
   name: 'Drift Lab',
-  version: '12.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v12.0.0/DriftLab.apk',
+  version: '13.0.0',
+  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v13.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -183,14 +183,11 @@ export const CONFIG = {
     aliensAt: 225, // 200-250 sn arası: uzaylı işgali başlar. Oyun burada gerçekten zorlaşır
     aliensAlert: 'UZAYLILAR GELDİ!',
     firstSpawnAt: 5,
-    // [saniye, değer] noktaları arasında doğrusal artar, yani her saniye biraz zorlaşır
-    policeCurve: [[0, 1], [15, 2], [30, 3], [50, 5], [120, 8], [200, 12], [280, 16], [420, 20]],
-    spawnCurve: [[0, 6], [30, 4.5], [50, 3.5], [200, 1.6], [280, 1.1], [420, 0.8]],
+    // [saniye, değer] noktaları arasında doğrusal artar, yani her saniye biraz zorlaşır.
+    // Polis sayısı, hızı ve davranışları aşağıdaki pursuit bölümündedir
     hpCurve: [[0, 1], [50, 1], [200, 1.9], [280, 2.3], [600, 3.5]],
     powerCurve: [[0, 0.65], [30, 0.8], [50, 0.9], [200, 1.25], [280, 1.4], [600, 1.8]],
-    aggressionCurve: [[0, 0.3], [50, 0.5], [200, 0.85], [280, 1], [600, 1.2]],
-    flankerShare: [[0, 0], [30, 0.1], [50, 0.25], [200, 0.45]],
-    maxActive: 22, // Performans için mutlak üst sınır (barikat ve tank dahil)
+    maxActive: 24, // Mutlak üst sınır (barikat ve tank dahil). Cihaz sınırı quality.js ve pursuit.phoneCap
     swatShare: [[50, 0.15], [200, 0.3], [280, 0.25]],
     motoFrom: 15,
     motoShare: [[15, 0.12], [50, 0.2], [280, 0.18]],
@@ -199,6 +196,61 @@ export const CONFIG = {
     advancedShare: [[200, 0.3], [280, 0.5]],
     tankCount: [[280, 1], [340, 2], [420, 3], [600, 4]],
     tankInterval: 22,
+  },
+
+  // ZORLUK EĞRİSİ: polis baskısının tüm ayarları burada. [saniye, değer] noktaları arası doğrusaldır.
+  // Saniye = oyun süresi + heat (arananlık). Tek düğmeyle ayar: countMul sayı, speedMul hız.
+  pursuit: {
+    countMul: 1, // 0.7 kolay, 1 normal, 1.3 zor
+    speedMul: 1,
+    policeCurve: [[0, 1], [15, 2], [30, 3], [60, 7], [120, 12], [180, 16], [240, 20], [300, 24]],
+    spawnCurve: [[0, 6], [30, 4.5], [60, 2.8], [120, 1.8], [200, 1.2], [280, 0.9], [420, 0.7]],
+    speedCurve: [[0, 0.93], [60, 0.97], [120, 1], [240, 1.04], [360, 1.07]],
+    speedRatioMax: 0.97, // Polis son hızı oyuncu hızının bu oranını geçemez: düz yolda kaçılır
+    aggressionCurve: [[0, 0.3], [50, 0.5], [200, 0.85], [280, 1], [600, 1.2]],
+    flankerShare: [[0, 0], [30, 0.1], [60, 0.22], [120, 0.3], [200, 0.36]],
+    interceptShare: [[45, 0], [60, 0.12], [200, 0.2]], // Önden gelen
+    blockShare: [[90, 0], [120, 0.1], [240, 0.16]], // Yolu kapatan
+    barricadeCurve: [[38, 22], [120, 16], [200, 12], [280, 9]],
+    // Arananlık: oyuncunun yaptıkları süreye saniye olarak eklenir, durulunca söner
+    heat: { kill: 5, nearMiss: 1, prop: 0.2, max: 60, decay: 0.3 },
+    // Adalet: oyuncunun çevresine aynı anda bu kadar polis girer, fazlası geride bekler
+    closeCurve: [[0, 2], [120, 3], [240, 4], [360, 5]],
+    closeR: 260,
+    frontMax: 2, // Önünde aynı anda en çok bu kadar polis yaklaşır
+    frontR: 360,
+    holdEvery: 15, // Kaç adımda bir yeniden bakılır
+    maxInterceptors: 2,
+    maxBlockers: 1,
+    pincerFrom: 60, // Bu saniyeden sonra kıskaç iki yandan sırayla gelir
+    aheadSpread: 0.9, // Önden doğma açısı
+    interceptAhead: 420,
+    interceptBrake: 190, // Karşılaşmaya bu kala yavaşlar: oyuncu kaçacak yer görür
+    interceptOffset: 44, // Tam burnuna değil, yanına gelir
+    blockDist: 520,
+    blockMinRoad: 120, // Bundan dar yol kapatılmaz: geçiş boşluğu kalsın
+    blockTime: 5,
+    roleTime: 9, // Görevini yapamayan normal kovalamaya döner
+    // Performans. Üst sınır: masaüstünde kalite seviyesi (quality.js cops), dokunmatikte ayrıca phoneCap
+    phoneCap: 12,
+    farDist: 850, // Bu uzaklıkta ve ekran dışındaki polis hafif hesaplanır
+    farStep: 3, // Uzak polis kaç adımda bir hesaplanır
+    recycleDist: 1300, // Sınır doluyken bundan uzak, ekran dışı polis alınıp önde yeniden doğar
+    recycleEvery: 1.2,
+    maxSirens: 3, // Aynı anda çalan siren sesi, en yakınlar
+  },
+
+  // Gizli sıra. gap: basışlar arası en uzun süre, maxHold: bunu aşan basılı tutma normal sürüş sayılır
+  // ve sırayı bozar. wheelOn, stickOn: eksen eşiği, axisBack: yeniden saymak için merkeze dönüş eşiği
+  cheat: {
+    sequence: ['L', 'L', 'R', 'R', 'L', 'R', 'L', 'R'],
+    gap: 1.5,
+    maxHold: 0.7,
+    wheelOn: 0.45,
+    stickOn: 0.6,
+    axisBack: 0.2,
+    messageOn: 'Aferin, hile kodunu buldun la!',
+    messageOff: 'Hile kapatıldı',
   },
 
   // speed: oyuncunun son hızına oran. HER ZAMAN 1'in altında kalmalı (test eder).
@@ -234,7 +286,7 @@ export const CONFIG = {
   water: { sinkTime: 2.3, bubbleEvery: 0.06, shrink: 0.5, spin: 1.5, deepProbe: 6 },
 
   policeAI: {
-    despawnDist: 2100,
+    despawnDist: 1900,
     catchUpDist: 1150, // Polis bu kadar geride kalınca yenisi öne doğar: kovalama kopmasın
     wallDamage: 0.22,
     wallMinImpact: 85,
@@ -249,7 +301,6 @@ export const CONFIG = {
 
   barricade: {
     from: 38,
-    intervalCurve: [[38, 24], [200, 15], [280, 11]],
     minGap: 72, // Barikatta her zaman kalan geçiş boşluğu
     spikeChance: 0.45,
     spikeFrom: 80,
