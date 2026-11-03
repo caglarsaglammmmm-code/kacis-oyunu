@@ -32,33 +32,12 @@ const cover = new PixelMenu(document.getElementById('cover'));
 const curtain = document.getElementById('curtain');
 const menuEl = document.getElementById('menu');
 const cheatBadge = document.getElementById('cheat-badge');
-// Ateş: ekran düğmesi ve Boşluk. Düğme kendi dokunuşunu alır, sürüş girdisine karışmaz
-const fireBtn = document.getElementById('btn-fire');
+// Ateş otomatiktir. Boşluk yalnız silahlı arabada alınır ve bekleme süresi dolmuşsa atar
 input.onFire = (down) => {
   const armed = !!game.weapon && game.state === 'play' && !paused;
   if (armed && down) game.fire();
   return armed;
 };
-fireBtn.addEventListener('pointerdown', (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  fireBtn.classList.add('down');
-  if (!paused) game.fire();
-});
-for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) fireBtn.addEventListener(ev, (e) => { e.stopPropagation(); fireBtn.classList.remove('down'); });
-fireBtn.addEventListener('contextmenu', (e) => e.preventDefault());
-let fireShown = false;
-function updateFire() {
-  const w = game.weapon;
-  const show = !!w && game.state === 'play';
-  if (show !== fireShown) { fireShown = show; fireBtn.hidden = !show; }
-  if (!show) return;
-  fireBtn.dataset.mode = input.mode;
-  const ammo = String(w.ammo);
-  if (fireBtn.lastElementChild.textContent !== ammo) fireBtn.lastElementChild.textContent = ammo;
-  fireBtn.style.setProperty('--cd', (w.cd / CONFIG.weapon.cooldown).toFixed(2));
-  fireBtn.classList.toggle('empty', w.ammo <= 0);
-}
 input.onCode = () => { if (game.state === 'play' && !paused) game.toggleCheat(); };
 const params = new URLSearchParams(location.search);
 let paused = false;
@@ -249,8 +228,6 @@ function toMenu() {
   game.carSpec = storage.selectedCar();
   game.startAttract();
   cheatBadge.hidden = true;
-  fireShown = false;
-  fireBtn.hidden = true;
   ui.refreshMenu();
   ui.show('menu');
   ui.intro();
@@ -400,7 +377,6 @@ function frame(now) {
     hudT = 0.1;
     ui.hud(game);
     if (cheatBadge.hidden === game.cheat) cheatBadge.hidden = !game.cheat;
-    updateFire();
   }
 
   // Kare süresi ölçümü ve otomatik kalite

@@ -17,9 +17,9 @@ export const BUILD = {
 
 export const CONFIG = {
   name: NAMES.oyun,
-  version: '17.0.0',
+  version: '18.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v17.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v18.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -402,12 +402,19 @@ export const CONFIG = {
     ledAlpha: 0.5, ledNight: 0.45, // Gündüz ve gece ek parlaklığı
   },
 
-  // GÜDÜMLÜ ENERJİ TOPU (yalnız weapon: true olan araba). damage: her isabetin sabit hasarı.
-  // hp: polis türüne göre silah dayanıklılığı; gereken isabet = hp / damage (normal polis 4, SWAT 8, tank 16).
-  // cooldown: atış arası (sn), ammo: en çok cephane, regen: bir cephanenin dolma süresi (sn),
-  // escapeAmmo: kıl payı kaçışta eklenen cephane, maxMissiles: aynı anda en çok mermi,
-  // range/cone: kilit menzili ve önde yarım koni açısı (radyan), turn: güdüm dönüş hızı, life: ömür (sn)
-  weapon: { damage: 25, hp: { car: 100, fast: 100, moto: 75, advanced: 125, swat: 200, tank: 400, rover: 150, ufo: 250 }, cooldown: 1.7, ammo: 6, regen: 9, escapeAmmo: 1, maxMissiles: 4, speed: 760, turn: 5.5, life: 2.4, range: 620, cone: 0.62, hitR: 30, lockEvery: 6 },
+  // GÜDÜMLÜ ENERJİ TOPU (yalnız weapon: true olan araba). Cephane sınırsız, ateş otomatik.
+  // fireEvery (SILAH_ATES_ARALIGI): iki atış arası (sn). Önündeki konide hedef yoksa atmaz; hedef çıkınca
+  // süre dolmuşsa hemen atar. Boşluk tuşu da yalnız süre dolmuşsa atar, aralığı kısaltmaz.
+  // damage (SILAH_HASAR): her isabetin sabit hasarı. hp: oyunun başındaki silah canı (polis türüne göre).
+  // armor: zırhlı araçlara giden hasarın katı (SWAT ve tank bu silahtan az etkilenir).
+  // Gereken isabet = tavan(hp / (damage * armor)): normal polis 100/22 = 5, SWAT 300/(22*0,7) = 20, tank 31.
+  // maxMissiles: aynı anda en çok mermi, range/cone: kilit menzili ve önde yarım koni açısı (radyan),
+  // turn: güdüm dönüş hızı, life: ömür (sn), lockEvery: hedef arama sıklığı (kare)
+  weapon: { fireEvery: 3.0, damage: 22, hp: { car: 100, fast: 100, moto: 80, advanced: 110, swat: 300, tank: 400, rover: 150, ufo: 250 }, armor: { swat: 0.7, tank: 0.6 }, maxMissiles: 3, speed: 760, turn: 5.5, life: 2.4, range: 620, cone: 0.62, hitR: 30, lockEvery: 6 },
+
+  // ZAMANLA ARTAN POLİS CANI (silah canı, bütün arabalarda). Yeni doğan polisin canı = hp * min(max, perMin ^ dakika).
+  // Sahadaki polisler değişmez. %12 / dk: 2. dk 1,25x, 5. dk 1,76x, ~9,7. dk'dan sonra 3x tavan
+  copHpGrowth: { perMin: 1.12, max: 3 },
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
   // Yeni kod eklemek için satır eklenir. car: açılan araba

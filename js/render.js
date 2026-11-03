@@ -1974,7 +1974,7 @@ export class Renderer {
     const lock = game.weapon.lock;
     if (lock && game.state === 'play') {
       const r = Math.max(lock.len, lock.wid) * 0.8;
-      ctx.globalAlpha = game.weapon.ammo > 0 ? 0.95 : 0.4;
+      ctx.globalAlpha = game.weapon.cd <= 0.4 ? 0.95 : 0.6; // Atışa yakın daha belirgin
       this.place(lock.x, lock.y, now * 0.003);
       ctx.drawImage(sp.reticle, -r, -r, r * 2, r * 2);
       ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);

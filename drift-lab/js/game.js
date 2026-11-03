@@ -18,6 +18,9 @@ const AL = CONFIG.aliens;
 const PU = CONFIG.pursuit;
 const ESC = CONFIG.escape;
 const WPN = CONFIG.weapon;
+const HPG = CONFIG.copHpGrowth;
+// Oyun dakikasına göre yeni polisin silah canı katı: üstel artış, tavanlı
+export function copHpMul(time) { return Math.min(HPG.max, HPG.perMin ** (Math.max(0, time) / 60)); }
 const WX = CONFIG.weather;
 
 // Hava: random ise ağırlıklı seçim, değilse ayardaki tür
@@ -247,7 +250,7 @@ export class Game {
     this.god = god;
     if (!keepWorld) this.world.reset(seed);
     this.resetRun(startTime);
-    this.weapon = carSpec.weapon ? { ammo: WPN.ammo, cd: 0, regenT: 0, lock: null } : null;
+    this.weapon = carSpec.weapon ? { cd: 0, lock: null, shots: 0 } : null;
     this.dayT = 0;
     dayState(0, this.daylight);
     resetBody(this.player, 100, 300, Math.PI / 2, carSpec);
@@ -878,7 +881,7 @@ export class Game {
     c.los = false; c.hitCd = 0; c.nearCd = 0; c.wakeT = 0;
     this.flankSide = -this.flankSide;
     c.side = this.flankSide; c.roleT = PU.roleTime; c.blockT = 0; c.hold = false; c.far = false;
-    c.mhp = WPN.hp[type] || WPN.hp.car; c.byWeapon = false;
+    c.mhpMax = (WPN.hp[type] || WPN.hp.car) * copHpMul(this.time); c.mhp = c.mhpMax; c.byWeapon = false;
     c.escIn = false; c.escHit = false; c.escHitAt = -99; c.escEnterT = 0; c.escAt = -99;
     c.turret = a; c.fireT = TK.fireEvery * 0.6; c.fxT = Math.random() * 3; c.hurtFlash = 0;
     this.cops.push(c);
@@ -1065,10 +1068,10 @@ export class Game {
   }
 
   // --- Güdümlü enerji topu ---
-  // Atış: bekleme ve cephane uygunsa burundan çıkar, varsa kilitli polisi izler. true: atıldı
+  // Atış: bekleme süresi dolmuşsa burundan çıkar, varsa kilitli polisi izler. Cephane sınırsız. true: atıldı
   fire() {
     const w = this.weapon;
-    if (!w || this.state !== 'play' || w.cd > 0 || w.ammo <= 0) return false;
+    if (!w || this.state !== 'play' || w.cd > 0) return false;
     const m = this.missiles.find((k) => !k.alive);
     if (!m) return false;
     const p = this.player;
@@ -1078,8 +1081,9 @@ export class Game {
     m.vx = ca * WPN.speed + p.vx * 0.3; m.vy = sa * WPN.speed + p.vy * 0.3;
     m.target = w.lock;
     for (let i = 0; i < m.tx.length; i++) { m.tx[i] = m.x; m.ty[i] = m.y; }
-    w.ammo--;
-    w.cd = WPN.cooldown;
+    w.shots++;
+    w.cd += WPN.fireEvery; // Taşan süre korunur: atışlar eşit aralıklı
+    if (w.cd <= 0) w.cd = WPN.fireEvery;
     this.emit('fire');
     return true;
   }
@@ -1103,13 +1107,14 @@ export class Game {
 
   updateWeapon(dt) {
     const w = this.weapon;
-    if (w.cd > 0) w.cd = Math.max(0, w.cd - dt);
-    if (w.ammo < WPN.ammo) {
-      w.regenT += dt;
-      if (w.regenT >= WPN.regen) { w.regenT = 0; w.ammo++; }
-    } else w.regenT = 0;
-    if (this.tickCount % WPN.lockEvery === 0) w.lock = this.findLock();
+    if (w.cd > 0) w.cd -= dt;
+    // Hazırken her kare hedef aranır: hedef çıkınca hemen atılır. Beklerken seyrek aranır
+    if (w.cd <= 0 || this.tickCount % WPN.lockEvery === 0) w.lock = this.findLock();
     else if (w.lock && !this.cops.includes(w.lock)) w.lock = null;
+    if (w.cd <= 0) {
+      if (w.lock && this.state === 'play') this.fire();
+      else w.cd = Math.max(w.cd, -dt); // Hedef yokken beklenen süre birikmez
+    }
     for (const m of this.missiles) if (m.alive) this.stepMissile(m, dt);
   }
 
@@ -1145,11 +1150,12 @@ export class Game {
     }
   }
 
-  // Her isabet sabit hasar: gereken isabet sayısı polis türüne göre (WPN.hp / WPN.damage)
+  // Her isabet sabit hasar (zırhlıda azaltılmış). Gereken isabet = can / hasar
   hitCop(c, x, y) {
-    const full = WPN.hp[c.type] || WPN.hp.car;
-    c.mhp -= WPN.damage;
-    c.hp = Math.min(c.hp - (c.maxHp * WPN.damage) / full, (c.maxHp * c.mhp) / full);
+    const full = c.mhpMax || WPN.hp[c.type] || WPN.hp.car;
+    const dmg = WPN.damage * (WPN.armor[c.type] ?? 1);
+    c.mhp -= dmg;
+    c.hp = Math.min(c.hp - (c.maxHp * dmg) / full, (c.maxHp * c.mhp) / full);
     if (c.mhp <= 0) { c.hp = -1; c.byWeapon = true; }
     c.hurtFlash = 0.35;
     this.fx.burst(FX.GLINT, x, y, 10, 160, 0.35, 7);
@@ -1197,7 +1203,6 @@ export class Game {
     this.escapes++;
     this.escLastT = this.runTime;
     c.escAt = this.runTime;
-    if (this.weapon) this.weapon.ammo = Math.min(WPN.ammo, this.weapon.ammo + WPN.escapeAmmo);
     this.emit('escape', { amount, bonus });
     return total;
   }
