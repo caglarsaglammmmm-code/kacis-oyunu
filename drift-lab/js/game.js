@@ -16,6 +16,7 @@ const TK = CONFIG.tank;
 const PW = CONFIG.powers;
 const AL = CONFIG.aliens;
 const PU = CONFIG.pursuit;
+const ESC = CONFIG.escape;
 const WT = CONFIG.water;
 const tmpSirens = new Float32Array(CONFIG.sirens.length);
 const byDist = (a, b) => a.pd - b.pd;
@@ -100,6 +101,7 @@ function makeCop() {
   b.turret = 0; b.fireT = 0; b.fxT = 0; b.hurtFlash = 0;
   b.wanderT = 0; b.wx = 0; b.wy = 0;
   b.side = 1; b.roleT = 0; b.blockT = 0; b.blockA = 0; b.hold = false; b.far = false; b.pd = 0;
+  b.escIn = false; b.escHit = false; b.escHitAt = -99; b.escEnterT = 0; b.escAt = -99; b.escX = 0; b.escY = 0;
   return b;
 }
 
@@ -159,6 +161,10 @@ export class Game {
     this.giantT = 0;
     this.heat = 0;
     this.recycleT = 0;
+    this.escapes = 0; // Kıl payı kaçış sayısı ve kazandırdığı para
+    this.escCoins = 0;
+    this.escCombo = 0;
+    this.escLastT = -99;
     this.cheat = false; // Kaydedilmez, her koşu kapalı başlar
     this.cheatUsed = false;
     this.phasing = false;
@@ -619,7 +625,9 @@ export class Game {
     this.state = 'over';
     if (this.giantT > 0) this.setGiant(false);
     // Hile kullanılan koşu kazandırmaz, rekor saymaz
-    const earned = this.cheatUsed ? 0 : this.coins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
+    // Kıl payı paraları ayrıca eklenir; geri kalan kazanç earnMul ile yumuşatılır
+    const base = this.coins - this.escCoins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
+    const earned = this.cheatUsed ? 0 : Math.round(base * SC.earnMul) + this.escCoins;
     this.result = {
       score: Math.floor(this.score),
       time: this.time,
@@ -835,6 +843,7 @@ export class Game {
     c.los = false; c.hitCd = 0; c.nearCd = 0; c.wakeT = 0;
     this.flankSide = -this.flankSide;
     c.side = this.flankSide; c.roleT = PU.roleTime; c.blockT = 0; c.hold = false; c.far = false;
+    c.escIn = false; c.escHit = false; c.escHitAt = -99; c.escEnterT = 0; c.escAt = -99;
     c.turret = a; c.fireT = TK.fireEvery * 0.6; c.fxT = Math.random() * 3; c.hurtFlash = 0;
     this.cops.push(c);
     return c;
@@ -962,6 +971,7 @@ export class Game {
         // Hilede polis görünür ve kovalar ama değemez
         if (!c.flying && dist < (c.len + p.len) * 0.75 && this.ghostT <= 0 && !this.cheat) {
           const rv = this.collideCars(p, c);
+          if (rv > 0) c.escHitAt = this.runTime; // Değdi: bu geçiş kıl payı sayılmaz
           if (rv > 1) this.copContact(c, rv, i);
           if (i >= this.cops.length || this.cops[i] !== c) continue;
         }
@@ -978,6 +988,7 @@ export class Game {
             this.emit('nearmiss');
           }
         }
+        if (!c.flying) this.checkEscape(c, dist);
         if (dist < nearest) {
           nearest = dist;
           closing = (dx * (c.vx - p.vx) + dy * (c.vy - p.vy)) / (dist || 1);
@@ -1002,6 +1013,50 @@ export class Game {
     }
     this.sirenDist = nearest;
     this.sirenClosing = closing;
+  }
+
+  // Kıl payı kaçış: polis yakın bölgeye girer, değmeden çıkarsa ödül. Ödül çıkış anında verilir
+  checkEscape(c, dist) {
+    const p = this.player;
+    const zone = p.wid * ESC.distMul + (p.len + p.wid + c.len + c.wid) / 4;
+    if (!c.escIn) {
+      if (dist < zone && this.escapeEligible(c)) {
+        c.escIn = true; c.escHit = false; c.escEnterT = this.runTime; c.escX = p.x; c.escY = p.y;
+      }
+      return 0;
+    }
+    if (dist < zone * ESC.exitMul) {
+      if (this.runTime - c.escEnterT > ESC.maxClose) c.escHit = true; // Yanında uzun kaldı: sıkışma ya da dönüp durma
+      return 0;
+    }
+    c.escIn = false;
+    // Girişten hemen önceki temas da sayılır: çarpışma aynı karede bölgeye girişten önce işlenir
+    if (c.escHit || c.escHitAt >= c.escEnterT - 0.1 || !this.escapeEligible(c)) return 0;
+    if (this.runTime - c.escAt < ESC.cooldown || this.runTime - this.escLastT < ESC.globalGap) return 0;
+    if (Math.hypot(p.x - c.escX, p.y - c.escY) < ESC.minTravel) return 0;
+    return this.rewardEscape(c);
+  }
+
+  // Yalnız polis gerçekten kovalarken, oyuncu hızla ileri giderken; hile ve görünmezlikte yok
+  escapeEligible(c) {
+    const p = this.player;
+    if (this.state !== 'play' || this.cheat || this.ghostT > 0 || c.flying) return false;
+    if (c.state !== 'chase' && c.state !== 'block' && c.state !== 'barricade') return false;
+    return p.speed >= ESC.minSpeed && p.forward > 0 && this.autoRevT <= 0;
+  }
+
+  rewardEscape(c) {
+    const amount = ESC.min + Math.floor(Math.random() * (ESC.max - ESC.min + 1));
+    this.escCombo = this.runTime - this.escLastT <= ESC.comboWindow ? this.escCombo + 1 : 1;
+    const bonus = this.escCombo % ESC.comboEvery === 0 ? ESC.comboBonus : 0;
+    const total = amount + bonus;
+    this.coins += total;
+    this.escCoins += total;
+    this.escapes++;
+    this.escLastT = this.runTime;
+    c.escAt = this.runTime;
+    this.emit('escape', { amount, bonus });
+    return total;
   }
 
   // Adalet: oyuncunun çevresine aynı anda sınırlı polis girer, önü tamamen kapanmaz. Fazlası gaz keser

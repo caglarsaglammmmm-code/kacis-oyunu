@@ -795,3 +795,12 @@ html[lang="ja"] #alert, html[lang="zh-CN"] #alert, html[lang="ja"] #toast, html[
 #splash.play p { animation: splash15 .8s ease-in-out both; }
 @keyframes splash15 { 0% { opacity: 0; } 28%, 72% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { #splash.play p { animation: none; opacity: 1; } }
+
+/* v16: kıl payı bildirimi. Üstte, dokunuşları almaz, kısa ve yumuşak */
+#escape-msg { position: fixed; left: 50%; top: calc(var(--safe-t) + 92px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 14px; border-radius: 12px; background: rgba(10, 12, 20, .5); pointer-events: none; opacity: 0; z-index: 6; white-space: nowrap; }
+#escape-msg b { font: 700 clamp(18px, 5vw, 26px)/1.1 var(--pxt); color: #ffe14d; text-shadow: 0 2px 0 #6b4a00, 0 0 10px rgba(255, 210, 63, .35); }
+#escape-msg small { font: 700 15px/1.1 var(--pxt); color: #7af6ff; letter-spacing: .04em; }
+#escape-msg small:empty { display: none; }
+#escape-msg.run { animation: escapeMsg 1.3s ease-out both; }
+@keyframes escapeMsg { 0% { opacity: 0; transform: translate(-50%, 6px) scale(.92); } 14% { opacity: 1; transform: translate(-50%, 0) scale(1.04); } 24%, 72% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -8px) scale(1); } }
+@media (prefers-reduced-motion: reduce) { #escape-msg.run { animation-duration: 1.3s; transform: translateX(-50%); } }

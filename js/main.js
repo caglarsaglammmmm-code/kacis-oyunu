@@ -294,6 +294,7 @@ game.onEvent = (name, v) => {
     case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
     case 'aliens': audio.alert(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
     case 'spike': audio.spike(); vibrate(60); break;
+    case 'escape': audio.escape(); ui.escapeToast(v); vibrate(18); break;
     case 'cheat': audio.cheat(v); ui.cheatMessage(v); vibrate(v ? [30, 30, 30, 30, 60] : 40); break;
     case 'copdown': audio.explosion(0.55 * v); vibrate(40); break;
     case 'explosion': audio.explosion(1); vibrate([120, 40, 220]); break;

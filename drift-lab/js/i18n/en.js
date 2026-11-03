@@ -60,6 +60,7 @@ export default {
     rev: 'REV',
   },
   alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!' },
+  escape: { toast: '+{n} CLOSE CALL!', combo: 'COMBO +{n}' },
   cheat: { on: 'Well, look at you! You found the cheat code!', off: 'Cheat off', badge: 'CHEAT ON' },
   cars: {
     atmaca: { desc: 'Every neighborhood’s old faithful', paints: ['Neighborhood Beige', 'Wine Red', 'Matte Army Green', 'Two-Tone Cream/Burgundy'] },

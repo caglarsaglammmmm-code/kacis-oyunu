@@ -60,6 +60,7 @@ export default {
     rev: 'ATRÁS',
   },
   alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!' },
+  escape: { toast: '+{n} ¡POR LOS PELOS!', combo: 'COMBO +{n}' },
   cheat: { on: '¡Toma ya! ¡Has encontrado el truco secreto!', off: 'Truco desactivado', badge: 'TRUCO ACTIVO' },
   cars: {
     atmaca: { desc: 'El veterano de todos los barrios', paints: ['Beige de barrio', 'Rojo vino', 'Verde militar mate', 'Bicolor crema/burdeos'] },
