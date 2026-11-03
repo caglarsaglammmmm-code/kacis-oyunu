@@ -152,9 +152,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '17.0.0',
+  version: '18.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v17.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v18.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -537,12 +537,19 @@ const CONFIG = {
     ledAlpha: 0.5, ledNight: 0.45, // Gündüz ve gece ek parlaklığı
   },
 
-  // GÜDÜMLÜ ENERJİ TOPU (yalnız weapon: true olan araba). damage: her isabetin sabit hasarı.
-  // hp: polis türüne göre silah dayanıklılığı; gereken isabet = hp / damage (normal polis 4, SWAT 8, tank 16).
-  // cooldown: atış arası (sn), ammo: en çok cephane, regen: bir cephanenin dolma süresi (sn),
-  // escapeAmmo: kıl payı kaçışta eklenen cephane, maxMissiles: aynı anda en çok mermi,
-  // range/cone: kilit menzili ve önde yarım koni açısı (radyan), turn: güdüm dönüş hızı, life: ömür (sn)
-  weapon: { damage: 25, hp: { car: 100, fast: 100, moto: 75, advanced: 125, swat: 200, tank: 400, rover: 150, ufo: 250 }, cooldown: 1.7, ammo: 6, regen: 9, escapeAmmo: 1, maxMissiles: 4, speed: 760, turn: 5.5, life: 2.4, range: 620, cone: 0.62, hitR: 30, lockEvery: 6 },
+  // GÜDÜMLÜ ENERJİ TOPU (yalnız weapon: true olan araba). Cephane sınırsız, ateş otomatik.
+  // fireEvery (SILAH_ATES_ARALIGI): iki atış arası (sn). Önündeki konide hedef yoksa atmaz; hedef çıkınca
+  // süre dolmuşsa hemen atar. Boşluk tuşu da yalnız süre dolmuşsa atar, aralığı kısaltmaz.
+  // damage (SILAH_HASAR): her isabetin sabit hasarı. hp: oyunun başındaki silah canı (polis türüne göre).
+  // armor: zırhlı araçlara giden hasarın katı (SWAT ve tank bu silahtan az etkilenir).
+  // Gereken isabet = tavan(hp / (damage * armor)): normal polis 100/22 = 5, SWAT 300/(22*0,7) = 20, tank 31.
+  // maxMissiles: aynı anda en çok mermi, range/cone: kilit menzili ve önde yarım koni açısı (radyan),
+  // turn: güdüm dönüş hızı, life: ömür (sn), lockEvery: hedef arama sıklığı (kare)
+  weapon: { fireEvery: 3.0, damage: 22, hp: { car: 100, fast: 100, moto: 80, advanced: 110, swat: 300, tank: 400, rover: 150, ufo: 250 }, armor: { swat: 0.7, tank: 0.6 }, maxMissiles: 3, speed: 760, turn: 5.5, life: 2.4, range: 620, cone: 0.62, hitR: 30, lockEvery: 6 },
+
+  // ZAMANLA ARTAN POLİS CANI (silah canı, bütün arabalarda). Yeni doğan polisin canı = hp * min(max, perMin ^ dakika).
+  // Sahadaki polisler değişmez. %12 / dk: 2. dk 1,25x, 5. dk 1,76x, ~9,7. dk'dan sonra 3x tavan
+  copHpGrowth: { perMin: 1.12, max: 3 },
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
   // Yeni kod eklemek için satır eklenir. car: açılan araba
@@ -4355,6 +4362,9 @@ const AL = CONFIG.aliens;
 const PU = CONFIG.pursuit;
 const ESC = CONFIG.escape;
 const WPN = CONFIG.weapon;
+const HPG = CONFIG.copHpGrowth;
+// Oyun dakikasına göre yeni polisin silah canı katı: üstel artış, tavanlı
+function copHpMul(time) { return Math.min(HPG.max, HPG.perMin ** (Math.max(0, time) / 60)); }
 const WX = CONFIG.weather;
 
 // Hava: random ise ağırlıklı seçim, değilse ayardaki tür
@@ -4584,7 +4594,7 @@ class Game {
     this.god = god;
     if (!keepWorld) this.world.reset(seed);
     this.resetRun(startTime);
-    this.weapon = carSpec.weapon ? { ammo: WPN.ammo, cd: 0, regenT: 0, lock: null } : null;
+    this.weapon = carSpec.weapon ? { cd: 0, lock: null, shots: 0 } : null;
     this.dayT = 0;
     dayState(0, this.daylight);
     resetBody(this.player, 100, 300, Math.PI / 2, carSpec);
@@ -5215,7 +5225,7 @@ class Game {
     c.los = false; c.hitCd = 0; c.nearCd = 0; c.wakeT = 0;
     this.flankSide = -this.flankSide;
     c.side = this.flankSide; c.roleT = PU.roleTime; c.blockT = 0; c.hold = false; c.far = false;
-    c.mhp = WPN.hp[type] || WPN.hp.car; c.byWeapon = false;
+    c.mhpMax = (WPN.hp[type] || WPN.hp.car) * copHpMul(this.time); c.mhp = c.mhpMax; c.byWeapon = false;
     c.escIn = false; c.escHit = false; c.escHitAt = -99; c.escEnterT = 0; c.escAt = -99;
     c.turret = a; c.fireT = TK.fireEvery * 0.6; c.fxT = Math.random() * 3; c.hurtFlash = 0;
     this.cops.push(c);
@@ -5402,10 +5412,10 @@ class Game {
   }
 
   // --- Güdümlü enerji topu ---
-  // Atış: bekleme ve cephane uygunsa burundan çıkar, varsa kilitli polisi izler. true: atıldı
+  // Atış: bekleme süresi dolmuşsa burundan çıkar, varsa kilitli polisi izler. Cephane sınırsız. true: atıldı
   fire() {
     const w = this.weapon;
-    if (!w || this.state !== 'play' || w.cd > 0 || w.ammo <= 0) return false;
+    if (!w || this.state !== 'play' || w.cd > 0) return false;
     const m = this.missiles.find((k) => !k.alive);
     if (!m) return false;
     const p = this.player;
@@ -5415,8 +5425,9 @@ class Game {
     m.vx = ca * WPN.speed + p.vx * 0.3; m.vy = sa * WPN.speed + p.vy * 0.3;
     m.target = w.lock;
     for (let i = 0; i < m.tx.length; i++) { m.tx[i] = m.x; m.ty[i] = m.y; }
-    w.ammo--;
-    w.cd = WPN.cooldown;
+    w.shots++;
+    w.cd += WPN.fireEvery; // Taşan süre korunur: atışlar eşit aralıklı
+    if (w.cd <= 0) w.cd = WPN.fireEvery;
     this.emit('fire');
     return true;
   }
@@ -5440,13 +5451,14 @@ class Game {
 
   updateWeapon(dt) {
     const w = this.weapon;
-    if (w.cd > 0) w.cd = Math.max(0, w.cd - dt);
-    if (w.ammo < WPN.ammo) {
-      w.regenT += dt;
-      if (w.regenT >= WPN.regen) { w.regenT = 0; w.ammo++; }
-    } else w.regenT = 0;
-    if (this.tickCount % WPN.lockEvery === 0) w.lock = this.findLock();
+    if (w.cd > 0) w.cd -= dt;
+    // Hazırken her kare hedef aranır: hedef çıkınca hemen atılır. Beklerken seyrek aranır
+    if (w.cd <= 0 || this.tickCount % WPN.lockEvery === 0) w.lock = this.findLock();
     else if (w.lock && !this.cops.includes(w.lock)) w.lock = null;
+    if (w.cd <= 0) {
+      if (w.lock && this.state === 'play') this.fire();
+      else w.cd = Math.max(w.cd, -dt); // Hedef yokken beklenen süre birikmez
+    }
     for (const m of this.missiles) if (m.alive) this.stepMissile(m, dt);
   }
 
@@ -5482,11 +5494,12 @@ class Game {
     }
   }
 
-  // Her isabet sabit hasar: gereken isabet sayısı polis türüne göre (WPN.hp / WPN.damage)
+  // Her isabet sabit hasar (zırhlıda azaltılmış). Gereken isabet = can / hasar
   hitCop(c, x, y) {
-    const full = WPN.hp[c.type] || WPN.hp.car;
-    c.mhp -= WPN.damage;
-    c.hp = Math.min(c.hp - (c.maxHp * WPN.damage) / full, (c.maxHp * c.mhp) / full);
+    const full = c.mhpMax || WPN.hp[c.type] || WPN.hp.car;
+    const dmg = WPN.damage * (WPN.armor[c.type] ?? 1);
+    c.mhp -= dmg;
+    c.hp = Math.min(c.hp - (c.maxHp * dmg) / full, (c.maxHp * c.mhp) / full);
     if (c.mhp <= 0) { c.hp = -1; c.byWeapon = true; }
     c.hurtFlash = 0.35;
     this.fx.burst(FX.GLINT, x, y, 10, 160, 0.35, 7);
@@ -5534,7 +5547,6 @@ class Game {
     this.escapes++;
     this.escLastT = this.runTime;
     c.escAt = this.runTime;
-    if (this.weapon) this.weapon.ammo = Math.min(WPN.ammo, this.weapon.ammo + WPN.escapeAmmo);
     this.emit('escape', { amount, bonus });
     return total;
   }
@@ -12594,7 +12606,7 @@ class Renderer {
     const lock = game.weapon.lock;
     if (lock && game.state === 'play') {
       const r = Math.max(lock.len, lock.wid) * 0.8;
-      ctx.globalAlpha = game.weapon.ammo > 0 ? 0.95 : 0.4;
+      ctx.globalAlpha = game.weapon.cd <= 0.4 ? 0.95 : 0.6; // Atışa yakın daha belirgin
       this.place(lock.x, lock.y, now * 0.003);
       ctx.drawImage(sp.reticle, -r, -r, r * 2, r * 2);
       ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
@@ -15587,33 +15599,12 @@ const cover = new PixelMenu(document.getElementById('cover'));
 const curtain = document.getElementById('curtain');
 const menuEl = document.getElementById('menu');
 const cheatBadge = document.getElementById('cheat-badge');
-// Ateş: ekran düğmesi ve Boşluk. Düğme kendi dokunuşunu alır, sürüş girdisine karışmaz
-const fireBtn = document.getElementById('btn-fire');
+// Ateş otomatiktir. Boşluk yalnız silahlı arabada alınır ve bekleme süresi dolmuşsa atar
 input.onFire = (down) => {
   const armed = !!game.weapon && game.state === 'play' && !paused;
   if (armed && down) game.fire();
   return armed;
 };
-fireBtn.addEventListener('pointerdown', (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  fireBtn.classList.add('down');
-  if (!paused) game.fire();
-});
-for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) fireBtn.addEventListener(ev, (e) => { e.stopPropagation(); fireBtn.classList.remove('down'); });
-fireBtn.addEventListener('contextmenu', (e) => e.preventDefault());
-let fireShown = false;
-function updateFire() {
-  const w = game.weapon;
-  const show = !!w && game.state === 'play';
-  if (show !== fireShown) { fireShown = show; fireBtn.hidden = !show; }
-  if (!show) return;
-  fireBtn.dataset.mode = input.mode;
-  const ammo = String(w.ammo);
-  if (fireBtn.lastElementChild.textContent !== ammo) fireBtn.lastElementChild.textContent = ammo;
-  fireBtn.style.setProperty('--cd', (w.cd / CONFIG.weapon.cooldown).toFixed(2));
-  fireBtn.classList.toggle('empty', w.ammo <= 0);
-}
 input.onCode = () => { if (game.state === 'play' && !paused) game.toggleCheat(); };
 const params = new URLSearchParams(location.search);
 let paused = false;
@@ -15804,8 +15795,6 @@ function toMenu() {
   game.carSpec = storage.selectedCar();
   game.startAttract();
   cheatBadge.hidden = true;
-  fireShown = false;
-  fireBtn.hidden = true;
   ui.refreshMenu();
   ui.show('menu');
   ui.intro();
@@ -15955,7 +15944,6 @@ function frame(now) {
     hudT = 0.1;
     ui.hud(game);
     if (cheatBadge.hidden === game.cheat) cheatBadge.hidden = !game.cheat;
-    updateFire();
   }
 
   // Kare süresi ölçümü ve otomatik kalite

@@ -27,44 +27,56 @@ const OWN = { coins: 50, owned: ['atmaca', 'kuzgun'], selected: 'kuzgun', settin
 const touch = (cdp, type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map((p) => ({ x: p.x, y: p.y, id: p.id || 1 })) });
 const start = async (page) => { await page.evaluate(() => __drift.play()); await page.waitForFunction(() => __drift.game.state === 'play'); await page.waitForTimeout(500); };
 
-// 1) Silah: üç kontrol sisteminde ateş düğmesi sürüşe karışmaz
+// 1) Silah: otomatik ateş, sınırsız cephane. Üç kontrol sisteminde ateş düğmesi yok, sürüş bozulmaz
 for (const mode of ['zones', 'wheel', 'stick']) {
   const { ctx, page, cdp } = await open(390, 844, '?god=1', 'tr-TR', { ...OWN, settings: { ...OWN.settings, control: mode } });
   await start(page);
-  const g0 = await page.evaluate(() => { const r = document.getElementById('btn-fire').getBoundingClientRect(); const rev = document.getElementById('ctl-rev'); const wh = document.getElementById('ctl-wheel'); const box = (e) => (e && !e.hidden && e.offsetParent ? e.getBoundingClientRect().toJSON() : null); return { fire: r.toJSON(), shown: !document.getElementById('btn-fire').hidden, rev: box(rev), wheel: box(wh), ammo: __drift.game.weapon.ammo, mode: __drift.input.mode }; });
-  ok(g0.shown && g0.mode === mode, `${mode}: ateş düğmesi görünüyor`, JSON.stringify(g0));
-  const overlap = (a, c) => a && c && a.left < c.right && c.left < a.right && a.top < c.bottom && c.top < a.bottom;
-  ok(!overlap(g0.fire, g0.rev) && !overlap(g0.fire, g0.wheel), `${mode}: ateş düğmesi direksiyon ve geri tuşuyla çakışmıyor`, JSON.stringify(g0));
-  const c = { x: g0.fire.left + g0.fire.width / 2, y: g0.fire.top + g0.fire.height / 2, id: 3 };
-  await touch(cdp, 'touchStart', [c]);
-  await page.waitForTimeout(60);
-  const s1 = await page.evaluate(() => ({ steer: __drift.input.steer, touches: __drift.input.touches.size, stick: __drift.input.stick.on, wheel: __drift.input.wheelId, ammo: __drift.game.weapon.ammo, missiles: __drift.game.missiles.filter((m) => m.alive).length }));
-  await touch(cdp, 'touchEnd', []);
-  ok(s1.ammo === g0.ammo - 1 && s1.missiles === 1, `${mode}: dokununca ateş etti`, JSON.stringify(s1));
-  ok(s1.steer === 0 && s1.touches === 0 && !s1.stick && s1.wheel === null, `${mode}: ateş dokunuşu sürüşe karışmadı`, JSON.stringify(s1));
-  // Ateş ederken öbür parmakla direksiyon çalışmaya devam eder
+  const g0 = await page.evaluate(() => ({ btn: !!document.getElementById('btn-fire'), ammo: 'ammo' in __drift.game.weapon, mode: __drift.input.mode }));
+  ok(!g0.btn && !g0.ammo && g0.mode === mode, `${mode}: ateş düğmesi ve cephane göstergesi yok`, JSON.stringify(g0));
+  // Önde sürekli bir hedef tutulur (ölmez): atış zamanları oyun saatinden ölçülür
+  const res = await page.evaluate(async () => {
+    const g = __drift.game; const p = g.player;
+    const c = g.spawnCop('car', 'chaser', p.x, p.y, 0); c.state = 'chase';
+    const hold = () => { c.x = p.x + Math.cos(p.a) * 200; c.y = p.y + Math.sin(p.a) * 200; c.vx = p.vx; c.vy = p.vy; c.mhp = c.mhpMax; c.hp = c.maxHp; if (!g.cops.includes(c)) g.cops.push(c); };
+    const t0 = performance.now(); const at = []; let last = g.weapon.shots; let most = 0;
+    while (performance.now() - t0 < 11000) {
+      hold();
+      await new Promise(requestAnimationFrame);
+      if (g.weapon.shots !== last) { last = g.weapon.shots; at.push(g.runTime); }
+      most = Math.max(most, g.missiles.filter((m) => m.alive).length);
+    }
+    return { at, most, state: g.state };
+  });
+  const gaps = res.at.slice(1).map((v, i) => +(v - res.at[i]).toFixed(3));
+  console.log(`  ${mode} atış aralıkları: ${gaps.join(' ')}`);
+  ok(gaps.length >= 2 && gaps.every((x) => Math.abs(x - 3) < 0.05), `${mode}: ~3,0 sn eşit aralıkla otomatik ateş`, JSON.stringify(gaps));
+  ok(res.most <= 4 && res.state === 'play', `${mode}: en çok ${res.most} mermi, oyun sürüyor`);
+  // Dokunmatik sürüş çalışıyor
   const W = 390; const H = 844;
-  const steerPt = mode === 'wheel' ? null : { x: W * 0.8, y: H * 0.5, id: 1 };
-  if (steerPt) {
-    await touch(cdp, 'touchStart', [steerPt]);
-    await page.waitForTimeout(40);
+  const pt = mode === 'wheel' ? null : { x: W * (mode === 'stick' ? 0.3 : 0.85), y: H * 0.6, id: 1 };
+  if (pt) {
+    await touch(cdp, 'touchStart', [pt]);
+    if (mode === 'stick') { await page.waitForTimeout(40); await touch(cdp, 'touchMove', [{ ...pt, x: pt.x + 70 }]); }
+    await page.waitForTimeout(120);
+    const st = await page.evaluate(() => __drift.input.steer);
     await touch(cdp, 'touchEnd', []);
+    ok(st !== 0, `${mode}: dokunuşla direksiyon çalışıyor`, String(st));
   }
-  // Bekleme süresinde ikinci atış yok
-  await page.evaluate(() => __drift.game.fire());
-  const s2 = await page.evaluate(() => __drift.game.weapon.ammo);
-  ok(s2 === s1.ammo, `${mode}: bekleme süresinde atılmaz`, String(s2));
   if (mode === 'zones') {
-    // Klavyede Boşluk
-    await page.waitForTimeout(1900);
+    // Boşluk: bekleme süresinde atmaz, süre dolunca atar
+    const before = await page.evaluate(() => { const g = __drift.game; g.cops.length = 0; g.weapon.cd = 1.5; return g.weapon.shots; });
     await page.keyboard.press('Space');
     await page.waitForTimeout(80);
-    ok((await page.evaluate(() => __drift.game.weapon.ammo)) === s2 - 1, 'Boşluk ateş eder');
+    ok((await page.evaluate(() => __drift.game.weapon.shots)) === before, 'Boşluk bekleme süresinde atmaz');
+    await page.evaluate(() => { __drift.game.weapon.cd = 0; });
+    await page.keyboard.press('Space');
+    await page.waitForTimeout(80);
+    ok((await page.evaluate(() => __drift.game.weapon.shots)) === before + 1, 'Boşluk süre dolunca atar');
     // Ekran görüntüsü: hedef kilidi ve mermi
+    await page.waitForTimeout(3100);
     await page.evaluate(() => {
       const g = __drift.game; const p = g.player;
       const c = g.spawnCop('car', 'chaser', p.x + Math.cos(p.a) * 260, p.y + Math.sin(p.a) * 260, p.a + Math.PI); c.state = 'chase';
-      g.weapon.cd = 0; g.weapon.lock = c; g.fire();
     });
     await page.waitForTimeout(160);
     await page.screenshot({ path: `${OUT}/silahli-araba.png` });
