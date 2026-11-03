@@ -11,10 +11,13 @@ import { PixelMenu } from './pixelmenu.js';
 import { loadAtlas } from './sheet.js';
 import { PHASE, FALL_AT, TOTAL, dropCurve } from './transition.js';
 import { Quality, guessLevel, LEVELS } from './quality.js';
+import { setLang, detectLang, getLang, tx } from './i18n/index.js';
 
 const STEP = 1 / 60;
 const canvas = document.getElementById('game');
 const storage = new Storage();
+// Dil: kayıtlıysa o, değilse cihazın dili (desteklenmiyorsa İngilizce)
+setLang(storage.data.settings.lang || detectLang(navigator.languages || [navigator.language]));
 const game = new Game();
 const renderer = new Renderer(canvas);
 const input = new Input();
@@ -48,6 +51,8 @@ function vibrate(ms) {
 }
 
 function applySettings() {
+  const lang = storage.data.settings.lang || detectLang(navigator.languages || [navigator.language]);
+  if (lang !== getLang()) { setLang(lang); ui.applyLang(); }
   audio.setEnabled(storage.data.settings.sound);
   audio.setVolume(storage.data.settings.volume / 100);
   ui.syncMute();
@@ -88,6 +93,7 @@ function resize() {
   game.view.h = h;
   input.width = w;
   controls.needLayout = true;
+  ui.fit();
   game.updateCamera(1);
 }
 
@@ -364,7 +370,8 @@ function frame(now) {
   perf.work[i] = performance.now() - t0;
   perf.i = (i + 1) % perf.frames.length;
   perf.count++;
-  if (!paused && !warming && !document.hidden && (game.state === 'play' || (film && film.left)) && quality.note(raw)) {
+  // Koşunun ilk iki karesi dünya hazırlığıdır, cihaz yavaşlığı sayılmaz
+  if (!paused && !warming && !document.hidden && ((game.state === 'play' && game.runTime > 0.6) || (film && film.left)) && quality.note(raw)) {
     perf.changes++;
     applyQuality();
   }
@@ -384,7 +391,7 @@ function handleBack() {
     const t = performance.now();
     if (t - lastBack < 2000) return true;
     lastBack = t;
-    ui.toast('Çıkmak için tekrar bas', '#ffffff');
+    ui.toast(tx('menu.exit'), '#ffffff');
     return false;
   }
   ui.refreshMenu();

@@ -1,0 +1,75 @@
+// Español
+export default {
+  start: 'JUGAR',
+  menu: {
+    garage: 'Coches', settings: 'Ajustes', howto: 'Cómo jugar', apk: 'Bajar APK',
+    best: 'Mejor: {score} pts · {time}', first: 'Tu primera huida te espera',
+    maker: 'Hecho por Çağlar Sağlam', exit: 'Pulsa otra vez para salir',
+  },
+  aria: {
+    game: 'Zona de juego', health: 'Salud', pause: 'Pausa', wanted: 'Nivel de búsqueda', damage: 'Daño', reverse: 'Marcha atrás',
+    mute: 'Activar o silenciar sonido', back: 'Atrás', prev: 'Anterior', next: 'Siguiente', start: 'Jugar',
+  },
+  garage: {
+    finish: { gloss: 'Brillante', metal: 'Metalizado', matte: 'Mate', pearl: 'Perla' }, twoTone: 'Bicolor',
+    title: 'Garaje', selected: 'Elegido', select: 'Elegir', buy: 'Comprar · {cost}', need: '{cost} monedas',
+    speed: 'Velocidad', accel: 'Aceleración', grip: 'Agarre', durability: 'Resistencia',
+  },
+  settings: {
+    title: 'Ajustes', sound: 'Sonido', volume: 'Volumen', ambient: 'Ambiente urbano', vibrate: 'Vibración',
+    control: 'Controles', zones: 'Izq. / Der.', wheel: 'Volante', stick: 'Joystick',
+    quality: 'Gráficos', auto: 'Auto', high: 'Alta', low: 'Baja',
+    language: 'Idioma / Language', privacy: 'Política de privacidad', version: 'Versión {v}',
+  },
+  dev: {
+    title: 'Desarrollador', god: 'Invencible', start: 'Tiempo inicial',
+    t0: '0 s', t45: '45 s (antes del SWAT)', t195: '195 s (antes de refuerzos)', t275: '275 s (antes de tanques)', t280: '280 s (tanques)',
+  },
+  howto: {
+    title: 'Cómo jugar',
+    rightH: 'Toca la mitad derecha', rightP: 'Gira a la derecha y derrapa',
+    leftH: 'Toca la mitad izquierda', leftP: 'Gira a la izquierda y derrapa',
+    bothH: 'Toca ambas a la vez', bothP: 'Frena y da marcha atrás',
+    tips: [
+      'El coche avanza solo. Tú solo diriges.',
+      'Elige los controles en Ajustes: Izq. / Der., Volante o Joystick.',
+      'Los muros hacen daño: humo, chispas, fuego y… ¡bum!',
+      'Sal de la ciudad: te esperan playas, bosques, desiertos y campo.',
+      'Esquivar a la policía por los pelos y derrapar sube tu combo.',
+      'Haz que la policía se estrelle contra los muros o embístela.',
+      '¿Ves un círculo rojo? ¡Sal ya: viene fuego de tanque!',
+    ],
+  },
+  power: {
+    blast: 'Explosión', ghost: 'Invisible', heal: 'Reparar', giant: 'Gigante',
+    blastInfo: 'Hace explotar todos los coches cercanos', ghostInfo: 'La policía no te ve durante {n} s',
+    healInfo: 'Repara el daño y apaga el fuego', giantInfo: 'Te vuelves gigante {n} s y no recibes daño',
+    healFloat: 'REPARADO +', ghostFloat: 'INVISIBLE', giantFloat: 'GIGANTE',
+  },
+  pause: { title: 'En pausa', resume: 'Continuar', menu: 'Menú principal' },
+  over: {
+    caught: '¡TE PILLARON!', sunk: '¡HUNDIDO!', record: '¡NUEVO RÉCORD!',
+    score: 'Puntos', time: 'Tiempo', coins: 'Monedas', kills: 'Policías derribados', broken: 'Objetos rotos', near: 'Por los pelos', drift: 'Derrape',
+    seconds: '{n} s', best: 'Mejor puntuación: {score} · Mayor tiempo: {time}', retry: 'Reintentar', menu: 'Menú principal',
+  },
+  hint: {
+    zones: ['Toca izq.', 'derrapa a la izq.', 'Toca ambos', 'marcha atrás', 'Toca der.', 'derrapa a la der.'],
+    wheel: ['Mantén ATRÁS', 'marcha atrás', 'Volante', 'abajo a la derecha', 'Gíralo', 'gira a izq. o der.'],
+    stick: ['Mitad izq.', 'pulsa y desliza', 'Joystick', 'aparece bajo tu dedo', 'Mantén ATRÁS', 'marcha atrás'],
+    rev: 'ATRÁS',
+  },
+  alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!' },
+  cheat: { on: '¡Toma ya! ¡Has encontrado el truco secreto!', off: 'Truco desactivado', badge: 'TRUCO ACTIVO' },
+  cars: {
+    atmaca: { desc: 'El veterano de todos los barrios', paints: ['Beige de barrio', 'Rojo vino', 'Verde militar mate', 'Bicolor crema/burdeos'] },
+    motor: { desc: 'El rey de las calles estrechas', paints: ['Rojo carreras', 'Azul eléctrico', 'Negro mate', 'Blanco perla'] },
+    granit: { desc: 'SUV alto y seguro', paints: ['Azul medianoche', 'Naranja brasa', 'Plata mate', 'Blanco perla'] },
+    elektra: { desc: 'Silencioso, potente, eléctrico', paints: ['Rojo Anatolia', 'Gris tormenta', 'Tierra mate', 'Azul hielo'] },
+    simsek: { desc: 'Alerón exagerado, tuning total', paints: ['Negro mate, franja amarilla', 'Naranja fuego', 'Verde neón', 'Morado metalizado'] },
+    cinar: { desc: 'Una leyenda clásica', paints: ['Naranja leyenda', 'Azul bebé', 'Bicolor crema/cereza', 'Oliva mate'] },
+    efe: { desc: 'Duro como el acero, herencia de papá', paints: ['Azul Bósforo', 'Caqui', 'Plata', 'Bicolor beige/marrón'] },
+    marmara: { desc: 'Sedán sencillo, lleno de sorpresas', paints: ['Blanco nieve', 'Rojo volcán', 'Antracita mate', 'Bicolor azul/negro'] },
+    liva: { desc: 'Compacto, ágil y volador', paints: ['Azul océano', 'Naranja llama', 'Blanco mate', 'Bicolor rojo/negro'] },
+    bozkir: { desc: 'Va a todas partes y nunca para', paints: ['Naranja cañón', 'Verde bosque', 'Beige arena', 'Bicolor gris/negro'] },
+  },
+};

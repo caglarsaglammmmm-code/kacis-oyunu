@@ -133,7 +133,8 @@ test('sw.js önbellek listesi eksiksiz', () => {
   const list = sw.match(/const ASSETS = \[([\s\S]*?)\];/)[1].match(/'[^']+'/g).map((i) => i.slice(1, -1));
   for (const f of list) if (f !== './') assert.ok(fs.existsSync(f), f);
   for (const f of fs.readdirSync('fonts').filter((n) => n.endsWith('.woff2'))) assert.ok(list.includes(`fonts/${f}`), f);
-  for (const f of fs.readdirSync('js')) if (f !== 'app.file.js') assert.ok(list.includes(`js/${f}`), f);
+  for (const f of fs.readdirSync('js')) if (f !== 'app.file.js' && f !== 'i18n') assert.ok(list.includes(`js/${f}`), f);
+  for (const f of fs.readdirSync('js/i18n')) assert.ok(list.includes(`js/i18n/${f}`), f);
 });
 
 test('açılış yazısı tam olarak istenen metin', () => {

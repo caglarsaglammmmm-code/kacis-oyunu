@@ -14,7 +14,7 @@ const b = await chromium.launch({ channel: 'msedge', headless: true, args: proce
 const logs = [];
 
 async function open(w, h, mobile, url = '') {
-  const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: mobile ? 2 : 1, isMobile: mobile, hasTouch: mobile });
+  const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: mobile ? 2 : 1, isMobile: mobile, hasTouch: mobile, locale: 'tr-TR' });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => logs.push(`pageerror ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error') logs.push(m.text()); });
@@ -68,19 +68,37 @@ async function testMode(mode, mobile) {
   await start(page);
   await pressAll(page, cdp, mode, WRONG, gap);
   ok(!(await cheat(page)).on, `${mode}: yanlış kod açmaz`);
-  await page.waitForTimeout(1700);
+  await page.waitForTimeout(2150);
   await pressAll(page, cdp, mode, SEQ.slice(0, 4), gap);
   ok((await cheat(page)).i >= 3, `${mode}: sıra ilerliyor`, JSON.stringify(await cheat(page)));
-  await page.waitForTimeout(1800);
+  await page.waitForTimeout(2300);
   await pressAll(page, cdp, mode, SEQ.slice(4), gap);
   ok(!(await cheat(page)).on, `${mode}: süre aşımı sıfırlar`);
-  await page.waitForTimeout(1700);
+  await page.waitForTimeout(2150);
   await pressAll(page, cdp, mode, SEQ, gap);
   await page.waitForTimeout(350);
   const on = await cheat(page);
   ok(on.on && on.badge, `${mode}: doğru kod açar`, JSON.stringify(on));
   ok(on.msg === 'Aferin, hile kodunu buldun la!' && Number(on.shown) > 0.8, `${mode}: mesaj görünür`, JSON.stringify(on));
   if (mode === 'zones') await page.screenshot({ path: `${OUT}/hile-acik-mesaj.png` });
+  // Kesin sınır: oyun saati elle ilerletilir, basışlar gerçek giriş yolundan geçer
+  if (mode === 'key') {
+    const t = await page.evaluate(() => {
+      const i = __drift.input; const g = __drift.game; const out = {};
+      for (const gap of [1.9, 2.0, 0.3]) {
+        if (g.cheat) g.toggleCheat();
+        i.code.reset();
+        let first = true;
+        for (const d of 'LLRRLRLR') { if (!first) i.clock += gap; first = false; const k = d === 'L' ? 'ArrowLeft' : 'ArrowRight'; i.key(k, true); i.key(k, false); }
+        out[gap] = g.cheat;
+      }
+      if (g.cheat) g.toggleCheat();
+      return out;
+    });
+    ok(t['1.9'] === true && t['2'] === false && t['0.3'] === true, 'klavye: 1,9 sn açar, 2,0 sn açmaz, hızlı açar', JSON.stringify(t));
+    await page.evaluate(() => { if (!__drift.game.cheat) __drift.game.toggleCheat(); });
+    await page.waitForTimeout(2800);
+  }
   await page.waitForTimeout(2800);
   ok(Number((await cheat(page)).shown) < 0.05, `${mode}: mesaj kaybolur`);
   await pressAll(page, cdp, mode, SEQ, gap);
@@ -186,6 +204,8 @@ async function testSigns() {
   await install();
   const measure = (key, loc, dayT, off) => page.evaluate(({ loc, dayT, off }) => {
     const k = __drift; const g = k.game; const r0 = k.renderer;
+    // Konum ölçülür: otomatik kalite zorlamalı hazırlığı yavaşlık sanıp ışıltıyı kapatmasın
+    k.quality.setMode('high'); r0.lod = k.LEVELS[0];
     g.state = 'over'; // Yalnız çizim: adım atılmaz
     const cx = loc.x + loc.w / 2 + off[0]; const cy = loc.y + loc.h + off[1];
     const p = g.player; p.x = cx; p.y = cy; p.vx = 0; p.vy = 0; p.speed = 0;
@@ -208,7 +228,9 @@ async function testSigns() {
     const c = g.world.chunk(tx, ty);
     for (let i = 0; i < c.rectCount; i++) if (c.rects[i].x === loc.x && c.rects[i].y === loc.y) rect = c.rects[i];
     const img = rect.signImg;
-    const draws = rec.filter((e) => e.img === img).map((e) => e.a.map((v) => +v.toFixed(2)));
+    // Aynı ad ve renkteki tabelalar önbellekte aynı görüntüyü paylaşabilir: yalnız bu binanın yakınındakiler
+    const mx = loc.x + loc.w / 2; const my = loc.y + loc.h / 2; const R = Math.max(loc.w, loc.h) * 0.6 + 260;
+    const draws = rec.filter((e) => e.img === img && Math.hypot(e.a[0] + e.a[2] / 2 - mx, e.a[1] + e.a[3] / 2 - my) < R).map((e) => e.a.map((v) => +v.toFixed(2)));
     const halos = rec.filter((e) => e.img !== img && e.a.length === 4 && e.img.width === 64 && e.op === 'lighter').map((e) => e.a);
     return { draws, halos, tall: rect.tall, tX: rect.tX0, roof: rect.tall ? [rect.tX0, rect.tX1, rect.tY0, rect.tY1] : null, y1: rect.y + rect.h };
   }, { loc, dayT, off });

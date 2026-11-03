@@ -1,20 +1,12 @@
 // Capacitor için oyunun yalnızca çalışma dosyalarını www/ altına kopyalar.
-// sw.js ve manifest alınmaz: APK dosyaları zaten içinde taşır, service worker
-// gerekmez. app.file.js de yalnızca file:// açılışı içindir.
-import fs from 'node:fs';
+// Sürüm FLAVOR ortam değişkeniyle seçilir: play (varsayılan) ya da arkadas.
+// sw.js ve manifest alınmaz: APK dosyaları zaten içinde taşır. app.file.js de
+// yalnızca file:// açılışı içindir.
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildWeb } from './flavor.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const www = path.join(root, 'www');
-
-fs.rmSync(www, { recursive: true, force: true });
-for (const entry of ['index.html', 'privacy.html', 'css', 'fonts', 'icons', 'js', 'assets']) {
-  fs.cpSync(path.join(root, entry), path.join(www, entry), {
-    recursive: true,
-    filter: (source) => !source.endsWith('app.file.js') && !source.endsWith('.txt'),
-  });
-}
-// Kaynakta manifest bağlantısı var; APK içinde dosya olmadığından çıkarılır
-const html = path.join(www, 'index.html');
-fs.writeFileSync(html, fs.readFileSync(html, 'utf8').replace(/<link rel="manifest"[^>]*>\r?\n/, ''));
+const flavor = process.env.FLAVOR || 'play';
+await buildWeb(flavor, path.join(root, 'www'));
+console.log(`www hazır: ${flavor}`);

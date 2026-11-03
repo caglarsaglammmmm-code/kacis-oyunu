@@ -1,0 +1,31 @@
+BAŞLIK:
+Drift Lab: Polisten Kaç
+
+KISA AÇIKLAMA:
+Dar sokaklarda drift at, polisten kaç, garajını büyüt. İnternetsiz oynanır.
+
+TANITIM:
+Yeni: Konya'dan ilham alan yerler, dev kolej kampüsü ve 6 dil desteği!
+
+UZUN AÇIKLAMA:
+Drift Lab'e hoş geldin: araba kendi gider, sen yalnızca yön verirsin.
+
+Ekranın sağına ya da soluna bas, köşeyi kır, lastikleri yak. Polisler peşinde, sokaklar dar, trafik yoğun. Ne kadar uzun dayanırsan o kadar çok skor ve coin toplarsın.
+
+NELER VAR
+• Üç kontrol seçeneği: Sağ / Sol dokunuş, Direksiyon ya da Joystick
+• Yüksek hızda gerçek drift hissi
+• Sonsuz şehir: mahalleler, çarşılar, dönel kavşaklar, otoban, sahil, orman, çöl
+• Konya'dan ilham alan yerler: yeşil kubbeli müze, tepe üstünde Selçuklu camisi, tramvay durakları, bedesten, Meram bağları
+• Haritanın en büyük binası: turuncu kampüsüyle Mandalina Koleji
+• Zamanla artan polis baskısı: kovalayan, iki yandan sıkıştıran, önden gelen ve yolu kapatan polisler, barikatlar, SWAT ve tanklar
+• Belirli bir süreden sonra sürpriz uzaylı işgali
+• On özgün araç, her biri dört boya seçeneğiyle
+• Patlama, Görünmezlik, Can ve Dev Mod güçleri
+• Gece-gündüz döngüsü, ışıklı tabelalar, canlı sokaklar
+• Türkçe, İngilizce, Japonca, Çince, İspanyolca ve Almanca
+• Yatay ve dikey ekranda oynanır
+
+İnternet gerekmez. Reklam yok, hesap yok, veri toplama yok.
+
+Oyundaki marka, mağaza, okul ve araç adları kurgudur. Tarihi yapılar genel ve stilize biçimde çizilmiştir.

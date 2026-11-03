@@ -76,3 +76,18 @@ Tüm denge değerleri tek dosyada: `js/config.js`. Tüm araç hızları tek yerd
 Dosyalar değişince `sw.js` içindeki `CACHE` sürümünü artırın.
 
 Fontlar SIL Open Font License ile dağıtılır; lisanslar `fonts/` içindedir.
+
+## İki sürüm, tek kod
+
+- `play` (varsayılan): Drift Lab, Play Store. Yalnız uydurma marka, okul ve kurum adları.
+- `arkadas`: Penci Zorn, arkadaşlara APK ve Pages kökü. Gerçek adlar.
+
+Adlar `names/tablo.mjs` içinde, her yer için `gercek` ve `uydurma` sütunuyla durur. Bu dosya oyuna kopyalanmaz:
+`tools/names.mjs` seçilen sütunla `js/names.js` üretir (depodaki kopya Play sürümüdür).
+
+- Yerel deneme: `FLAVOR=arkadas PORT=8082 node tools/serve.mjs`
+- Web derlemesi: `node tools/flavor.mjs <play|arkadas> <klasör> --pages`
+- Android: `npm run android:build` (iki sürüm; tek sürüm için `npm run android:build -- play`)
+- Play paketinde gerçek ad kalmadığının kanıtı: `node tools/play-clean.mjs --kontrol`
+
+Diller: `js/i18n/` (tr, en, ja, zh, es, de). Mağaza metinleri: `gorseller/play-store/metinler/`.

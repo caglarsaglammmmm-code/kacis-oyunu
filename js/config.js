@@ -1,6 +1,8 @@
 // Oyunun TÜM ayarları burada. Denge değiştirmek için yalnızca bu dosyayı düzenleyin,
 // ardından `npm run bundle` çalıştırın (file:// kopyası için).
 
+import { NAMES } from './names.js';
+
 export const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 6, SHALLOW: 7, FIELD: 8, ALLEY: 9, TRACK: 10 };
 
 // Bina stilleri. 0-6 şehir çatıları, sonrası js/art.js içinde özel çizilir
@@ -9,12 +11,15 @@ export const BUILD = {
   FIRETOWER: 14, ADOBE: 15, MESA: 16, BARN: 17, SILO: 18, WINDMILL: 19, WATERTOWER: 20, GAS: 21,
   APARTMENT: 22, MARKET: 23, KOLEJ: 24, BAZAAR: 25, CHAIN: 26, BANK: 27, RESIDENCE: 28, OFFICE: 29, HOTEL: 30,
   HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CAFE: 40, SHOP: 41, SKYSCRAPER: 42, RUIN: 43, SITEWORK: 44, FACTORY: 45,
+  // Özel yerler (js/landmarks.js çizer)
+  SERVIS: 46, MUZE: 47, SELCUK_CAMI: 48, KONGRE: 49, KULE: 50, AVM: 51, BEDESTEN: 52, BAGEVI: 53, OZEL_OKUL: 54, ANIT: 55,
 };
 
 export const CONFIG = {
-  name: 'Drift Lab',
-  version: '13.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v13.0.0/DriftLab.apk',
+  name: NAMES.oyun,
+  version: '14.0.0',
+  // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v14.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -53,7 +58,17 @@ export const CONFIG = {
       harabe: { alleys: [4, 3], maxB: 5, wide: 0.5, detached: 0.4, stub: 0.4 },
       sanayi: { alleys: [3, 2], maxB: 8, wide: 0.8, detached: 0.3, stub: 0.2 },
     },
-    sistemRing: [4, 9],
+    sistemRing: [4, 9], // Kolej: başlangıçtan bu kadar chunk uzakta
+    // Tek seferlik özel yerler: her biri kendi chunk'ında, başlangıçtan ring kadar uzakta, birbirinden ayrı.
+    // Adlar isim tablosundadır (names/tablo.mjs)
+    landmarks: [
+      { id: 'mevlana', ring: [2, 5] }, { id: 'alaaddin', ring: [3, 6] }, { id: 'zafer', ring: [2, 6] },
+      { id: 'serife', ring: [2, 5] }, { id: 'bedesten', ring: [3, 7] }, { id: 'kongre', ring: [4, 8] },
+      { id: 'kule', ring: [4, 8] }, { id: 'kulturpark', ring: [4, 9] }, { id: 'ted', ring: [5, 10] },
+      { id: 'gundogdu', ring: [5, 10] }, { id: 'meram', ring: [6, 11] },
+    ],
+    // Yüksek özel yapıların yükseklik payı (sıradan binalar en çok tall.height[1])
+    landmarkHeight: { kolej: 0.46, kule: 0.95 },
     // Bina yüksekliği: share yüksek bina oranı, height kameraya uzanma payı
     // ruin ve work: sıradan mahallede harabe ve inşaat, fire: yangın olasılığı
     tall: { share: 0.62, height: [0.16, 0.42], maxPerChunk: 16 },
@@ -65,10 +80,10 @@ export const CONFIG = {
     // Sokak geometrisi. setback: binaların sokağa bakan cephesi karodan bu kadar içeride, yani bir karoluk
     // sokak 40 + 2 * setback genişliğindedir. cornerRadius: açık bina köşelerinin çarpışma yuvarlaması
     street: { setback: 7, cornerRadius: 16 },
-    roadTones: ['#3f4249', '#5b5f66', '#a4a7a9'], // Tek Kolej Koleji başlangıçtan bu kadar chunk uzakta
+    roadTones: ['#3f4249', '#5b5f66', '#a4a7a9'],
     bigSites: [
-      { name: 'Yeşilvadi Sitesi', color: '#7fa86b', ring: [5, 11], layout: 0 },
-      { name: 'Mavi Orman Sitesi', color: '#c98a5a', ring: [8, 15], layout: 1 },
+      { name: NAMES.siteler.buyuk1, color: '#7fa86b', ring: [5, 11], layout: 0 },
+      { name: NAMES.siteler.buyuk2, color: '#c98a5a', ring: [8, 15], layout: 1 },
     ],
   },
 
@@ -137,16 +152,16 @@ export const CONFIG = {
   // Sıra önemli: pahalılaştıkça hız, kayma ve dayanıklılık artar.
   // engine: motor sesi. kind ses karakteri (js/audio.js ENGINE_KINDS), cyl silindir, idle-red devir aralığı, gears vites
   cars: [
-    { id: 'atmaca', paints: [{ name: 'Mahalle Beji', color: '#d9d4c7', finish: 'gloss' }, { name: 'Şarap Kırmızı', color: '#8e1b24', finish: 'metal' }, { name: 'Mat Asker Yeşili', color: '#4d5a3a', finish: 'matte' }, { name: 'Çift Ton Krem-Bordo', color: '#e6dcc2', finish: 'gloss', roof: '#6d1620' }], finish: 'gloss', name: 'Atmaca', cost: 0, desc: 'Her mahallenin emektarı', shape: 'atmaca', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { kind: 'old', cyl: 4, idle: 800, red: 5000, gears: 4, gain: 1 } },
-    { id: 'motor', paints: [{ name: 'Yarış Kırmızı', color: '#e8352e', finish: 'gloss', accent: '#ffe14d' }, { name: 'Elektrik Mavi', color: '#0a7cff', finish: 'metal', accent: '#ffffff' }, { name: 'Mat Siyah', color: '#1b1d22', finish: 'matte', accent: '#ff7a00' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl', accent: '#e8352e' }], finish: 'gloss', name: 'Motosiklet', cost: 100, desc: 'Dar sokakların kralı', shape: 'moto', maxSpeed: 445, accel: 610, turnRate: 3.3, grip: 4.5, driftGrip: 1.1, durability: 1.05, mass: 0.9, len: 36, wid: 16, color: '#e8352e', accent: '#ffe14d', engine: { kind: 'moto', cyl: 4, idle: 1500, red: 12500, gears: 6, gain: 0.8 } },
-    { id: 'granit', paints: [{ name: 'Gece Mavisi', color: '#1f3a68', finish: 'metal' }, { name: 'Kor Turuncu', color: '#e8551e', finish: 'metal' }, { name: 'Mat Gümüş', color: '#a7aeb7', finish: 'matte' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl' }], finish: 'metal', name: 'Granit SUV', cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'granit', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { kind: 'diesel', cyl: 4, idle: 750, red: 4300, gears: 6, gain: 1 } },
-    { id: 'elektra', paints: [{ name: 'Anadolu Kırmızı', color: '#b3122a', finish: 'metal' }, { name: 'Fırtına Grisi', color: '#4a5560', finish: 'metal' }, { name: 'Mat Toprak', color: '#8a6a4a', finish: 'matte' }, { name: 'Buz Mavisi', color: '#bcd9e6', finish: 'pearl' }], finish: 'metal', name: 'Elektra X1', cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'elektra', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { kind: 'ev', cyl: 6, idle: 0, red: 24000, gears: 1, gain: 0.7 } },
-    { id: 'simsek', paints: [{ name: 'Mat Siyah Sarı Şerit', color: '#111318', finish: 'matte', accent: '#ffd23f' }, { name: 'Ateş Turuncu', color: '#ff5a12', finish: 'gloss', accent: '#111318' }, { name: 'Neon Yeşil', color: '#39d353', finish: 'gloss', accent: '#111318' }, { name: 'Mor Metalik', color: '#6a2bd9', finish: 'metal', accent: '#21d4fd' }], finish: 'matte', name: 'Şimşek', cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'simsek', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { kind: 'turbo', cyl: 4, idle: 950, red: 7400, gears: 5, gain: 1 } },
-    { id: 'cinar', paints: [{ name: 'Efsane Turuncu', color: '#e8782a', finish: 'gloss', accent: '#f6efe0' }, { name: 'Bebek Mavisi', color: '#7ec6e8', finish: 'gloss', accent: '#f6efe0' }, { name: 'Çift Ton Krem-Vişne', color: '#ead9b0', finish: 'gloss', roof: '#8a1f2f' }, { name: 'Mat Zeytin', color: '#6b6b3a', finish: 'matte', accent: '#f6efe0' }], finish: 'gloss', name: 'Çınar A', cost: 680, desc: 'Klasik efsane', shape: 'cinar', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { kind: 'old', cyl: 3, idle: 700, red: 4600, gears: 4, gain: 1.05 } },
-    { id: 'efe', paints: [{ name: 'Boğaz Mavisi', color: '#2f6fb0', finish: 'gloss' }, { name: 'Haki', color: '#75805a', finish: 'matte' }, { name: 'Gümüş', color: '#b9c1ca', finish: 'metal' }, { name: 'Çift Ton Bej-Kahve', color: '#dcc9a4', finish: 'gloss', roof: '#5c3a22' }], finish: 'gloss', name: 'Efe 131', cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'efe', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { kind: 'old', cyl: 6, idle: 650, red: 5200, gears: 4, gain: 1 } },
-    { id: 'marmara', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: 'Marmara S', cost: 1200, desc: 'Sade sedan, sürprizli', shape: 'marmara', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { kind: 'inline', cyl: 4, idle: 800, red: 6400, gears: 5, gain: 1 } },
-    { id: 'liva', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: 'Liva', cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'liva', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { kind: 'thin', cyl: 3, idle: 950, red: 7200, gears: 5, gain: 0.95 } },
-    { id: 'bozkir', paints: [{ name: 'Kanyon Turuncusu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: 'Bozkır 4x4', cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'bozkir', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { kind: 'v8', cyl: 8, idle: 620, red: 5800, gears: 5, gain: 1.15 } },
+    { id: 'atmaca', paints: [{ name: 'Mahalle Beji', color: '#d9d4c7', finish: 'gloss' }, { name: 'Şarap Kırmızı', color: '#8e1b24', finish: 'metal' }, { name: 'Mat Asker Yeşili', color: '#4d5a3a', finish: 'matte' }, { name: 'Çift Ton Krem-Bordo', color: '#e6dcc2', finish: 'gloss', roof: '#6d1620' }], finish: 'gloss', name: NAMES.arabalar.atmaca, cost: 0, desc: 'Her mahallenin emektarı', shape: 'atmaca', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { kind: 'old', cyl: 4, idle: 800, red: 5000, gears: 4, gain: 1 } },
+    { id: 'motor', paints: [{ name: 'Yarış Kırmızı', color: '#e8352e', finish: 'gloss', accent: '#ffe14d' }, { name: 'Elektrik Mavi', color: '#0a7cff', finish: 'metal', accent: '#ffffff' }, { name: 'Mat Siyah', color: '#1b1d22', finish: 'matte', accent: '#ff7a00' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl', accent: '#e8352e' }], finish: 'gloss', name: NAMES.arabalar.motor, cost: 100, desc: 'Dar sokakların kralı', shape: 'moto', maxSpeed: 445, accel: 610, turnRate: 3.3, grip: 4.5, driftGrip: 1.1, durability: 1.05, mass: 0.9, len: 36, wid: 16, color: '#e8352e', accent: '#ffe14d', engine: { kind: 'moto', cyl: 4, idle: 1500, red: 12500, gears: 6, gain: 0.8 } },
+    { id: 'granit', paints: [{ name: 'Gece Mavisi', color: '#1f3a68', finish: 'metal' }, { name: 'Kor Turuncu', color: '#e8551e', finish: 'metal' }, { name: 'Mat Gümüş', color: '#a7aeb7', finish: 'matte' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl' }], finish: 'metal', name: NAMES.arabalar.granit, cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'granit', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { kind: 'diesel', cyl: 4, idle: 750, red: 4300, gears: 6, gain: 1 } },
+    { id: 'elektra', paints: [{ name: 'Anadolu Kırmızı', color: '#b3122a', finish: 'metal' }, { name: 'Fırtına Grisi', color: '#4a5560', finish: 'metal' }, { name: 'Mat Toprak', color: '#8a6a4a', finish: 'matte' }, { name: 'Buz Mavisi', color: '#bcd9e6', finish: 'pearl' }], finish: 'metal', name: NAMES.arabalar.elektra, cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'elektra', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { kind: 'ev', cyl: 6, idle: 0, red: 24000, gears: 1, gain: 0.7 } },
+    { id: 'simsek', paints: [{ name: 'Mat Siyah Sarı Şerit', color: '#111318', finish: 'matte', accent: '#ffd23f' }, { name: 'Ateş Turuncu', color: '#ff5a12', finish: 'gloss', accent: '#111318' }, { name: 'Neon Yeşil', color: '#39d353', finish: 'gloss', accent: '#111318' }, { name: 'Mor Metalik', color: '#6a2bd9', finish: 'metal', accent: '#21d4fd' }], finish: 'matte', name: NAMES.arabalar.simsek, cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'simsek', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { kind: 'turbo', cyl: 4, idle: 950, red: 7400, gears: 5, gain: 1 } },
+    { id: 'cinar', paints: [{ name: 'Efsane Turuncu', color: '#e8782a', finish: 'gloss', accent: '#f6efe0' }, { name: 'Bebek Mavisi', color: '#7ec6e8', finish: 'gloss', accent: '#f6efe0' }, { name: 'Çift Ton Krem-Vişne', color: '#ead9b0', finish: 'gloss', roof: '#8a1f2f' }, { name: 'Mat Zeytin', color: '#6b6b3a', finish: 'matte', accent: '#f6efe0' }], finish: 'gloss', name: NAMES.arabalar.cinar, cost: 680, desc: 'Klasik efsane', shape: 'cinar', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { kind: 'old', cyl: 3, idle: 700, red: 4600, gears: 4, gain: 1.05 } },
+    { id: 'efe', paints: [{ name: 'Boğaz Mavisi', color: '#2f6fb0', finish: 'gloss' }, { name: 'Haki', color: '#75805a', finish: 'matte' }, { name: 'Gümüş', color: '#b9c1ca', finish: 'metal' }, { name: 'Çift Ton Bej-Kahve', color: '#dcc9a4', finish: 'gloss', roof: '#5c3a22' }], finish: 'gloss', name: NAMES.arabalar.efe, cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'efe', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { kind: 'old', cyl: 6, idle: 650, red: 5200, gears: 4, gain: 1 } },
+    { id: 'marmara', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: NAMES.arabalar.marmara, cost: 1200, desc: 'Sade sedan, sürprizli', shape: 'marmara', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { kind: 'inline', cyl: 4, idle: 800, red: 6400, gears: 5, gain: 1 } },
+    { id: 'liva', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: NAMES.arabalar.liva, cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'liva', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { kind: 'thin', cyl: 3, idle: 950, red: 7200, gears: 5, gain: 0.95 } },
+    { id: 'bozkir', paints: [{ name: 'Kanyon Turuncusu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: NAMES.arabalar.bozkir, cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'bozkir', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { kind: 'v8', cyl: 8, idle: 620, red: 5800, gears: 5, gain: 1.15 } },
   ],
 
   damage: {
@@ -179,9 +194,7 @@ export const CONFIG = {
     swatAt: 50,
     advancedAt: 200,
     tanksAt: 280,
-    alerts: { 50: 'SWAT geliyor!', 200: 'Ağır takviye!', 280: 'TANKLAR!' },
     aliensAt: 225, // 200-250 sn arası: uzaylı işgali başlar. Oyun burada gerçekten zorlaşır
-    aliensAlert: 'UZAYLILAR GELDİ!',
     firstSpawnAt: 5,
     // [saniye, değer] noktaları arasında doğrusal artar, yani her saniye biraz zorlaşır.
     // Polis sayısı, hızı ve davranışları aşağıdaki pursuit bölümündedir
@@ -213,7 +226,7 @@ export const CONFIG = {
     blockShare: [[90, 0], [120, 0.1], [240, 0.16]], // Yolu kapatan
     barricadeCurve: [[38, 22], [120, 16], [200, 12], [280, 9]],
     // Arananlık: oyuncunun yaptıkları süreye saniye olarak eklenir, durulunca söner
-    heat: { kill: 5, nearMiss: 1, prop: 0.2, max: 60, decay: 0.3 },
+    heat: { kill: 5, nearMiss: 1, prop: 0.2, max: 60, decay: 0.3, from: 45 }, // from: bu saniyeden önce etkisiz, başlangıç kolay kalır
     // Adalet: oyuncunun çevresine aynı anda bu kadar polis girer, fazlası geride bekler
     closeCurve: [[0, 2], [120, 3], [240, 4], [360, 5]],
     closeR: 260,
@@ -240,17 +253,16 @@ export const CONFIG = {
     maxSirens: 3, // Aynı anda çalan siren sesi, en yakınlar
   },
 
-  // Gizli sıra. gap: basışlar arası en uzun süre, maxHold: bunu aşan basılı tutma normal sürüş sayılır
+  // Gizli sıra. gap: her basış bir öncekinden bu süreden KISA sürede yapılmalı; gap ve üstü sırayı
+  // baştan başlatır (1,9 sn geçerli, 2,0 sn geçersiz). maxHold: bunu aşan basılı tutma normal sürüş sayılır
   // ve sırayı bozar. wheelOn, stickOn: eksen eşiği, axisBack: yeniden saymak için merkeze dönüş eşiği
   cheat: {
     sequence: ['L', 'L', 'R', 'R', 'L', 'R', 'L', 'R'],
-    gap: 1.5,
-    maxHold: 0.7,
+    gap: 2,
+    maxHold: 0.45, // Kod girişi kısa dokunuşlarla yapılır; sürüşteki basılı tutmalar sırayı bozar
     wheelOn: 0.45,
     stickOn: 0.6,
     axisBack: 0.2,
-    messageOn: 'Aferin, hile kodunu buldun la!',
-    messageOff: 'Hile kapatıldı',
   },
 
   // speed: oyuncunun son hızına oran. HER ZAMAN 1'in altında kalmalı (test eder).
@@ -421,11 +433,12 @@ export const CONFIG = {
 
   // Tabela adları. Tüm adlar uydurmadır
   signs: {
-    bigshops: ['Merkez Çarşı İş Hanı', 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
-    hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', 'Sahil Palas Oteli', 'Otel Saray', 'Mavi Otel'],
-    shops: ['Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Piksel Oyun Salonu', 'Bit Bilgisayar', 'Telefoncu', 'Nane Döner', 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Çınar Kafe'],
-    chains: { 'Pazarcık Market': '#3f8f5b', Ucuzlar: '#7b3fa0', 'Sepet Market': '#1f9e9e', 'Yıldız Mağazaları': '#c23b6b', 'Dörtyol Market': '#6a7f2a', 'Teknoloji Durağı': '#2b3a67', 'Yapı Dünyası': '#8a5a2b', 'Köşe Bakkal': '#b5651d' },
-    banks: { 'Yıldız Bankası': '#3b3f8f', 'Anadolu Tasarruf': '#8a6d1f', 'Bereket Bankası': '#6b8e23', 'Güven Kredi': '#5b2a86', 'Marmara Yatırım': '#0f6e84' },
+    bigshops: [NAMES.tekil.ishani, 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
+    hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', NAMES.tekil.otel, 'Otel Saray', 'Mavi Otel'],
+    shops: [...NAMES.konya.firinlar, 'Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Piksel Oyun Salonu', 'Bit Bilgisayar', 'Telefoncu', NAMES.tekil.doner, 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Çınar Kafe'],
+    chains: Object.fromEntries(NAMES.zincirler.map((c) => [c.ad, c.renk])),
+    chainIds: Object.fromEntries(NAMES.zincirler.map((c) => [c.ad, c.id])),
+    banks: Object.fromEntries(NAMES.bankalar.map((b) => [b.ad, b.renk])),
     sites: ['Yeşil Tepe Sitesi', 'Boğaz Evleri', 'Mavi Konak Sitesi', 'Çamlık Sitesi', 'Güneş Sitesi', 'Lale Evleri', 'Marmara Konutları', 'Park Evleri'],
     // Dükkân önü: indirim yazıları ve görülme olasılıkları
     promos: ['%30 İNDİRİM', 'BUGÜNE ÖZEL', '%50 İNDİRİM', '2 AL 1 ÖDE', 'KAMPANYA', 'FIRSAT!', 'YENİ AÇILDI', 'SON GÜN'],

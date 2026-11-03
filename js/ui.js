@@ -2,6 +2,7 @@
 import { paintPixelCar } from './pixelcars.js';
 import { CONFIG, MAX_STARS } from './config.js';
 import { paintPower, POWER_LOOK } from './art.js';
+import { tx, txNum, getLang, LANGS } from './i18n/index.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -10,8 +11,19 @@ export function formatTime(t) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
-// Intl nesnesi tek kez kurulur; toLocaleString her çağrıda pahalıdır
-const NUM = new Intl.NumberFormat('tr-TR');
+// Uzun yazı kutusuna sığmazsa yazı küçülür (özellikle Almanca); tek satırlık metinler
+const FIT = '.start-txt, .tile span, .menu .btn, .panel .btn, .seg button, .screen header h2, #over-title, .car-tag b, .car-tag small, #ctl-rev, .summary span, .big-score span, #hint b, #hint span, .toggle > span, .volume > span, .seg-row > span, #cheat-badge, #garage-action';
+function fitOne(el) {
+  el.style.fontSize = '';
+  if (!el.offsetParent || !el.clientWidth) return;
+  const base = parseFloat(getComputedStyle(el).fontSize);
+  const min = Math.max(9, Math.round(base * 0.55));
+  let s = base;
+  while (s > min && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 2)) {
+    s -= 1;
+    el.style.fontSize = `${s}px`;
+  }
+}
 
 const SCREENS = ['menu', 'garage', 'settings', 'howto', 'over', 'pause'];
 
@@ -25,7 +37,12 @@ export class UI {
     this.buildStars();
     this.buildPowers();
     this.syncSettings();
-    this.refreshMenu();
+    this.applyLang();
+    // Piksel yazı tipi geç yüklenir: yüklenince yazılar yeniden sığdırılır
+    if (document.fonts) {
+      document.fonts.addEventListener('loadingdone', () => this.fit());
+      document.fonts.ready.then(() => this.fit());
+    }
   }
 
   bind() {
@@ -86,7 +103,6 @@ export class UI {
     $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
     $('dev-start').addEventListener('change', (e) => { d.dev.startTime = Number(e.target.value); this.storage.save(); });
     // Gizli geliştirici bölümü: sürüm yazısına 7 kez dokun
-    $('version').textContent = `Sürüm ${CONFIG.version}`;
     $('version').addEventListener('click', () => {
       if (++this.devTaps >= 7) $('dev-panel').hidden = false;
     });
@@ -115,11 +131,47 @@ export class UI {
   }
 
   intro() {
-    $('maker').textContent = 'Çağlar Sağlam tarafından yapıldı';
+    $('maker').textContent = tx('menu.maker');
   }
 
   show(name) {
     for (const s of SCREENS) $(s).hidden = s !== name;
+    if (name) this.fit($(name));
+  }
+
+  // Görünen ekrandaki yazılar kutularına sığdırılır
+  fit(root = document) {
+    for (const el of root.querySelectorAll(FIT)) fitOne(el);
+  }
+
+  // Dil değişince oyun yeniden başlamadan bütün yazılar yenilenir
+  applyLang() {
+    const code = getLang();
+    // Sayı biçimleri menüdeyken kurulur: oyunun ilk karesinde kurulum takılma yapmasın
+    txNum(0); txNum(0, 1);
+    document.documentElement.lang = code === 'zh' ? 'zh-CN' : code;
+    for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = tx(el.dataset.i18n);
+    for (const el of document.querySelectorAll('[data-i18n-label]')) el.setAttribute('aria-label', tx(`aria.${el.dataset.i18nLabel}`));
+    // BAŞLA: harfler sırayla beyaz ve turuncu
+    const st = $('start-txt');
+    st.textContent = '';
+    for (const ch of tx('start')) { const i = document.createElement('i'); i.textContent = ch; st.appendChild(i); }
+    $('version').textContent = tx('settings.version', { v: CONFIG.version });
+    const tips = $('howto-tips');
+    tips.textContent = '';
+    for (const line of tx('howto.tips')) { const li = document.createElement('li'); li.textContent = line; tips.appendChild(li); }
+    for (const b of document.querySelectorAll('.seg[data-set=lang] button')) b.textContent = LANGS[b.dataset.v];
+    $('cheat-badge').textContent = tx('cheat.badge');
+    $('ctl-rev').textContent = tx('hint.rev');
+    this.buildHowtoPowers();
+    this.refreshMenu();
+    this.intro();
+    if (!$('garage').hidden) this.renderGarage();
+    if (!$('hint').hidden) this.showHint(true);
+    if (!$('over').hidden && this.lastResult) this.over(...this.lastResult);
+    this.last.score = '';
+    this.last.combo = '';
+    this.fit();
   }
 
   hideAll() {
@@ -133,10 +185,16 @@ export class UI {
   refreshMenu() {
     const d = this.storage.data;
     $('menu-coins').textContent = d.coins;
-    $('menu-best').textContent = d.bestScore ? `En iyi: ${d.bestScore.toLocaleString('tr-TR')} puan · ${formatTime(d.bestTime)}` : 'İlk kaçışın seni bekliyor';
+    $('menu-best').textContent = d.bestScore ? tx('menu.best', { score: txNum(d.bestScore), time: formatTime(d.bestTime) }) : tx('menu.first');
     const car = this.storage.selectedCar();
     $('menu-car-name').textContent = car.name;
-    $('menu-car-paint').textContent = (car.paints[this.storage.paintIndex(car.id)] || car.paints[0]).name;
+    $('menu-car-paint').textContent = this.paintName(car, this.storage.paintIndex(car.id));
+    if (!$('menu').hidden) this.fit($('menu'));
+  }
+
+  paintName(car, i) {
+    const names = tx(`cars.${car.id}.paints`);
+    return (Array.isArray(names) && names[i]) || (car.paints[i] || car.paints[0]).name;
   }
 
   splash(done) {
@@ -193,14 +251,18 @@ export class UI {
       box.appendChild(el);
       this.pw[kind] = { el, t, fill, last: '' };
     }
+  }
+
+  buildHowtoPowers() {
     const list = $('howto-powers');
-    const info = { blast: 'Yakındaki bütün arabalar patlar', ghost: `${CONFIG.powers.duration} sn polis seni göremez`, heal: 'Hasarı onarır, ateşi söndürür', giant: `${CONFIG.powers.duration} sn devleşirsin, hasar almazsın` };
-    for (const kind of Object.keys(info)) {
+    list.textContent = '';
+    const n = CONFIG.powers.duration;
+    for (const kind of ['blast', 'ghost', 'heal', 'giant']) {
       const row = document.createElement('div');
       const name = document.createElement('b');
-      name.textContent = POWER_LOOK[kind].name;
+      name.textContent = tx(`power.${kind}`);
       const d = document.createElement('span');
-      d.textContent = info[kind];
+      d.textContent = tx(`power.${kind}Info`, { n });
       const text = document.createElement('p');
       text.append(name, d);
       row.append(this.powerCanvas(kind, 20), text);
@@ -218,11 +280,11 @@ export class UI {
   }
 
   powerToast(kind) {
-    this.toast(POWER_LOOK[kind].name, POWER_LOOK[kind].color);
+    this.toast(tx(`power.${kind}`), POWER_LOOK[kind].color);
   }
 
   alert(stage) {
-    const text = CONFIG.difficulty.alerts[[0, CONFIG.difficulty.swatAt, CONFIG.difficulty.advancedAt, CONFIG.difficulty.tanksAt][stage]];
+    const text = tx(`alert.${['', 'swat', 'heavy', 'tanks'][stage] || 'tanks'}`);
     const el = $('alert');
     el.textContent = text;
     el.classList.remove('run');
@@ -232,7 +294,7 @@ export class UI {
 
   cheatMessage(on) {
     const el = $('cheat-msg');
-    el.firstElementChild.textContent = on ? CONFIG.cheat.messageOn : CONFIG.cheat.messageOff;
+    el.firstElementChild.textContent = tx(on ? 'cheat.on' : 'cheat.off');
     el.classList.remove('run');
     void el.offsetWidth;
     el.classList.add('run');
@@ -240,7 +302,7 @@ export class UI {
 
   alienAlert() {
     const el = $('alert');
-    el.textContent = CONFIG.difficulty.aliensAlert;
+    el.textContent = tx('alert.aliens');
     el.classList.remove('run');
     void el.offsetWidth;
     el.classList.add('run');
@@ -249,7 +311,7 @@ export class UI {
   showHint(on) {
     if (on) {
       const m = this.storage.data.settings.control;
-      const T = { zones: ['Sola bas', 'sola drift', 'İkisine bas', 'geri vites', 'Sağa bas', 'sağa drift'], wheel: ['GERİ tut', 'geri vites', 'Direksiyon', 'sağ altta', 'Çevir', 'sağa sola döner'], stick: ['Sol yarı', 'bas ve kaydır', 'Joystick', 'parmağının altında', 'GERİ tut', 'geri vites'] }[m] || [];
+      const T = tx(`hint.${['zones', 'wheel', 'stick'].includes(m) ? m : 'zones'}`);
       ['hint-l', 'hint-ls', 'hint-m', 'hint-ms', 'hint-r', 'hint-rs'].forEach((id, i) => { $(id).textContent = T[i]; });
     }
     $('hint').hidden = !on;
@@ -266,7 +328,7 @@ export class UI {
     const time = formatTime(g.time);
     if (time !== l.time) { l.time = time; $('hud-time').textContent = time; }
     const score = Math.floor(g.score);
-    if (score !== l.score) { l.score = score; $('hud-score').textContent = NUM.format(score); }
+    if (score !== l.score) { l.score = score; $('hud-score').textContent = txNum(score); }
     if (g.coins !== l.coins) { l.coins = g.coins; $('hud-coins').textContent = g.coins; }
     const health = Math.max(0, Math.round(100 - g.damage));
     if (health !== l.health) {
@@ -289,7 +351,7 @@ export class UI {
     }
     this.powerChip('ghost', g.ghostT);
     this.powerChip('giant', g.giantT);
-    const combo = g.combo >= 1.25 ? `x${g.combo.toFixed(1).replace('.', ',')}` : '';
+    const combo = g.combo >= 1.25 ? `x${txNum(g.combo, 1)}` : '';
     if (combo !== l.combo) { l.combo = combo; $('hud-combo').textContent = combo; }
   }
 
@@ -305,16 +367,17 @@ export class UI {
 
   over(result, record) {
     const d = this.storage.data;
-    $('over-title').textContent = record.newScore ? 'YENİ REKOR!' : result.cause === 'water' ? 'BATTIN!' : 'YAKALANDIN!';
+    $('over-title').textContent = tx(record.newScore ? 'over.record' : result.cause === 'water' ? 'over.sunk' : 'over.caught');
     $('over-title').classList.toggle('record', record.newScore);
-    $('over-score').textContent = result.score.toLocaleString('tr-TR');
+    $('over-score').textContent = txNum(result.score);
     $('over-time').textContent = formatTime(result.time);
     $('over-coins').textContent = `+${result.coins}`;
     $('over-kills').textContent = result.kills;
     $('over-broken').textContent = result.broken;
     $('over-near').textContent = result.nearMisses;
-    $('over-drift').textContent = `${result.driftTime.toFixed(1).replace('.', ',')} sn`;
-    $('over-best').textContent = `En iyi skor: ${d.bestScore.toLocaleString('tr-TR')} · En uzun süre: ${formatTime(d.bestTime)}`;
+    $('over-drift').textContent = tx('over.seconds', { n: txNum(result.driftTime, 1) });
+    $('over-best').textContent = tx('over.best', { score: txNum(d.bestScore), time: formatTime(d.bestTime) });
+    this.lastResult = [result, record];
     this.show('over');
     // Hâlâ basılı parmak yanlışlıkla düğmeye basmasın
     const btns = $('over-actions');
@@ -339,8 +402,8 @@ export class UI {
       b.className = `swatch ${p.finish}${i === paintI ? ' on' : ''}`;
       b.style.setProperty('--c', p.color);
       b.style.setProperty('--r', p.roof || p.color);
-      b.title = p.name;
-      b.setAttribute('aria-label', p.name);
+      b.title = this.paintName(car, i);
+      b.setAttribute('aria-label', b.title);
       b.addEventListener('click', () => {
         this.actions.tap();
         this.gp = i;
@@ -349,9 +412,10 @@ export class UI {
       });
       swatch.appendChild(b);
     });
-    $('garage-paint-name').textContent = `${car.paints[paintI].name} · ${{ gloss: 'Parlak', metal: 'Metalik', matte: 'Mat', pearl: 'İnci' }[car.paints[paintI].finish]}${car.paints[paintI].roof ? ' · Çift ton' : ''}`;
+    const pt = car.paints[paintI];
+    $('garage-paint-name').textContent = `${this.paintName(car, paintI)} · ${tx(`garage.finish.${pt.finish}`)}${pt.roof ? ` · ${tx('garage.twoTone')}` : ''}`;
     $('garage-name').textContent = car.name;
-    $('garage-desc').textContent = car.desc;
+    $('garage-desc').textContent = tx(`cars.${car.id}.desc`);
 
     const stats = $('garage-stats');
     stats.textContent = '';
@@ -373,17 +437,17 @@ export class UI {
     };
     const norm = (v, a, b) => (v - a) / (b - a);
     const range = (key) => { const v = cars.map((c) => c[key]); return [Math.min(...v), Math.max(...v)]; };
-    stat('Hız', norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
-    stat('İvme', norm(car.accel, ...range('accel')), String(Math.round(car.accel / 7)));
-    stat('Yol tutuş', norm(car.grip, ...range('grip')), String(Math.round(car.grip * 20)));
-    stat('Dayanıklılık', norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
+    stat(tx('garage.speed'), norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
+    stat(tx('garage.accel'), norm(car.accel, ...range('accel')), String(Math.round(car.accel / 7)));
+    stat(tx('garage.grip'), norm(car.grip, ...range('grip')), String(Math.round(car.grip * 20)));
+    stat(tx('garage.durability'), norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
 
     const act = $('garage-action');
     act.classList.toggle('buy', !owned);
-    if (selected) { act.textContent = 'Seçili'; act.disabled = true; }
-    else if (owned) { act.textContent = 'Seç'; act.disabled = false; }
+    if (selected) { act.textContent = tx('garage.selected'); act.disabled = true; }
+    else if (owned) { act.textContent = tx('garage.select'); act.disabled = false; }
     else {
-      act.textContent = d.coins >= car.cost ? `Satın al · ${car.cost}` : `${car.cost} coin`;
+      act.textContent = tx(d.coins >= car.cost ? 'garage.buy' : 'garage.need', { cost: txNum(car.cost) });
       act.disabled = d.coins < car.cost;
     }
     act.onclick = () => {
@@ -411,6 +475,7 @@ export class UI {
     });
     const on = list.children[this.gi];
     if (on) list.scrollLeft = on.offsetLeft - list.clientWidth / 2 + on.offsetWidth / 2;
+    if (!$('garage').hidden) this.fit($('garage'));
   }
 
   stepCar(dir) {

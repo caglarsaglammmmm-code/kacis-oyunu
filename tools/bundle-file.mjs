@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const MODULES = ['config', 'physics', 'world', 'effects', 'police', 'crowd', 'game', 'art', 'cars', 'buildings', 'carsheet', 'sheet', 'carmodels', 'car3d', 'menu3d', 'render', 'cheat', 'input', 'controls', 'storage', 'audio', 'pixelcars', 'pixelmenu', 'ui', 'transition', 'quality', 'main'];
+const MODULES = ['names', 'config', 'i18n/tr', 'i18n/en', 'i18n/ja', 'i18n/zh', 'i18n/es', 'i18n/de', 'i18n/index', 'physics', 'world', 'effects', 'police', 'crowd', 'game', 'art', 'landmarks', 'cars', 'buildings', 'carsheet', 'sheet', 'carmodels', 'car3d', 'menu3d', 'render', 'cheat', 'input', 'controls', 'storage', 'audio', 'pixelcars', 'pixelmenu', 'ui', 'transition', 'quality', 'main'];
 
 export function buildBundle() {
   const parts = MODULES.map((name) => {
@@ -14,6 +14,8 @@ export function buildBundle() {
     const body = source
       .replace(/^import .*;\r?\n/gm, '')
       .replace(/^export \{.*\};?\r?\n/gm, '')
+      // Dil dosyası: export default -> const TR = ... (i18n/index.js aynı adla içe aktarır)
+      .replace(/^export default /m, `const ${path.basename(name).toUpperCase()} = `)
       .replace(/^export /gm, '');
     return `// --- ${name}.js ---\n${body}`;
   });

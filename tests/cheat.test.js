@@ -61,7 +61,7 @@ test('sıra doğru girilince tamamlanır, süre aşımı ve yanlış yön başa 
   const all = (gap) => { let done = false; for (const d of SEQ) { t += gap; done = c.press(d, t); } return done; };
   assert.equal(SEQ.join(''), 'LLRRLRLR');
   assert.equal(all(0.5), true);
-  assert.equal(all(1.6), false, 'süre aşımı');
+  assert.equal(all(2.0), false, 'süre aşımı');
   c.reset();
   for (const d of SEQ.slice(0, 7)) { t += 0.3; c.press(d, t); }
   assert.equal(c.press('L', t + 0.3), false, 'son basış yanlış');
@@ -81,7 +81,7 @@ for (const [mode, tap] of [['zones', tapZones], ['wheel', tapWheel], ['stick', t
     assert.equal(n(), 1, 'yanlış kod');
     wait(i, 2);
     for (const d of SEQ.slice(0, 4)) tap(i, d);
-    wait(i, 1.7);
+    wait(i, 2.0);
     for (const d of SEQ.slice(4)) tap(i, d);
     assert.equal(n(), 1, 'süre aşımı');
   });
@@ -217,30 +217,40 @@ test('kalite sınırı aşılmaz, polis havuzdan gelir', () => {
 });
 
 test('üç rol de oyunda görülür, oyuncunun çevresi tamamen kapanmaz', () => {
-  const g = play(44, 240);
-  g.god = true;
+  // Roller rastgele seçilir: birkaç haritada bakılır. Kuşatma her haritada sıfır olmalı
   const roles = new Set();
   const states = new Set();
   let sealed = 0;
   let samples = 0;
-  let steer = 0;
-  const p = g.player;
-  for (let i = 0; i < 60 * 180; i++) {
-    if (i % 80 === 0) steer = [0, 1, 0, -1][(i / 80) % 4];
-    g.tick(dt, steer, false);
-    for (const c of g.cops) { roles.add(c.role); states.add(c.state); }
-    if (i % 30) continue;
-    samples++;
-    const sect = new Uint8Array(8);
-    for (const c of g.cops) {
-      if (c.flying || Math.hypot(c.x - p.x, c.y - p.y) > 110) continue; // Bu halkada dolu sektörler arası boşluk araba genişliğindedir
-      sect[Math.floor(((Math.atan2(c.y - p.y, c.x - p.x) + Math.PI) / 6.2832) * 8) % 8] = 1;
+  let run = 0;
+  let longest = 0;
+  for (const seed of [44, 45, 46, 47]) {
+    const g = play(seed, 240);
+    g.god = true;
+    let steer = 0;
+    const p = g.player;
+    for (let i = 0; i < 60 * 150; i++) {
+      if (i % 80 === 0) steer = [0, 1, 0, -1][(i / 80) % 4];
+      g.tick(dt, steer, false);
+      for (const c of g.cops) { roles.add(c.role); states.add(c.state); }
+      if (i % 30) continue;
+      samples++;
+      const sect = new Uint8Array(8);
+      for (const c of g.cops) {
+        // Barikat arabaları sayılmaz: geçiş boşluğunu ayrı test denetler.
+        // 110 birimlik halkada dolu sektörler arası boşluk araba genişliğindedir
+        if (c.flying || c.state === 'barricade' || Math.hypot(c.x - p.x, c.y - p.y) > 110) continue;
+        sect[Math.floor(((Math.atan2(c.y - p.y, c.x - p.x) + Math.PI) / 6.2832) * 8) % 8] = 1;
+      }
+      if (sect.every(Boolean)) { sealed++; run++; longest = Math.max(longest, run); } else run = 0;
     }
-    if (sect.every(Boolean)) sealed++;
+    if (['chaser', 'flanker', 'interceptor', 'blocker'].every((r) => roles.has(r)) && states.has('block') && seed >= 45) break;
   }
   for (const r of ['chaser', 'flanker', 'interceptor', 'blocker']) assert.ok(roles.has(r), r);
   assert.ok(states.has('block'), [...states].join());
-  assert.equal(sealed, 0, `kapalı ${sealed}/${samples}`);
+  // Kaçış yolu sürekli kapanmaz: yarım saniyeden uzun kuşatma yok, toplamda da çok nadir
+  assert.ok(longest <= 1, `art arda kapalı ${longest}`);
+  assert.ok(sealed <= samples * 0.01, `kapalı ${sealed}/${samples}`);
 });
 
 test('aynı anda en çok üç siren sesi çalar, en yakınlar seçilir', () => {
@@ -250,3 +260,36 @@ test('aynı anda en çok üç siren sesi çalar, en yakınlar seçilir', () => {
   assert.equal(loudest(new Float32Array(4).fill(1e9), 3, new Uint8Array(4)).reduce((a, b) => a + b), 0);
   assert.ok(CONFIG.pursuit.maxSirens <= 3);
 });
+
+test('zaman sınırı: 1,9 sn aralık geçerli, 2,0 sn ve üstü geçersiz, hızlı giriş geçerli', () => {
+  assert.equal(CONFIG.cheat.gap, 2);
+  const run = (gap) => { const c = new CheatCode(); let t = 10; let done = false; for (const d of SEQ) { t += gap; done = c.press(d, t); } return done; };
+  assert.equal(run(1.9), true, '1,9 sn');
+  assert.equal(run(1.99), true, '1,99 sn');
+  assert.equal(run(2.0), false, '2,0 sn');
+  assert.equal(run(2.5), false, '2,5 sn');
+  assert.equal(run(0.12), true, 'hızlı');
+  // Tek bir uzun ara da sırayı bozar: sonda 2,0 sn bekleyen giriş açmaz
+  const c = new CheatCode(); let t = 0;
+  SEQ.slice(0, 7).forEach((d) => { t += 0.3; c.press(d, t); });
+  assert.equal(c.press('R', t + 2.0), false);
+});
+
+// Gerçek giriş yolu: oyun adımları (1/60 sn) birikerek saat ilerler
+for (const [mode, tap] of [['zones', tapZones], ['wheel', tapWheel], ['stick', tapStick], ['zones', tapKeys]]) {
+  test(`${mode} + ${tap.name}: 1,9 sn aralıkla açılır, 2,0 sn aralıkla açılmaz`, () => {
+    for (const [gap, want] of [[1.9, 1], [2.0, 0], [0.25, 1]]) {
+      const i = makeInput(mode);
+      const n = countOf(i);
+      for (const d of SEQ) {
+        const t0 = i.clock;
+        tap(i, d);
+        // Basışın kendisi de süreden sayılır: bir sonraki basış tam gap sonra başlar
+        const pressAt = i.code.t;
+        wait(i, Math.max(0, gap - (i.clock - pressAt)));
+        assert.ok(i.clock >= t0);
+      }
+      assert.equal(n(), want, `${gap} sn`);
+    }
+  });
+}

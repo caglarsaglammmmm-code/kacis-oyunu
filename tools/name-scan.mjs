@@ -5,7 +5,7 @@ import path from 'node:path';
 
 const OLD = [
   'tofa[sş]', 'do[gğ]an', '[sş]ahin', 'T10X', 'anadol', 'murat', 'egea', 'fiat', 'renault', 'clio', 'dacia', 'duster', 'opel', 'grandland', 'tog', 'togg',
-  'bmw', 'audi', 'mercedes', 'benz', 'volkswagen', 'vw', 'bavyera', 'megane', 'linea', 'hyundai', 'toyota', 'honda', 'kia', 'nissan', 'peugeot',
+  'bmw', 'audi', 'mercedes', 'benz', 'volkswagen', 'bavyera', 'megane', 'linea', 'hyundai', 'toyota', 'honda', 'kia', 'nissan', 'peugeot',
   'migros', 'b[iİ]m', '[sşŞ]ok', 'a101', 'carrefour(sa)?', 'ko[cç]ta[sş]', '[iİ]topya', 'czn', 'burak',
   'akbank', '[iİ][sş] bankas[ıi]', 'ziraat', 'garanti', 'yap[ıi] kredi',
   'nevada', 'sistem koleji?', 'natura', 'do[gğ]a [sş]ehir', 'penci', 'zorn', 'pencizorn', 'kackacabilirsen', 'ka[cç] ka[cç]abilirsen',
@@ -15,8 +15,9 @@ const OLD = [
 ];
 const RE = new RegExp(`(?<![\\p{L}\\p{N}_])(${OLD.join('|')})(?![\\p{L}\\p{N}_])`, 'giu');
 // Bu dosyalar eski adları bilerek taşır ya da üçüncü taraf koddur
-const SKIP = new Set(['tools/name-scan.mjs', 'tools/build-android.mjs', 'android/app/src/main/assets/capacitor.config.json']);
-const SKIP_DIR = /(^|\/)(node_modules|\.git|\.gradle|build|e2e-out|vendor|fonts|dist|gradle|www|capacitor-cordova-android-plugins|public)(\/|$)/;
+const SKIP = new Set(['tools/name-scan.mjs', 'tools/build-android.mjs', 'tools/play-clean.mjs', 'tools/flavor.mjs', 'android/app/build.gradle', 'android/app/src/main/assets/capacitor.config.json']);
+// names, flavors ve android/app/src/arkadas: gerçek isimli sürümün kaynağı, Play paketine girmez
+const SKIP_DIR = /(^|\/)(names|flavors|arkadas|node_modules|\.git|\.gradle|build|e2e-out|vendor|fonts|dist|gradle|www|capacitor-cordova-android-plugins|public)(\/|$)/;
 const TEXT = /\.(js|mjs|html|css|json|md|xml|gradle|properties|java|txt|pro|svg)$/i;
 // Sahiplerinden gelen genel kelimeler: "Sistem" gibi sözlük sözcükleri değil, yalnızca eski ad olanlar listede
 const ALLOW_LINE = /(capacitor|getcapacitor|androidx)/i;

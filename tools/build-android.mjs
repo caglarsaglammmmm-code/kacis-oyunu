@@ -1,4 +1,6 @@
-// İmzalı APK ve AAB üretir: npm run android:build
+// İki sürümü üretir: npm run android:build [play|arkadas]
+//   play    : Drift Lab, uydurma isimler, yükleme anahtarıyla imzalı AAB ve APK (Play Store)
+//   arkadas : Penci Zorn, gerçek isimler, eski kurulumların üstüne güncellenen debug imzalı APK
 // JAVA_HOME ve ANDROID_HOME tanımlı değilse %LOCALAPPDATA%\\Android altındaki JDK 21 ve SDK kullanılır.
 // İmza: DRIFTLAB_KEYSTORE ve DRIFTLAB_STORE_PASSWORD ortam değişkenleri ya da depo dışındaki
 // ~/.driftlab/keystore.properties. Anahtar yoksa APK ve AAB imzasız çıkar, mağazaya yüklenmez.
@@ -25,15 +27,30 @@ if (!env.DRIFTLAB_KEYSTORE && fs.existsSync(props)) {
 if (!env.DRIFTLAB_KEYSTORE) console.warn('UYARI: imza anahtarı yok, çıktı imzasız olacak');
 const run = (cmd, args, cwd = root) => execFileSync(cmd, args, { cwd, env, stdio: 'inherit', shell: process.platform === 'win32' });
 
-run('node', ['tools/prepare-www.mjs']);
-run('npx', ['cap', 'sync', 'android']);
 fs.writeFileSync(path.join(root, 'android', 'local.properties'), `sdk.dir=${env.ANDROID_HOME.replaceAll('\\', '/')}\n`);
 const project = path.join(root, 'android');
-run(path.join(project, process.platform === 'win32' ? 'gradlew.bat' : 'gradlew'), ['assembleRelease', 'bundleRelease', '--no-daemon'], project);
-
+const gradle = path.join(project, process.platform === 'win32' ? 'gradlew.bat' : 'gradlew');
 fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
-const apk = path.join(root, 'dist', 'DriftLab.apk');
-const aab = path.join(root, 'dist', 'DriftLab.aab');
-fs.copyFileSync(path.join(root, 'android/app/build/outputs/apk/release/app-release.apk'), apk);
-fs.copyFileSync(path.join(root, 'android/app/build/outputs/bundle/release/app-release.aab'), aab);
-console.log(`APK: ${apk}\nAAB: ${aab}`);
+const want = process.argv.slice(2).filter((a) => !a.startsWith('-'));
+const flavors = want.length ? want : ['play', 'arkadas'];
+for (const flavor of flavors) {
+  // Web dosyaları sürüme göre hazırlanır; Capacitor ortak klasöre kopyalar, sonra o sürüm derlenir
+  run('node', ['tools/prepare-www.mjs'], root);
+  execFileSync('node', ['tools/prepare-www.mjs'], { cwd: root, env: { ...env, FLAVOR: flavor }, stdio: 'inherit', shell: process.platform === 'win32' });
+  run('npx', ['cap', 'sync', 'android']);
+  if (flavor === 'play') {
+    // cap sync www'yi yeniden okur: Play sürümü
+    run(gradle, ['assemblePlayRelease', 'bundlePlayRelease', '--no-daemon'], project);
+    const apk = path.join(root, 'dist', 'DriftLab.apk');
+    const aab = path.join(root, 'dist', 'DriftLab.aab');
+    fs.copyFileSync(path.join(root, 'android/app/build/outputs/apk/play/release/app-play-release.apk'), apk);
+    fs.copyFileSync(path.join(root, 'android/app/build/outputs/bundle/playRelease/app-play-release.aab'), aab);
+    console.log(`Play APK: ${apk}\nPlay AAB: ${aab}`);
+  } else {
+    // Arkadaş sürümü önceki APK'lar gibi bu bilgisayarın debug anahtarıyla imzalanır: telefondaki oyun silinmeden güncellenir
+    run(gradle, ['assembleArkadasDebug', '--no-daemon'], project);
+    const apk = path.join(root, 'dist', 'PenciZorn.apk');
+    fs.copyFileSync(path.join(root, 'android/app/build/outputs/apk/arkadas/debug/app-arkadas-debug.apk'), apk);
+    console.log(`Arkadaş APK: ${apk}`);
+  }
+}

@@ -1,9 +1,138 @@
 // Üretilmiş dosya, elle düzenlemeyin. Kaynak: js/*.js (npm run bundle)
 (function () {
 'use strict';
+// --- names.js ---
+// Üretilmiş dosya, elle düzenlemeyin. Kaynak: names/tablo.mjs (npm run names)
+// Sürüm: play
+const FLAVOR = 'play';
+const NAMES = {
+ "oyun": "Drift Lab",
+ "indir": "",
+ "kolej": {
+  "ad": "MANDALİNA KOLEJİ",
+  "ust": "MANDALİNA"
+ },
+ "okullar": {
+  "serife": "Anadolu Fen Okulu",
+  "ted": "Bozkır Koleji",
+  "gundogdu": "Gün Işığı Koleji"
+ },
+ "kule": "Bozkır Kulesi",
+ "konya": {
+  "mevlana": "Mevlana Müzesi",
+  "alaaddin": "Alaaddin Camii",
+  "tepe": "Alaaddin Tepesi",
+  "kongre": "Selçuklu Kongre Merkezi",
+  "kulturpark": "Kültürpark",
+  "zafer": "Zafer Meydanı",
+  "bedesten": "Bedesten Çarşısı",
+  "meram": "Meram Bağları",
+  "duraklar": [
+   "Alaaddin",
+   "Zafer",
+   "Mevlana",
+   "Kültürpark",
+   "Kongre Merkezi"
+  ],
+  "firinlar": [
+   "Etli Ekmek Fırını",
+   "Konya Fırını",
+   "Fırın Kebabı",
+   "Etliekmek Salonu",
+   "Bamya Çorbası"
+  ]
+ },
+ "arabalar": {
+  "atmaca": "Atmaca",
+  "motor": "Motosiklet",
+  "granit": "Granit SUV",
+  "elektra": "Elektra X1",
+  "simsek": "Şimşek",
+  "cinar": "Çınar A",
+  "efe": "Efe 131",
+  "marmara": "Marmara S",
+  "liva": "Liva",
+  "bozkir": "Bozkır 4x4"
+ },
+ "zincirler": [
+  {
+   "id": "pazarcik",
+   "ad": "Pazarcık Market",
+   "renk": "#3f8f5b"
+  },
+  {
+   "id": "ucuzlar",
+   "ad": "Ucuzlar",
+   "renk": "#7b3fa0"
+  },
+  {
+   "id": "sepet",
+   "ad": "Sepet Market",
+   "renk": "#1f9e9e"
+  },
+  {
+   "id": "yildiz",
+   "ad": "Yıldız Mağazaları",
+   "renk": "#c23b6b"
+  },
+  {
+   "id": "dortyol",
+   "ad": "Dörtyol Market",
+   "renk": "#6a7f2a"
+  },
+  {
+   "id": "teknoloji",
+   "ad": "Teknoloji Durağı",
+   "renk": "#2b3a67"
+  },
+  {
+   "id": "yapi",
+   "ad": "Yapı Dünyası",
+   "renk": "#8a5a2b"
+  },
+  {
+   "id": "kose",
+   "ad": "Köşe Bakkal",
+   "renk": "#b5651d"
+  }
+ ],
+ "bankalar": [
+  {
+   "ad": "Yıldız Bankası",
+   "renk": "#3b3f8f"
+  },
+  {
+   "ad": "Anadolu Tasarruf",
+   "renk": "#8a6d1f"
+  },
+  {
+   "ad": "Bereket Bankası",
+   "renk": "#6b8e23"
+  },
+  {
+   "ad": "Güven Kredi",
+   "renk": "#5b2a86"
+  },
+  {
+   "ad": "Marmara Yatırım",
+   "renk": "#0f6e84"
+  }
+ ],
+ "siteler": {
+  "buyuk1": "Yeşilvadi Sitesi",
+  "buyuk2": "Mavi Orman Sitesi"
+ },
+ "tekil": {
+  "ishani": "Merkez Çarşı İş Hanı",
+  "otel": "Sahil Palas Oteli",
+  "doner": "Nane Döner"
+ }
+};
+
 // --- config.js ---
 // Oyunun TÜM ayarları burada. Denge değiştirmek için yalnızca bu dosyayı düzenleyin,
 // ardından `npm run bundle` çalıştırın (file:// kopyası için).
+
 
 const GROUND = { GRASS: 0, ROAD: 1, WALK: 2, PLAZA: 3, WATER: 4, SAND: 5, DIRT: 6, SHALLOW: 7, FIELD: 8, ALLEY: 9, TRACK: 10 };
 
@@ -13,12 +142,15 @@ const BUILD = {
   FIRETOWER: 14, ADOBE: 15, MESA: 16, BARN: 17, SILO: 18, WINDMILL: 19, WATERTOWER: 20, GAS: 21,
   APARTMENT: 22, MARKET: 23, KOLEJ: 24, BAZAAR: 25, CHAIN: 26, BANK: 27, RESIDENCE: 28, OFFICE: 29, HOTEL: 30,
   HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CAFE: 40, SHOP: 41, SKYSCRAPER: 42, RUIN: 43, SITEWORK: 44, FACTORY: 45,
+  // Özel yerler (js/landmarks.js çizer)
+  SERVIS: 46, MUZE: 47, SELCUK_CAMI: 48, KONGRE: 49, KULE: 50, AVM: 51, BEDESTEN: 52, BAGEVI: 53, OZEL_OKUL: 54, ANIT: 55,
 };
 
 const CONFIG = {
-  name: 'Drift Lab',
-  version: '13.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v13.0.0/DriftLab.apk',
+  name: NAMES.oyun,
+  version: '14.0.0',
+  // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v14.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -57,7 +189,17 @@ const CONFIG = {
       harabe: { alleys: [4, 3], maxB: 5, wide: 0.5, detached: 0.4, stub: 0.4 },
       sanayi: { alleys: [3, 2], maxB: 8, wide: 0.8, detached: 0.3, stub: 0.2 },
     },
-    sistemRing: [4, 9],
+    sistemRing: [4, 9], // Kolej: başlangıçtan bu kadar chunk uzakta
+    // Tek seferlik özel yerler: her biri kendi chunk'ında, başlangıçtan ring kadar uzakta, birbirinden ayrı.
+    // Adlar isim tablosundadır (names/tablo.mjs)
+    landmarks: [
+      { id: 'mevlana', ring: [2, 5] }, { id: 'alaaddin', ring: [3, 6] }, { id: 'zafer', ring: [2, 6] },
+      { id: 'serife', ring: [2, 5] }, { id: 'bedesten', ring: [3, 7] }, { id: 'kongre', ring: [4, 8] },
+      { id: 'kule', ring: [4, 8] }, { id: 'kulturpark', ring: [4, 9] }, { id: 'ted', ring: [5, 10] },
+      { id: 'gundogdu', ring: [5, 10] }, { id: 'meram', ring: [6, 11] },
+    ],
+    // Yüksek özel yapıların yükseklik payı (sıradan binalar en çok tall.height[1])
+    landmarkHeight: { kolej: 0.46, kule: 0.95 },
     // Bina yüksekliği: share yüksek bina oranı, height kameraya uzanma payı
     // ruin ve work: sıradan mahallede harabe ve inşaat, fire: yangın olasılığı
     tall: { share: 0.62, height: [0.16, 0.42], maxPerChunk: 16 },
@@ -69,10 +211,10 @@ const CONFIG = {
     // Sokak geometrisi. setback: binaların sokağa bakan cephesi karodan bu kadar içeride, yani bir karoluk
     // sokak 40 + 2 * setback genişliğindedir. cornerRadius: açık bina köşelerinin çarpışma yuvarlaması
     street: { setback: 7, cornerRadius: 16 },
-    roadTones: ['#3f4249', '#5b5f66', '#a4a7a9'], // Tek Kolej Koleji başlangıçtan bu kadar chunk uzakta
+    roadTones: ['#3f4249', '#5b5f66', '#a4a7a9'],
     bigSites: [
-      { name: 'Yeşilvadi Sitesi', color: '#7fa86b', ring: [5, 11], layout: 0 },
-      { name: 'Mavi Orman Sitesi', color: '#c98a5a', ring: [8, 15], layout: 1 },
+      { name: NAMES.siteler.buyuk1, color: '#7fa86b', ring: [5, 11], layout: 0 },
+      { name: NAMES.siteler.buyuk2, color: '#c98a5a', ring: [8, 15], layout: 1 },
     ],
   },
 
@@ -141,16 +283,16 @@ const CONFIG = {
   // Sıra önemli: pahalılaştıkça hız, kayma ve dayanıklılık artar.
   // engine: motor sesi. kind ses karakteri (js/audio.js ENGINE_KINDS), cyl silindir, idle-red devir aralığı, gears vites
   cars: [
-    { id: 'atmaca', paints: [{ name: 'Mahalle Beji', color: '#d9d4c7', finish: 'gloss' }, { name: 'Şarap Kırmızı', color: '#8e1b24', finish: 'metal' }, { name: 'Mat Asker Yeşili', color: '#4d5a3a', finish: 'matte' }, { name: 'Çift Ton Krem-Bordo', color: '#e6dcc2', finish: 'gloss', roof: '#6d1620' }], finish: 'gloss', name: 'Atmaca', cost: 0, desc: 'Her mahallenin emektarı', shape: 'atmaca', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { kind: 'old', cyl: 4, idle: 800, red: 5000, gears: 4, gain: 1 } },
-    { id: 'motor', paints: [{ name: 'Yarış Kırmızı', color: '#e8352e', finish: 'gloss', accent: '#ffe14d' }, { name: 'Elektrik Mavi', color: '#0a7cff', finish: 'metal', accent: '#ffffff' }, { name: 'Mat Siyah', color: '#1b1d22', finish: 'matte', accent: '#ff7a00' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl', accent: '#e8352e' }], finish: 'gloss', name: 'Motosiklet', cost: 100, desc: 'Dar sokakların kralı', shape: 'moto', maxSpeed: 445, accel: 610, turnRate: 3.3, grip: 4.5, driftGrip: 1.1, durability: 1.05, mass: 0.9, len: 36, wid: 16, color: '#e8352e', accent: '#ffe14d', engine: { kind: 'moto', cyl: 4, idle: 1500, red: 12500, gears: 6, gain: 0.8 } },
-    { id: 'granit', paints: [{ name: 'Gece Mavisi', color: '#1f3a68', finish: 'metal' }, { name: 'Kor Turuncu', color: '#e8551e', finish: 'metal' }, { name: 'Mat Gümüş', color: '#a7aeb7', finish: 'matte' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl' }], finish: 'metal', name: 'Granit SUV', cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'granit', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { kind: 'diesel', cyl: 4, idle: 750, red: 4300, gears: 6, gain: 1 } },
-    { id: 'elektra', paints: [{ name: 'Anadolu Kırmızı', color: '#b3122a', finish: 'metal' }, { name: 'Fırtına Grisi', color: '#4a5560', finish: 'metal' }, { name: 'Mat Toprak', color: '#8a6a4a', finish: 'matte' }, { name: 'Buz Mavisi', color: '#bcd9e6', finish: 'pearl' }], finish: 'metal', name: 'Elektra X1', cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'elektra', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { kind: 'ev', cyl: 6, idle: 0, red: 24000, gears: 1, gain: 0.7 } },
-    { id: 'simsek', paints: [{ name: 'Mat Siyah Sarı Şerit', color: '#111318', finish: 'matte', accent: '#ffd23f' }, { name: 'Ateş Turuncu', color: '#ff5a12', finish: 'gloss', accent: '#111318' }, { name: 'Neon Yeşil', color: '#39d353', finish: 'gloss', accent: '#111318' }, { name: 'Mor Metalik', color: '#6a2bd9', finish: 'metal', accent: '#21d4fd' }], finish: 'matte', name: 'Şimşek', cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'simsek', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { kind: 'turbo', cyl: 4, idle: 950, red: 7400, gears: 5, gain: 1 } },
-    { id: 'cinar', paints: [{ name: 'Efsane Turuncu', color: '#e8782a', finish: 'gloss', accent: '#f6efe0' }, { name: 'Bebek Mavisi', color: '#7ec6e8', finish: 'gloss', accent: '#f6efe0' }, { name: 'Çift Ton Krem-Vişne', color: '#ead9b0', finish: 'gloss', roof: '#8a1f2f' }, { name: 'Mat Zeytin', color: '#6b6b3a', finish: 'matte', accent: '#f6efe0' }], finish: 'gloss', name: 'Çınar A', cost: 680, desc: 'Klasik efsane', shape: 'cinar', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { kind: 'old', cyl: 3, idle: 700, red: 4600, gears: 4, gain: 1.05 } },
-    { id: 'efe', paints: [{ name: 'Boğaz Mavisi', color: '#2f6fb0', finish: 'gloss' }, { name: 'Haki', color: '#75805a', finish: 'matte' }, { name: 'Gümüş', color: '#b9c1ca', finish: 'metal' }, { name: 'Çift Ton Bej-Kahve', color: '#dcc9a4', finish: 'gloss', roof: '#5c3a22' }], finish: 'gloss', name: 'Efe 131', cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'efe', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { kind: 'old', cyl: 6, idle: 650, red: 5200, gears: 4, gain: 1 } },
-    { id: 'marmara', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: 'Marmara S', cost: 1200, desc: 'Sade sedan, sürprizli', shape: 'marmara', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { kind: 'inline', cyl: 4, idle: 800, red: 6400, gears: 5, gain: 1 } },
-    { id: 'liva', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: 'Liva', cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'liva', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { kind: 'thin', cyl: 3, idle: 950, red: 7200, gears: 5, gain: 0.95 } },
-    { id: 'bozkir', paints: [{ name: 'Kanyon Turuncusu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: 'Bozkır 4x4', cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'bozkir', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { kind: 'v8', cyl: 8, idle: 620, red: 5800, gears: 5, gain: 1.15 } },
+    { id: 'atmaca', paints: [{ name: 'Mahalle Beji', color: '#d9d4c7', finish: 'gloss' }, { name: 'Şarap Kırmızı', color: '#8e1b24', finish: 'metal' }, { name: 'Mat Asker Yeşili', color: '#4d5a3a', finish: 'matte' }, { name: 'Çift Ton Krem-Bordo', color: '#e6dcc2', finish: 'gloss', roof: '#6d1620' }], finish: 'gloss', name: NAMES.arabalar.atmaca, cost: 0, desc: 'Her mahallenin emektarı', shape: 'atmaca', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { kind: 'old', cyl: 4, idle: 800, red: 5000, gears: 4, gain: 1 } },
+    { id: 'motor', paints: [{ name: 'Yarış Kırmızı', color: '#e8352e', finish: 'gloss', accent: '#ffe14d' }, { name: 'Elektrik Mavi', color: '#0a7cff', finish: 'metal', accent: '#ffffff' }, { name: 'Mat Siyah', color: '#1b1d22', finish: 'matte', accent: '#ff7a00' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl', accent: '#e8352e' }], finish: 'gloss', name: NAMES.arabalar.motor, cost: 100, desc: 'Dar sokakların kralı', shape: 'moto', maxSpeed: 445, accel: 610, turnRate: 3.3, grip: 4.5, driftGrip: 1.1, durability: 1.05, mass: 0.9, len: 36, wid: 16, color: '#e8352e', accent: '#ffe14d', engine: { kind: 'moto', cyl: 4, idle: 1500, red: 12500, gears: 6, gain: 0.8 } },
+    { id: 'granit', paints: [{ name: 'Gece Mavisi', color: '#1f3a68', finish: 'metal' }, { name: 'Kor Turuncu', color: '#e8551e', finish: 'metal' }, { name: 'Mat Gümüş', color: '#a7aeb7', finish: 'matte' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl' }], finish: 'metal', name: NAMES.arabalar.granit, cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'granit', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { kind: 'diesel', cyl: 4, idle: 750, red: 4300, gears: 6, gain: 1 } },
+    { id: 'elektra', paints: [{ name: 'Anadolu Kırmızı', color: '#b3122a', finish: 'metal' }, { name: 'Fırtına Grisi', color: '#4a5560', finish: 'metal' }, { name: 'Mat Toprak', color: '#8a6a4a', finish: 'matte' }, { name: 'Buz Mavisi', color: '#bcd9e6', finish: 'pearl' }], finish: 'metal', name: NAMES.arabalar.elektra, cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'elektra', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { kind: 'ev', cyl: 6, idle: 0, red: 24000, gears: 1, gain: 0.7 } },
+    { id: 'simsek', paints: [{ name: 'Mat Siyah Sarı Şerit', color: '#111318', finish: 'matte', accent: '#ffd23f' }, { name: 'Ateş Turuncu', color: '#ff5a12', finish: 'gloss', accent: '#111318' }, { name: 'Neon Yeşil', color: '#39d353', finish: 'gloss', accent: '#111318' }, { name: 'Mor Metalik', color: '#6a2bd9', finish: 'metal', accent: '#21d4fd' }], finish: 'matte', name: NAMES.arabalar.simsek, cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'simsek', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { kind: 'turbo', cyl: 4, idle: 950, red: 7400, gears: 5, gain: 1 } },
+    { id: 'cinar', paints: [{ name: 'Efsane Turuncu', color: '#e8782a', finish: 'gloss', accent: '#f6efe0' }, { name: 'Bebek Mavisi', color: '#7ec6e8', finish: 'gloss', accent: '#f6efe0' }, { name: 'Çift Ton Krem-Vişne', color: '#ead9b0', finish: 'gloss', roof: '#8a1f2f' }, { name: 'Mat Zeytin', color: '#6b6b3a', finish: 'matte', accent: '#f6efe0' }], finish: 'gloss', name: NAMES.arabalar.cinar, cost: 680, desc: 'Klasik efsane', shape: 'cinar', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { kind: 'old', cyl: 3, idle: 700, red: 4600, gears: 4, gain: 1.05 } },
+    { id: 'efe', paints: [{ name: 'Boğaz Mavisi', color: '#2f6fb0', finish: 'gloss' }, { name: 'Haki', color: '#75805a', finish: 'matte' }, { name: 'Gümüş', color: '#b9c1ca', finish: 'metal' }, { name: 'Çift Ton Bej-Kahve', color: '#dcc9a4', finish: 'gloss', roof: '#5c3a22' }], finish: 'gloss', name: NAMES.arabalar.efe, cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'efe', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { kind: 'old', cyl: 6, idle: 650, red: 5200, gears: 4, gain: 1 } },
+    { id: 'marmara', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: NAMES.arabalar.marmara, cost: 1200, desc: 'Sade sedan, sürprizli', shape: 'marmara', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { kind: 'inline', cyl: 4, idle: 800, red: 6400, gears: 5, gain: 1 } },
+    { id: 'liva', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: NAMES.arabalar.liva, cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'liva', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { kind: 'thin', cyl: 3, idle: 950, red: 7200, gears: 5, gain: 0.95 } },
+    { id: 'bozkir', paints: [{ name: 'Kanyon Turuncusu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: NAMES.arabalar.bozkir, cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'bozkir', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { kind: 'v8', cyl: 8, idle: 620, red: 5800, gears: 5, gain: 1.15 } },
   ],
 
   damage: {
@@ -183,9 +325,7 @@ const CONFIG = {
     swatAt: 50,
     advancedAt: 200,
     tanksAt: 280,
-    alerts: { 50: 'SWAT geliyor!', 200: 'Ağır takviye!', 280: 'TANKLAR!' },
     aliensAt: 225, // 200-250 sn arası: uzaylı işgali başlar. Oyun burada gerçekten zorlaşır
-    aliensAlert: 'UZAYLILAR GELDİ!',
     firstSpawnAt: 5,
     // [saniye, değer] noktaları arasında doğrusal artar, yani her saniye biraz zorlaşır.
     // Polis sayısı, hızı ve davranışları aşağıdaki pursuit bölümündedir
@@ -217,7 +357,7 @@ const CONFIG = {
     blockShare: [[90, 0], [120, 0.1], [240, 0.16]], // Yolu kapatan
     barricadeCurve: [[38, 22], [120, 16], [200, 12], [280, 9]],
     // Arananlık: oyuncunun yaptıkları süreye saniye olarak eklenir, durulunca söner
-    heat: { kill: 5, nearMiss: 1, prop: 0.2, max: 60, decay: 0.3 },
+    heat: { kill: 5, nearMiss: 1, prop: 0.2, max: 60, decay: 0.3, from: 45 }, // from: bu saniyeden önce etkisiz, başlangıç kolay kalır
     // Adalet: oyuncunun çevresine aynı anda bu kadar polis girer, fazlası geride bekler
     closeCurve: [[0, 2], [120, 3], [240, 4], [360, 5]],
     closeR: 260,
@@ -244,17 +384,16 @@ const CONFIG = {
     maxSirens: 3, // Aynı anda çalan siren sesi, en yakınlar
   },
 
-  // Gizli sıra. gap: basışlar arası en uzun süre, maxHold: bunu aşan basılı tutma normal sürüş sayılır
+  // Gizli sıra. gap: her basış bir öncekinden bu süreden KISA sürede yapılmalı; gap ve üstü sırayı
+  // baştan başlatır (1,9 sn geçerli, 2,0 sn geçersiz). maxHold: bunu aşan basılı tutma normal sürüş sayılır
   // ve sırayı bozar. wheelOn, stickOn: eksen eşiği, axisBack: yeniden saymak için merkeze dönüş eşiği
   cheat: {
     sequence: ['L', 'L', 'R', 'R', 'L', 'R', 'L', 'R'],
-    gap: 1.5,
-    maxHold: 0.7,
+    gap: 2,
+    maxHold: 0.45, // Kod girişi kısa dokunuşlarla yapılır; sürüşteki basılı tutmalar sırayı bozar
     wheelOn: 0.45,
     stickOn: 0.6,
     axisBack: 0.2,
-    messageOn: 'Aferin, hile kodunu buldun la!',
-    messageOff: 'Hile kapatıldı',
   },
 
   // speed: oyuncunun son hızına oran. HER ZAMAN 1'in altında kalmalı (test eder).
@@ -425,11 +564,12 @@ const CONFIG = {
 
   // Tabela adları. Tüm adlar uydurmadır
   signs: {
-    bigshops: ['Merkez Çarşı İş Hanı', 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
-    hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', 'Sahil Palas Oteli', 'Otel Saray', 'Mavi Otel'],
-    shops: ['Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Piksel Oyun Salonu', 'Bit Bilgisayar', 'Telefoncu', 'Nane Döner', 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Çınar Kafe'],
-    chains: { 'Pazarcık Market': '#3f8f5b', Ucuzlar: '#7b3fa0', 'Sepet Market': '#1f9e9e', 'Yıldız Mağazaları': '#c23b6b', 'Dörtyol Market': '#6a7f2a', 'Teknoloji Durağı': '#2b3a67', 'Yapı Dünyası': '#8a5a2b', 'Köşe Bakkal': '#b5651d' },
-    banks: { 'Yıldız Bankası': '#3b3f8f', 'Anadolu Tasarruf': '#8a6d1f', 'Bereket Bankası': '#6b8e23', 'Güven Kredi': '#5b2a86', 'Marmara Yatırım': '#0f6e84' },
+    bigshops: [NAMES.tekil.ishani, 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
+    hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', NAMES.tekil.otel, 'Otel Saray', 'Mavi Otel'],
+    shops: [...NAMES.konya.firinlar, 'Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Piksel Oyun Salonu', 'Bit Bilgisayar', 'Telefoncu', NAMES.tekil.doner, 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Çınar Kafe'],
+    chains: Object.fromEntries(NAMES.zincirler.map((c) => [c.ad, c.renk])),
+    chainIds: Object.fromEntries(NAMES.zincirler.map((c) => [c.ad, c.id])),
+    banks: Object.fromEntries(NAMES.bankalar.map((b) => [b.ad, b.renk])),
     sites: ['Yeşil Tepe Sitesi', 'Boğaz Evleri', 'Mavi Konak Sitesi', 'Çamlık Sitesi', 'Güneş Sitesi', 'Lale Evleri', 'Marmara Konutları', 'Park Evleri'],
     // Dükkân önü: indirim yazıları ve görülme olasılıkları
     promos: ['%30 İNDİRİM', 'BUGÜNE ÖZEL', '%50 İNDİRİM', '2 AL 1 ÖDE', 'KAMPANYA', 'FIRSAT!', 'YENİ AÇILDI', 'SON GÜN'],
@@ -476,6 +616,545 @@ const CONFIG = {
 
 // Yıldız seviyesi: başlangıçta 1, her eşikte artar
 const MAX_STARS = 4;
+
+// --- i18n/tr.js ---
+// Türkçe. Anahtarlar bütün dillerde aynıdır; {ad} biçimindeki yerlere değer konur.
+const TR = {
+  start: 'BAŞLA',
+  menu: {
+    garage: 'Araba Seç', settings: 'Ayarlar', howto: 'Nasıl?', apk: 'APK İndir',
+    best: 'En iyi: {score} puan · {time}', first: 'İlk kaçışın seni bekliyor',
+    maker: 'Çağlar Sağlam tarafından yapıldı', exit: 'Çıkmak için tekrar bas',
+  },
+  aria: {
+    game: 'Oyun alanı', health: 'Sağlık', pause: 'Duraklat', wanted: 'Arananlık', damage: 'Hasar', reverse: 'Geri vites',
+    mute: 'Sesi aç veya kapat', back: 'Geri', prev: 'Önceki', next: 'Sonraki', start: 'Başla',
+  },
+  garage: {
+    finish: { gloss: 'Parlak', metal: 'Metalik', matte: 'Mat', pearl: 'İnci' }, twoTone: 'Çift ton',
+    title: 'Garaj', selected: 'Seçili', select: 'Seç', buy: 'Satın al · {cost}', need: '{cost} coin',
+    speed: 'Hız', accel: 'İvme', grip: 'Yol tutuş', durability: 'Dayanıklılık',
+  },
+  settings: {
+    title: 'Ayarlar', sound: 'Ses', volume: 'Ses düzeyi', ambient: 'Sokak ambiyansı', vibrate: 'Titreşim',
+    control: 'Kontrol', zones: 'Sağ / Sol', wheel: 'Direksiyon', stick: 'Joystick',
+    quality: 'Grafik kalitesi', auto: 'Otomatik', high: 'Yüksek', low: 'Düşük',
+    language: 'Dil / Language', privacy: 'Gizlilik Politikası', version: 'Sürüm {v}',
+  },
+  dev: {
+    title: 'Geliştirici', god: 'Ölümsüzlük', start: 'Başlangıç süresi',
+    t0: '0 sn', t45: '45 sn (SWAT öncesi)', t195: '195 sn (takviye öncesi)', t275: '275 sn (tank öncesi)', t280: '280 sn (tanklar)',
+  },
+  howto: {
+    title: 'Nasıl Oynanır',
+    rightH: 'Sağ yarıya bas', rightP: 'Sağa döner, drift atar',
+    leftH: 'Sol yarıya bas', leftP: 'Sola döner, drift atar',
+    bothH: 'İkisine birden bas', bothP: 'Durur ve geri gider',
+    tips: [
+      'Araba kendi gider. Sen yalnızca yön verirsin.',
+      "Ayarlar'dan kontrolü seç: Sağ / Sol, Direksiyon ya da Joystick.",
+      'Duvarlar hasar verir: duman, kıvılcım, ateş, patlama.',
+      'Şehirden çık: sahil, orman, çöl ve kırsal seni bekliyor.',
+      'Polise kıl payı yaklaşmak ve drift atmak combo çarpanını büyütür.',
+      'Polisleri duvara bindir ya da çarparak devir.',
+      'Kırmızı daire görürsen hemen çık: tank ateşi geliyor!',
+    ],
+  },
+  power: {
+    blast: 'Patlama', ghost: 'Görünmezlik', heal: 'Can', giant: 'Dev mod',
+    blastInfo: 'Yakındaki bütün arabalar patlar', ghostInfo: '{n} sn polis seni göremez',
+    healInfo: 'Hasarı onarır, ateşi söndürür', giantInfo: '{n} sn devleşirsin, hasar almazsın',
+    healFloat: 'CAN +', ghostFloat: 'GÖRÜNMEZ', giantFloat: 'DEV MOD',
+  },
+  pause: { title: 'Duraklatıldı', resume: 'Devam et', menu: 'Ana menü' },
+  over: {
+    caught: 'YAKALANDIN!', sunk: 'BATTIN!', record: 'YENİ REKOR!',
+    score: 'Skor', time: 'Süre', coins: 'Coin', kills: 'Devrilen polis', broken: 'Kırılan nesne', near: 'Yakın kaçış', drift: 'Drift',
+    seconds: '{n} sn', best: 'En iyi skor: {score} · En uzun süre: {time}', retry: 'Tekrar dene', menu: 'Ana menü',
+  },
+  hint: {
+    zones: ['Sola bas', 'sola drift', 'İkisine bas', 'geri vites', 'Sağa bas', 'sağa drift'],
+    wheel: ['GERİ tut', 'geri vites', 'Direksiyon', 'sağ altta', 'Çevir', 'sağa sola döner'],
+    stick: ['Sol yarı', 'bas ve kaydır', 'Joystick', 'parmağının altında', 'GERİ tut', 'geri vites'],
+    rev: 'GERİ',
+  },
+  alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!' },
+  cheat: { on: 'Aferin, hile kodunu buldun la!', off: 'Hile kapatıldı', badge: 'HİLE AÇIK' },
+  cars: {
+    atmaca: { desc: 'Her mahallenin emektarı', paints: ['Mahalle Beji', 'Şarap Kırmızı', 'Mat Asker Yeşili', 'Çift Ton Krem-Bordo'] },
+    motor: { desc: 'Dar sokakların kralı', paints: ['Yarış Kırmızı', 'Elektrik Mavi', 'Mat Siyah', 'İnci Beyaz'] },
+    granit: { desc: 'Yüksek ve güvenli SUV', paints: ['Gece Mavisi', 'Kor Turuncu', 'Mat Gümüş', 'İnci Beyaz'] },
+    elektra: { desc: 'Sessiz, güçlü, elektrikli', paints: ['Anadolu Kırmızı', 'Fırtına Grisi', 'Mat Toprak', 'Buz Mavisi'] },
+    simsek: { desc: 'Abartılı spoyler, tam tuning', paints: ['Mat Siyah Sarı Şerit', 'Ateş Turuncu', 'Neon Yeşil', 'Mor Metalik'] },
+    cinar: { desc: 'Klasik efsane', paints: ['Efsane Turuncu', 'Bebek Mavisi', 'Çift Ton Krem-Vişne', 'Mat Zeytin'] },
+    efe: { desc: 'Çelik gibi, babadan kalma', paints: ['Boğaz Mavisi', 'Haki', 'Gümüş', 'Çift Ton Bej-Kahve'] },
+    marmara: { desc: 'Sade sedan, sürprizli', paints: ['Kar Beyaz', 'Volkan Kırmızı', 'Mat Antrasit', 'Çift Ton Mavi-Siyah'] },
+    liva: { desc: 'Küçük, çevik, uçan hatchback', paints: ['Okyanus Mavi', 'Alev Turuncu', 'Mat Beyaz', 'Çift Ton Kırmızı-Siyah'] },
+    bozkir: { desc: 'Her yerde gider, hiç durmaz', paints: ['Kanyon Turuncusu', 'Orman Yeşili', 'Kum Beji', 'Çift Ton Gri-Siyah'] },
+  },
+};
+
+// --- i18n/en.js ---
+// English
+const EN = {
+  start: 'START',
+  menu: {
+    garage: 'Cars', settings: 'Settings', howto: 'How to play', apk: 'Get APK',
+    best: 'Best: {score} pts · {time}', first: 'Your first getaway awaits',
+    maker: 'Made by Çağlar Sağlam', exit: 'Press again to exit',
+  },
+  aria: {
+    game: 'Game area', health: 'Health', pause: 'Pause', wanted: 'Wanted level', damage: 'Damage', reverse: 'Reverse',
+    mute: 'Toggle sound', back: 'Back', prev: 'Previous', next: 'Next', start: 'Start',
+  },
+  garage: {
+    finish: { gloss: 'Gloss', metal: 'Metallic', matte: 'Matte', pearl: 'Pearl' }, twoTone: 'Two-tone',
+    title: 'Garage', selected: 'Selected', select: 'Select', buy: 'Buy · {cost}', need: '{cost} coins',
+    speed: 'Speed', accel: 'Acceleration', grip: 'Grip', durability: 'Durability',
+  },
+  settings: {
+    title: 'Settings', sound: 'Sound', volume: 'Volume', ambient: 'Street ambience', vibrate: 'Vibration',
+    control: 'Controls', zones: 'Left / Right', wheel: 'Wheel', stick: 'Joystick',
+    quality: 'Graphics', auto: 'Auto', high: 'High', low: 'Low',
+    language: 'Language', privacy: 'Privacy Policy', version: 'Version {v}',
+  },
+  dev: {
+    title: 'Developer', god: 'Invincible', start: 'Start time',
+    t0: '0 s', t45: '45 s (before SWAT)', t195: '195 s (before backup)', t275: '275 s (before tanks)', t280: '280 s (tanks)',
+  },
+  howto: {
+    title: 'How to Play',
+    rightH: 'Tap the right half', rightP: 'Turns right and drifts',
+    leftH: 'Tap the left half', leftP: 'Turns left and drifts',
+    bothH: 'Tap both at once', bothP: 'Brakes and reverses',
+    tips: [
+      'Your car drives itself. You just steer.',
+      'Pick your controls in Settings: Left / Right, Wheel or Joystick.',
+      'Walls hurt: smoke, sparks, fire, then boom.',
+      'Leave the city: beaches, forests, deserts and countryside await.',
+      'Close calls with the police and long drifts grow your combo.',
+      'Make the police crash into walls, or ram them off the road.',
+      'See a red circle? Get out fast: tank fire incoming!',
+    ],
+  },
+  power: {
+    blast: 'Blast', ghost: 'Ghost', heal: 'Repair', giant: 'Giant',
+    blastInfo: 'Blows up every car nearby', ghostInfo: 'The police can’t see you for {n} s',
+    healInfo: 'Fixes damage and puts out fire', giantInfo: 'Grow huge for {n} s and take no damage',
+    healFloat: 'REPAIR +', ghostFloat: 'GHOST', giantFloat: 'GIANT',
+  },
+  pause: { title: 'Paused', resume: 'Resume', menu: 'Main menu' },
+  over: {
+    caught: 'BUSTED!', sunk: 'SUNK!', record: 'NEW RECORD!',
+    score: 'Score', time: 'Time', coins: 'Coins', kills: 'Police wrecked', broken: 'Objects smashed', near: 'Close calls', drift: 'Drift',
+    seconds: '{n} s', best: 'Best score: {score} · Longest run: {time}', retry: 'Try again', menu: 'Main menu',
+  },
+  hint: {
+    zones: ['Tap left', 'drift left', 'Tap both', 'reverse', 'Tap right', 'drift right'],
+    wheel: ['Hold REV', 'reverse', 'Wheel', 'bottom right', 'Turn it', 'steer left or right'],
+    stick: ['Left half', 'press and slide', 'Joystick', 'appears under your thumb', 'Hold REV', 'reverse'],
+    rev: 'REV',
+  },
+  alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!' },
+  cheat: { on: 'Well, look at you! You found the cheat code!', off: 'Cheat off', badge: 'CHEAT ON' },
+  cars: {
+    atmaca: { desc: 'Every neighborhood’s old faithful', paints: ['Neighborhood Beige', 'Wine Red', 'Matte Army Green', 'Two-Tone Cream/Burgundy'] },
+    motor: { desc: 'King of the narrow streets', paints: ['Racing Red', 'Electric Blue', 'Matte Black', 'Pearl White'] },
+    granit: { desc: 'Tall and safe SUV', paints: ['Midnight Blue', 'Ember Orange', 'Matte Silver', 'Pearl White'] },
+    elektra: { desc: 'Quiet, strong, electric', paints: ['Anatolian Red', 'Storm Gray', 'Matte Earth', 'Ice Blue'] },
+    simsek: { desc: 'Huge spoiler, fully tuned', paints: ['Matte Black, Yellow Stripe', 'Fire Orange', 'Neon Green', 'Metallic Purple'] },
+    cinar: { desc: 'A classic legend', paints: ['Legend Orange', 'Baby Blue', 'Two-Tone Cream/Cherry', 'Matte Olive'] },
+    efe: { desc: 'Tough as steel, handed down from Dad', paints: ['Bosphorus Blue', 'Khaki', 'Silver', 'Two-Tone Beige/Brown'] },
+    marmara: { desc: 'Plain sedan, full of surprises', paints: ['Snow White', 'Volcano Red', 'Matte Anthracite', 'Two-Tone Blue/Black'] },
+    liva: { desc: 'Small, nimble, flying hatchback', paints: ['Ocean Blue', 'Flame Orange', 'Matte White', 'Two-Tone Red/Black'] },
+    bozkir: { desc: 'Goes anywhere, never stops', paints: ['Canyon Orange', 'Forest Green', 'Sand Beige', 'Two-Tone Gray/Black'] },
+  },
+};
+
+// --- i18n/ja.js ---
+// 日本語
+const JA = {
+  start: 'スタート',
+  menu: {
+    garage: '車を選ぶ', settings: '設定', howto: '遊び方', apk: 'APKを入手',
+    best: 'ベスト：{score}点 · {time}', first: '最初の逃走が待っている',
+    maker: '制作：Çağlar Sağlam', exit: 'もう一度押すと終了',
+  },
+  aria: {
+    game: 'ゲーム画面', health: '耐久力', pause: '一時停止', wanted: '手配レベル', damage: 'ダメージ', reverse: 'バック',
+    mute: 'サウンドのオン／オフ', back: '戻る', prev: '前へ', next: '次へ', start: 'スタート',
+  },
+  garage: {
+    finish: { gloss: '光沢', metal: 'メタリック', matte: 'マット', pearl: 'パール' }, twoTone: '2トーン',
+    title: 'ガレージ', selected: '選択中', select: '選ぶ', buy: '購入 · {cost}', need: '{cost}コイン',
+    speed: '最高速', accel: '加速', grip: 'グリップ', durability: '耐久',
+  },
+  settings: {
+    title: '設定', sound: 'サウンド', volume: '音量', ambient: '街の環境音', vibrate: '振動',
+    control: '操作', zones: '左右タップ', wheel: 'ハンドル', stick: 'スティック',
+    quality: '画質', auto: '自動', high: '高', low: '低',
+    language: '言語 / Language', privacy: 'プライバシーポリシー', version: 'バージョン {v}',
+  },
+  dev: {
+    title: '開発者', god: '無敵', start: '開始時間',
+    t0: '0秒', t45: '45秒（SWAT前）', t195: '195秒（増援前）', t275: '275秒（戦車前）', t280: '280秒（戦車）',
+  },
+  howto: {
+    title: '遊び方',
+    rightH: '右半分をタップ', rightP: '右に曲がってドリフト',
+    leftH: '左半分をタップ', leftP: '左に曲がってドリフト',
+    bothH: '両方を同時にタップ', bothP: '止まってバック',
+    tips: [
+      '車は自動で走る。君はハンドルを切るだけ。',
+      '操作は設定で選べる：左右タップ、ハンドル、スティック。',
+      '壁にぶつかるとダメージ：煙、火花、炎、そして爆発。',
+      '街を抜け出せ。海辺、森、砂漠、田舎が待っている。',
+      '警察すれすれの回避とドリフトでコンボ倍率アップ。',
+      '警察を壁に激突させるか、体当たりで倒そう。',
+      '赤い円が見えたらすぐ逃げろ。戦車の砲撃が来る！',
+    ],
+  },
+  power: {
+    blast: '爆発', ghost: 'ゴースト', heal: '修理', giant: '巨大化',
+    blastInfo: '周りの車をまとめて吹き飛ばす', ghostInfo: '{n}秒間、警察に見つからない',
+    healInfo: 'ダメージを直して火を消す', giantInfo: '{n}秒間巨大化、ダメージを受けない',
+    healFloat: '修理 +', ghostFloat: 'ゴースト', giantFloat: '巨大化',
+  },
+  pause: { title: '一時停止', resume: '再開', menu: 'メインメニュー' },
+  over: {
+    caught: '捕まった！', sunk: '沈没！', record: '新記録！',
+    score: 'スコア', time: 'タイム', coins: 'コイン', kills: '倒した警察', broken: '壊した物', near: 'ニアミス', drift: 'ドリフト',
+    seconds: '{n}秒', best: 'ベストスコア：{score} · 最長記録：{time}', retry: 'もう一度', menu: 'メインメニュー',
+  },
+  hint: {
+    zones: ['左をタップ', '左へドリフト', '両方タップ', 'バック', '右をタップ', '右へドリフト'],
+    wheel: ['「バック」長押し', 'バック', 'ハンドル', '右下にある', '回す', '左右に曲がる'],
+    stick: ['左半分', '押してスライド', 'スティック', '指の下に出る', '「バック」長押し', 'バック'],
+    rev: 'バック',
+  },
+  alert: { swat: 'SWAT出動！', heavy: '重装増援！', tanks: '戦車だ！', aliens: 'エイリアン襲来！' },
+  cheat: { on: 'やるじゃん！隠しコマンドを見つけたね！', off: 'チート解除', badge: 'チートON' },
+  cars: {
+    atmaca: { desc: 'どの街にもいるベテラン', paints: ['下町ベージュ', 'ワインレッド', 'マット・アーミーグリーン', '2トーン クリーム／ボルドー'] },
+    motor: { desc: '狭い路地の王様', paints: ['レーシングレッド', 'エレクトリックブルー', 'マットブラック', 'パールホワイト'] },
+    granit: { desc: '背が高く安心なSUV', paints: ['ミッドナイトブルー', 'エンバーオレンジ', 'マットシルバー', 'パールホワイト'] },
+    elektra: { desc: '静かでパワフルなEV', paints: ['アナトリアンレッド', 'ストームグレー', 'マット・アース', 'アイスブルー'] },
+    simsek: { desc: '巨大スポイラーのフルチューン', paints: ['マットブラック＋イエローライン', 'ファイアオレンジ', 'ネオングリーン', 'メタリックパープル'] },
+    cinar: { desc: '伝説のクラシック', paints: ['レジェンドオレンジ', 'ベビーブルー', '2トーン クリーム／チェリー', 'マット・オリーブ'] },
+    efe: { desc: '鋼のように頑丈、父譲りの一台', paints: ['ボスポラスブルー', 'カーキ', 'シルバー', '2トーン ベージュ／ブラウン'] },
+    marmara: { desc: '地味なセダン、でも侮れない', paints: ['スノーホワイト', 'ボルケーノレッド', 'マット・アンスラサイト', '2トーン ブルー／ブラック'] },
+    liva: { desc: '小さく軽快な空飛ぶハッチバック', paints: ['オーシャンブルー', 'フレイムオレンジ', 'マットホワイト', '2トーン レッド／ブラック'] },
+    bozkir: { desc: 'どこでも走り、決して止まらない', paints: ['キャニオンオレンジ', 'フォレストグリーン', 'サンドベージュ', '2トーン グレー／ブラック'] },
+  },
+};
+
+// --- i18n/zh.js ---
+// 简体中文
+const ZH = {
+  start: '开始',
+  menu: {
+    garage: '选车', settings: '设置', howto: '玩法', apk: '下载 APK',
+    best: '最佳：{score} 分 · {time}', first: '你的第一次逃亡正等着你',
+    maker: '制作：Çağlar Sağlam', exit: '再按一次退出',
+  },
+  aria: {
+    game: '游戏区域', health: '耐久', pause: '暂停', wanted: '通缉等级', damage: '损伤', reverse: '倒车',
+    mute: '开关声音', back: '返回', prev: '上一辆', next: '下一辆', start: '开始',
+  },
+  garage: {
+    finish: { gloss: '亮面', metal: '金属漆', matte: '哑光', pearl: '珠光' }, twoTone: '双色',
+    title: '车库', selected: '已选', select: '选择', buy: '购买 · {cost}', need: '{cost} 金币',
+    speed: '速度', accel: '加速', grip: '抓地力', durability: '耐久',
+  },
+  settings: {
+    title: '设置', sound: '声音', volume: '音量', ambient: '街道环境音', vibrate: '振动',
+    control: '操控', zones: '左右点击', wheel: '方向盘', stick: '摇杆',
+    quality: '画质', auto: '自动', high: '高', low: '低',
+    language: '语言 / Language', privacy: '隐私政策', version: '版本 {v}',
+  },
+  dev: {
+    title: '开发者', god: '无敌', start: '开始时间',
+    t0: '0 秒', t45: '45 秒（SWAT 前）', t195: '195 秒（增援前）', t275: '275 秒（坦克前）', t280: '280 秒（坦克）',
+  },
+  howto: {
+    title: '玩法说明',
+    rightH: '点击右半屏', rightP: '向右转并漂移',
+    leftH: '点击左半屏', leftP: '向左转并漂移',
+    bothH: '同时点击两侧', bothP: '刹车并倒车',
+    tips: [
+      '车会自己往前开，你只需要控制方向。',
+      '在设置中选择操控方式：左右点击、方向盘或摇杆。',
+      '撞墙会受损：冒烟、火花、起火，最后爆炸。',
+      '冲出城市：海滩、森林、沙漠和乡村等着你。',
+      '与警察擦身而过和漂移都能提高连击倍数。',
+      '让警车撞上墙，或者直接把它们撞翻。',
+      '看到红圈就赶紧跑：坦克炮火来了！',
+    ],
+  },
+  power: {
+    blast: '爆破', ghost: '隐身', heal: '修复', giant: '巨大化',
+    blastInfo: '附近所有车辆全部爆炸', ghostInfo: '{n} 秒内警察看不见你',
+    healInfo: '修复损伤并扑灭火焰', giantInfo: '{n} 秒内变得巨大，不受伤害',
+    healFloat: '修复 +', ghostFloat: '隐身', giantFloat: '巨大化',
+  },
+  pause: { title: '已暂停', resume: '继续', menu: '主菜单' },
+  over: {
+    caught: '被抓了！', sunk: '沉没了！', record: '新纪录！',
+    score: '得分', time: '时间', coins: '金币', kills: '击毁警车', broken: '撞毁物品', near: '惊险闪避', drift: '漂移',
+    seconds: '{n} 秒', best: '最高分：{score} · 最长时间：{time}', retry: '再来一次', menu: '主菜单',
+  },
+  hint: {
+    zones: ['点左侧', '向左漂移', '同时点两侧', '倒车', '点右侧', '向右漂移'],
+    wheel: ['按住“倒车”', '倒车', '方向盘', '在右下角', '转动', '左右转向'],
+    stick: ['左半屏', '按住滑动', '摇杆', '出现在手指下', '按住“倒车”', '倒车'],
+    rev: '倒车',
+  },
+  alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！' },
+  cheat: { on: '可以啊，你找到作弊码了！', off: '作弊已关闭', badge: '作弊已开启' },
+  cars: {
+    atmaca: { desc: '每条街坊的老伙计', paints: ['街坊米色', '酒红', '哑光军绿', '双色 奶白/酒红'] },
+    motor: { desc: '窄巷之王', paints: ['赛道红', '电光蓝', '哑光黑', '珍珠白'] },
+    granit: { desc: '高大安全的 SUV', paints: ['午夜蓝', '炭火橙', '哑光银', '珍珠白'] },
+    elektra: { desc: '安静、强劲、纯电', paints: ['安纳托利亚红', '风暴灰', '哑光土色', '冰川蓝'] },
+    simsek: { desc: '夸张尾翼，全套改装', paints: ['哑光黑配黄条', '烈焰橙', '霓虹绿', '金属紫'] },
+    cinar: { desc: '经典传奇', paints: ['传奇橙', '宝宝蓝', '双色 奶白/樱桃红', '哑光橄榄'] },
+    efe: { desc: '钢铁般结实，父辈传下来的', paints: ['海峡蓝', '卡其', '银色', '双色 米色/棕色'] },
+    marmara: { desc: '朴素轿车，暗藏惊喜', paints: ['雪白', '火山红', '哑光炭灰', '双色 蓝/黑'] },
+    liva: { desc: '小巧灵活，会飞的两厢车', paints: ['海洋蓝', '火焰橙', '哑光白', '双色 红/黑'] },
+    bozkir: { desc: '哪里都能去，从不停下', paints: ['峡谷橙', '森林绿', '沙米色', '双色 灰/黑'] },
+  },
+};
+
+// --- i18n/es.js ---
+// Español
+const ES = {
+  start: 'JUGAR',
+  menu: {
+    garage: 'Coches', settings: 'Ajustes', howto: 'Cómo jugar', apk: 'Bajar APK',
+    best: 'Mejor: {score} pts · {time}', first: 'Tu primera huida te espera',
+    maker: 'Hecho por Çağlar Sağlam', exit: 'Pulsa otra vez para salir',
+  },
+  aria: {
+    game: 'Zona de juego', health: 'Salud', pause: 'Pausa', wanted: 'Nivel de búsqueda', damage: 'Daño', reverse: 'Marcha atrás',
+    mute: 'Activar o silenciar sonido', back: 'Atrás', prev: 'Anterior', next: 'Siguiente', start: 'Jugar',
+  },
+  garage: {
+    finish: { gloss: 'Brillante', metal: 'Metalizado', matte: 'Mate', pearl: 'Perla' }, twoTone: 'Bicolor',
+    title: 'Garaje', selected: 'Elegido', select: 'Elegir', buy: 'Comprar · {cost}', need: '{cost} monedas',
+    speed: 'Velocidad', accel: 'Aceleración', grip: 'Agarre', durability: 'Resistencia',
+  },
+  settings: {
+    title: 'Ajustes', sound: 'Sonido', volume: 'Volumen', ambient: 'Ambiente urbano', vibrate: 'Vibración',
+    control: 'Controles', zones: 'Izq. / Der.', wheel: 'Volante', stick: 'Joystick',
+    quality: 'Gráficos', auto: 'Auto', high: 'Alta', low: 'Baja',
+    language: 'Idioma / Language', privacy: 'Política de privacidad', version: 'Versión {v}',
+  },
+  dev: {
+    title: 'Desarrollador', god: 'Invencible', start: 'Tiempo inicial',
+    t0: '0 s', t45: '45 s (antes del SWAT)', t195: '195 s (antes de refuerzos)', t275: '275 s (antes de tanques)', t280: '280 s (tanques)',
+  },
+  howto: {
+    title: 'Cómo jugar',
+    rightH: 'Toca la mitad derecha', rightP: 'Gira a la derecha y derrapa',
+    leftH: 'Toca la mitad izquierda', leftP: 'Gira a la izquierda y derrapa',
+    bothH: 'Toca ambas a la vez', bothP: 'Frena y da marcha atrás',
+    tips: [
+      'El coche avanza solo. Tú solo diriges.',
+      'Elige los controles en Ajustes: Izq. / Der., Volante o Joystick.',
+      'Los muros hacen daño: humo, chispas, fuego y… ¡bum!',
+      'Sal de la ciudad: te esperan playas, bosques, desiertos y campo.',
+      'Esquivar a la policía por los pelos y derrapar sube tu combo.',
+      'Haz que la policía se estrelle contra los muros o embístela.',
+      '¿Ves un círculo rojo? ¡Sal ya: viene fuego de tanque!',
+    ],
+  },
+  power: {
+    blast: 'Explosión', ghost: 'Invisible', heal: 'Reparar', giant: 'Gigante',
+    blastInfo: 'Hace explotar todos los coches cercanos', ghostInfo: 'La policía no te ve durante {n} s',
+    healInfo: 'Repara el daño y apaga el fuego', giantInfo: 'Te vuelves gigante {n} s y no recibes daño',
+    healFloat: 'REPARADO +', ghostFloat: 'INVISIBLE', giantFloat: 'GIGANTE',
+  },
+  pause: { title: 'En pausa', resume: 'Continuar', menu: 'Menú principal' },
+  over: {
+    caught: '¡TE PILLARON!', sunk: '¡HUNDIDO!', record: '¡NUEVO RÉCORD!',
+    score: 'Puntos', time: 'Tiempo', coins: 'Monedas', kills: 'Policías derribados', broken: 'Objetos rotos', near: 'Por los pelos', drift: 'Derrape',
+    seconds: '{n} s', best: 'Mejor puntuación: {score} · Mayor tiempo: {time}', retry: 'Reintentar', menu: 'Menú principal',
+  },
+  hint: {
+    zones: ['Toca izq.', 'derrapa a la izq.', 'Toca ambos', 'marcha atrás', 'Toca der.', 'derrapa a la der.'],
+    wheel: ['Mantén ATRÁS', 'marcha atrás', 'Volante', 'abajo a la derecha', 'Gíralo', 'gira a izq. o der.'],
+    stick: ['Mitad izq.', 'pulsa y desliza', 'Joystick', 'aparece bajo tu dedo', 'Mantén ATRÁS', 'marcha atrás'],
+    rev: 'ATRÁS',
+  },
+  alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!' },
+  cheat: { on: '¡Toma ya! ¡Has encontrado el truco secreto!', off: 'Truco desactivado', badge: 'TRUCO ACTIVO' },
+  cars: {
+    atmaca: { desc: 'El veterano de todos los barrios', paints: ['Beige de barrio', 'Rojo vino', 'Verde militar mate', 'Bicolor crema/burdeos'] },
+    motor: { desc: 'El rey de las calles estrechas', paints: ['Rojo carreras', 'Azul eléctrico', 'Negro mate', 'Blanco perla'] },
+    granit: { desc: 'SUV alto y seguro', paints: ['Azul medianoche', 'Naranja brasa', 'Plata mate', 'Blanco perla'] },
+    elektra: { desc: 'Silencioso, potente, eléctrico', paints: ['Rojo Anatolia', 'Gris tormenta', 'Tierra mate', 'Azul hielo'] },
+    simsek: { desc: 'Alerón exagerado, tuning total', paints: ['Negro mate, franja amarilla', 'Naranja fuego', 'Verde neón', 'Morado metalizado'] },
+    cinar: { desc: 'Una leyenda clásica', paints: ['Naranja leyenda', 'Azul bebé', 'Bicolor crema/cereza', 'Oliva mate'] },
+    efe: { desc: 'Duro como el acero, herencia de papá', paints: ['Azul Bósforo', 'Caqui', 'Plata', 'Bicolor beige/marrón'] },
+    marmara: { desc: 'Sedán sencillo, lleno de sorpresas', paints: ['Blanco nieve', 'Rojo volcán', 'Antracita mate', 'Bicolor azul/negro'] },
+    liva: { desc: 'Compacto, ágil y volador', paints: ['Azul océano', 'Naranja llama', 'Blanco mate', 'Bicolor rojo/negro'] },
+    bozkir: { desc: 'Va a todas partes y nunca para', paints: ['Naranja cañón', 'Verde bosque', 'Beige arena', 'Bicolor gris/negro'] },
+  },
+};
+
+// --- i18n/de.js ---
+// Deutsch
+const DE = {
+  start: 'START',
+  menu: {
+    garage: 'Autos', settings: 'Optionen', howto: 'Anleitung', apk: 'APK laden',
+    best: 'Bestwert: {score} Pkt. · {time}', first: 'Deine erste Flucht wartet',
+    maker: 'Gemacht von Çağlar Sağlam', exit: 'Zum Beenden erneut drücken',
+  },
+  aria: {
+    game: 'Spielfeld', health: 'Zustand', pause: 'Pause', wanted: 'Fahndungsstufe', damage: 'Schaden', reverse: 'Rückwärtsgang',
+    mute: 'Ton an oder aus', back: 'Zurück', prev: 'Vorheriges', next: 'Nächstes', start: 'Start',
+  },
+  garage: {
+    finish: { gloss: 'Glanz', metal: 'Metallic', matte: 'Matt', pearl: 'Perleffekt' }, twoTone: 'Zweifarbig',
+    title: 'Garage', selected: 'Gewählt', select: 'Wählen', buy: 'Kaufen · {cost}', need: '{cost} Münzen',
+    speed: 'Tempo', accel: 'Beschleunigung', grip: 'Grip', durability: 'Haltbarkeit',
+  },
+  settings: {
+    title: 'Einstellungen', sound: 'Ton', volume: 'Lautstärke', ambient: 'Straßenkulisse', vibrate: 'Vibration',
+    control: 'Steuerung', zones: 'Links / Rechts', wheel: 'Lenkrad', stick: 'Joystick',
+    quality: 'Grafik', auto: 'Auto', high: 'Hoch', low: 'Niedrig',
+    language: 'Sprache / Language', privacy: 'Datenschutz', version: 'Version {v}',
+  },
+  dev: {
+    title: 'Entwickler', god: 'Unbesiegbar', start: 'Startzeit',
+    t0: '0 s', t45: '45 s (vor SWAT)', t195: '195 s (vor Verstärkung)', t275: '275 s (vor Panzern)', t280: '280 s (Panzer)',
+  },
+  howto: {
+    title: 'So wird gespielt',
+    rightH: 'Rechte Hälfte drücken', rightP: 'Lenkt nach rechts und driftet',
+    leftH: 'Linke Hälfte drücken', leftP: 'Lenkt nach links und driftet',
+    bothH: 'Beide gleichzeitig drücken', bothP: 'Bremst und fährt rückwärts',
+    tips: [
+      'Dein Auto fährt von selbst. Du lenkst nur.',
+      'Wähle die Steuerung in den Einstellungen: Links / Rechts, Lenkrad oder Joystick.',
+      'Wände schaden: Rauch, Funken, Feuer – und dann knallt’s.',
+      'Raus aus der Stadt: Strand, Wald, Wüste und Land warten.',
+      'Knappe Manöver an der Polizei vorbei und Drifts erhöhen deine Combo.',
+      'Lass die Polizei gegen Wände krachen oder ramme sie von der Straße.',
+      'Roter Kreis? Sofort weg da: Panzerbeschuss!',
+    ],
+  },
+  power: {
+    blast: 'Explosion', ghost: 'Tarnung', heal: 'Reparatur', giant: 'Riese',
+    blastInfo: 'Sprengt alle Autos in der Nähe', ghostInfo: 'Die Polizei sieht dich {n} s lang nicht',
+    healInfo: 'Repariert Schäden und löscht Feuer', giantInfo: '{n} s lang riesig und unverwundbar',
+    healFloat: 'REPARIERT +', ghostFloat: 'GETARNT', giantFloat: 'RIESE',
+  },
+  pause: { title: 'Pausiert', resume: 'Weiter', menu: 'Hauptmenü' },
+  over: {
+    caught: 'ERWISCHT!', sunk: 'VERSENKT!', record: 'NEUER REKORD!',
+    score: 'Punkte', time: 'Zeit', coins: 'Münzen', kills: 'Polizei erledigt', broken: 'Zerstörte Objekte', near: 'Knappe Manöver', drift: 'Drift',
+    seconds: '{n} s', best: 'Bestwert: {score} · Längste Fahrt: {time}', retry: 'Nochmal', menu: 'Hauptmenü',
+  },
+  hint: {
+    zones: ['Links drücken', 'Drift links', 'Beide drücken', 'Rückwärts', 'Rechts drücken', 'Drift rechts'],
+    wheel: ['RÜCK halten', 'Rückwärts', 'Lenkrad', 'unten rechts', 'Drehen', 'lenkt links oder rechts'],
+    stick: ['Linke Hälfte', 'drücken und ziehen', 'Joystick', 'erscheint unter dem Daumen', 'RÜCK halten', 'Rückwärts'],
+    rev: 'RÜCK',
+  },
+  alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!' },
+  cheat: { on: 'Na sieh mal einer an – du hast den Cheatcode gefunden!', off: 'Cheat aus', badge: 'CHEAT AN' },
+  cars: {
+    atmaca: { desc: 'Der treue Klassiker jeder Nachbarschaft', paints: ['Kiez-Beige', 'Weinrot', 'Mattes Armeegrün', 'Zweifarbig Creme/Bordeaux'] },
+    motor: { desc: 'König der engen Gassen', paints: ['Rennrot', 'Elektroblau', 'Mattschwarz', 'Perlweiß'] },
+    granit: { desc: 'Hoher, sicherer SUV', paints: ['Mitternachtsblau', 'Glutorange', 'Mattsilber', 'Perlweiß'] },
+    elektra: { desc: 'Leise, stark, elektrisch', paints: ['Anatolienrot', 'Sturmgrau', 'Mattes Erdbraun', 'Eisblau'] },
+    simsek: { desc: 'Riesiger Spoiler, voll getunt', paints: ['Mattschwarz mit Gelbstreifen', 'Feuerorange', 'Neongrün', 'Lila Metallic'] },
+    cinar: { desc: 'Eine klassische Legende', paints: ['Legendenorange', 'Babyblau', 'Zweifarbig Creme/Kirsche', 'Matte Olive'] },
+    efe: { desc: 'Stahlhart, von Papa geerbt', paints: ['Bosporusblau', 'Khaki', 'Silber', 'Zweifarbig Beige/Braun'] },
+    marmara: { desc: 'Schlichte Limousine voller Überraschungen', paints: ['Schneeweiß', 'Vulkanrot', 'Mattes Anthrazit', 'Zweifarbig Blau/Schwarz'] },
+    liva: { desc: 'Kleiner, wendiger Flitzer', paints: ['Ozeanblau', 'Flammenorange', 'Mattweiß', 'Zweifarbig Rot/Schwarz'] },
+    bozkir: { desc: 'Fährt überall, hält nie an', paints: ['Canyonorange', 'Waldgrün', 'Sandbeige', 'Zweifarbig Grau/Schwarz'] },
+  },
+};
+
+// --- i18n/index.js ---
+// Dil sistemi. Bütün arayüz metinleri js/i18n/<dil>.js dosyalarındadır, kodda sabit metin yoktur.
+// DOM'a dokunmaz (ui.js uygular); birim testle sınanır.
+// Adlar tek dosyalık pakette çakışmasın diye öneklidir (tools/bundle-file.mjs).
+
+const LANG_PACKS = { tr: TR, en: EN, ja: JA, zh: ZH, es: ES, de: DE };
+// Seçim listesinde her dil kendi adıyla görünür
+const LANGS = { tr: 'Türkçe', en: 'English', ja: '日本語', zh: '简体中文', es: 'Español', de: 'Deutsch' };
+const LOCALES = { tr: 'tr-TR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN', es: 'es-ES', de: 'de-DE' };
+
+const langState = { code: 'tr', pack: TR, listeners: [], numbers: new Map() };
+
+// Tarayıcı ya da telefon dili: desteklenen ilk dil, yoksa İngilizce
+function detectLang(list) {
+  for (const l of list || []) {
+    const k = String(l).toLowerCase().split(/[-_]/)[0];
+    if (LANG_PACKS[k]) return k;
+  }
+  return 'en';
+}
+
+function setLang(code) {
+  const next = LANG_PACKS[code] ? code : 'en';
+  if (next === langState.code) return next;
+  langState.code = next;
+  langState.pack = LANG_PACKS[next];
+  for (const f of langState.listeners) f(next);
+  return next;
+}
+
+const getLang = () => langState.code;
+const onLang = (f) => langState.listeners.push(f);
+
+function langFind(p, key) {
+  let v = p;
+  for (const part of key.split('.')) {
+    if (v == null) return undefined;
+    v = v[part];
+  }
+  return v;
+}
+
+// tx('over.best', { score: 10 }). Eksik anahtar İngilizceye, o da yoksa Türkçeye düşer
+function tx(key, params) {
+  let s = langFind(langState.pack, key);
+  if (s === undefined) s = langFind(EN, key);
+  if (s === undefined) s = langFind(TR, key);
+  if (s === undefined) return key;
+  if (typeof s !== 'string' || !params) return s;
+  return s.replace(/\{(\w+)\}/g, (m, k) => (params[k] !== undefined ? String(params[k]) : m));
+}
+
+// Sayı biçimi dile göre: 1.234 / 1,234 / 1 234
+function txNum(n, digits = 0) {
+  const key = `${langState.code}:${digits}`;
+  let f = langState.numbers.get(key);
+  if (!f) {
+    f = new Intl.NumberFormat(LOCALES[langState.code], { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    langState.numbers.set(key, f);
+  }
+  return f.format(n);
+}
+
+// Test ve denetim için: bir dilin bütün anahtarları
+function langKeys(code) {
+  const out = [];
+  const walk = (o, pre) => {
+    for (const [k, v] of Object.entries(o)) {
+      const key = pre ? `${pre}.${k}` : k;
+      if (v && typeof v === 'object' && !Array.isArray(v)) walk(v, key);
+      else out.push(key);
+    }
+  };
+  walk(LANG_PACKS[code], '');
+  return out;
+}
 
 // --- physics.js ---
 // Araba fiziği: ileri hız, yanal kayma ve açısal hız ayrı ayrı hesaplanır.
@@ -753,6 +1432,7 @@ class World {
   constructor(seed = 12345) {
     this.seed = seed | 0;
     this.kolej = null;
+    this.marks = null;
     this.sites = null;
     this.chunks = new Map();
     this.free = [];
@@ -773,6 +1453,7 @@ class World {
     this.lastKey = -1;
     this.seed = seed | 0;
     this.kolej = null;
+    this.marks = null;
     this.sites = null;
   }
 
@@ -977,6 +1658,7 @@ class World {
 
     // Tek seferlik yerler önce hesaplanır: ilk çağrı rastgele diziyi bozmasın
     const sis = this.sistemChunk();
+    const mark = this.landmarkAt(cx, cy);
     const big = this.bigSiteAt(cx, cy);
     this.biomeAt(cx, cy, biomeOut);
     seedRng(cx, cy, this.seed);
@@ -987,6 +1669,8 @@ class World {
     let t = home ? 'mahalle' : 'city';
     if (cx === sis.cx && cy === sis.cy) {
       t = 'kolej';
+    } else if (mark) {
+      t = mark;
     } else if (big) {
       t = 'bigsite';
     } else if (!home) {
@@ -1013,6 +1697,7 @@ class World {
     else if (t === 'viraj') this.fillCurvy(c);
     else if (t === 'pazar') this.fillPazar(c);
     else if (t === 'kolej') this.fillSistem(c);
+    else if (LANDMARKS.has(t)) this.fillLandmark(c, t);
     else if (t === 'sea') this.fillSea(c);
     else if (t === 'beach') this.fillBeach(c);
     else if (t === 'forest') this.fillForest(c);
@@ -1043,6 +1728,9 @@ class World {
     if (!r) { r = { kind: '', x: 0, y: 0, w: 0, h: 0, style: 0, color: '', alive: true, seed: 0 }; c.rects[c.rectCount] = r; }
     c.rectCount++;
     r.kind = kind; r.style = style; r.color = color; r.alive = true; r.seed = rint(0, 999);
+    // Kayıt yeniden kullanılır: önceki binanın tabela görüntüsü kalmasın (render.js rectSign önbelleği)
+    r.signImg = null;
+    r.landmark = ''; r.signArt = ''; r.roofSignH = 0; r.noRoofSign = false; r.variant = '';
     r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
@@ -1300,7 +1988,8 @@ class World {
     let p = c.pads[c.padCount];
     if (!p) { p = { kind: '', tx: 0, ty: 0, w: 0, h: 0 }; c.pads[c.padCount] = p; }
     c.padCount++;
-    p.kind = kind; p.tx = tx; p.ty = ty; p.w = w; p.h = h;
+    p.kind = kind; p.tx = tx; p.ty = ty; p.w = w; p.h = h; p.text = '';
+    return p;
   }
 
   // Bloğa özel yapı: cami, hastane, okul, stadyum, spor sahaları ya da gölet. Artan yer yine dolar
@@ -1423,7 +2112,7 @@ class World {
     if (area >= 12 && chance(0.2)) {
       const brand = pick(keys(SG.chains));
       const r = add(BUILD.CHAIN, SG.chains[brand], brand, SG.chains[brand], 2);
-      r.brand = brand;
+      r.brand = SG.chainIds[brand];
       return;
     }
     if (area >= 12 && chance(0.08)) { add(BUILD.MARKET, pick(SG.colors), pick(SG.markets)); return; }
@@ -1509,7 +2198,8 @@ class World {
           const ay = Math.round(Math.sin(t) * r);
           this.biomeAt(ax, ay, out);
           const sis = this.kolej;
-          const clash = this.sites.some((o) => Math.abs(o.cx - ax) < 3 && Math.abs(o.cy - ay) < 3) || (Math.abs(sis.cx - ax) < 3 && Math.abs(sis.cy - ay) < 3);
+          const clash = this.sites.some((o) => Math.abs(o.cx - ax) < 3 && Math.abs(o.cy - ay) < 3) || (Math.abs(sis.cx - ax) < 3 && Math.abs(sis.cy - ay) < 3)
+            || this.landmarkList().some((o) => o.cx - ax >= -1 && o.cx - ax <= 2 && o.cy - ay >= -1 && o.cy - ay <= 2);
           if (out.biome === 'city' && !clash && !isHighwayRow(ay) && !isHighwayRow(ay + 1) && Math.max(Math.abs(ax), Math.abs(ay)) > 3) {
             this.sites.push({ ...s, cx: ax, cy: ay });
             break;
@@ -1535,6 +2225,11 @@ class World {
     for (let i = 0; i < c.rectCount; i++) {
       const r = c.rects[i];
       if (r.kind !== 'building') continue;
+      if (r.landmark && W.landmarkHeight[r.landmark]) {
+        r.tall = W.landmarkHeight[r.landmark];
+        c.talls.push(r);
+        continue;
+      }
       const tower = r.style === S.SKYSCRAPER || r.style === S.RESIDENCE || r.style === S.OFFICE || (r.style >= S.TOWER_GLASS && r.style <= S.TOWER_STEP);
       const plain = r.style === S.APARTMENT || r.style === S.HOTEL || r.style === S.ISHANI || r.style === S.SITE_BLOCK;
       // Tohumdan türetilir: rastgele sayı dizisini bozmaz
@@ -1612,12 +2307,203 @@ class World {
     return this.kolej;
   }
 
+  // Kolej kampüsü: haritanın en geniş ve en yüksek binası, bahçe, çit, servisler, spor sahaları
   fillSistem(c) {
-    this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
-    // Haritanın en büyük binası: chunk'ın neredeyse tamamı
-    this.addRect(c, 'building', 5, 5, 30, 27, 3, BUILD.KOLEJ, '#ff7a00');
-    for (let k = 6; k < 29; k += 3) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 28.6 * TILE);
-    this.scatter(c, PROP.SIMITCART, 3, [GROUND.PLAZA]);
+    this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
+    const r = this.addRect(c, 'building', 6, 6, 28, 15, 3, BUILD.KOLEJ, '#ff7a00');
+    r.landmark = 'kolej'; r.sign = NAMES.kolej.ad; r.signColor = '#ff7a00'; r.signArt = 'kolej'; r.signSize = 3; r.roofSignH = 120;
+    this.setGround(c, 6, 15, 28, 18, GROUND.PLAZA); // Ön avlu
+    this.setGround(c, 15, 18, 20, CT, GROUND.PLAZA); // Kapıya giden yol
+    this.setGround(c, ART, 18, 15, 20, GROUND.PLAZA);
+    this.addPad(c, 'stairs', 14, 15, 6, 1);
+    this.addPad(c, 'flag', 20, 16, 2, 2);
+    this.setGround(c, 5, 21, 13, 26, GROUND.PLAZA);
+    this.addPad(c, 'basket', 5, 21, 8, 5);
+    this.setGround(c, 5, 26, 14, 31, GROUND.PLAZA);
+    this.addPad(c, 'foot', 5, 26, 9, 5);
+    this.setGround(c, 21, 19, 31, 26, GROUND.PLAZA);
+    this.addPad(c, 'parking', 21, 19, 10, 7);
+    for (const bx of [22, 25, 28]) this.addRect(c, 'building', bx, 20, bx + 2, 24, 5, BUILD.SERVIS, '#f5b800');
+    this.fence(c, [[15, 20]], [[18, 20]], '#24262b');
+    this.scatter(c, PROP.TREE, 46, [GROUND.GRASS]);
+    this.scatter(c, PROP.BUSH, 16, [GROUND.GRASS]);
+    for (let k = 19; k < 30; k += 3) { this.addProp(c, PROP.BENCH, c.x + 14.6 * TILE, c.y + (k + 0.5) * TILE, Math.PI / 2); this.addProp(c, PROP.BENCH, c.x + 20.4 * TILE, c.y + (k + 0.5) * TILE, Math.PI / 2); }
+  }
+
+  // Çevre çiti: güneyde ve batıda verilen karo aralıklarında kapı boşluğu bırakır
+  fence(c, southGaps, westGaps, color) {
+    const thin = (r, side) => {
+      if (side === 'n') r.h = 6;
+      else if (side === 's') { r.y += r.h - 6; r.h = 6; }
+      else if (side === 'w') r.w = 6;
+      else { r.x += r.w - 6; r.w = 6; }
+    };
+    const run = (side, from, to, gaps) => {
+      let a = from;
+      for (const [g0, g1] of [...gaps, [to, to]]) {
+        if (g0 > a) {
+          let r;
+          if (side === 'n') r = this.addRect(c, 'wall', a, ART, g0, ART + 1, 0, 0, color);
+          else if (side === 's') r = this.addRect(c, 'wall', a, CT - 1, g0, CT, 0, 0, color);
+          else if (side === 'w') r = this.addRect(c, 'wall', ART, a, ART + 1, g0, 0, 0, color);
+          else r = this.addRect(c, 'wall', CT - 1, a, CT, g0, 0, 0, color);
+          thin(r, side);
+        }
+        a = g1;
+      }
+    };
+    run('n', ART, CT, []);
+    run('s', ART, CT, southGaps);
+    run('w', ART + 1, CT - 1, westGaps);
+    run('e', ART + 1, CT - 1, []);
+  }
+
+  // Özel yerlerin chunk'ları: tohuma bağlı, kolejden, büyük sitelerden ve birbirinden ayrı
+  landmarkList() {
+    if (this.marks) return this.marks;
+    this.marks = [];
+    const sis = this.sistemChunk();
+    const out = { biome: '', sea: false };
+    W.landmarks.forEach((m, n) => {
+      const [a, b] = m.ring;
+      for (let i = 0; i < 600; i++) {
+        seedRng(i, 131 + n, this.seed ^ 0x5a5a);
+        const r = a + rnd() * (b - a + i * 0.01);
+        const t = rnd() * 6.283;
+        const x = Math.round(Math.cos(t) * r);
+        const y = Math.round(Math.sin(t) * r);
+        if (Math.max(Math.abs(x), Math.abs(y)) <= 1 || isHighwayRow(y)) continue;
+        if (Math.abs(sis.cx - x) < 2 && Math.abs(sis.cy - y) < 2) continue;
+        if (this.marks.some((o) => Math.abs(o.cx - x) < 2 && Math.abs(o.cy - y) < 2)) continue;
+        this.biomeAt(x, y, out);
+        if (out.biome !== 'city' && !(m.id === 'meram' && (out.biome === 'rural' || out.biome === 'forest'))) continue;
+        this.marks.push({ id: m.id, cx: x, cy: y });
+        break;
+      }
+    });
+    return this.marks;
+  }
+
+  landmarkAt(cx, cy) {
+    for (const m of this.landmarkList()) if (m.cx === cx && m.cy === cy) return m.id;
+    return null;
+  }
+
+  // Tramvay rayı kuzeydeki ana yolda, durak adıyla
+  tram(c, stop) {
+    const p = this.addPad(c, 'tram', 0, 0, CT, ART);
+    p.text = stop;
+  }
+
+  sign(r, text, color, size = 2) {
+    r.sign = text; r.signColor = color; r.signSize = size;
+    return r;
+  }
+
+  fillLandmark(c, id) {
+    const K = NAMES.konya;
+    const D = K.duraklar;
+    const B = BUILD;
+    if (id === 'mevlana') {
+      this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
+      this.sign(this.addRect(c, 'building', 7, 6, 27, 16, 3, B.MUZE, '#dcccaa'), K.mevlana, '#0b7f69', 2);
+      this.setGround(c, 6, 18, 14, 28, GROUND.GRASS);
+      this.addPad(c, 'gul', 6, 18, 8, 10);
+      this.setGround(c, 21, 18, 29, 28, GROUND.GRASS);
+      this.addPad(c, 'gul', 21, 18, 8, 10);
+      this.addRect(c, 'water', 16, 20, 19, 23, 10, 2, '#3aa7e8'); // Şadırvan
+      this.addPad(c, 'yildiz', 14, 24, 7, 6);
+      this.scatter(c, PROP.TREE, 14, [GROUND.GRASS]);
+      for (let k = 7; k < 28; k += 4) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 17.3 * TILE);
+      this.tram(c, D[2]);
+    } else if (id === 'alaaddin') {
+      this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
+      this.addPad(c, 'hill', 7, 7, 21, 21);
+      // Tepenin çevresinde yürüyüş halkası ve çay bahçeleri
+      for (let y = ART; y < CT; y++) for (let x = ART; x < CT; x++) {
+        const d = Math.hypot(x + 0.5 - 17.5, y + 0.5 - 17.5);
+        if (d > 11.2 && d < 12.6) c.ground[y * CT + x] = GROUND.PLAZA;
+      }
+      this.sign(this.addRect(c, 'building', 13, 12, 23, 19, 3, B.SELCUK_CAMI, '#c9b99a'), K.alaaddin, '#4a7870', 2);
+      this.sign(this.addRect(c, 'building', 26, 26, 29, 29, 4, B.ANIT, '#b5523b'), K.tepe, '#2f6b4f', 1).variant = 'kosk';
+      this.scatter(c, PROP.TREE, 40, [GROUND.GRASS]);
+      this.scatter(c, PROP.UMBRELLA, 10, [GROUND.PLAZA]);
+      this.scatter(c, PROP.CHAIRS, 8, [GROUND.PLAZA]);
+      this.tram(c, D[0]);
+    } else if (id === 'zafer') {
+      this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
+      this.addPad(c, 'yildiz', 9, 9, 17, 17);
+      this.sign(this.addRect(c, 'building', 15, 15, 20, 20, 2, B.ANIT, '#b9ad98'), K.zafer, '#a8323a', 1);
+      for (const [x, y] of [[6, 6], [27, 6], [6, 27], [27, 27]]) this.addRect(c, 'water', x, y, x + 2, y + 2, 10, 2, '#3aa7e8');
+      // Güney kenarında Konya fırınları
+      K.firinlar.slice(0, 4).forEach((n, i) => this.sign(this.addRect(c, 'building', 5 + i * 6, 28, 10 + i * 6, 31, 3, B.SHOP, '#a8733f'), n, '#c8261e', 1));
+      this.scatter(c, PROP.BENCH, 12, [GROUND.PLAZA]);
+      this.scatter(c, PROP.SIMITCART, 3, [GROUND.PLAZA]);
+      this.scatter(c, PROP.UNCLES, 4, [GROUND.PLAZA]);
+      this.tram(c, D[1]);
+    } else if (id === 'bedesten') {
+      this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
+      this.sign(this.addRect(c, 'building', 5, 6, 30, 10, 3, B.BEDESTEN, '#c6b28c'), K.bedesten, '#7a2a18', 2);
+      this.addRect(c, 'building', 5, 13, 30, 17, 3, B.BEDESTEN, '#c6b28c');
+      this.addRect(c, 'building', 5, 20, 30, 24, 3, B.BEDESTEN, '#c6b28c');
+      K.firinlar.forEach((n, i) => this.sign(this.addRect(c, 'building', 5 + i * 5, 27, 9 + i * 5, 31, 3, B.SHOP, '#a8733f'), n, '#c8261e', 1));
+      this.scatter(c, PROP.STALL, 14, [GROUND.PLAZA]);
+      this.scatter(c, PROP.UNCLES, 3, [GROUND.PLAZA]);
+    } else if (id === 'kongre') {
+      this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
+      this.sign(this.addRect(c, 'building', 5, 6, 30, 17, 3, B.KONGRE, '#1c7a8c'), K.kongre, '#1c4f6a', 2);
+      this.addRect(c, 'water', 14, 20, 21, 24, 8, 2, '#3aa7e8');
+      this.addPad(c, 'yildiz', 6, 19, 7, 7);
+      this.addPad(c, 'yildiz', 22, 19, 7, 7);
+      this.addPad(c, 'parking', 5, 27, 26, 4);
+      for (let k = 7; k < 29; k += 3) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 25.5 * TILE);
+      this.tram(c, D[4]);
+    } else if (id === 'kule') {
+      this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
+      const t = this.sign(this.addRect(c, 'building', 13, 6, 18, 11, 2, B.KULE, '#1d3550'), NAMES.kule, '#1b3a5a', 2);
+      t.landmark = 'kule'; t.noRoofSign = true; // Kulenin adı cephede, sivri çatıda yazı olmaz
+      this.addRect(c, 'building', 6, 13, 29, 22, 3, B.AVM, '#aab3bb');
+      this.addPad(c, 'parking', 5, 24, 26, 6);
+      this.scatter(c, PROP.BENCH, 6, [GROUND.PLAZA]);
+    } else if (id === 'kulturpark') {
+      this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
+      this.setGround(c, 16, ART, 19, CT, GROUND.PLAZA);
+      this.setGround(c, ART, 16, CT, 19, GROUND.PLAZA);
+      this.addRect(c, 'water', 6, 6, 13, 12, 6, 0, '#3aa7e8'); // Havuz: araba düşmez
+      this.setGround(c, 21, 20, 30, 28, GROUND.PLAZA);
+      this.addPad(c, 'amfi', 21, 20, 9, 8);
+      this.sign(this.addRect(c, 'building', 16, 16, 19, 19, 4, B.ANIT, '#b5523b'), K.kulturpark, '#2f6b4f', 1).variant = 'kosk';
+      this.scatter(c, PROP.TREE, 50, [GROUND.GRASS]);
+      this.scatter(c, PROP.BENCH, 14, [GROUND.GRASS, GROUND.PLAZA]);
+      this.tram(c, D[3]);
+    } else if (id === 'meram') {
+      this.setGround(c, ART, ART, CT, CT, GROUND.DIRT);
+      this.addPad(c, 'bag', 4, 4, 13, 12);
+      this.addPad(c, 'bag', 19, 18, 12, 12);
+      this.setGround(c, ART, 16, CT, 18, GROUND.ALLEY);
+      for (const [x, y] of [[19, 6], [24, 10], [6, 20], [11, 25]]) {
+        this.addRect(c, 'building', x, y, x + 3, y + 3, 5, B.BAGEVI, '#f0e6d2');
+      }
+      this.sign(this.addRect(c, 'building', 26, 4, 30, 7, 5, B.BAGEVI, '#f0e6d2'), K.meram, '#5c3a22', 1);
+      this.scatter(c, PROP.TREE, 34, [GROUND.DIRT]);
+      this.scatter(c, PROP.BUSH, 12, [GROUND.DIRT]);
+    } else {
+      // Okullar: ad isim tablosunda, renkler uydurma ve genel
+      const look = { serife: ['#efe2c0', '#c8261e'], ted: ['#f2f2f2', '#c1121f'], gundogdu: ['#ffe08a', '#1f3a68'] }[id];
+      this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
+      const r = this.sign(this.addRect(c, 'building', 7, 6, 27, 14, 3, B.OZEL_OKUL, look[0]), NAMES.okullar[id], look[1], 3);
+      r.signColor = look[1];
+      this.setGround(c, 7, 14, 27, 19, GROUND.PLAZA);
+      this.addPad(c, 'yard', 7, 15, 10, 4);
+      this.setGround(c, 15, 19, 20, CT, GROUND.PLAZA);
+      this.setGround(c, 5, 21, 13, 27, GROUND.PLAZA);
+      this.addPad(c, 'basket', 5, 21, 8, 6);
+      this.setGround(c, 22, 21, 30, 27, GROUND.PLAZA);
+      this.addRect(c, 'building', 23, 22, 25, 26, 5, B.SERVIS, '#f5b800');
+      this.addRect(c, 'building', 26, 22, 28, 26, 5, B.SERVIS, '#f5b800');
+      this.fence(c, [[15, 20]], [], '#3a3d44');
+      this.scatter(c, PROP.TREE, 30, [GROUND.GRASS]);
+    }
   }
 
   fillPark(c) {
@@ -2015,6 +2901,7 @@ World.prototype.tmp = { nx: 0, ny: 0 };
 const biomeOut = { biome: 'city', sea: false };
 const biomeOut2 = { biome: 'city', sea: false };
 const SITE_NAMES = CONFIG.signs.sites;
+const LANDMARKS = new Set(CONFIG.world.landmarks.map((m) => m.id));
 const PASTELS = ['#7fa8c9', '#c9a27f', '#a0a8b8', '#8fb59a', '#c98f8f', '#b0a080', '#9a8fc0'];
 const RESERVED = [[CT - 1, ART], [ART, CT - 1], [ART, ART]];
 const xsBuf = [];
@@ -3315,7 +4202,7 @@ function interp(curve, t) {
 // Süreye göre zorluk: eğriler doğrusal olduğu için her saniye biraz artar.
 // heat: arananlık. Yalnız polis baskısını öne alır, aşama ve uzaylı eşikleri süreye bağlıdır
 function difficultyAt(t, out = {}, heat = 0) {
-  const h = t + heat;
+  const h = t + (t >= PU.heat.from ? heat : 0);
   out.stage = t >= D.tanksAt ? 3 : t >= D.advancedAt ? 2 : t >= D.swatAt ? 1 : 0;
   out.stars = Math.min(MAX_STARS, 1 + out.stage);
   out.maxPolice = Math.min(D.maxActive, Math.round(interp(PU.policeCurve, h) * PU.countMul));
@@ -4694,14 +5581,14 @@ class Game {
       this.burning = false;
       this.burnT = 0;
       this.sinceHit = 0;
-      this.fx.float(p.x, p.y - 34, 'CAN +', '#2fd872');
+      this.fx.float(p.x, p.y - 34, tx('power.healFloat'), '#2fd872');
     } else if (name === 'ghost') {
       this.ghostT = PW.duration;
-      this.fx.float(p.x, p.y - 34, 'GÖRÜNMEZ', '#a07bff');
+      this.fx.float(p.x, p.y - 34, tx('power.ghostFloat'), '#a07bff');
     } else if (name === 'giant') {
       this.giantT = PW.duration;
       this.setGiant(true);
-      this.fx.float(p.x, p.y - 34, 'DEV MOD', '#ffd23f');
+      this.fx.float(p.x, p.y - 34, tx('power.giantFloat'), '#ffd23f');
     }
   }
 
@@ -5227,10 +6114,11 @@ function paintRover(g, spec) {
 
 // --- Güç simgeleri ---
 const POWER_LOOK = {
-  blast: { color: '#ff7a1a', name: 'Patlama' },
-  ghost: { color: '#a07bff', name: 'Görünmezlik' },
-  heal: { color: '#2fd872', name: 'Can' },
-  giant: { color: '#ffd23f', name: 'Dev mod' },
+  // Adlar dil dosyasında: power.blast, power.ghost ...
+  blast: { color: '#ff7a1a' },
+  ghost: { color: '#a07bff' },
+  heal: { color: '#2fd872' },
+  giant: { color: '#ffd23f' },
 };
 
 function paintPower(g, kind) {
@@ -5986,6 +6874,510 @@ function paintStars(g, seed) {
     const q = 0.7 + r() * 1;
     g.fillRect(-160 + r() * 320, -45 + r() * r() * 90, q, q);
   }
+}
+
+// --- landmarks.js ---
+// Özel yerler: kolej, Konya yapıları, okullar. Kodla çizilir, gerçek logo ya da marka kullanılmaz.
+// Zemin çizimleri chunk önbelleğine bir kez işlenir. Yüksek yapıların (kolej, kule) duvar, çatı ve
+// gece pencere dokuları ilk görüldüğünde bir kez üretilir, sonra yalnızca kopyalanır.
+
+const S = BUILD;
+const TAU = Math.PI * 2;
+
+function mk(w, h) {
+  if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(w, h);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  return c;
+}
+
+function text(g, s, x, y, size, color, weight = 900, font = 'Nunito, sans-serif') {
+  g.font = `${weight} ${size}px ${font}`;
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillStyle = color;
+  g.fillText(s, x, y);
+}
+
+// Selçuklu yıldızı: iç içe iki kare, sekiz köşe
+function star8(g, x, y, R, fill, stroke) {
+  g.beginPath();
+  for (let i = 0; i < 16; i++) {
+    const a = (i / 16) * TAU - Math.PI / 2;
+    const q = i % 2 ? R * 0.62 : R;
+    g[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * q, y + Math.sin(a) * q);
+  }
+  g.closePath();
+  if (fill) { g.fillStyle = fill; g.fill(); }
+  if (stroke) { g.strokeStyle = stroke; g.stroke(); }
+}
+
+// Kubbe: kurşun gri ya da firuze, yumuşak ışık
+function dome(g, x, y, R, base = '#8d98a3') {
+  const gr = g.createRadialGradient(x - R * 0.35, y - R * 0.4, R * 0.1, x, y, R);
+  gr.addColorStop(0, shade(base, 0.45)); gr.addColorStop(0.7, base); gr.addColorStop(1, shade(base, -0.35));
+  g.fillStyle = gr; g.beginPath(); g.arc(x, y, R, 0, TAU); g.fill();
+  g.strokeStyle = shade(base, -0.45); g.lineWidth = 1; g.stroke();
+  g.fillStyle = '#d9b44a'; g.beginPath(); g.arc(x, y, Math.max(1.4, R * 0.12), 0, TAU); g.fill();
+}
+
+// Taç kapı: taş çerçeve, mukarnas sıraları, ortada geçit
+function portal(g, cx, y, w, h, stone = '#cbb894') {
+  g.fillStyle = shade(stone, -0.25); g.fillRect(cx - w / 2 - 3, y - 3, w + 6, h + 6);
+  g.fillStyle = stone; g.fillRect(cx - w / 2, y, w, h);
+  g.fillStyle = shade(stone, -0.18);
+  for (let row = 0; row < 3; row++) {
+    const n = 5 - row;
+    for (let i = 0; i < n; i++) {
+      const px = cx - w * 0.32 + (i + 0.5) * (w * 0.64 / n);
+      g.beginPath(); g.arc(px, y + 4 + row * 4.5, 2.4, Math.PI, 0); g.fill();
+    }
+  }
+  g.fillStyle = '#4a3a2a'; rr(g, cx - w * 0.18, y + h * 0.45, w * 0.36, h * 0.55, w * 0.18); g.fill();
+  star8(g, cx, y + h * 0.3, Math.min(5, w * 0.12), '#e9d9b0', null);
+}
+
+// --- Zemin çizimleri (düz yapılar) ---
+
+// Okul servisi: sarı, üstten görünüm
+function servis(g, r) {
+  const v = r.h >= r.w;
+  const L = v ? r.h : r.w; const W = v ? r.w : r.h;
+  g.save();
+  g.translate(r.x + r.w / 2, r.y + r.h / 2);
+  if (!v) g.rotate(-Math.PI / 2);
+  g.fillStyle = 'rgba(0,0,0,.25)'; rr(g, -W / 2 + 3, -L / 2 + 4, W, L, 7); g.fill();
+  g.fillStyle = '#f5b800'; rr(g, -W / 2, -L / 2, W, L, 7); g.fill();
+  g.fillStyle = '#ffd23f'; rr(g, -W / 2 + 4, -L / 2 + 16, W - 8, L - 26, 4); g.fill();
+  g.fillStyle = '#20242b'; rr(g, -W / 2 + 3, -L / 2 + 3, W - 6, 10, 3); g.fill();
+  g.fillStyle = '#2b3038';
+  for (let k = -L / 2 + 22; k < L / 2 - 12; k += 14) { g.fillRect(-W / 2, k, 3, 9); g.fillRect(W / 2 - 3, k, 3, 9); }
+  g.fillStyle = '#f4f6f8'; g.fillRect(-W / 2 + 6, -L / 2 + 30, W - 12, 3);
+  g.save(); g.rotate(Math.PI / 2);
+  text(g, 'OKUL TAŞITI', 0, 0, Math.min(9, W * 0.32), '#1b1d22');
+  g.restore();
+  g.fillStyle = '#e8352e'; g.fillRect(-W / 2 + 4, L / 2 - 4, 6, 3); g.fillRect(W / 2 - 10, L / 2 - 4, 6, 3);
+  g.restore();
+}
+
+// Müze: taş külliye, kurşun kubbeler ve yeşil konik kubbe (stilize)
+function muze(g, r) {
+  const { x, y, w, h } = r;
+  g.fillStyle = '#b6a585'; rr(g, x, y, w, h, 6); g.fill();
+  g.fillStyle = '#dcccaa'; rr(g, x + 5, y + 5, w - 10, h - 14, 5); g.fill();
+  // Avlu revakları
+  g.fillStyle = '#cdbb96';
+  for (let px = x + 14; px < x + w * 0.6; px += 22) { g.beginPath(); g.arc(px, y + h - 16, 8, Math.PI, 0); g.fill(); }
+  // Küçük kubbeler
+  for (let i = 0; i < 6; i++) {
+    const px = x + w * 0.1 + (i % 3) * w * 0.17;
+    const py = y + h * (i < 3 ? 0.28 : 0.6);
+    dome(g, px, py, Math.min(w, h) * 0.1);
+  }
+  // Yeşil kubbe: dilimli koni, tepede alem
+  const cx = x + w * 0.76; const cy = y + h * 0.4; const R = Math.min(w, h) * 0.3;
+  g.fillStyle = 'rgba(20,30,40,.3)'; g.beginPath(); g.ellipse(cx + R * 0.5, cy + R * 0.7, R * 1.1, R * 0.8, 0.4, 0, TAU); g.fill();
+  g.fillStyle = '#e8dcc0'; g.beginPath(); g.arc(cx, cy, R * 1.12, 0, TAU); g.fill();
+  const n = 16;
+  for (let i = 0; i < n; i++) {
+    const a0 = (i / n) * TAU; const a1 = ((i + 1) / n) * TAU;
+    g.fillStyle = i % 2 ? '#13a183' : '#0b7f69';
+    g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, R, a0, a1); g.closePath(); g.fill();
+  }
+  const hi = g.createRadialGradient(cx - R * 0.4, cy - R * 0.45, 1, cx, cy, R);
+  hi.addColorStop(0, 'rgba(255,255,255,.55)'); hi.addColorStop(0.5, 'rgba(255,255,255,.08)'); hi.addColorStop(1, 'rgba(0,0,0,.25)');
+  g.fillStyle = hi; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill();
+  g.fillStyle = '#e2bd4c'; g.beginPath(); g.arc(cx, cy, R * 0.12, 0, TAU); g.fill();
+  // Minare
+  const mx = x + w - 12; const my = y + 12;
+  g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(mx, my, 34, 4);
+  g.fillStyle = '#e6dcc8'; g.beginPath(); g.arc(mx, my, 6, 0, TAU); g.fill();
+  g.fillStyle = '#1aa58a'; g.beginPath(); g.arc(mx, my, 3.6, 0, TAU); g.fill();
+  portal(g, x + w * 0.32, y + h - 26, 40, 26);
+}
+
+// Selçuklu camisi (tepe üstünde): taş gövde, düz ahşap çatı çizgileri, piramit külahlı türbe
+function selcukCami(g, r) {
+  const { x, y, w, h } = r;
+  g.fillStyle = '#a8977a'; rr(g, x, y, w, h, 5); g.fill();
+  g.fillStyle = '#c9b99a'; rr(g, x + 4, y + 4, w - 8, h - 12, 4); g.fill();
+  g.strokeStyle = 'rgba(90,70,50,.35)'; g.lineWidth = 1;
+  for (let px = x + 10; px < x + w - 8; px += 9) { g.beginPath(); g.moveTo(px, y + 8); g.lineTo(px, y + h * 0.6); g.stroke(); }
+  dome(g, x + w * 0.62, y + h * 0.32, Math.min(w, h) * 0.16, '#8a96a2');
+  // Türbe: sekizgen, külah
+  const tx = x + w * 0.2; const ty = y + h * 0.3; const R = Math.min(w, h) * 0.16;
+  g.fillStyle = '#d8cbb0'; g.beginPath();
+  for (let i = 0; i < 8; i++) { const a = (i / 8) * TAU + 0.39; g[i ? 'lineTo' : 'moveTo'](tx + Math.cos(a) * R * 1.15, ty + Math.sin(a) * R * 1.15); }
+  g.closePath(); g.fill();
+  for (let i = 0; i < 8; i++) {
+    const a0 = (i / 8) * TAU + 0.39; const a1 = ((i + 1) / 8) * TAU + 0.39;
+    g.fillStyle = i % 2 ? '#5e8f86' : '#4a7870';
+    g.beginPath(); g.moveTo(tx, ty); g.lineTo(tx + Math.cos(a0) * R, ty + Math.sin(a0) * R); g.lineTo(tx + Math.cos(a1) * R, ty + Math.sin(a1) * R); g.closePath(); g.fill();
+  }
+  const mx = x + w - 10; const my = y + h * 0.7;
+  g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(mx, my, 30, 4);
+  g.fillStyle = '#b8a27c'; g.beginPath(); g.arc(mx, my, 5.5, 0, TAU); g.fill();
+  portal(g, x + w * 0.45, y + h - 24, 34, 22, '#c4ae86');
+}
+
+// Kongre merkezi: cam kenar, Selçuklu yıldızlı çatı deseni
+function kongre(g, r) {
+  const { x, y, w, h } = r;
+  g.fillStyle = '#244a60'; rr(g, x, y, w, h, 10); g.fill();
+  g.fillStyle = '#7fc4dc'; rr(g, x + 4, y + 4, w - 8, h - 8, 8); g.fill();
+  g.fillStyle = '#1c7a8c'; rr(g, x + 12, y + 12, w - 24, h - 30, 6); g.fill();
+  g.save(); rr(g, x + 12, y + 12, w - 24, h - 30, 6); g.clip();
+  g.lineWidth = 1.2;
+  for (let py = y + 24; py < y + h; py += 26) {
+    for (let px = x + 24 + ((py / 26) % 2) * 13; px < x + w; px += 26) star8(g, px, py, 10, 'rgba(255,255,255,.18)', 'rgba(240,210,120,.75)');
+  }
+  g.restore();
+  g.fillStyle = '#e9edf0'; g.fillRect(x + w * 0.3, y + h - 18, w * 0.4, 14);
+  g.fillStyle = '#1d2a33'; for (let px = x + w * 0.32; px < x + w * 0.68; px += 12) g.fillRect(px, y + h - 15, 8, 9);
+}
+
+// Alışveriş merkezi podyumu: tavan pencereleri, çatı makineleri
+function avm(g, r) {
+  const { x, y, w, h } = r;
+  g.fillStyle = '#6f7780'; rr(g, x, y, w, h, 6); g.fill();
+  g.fillStyle = '#aab3bb'; rr(g, x + 4, y + 4, w - 8, h - 14, 5); g.fill();
+  g.fillStyle = '#7ec6e8';
+  for (let px = x + 20; px < x + w - 30; px += 46) { rr(g, px, y + h * 0.3, 28, h * 0.32, 4); g.fill(); }
+  g.fillStyle = '#e4e7ea'; for (let px = x + 14; px < x + w - 14; px += 34) g.fillRect(px, y + 10, 14, 9);
+  g.fillStyle = '#d0121b'; g.fillRect(x + w * 0.4, y + h - 12, w * 0.2, 8);
+}
+
+// Bedesten: uzun taş sıra, üstünde dizi dizi küçük kubbe
+function bedesten(g, r) {
+  const { x, y, w, h } = r;
+  g.fillStyle = '#9d8a6c'; rr(g, x, y, w, h, 4); g.fill();
+  g.fillStyle = '#c6b28c'; rr(g, x + 3, y + 3, w - 6, h - 12, 3); g.fill();
+  const R = Math.min(h * 0.28, 14);
+  for (let px = x + R + 6; px < x + w - R; px += R * 2.3) dome(g, px, y + h * 0.42, R, '#8f9aa4');
+  g.fillStyle = '#4e3b2a';
+  for (let px = x + 10; px < x + w - 10; px += 22) { g.beginPath(); g.arc(px + 6, y + h - 3, 6, Math.PI, 0); g.fill(); }
+}
+
+// Bağ evi: kiremit çatı, baca, asma çardak
+function bagevi(g, r) {
+  const { x, y, w, h } = r;
+  g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(x + 4, y + 5, w, h);
+  g.fillStyle = '#f0e6d2'; g.fillRect(x, y, w, h);
+  g.fillStyle = '#b5523b'; g.fillRect(x, y, w, h * 0.5);
+  g.fillStyle = '#9c4430'; g.fillRect(x, y + h * 0.5, w, h * 0.32);
+  g.fillStyle = '#7a3526'; g.fillRect(x, y + h * 0.48, w, 3);
+  g.fillStyle = '#8c8c8c'; g.fillRect(x + w * 0.72, y + 4, 7, 7);
+  g.fillStyle = '#6b4a2a'; g.fillRect(x - 10, y + h * 0.5, 10, 2); g.fillRect(x - 10, y + h - 2, 10, 2);
+  g.fillStyle = '#4f9a3a'; for (let k = 0; k < 4; k++) { g.beginPath(); g.arc(x - 6 + (k % 2) * 4, y + h * 0.55 + k * 6, 4, 0, TAU); g.fill(); }
+}
+
+// Okul ve kolejler: renk paleti binada (r.color gövde, r.signColor vurgu)
+function ozelOkul(g, r) {
+  const { x, y, w, h } = r;
+  const body = r.color; const acc = r.signColor || '#1d6fb8';
+  g.fillStyle = shade(body, -0.35); rr(g, x, y, w, h, 6); g.fill();
+  g.fillStyle = body; rr(g, x + 4, y + 4, w - 8, h - 16, 5); g.fill();
+  // İç avlu
+  g.fillStyle = shade(body, 0.25); rr(g, x + w * 0.35, y + h * 0.22, w * 0.3, h * 0.38, 4); g.fill();
+  g.fillStyle = '#5da33e'; g.beginPath(); g.arc(x + w * 0.5, y + h * 0.41, Math.min(w, h) * 0.08, 0, TAU); g.fill();
+  // Vurgu çizgileri ve güneş panelleri
+  g.fillStyle = acc; g.fillRect(x + 4, y + 4, w - 8, 6); g.fillRect(x + 4, y + h - 22, w - 8, 6);
+  g.fillStyle = '#26303a';
+  for (let px = x + 12; px < x + w * 0.3; px += 14) g.fillRect(px, y + 16, 10, 16);
+  for (let px = x + w * 0.7; px < x + w - 12; px += 14) g.fillRect(px, y + 16, 10, 16);
+  // Giriş saçağı
+  g.fillStyle = '#f4f6f8'; g.fillRect(x + w / 2 - 30, y + h - 14, 60, 12);
+  g.fillStyle = acc; g.fillRect(x + w / 2 - 30, y + h - 14, 60, 3);
+}
+
+// Anıt ve köşk: taş kaide, sekiz köşeli yıldız, uzun gölge
+function anit(g, r) {
+  const { x, y, w, h } = r;
+  const cx = x + w / 2; const cy = y + h / 2; const R = Math.min(w, h) / 2;
+  if (r.variant === 'kosk') {
+    g.fillStyle = '#7a5a3a'; rr(g, x, y, w, h, 8); g.fill();
+    g.fillStyle = '#b5523b'; rr(g, x + 3, y + 3, w - 6, h - 6, 6); g.fill();
+    g.strokeStyle = '#8c3e2c'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x + 3, y + 3); g.lineTo(x + w - 3, y + h - 3); g.moveTo(x + w - 3, y + 3); g.lineTo(x + 3, y + h - 3); g.stroke();
+    return;
+  }
+  g.fillStyle = 'rgba(0,0,0,.28)'; g.beginPath(); g.ellipse(cx + R * 0.8, cy + R * 0.6, R * 1.2, R * 0.5, 0.5, 0, TAU); g.fill();
+  g.fillStyle = '#b9ad98'; g.beginPath(); g.arc(cx, cy, R, 0, TAU); g.fill();
+  g.fillStyle = '#d8cfbd'; g.beginPath(); g.arc(cx, cy, R * 0.78, 0, TAU); g.fill();
+  star8(g, cx, cy, R * 0.6, '#c9a24a', '#8a6d1f');
+  g.fillStyle = '#f2eee6'; g.beginPath(); g.arc(cx, cy, R * 0.18, 0, TAU); g.fill();
+}
+
+function paintLandmark(g, r) {
+  switch (r.style) {
+    case S.SERVIS: servis(g, r); return true;
+    case S.MUZE: muze(g, r); return true;
+    case S.SELCUK_CAMI: selcukCami(g, r); return true;
+    case S.KONGRE: kongre(g, r); return true;
+    case S.AVM: avm(g, r); return true;
+    case S.BEDESTEN: bedesten(g, r); return true;
+    case S.BAGEVI: bagevi(g, r); return true;
+    case S.OZEL_OKUL: ozelOkul(g, r); return true;
+    case S.ANIT: anit(g, r); return true;
+    case S.KULE: g.fillStyle = '#1d3550'; g.fillRect(r.x, r.y, r.w, r.h); return true;
+    default: return false;
+  }
+}
+
+// --- Açık alanlar (pad) ---
+function paintPad(g, p, x, y, w, h) {
+  switch (p.kind) {
+    case 'stairs': {
+      // Geniş giriş merdiveni ve turuncu korkuluk
+      for (let k = 0; k < 6; k++) { g.fillStyle = k % 2 ? '#e9ecef' : '#d3d8dd'; g.fillRect(x, y + (k * h) / 6, w, h / 6 + 0.5); }
+      g.fillStyle = '#ff7a00'; g.fillRect(x, y, 4, h); g.fillRect(x + w - 4, y, 4, h); g.fillRect(x + w / 2 - 2, y, 4, h);
+      return true;
+    }
+    case 'flag': {
+      const fx = x + w / 2; const fy = y + h / 2;
+      g.fillStyle = '#c9ced4'; g.beginPath(); g.arc(fx, fy, 9, 0, TAU); g.fill();
+      g.fillStyle = 'rgba(0,0,0,.3)'; g.fillRect(fx, fy, 46, 3);
+      g.fillStyle = '#f2f4f6'; g.beginPath(); g.arc(fx, fy, 3.5, 0, TAU); g.fill();
+      g.fillStyle = '#e30a17'; g.fillRect(fx + 4, fy - 20, 40, 24);
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(fx + 18, fy - 8, 7, 0, TAU); g.fill();
+      g.fillStyle = '#e30a17'; g.beginPath(); g.arc(fx + 20, fy - 8, 5.8, 0, TAU); g.fill();
+      star8(g, fx + 29, fy - 8, 3.4, '#fff', null);
+      return true;
+    }
+    case 'tram': {
+      // Tramvay: yolun ortasında iki ray, durak peronu, sundurma ve durak adı
+      const vertical = h > w;
+      const mid = vertical ? x + w / 2 : y + h / 2;
+      g.fillStyle = 'rgba(60,62,66,.55)';
+      if (vertical) g.fillRect(mid - 18, y, 36, h); else g.fillRect(x, mid - 18, w, 36);
+      g.fillStyle = '#b8bec5';
+      for (const o of [-13, -7, 7, 13]) { if (vertical) g.fillRect(mid + o - 1, y, 2, h); else g.fillRect(x, mid + o - 1, w, 2); }
+      g.fillStyle = 'rgba(90,70,50,.6)';
+      for (let k = 0; k < (vertical ? h : w); k += 14) { if (vertical) g.fillRect(mid - 16, y + k, 32, 3); else g.fillRect(x + k, mid - 16, 3, 32); }
+      if (p.text) {
+        const px = vertical ? mid + 22 : x + w * 0.3; const py = vertical ? y + h * 0.3 : mid + 22;
+        const pw = vertical ? 16 : 150; const ph = vertical ? 150 : 16;
+        g.fillStyle = '#c9ced4'; g.fillRect(px, py, pw, ph);
+        g.fillStyle = '#ffd23f'; if (vertical) g.fillRect(px, py, 3, ph); else g.fillRect(px, py, pw, 3);
+        g.fillStyle = '#2b6fd6'; if (vertical) g.fillRect(px + 6, py + ph * 0.3, 9, ph * 0.4); else g.fillRect(px + pw * 0.3, py + 6, pw * 0.4, 9);
+        g.fillStyle = '#1b2a4a'; rr(g, px + (vertical ? 18 : pw * 0.05), py + (vertical ? 4 : 18), vertical ? 70 : 70, 14, 3); g.fill();
+        text(g, p.text, px + (vertical ? 53 : pw * 0.05 + 35), py + (vertical ? 11 : 25), 8, '#ffffff', 800);
+      }
+      return true;
+    }
+    case 'hill': {
+      // Tepe: üst üste yeşil halkalar, ışık sol üstten
+      const cx = x + w / 2; const cy = y + h / 2; const R = Math.min(w, h) / 2;
+      for (let k = 0; k < 6; k++) {
+        const q = R * (1 - k * 0.14);
+        g.fillStyle = shade('#5f9f45', 0.06 * k);
+        g.beginPath(); g.ellipse(cx - k * 3, cy - k * 4, q, q * 0.96, 0, 0, TAU); g.fill();
+      }
+      g.strokeStyle = 'rgba(40,80,30,.35)'; g.lineWidth = 1.2;
+      for (let k = 1; k < 6; k++) { g.beginPath(); g.ellipse(cx - k * 3, cy - k * 4, R * (1 - k * 0.14), R * (1 - k * 0.14) * 0.96, 0, 0, TAU); g.stroke(); }
+      return true;
+    }
+    case 'amfi': {
+      const cx = x + w / 2; const cy = y + h * 0.15; const R = Math.min(w, h * 1.6) * 0.5;
+      for (let k = 0; k < 7; k++) { g.fillStyle = k % 2 ? '#d8cfbd' : '#c4b9a3'; g.beginPath(); g.arc(cx, cy, R * (1 - k * 0.11), 0, Math.PI); g.fill(); }
+      g.fillStyle = '#8a5a3a'; g.fillRect(cx - R * 0.32, cy - 12, R * 0.64, 14);
+      return true;
+    }
+    case 'yildiz': {
+      // Meydan taşı: büyük Selçuklu yıldızı, çevresinde küçükleri
+      g.fillStyle = '#d9d2c4'; g.fillRect(x, y, w, h);
+      g.lineWidth = 1.5;
+      const R = Math.min(w, h) * 0.32;
+      star8(g, x + w / 2, y + h / 2, R, '#c9b48a', '#8f7a52');
+      star8(g, x + w / 2, y + h / 2, R * 0.55, '#a8323a', '#7a2028');
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * TAU;
+        star8(g, x + w / 2 + Math.cos(a) * R * 1.35, y + h / 2 + Math.sin(a) * R * 1.35, R * 0.18, '#b8a37a', '#8f7a52');
+      }
+      return true;
+    }
+    case 'bag': {
+      // Bağ: toprak üstünde asma sıraları
+      g.fillStyle = '#b89463'; g.fillRect(x, y, w, h);
+      for (let k = 8; k < h; k += 16) {
+        g.fillStyle = '#8a6a42'; g.fillRect(x + 4, y + k + 4, w - 8, 2);
+        g.fillStyle = '#5c9a3c';
+        for (let px = x + 8; px < x + w - 8; px += 11) { g.beginPath(); g.arc(px, y + k + 3, 4.2, 0, TAU); g.fill(); }
+      }
+      return true;
+    }
+    case 'gul': {
+      // Gül bahçesi: yuvarlak tarhlar
+      g.fillStyle = '#5c9a3c'; g.fillRect(x, y, w, h);
+      for (let py = y + 14; py < y + h - 8; py += 26) {
+        for (let px = x + 14; px < x + w - 8; px += 26) {
+          g.fillStyle = '#3f7d2f'; g.beginPath(); g.arc(px, py, 10, 0, TAU); g.fill();
+          for (let k = 0; k < 5; k++) { g.fillStyle = k % 2 ? '#e8395a' : '#ff8fb0'; g.beginPath(); g.arc(px + Math.cos(k * 1.26) * 5, py + Math.sin(k * 1.26) * 5, 2.4, 0, TAU); g.fill(); }
+        }
+      }
+      return true;
+    }
+    default: return false;
+  }
+}
+
+// --- Tabela ---
+// Kolej tabelası: siyah zemin, turuncu çerçeve, beyaz ve turuncu harfler
+function landmarkSign(r) {
+  if (r.signArt !== 'kolej') return null;
+  const words = r.sign.split(' ');
+  const last = words.pop();
+  const first = words.join(' ');
+  const H = 96;
+  const c0 = mk(8, 8).getContext('2d');
+  c0.font = `400 ${H * 0.62}px Bungee, Nunito, sans-serif`;
+  const w1 = c0.measureText(`${first} `).width;
+  const w2 = c0.measureText(last).width;
+  const W = Math.ceil(w1 + w2 + H * 0.8);
+  const c = mk(W, H);
+  const g = c.getContext('2d');
+  g.fillStyle = '#121316'; rr(g, 0, 0, W, H, 18); g.fill();
+  g.strokeStyle = '#ff7a00'; g.lineWidth = 7; rr(g, 6, 6, W - 12, H - 12, 13); g.stroke();
+  g.font = `400 ${H * 0.62}px Bungee, Nunito, sans-serif`;
+  g.textBaseline = 'middle';
+  g.textAlign = 'left';
+  const x0 = H * 0.4;
+  g.fillStyle = '#ffffff'; g.fillText(`${first} `, x0, H * 0.54);
+  g.fillStyle = '#ff7a00'; g.fillText(last, x0 + w1, H * 0.54);
+  return c;
+}
+
+// --- Yüksek yapılar: duvar, çatı ve gece pencereleri ---
+// Duvar dokusu yüksekliği 192: alt kenar zemin, üst kenar çatı (render.js drawTalls ile aynı)
+const H0 = 192;
+
+function wallKolej(len, lit, front) {
+  const c = mk(len, H0);
+  const g = c.getContext('2d');
+  const floors = 7;
+  const fh = (H0 - 26) / floors;
+  if (!lit) {
+    g.fillStyle = '#ff7a00'; g.fillRect(0, 0, len, H0);
+    g.fillStyle = '#16171a'; g.fillRect(0, 0, len, 9);
+    g.fillStyle = '#ff9a3c'; for (let px = 6; px < len; px += 18) g.fillRect(px, 3, 6, 3);
+  }
+  for (let f = 0; f < floors; f++) {
+    const y = 12 + f * fh;
+    if (!lit) { g.fillStyle = '#f7f7f5'; g.fillRect(0, y + fh - 4, len, 4); }
+    for (let px = 6, col = 0; px < len - 10; px += 22, col++) {
+      if (front && f >= floors - 2 && Math.abs(px + 8 - len / 2) < 46) continue; // Giriş holü
+      if (!lit) {
+        if (col % 4 === 0) { g.fillStyle = '#f7f7f5'; g.fillRect(px - 3, y, 3, fh - 4); }
+        g.fillStyle = '#1e2127'; g.fillRect(px, y + 3, 16, fh - 10);
+        g.fillStyle = 'rgba(140,190,230,.35)'; g.fillRect(px, y + 3, 6, fh - 10);
+      } else {
+        const on = ((f * 131 + col * 71 + len) % 10) < 7;
+        if (!on) continue;
+        g.fillStyle = (f + col) % 5 === 0 ? '#bfe4ff' : '#ffe2a0';
+        g.fillRect(px, y + 3, 16, fh - 10);
+      }
+    }
+  }
+  if (front) {
+    // Büyük giriş: beyaz sütunlar, cam kapılar, siyah saçak
+    const ex = len / 2; const top = 12 + (floors - 2) * fh;
+    if (!lit) {
+      g.fillStyle = '#16171a'; g.fillRect(ex - 50, top, 100, 7);
+      g.fillStyle = '#2a3440'; g.fillRect(ex - 44, top + 7, 88, H0 - top - 7);
+      g.fillStyle = '#f7f7f5'; for (let k = -44; k <= 40; k += 21) g.fillRect(ex + k, top + 7, 5, H0 - top - 7);
+    } else {
+      g.fillStyle = '#ffe7b0'; g.fillRect(ex - 39, top + 9, 78, H0 - top - 9);
+    }
+  }
+  return c;
+}
+
+function roofKolej(w, h) {
+  const c = mk(w, h);
+  const g = c.getContext('2d');
+  g.fillStyle = '#16171a'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#ff8a1f'; g.fillRect(8, 8, w - 16, h - 16);
+  g.fillStyle = '#ffffff'; g.fillRect(8, 8, w - 16, 5); g.fillRect(8, h - 13, w - 16, 5);
+  // Güneş panelleri
+  g.fillStyle = '#23324a';
+  for (let py = 22; py < h - 30; py += 18) for (let px = 20; px < w * 0.3; px += 26) { g.fillRect(px, py, 22, 13); }
+  g.strokeStyle = 'rgba(160,200,240,.5)'; g.lineWidth = 1;
+  for (let py = 22; py < h - 30; py += 18) for (let px = 20; px < w * 0.3; px += 26) { g.strokeRect(px + 0.5, py + 0.5, 21, 12); }
+  // Çatı bahçesi
+  g.fillStyle = '#5da33e'; rr(g, w * 0.72, 20, w * 0.24, h - 44, 10); g.fill();
+  for (let k = 0; k < 7; k++) { g.fillStyle = k % 2 ? '#3f7d2f' : '#7fbf4e'; g.beginPath(); g.arc(w * 0.75 + (k % 4) * w * 0.05, 34 + Math.floor(k / 4) * (h * 0.3), 9, 0, TAU); g.fill(); }
+  // Renkli su depoları ve klimalar
+  [['#e8352e', 0.36], ['#2b6fd6', 0.42], ['#ffd23f', 0.48], ['#39c47a', 0.54]].forEach(([col, k]) => { g.fillStyle = col; g.beginPath(); g.arc(w * k, h - 30, 8, 0, TAU); g.fill(); g.fillStyle = 'rgba(255,255,255,.4)'; g.beginPath(); g.arc(w * k - 2, h - 32, 3, 0, TAU); g.fill(); });
+  g.fillStyle = '#e4e7ea'; for (let px = w * 0.6; px < w * 0.7; px += 14) g.fillRect(px, 24, 10, 8);
+  return c;
+}
+
+function wallKule(len, lit) {
+  const c = mk(len, H0);
+  const g = c.getContext('2d');
+  if (!lit) {
+    const gr = g.createLinearGradient(0, 0, len, 0);
+    gr.addColorStop(0, '#20456a'); gr.addColorStop(0.5, '#3f78a6'); gr.addColorStop(1, '#1b3a5a');
+    g.fillStyle = gr; g.fillRect(0, 0, len, H0);
+    g.fillStyle = 'rgba(255,255,255,.18)'; for (let py = 14; py < H0; py += 4.4) g.fillRect(0, py, len, 1);
+    g.fillStyle = '#c9d2db'; for (let px = 4; px < len; px += 16) g.fillRect(px, 0, 2, H0);
+    g.fillStyle = '#dfe6ec'; g.fillRect(0, 0, len, 12);
+  } else {
+    for (let py = 16; py < H0 - 4; py += 4.4) {
+      for (let px = 6; px < len - 6; px += 16) {
+        if (((py * 7 + px * 3) | 0) % 9 > 3) continue;
+        g.fillStyle = ((px + py) | 0) % 3 ? '#fff1c8' : '#cfe8ff';
+        g.fillRect(px, py, 12, 2.6);
+      }
+    }
+  }
+  return c;
+}
+
+function roofKule(w, h) {
+  const c = mk(w, h);
+  const g = c.getContext('2d');
+  // Sivri tepe: dört yüzlü piramit, ortada anten
+  const cx = w / 2; const cy = h / 2;
+  const faces = [['#cfd8e0', [0, 0, w, 0]], ['#9fb0bf', [w, 0, w, h]], ['#7d8fa0', [w, h, 0, h]], ['#b6c4d0', [0, h, 0, 0]]];
+  for (const [col, [ax, ay, bx, by]] of faces) { g.fillStyle = col; g.beginPath(); g.moveTo(cx, cy); g.lineTo(ax, ay); g.lineTo(bx, by); g.closePath(); g.fill(); }
+  g.strokeStyle = 'rgba(30,50,70,.45)'; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(0, 0); g.lineTo(w, h); g.moveTo(w, 0); g.lineTo(0, h); g.stroke();
+  g.fillStyle = '#e8352e'; g.beginPath(); g.arc(cx, cy, Math.max(3, w * 0.05), 0, TAU); g.fill();
+  return c;
+}
+
+const ART_CACHE = new Map();
+// r.landmark: 'kolej' | 'kule'. Doku boyu binanın kendi oranına göre, bir kez üretilir
+function tallArt(r) {
+  const key = `${r.landmark}:${Math.round(r.w)}x${Math.round(r.h)}`;
+  let a = ART_CACHE.get(key);
+  if (a) return a;
+  const lenN = Math.min(1024, Math.max(96, Math.round(r.w * 0.6)));
+  const lenE = Math.min(1024, Math.max(96, Math.round(r.h * 0.6)));
+  const rot = (src) => {
+    const c = mk(H0, src.width);
+    const g = c.getContext('2d');
+    g.translate(H0 / 2, src.width / 2); g.rotate(Math.PI / 2); g.drawImage(src, -src.width / 2, -H0 / 2);
+    return c;
+  };
+  if (r.landmark === 'kolej') {
+    a = {
+      n: wallKolej(lenN, false, true), e: rot(wallKolej(lenE, false, false)),
+      litN: wallKolej(lenN, true, true), litE: rot(wallKolej(lenE, true, false)),
+      roof: roofKolej(Math.round(r.w * 0.6), Math.round(r.h * 0.6)),
+    };
+  } else if (r.landmark === 'kule') {
+    a = {
+      n: wallKule(lenN, false), e: rot(wallKule(lenE, false)),
+      litN: wallKule(lenN, true), litE: rot(wallKule(lenE, true)),
+      roof: roofKule(128, 128), beacon: true,
+    };
+  } else {
+    return null;
+  }
+  ART_CACHE.set(key, a);
+  return a;
 }
 
 // --- cars.js ---
@@ -6761,24 +8153,24 @@ function cafe(g, r) {
 // Her zincirin kendi cephesi: renk, biçim, tente ve otopark
 const CHAINS = {
   // Tenteli küçük market: çizgili sundurma
-  'Pazarcık Market': (g, r) => { box(g, r, '#3f8f5b', '#f4ead2'); for (let px = r.x; px < r.x + r.w; px += 16) { g.fillStyle = (px - r.x) % 32 ? '#f4ead2' : '#3f8f5b'; g.fillRect(px, r.y + r.h - 22, 16, 7); } },
+  pazarcik: (g, r) => { box(g, r, '#3f8f5b', '#f4ead2'); for (let px = r.x; px < r.x + r.w; px += 16) { g.fillStyle = (px - r.x) % 32 ? '#f4ead2' : '#3f8f5b'; g.fillRect(px, r.y + r.h - 22, 16, 7); } },
   // İndirim marketi: büyük yıldız çatı yaması
-  Ucuzlar: (g, r) => { box(g, r, '#7b3fa0', '#ffd23f'); g.fillStyle = '#ffd23f'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -1.57 + i * 0.628; const q = i % 2 ? 9 : 20; g[i ? 'lineTo' : 'moveTo'](r.x + r.w * 0.78 + Math.cos(a) * q, r.y + 24 + Math.sin(a) * q); } g.closePath(); g.fill(); },
-  'Sepet Market': (g, r) => { box(g, r, '#1f9e9e', '#e9f6f4'); g.strokeStyle = '#e9f6f4'; g.lineWidth = 3; g.strokeRect(r.x + r.w * 0.7, r.y + 16, 26, 14); g.beginPath(); g.arc(r.x + r.w * 0.7 + 13, r.y + 16, 11, 3.14, 0); g.stroke(); },
-  'Yıldız Mağazaları': (g, r) => { box(g, r, '#c23b6b', '#fff0d8'); g.fillStyle = '#fff0d8'; for (const k of [0.2, 0.5, 0.8]) { g.beginPath(); g.arc(r.x + r.w * k, r.y + 18, 5, 0, 7); g.fill(); } },
-  'Dörtyol Market': (g, r) => { box(g, r, '#6a7f2a', '#f7f3e3'); g.fillStyle = '#f7f3e3'; g.fillRect(r.x + r.w * 0.5 - 2, r.y + 8, 4, r.h - 34); g.fillRect(r.x + 8, r.y + (r.h - 26) * 0.5, r.w - 16, 4); },
-  'Teknoloji Durağı': (g, r) => {
+  ucuzlar: (g, r) => { box(g, r, '#7b3fa0', '#ffd23f'); g.fillStyle = '#ffd23f'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -1.57 + i * 0.628; const q = i % 2 ? 9 : 20; g[i ? 'lineTo' : 'moveTo'](r.x + r.w * 0.78 + Math.cos(a) * q, r.y + 24 + Math.sin(a) * q); } g.closePath(); g.fill(); },
+  sepet: (g, r) => { box(g, r, '#1f9e9e', '#e9f6f4'); g.strokeStyle = '#e9f6f4'; g.lineWidth = 3; g.strokeRect(r.x + r.w * 0.7, r.y + 16, 26, 14); g.beginPath(); g.arc(r.x + r.w * 0.7 + 13, r.y + 16, 11, 3.14, 0); g.stroke(); },
+  yildiz: (g, r) => { box(g, r, '#c23b6b', '#fff0d8'); g.fillStyle = '#fff0d8'; for (const k of [0.2, 0.5, 0.8]) { g.beginPath(); g.arc(r.x + r.w * k, r.y + 18, 5, 0, 7); g.fill(); } },
+  dortyol: (g, r) => { box(g, r, '#6a7f2a', '#f7f3e3'); g.fillStyle = '#f7f3e3'; g.fillRect(r.x + r.w * 0.5 - 2, r.y + 8, 4, r.h - 34); g.fillRect(r.x + 8, r.y + (r.h - 26) * 0.5, r.w - 16, 4); },
+  teknoloji: (g, r) => {
     box(g, r, '#2b3a67', '#b7f34a');
     g.strokeStyle = '#b7f34a'; g.lineWidth = 2;
     for (let px = r.x + 14; px < r.x + r.w - 16; px += 22) { g.beginPath(); g.arc(px, r.y + 16, 5, 0, 7); g.stroke(); }
   },
-  'Yapı Dünyası': (g, r) => {
+  yapi: (g, r) => {
     box(g, r, '#8a5a2b', '#f2e6d0');
     g.fillStyle = '#6f8f55'; g.fillRect(r.x + r.w * 0.7, r.y, r.w * 0.3, r.h - 18); // Bahçe bölümü
     g.fillStyle = 'rgba(255,255,255,.25)';
     for (let px = r.x + r.w * 0.7; px < r.x + r.w; px += 12) g.fillRect(px, r.y, 2, r.h - 18);
   },
-  'Köşe Bakkal': (g, r) => { box(g, r, '#b5651d', '#fff4d8'); stripe(g, r, '#fff4d8', '#b5651d'); },
+  kose: (g, r) => { box(g, r, '#b5651d', '#fff4d8'); stripe(g, r, '#fff4d8', '#b5651d'); },
 };
 
 function box(g, r, roof, band) {
@@ -6812,11 +8204,13 @@ function kolej(g, r) {
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.fillStyle = '#17181b';
-  g.fillText('MANDALİNA', cx + 4, cy - size * 0.55 + 4);
-  g.fillText('KOLEJİ', cx + 4, cy + size * 0.55 + 4);
+  const [top, ...rest] = NAMES.kolej.ad.split(' ');
+  const bottom = rest.join(' ');
+  g.fillText(top, cx + 4, cy - size * 0.55 + 4);
+  g.fillText(bottom, cx + 4, cy + size * 0.55 + 4);
   g.fillStyle = '#ffffff';
-  g.fillText('MANDALİNA', cx, cy - size * 0.55);
-  g.fillText('KOLEJİ', cx, cy + size * 0.55);
+  g.fillText(top, cx, cy - size * 0.55);
+  g.fillText(bottom, cx, cy + size * 0.55);
   // Cephe: beyaz sütunlar, siyah camlar, turuncu giriş
   for (let px = x + 10; px < x + w - 12; px += 24) {
     g.fillStyle = '#ffffff'; g.fillRect(px, y + h - 38, 6, 38);
@@ -6824,7 +8218,7 @@ function kolej(g, r) {
     g.fillStyle = '#ff9a3c'; g.fillRect(px + 6, y + h - 20, 16, 12);
   }
   g.fillStyle = '#ff7a00'; g.fillRect(x + w / 2 - 58, y + h - 40, 116, 40);
-  label(g, 'MANDALİNA KOLEJİ', x + w / 2, y + h - 22, 8.5, '#ffffff', 900);
+  label(g, NAMES.kolej.ad, x + w / 2, y + h - 22, 8.5, '#ffffff', 900);
 }
 
 
@@ -7186,7 +8580,7 @@ function paintBuilding2(g, r) {
   switch (r.style) {
     case S.APARTMENT: apartment2(g, r); break;
     case S.KOLEJ: kolej(g, r); break;
-    case S.CHAIN: (CHAINS[r.brand] || CHAINS['Pazarcık Market'])(g, r); break;
+    case S.CHAIN: (CHAINS[r.brand] || CHAINS.pazarcik)(g, r); break;
     case S.BANK: bank2(g, r); break;
     case S.RUIN: ruin(g, r); return true;
     case S.SITEWORK: sitework(g, r); return true;
@@ -7206,7 +8600,7 @@ function paintBuilding2(g, r) {
     case S.ISHANI: ishani(g, r); break;
     case S.SHOPROW: shoprow(g, r); break;
     case S.CAFE: cafe(g, r); break;
-    default: return false;
+    default: return paintLandmark(g, r);
   }
   if (r.style === S.APARTMENT || r.style === S.SITE_BLOCK || r.style === S.RESIDENCE || r.style === S.HOTEL || r.style === S.ISHANI || r.style === S.SHOPROW) facadeBits(g, r);
   return true;
@@ -7224,6 +8618,13 @@ function shadowOf(r) {
     case S.APARTMENT: return 0.9 + (r.seed % 4) * 0.3;
     case S.GECEKONDU: case S.VILLA: case S.SHOP: return 0.45;
     case S.STADIUM: return 1;
+    case S.MUZE: case S.OZEL_OKUL: return 2.2;
+    case S.ANIT: return 2.6;
+    case S.SELCUK_CAMI: case S.KONGRE: return 1.8;
+    case S.AVM: return 1.5;
+    case S.BEDESTEN: return 1.2;
+    case S.SERVIS: return 0.8;
+    case S.BAGEVI: return 0.6;
     default: return 1;
   }
 }
@@ -8804,7 +10205,7 @@ function signHalo(color) {
 
 // Tabela görüntüsü binada saklanır: her karede anahtar metni üretilmez
 function rectSign(r) {
-  return r.signImg || (r.signImg = signCanvas(r.sign, r.signColor, r.seed));
+  return r.signImg || (r.signImg = landmarkSign(r) || signCanvas(r.sign, r.signColor, r.seed));
 }
 
 // Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
@@ -8813,12 +10214,31 @@ const CHUNK_FIT = (CHUNK + 0.6) / CHUNK; // Zemin parçaları ek yeri kapansın 
 
 // Yüksek binada tabela çatının ortasındadır: gündüz, gece ve ışıltı aynı kutuyu kullanır
 function roofSignBox(r, img) {
-  const w = Math.min((r.tX1 - r.tX0) * 0.92, (img.width / img.height) * 38);
+  const w = Math.min((r.tX1 - r.tX0) * 0.92, (img.width / img.height) * (r.roofSignH || 38));
   const h = (w / img.width) * img.height;
   signOut.w = w;
   signOut.h = h;
   signOut.x = (r.tX0 + r.tX1) / 2 - w / 2;
   signOut.y = (r.tY0 + r.tY1) / 2 - h / 2;
+  return signOut;
+}
+
+// Özel yapının güney cephesindeki dev tabela: duvar kameraya bakınca görünür, duvarla birlikte uzar
+function facadeSignBox(r, img, camY) {
+  const y1 = r.y + r.h;
+  if (camY <= y1) return null;
+  const t = 0.56;
+  const wy = y1 + (r.tY1 - y1) * t;
+  const xa = r.x + (r.tX0 - r.x) * t;
+  const xb = r.x + r.w + (r.tX1 - r.x - r.w) * t;
+  const wallH = y1 - r.tY1;
+  let w = (xb - xa) * (r.landmark === 'kule' ? 0.86 : 0.6);
+  let h = (w * img.height) / img.width;
+  if (h > wallH * 0.3) { h = wallH * 0.3; w = (h * img.width) / img.height; }
+  if (h < 5) return null;
+  signOut.w = w; signOut.h = h;
+  signOut.x = (xa + xb) / 2 - w / 2;
+  signOut.y = wy - h / 2;
   return signOut;
 }
 
@@ -9080,36 +10500,55 @@ class Renderer {
       const r = list[ti];
       const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
       const X0 = r.tX0; const X1 = r.tX1; const Y0 = r.tY0; const Y1 = r.tY1;
-      const tex = this.walls[r.seed % this.walls.length];
-      // Güney ve kuzey duvarları
-      if (cy > y1 || cy < y0) {
-        const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
-        ctx.globalAlpha = 1;
-        for (let t = 0; t < N; t++) {
-          const a = t / N; const b = (t + 1) / N;
-          const xa = x0 + (X0 - x0) * b; const xb = x1 + (X1 - x1) * b;
-          const ya = fromY + (toY - fromY) * a; const yb = fromY + (toY - fromY) * b;
-          ctx.drawImage(tex.n, 0, 192 * (1 - b), Math.min(96, r.w), 192 / N, xa, Math.min(ya, yb) - 0.4, xb - xa, Math.abs(yb - ya) + 0.8);
-        }
-        if (cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
-      }
-      // Doğu ve batı duvarları
-      if (cx > x1 || cx < x0) {
-        const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
-        for (let t = 0; t < N; t++) {
-          const a = t / N; const b = (t + 1) / N;
-          const ya = y0 + (Y0 - y0) * b; const yb = y1 + (Y1 - y1) * b;
-          const xa = fromX + (toX - fromX) * a; const xc = fromX + (toX - fromX) * b;
-          ctx.drawImage(tex.e, 192 * (1 - b), 0, 192 / N, Math.min(96, r.h), Math.min(xa, xc) - 0.4, ya, Math.abs(xc - xa) + 0.8, yb - ya);
-        }
-        ctx.fillStyle = 'rgba(0,0,20,.16)';
-        ctx.beginPath(); ctx.moveTo(fromX, y0); ctx.lineTo(toX, Y0); ctx.lineTo(toX, Y1); ctx.lineTo(fromX, y1); ctx.closePath(); ctx.fill();
-      }
-      ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
-      if (r.sign) {
+      // Özel yapı (kolej, kule) kendi duvar ve çatı dokusunu getirir
+      const art = r.landmark ? tallArt(r) : null;
+      const tex = art || this.walls[r.seed % this.walls.length];
+      ctx.globalAlpha = 1;
+      this.tallWalls(r, tex, art, cx, cy, N, true);
+      ctx.drawImage(art ? art.roof : this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
+      if (r.sign && !r.noRoofSign) {
         const img = rectSign(r);
         const b = roofSignBox(r, img);
         ctx.drawImage(img, b.x, b.y, b.w, b.h);
+      }
+      if (r.sign && r.landmark) {
+        const img = rectSign(r);
+        const b = facadeSignBox(r, img, cy);
+        if (b) ctx.drawImage(img, b.x, b.y, b.w, b.h);
+      }
+    }
+  }
+
+  // Yüksek binanın kameraya bakan duvarları. tex: { n, e } dokusu. shadeIt: gölge katmanı (gündüz)
+  tallWalls(r, tex, art, cx, cy, N, shadeIt) {
+    const ctx = this.ctx;
+    const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
+    const X0 = r.tX0; const X1 = r.tX1; const Y0 = r.tY0; const Y1 = r.tY1;
+    const nW = art ? tex.n.width : Math.min(96, r.w);
+    const eH = art ? tex.e.height : Math.min(96, r.h);
+    // Güney ve kuzey duvarları
+    if (cy > y1 || cy < y0) {
+      const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
+      for (let t = 0; t < N; t++) {
+        const a = t / N; const b = (t + 1) / N;
+        const xa = x0 + (X0 - x0) * b; const xb = x1 + (X1 - x1) * b;
+        const ya = fromY + (toY - fromY) * a; const yb = fromY + (toY - fromY) * b;
+        ctx.drawImage(tex.n, 0, 192 * (1 - b), nW, 192 / N, xa, Math.min(ya, yb) - 0.4, xb - xa, Math.abs(yb - ya) + 0.8);
+      }
+      if (shadeIt && cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
+    }
+    // Doğu ve batı duvarları
+    if (cx > x1 || cx < x0) {
+      const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
+      for (let t = 0; t < N; t++) {
+        const a = t / N; const b = (t + 1) / N;
+        const ya = y0 + (Y0 - y0) * b; const yb = y1 + (Y1 - y1) * b;
+        const xa = fromX + (toX - fromX) * a; const xc = fromX + (toX - fromX) * b;
+        ctx.drawImage(tex.e, 192 * (1 - b), 0, 192 / N, eH, Math.min(xa, xc) - 0.4, ya, Math.abs(xc - xa) + 0.8, yb - ya);
+      }
+      if (shadeIt) {
+        ctx.fillStyle = 'rgba(0,0,20,.16)';
+        ctx.beginPath(); ctx.moveTo(fromX, y0); ctx.lineTo(toX, Y0); ctx.lineTo(toX, Y1); ctx.lineTo(fromX, y1); ctx.closePath(); ctx.fill();
       }
     }
   }
@@ -9883,6 +11322,8 @@ class Renderer {
         g.fillStyle = '#7c7f82'; g.fillRect(x, y, w, h);
         g.strokeStyle = '#fff'; g.lineWidth = 1.5;
         for (let k = 0; k < w; k += 40) { g.beginPath(); g.moveTo(x + k, y); g.lineTo(x + k, y + 34); g.stroke(); }
+      } else {
+        paintPad(g, p, x, y, w, h); // Özel yerlerin alanları: merdiven, bayrak, tramvay, tepe, bağ
       }
     }
   }
@@ -10036,8 +11477,8 @@ class Renderer {
   // Tabela, uydu çanağı, güneş paneli ve balkon çamaşırı
   bakeSign(g, r) {
     if (r.style === 0 || r.style === 1 || r.style === 2 || r.style === 3 || r.style === 5 || r.style === BUILD.APARTMENT) roofClutter(g, r);
-    if (!r.sign) return;
-    const img = signCanvas(r.sign, r.signColor, r.seed);
+    if (!r.sign || r.tall > 0) return; // Yüksek binanın tabelası çatıda, her karede çizilir
+    const img = rectSign(r);
     const b = signBox(r, img);
     g.drawImage(img, b.x, b.y, b.w, b.h);
   }
@@ -10425,11 +11866,18 @@ class Renderer {
       }
     }
     const talls = this.tallList;
+    const cam = game.cam;
     for (let i = 0; i < talls.length; i++) {
       const r = talls[i];
-      if (!r.sign || r.tX1 < x0 || r.tX0 > x1 || r.tY1 < y0 || r.tY0 > y1) continue;
+      if (r.tX1 < x0 || r.tX0 > x1 || r.tY1 < y0 || r.tY0 > y1) continue;
+      if (r.landmark) this.litLandmark(r, night, now, i + 1, cam);
+      if (!r.sign) continue;
       const img = rectSign(r);
-      this.litSign(r, img, roofSignBox(r, img), night, now, i + 1, game.cam.y > r.y + r.h);
+      if (!r.noRoofSign) this.litSign(r, img, roofSignBox(r, img), night, now, i + 1, cam.y > r.y + r.h);
+      if (r.landmark) {
+        const b = facadeSignBox(r, img, cam.y);
+        if (b) this.litSign(r, img, { x: b.x, y: b.y, w: b.w, h: b.h }, night, now, i + 1, false);
+      }
     }
     // Araç farları
     ctx.globalCompositeOperation = 'lighter';
@@ -10494,6 +11942,27 @@ class Renderer {
         ctx.drawImage(halo, r.x - 6, r.y + r.h - 2, r.w + 12, 40);
       }
     }
+    if (clipped) ctx.restore();
+  }
+
+  // Özel yapının gece pencereleri ve kulenin ikaz lambası. Öndeki binalar kırpar
+  litLandmark(r, night, now, from, cam) {
+    const art = tallArt(r);
+    if (!art) return;
+    const ctx = this.ctx;
+    const minX = Math.min(r.x, r.tX0); const maxX = Math.max(r.x + r.w, r.tX1);
+    const minY = Math.min(r.y, r.tY0); const maxY = Math.max(r.y + r.h, r.tY1);
+    const clipped = this.clipOccluders(minX, minY, maxX - minX, maxY - minY, from);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = Math.min(1, night * 1.1);
+    this.tallWalls(r, { n: art.litN, e: art.litE }, art, cam.x, cam.y, this.lod.slices, false);
+    if (art.beacon) {
+      const on = Math.floor(now / 700) % 2 === 0;
+      const bx = (r.tX0 + r.tX1) / 2; const by = (r.tY0 + r.tY1) / 2;
+      ctx.globalAlpha = night * (on ? 0.95 : 0.25);
+      ctx.drawImage(this.sprites.red, bx - 40, by - 40, 80, 80);
+    }
+    ctx.globalCompositeOperation = 'source-over';
     if (clipped) ctx.restore();
   }
 
@@ -10924,7 +12393,8 @@ class CheatCode {
 
   // dir: 'L' ya da 'R', now: saniye. Sıra tamamlanınca true döner
   press(dir, now) {
-    if (this.i > 0 && now - this.t > C.gap) this.i = 0;
+    // Sınır dahil değildir: tam 2 sn de geçersizdir. Adım toplamındaki kayan nokta payı yutulur
+    if (this.i > 0 && now - this.t >= C.gap - 1e-6) this.i = 0;
     if (dir === C.sequence[this.i]) this.i++;
     else this.i = dir === C.sequence[0] ? 1 : 0;
     this.t = now;
@@ -11275,7 +12745,7 @@ function defaultSave() {
     coins: 0,
     owned: [CONFIG.cars[0].id],
     selected: CONFIG.cars[0].id,
-    settings: { sound: true, vibrate: true, ambient: true, volume: 80, quality: 'auto', qLevel: -1, control: 'zones' },
+    settings: { sound: true, vibrate: true, ambient: true, volume: 80, quality: 'auto', qLevel: -1, control: 'zones', lang: '' },
     dev: { god: false, startTime: 0 },
     tutorial: false,
     paints: {},
@@ -11303,6 +12773,7 @@ function sanitize(data) {
     if (['auto', 'high', 'low'].includes(data.settings.quality)) d.settings.quality = data.settings.quality;
     if (Number.isInteger(data.settings.qLevel) && data.settings.qLevel >= -1 && data.settings.qLevel <= 3) d.settings.qLevel = data.settings.qLevel;
     if (['zones', 'wheel', 'stick'].includes(data.settings.control)) d.settings.control = data.settings.control;
+    if (['tr', 'en', 'ja', 'zh', 'es', 'de'].includes(data.settings.lang)) d.settings.lang = data.settings.lang;
   }
   if (data.dev) {
     d.dev.god = data.dev.god === true;
@@ -12394,8 +13865,19 @@ function formatTime(t) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
-// Intl nesnesi tek kez kurulur; toLocaleString her çağrıda pahalıdır
-const NUM = new Intl.NumberFormat('tr-TR');
+// Uzun yazı kutusuna sığmazsa yazı küçülür (özellikle Almanca); tek satırlık metinler
+const FIT = '.start-txt, .tile span, .menu .btn, .panel .btn, .seg button, .screen header h2, #over-title, .car-tag b, .car-tag small, #ctl-rev, .summary span, .big-score span, #hint b, #hint span, .toggle > span, .volume > span, .seg-row > span, #cheat-badge, #garage-action';
+function fitOne(el) {
+  el.style.fontSize = '';
+  if (!el.offsetParent || !el.clientWidth) return;
+  const base = parseFloat(getComputedStyle(el).fontSize);
+  const min = Math.max(9, Math.round(base * 0.55));
+  let s = base;
+  while (s > min && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 2)) {
+    s -= 1;
+    el.style.fontSize = `${s}px`;
+  }
+}
 
 const SCREENS = ['menu', 'garage', 'settings', 'howto', 'over', 'pause'];
 
@@ -12409,7 +13891,12 @@ class UI {
     this.buildStars();
     this.buildPowers();
     this.syncSettings();
-    this.refreshMenu();
+    this.applyLang();
+    // Piksel yazı tipi geç yüklenir: yüklenince yazılar yeniden sığdırılır
+    if (document.fonts) {
+      document.fonts.addEventListener('loadingdone', () => this.fit());
+      document.fonts.ready.then(() => this.fit());
+    }
   }
 
   bind() {
@@ -12470,7 +13957,6 @@ class UI {
     $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
     $('dev-start').addEventListener('change', (e) => { d.dev.startTime = Number(e.target.value); this.storage.save(); });
     // Gizli geliştirici bölümü: sürüm yazısına 7 kez dokun
-    $('version').textContent = `Sürüm ${CONFIG.version}`;
     $('version').addEventListener('click', () => {
       if (++this.devTaps >= 7) $('dev-panel').hidden = false;
     });
@@ -12499,11 +13985,47 @@ class UI {
   }
 
   intro() {
-    $('maker').textContent = 'Çağlar Sağlam tarafından yapıldı';
+    $('maker').textContent = tx('menu.maker');
   }
 
   show(name) {
     for (const s of SCREENS) $(s).hidden = s !== name;
+    if (name) this.fit($(name));
+  }
+
+  // Görünen ekrandaki yazılar kutularına sığdırılır
+  fit(root = document) {
+    for (const el of root.querySelectorAll(FIT)) fitOne(el);
+  }
+
+  // Dil değişince oyun yeniden başlamadan bütün yazılar yenilenir
+  applyLang() {
+    const code = getLang();
+    // Sayı biçimleri menüdeyken kurulur: oyunun ilk karesinde kurulum takılma yapmasın
+    txNum(0); txNum(0, 1);
+    document.documentElement.lang = code === 'zh' ? 'zh-CN' : code;
+    for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = tx(el.dataset.i18n);
+    for (const el of document.querySelectorAll('[data-i18n-label]')) el.setAttribute('aria-label', tx(`aria.${el.dataset.i18nLabel}`));
+    // BAŞLA: harfler sırayla beyaz ve turuncu
+    const st = $('start-txt');
+    st.textContent = '';
+    for (const ch of tx('start')) { const i = document.createElement('i'); i.textContent = ch; st.appendChild(i); }
+    $('version').textContent = tx('settings.version', { v: CONFIG.version });
+    const tips = $('howto-tips');
+    tips.textContent = '';
+    for (const line of tx('howto.tips')) { const li = document.createElement('li'); li.textContent = line; tips.appendChild(li); }
+    for (const b of document.querySelectorAll('.seg[data-set=lang] button')) b.textContent = LANGS[b.dataset.v];
+    $('cheat-badge').textContent = tx('cheat.badge');
+    $('ctl-rev').textContent = tx('hint.rev');
+    this.buildHowtoPowers();
+    this.refreshMenu();
+    this.intro();
+    if (!$('garage').hidden) this.renderGarage();
+    if (!$('hint').hidden) this.showHint(true);
+    if (!$('over').hidden && this.lastResult) this.over(...this.lastResult);
+    this.last.score = '';
+    this.last.combo = '';
+    this.fit();
   }
 
   hideAll() {
@@ -12517,10 +14039,16 @@ class UI {
   refreshMenu() {
     const d = this.storage.data;
     $('menu-coins').textContent = d.coins;
-    $('menu-best').textContent = d.bestScore ? `En iyi: ${d.bestScore.toLocaleString('tr-TR')} puan · ${formatTime(d.bestTime)}` : 'İlk kaçışın seni bekliyor';
+    $('menu-best').textContent = d.bestScore ? tx('menu.best', { score: txNum(d.bestScore), time: formatTime(d.bestTime) }) : tx('menu.first');
     const car = this.storage.selectedCar();
     $('menu-car-name').textContent = car.name;
-    $('menu-car-paint').textContent = (car.paints[this.storage.paintIndex(car.id)] || car.paints[0]).name;
+    $('menu-car-paint').textContent = this.paintName(car, this.storage.paintIndex(car.id));
+    if (!$('menu').hidden) this.fit($('menu'));
+  }
+
+  paintName(car, i) {
+    const names = tx(`cars.${car.id}.paints`);
+    return (Array.isArray(names) && names[i]) || (car.paints[i] || car.paints[0]).name;
   }
 
   splash(done) {
@@ -12577,14 +14105,18 @@ class UI {
       box.appendChild(el);
       this.pw[kind] = { el, t, fill, last: '' };
     }
+  }
+
+  buildHowtoPowers() {
     const list = $('howto-powers');
-    const info = { blast: 'Yakındaki bütün arabalar patlar', ghost: `${CONFIG.powers.duration} sn polis seni göremez`, heal: 'Hasarı onarır, ateşi söndürür', giant: `${CONFIG.powers.duration} sn devleşirsin, hasar almazsın` };
-    for (const kind of Object.keys(info)) {
+    list.textContent = '';
+    const n = CONFIG.powers.duration;
+    for (const kind of ['blast', 'ghost', 'heal', 'giant']) {
       const row = document.createElement('div');
       const name = document.createElement('b');
-      name.textContent = POWER_LOOK[kind].name;
+      name.textContent = tx(`power.${kind}`);
       const d = document.createElement('span');
-      d.textContent = info[kind];
+      d.textContent = tx(`power.${kind}Info`, { n });
       const text = document.createElement('p');
       text.append(name, d);
       row.append(this.powerCanvas(kind, 20), text);
@@ -12602,11 +14134,11 @@ class UI {
   }
 
   powerToast(kind) {
-    this.toast(POWER_LOOK[kind].name, POWER_LOOK[kind].color);
+    this.toast(tx(`power.${kind}`), POWER_LOOK[kind].color);
   }
 
   alert(stage) {
-    const text = CONFIG.difficulty.alerts[[0, CONFIG.difficulty.swatAt, CONFIG.difficulty.advancedAt, CONFIG.difficulty.tanksAt][stage]];
+    const text = tx(`alert.${['', 'swat', 'heavy', 'tanks'][stage] || 'tanks'}`);
     const el = $('alert');
     el.textContent = text;
     el.classList.remove('run');
@@ -12616,7 +14148,7 @@ class UI {
 
   cheatMessage(on) {
     const el = $('cheat-msg');
-    el.firstElementChild.textContent = on ? CONFIG.cheat.messageOn : CONFIG.cheat.messageOff;
+    el.firstElementChild.textContent = tx(on ? 'cheat.on' : 'cheat.off');
     el.classList.remove('run');
     void el.offsetWidth;
     el.classList.add('run');
@@ -12624,7 +14156,7 @@ class UI {
 
   alienAlert() {
     const el = $('alert');
-    el.textContent = CONFIG.difficulty.aliensAlert;
+    el.textContent = tx('alert.aliens');
     el.classList.remove('run');
     void el.offsetWidth;
     el.classList.add('run');
@@ -12633,7 +14165,7 @@ class UI {
   showHint(on) {
     if (on) {
       const m = this.storage.data.settings.control;
-      const T = { zones: ['Sola bas', 'sola drift', 'İkisine bas', 'geri vites', 'Sağa bas', 'sağa drift'], wheel: ['GERİ tut', 'geri vites', 'Direksiyon', 'sağ altta', 'Çevir', 'sağa sola döner'], stick: ['Sol yarı', 'bas ve kaydır', 'Joystick', 'parmağının altında', 'GERİ tut', 'geri vites'] }[m] || [];
+      const T = tx(`hint.${['zones', 'wheel', 'stick'].includes(m) ? m : 'zones'}`);
       ['hint-l', 'hint-ls', 'hint-m', 'hint-ms', 'hint-r', 'hint-rs'].forEach((id, i) => { $(id).textContent = T[i]; });
     }
     $('hint').hidden = !on;
@@ -12650,7 +14182,7 @@ class UI {
     const time = formatTime(g.time);
     if (time !== l.time) { l.time = time; $('hud-time').textContent = time; }
     const score = Math.floor(g.score);
-    if (score !== l.score) { l.score = score; $('hud-score').textContent = NUM.format(score); }
+    if (score !== l.score) { l.score = score; $('hud-score').textContent = txNum(score); }
     if (g.coins !== l.coins) { l.coins = g.coins; $('hud-coins').textContent = g.coins; }
     const health = Math.max(0, Math.round(100 - g.damage));
     if (health !== l.health) {
@@ -12673,7 +14205,7 @@ class UI {
     }
     this.powerChip('ghost', g.ghostT);
     this.powerChip('giant', g.giantT);
-    const combo = g.combo >= 1.25 ? `x${g.combo.toFixed(1).replace('.', ',')}` : '';
+    const combo = g.combo >= 1.25 ? `x${txNum(g.combo, 1)}` : '';
     if (combo !== l.combo) { l.combo = combo; $('hud-combo').textContent = combo; }
   }
 
@@ -12689,16 +14221,17 @@ class UI {
 
   over(result, record) {
     const d = this.storage.data;
-    $('over-title').textContent = record.newScore ? 'YENİ REKOR!' : result.cause === 'water' ? 'BATTIN!' : 'YAKALANDIN!';
+    $('over-title').textContent = tx(record.newScore ? 'over.record' : result.cause === 'water' ? 'over.sunk' : 'over.caught');
     $('over-title').classList.toggle('record', record.newScore);
-    $('over-score').textContent = result.score.toLocaleString('tr-TR');
+    $('over-score').textContent = txNum(result.score);
     $('over-time').textContent = formatTime(result.time);
     $('over-coins').textContent = `+${result.coins}`;
     $('over-kills').textContent = result.kills;
     $('over-broken').textContent = result.broken;
     $('over-near').textContent = result.nearMisses;
-    $('over-drift').textContent = `${result.driftTime.toFixed(1).replace('.', ',')} sn`;
-    $('over-best').textContent = `En iyi skor: ${d.bestScore.toLocaleString('tr-TR')} · En uzun süre: ${formatTime(d.bestTime)}`;
+    $('over-drift').textContent = tx('over.seconds', { n: txNum(result.driftTime, 1) });
+    $('over-best').textContent = tx('over.best', { score: txNum(d.bestScore), time: formatTime(d.bestTime) });
+    this.lastResult = [result, record];
     this.show('over');
     // Hâlâ basılı parmak yanlışlıkla düğmeye basmasın
     const btns = $('over-actions');
@@ -12723,8 +14256,8 @@ class UI {
       b.className = `swatch ${p.finish}${i === paintI ? ' on' : ''}`;
       b.style.setProperty('--c', p.color);
       b.style.setProperty('--r', p.roof || p.color);
-      b.title = p.name;
-      b.setAttribute('aria-label', p.name);
+      b.title = this.paintName(car, i);
+      b.setAttribute('aria-label', b.title);
       b.addEventListener('click', () => {
         this.actions.tap();
         this.gp = i;
@@ -12733,9 +14266,10 @@ class UI {
       });
       swatch.appendChild(b);
     });
-    $('garage-paint-name').textContent = `${car.paints[paintI].name} · ${{ gloss: 'Parlak', metal: 'Metalik', matte: 'Mat', pearl: 'İnci' }[car.paints[paintI].finish]}${car.paints[paintI].roof ? ' · Çift ton' : ''}`;
+    const pt = car.paints[paintI];
+    $('garage-paint-name').textContent = `${this.paintName(car, paintI)} · ${tx(`garage.finish.${pt.finish}`)}${pt.roof ? ` · ${tx('garage.twoTone')}` : ''}`;
     $('garage-name').textContent = car.name;
-    $('garage-desc').textContent = car.desc;
+    $('garage-desc').textContent = tx(`cars.${car.id}.desc`);
 
     const stats = $('garage-stats');
     stats.textContent = '';
@@ -12757,17 +14291,17 @@ class UI {
     };
     const norm = (v, a, b) => (v - a) / (b - a);
     const range = (key) => { const v = cars.map((c) => c[key]); return [Math.min(...v), Math.max(...v)]; };
-    stat('Hız', norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
-    stat('İvme', norm(car.accel, ...range('accel')), String(Math.round(car.accel / 7)));
-    stat('Yol tutuş', norm(car.grip, ...range('grip')), String(Math.round(car.grip * 20)));
-    stat('Dayanıklılık', norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
+    stat(tx('garage.speed'), norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
+    stat(tx('garage.accel'), norm(car.accel, ...range('accel')), String(Math.round(car.accel / 7)));
+    stat(tx('garage.grip'), norm(car.grip, ...range('grip')), String(Math.round(car.grip * 20)));
+    stat(tx('garage.durability'), norm(car.durability, base.durability, top.durability), String(Math.round(car.durability * 100)));
 
     const act = $('garage-action');
     act.classList.toggle('buy', !owned);
-    if (selected) { act.textContent = 'Seçili'; act.disabled = true; }
-    else if (owned) { act.textContent = 'Seç'; act.disabled = false; }
+    if (selected) { act.textContent = tx('garage.selected'); act.disabled = true; }
+    else if (owned) { act.textContent = tx('garage.select'); act.disabled = false; }
     else {
-      act.textContent = d.coins >= car.cost ? `Satın al · ${car.cost}` : `${car.cost} coin`;
+      act.textContent = tx(d.coins >= car.cost ? 'garage.buy' : 'garage.need', { cost: txNum(car.cost) });
       act.disabled = d.coins < car.cost;
     }
     act.onclick = () => {
@@ -12795,6 +14329,7 @@ class UI {
     });
     const on = list.children[this.gi];
     if (on) list.scrollLeft = on.offsetLeft - list.clientWidth / 2 + on.offsetWidth / 2;
+    if (!$('garage').hidden) this.fit($('garage'));
   }
 
   stepCar(dir) {
@@ -12925,6 +14460,8 @@ class Quality {
 const STEP = 1 / 60;
 const canvas = document.getElementById('game');
 const storage = new Storage();
+// Dil: kayıtlıysa o, değilse cihazın dili (desteklenmiyorsa İngilizce)
+setLang(storage.data.settings.lang || detectLang(navigator.languages || [navigator.language]));
 const game = new Game();
 const renderer = new Renderer(canvas);
 const input = new Input();
@@ -12958,6 +14495,8 @@ function vibrate(ms) {
 }
 
 function applySettings() {
+  const lang = storage.data.settings.lang || detectLang(navigator.languages || [navigator.language]);
+  if (lang !== getLang()) { setLang(lang); ui.applyLang(); }
   audio.setEnabled(storage.data.settings.sound);
   audio.setVolume(storage.data.settings.volume / 100);
   ui.syncMute();
@@ -12998,6 +14537,7 @@ function resize() {
   game.view.h = h;
   input.width = w;
   controls.needLayout = true;
+  ui.fit();
   game.updateCamera(1);
 }
 
@@ -13274,7 +14814,8 @@ function frame(now) {
   perf.work[i] = performance.now() - t0;
   perf.i = (i + 1) % perf.frames.length;
   perf.count++;
-  if (!paused && !warming && !document.hidden && (game.state === 'play' || (film && film.left)) && quality.note(raw)) {
+  // Koşunun ilk iki karesi dünya hazırlığıdır, cihaz yavaşlığı sayılmaz
+  if (!paused && !warming && !document.hidden && ((game.state === 'play' && game.runTime > 0.6) || (film && film.left)) && quality.note(raw)) {
     perf.changes++;
     applyQuality();
   }
@@ -13294,7 +14835,7 @@ function handleBack() {
     const t = performance.now();
     if (t - lastBack < 2000) return true;
     lastBack = t;
-    ui.toast('Çıkmak için tekrar bas', '#ffffff');
+    ui.toast(tx('menu.exit'), '#ffffff');
     return false;
   }
   ui.refreshMenu();

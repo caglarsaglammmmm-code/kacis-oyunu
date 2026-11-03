@@ -1,15 +1,16 @@
 {
   "name": "drift-lab",
-  "version": "13.0.0",
+  "version": "14.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/physics.test.js tests/world.test.js tests/game.test.js tests/police.test.js tests/misc.test.js tests/cheat.test.js",
+    "test": "node --test tests/physics.test.js tests/world.test.js tests/game.test.js tests/police.test.js tests/misc.test.js tests/cheat.test.js tests/i18n.test.js",
     "bundle": "node tools/bundle-file.mjs",
     "serve": "node tools/serve.mjs",
     "e2e": "node tools/e2e.mjs",
     "icons": "node tools/make-pixel-assets.mjs",
-    "android:build": "node tools/build-android.mjs"
+    "android:build": "node tools/build-android.mjs",
+    "names": "node tools/names.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",

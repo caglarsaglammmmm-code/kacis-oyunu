@@ -4,9 +4,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { namesSource } from './names.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const port = Number(process.env.PORT) || 8080;
+// FLAVOR=arkadas: gerçek isimli sürüm denenir (isim tablosu anında üretilir)
+const flavor = process.env.FLAVOR || 'play';
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.webp': 'image/webp',
@@ -17,8 +20,13 @@ const TYPES = {
   '.woff2': 'font/woff2',
 };
 
-http.createServer((req, res) => {
+http.createServer(async (req, res) => {
   const pathname = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  if (flavor !== 'play' && pathname === '/js/names.js') {
+    res.writeHead(200, { 'Content-Type': TYPES['.js'], 'Cache-Control': 'no-cache' });
+    res.end(await namesSource(flavor));
+    return;
+  }
   const file = path.normalize(path.join(root, pathname === '/' ? 'index.html' : pathname));
   if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
     res.writeHead(404).end('Bulunamadı');

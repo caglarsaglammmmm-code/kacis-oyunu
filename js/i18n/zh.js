@@ -1,0 +1,75 @@
+// 简体中文
+export default {
+  start: '开始',
+  menu: {
+    garage: '选车', settings: '设置', howto: '玩法', apk: '下载 APK',
+    best: '最佳：{score} 分 · {time}', first: '你的第一次逃亡正等着你',
+    maker: '制作：Çağlar Sağlam', exit: '再按一次退出',
+  },
+  aria: {
+    game: '游戏区域', health: '耐久', pause: '暂停', wanted: '通缉等级', damage: '损伤', reverse: '倒车',
+    mute: '开关声音', back: '返回', prev: '上一辆', next: '下一辆', start: '开始',
+  },
+  garage: {
+    finish: { gloss: '亮面', metal: '金属漆', matte: '哑光', pearl: '珠光' }, twoTone: '双色',
+    title: '车库', selected: '已选', select: '选择', buy: '购买 · {cost}', need: '{cost} 金币',
+    speed: '速度', accel: '加速', grip: '抓地力', durability: '耐久',
+  },
+  settings: {
+    title: '设置', sound: '声音', volume: '音量', ambient: '街道环境音', vibrate: '振动',
+    control: '操控', zones: '左右点击', wheel: '方向盘', stick: '摇杆',
+    quality: '画质', auto: '自动', high: '高', low: '低',
+    language: '语言 / Language', privacy: '隐私政策', version: '版本 {v}',
+  },
+  dev: {
+    title: '开发者', god: '无敌', start: '开始时间',
+    t0: '0 秒', t45: '45 秒（SWAT 前）', t195: '195 秒（增援前）', t275: '275 秒（坦克前）', t280: '280 秒（坦克）',
+  },
+  howto: {
+    title: '玩法说明',
+    rightH: '点击右半屏', rightP: '向右转并漂移',
+    leftH: '点击左半屏', leftP: '向左转并漂移',
+    bothH: '同时点击两侧', bothP: '刹车并倒车',
+    tips: [
+      '车会自己往前开，你只需要控制方向。',
+      '在设置中选择操控方式：左右点击、方向盘或摇杆。',
+      '撞墙会受损：冒烟、火花、起火，最后爆炸。',
+      '冲出城市：海滩、森林、沙漠和乡村等着你。',
+      '与警察擦身而过和漂移都能提高连击倍数。',
+      '让警车撞上墙，或者直接把它们撞翻。',
+      '看到红圈就赶紧跑：坦克炮火来了！',
+    ],
+  },
+  power: {
+    blast: '爆破', ghost: '隐身', heal: '修复', giant: '巨大化',
+    blastInfo: '附近所有车辆全部爆炸', ghostInfo: '{n} 秒内警察看不见你',
+    healInfo: '修复损伤并扑灭火焰', giantInfo: '{n} 秒内变得巨大，不受伤害',
+    healFloat: '修复 +', ghostFloat: '隐身', giantFloat: '巨大化',
+  },
+  pause: { title: '已暂停', resume: '继续', menu: '主菜单' },
+  over: {
+    caught: '被抓了！', sunk: '沉没了！', record: '新纪录！',
+    score: '得分', time: '时间', coins: '金币', kills: '击毁警车', broken: '撞毁物品', near: '惊险闪避', drift: '漂移',
+    seconds: '{n} 秒', best: '最高分：{score} · 最长时间：{time}', retry: '再来一次', menu: '主菜单',
+  },
+  hint: {
+    zones: ['点左侧', '向左漂移', '同时点两侧', '倒车', '点右侧', '向右漂移'],
+    wheel: ['按住“倒车”', '倒车', '方向盘', '在右下角', '转动', '左右转向'],
+    stick: ['左半屏', '按住滑动', '摇杆', '出现在手指下', '按住“倒车”', '倒车'],
+    rev: '倒车',
+  },
+  alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！' },
+  cheat: { on: '可以啊，你找到作弊码了！', off: '作弊已关闭', badge: '作弊已开启' },
+  cars: {
+    atmaca: { desc: '每条街坊的老伙计', paints: ['街坊米色', '酒红', '哑光军绿', '双色 奶白/酒红'] },
+    motor: { desc: '窄巷之王', paints: ['赛道红', '电光蓝', '哑光黑', '珍珠白'] },
+    granit: { desc: '高大安全的 SUV', paints: ['午夜蓝', '炭火橙', '哑光银', '珍珠白'] },
+    elektra: { desc: '安静、强劲、纯电', paints: ['安纳托利亚红', '风暴灰', '哑光土色', '冰川蓝'] },
+    simsek: { desc: '夸张尾翼，全套改装', paints: ['哑光黑配黄条', '烈焰橙', '霓虹绿', '金属紫'] },
+    cinar: { desc: '经典传奇', paints: ['传奇橙', '宝宝蓝', '双色 奶白/樱桃红', '哑光橄榄'] },
+    efe: { desc: '钢铁般结实，父辈传下来的', paints: ['海峡蓝', '卡其', '银色', '双色 米色/棕色'] },
+    marmara: { desc: '朴素轿车，暗藏惊喜', paints: ['雪白', '火山红', '哑光炭灰', '双色 蓝/黑'] },
+    liva: { desc: '小巧灵活，会飞的两厢车', paints: ['海洋蓝', '火焰橙', '哑光白', '双色 红/黑'] },
+    bozkir: { desc: '哪里都能去，从不停下', paints: ['峡谷橙', '森林绿', '沙米色', '双色 灰/黑'] },
+  },
+};

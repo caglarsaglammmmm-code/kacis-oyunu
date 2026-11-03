@@ -184,8 +184,11 @@ test('Yeşilvadi ve Mavi Orman büyük siteleri tek ve çok bloklu; Mandalina Ko
         assert.ok(blocks >= 5, `blok ${blocks}`);
       }
       if (c.template === 'kolej') {
+        // Haritanın en geniş ve en yüksek binası
         const r = c.rects[0];
-        assert.ok(r.w >= 600 && r.h >= 560, 'en büyük bina');
+        assert.equal(r.landmark, 'kolej');
+        assert.ok(r.w >= 800 && r.h >= 340, 'en geniş bina');
+        assert.ok(r.tall > CONFIG.world.tall.height[1], 'en yüksek bina');
       }
     }
   }
@@ -381,4 +384,18 @@ test('sokaklar genişledi: bina cepheleri geri çekilir, açık köşeler yuvarl
     }
   }
   assert.ok(checked > 50 && rounded > 50, checked + ' ' + rounded);
+});
+
+test('yeniden kullanılan bina kaydı eski tabela görüntüsünü taşımaz', () => {
+  const w = new World(7);
+  const c = w.chunk(3, 3);
+  let r = null;
+  for (let i = 0; i < c.rectCount; i++) if (c.rects[i].sign) { r = c.rects[i]; break; }
+  assert.ok(r, 'tabelalı bina');
+  r.signImg = { eski: true };
+  // Chunk'lar silinip havuzdan yeniden kullanılır
+  for (const k of w.list.splice(0)) { w.chunks.delete((k.cx + 32768) * 65536 + (k.cy + 32768)); w.release(k); }
+  w.lastKey = -1;
+  for (let i = 0; i < 6; i++) w.chunk(10 + i, 10);
+  for (const k of w.list) for (let i = 0; i < k.rectCount; i++) assert.ok(!k.rects[i].signImg || !k.rects[i].signImg.eski, 'eski görüntü kaldı');
 });

@@ -1,12 +1,21 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'drift-lab-v13';
+const CACHE = 'drift-lab-v14';
 const ASSETS = [
   './',
   'index.html',
   'privacy.html',
   'manifest.json',
   'css/style.css',
+  'js/names.js',
   'js/config.js',
+  'js/i18n/index.js',
+  'js/i18n/tr.js',
+  'js/i18n/en.js',
+  'js/i18n/ja.js',
+  'js/i18n/zh.js',
+  'js/i18n/es.js',
+  'js/i18n/de.js',
+  'assets/ui/btn-start.png',
   'js/cheat.js',
   'js/controls.js',
   'js/physics.js',
@@ -23,6 +32,7 @@ const ASSETS = [
   'js/menu3d.js',
   'assets/cars.webp',
   'js/cars.js',
+  'js/landmarks.js',
   'js/buildings.js',
   'js/game.js',
   'js/render.js',
