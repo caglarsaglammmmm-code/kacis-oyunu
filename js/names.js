@@ -2,8 +2,8 @@
 // Sürüm: arkadas
 export const FLAVOR = 'arkadas';
 export const NAMES = {
- "oyun": "Penci Zorn",
- "indir": "https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk",
+ "oyun": "Drift Lab",
+ "indir": "https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/DriftLab-Arkadas.apk",
  "kolej": {
   "ad": "SİSTEM KOLEJİ",
   "ust": "SİSTEM"

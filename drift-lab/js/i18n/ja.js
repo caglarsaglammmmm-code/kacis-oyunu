@@ -1,6 +1,7 @@
 // 日本語
 export default {
   start: 'スタート',
+  splash: '開発：{name}',
   menu: {
     garage: '車を選ぶ', settings: '設定', howto: '遊び方', apk: 'APKを入手',
     best: 'ベスト：{score}点 · {time}', first: '最初の逃走が待っている',

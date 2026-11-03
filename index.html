@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Penci Zorn</title>
-<meta name="description" content="Penci Zorn: Türk sokaklarında kuşbakışı polis kaçış ve drift oyunu">
+<title>Drift Lab</title>
+<meta name="description" content="Drift Lab: Türk sokaklarında kuşbakışı polis kaçış ve drift oyunu">
 <meta name="theme-color" content="#0a0824">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -50,10 +50,10 @@
 <div id="cheat-msg"><span></span></div>
 
 <section id="menu" class="screen menu" hidden>
-  <canvas id="cover" aria-label="Penci Zorn"></canvas>
+  <canvas id="cover" aria-label="Drift Lab"></canvas>
   <canvas id="cover-blur" aria-hidden="true"></canvas>
   <div class="menu-coins"><i class="coin"></i><span id="menu-coins">0</span></div>
-  <h1 class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Penci Zorn</h1>
+  <h1 class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Drift Lab</h1>
   <p class="maker" id="maker"></p>
   <button id="btn-mute" class="mute" aria-label="Sesi aç veya kapat" data-i18n-label="mute"><svg viewBox="0 0 16 16"><path d="M1 6h3V5h1V4h1V3h1v10H6v-1H5v-1H4v-1H1z"/><path class="wave" d="M9 6h1v4H9zM11 4h1v8h-1zM13 2h1v12h-1z"/><path class="off" d="M9 5h2v2h1V5h2v2h-2v2h2v2h-2V9h-1v2H9V9h2V7H9z"/></svg></button>
   <div class="menu-panel">
@@ -66,7 +66,7 @@
         <button id="btn-settings" class="tile t-set"><svg viewBox="0 0 24 24"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5zM19.4 13l2-1.5-2-3.4-2.3.9a7 7 0 0 0-1.7-1L15 5h-4l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 1.7 1L11 22h4l.4-2.5a7 7 0 0 0 1.7-1l2.3.9 2-3.4-2-1.5a7 7 0 0 0 0-2z" transform="translate(0 -1.5)"/></svg><span data-i18n="menu.settings">Ayarlar</span></button>
         <button id="btn-howto" class="tile t-how"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm1 14h-2v-2h2zm2-7c0 2-3 2-3 4h-2c0-3 3-3 3-4.500A1.500 1.500 0 0 0 10 9H8a4 4 0 0 1 7 1z"/></svg><span data-i18n="menu.howto">Nasıl?</span></button>
       </div>
-      <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk" rel="noopener" data-i18n="menu.apk">APK İndir</a>
+      <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/DriftLab-Arkadas.apk" rel="noopener" data-i18n="menu.apk">APK İndir</a>
     </nav>
   </div>
 </section>
@@ -151,7 +151,7 @@
 </section>
 
 <div id="curtain"></div>
-<div id="splash" hidden><p>Penci Zorn</p></div>
+<div id="splash" hidden><p id="splash-text"></p></div>
 
 <script>
   // file:// üzerinde ES modül çalışmaz; orada tek dosyalık kopya yüklenir.

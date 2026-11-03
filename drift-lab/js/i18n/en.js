@@ -1,6 +1,7 @@
 // English
 export default {
   start: 'START',
+  splash: 'Developed by {name}',
   menu: {
     garage: 'Cars', settings: 'Settings', howto: 'How to play', apk: 'Get APK',
     best: 'Best: {score} pts · {time}', first: 'Your first getaway awaits',

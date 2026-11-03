@@ -1,6 +1,7 @@
 // 简体中文
 export default {
   start: '开始',
+  splash: '开发者：{name}',
   menu: {
     garage: '选车', settings: '设置', howto: '玩法', apk: '下载 APK',
     best: '最佳：{score} 分 · {time}', first: '你的第一次逃亡正等着你',
