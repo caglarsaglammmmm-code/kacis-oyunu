@@ -17,8 +17,8 @@ const BUILD = {
 
 const CONFIG = {
   name: 'Drift Lab',
-  version: '12.0.0',
-  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v12.0.0/DriftLab.apk',
+  version: '13.0.0',
+  apkUrl: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v13.0.0/DriftLab.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -187,14 +187,11 @@ const CONFIG = {
     aliensAt: 225, // 200-250 sn arası: uzaylı işgali başlar. Oyun burada gerçekten zorlaşır
     aliensAlert: 'UZAYLILAR GELDİ!',
     firstSpawnAt: 5,
-    // [saniye, değer] noktaları arasında doğrusal artar, yani her saniye biraz zorlaşır
-    policeCurve: [[0, 1], [15, 2], [30, 3], [50, 5], [120, 8], [200, 12], [280, 16], [420, 20]],
-    spawnCurve: [[0, 6], [30, 4.5], [50, 3.5], [200, 1.6], [280, 1.1], [420, 0.8]],
+    // [saniye, değer] noktaları arasında doğrusal artar, yani her saniye biraz zorlaşır.
+    // Polis sayısı, hızı ve davranışları aşağıdaki pursuit bölümündedir
     hpCurve: [[0, 1], [50, 1], [200, 1.9], [280, 2.3], [600, 3.5]],
     powerCurve: [[0, 0.65], [30, 0.8], [50, 0.9], [200, 1.25], [280, 1.4], [600, 1.8]],
-    aggressionCurve: [[0, 0.3], [50, 0.5], [200, 0.85], [280, 1], [600, 1.2]],
-    flankerShare: [[0, 0], [30, 0.1], [50, 0.25], [200, 0.45]],
-    maxActive: 22, // Performans için mutlak üst sınır (barikat ve tank dahil)
+    maxActive: 24, // Mutlak üst sınır (barikat ve tank dahil). Cihaz sınırı quality.js ve pursuit.phoneCap
     swatShare: [[50, 0.15], [200, 0.3], [280, 0.25]],
     motoFrom: 15,
     motoShare: [[15, 0.12], [50, 0.2], [280, 0.18]],
@@ -203,6 +200,61 @@ const CONFIG = {
     advancedShare: [[200, 0.3], [280, 0.5]],
     tankCount: [[280, 1], [340, 2], [420, 3], [600, 4]],
     tankInterval: 22,
+  },
+
+  // ZORLUK EĞRİSİ: polis baskısının tüm ayarları burada. [saniye, değer] noktaları arası doğrusaldır.
+  // Saniye = oyun süresi + heat (arananlık). Tek düğmeyle ayar: countMul sayı, speedMul hız.
+  pursuit: {
+    countMul: 1, // 0.7 kolay, 1 normal, 1.3 zor
+    speedMul: 1,
+    policeCurve: [[0, 1], [15, 2], [30, 3], [60, 7], [120, 12], [180, 16], [240, 20], [300, 24]],
+    spawnCurve: [[0, 6], [30, 4.5], [60, 2.8], [120, 1.8], [200, 1.2], [280, 0.9], [420, 0.7]],
+    speedCurve: [[0, 0.93], [60, 0.97], [120, 1], [240, 1.04], [360, 1.07]],
+    speedRatioMax: 0.97, // Polis son hızı oyuncu hızının bu oranını geçemez: düz yolda kaçılır
+    aggressionCurve: [[0, 0.3], [50, 0.5], [200, 0.85], [280, 1], [600, 1.2]],
+    flankerShare: [[0, 0], [30, 0.1], [60, 0.22], [120, 0.3], [200, 0.36]],
+    interceptShare: [[45, 0], [60, 0.12], [200, 0.2]], // Önden gelen
+    blockShare: [[90, 0], [120, 0.1], [240, 0.16]], // Yolu kapatan
+    barricadeCurve: [[38, 22], [120, 16], [200, 12], [280, 9]],
+    // Arananlık: oyuncunun yaptıkları süreye saniye olarak eklenir, durulunca söner
+    heat: { kill: 5, nearMiss: 1, prop: 0.2, max: 60, decay: 0.3 },
+    // Adalet: oyuncunun çevresine aynı anda bu kadar polis girer, fazlası geride bekler
+    closeCurve: [[0, 2], [120, 3], [240, 4], [360, 5]],
+    closeR: 260,
+    frontMax: 2, // Önünde aynı anda en çok bu kadar polis yaklaşır
+    frontR: 360,
+    holdEvery: 15, // Kaç adımda bir yeniden bakılır
+    maxInterceptors: 2,
+    maxBlockers: 1,
+    pincerFrom: 60, // Bu saniyeden sonra kıskaç iki yandan sırayla gelir
+    aheadSpread: 0.9, // Önden doğma açısı
+    interceptAhead: 420,
+    interceptBrake: 190, // Karşılaşmaya bu kala yavaşlar: oyuncu kaçacak yer görür
+    interceptOffset: 44, // Tam burnuna değil, yanına gelir
+    blockDist: 520,
+    blockMinRoad: 120, // Bundan dar yol kapatılmaz: geçiş boşluğu kalsın
+    blockTime: 5,
+    roleTime: 9, // Görevini yapamayan normal kovalamaya döner
+    // Performans. Üst sınır: masaüstünde kalite seviyesi (quality.js cops), dokunmatikte ayrıca phoneCap
+    phoneCap: 12,
+    farDist: 850, // Bu uzaklıkta ve ekran dışındaki polis hafif hesaplanır
+    farStep: 3, // Uzak polis kaç adımda bir hesaplanır
+    recycleDist: 1300, // Sınır doluyken bundan uzak, ekran dışı polis alınıp önde yeniden doğar
+    recycleEvery: 1.2,
+    maxSirens: 3, // Aynı anda çalan siren sesi, en yakınlar
+  },
+
+  // Gizli sıra. gap: basışlar arası en uzun süre, maxHold: bunu aşan basılı tutma normal sürüş sayılır
+  // ve sırayı bozar. wheelOn, stickOn: eksen eşiği, axisBack: yeniden saymak için merkeze dönüş eşiği
+  cheat: {
+    sequence: ['L', 'L', 'R', 'R', 'L', 'R', 'L', 'R'],
+    gap: 1.5,
+    maxHold: 0.7,
+    wheelOn: 0.45,
+    stickOn: 0.6,
+    axisBack: 0.2,
+    messageOn: 'Aferin, hile kodunu buldun la!',
+    messageOff: 'Hile kapatıldı',
   },
 
   // speed: oyuncunun son hızına oran. HER ZAMAN 1'in altında kalmalı (test eder).
@@ -238,7 +290,7 @@ const CONFIG = {
   water: { sinkTime: 2.3, bubbleEvery: 0.06, shrink: 0.5, spin: 1.5, deepProbe: 6 },
 
   policeAI: {
-    despawnDist: 2100,
+    despawnDist: 1900,
     catchUpDist: 1150, // Polis bu kadar geride kalınca yenisi öne doğar: kovalama kopmasın
     wallDamage: 0.22,
     wallMinImpact: 85,
@@ -253,7 +305,6 @@ const CONFIG = {
 
   barricade: {
     from: 38,
-    intervalCurve: [[38, 24], [200, 15], [280, 11]],
     minGap: 72, // Barikatta her zaman kalan geçiş boşluğu
     spikeChance: 0.45,
     spikeFrom: 80,
@@ -2180,6 +2231,20 @@ class Effects {
 // Polis yapay zekâsı: akış alanıyla yol bulma, kovalama, sıkıştırma, barikat, tank.
 
 const COP_AI = CONFIG.policeAI;
+const CHASE = CONFIG.pursuit;
+
+// En yakın k sesi işaretler: siren sesleri üst üste binip bozulmasın
+function loudest(dists, k, mask) {
+  mask.fill(0);
+  for (let n = 0; n < k; n++) {
+    let best = -1;
+    let d = 1e8;
+    for (let i = 0; i < dists.length; i++) if (!mask[i] && dists[i] < d) { d = dists[i]; best = i; }
+    if (best < 0) break;
+    mask[best] = 1;
+  }
+  return mask;
+}
 
 // Oyuncunun çevresinde 96x96 karoluk en kısa yol alanı. Binalar, su ve çıkmazlar çözülür.
 class FlowField {
@@ -2339,11 +2404,35 @@ function drivePatrol(cop, g, dt) {
   if (cop.role === 'flanker' && dist < 520) {
     const fx = Math.cos(p.a);
     const fy = Math.sin(p.a);
-    const side = (dx * -fy + dy * fx) > 0 ? -1 : 1; // Oyuncunun hangi tarafındayız
+    // İki yandan sırayla gelir, erken safhada bulunduğu yandan
+    const side = g.time >= CHASE.pincerFrom ? cop.side : (dx * -fy + dy * fx) > 0 ? -1 : 1;
     const gap = dist < 90 ? 14 : 44;
     const back = cop.type === 'advanced' ? -22 : 8;
     target.x = p.x + p.vx * 0.32 + fx * back - fy * side * gap;
     target.y = p.y + p.vy * 0.32 + fy * back + fx * side * gap;
+  }
+
+  // Önden gelen ve yol kapatan: oyuncunun gidiş çizgisindeki bir noktaya gider
+  let brake = false;
+  if ((cop.role === 'interceptor' || cop.role === 'blocker') && g.ghostT <= 0) {
+    cop.roleT -= dt;
+    const sp = Math.max(1, p.speed);
+    const hx = p.vx / sp;
+    const hy = p.vy / sp;
+    const ahead = -(dx * hx + dy * hy);
+    if (ahead < 60 || cop.roleT <= 0 || p.speed < 60) {
+      cop.role = 'chaser';
+    } else if (cop.role === 'blocker' && ahead < CHASE.blockDist && g.roadWidthAt(cop.x, cop.y, hx, hy) >= CHASE.blockMinRoad) {
+      cop.state = 'block';
+      cop.blockT = CHASE.blockTime;
+      cop.blockA = Math.atan2(hy, hx) + Math.PI / 2;
+    } else {
+      const off = cop.role === 'interceptor' ? cop.side * CHASE.interceptOffset : 0;
+      const k = Math.min(ahead * 0.6, CHASE.interceptAhead);
+      target.x = p.x + hx * k - hy * off;
+      target.y = p.y + hy * k + hx * off;
+      brake = cop.role === 'interceptor' && ahead < CHASE.interceptBrake;
+    }
   }
 
   if (g.ghostT > 0) {
@@ -2381,6 +2470,8 @@ function drivePatrol(cop, g, dt) {
   const sharp = Math.abs(err) > 1.1;
   if (sharp && cop.speed > 190) throttle = -0.35;
   if ((left && right) && cop.speed > 200) throttle = -0.5;
+  if (brake) throttle = Math.min(throttle, 0.35);
+  if (cop.hold) throttle = dist < 150 ? -1 : cop.speed > 70 ? -0.5 : 0; // Sıra bekler: oyuncunun çevresi tamamen kapanmaz
 
   // Takılma: ışınlanma yok. Geri vitese takar, burnu çevirip yeniden dener.
   if (cop.reverseT > 0) {
@@ -2421,6 +2512,15 @@ function driveCop(cop, g, dt) {
     cop.wakeT -= dt;
     const d = Math.hypot(g.player.x - cop.x, g.player.y - cop.y);
     if ((d < CONFIG.barricade.wakeDist && g.ghostT <= 0) || cop.wakeT <= 0) cop.state = 'chase';
+    return;
+  }
+  if (cop.state === 'block') {
+    // Yolun ortasında durup enine döner, oyuncu yaklaşınca ya da süre dolunca kovalamaya geçer
+    cop.blockT -= dt;
+    cop.ctlS = Math.max(-1, Math.min(1, wrapAngle(cop.blockA - cop.a) * 2));
+    cop.ctlT = cop.speed > 60 ? -1 : 0;
+    const d = Math.hypot(g.player.x - cop.x, g.player.y - cop.y);
+    if (d < CONFIG.barricade.wakeDist || cop.blockT <= 0 || g.ghostT > 0) { cop.state = 'chase'; cop.role = 'chaser'; }
     return;
   }
   if (cop.flying) return;
@@ -2623,7 +2723,7 @@ class Crowd {
       const dx = h.x - p.x;
       const dy = h.y - p.y;
       const reach = (h.len + p.len) * 0.62;
-      if (g.state === 'play' && dx * dx + dy * dy < reach * reach) {
+      if (g.state === 'play' && !g.cheat && dx * dx + dy * dy < reach * reach) {
         const y = h.y;
         const rv = g.collideCars(p, h);
         h.y = y; h.vy = 0;
@@ -2901,6 +3001,7 @@ class Crowd {
   }
 
   checkHit(p, b, isPlayer) {
+    if (isPlayer && this.g.cheat) return false;
     const r = b.len * 0.44 + 7;
     const dx = p.x - b.x;
     const dy = p.y - b.y;
@@ -3067,7 +3168,7 @@ class Crowd {
 
     // Oyuncuyla çarpışma
     if (g.state === 'play' && far < (n.len + p.len) * 0.8) {
-      const rv = g.collideCars(p, n);
+      const rv = g.cheat ? 0 : g.collideCars(p, n);
       if (rv > 30) this.hitNpc(n, rv, true);
     }
     // Polislerle çarpışma
@@ -3194,8 +3295,10 @@ const BAR = CONFIG.barricade;
 const TK = CONFIG.tank;
 const PW = CONFIG.powers;
 const AL = CONFIG.aliens;
+const PU = CONFIG.pursuit;
 const WT = CONFIG.water;
 const tmpSirens = new Float32Array(CONFIG.sirens.length);
+const byDist = (a, b) => a.pd - b.pd;
 
 function interp(curve, t) {
   if (t <= curve[0][0]) return curve[0][1];
@@ -3209,22 +3312,28 @@ function interp(curve, t) {
   return curve[curve.length - 1][1];
 }
 
-// Süreye göre zorluk: eğriler doğrusal olduğu için her saniye biraz artar
-function difficultyAt(t, out = {}) {
+// Süreye göre zorluk: eğriler doğrusal olduğu için her saniye biraz artar.
+// heat: arananlık. Yalnız polis baskısını öne alır, aşama ve uzaylı eşikleri süreye bağlıdır
+function difficultyAt(t, out = {}, heat = 0) {
+  const h = t + heat;
   out.stage = t >= D.tanksAt ? 3 : t >= D.advancedAt ? 2 : t >= D.swatAt ? 1 : 0;
   out.stars = Math.min(MAX_STARS, 1 + out.stage);
-  out.maxPolice = Math.min(D.maxActive, Math.round(interp(D.policeCurve, t)));
-  out.spawnInterval = interp(D.spawnCurve, t);
+  out.maxPolice = Math.min(D.maxActive, Math.round(interp(PU.policeCurve, h) * PU.countMul));
+  out.spawnInterval = interp(PU.spawnCurve, h) / PU.countMul;
+  out.speedMul = interp(PU.speedCurve, h) * PU.speedMul;
+  out.closeMax = Math.round(interp(PU.closeCurve, h));
+  out.interceptShare = interp(PU.interceptShare, h);
+  out.blockShare = interp(PU.blockShare, h);
   out.hpMul = interp(D.hpCurve, t);
   out.power = interp(D.powerCurve, t);
-  out.aggression = interp(D.aggressionCurve, t);
-  out.flankerShare = interp(D.flankerShare, t);
+  out.aggression = interp(PU.aggressionCurve, h);
+  out.flankerShare = interp(PU.flankerShare, h);
   out.swatShare = t >= D.swatAt ? interp(D.swatShare, t) : 0;
   out.advancedShare = t >= D.advancedAt ? interp(D.advancedShare, t) : 0;
   out.motoShare = t >= D.motoFrom ? interp(D.motoShare, t) : 0;
   out.fastShare = t >= D.fastFrom ? interp(D.fastShare, t) : 0;
   out.tanks = t >= D.tanksAt ? Math.round(interp(D.tankCount, t)) : 0;
-  out.barricadeEvery = t >= BAR.from ? interp(BAR.intervalCurve, t) : Infinity;
+  out.barricadeEvery = t >= BAR.from ? interp(PU.barricadeCurve, h) : Infinity;
   out.ufos = t >= D.aliensAt ? Math.round(interp(AL.ufoCount, t)) : 0;
   out.rovers = t >= D.aliensAt ? Math.round(interp(AL.roverCount, t)) : 0;
   return out;
@@ -3270,6 +3379,7 @@ function makeCop() {
   b.los = false; b.hitCd = 0; b.nearCd = 0; b.wakeT = 0;
   b.turret = 0; b.fireT = 0; b.fxT = 0; b.hurtFlash = 0;
   b.wanderT = 0; b.wx = 0; b.wy = 0;
+  b.side = 1; b.roleT = 0; b.blockT = 0; b.blockA = 0; b.hold = false; b.far = false; b.pd = 0;
   return b;
 }
 
@@ -3289,6 +3399,10 @@ class Game {
     this.player = makeBody();
     this.cops = [];
     this.copPool = [];
+    for (let i = 0; i < D.maxActive; i++) this.copPool.push(makeCop()); // Oyun sırasında bellek ayrılmaz
+    this.copLimit = D.maxActive;
+    this.nearCops = [];
+    this.flankSide = 1;
     this.shots = [];
     for (let i = 0; i < 8; i++) this.shots.push({ x: 0, y: 0, t: 0, alive: false });
     this.spikes = [];
@@ -3323,6 +3437,14 @@ class Game {
     this.npcHits = 0;
     this.ghostT = 0;
     this.giantT = 0;
+    this.heat = 0;
+    this.recycleT = 0;
+    this.cheat = false; // Kaydedilmez, her koşu kapalı başlar
+    this.cheatUsed = false;
+    this.phasing = false;
+    this.exitOn = false;
+    this.exitX = 0;
+    this.exitY = 0;
     this.powerT = 12;
     this.powersTaken = 0;
     this.combo = 1;
@@ -3481,7 +3603,8 @@ class Game {
   tickPlay(dt, steer, reverse) {
     this.time += dt;
     this.runTime += dt;
-    difficultyAt(this.time, this.diff);
+    if (this.heat > 0) this.heat = Math.max(0, this.heat - PU.heat.decay * dt);
+    difficultyAt(this.time, this.diff, this.heat);
     this.world.update(this.player.x, this.player.y);
 
     if (this.diff.stage !== this.lastStage) {
@@ -3568,12 +3691,13 @@ class Game {
   updatePlayer(dt, steer, reverse) {
     const p = this.player;
     const g = this.world.groundAt(p.x, p.y);
-    const surf = CONFIG.surfaces[g];
+    const noclip = this.cheat || this.exitOn;
+    const surf = CONFIG.surfaces[this.cheat ? GROUND.ROAD : g]; // Hile: hiçbir zemin yavaşlatmaz
     // Duvara saplanınca kendiliğinden geri çıkar: tek parmakla oyun kilitlenmesin
     if (this.autoRevT > 0) {
       this.autoRevT -= dt;
       reverse = true;
-    } else if (p.speed < 40 && !reverse) {
+    } else if (p.speed < 40 && !reverse && !noclip) {
       this.stuckT += dt;
       if (this.stuckT > DMG.autoReverseAfter) {
         this.stuckT = 0;
@@ -3587,13 +3711,19 @@ class Game {
     if (this.hitCd > 0) this.hitCd -= dt;
 
     // Derin suya düştü: ölümsüzlükte duvar gibi davranır, testler ve geliştirici için
-    if (g === GROUND.WATER && !this.god && this.world.circleHit(p.x, p.y, WT.deepProbe, hit) && isDeep(hit.rect)) {
+    if (g === GROUND.WATER && !this.god && !noclip && this.world.circleHit(p.x, p.y, WT.deepProbe, hit) && isDeep(hit.rect)) {
       this.startSink();
       return;
     }
 
-    const impact = this.collideWorld(p, true);
-    if (impact > 0) this.playerImpact(impact, DMG.wallScale, false);
+    if (noclip) {
+      this.phasing = this.world.circleHit(p.x, p.y, p.wid * 0.6, hit);
+      if (this.exitOn) this.stepExit(dt);
+    } else {
+      this.phasing = false;
+      const impact = this.collideWorld(p, true);
+      if (impact > 0) this.playerImpact(impact, DMG.wallScale, false);
+    }
     this.collideProps(p, true);
     this.driftEffects(dt, g);
 
@@ -3633,7 +3763,56 @@ class Game {
     }
   }
 
+  // --- Gizli hile ---
+  toggleCheat() {
+    if (this.state !== 'play') return false;
+    this.cheat = !this.cheat;
+    if (this.cheat) {
+      this.cheatUsed = true;
+      this.exitOn = false;
+    } else if (this.world.circleHit(this.player.x, this.player.y, this.player.wid * 0.8, hit)) {
+      this.findExit();
+    } else {
+      this.phasing = false;
+    }
+    this.emit('cheat', this.cheat ? 1 : 0);
+    return this.cheat;
+  }
+
+  // Hile bina içinde kapanırsa araç en yakın boş yere süzülür: duvara saplanmaz
+  findExit() {
+    const p = this.player;
+    const r = p.wid * 0.8;
+    for (let d = TILE; d < TILE * 40; d += TILE / 2) {
+      for (let i = 0; i < 16; i++) {
+        const a = (i / 16) * 6.283;
+        const x = p.x + Math.cos(a) * d;
+        const y = p.y + Math.sin(a) * d;
+        if (this.world.circleHit(x, y, r, hit) || this.world.groundAt(x, y) === GROUND.WATER) continue;
+        this.exitOn = true;
+        this.exitX = x;
+        this.exitY = y;
+        return;
+      }
+    }
+  }
+
+  stepExit(dt) {
+    const p = this.player;
+    const k = 1 - Math.exp(-9 * dt);
+    p.x += (this.exitX - p.x) * k;
+    p.y += (this.exitY - p.y) * k;
+    p.vx *= 0.8;
+    p.vy *= 0.8;
+    if (Math.hypot(this.exitX - p.x, this.exitY - p.y) < 5) { this.exitOn = false; this.phasing = false; }
+  }
+
+  addHeat(v) {
+    if (!this.cheat) this.heat = Math.min(PU.heat.max, this.heat + v);
+  }
+
   playerImpact(impact, mul, fromCop, cap = DMG.maxSingleHit) {
+    if (this.cheat) return 0;
     const dmg = Math.min(cap, impactDamage(impact, this.carSpec.durability, mul, this.time));
     if (dmg <= 0) return 0;
     this.emit('crash', Math.min(1, impact / 380));
@@ -3653,7 +3832,7 @@ class Game {
   }
 
   hurt(amount) {
-    if (this.god || this.giantT > 0) return;
+    if (this.god || this.giantT > 0 || this.cheat) return;
     this.damage = Math.min(DMG.stages[3], this.damage + amount);
     if (amount >= 2) this.sinceHit = 0;
     if (this.burning) this.burnT = DMG.burnTime;
@@ -3669,7 +3848,7 @@ class Game {
       }
       this.burnT -= dt;
       if (this.burnT > 0) {
-        if (!this.god && this.giantT <= 0) this.damage += DMG.burnRate * dt;
+        if (!this.god && this.giantT <= 0 && !this.cheat) this.damage += DMG.burnRate * dt;
       } else {
         this.damage = Math.max(DMG.regenFloor, this.damage - DMG.regenRate * dt);
       }
@@ -3698,7 +3877,7 @@ class Game {
       if (this.stage >= 3) this.fx.spawn(FX.FIRE, hx + (Math.random() - 0.5) * 12, hy + (Math.random() - 0.5) * 12, p.vx * 0.5, p.vy * 0.5, 0.36, 8);
     }
 
-    if (this.damage >= DMG.stages[3]) this.explodePlayer();
+    if (this.damage >= DMG.stages[3] && !this.cheat) this.explodePlayer();
   }
 
   explodePlayer() {
@@ -3719,7 +3898,8 @@ class Game {
   finish() {
     this.state = 'over';
     if (this.giantT > 0) this.setGiant(false);
-    const earned = this.coins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
+    // Hile kullanılan koşu kazandırmaz, rekor saymaz
+    const earned = this.cheatUsed ? 0 : this.coins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
     this.result = {
       score: Math.floor(this.score),
       time: this.time,
@@ -3729,6 +3909,7 @@ class Game {
       driftTime: this.driftTime,
       nearMisses: this.nearMisses,
       cause: this.cause,
+      cheated: this.cheatUsed,
     };
     this.emit('gameover');
   }
@@ -3814,7 +3995,7 @@ class Game {
             continue;
           }
           const info = PROP_INFO[pr.kind];
-          if (info.pass) continue;
+          if (info.pass || (isPlayer && (this.cheat || this.exitOn))) continue;
           const rr = info.r + R;
           const d2 = dx * dx + dy * dy;
           if (d2 >= rr * rr) continue;
@@ -3844,6 +4025,7 @@ class Game {
     if (pr.kind === PROP.PARKED) this.fx.sparks(pr.x, pr.y, 10);
     if (!isPlayer) return;
     this.broken++;
+    this.addHeat(PU.heat.prop);
     this.addScore(SC.prop, pr.x, pr.y);
     if (info.dmg > 0) this.hurt(info.dmg / this.carSpec.durability);
     this.emit('break', info.drag);
@@ -3906,7 +4088,7 @@ class Game {
     const spec = CONFIG.police[type] || AL[type];
     const c = this.copPool.pop() || makeCop();
     const d = this.diff;
-    resetBody(c, x, y, a, { ...spec, grip: spec.grip });
+    resetBody(c, x, y, a, spec);
     c.id = this.nextId++;
     c.type = type;
     c.spec = spec;
@@ -3919,7 +4101,9 @@ class Game {
     c.wanderT = 0;
     c.staticBody = false;
     // Polis son hızı her zaman oyuncu arabasına oranlıdır, yani hep biraz yavaştır
-    c.drive.maxSpeed = this.carSpec.maxSpeed * spec.speed * CONFIG.speedScale.police;
+    // Uzaylılar kendi hızındadır. Polis zamanla hızlanır ama oyuncuyu geçemez
+    const ratio = spec.speed < 1 ? Math.min(Math.max(spec.speed, PU.speedRatioMax), spec.speed * d.speedMul) : spec.speed;
+    c.drive.maxSpeed = this.carSpec.maxSpeed * ratio * CONFIG.speedScale.police;
     c.drive.accel = spec.accel;
     c.drive.turnRate = spec.turnRate;
     c.drive.grip = spec.grip;
@@ -3929,6 +4113,8 @@ class Game {
     c.power = d.power;
     c.ctlS = 0; c.ctlT = 1; c.stuckT = 0; c.reverseT = 0; c.reverses = 0;
     c.los = false; c.hitCd = 0; c.nearCd = 0; c.wakeT = 0;
+    this.flankSide = -this.flankSide;
+    c.side = this.flankSide; c.roleT = PU.roleTime; c.blockT = 0; c.hold = false; c.far = false;
     c.turret = a; c.fireT = TK.fireEvery * 0.6; c.fxT = Math.random() * 3; c.hurtFlash = 0;
     this.cops.push(c);
     return c;
@@ -3965,6 +4151,7 @@ class Game {
     this.fx.debris(c.x, c.y, c.type === 'tank' ? '#5d6b3a' : c.type === 'ufo' || c.type === 'rover' ? '#39ff9c' : '#2f4c8a', 12, 280);
     this.fx.debris(c.x, c.y, '#f4f4f4', 6, 240);
     this.kills++;
+    this.addHeat(PU.heat.kill);
     this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.type === 'ufo' ? 6 : c.type === 'rover' ? 3 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
     if (Math.random() < 0.6) this.world.dropCoin(c.x, c.y);
     const near = Math.hypot(c.x - this.player.x, c.y - this.player.y) < 500;
@@ -3999,6 +4186,7 @@ class Game {
     const sirens = this.sirens;
     sirens.fill(1e9);
     const playing = this.state === 'play';
+    if (this.tickCount % PU.holdEvery === 0) this.assignHolds();
 
     for (let i = this.cops.length - 1; i >= 0; i--) {
       const c = this.cops[i];
@@ -4011,10 +4199,20 @@ class Game {
         this.removeCop(i);
         continue;
       }
-      driveCop(c, this, dt);
-      if (c.hitCd > 0) c.hitCd -= dt;
-      if (c.nearCd > 0) c.nearCd -= dt;
-      c.fxT += dt;
+      // Uzak ve görünmeyen polis seyrek hesaplanır: adım büyür, sonuç aynı yola çıkar
+      c.far = dist > PU.farDist && !c.flying && !this.onScreen(c.x, c.y, 200);
+      if (c.far && (this.tickCount + c.id) % PU.farStep !== 0) {
+        if (playing) {
+          if (dist < nearest) nearest = dist;
+          if (c.sirenId >= 0 && dist < sirens[c.sirenId]) sirens[c.sirenId] = dist;
+        }
+        continue;
+      }
+      const cdt = c.far ? dt * PU.farStep : dt;
+      driveCop(c, this, cdt);
+      if (c.hitCd > 0) c.hitCd -= cdt;
+      if (c.nearCd > 0) c.nearCd -= cdt;
+      c.fxT += cdt;
 
       if (c.flying) {
         this.updateUfo(c, dt, playing);
@@ -4023,14 +4221,14 @@ class Game {
       } else {
         c.staticBody = false;
         const surf = CONFIG.surfaces[world.groundAt(c.x, c.y)];
-        stepCar(c, c.ctlS, c.ctlT, c.drive, surf, dt);
+        stepCar(c, c.ctlS, c.ctlT, c.drive, surf, cdt);
         const impact = this.collideWorld(c, false);
         if (impact > AI.wallMinImpact) {
           c.hp -= (impact - AI.wallMinImpact) * AI.wallDamage * (40 / Math.max(40, c.spec.hp * 0.5));
           c.hurtFlash = 0.3;
         }
         // Nesne taraması ekran çevresinde ve kare atlayarak: telefonda yük azalır
-        if ((this.tickCount + c.id) % 3 === 0 && this.onScreen(c.x, c.y, 160)) this.collideProps(c, false);
+        if (!c.far && (this.tickCount + c.id) % 3 === 0 && this.onScreen(c.x, c.y, 160)) this.collideProps(c, false);
       }
 
       if (c.hurtFlash > 0) c.hurtFlash -= dt;
@@ -4041,19 +4239,21 @@ class Game {
 
       if (playing) {
         // Oyuncu ile çarpışma
-        if (!c.flying && dist < (c.len + p.len) * 0.75 && this.ghostT <= 0) {
+        // Hilede polis görünür ve kovalar ama değemez
+        if (!c.flying && dist < (c.len + p.len) * 0.75 && this.ghostT <= 0 && !this.cheat) {
           const rv = this.collideCars(p, c);
           if (rv > 1) this.copContact(c, rv, i);
           if (i >= this.cops.length || this.cops[i] !== c) continue;
         }
         // Yakın kaçış
-        if (this.ghostT <= 0 && c.nearCd <= 0 && c.hitCd <= 0 && dist < SC.nearMissDist + c.wid * 0.5 && c.state === 'chase') {
+        if (this.ghostT <= 0 && !this.cheat && c.nearCd <= 0 && c.hitCd <= 0 && dist < SC.nearMissDist + c.wid * 0.5 && c.state === 'chase') {
           const rvx = p.vx - c.vx;
           const rvy = p.vy - c.vy;
           const rel = Math.hypot(rvx, rvy);
           if (rel > SC.nearMissSpeed && dist > (c.wid + p.wid) * 0.55 && rvx * -dx + rvy * -dy > 0) {
             c.nearCd = 2.5;
             this.nearMisses++;
+            this.addHeat(PU.heat.nearMiss);
             this.addScore(SC.nearMiss, p.x, p.y - 30, SC.comboNearStep, '#7af6ff');
             this.emit('nearmiss');
           }
@@ -4073,7 +4273,7 @@ class Game {
       for (let j = i + 1; j < cops.length; j++) {
         const a = cops[i];
         const b = cops[j];
-        if (a.flying || b.flying) continue;
+        if (a.flying || b.flying || (a.far && b.far)) continue;
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const r = (a.len + b.len) * 0.6;
@@ -4082,6 +4282,30 @@ class Game {
     }
     this.sirenDist = nearest;
     this.sirenClosing = closing;
+  }
+
+  // Adalet: oyuncunun çevresine aynı anda sınırlı polis girer, önü tamamen kapanmaz. Fazlası gaz keser
+  assignHolds() {
+    const p = this.player;
+    const near = this.nearCops;
+    near.length = 0;
+    const fx = Math.cos(p.a);
+    const fy = Math.sin(p.a);
+    for (const c of this.cops) {
+      c.hold = false;
+      if (c.flying || c.type === 'tank' || c.state === 'barricade') continue;
+      c.pd = Math.hypot(c.x - p.x, c.y - p.y);
+      if (c.pd < PU.closeR) near.push(c);
+    }
+    near.sort(byDist);
+    for (let i = this.diff.closeMax; i < near.length; i++) near[i].hold = true;
+    let front = 0;
+    for (const c of this.cops) {
+      if (c.flying || c.type === 'tank' || c.state === 'barricade' || c.pd >= PU.frontR) continue;
+      if ((c.x - p.x) * fx + (c.y - p.y) * fy < 0) continue;
+      front++;
+      if (front > PU.frontMax) c.hold = true;
+    }
   }
 
   copContact(c, rv) {
@@ -4131,7 +4355,7 @@ class Game {
     const bx = p.x - c.x;
     const by = p.y - c.y;
     const bd = Math.hypot(bx, by);
-    c.beam = playing && this.ghostT <= 0 && bd < AL.beamRange ? 1 : 0;
+    c.beam = playing && this.ghostT <= 0 && !this.cheat && bd < AL.beamRange ? 1 : 0;
     if (c.beam) {
       p.vx -= (bx / (bd + 1)) * AL.beamPull * dt;
       p.vy -= (by / (bd + 1)) * AL.beamPull * dt;
@@ -4146,6 +4370,44 @@ class Game {
   }
 
   // --- Yönetmen: doğma, barikat, tank ---
+  countRole(role) {
+    let n = 0;
+    for (const c of this.cops) if (c.role === role) n++;
+    return n;
+  }
+
+  pickRole(r) {
+    const d = this.diff;
+    let s = d.interceptShare;
+    if (r < s) return this.countRole('interceptor') < PU.maxInterceptors ? 'interceptor' : 'chaser';
+    s += d.blockShare;
+    if (r < s) return this.countRole('blocker') < PU.maxBlockers ? 'blocker' : 'chaser';
+    s += d.flankerShare;
+    return r < s ? 'flanker' : 'chaser';
+  }
+
+  // Ekran dışındaki en uzak sıradan polisi havuza alır. Yenisi oyuncunun önünde doğar
+  dropFarthest(minDist = 0) {
+    const p = this.player;
+    let best = -1;
+    let far = minDist;
+    for (let i = 0; i < this.cops.length; i++) {
+      const c = this.cops[i];
+      if (c.type === 'tank' || c.flying || this.onScreen(c.x, c.y, 120)) continue;
+      const d = Math.hypot(c.x - p.x, c.y - p.y);
+      if (d > far) { far = d; best = i; }
+    }
+    if (best < 0) return false;
+    this.removeCop(best);
+    return true;
+  }
+
+  // Özel araçlar için yer açar: sınır aşılmaz
+  makeRoom(n) {
+    while (this.cops.length + n > this.copLimit) if (!this.dropFarthest()) return false;
+    return true;
+  }
+
   countType(type) {
     let n = 0;
     for (const c of this.cops) if (c.type === type) n++;
@@ -4166,11 +4428,11 @@ class Game {
   }
 
   // Ekran dışı yol karosu bulur; akış alanında ulaşılabilir olmalı
-  findSpawn(out, minR, maxR, bias) {
+  findSpawn(out, minR, maxR, bias, spreadBy = 2.2) {
     const p = this.player;
     const heading = Math.atan2(p.vy, p.vx);
     for (let i = 0; i < 16; i++) {
-      const spread = bias ? (Math.random() - 0.5) * 2.2 : Math.random() * 6.283;
+      const spread = bias ? (Math.random() - 0.5) * spreadBy : Math.random() * 6.283;
       const a = bias ? heading + spread : spread;
       const r = minR + Math.random() * (maxR - minR);
       const x = p.x + Math.cos(a) * r;
@@ -4194,12 +4456,20 @@ class Game {
     this.spawnT -= dt;
     // Oyuncu çok açılırsa kovalama kopmasın
     if (this.sirenDist > AI.catchUpDist && this.spawnT > 0.6) this.spawnT = 0.6;
+    const cap = Math.min(d.maxPolice, this.copLimit);
+    this.recycleT -= dt;
+    if (this.recycleT <= 0) {
+      this.recycleT = PU.recycleEvery;
+      if (this.cops.length > this.copLimit) this.dropFarthest();
+      else if (this.cops.length >= cap) this.dropFarthest(PU.recycleDist);
+    }
     const active = this.cops.length;
-    if (this.spawnT <= 0 && active < d.maxPolice) {
+    if (this.spawnT <= 0 && active < cap) {
       const min = this.viewRadius() + AI.viewMargin;
-      if (this.findSpawn(spawnPt, min, min + AI.spawnExtra, Math.random() < 0.5)) {
+      const role = this.pickRole(Math.random());
+      const ahead = role === 'interceptor' || role === 'blocker';
+      if (this.findSpawn(spawnPt, min, min + AI.spawnExtra, ahead || Math.random() < 0.5, ahead ? PU.aheadSpread : 2.2)) {
         const type = this.pickType(Math.random());
-        const role = Math.random() < d.flankerShare ? 'flanker' : 'chaser';
         this.spawnCop(type, role, spawnPt.x, spawnPt.y, Math.atan2(p.y - spawnPt.y, p.x - spawnPt.x));
         this.spawnT = d.spawnInterval;
       } else {
@@ -4207,17 +4477,17 @@ class Game {
       }
     }
 
-    if (d.ufos > 0 && active < D.maxActive - 1) {
+    if (d.ufos > 0) {
       this.alienT -= dt;
       if (this.alienT <= 0) {
         this.alienT = AL.spawnEvery;
         const min = this.viewRadius() + 160;
         const heading = Math.atan2(p.vy, p.vx) + (Math.random() - 0.5) * 2.6;
-        if (this.countType('ufo') < d.ufos) {
+        if (this.countType('ufo') < Math.min(d.ufos, Math.ceil(this.copLimit * 0.2)) && this.makeRoom(1)) {
           // Daire binaya takılmaz, önünden gelir
           this.spawnCop('ufo', 'chaser', p.x + Math.cos(heading) * min, p.y + Math.sin(heading) * min, 0);
         }
-        if (this.countType('rover') < d.rovers && this.findSpawn(spawnPt, min, min + 300, true)) {
+        if (this.countType('rover') < Math.min(d.rovers, Math.ceil(this.copLimit * 0.4)) && this.makeRoom(1) && this.findSpawn(spawnPt, min, min + 300, true)) {
           this.spawnCop('rover', Math.random() < 0.5 ? 'flanker' : 'chaser', spawnPt.x, spawnPt.y, Math.atan2(p.y - spawnPt.y, p.x - spawnPt.x));
         }
       }
@@ -4225,7 +4495,7 @@ class Game {
 
     if (d.tanks > 0) {
       this.tankT -= dt;
-      if (this.tankT <= 0 && this.countType('tank') < d.tanks && active < D.maxActive) {
+      if (this.tankT <= 0 && this.countType('tank') < Math.min(d.tanks, Math.ceil(this.copLimit * 0.15)) && this.makeRoom(1)) {
         const min = this.viewRadius() + 200;
         if (this.findSpawn(spawnPt, min, min + 500, true)) {
           this.spawnCop('tank', 'chaser', spawnPt.x, spawnPt.y, Math.atan2(p.y - spawnPt.y, p.x - spawnPt.x));
@@ -4245,10 +4515,25 @@ class Game {
     }
   }
 
+  // Gidiş yönüne dik yol genişliği; yol ekseni gidiş yönündedir
+  roadWidthAt(px, py, hx, hy) {
+    const world = this.world;
+    const horizontal = Math.abs(hx) > Math.abs(hy);
+    const cxd = horizontal ? 0 : 1;
+    const cyd = horizontal ? 1 : 0;
+    const road = (x, y) => world.groundAt(x, y) === GROUND.ROAD && !world.blockedAt(x, y);
+    if (!road(px, py)) return 0;
+    let a = 0;
+    while (a < 7 && road(px - cxd * (a + 1) * 20, py - cyd * (a + 1) * 20)) a++;
+    let b = 0;
+    while (b < 7 && road(px + cxd * (b + 1) * 20, py + cyd * (b + 1) * 20)) b++;
+    return (a + b) * 20 + 20;
+  }
+
   // Oyuncunun önündeki yolu tespit eder, yan yana arabalarla kapatır, boşluk bırakır
   placeBarricade() {
     const p = this.player;
-    if (p.speed < 120 || this.cops.length >= D.maxActive - 2) return false;
+    if (p.speed < 120 || !this.makeRoom(3)) return false;
     const dist = this.viewRadius() + BAR.distAhead;
     const hx = p.vx / p.speed;
     const hy = p.vy / p.speed;
@@ -4303,7 +4588,7 @@ class Game {
       const dx = p.x - s.x;
       const dy = p.y - s.y;
       if (dx * dx + dy * dy > 2800 * 2800) { s.alive = false; continue; }
-      if (s.used) continue;
+      if (s.used || this.cheat) continue;
       const along = dx * Math.cos(s.a) + dy * Math.sin(s.a);
       const across = -dx * Math.sin(s.a) + dy * Math.cos(s.a);
       if (Math.abs(along) < s.len / 2 + p.wid * 0.4 && Math.abs(across) < 16 + p.len * 0.3) {
@@ -4345,7 +4630,7 @@ class Game {
       this.cam.shake = Math.min(16, this.cam.shake + 8);
       const p = this.player;
       const d = Math.hypot(p.x - s.x, p.y - s.y);
-      if (this.state === 'play' && d < TK.radius) {
+      if (this.state === 'play' && d < TK.radius && !this.cheat) {
         const amount = (TK.damage * (1 - (0.5 * d) / TK.radius)) / this.carSpec.durability;
         this.hurt(amount);
         this.hitFlash = 1;
@@ -8524,11 +8809,35 @@ function rectSign(r) {
 
 // Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
 const signOut = { x: 0, y: 0, w: 0, h: 0 };
+const CHUNK_FIT = (CHUNK + 0.6) / CHUNK; // Zemin parçaları ek yeri kapansın diye bu kadar büyük çizilir
+
+// Yüksek binada tabela çatının ortasındadır: gündüz, gece ve ışıltı aynı kutuyu kullanır
+function roofSignBox(r, img) {
+  const w = Math.min((r.tX1 - r.tX0) * 0.92, (img.width / img.height) * 38);
+  const h = (w / img.width) * img.height;
+  signOut.w = w;
+  signOut.h = h;
+  signOut.x = (r.tX0 + r.tX1) / 2 - w / 2;
+  signOut.y = (r.tY0 + r.tY1) / 2 - h / 2;
+  return signOut;
+}
+
+// Alçak binada tabela zemin parçasına işlenmiştir: gece katmanı aynı ölçeğe oturur, çift görünmez
+function groundSignBox(r, img, c) {
+  const b = signBox(r, img);
+  b.x = c.x + (b.x - c.x) * CHUNK_FIT;
+  b.y = c.y + (b.y - c.y) * CHUNK_FIT;
+  b.w *= CHUNK_FIT;
+  b.h *= CHUNK_FIT;
+  return b;
+}
 function signBox(r, img) {
   const size = r.signSize ?? 1;
   const hTarget = [18, 24, 32, 46][size] ?? 24;
   const maxW = size === 3 ? r.w * 0.94 : r.w - 6;
-  const w = Math.min(maxW, (img.width / img.height) * hTarget);
+  // Dar binada tabela sığacak kadar küçülür, cepheden taşmaz
+  const fit = Math.min(hTarget, Math.max(10, r.h - 9));
+  const w = Math.min(maxW, (img.width / img.height) * fit);
   const h = (w / img.width) * img.height;
   signOut.w = w;
   signOut.h = h;
@@ -8558,6 +8867,7 @@ class Renderer {
     this.playerSprite = null;
     this.playerId = '';
     this.lod = { slices: 6, balcony: 1, night: 2, speedLines: true, fireSmoke: true };
+    this.tallList = [];
     this.syncBakes = 0; // Görünür parça hazır değilse kare beklemiştir: ölçüm için
     this.queue = []; // Sprite işleri kare bütçesiyle yapılır
     this.makeSprites();
@@ -8723,59 +9033,83 @@ class Renderer {
   }
 
   // Kameraya göre yukarı uzanan binalar: taban sabit, çatı kameradan dışa kayar ve büyür
+  // Görünen yüksek binalar uzaktan yakına sıralanır: yakın olan uzak olanı örter.
+  // Çatı izdüşümü binada saklanır, tabela ve ışıltı buradan okur
+  collectTalls(game, c0x, c1x, c0y, c1y) {
+    const cam = game.cam;
+    const cx = cam.x; const cy = cam.y;
+    const mx = cam.halfW + 120; const my = cam.halfH + 120;
+    const list = this.tallList;
+    let n = 0;
+    for (let gy = c0y - 1; gy <= c1y + 1; gy++) {
+      for (let gx = c0x - 1; gx <= c1x + 1; gx++) {
+        const c = game.world.chunks.get((gx + 32768) * 65536 + (gy + 32768));
+        if (!c) continue;
+        for (let ti = 0; ti < c.talls.length; ti++) {
+          const r = c.talls[ti];
+          if (!r.alive || r.x + r.w < cx - mx || r.x > cx + mx || r.y + r.h < cy - my || r.y > cy + my) continue;
+          const k = r.tall;
+          r.tX0 = r.x + (r.x - cx) * k; r.tX1 = r.x + r.w + (r.x + r.w - cx) * k;
+          r.tY0 = r.y + (r.y - cy) * k; r.tY1 = r.y + r.h + (r.y + r.h - cy) * k;
+          const dx = cx < r.x ? r.x - cx : cx > r.x + r.w ? cx - r.x - r.w : 0;
+          const dy = cy < r.y ? r.y - cy : cy > r.y + r.h ? cy - r.y - r.h : 0;
+          r.tDist = dx * dx + dy * dy;
+          list[n++] = r;
+        }
+      }
+    }
+    list.length = n;
+    for (let i = 1; i < n; i++) {
+      const r = list[i];
+      let j = i - 1;
+      while (j >= 0 && list[j].tDist < r.tDist) { list[j + 1] = list[j]; j--; }
+      list[j + 1] = r;
+    }
+    for (let i = 0; i < n; i++) list[i].tSeq = i;
+  }
+
   drawTalls(game, c0x, c1x, c0y, c1y) {
     const ctx = this.ctx;
     const cam = game.cam;
     const cx = cam.x; const cy = cam.y;
     const N = this.lod.slices;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
-    const mx = cam.halfW + 120; const my = cam.halfH + 120;
-    for (let gy = c0y - 1; gy <= c1y + 1; gy++) {
-      for (let gx = c0x - 1; gx <= c1x + 1; gx++) {
-        const key = (gx + 32768) * 65536 + (gy + 32768);
-        const c = game.world.chunks.get(key);
-        if (!c) continue;
-        for (let ti = 0; ti < c.talls.length; ti++) {
-          const r = c.talls[ti];
-          if (!r.alive) continue;
-          const k = r.tall;
-          if (r.x + r.w < cx - mx || r.x > cx + mx || r.y + r.h < cy - my || r.y > cy + my) continue;
-          const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
-          const X0 = x0 + (x0 - cx) * k; const X1 = x1 + (x1 - cx) * k;
-          const Y0 = y0 + (y0 - cy) * k; const Y1 = y1 + (y1 - cy) * k;
-          const tex = this.walls[r.seed % this.walls.length];
-          // Güney ve kuzey duvarları
-          if (cy > y1 || cy < y0) {
-            const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
-            ctx.globalAlpha = 1;
-            for (let t = 0; t < N; t++) {
-              const a = t / N; const b = (t + 1) / N;
-              const xa = x0 + (X0 - x0) * b; const xb = x1 + (X1 - x1) * b;
-              const ya = fromY + (toY - fromY) * a; const yb = fromY + (toY - fromY) * b;
-              ctx.drawImage(tex.n, 0, 192 * (1 - b), Math.min(96, r.w), 192 / N, xa, Math.min(ya, yb) - 0.4, xb - xa, Math.abs(yb - ya) + 0.8);
-            }
-            if (cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
-          }
-          // Doğu ve batı duvarları
-          if (cx > x1 || cx < x0) {
-            const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
-            for (let t = 0; t < N; t++) {
-              const a = t / N; const b = (t + 1) / N;
-              const ya = y0 + (Y0 - y0) * b; const yb = y1 + (Y1 - y1) * b;
-              const xa = fromX + (toX - fromX) * a; const xc = fromX + (toX - fromX) * b;
-              ctx.drawImage(tex.e, 192 * (1 - b), 0, 192 / N, Math.min(96, r.h), Math.min(xa, xc) - 0.4, ya, Math.abs(xc - xa) + 0.8, yb - ya);
-            }
-            ctx.fillStyle = 'rgba(0,0,20,.16)';
-            ctx.beginPath(); ctx.moveTo(fromX, y0); ctx.lineTo(toX, Y0); ctx.lineTo(toX, Y1); ctx.lineTo(fromX, y1); ctx.closePath(); ctx.fill();
-          }
-          ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
-          if (r.sign) {
-            const img = rectSign(r);
-            const w = Math.min((X1 - X0) * 0.92, (img.width / img.height) * 38);
-            const h = (w / img.width) * img.height;
-            ctx.drawImage(img, (X0 + X1) / 2 - w / 2, (Y0 + Y1) / 2 - h / 2, w, h);
-          }
+    this.collectTalls(game, c0x, c1x, c0y, c1y);
+    const list = this.tallList;
+    for (let ti = 0; ti < list.length; ti++) {
+      const r = list[ti];
+      const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
+      const X0 = r.tX0; const X1 = r.tX1; const Y0 = r.tY0; const Y1 = r.tY1;
+      const tex = this.walls[r.seed % this.walls.length];
+      // Güney ve kuzey duvarları
+      if (cy > y1 || cy < y0) {
+        const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
+        ctx.globalAlpha = 1;
+        for (let t = 0; t < N; t++) {
+          const a = t / N; const b = (t + 1) / N;
+          const xa = x0 + (X0 - x0) * b; const xb = x1 + (X1 - x1) * b;
+          const ya = fromY + (toY - fromY) * a; const yb = fromY + (toY - fromY) * b;
+          ctx.drawImage(tex.n, 0, 192 * (1 - b), Math.min(96, r.w), 192 / N, xa, Math.min(ya, yb) - 0.4, xb - xa, Math.abs(yb - ya) + 0.8);
         }
+        if (cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
+      }
+      // Doğu ve batı duvarları
+      if (cx > x1 || cx < x0) {
+        const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
+        for (let t = 0; t < N; t++) {
+          const a = t / N; const b = (t + 1) / N;
+          const ya = y0 + (Y0 - y0) * b; const yb = y1 + (Y1 - y1) * b;
+          const xa = fromX + (toX - fromX) * a; const xc = fromX + (toX - fromX) * b;
+          ctx.drawImage(tex.e, 192 * (1 - b), 0, 192 / N, Math.min(96, r.h), Math.min(xa, xc) - 0.4, ya, Math.abs(xc - xa) + 0.8, yb - ya);
+        }
+        ctx.fillStyle = 'rgba(0,0,20,.16)';
+        ctx.beginPath(); ctx.moveTo(fromX, y0); ctx.lineTo(toX, Y0); ctx.lineTo(toX, Y1); ctx.lineTo(fromX, y1); ctx.closePath(); ctx.fill();
+      }
+      ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
+      if (r.sign) {
+        const img = rectSign(r);
+        const b = roofSignBox(r, img);
+        ctx.drawImage(img, b.x, b.y, b.w, b.h);
       }
     }
   }
@@ -9786,6 +10120,7 @@ class Renderer {
     this.drawUfos(game, now, vx0, vx1, vy0, vy1);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawNight(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now);
+    this.drawPhasing(game);
     this.drawSirens(game, now, vx0, vx1, vy0, vy1);
     this.drawWaves(game);
     this.drawFloats(game);
@@ -10066,6 +10401,7 @@ class Renderer {
             ctx.drawImage(sp.lamp, l.x - 70, l.y - 70, 140, 140);
           } else if (l.kind === 1) {
             if (!l.rect.alive || (l.rect.seed + i) % 4 === 0 || night <= l.at) continue; // Bazı evlerde ışık kapalı
+            if (l.rect.tall > 0 && game.cam.y <= l.rect.y + l.rect.h) continue; // Bu açıda cephe görünmez, ışık çatıya binmesin
             ctx.globalAlpha = Math.min(1, (night - l.at) / 0.16) * 0.85; // Her pencere kendi sırasında yanar
             ctx.drawImage(sp.win, l.x, l.y, l.w, l.h);
           } else if (l.kind === 2) {
@@ -10076,47 +10412,27 @@ class Renderer {
         }
       }
     }
-    ctx.globalCompositeOperation = 'source-over';
-    // Tabelalar gece aydınlık kalır
-    ctx.globalAlpha = night * 0.9;
+    // Tabelalar gece aydınlık kalır. Alçak binalarınki zemindeki yerinde, yüksek binalarınki çatıda
     for (let cy = c0y; cy <= c1y; cy++) {
       for (let cx = c0x; cx <= c1x; cx++) {
         const c = game.world.chunk(cx, cy);
         for (let i = 0; i < c.lightCount; i++) {
           const l = c.lights[i];
-          if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1) continue;
-          const r = l.rect;
-          const img = rectSign(r);
-          const b = signBox(r, img);
-          ctx.drawImage(img, b.x, b.y, b.w, b.h);
+          if (l.kind < 2 || !l.rect.alive || l.rect.tall > 0 || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1 + 40) continue;
+          const img = rectSign(l.rect);
+          this.litSign(l.rect, img, groundSignBox(l.rect, img, c), night, now, 0, true);
         }
       }
     }
-    // Tabela ışıltısı ve yola düşen yansıması
-    ctx.globalCompositeOperation = 'lighter';
-    for (let cy = c0y; this.lod.night > 0 && cy <= c1y; cy++) {
-      for (let cx = c0x; cx <= c1x; cx++) {
-        const c = game.world.chunk(cx, cy);
-        for (let i = 0; i < c.lightCount; i++) {
-          const l = c.lights[i];
-          if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1 + 40) continue;
-          const r = l.rect;
-          const img = rectSign(r);
-          const b = signBox(r, img);
-          const halo = signHalo(r.signColor);
-          const led = signKind(r.sign) === 'led';
-          const flick = led ? 0.82 + 0.18 * Math.sin(now * 0.02 + r.seed) : 1;
-          ctx.globalAlpha = night * 0.6 * flick;
-          ctx.drawImage(img, b.x, b.y, b.w, b.h);
-          ctx.globalAlpha = night * 0.5 * flick;
-          ctx.drawImage(halo, b.x - 26, b.y - 22, b.w + 52, b.h + 44);
-          if (this.lod.night < 2) continue;
-          ctx.globalAlpha = night * 0.3;
-          ctx.drawImage(halo, r.x - 6, r.y + r.h - 2, r.w + 12, 40);
-        }
-      }
+    const talls = this.tallList;
+    for (let i = 0; i < talls.length; i++) {
+      const r = talls[i];
+      if (!r.sign || r.tX1 < x0 || r.tX0 > x1 || r.tY1 < y0 || r.tY0 > y1) continue;
+      const img = rectSign(r);
+      this.litSign(r, img, roofSignBox(r, img), night, now, i + 1, game.cam.y > r.y + r.h);
     }
     // Araç farları
+    ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = night;
     const beam = sp.beam;
     const bw = beam.width / SPR;
@@ -10151,6 +10467,77 @@ class Renderer {
       ctx.drawImage(sp.moon, W * 0.62, 12, 44, 44);
       ctx.globalCompositeOperation = 'source-over';
     }
+    ctx.globalAlpha = 1;
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
+  // Tek tabelanın gece hâli: yazı, tam arkasında ışıltı, yola düşen yansıma.
+  // from: tallList içinde bu tabelayı örtebilecek ilk bina. Örtenlerin izdüşümü kırpılır
+  litSign(r, img, b, night, now, from, reflect) {
+    const ctx = this.ctx;
+    const x = b.x; const y = b.y; const w = b.w; const h = b.h;
+    const bottom = reflect ? Math.max(y + h + 22, r.y + r.h + 38) : y + h + 22;
+    const clipped = this.clipOccluders(x - 26, y - 22, w + 52, bottom - y + 22, from);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = night * 0.9;
+    ctx.drawImage(img, x, y, w, h);
+    if (this.lod.night > 0) {
+      const halo = signHalo(r.signColor);
+      const flick = signKind(r.sign) === 'led' ? 0.82 + 0.18 * Math.sin(now * 0.02 + r.seed) : 1;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = night * 0.6 * flick;
+      ctx.drawImage(img, x, y, w, h);
+      ctx.globalAlpha = night * 0.5 * flick;
+      ctx.drawImage(halo, x - 26, y - 22, w + 52, h + 44);
+      if (reflect && this.lod.night >= 2) {
+        ctx.globalAlpha = night * 0.3;
+        ctx.drawImage(halo, r.x - 6, r.y + r.h - 2, r.w + 12, 40);
+      }
+    }
+    if (clipped) ctx.restore();
+  }
+
+  // Kutunun üstüne binen yüksek bina gövdelerini (taban ve çatının dış zarfı) çizim alanından çıkarır
+  clipOccluders(x, y, w, h, from) {
+    const ctx = this.ctx;
+    const list = this.tallList;
+    let clipped = false;
+    for (let i = from; i < list.length; i++) {
+      const r = list[i];
+      const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
+      const minX = Math.min(x0, r.tX0); const maxX = Math.max(x1, r.tX1);
+      const minY = Math.min(y0, r.tY0); const maxY = Math.max(y1, r.tY1);
+      if (maxX <= x || minX >= x + w || maxY <= y || minY >= y + h) continue;
+      if (!clipped) { ctx.save(); clipped = true; }
+      ctx.beginPath();
+      ctx.rect(x - 400, y - 400, w + 800, h + 800);
+      const top = r.tY0 < y0; const bot = r.tY1 > y1; const left = r.tX0 < x0; const right = r.tX1 > x1;
+      ctx.moveTo(top ? r.tX0 : x0, minY);
+      ctx.lineTo(top ? r.tX1 : x1, minY);
+      ctx.lineTo(maxX, right ? r.tY0 : y0);
+      ctx.lineTo(maxX, right ? r.tY1 : y1);
+      ctx.lineTo(bot ? r.tX1 : x1, maxY);
+      ctx.lineTo(bot ? r.tX0 : x0, maxY);
+      ctx.lineTo(minX, left ? r.tY1 : y1);
+      ctx.lineTo(minX, left ? r.tY0 : y0);
+      ctx.closePath();
+      ctx.clip('evenodd');
+    }
+    return clipped;
+  }
+
+  // Hilede bina içinden geçen araç kaybolmaz: en üstte yarı saydam görünür
+  drawPhasing(game) {
+    if (!game.phasing || game.state !== 'play') return;
+    const ctx = this.ctx;
+    const p = game.player;
+    const img = this.playerSprite;
+    const k = p.len / game.carSpec.len;
+    const w = (img.wu || img.width / SPR) * k;
+    const h = (img.hu || img.height / SPR) * k;
+    this.place(p.x, p.y, p.a);
+    ctx.globalAlpha = 0.72;
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
     ctx.globalAlpha = 1;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
@@ -10519,6 +10906,34 @@ class Renderer {
 }
 
 
+// --- cheat.js ---
+// Basış sırası denetleyicisi. Girişten bağımsızdır: dokunuş, tuş ve eksen aynı yola gelir.
+// DOM'a dokunmaz, birim testle sınanır.
+
+const C = CONFIG.cheat;
+
+class CheatCode {
+  constructor() {
+    this.i = 0;
+    this.t = 0;
+  }
+
+  reset() {
+    this.i = 0;
+  }
+
+  // dir: 'L' ya da 'R', now: saniye. Sıra tamamlanınca true döner
+  press(dir, now) {
+    if (this.i > 0 && now - this.t > C.gap) this.i = 0;
+    if (dir === C.sequence[this.i]) this.i++;
+    else this.i = dir === C.sequence[0] ? 1 : 0;
+    this.t = now;
+    if (this.i < C.sequence.length) return false;
+    this.i = 0;
+    return true;
+  }
+}
+
 // --- input.js ---
 // Üç dokunmatik kontrol tek yerde. Klavye her modda aynı çalışır.
 // zones: sağ yarı = sağa, sol yarı = sola, ikisi birden = geri (eski sistem, aynen).
@@ -10534,6 +10949,7 @@ const WHEEL_DEAD = 0.03;
 const STICK_R = 54; // Joystick yarıçapı, px
 const STICK_DEAD = 8; // Bu kadar kayma titreme sayılır, px
 const STICK_SMOOTH = 24;
+const CH = CONFIG.cheat;
 
 const wrap = (a) => {
   while (a > Math.PI) a -= Math.PI * 2;
@@ -10559,6 +10975,11 @@ class Input {
     this.axis = 0; // Yumuşatılmış analog direksiyon
     this.revHeld = false;
     this.bounds = { l: 0, t: 0, r: 1, b: 1 }; // Joystick halkası bunun dışına taşmaz
+    this.code = new CheatCode();
+    this.onCode = null;
+    this.clock = 0; // Yalnız oyun adımlarında akar: duraklatma sayılmaz
+    this.heldT = 0;
+    this.axisReady = true;
   }
 
   setMode(mode) {
@@ -10581,6 +11002,26 @@ class Input {
       this.axis += (target - this.axis) * (1 - Math.exp(-STICK_SMOOTH * dt));
       if (Math.abs(this.axis) < 0.005) this.axis = 0;
     }
+    this.watchCode(dt);
+  }
+
+  // Direksiyon ve joystick: eşiği aşan kısa hareket bir basıştır, sonraki için merkeze dönmek gerekir.
+  // Uzun tutuş normal sürüştür, sırayı bozar
+  watchCode(dt) {
+    this.clock += dt;
+    const a = this.axis;
+    const abs = Math.abs(a);
+    if (abs < CH.axisBack) this.axisReady = true;
+    else if (this.axisReady && abs >= (this.mode === 'wheel' ? CH.wheelOn : CH.stickOn)) {
+      this.axisReady = false;
+      this.tap(a < 0 ? 'L' : 'R');
+    }
+    this.heldT = this.left || this.right || abs >= CH.axisBack ? this.heldT + dt : 0;
+    if (this.heldT > CH.maxHold) this.code.reset();
+  }
+
+  tap(dir) {
+    if (this.code.press(dir, this.clock) && this.onCode) this.onCode();
   }
 
   get left() {
@@ -10610,6 +11051,7 @@ class Input {
   press(id, side) {
     this.touches.set(id, side);
     this.last = side;
+    this.tap(side);
   }
 
   release(id) {
@@ -10630,6 +11072,9 @@ class Input {
     this.stick.dy = 0;
     this.axis = 0;
     this.revHeld = false;
+    this.code.reset();
+    this.heldT = 0;
+    this.axisReady = true;
   }
 
   sideOf(x) {
@@ -10637,8 +11082,8 @@ class Input {
   }
 
   key(code, down) {
-    if (code === 'ArrowLeft' || code === 'KeyA') { this.keyL = down; if (down) this.last = 'L'; return true; }
-    if (code === 'ArrowRight' || code === 'KeyD') { this.keyR = down; if (down) this.last = 'R'; return true; }
+    if (code === 'ArrowLeft' || code === 'KeyA') { this.keyL = down; if (down) { this.last = 'L'; this.tap('L'); } return true; }
+    if (code === 'ArrowRight' || code === 'KeyD') { this.keyR = down; if (down) { this.last = 'R'; this.tap('R'); } return true; }
     return false;
   }
 
@@ -11110,6 +11555,7 @@ class AudioEngine {
     // Dört farklı siren: her tür en yakın aracına göre ayrı çalar
     // Perde yaklaşma hızına göre kayar (Doppler hissi)
     this.voices = {};
+    this.sirenMask = new Uint8Array(CONFIG.sirens.length);
     const makeVoice = (name, type, center) => {
       const osc = ctx.createOscillator();
       osc.type = type;
@@ -11286,10 +11732,11 @@ class AudioEngine {
     const sec = now / 1000;
     const S = game.sirens;
     const quiet = game.ghostT > 0 ? 0.35 : 1;
+    const mask = loudest(S, CONFIG.pursuit.maxSirens, this.sirenMask);
     const setVoice = (name, freq, gate = 1) => {
       const v = this.voices[name];
       const d = S[CONFIG.sirens.indexOf(name)];
-      if (on && d < 1300 && gate) {
+      if (on && d < 1300 && gate && mask[CONFIG.sirens.indexOf(name)]) {
         const vol = 1 - d / 1300;
         v.osc.frequency.setTargetAtTime(freq * doppler, t, 0.02);
         v.gain.gain.setTargetAtTime((0.018 + vol * vol * 0.062) * quiet, t, 0.04);
@@ -11579,6 +12026,12 @@ class AudioEngine {
   tankFire() {
     this.burst(0.55, 700, 0.8, 'lowpass', 70);
     this.tone(90, 0.4, 0.5, 'sine', 40);
+  }
+
+  // Gizli ödül: yükselen dört nota, kapanışta iki inen nota
+  cheat(on) {
+    const notes = on ? [523, 659, 784, 1047] : [659, 440];
+    notes.forEach((f, i) => this.tone(f, 0.16, 0.2, 'triangle', f * 1.01, i * 0.09));
   }
 
   splash() { this.burst(0.4, 2400, 0.3, 'highpass', 600); }
@@ -12161,6 +12614,14 @@ class UI {
     el.classList.add('run');
   }
 
+  cheatMessage(on) {
+    const el = $('cheat-msg');
+    el.firstElementChild.textContent = on ? CONFIG.cheat.messageOn : CONFIG.cheat.messageOff;
+    el.classList.remove('run');
+    void el.offsetWidth;
+    el.classList.add('run');
+  }
+
   alienAlert() {
     const el = $('alert');
     el.textContent = CONFIG.difficulty.aliensAlert;
@@ -12375,16 +12836,16 @@ function dropCurve(t) {
 }
 
 // --- quality.js ---
-// Grafik kalitesi: Otomatik modda FPS'e göre seviye değişir. Oynanış değerlerine dokunmaz,
-// yalnız çizim yükünü ayarlar. Tarayıcıya bağlı değildir, birim testle sınanır.
+// Grafik kalitesi: Otomatik modda FPS'e göre seviye değişir. Çizim yükünü ve aynı anda aktif polis
+// sınırını (cops) ayarlar. Tarayıcıya bağlı değildir, birim testle sınanır.
 // dpr: çözünürlük üst sınırı, pixels: tuval piksel bütçesi (tablet), particles: parçacık oranı,
 // crowd: kalabalık oranı, slices: bina duvar dilimi, balcony: balkon oranı, night: 2 tam gece ışıkları,
 // 1 yansımasız, 0 yalnız temel ışık; speedLines, fireSmoke: küçük süsler.
 const LEVELS = [
-  { name: 'yuksek', dpr: 1.75, pixels: 2600000, particles: 1, crowd: 1, slices: 6, balcony: 1, night: 2, speedLines: true, fireSmoke: true },
-  { name: 'orta', dpr: 1.5, pixels: 1600000, particles: 0.75, crowd: 1, slices: 5, balcony: 0.7, night: 2, speedLines: true, fireSmoke: true },
-  { name: 'dusuk', dpr: 1.25, pixels: 1100000, particles: 0.5, crowd: 0.8, slices: 4, balcony: 0.4, night: 1, speedLines: false, fireSmoke: false },
-  { name: 'en-dusuk', dpr: 1, pixels: 700000, particles: 0.3, crowd: 0.6, slices: 3, balcony: 0, night: 0, speedLines: false, fireSmoke: false },
+  { name: 'yuksek', cops: 24, dpr: 1.75, pixels: 2600000, particles: 1, crowd: 1, slices: 6, balcony: 1, night: 2, speedLines: true, fireSmoke: true },
+  { name: 'orta', cops: 18, dpr: 1.5, pixels: 1600000, particles: 0.75, crowd: 1, slices: 5, balcony: 0.7, night: 2, speedLines: true, fireSmoke: true },
+  { name: 'dusuk', cops: 12, dpr: 1.25, pixels: 1100000, particles: 0.5, crowd: 0.8, slices: 4, balcony: 0.4, night: 1, speedLines: false, fireSmoke: false },
+  { name: 'en-dusuk', cops: 8, dpr: 1, pixels: 700000, particles: 0.3, crowd: 0.6, slices: 3, balcony: 0, night: 0, speedLines: false, fireSmoke: false },
 ];
 
 const QUALITY_MODES = ['auto', 'high', 'low'];
@@ -12476,6 +12937,8 @@ game.paint = storage.paintIndex(game.carSpec.id);
 const cover = new PixelMenu(document.getElementById('cover'));
 const curtain = document.getElementById('curtain');
 const menuEl = document.getElementById('menu');
+const cheatBadge = document.getElementById('cheat-badge');
+input.onCode = () => { if (game.state === 'play' && !paused) game.toggleCheat(); };
 const params = new URLSearchParams(location.search);
 let paused = false;
 let accumulator = 0;
@@ -12521,6 +12984,7 @@ function fitCanvas(w, h) {
 function applyQuality() {
   const q = quality.settings;
   renderer.lod = q;
+  game.copLimit = Math.min(q.cops, navigator.maxTouchPoints > 0 ? CONFIG.pursuit.phoneCap : q.cops);
   game.fx.density = q.particles;
   game.crowd.limit = q.crowd;
   fitCanvas(window.innerWidth, window.innerHeight);
@@ -12656,6 +13120,7 @@ function toMenu() {
   ui.showHint(false);
   game.carSpec = storage.selectedCar();
   game.startAttract();
+  cheatBadge.hidden = true;
   ui.refreshMenu();
   ui.show('menu');
   ui.intro();
@@ -12733,6 +13198,7 @@ game.onEvent = (name, v) => {
     case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
     case 'aliens': audio.alert(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
     case 'spike': audio.spike(); vibrate(60); break;
+    case 'cheat': audio.cheat(v); ui.cheatMessage(v); vibrate(v ? [30, 30, 30, 30, 60] : 40); break;
     case 'copdown': audio.explosion(0.55 * v); vibrate(40); break;
     case 'explosion': audio.explosion(1); vibrate([120, 40, 220]); break;
     case 'tankfire': audio.tankFire(); vibrate(30); break;
@@ -12740,7 +13206,7 @@ game.onEvent = (name, v) => {
     case 'alert': audio.alert(); ui.alert(v); vibrate([60, 40, 60]); break;
     case 'gameover': {
       rememberQuality();
-      const record = storage.recordRun(game.result);
+      const record = game.result.cheated ? { newScore: false, newTime: false } : storage.recordRun(game.result);
       ui.setHud(false);
       ui.over(game.result, record);
       keepAwake(false);
@@ -12799,6 +13265,7 @@ function frame(now) {
   if (hudT <= 0 && game.state === 'play') {
     hudT = 0.1;
     ui.hud(game);
+    if (cheatBadge.hidden === game.cheat) cheatBadge.hidden = !game.cheat;
   }
 
   // Kare süresi ölçümü ve otomatik kalite

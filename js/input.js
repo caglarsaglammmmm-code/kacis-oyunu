@@ -4,6 +4,7 @@
 // stick: sol yarıda basılan yerde beliren görünmez joystick.
 // DOM'a dokunmaz: görünüm controls.js'tedir, burası birim testle sınanır.
 import { CONFIG } from './config.js';
+import { CheatCode } from './cheat.js';
 
 export const CONTROLS = ['zones', 'wheel', 'stick'];
 export const WHEEL_MAX = (130 * Math.PI) / 180; // Tam kilit açısı
@@ -13,6 +14,7 @@ const WHEEL_DEAD = 0.03;
 const STICK_R = 54; // Joystick yarıçapı, px
 const STICK_DEAD = 8; // Bu kadar kayma titreme sayılır, px
 const STICK_SMOOTH = 24;
+const CH = CONFIG.cheat;
 
 const wrap = (a) => {
   while (a > Math.PI) a -= Math.PI * 2;
@@ -38,6 +40,11 @@ export class Input {
     this.axis = 0; // Yumuşatılmış analog direksiyon
     this.revHeld = false;
     this.bounds = { l: 0, t: 0, r: 1, b: 1 }; // Joystick halkası bunun dışına taşmaz
+    this.code = new CheatCode();
+    this.onCode = null;
+    this.clock = 0; // Yalnız oyun adımlarında akar: duraklatma sayılmaz
+    this.heldT = 0;
+    this.axisReady = true;
   }
 
   setMode(mode) {
@@ -60,6 +67,26 @@ export class Input {
       this.axis += (target - this.axis) * (1 - Math.exp(-STICK_SMOOTH * dt));
       if (Math.abs(this.axis) < 0.005) this.axis = 0;
     }
+    this.watchCode(dt);
+  }
+
+  // Direksiyon ve joystick: eşiği aşan kısa hareket bir basıştır, sonraki için merkeze dönmek gerekir.
+  // Uzun tutuş normal sürüştür, sırayı bozar
+  watchCode(dt) {
+    this.clock += dt;
+    const a = this.axis;
+    const abs = Math.abs(a);
+    if (abs < CH.axisBack) this.axisReady = true;
+    else if (this.axisReady && abs >= (this.mode === 'wheel' ? CH.wheelOn : CH.stickOn)) {
+      this.axisReady = false;
+      this.tap(a < 0 ? 'L' : 'R');
+    }
+    this.heldT = this.left || this.right || abs >= CH.axisBack ? this.heldT + dt : 0;
+    if (this.heldT > CH.maxHold) this.code.reset();
+  }
+
+  tap(dir) {
+    if (this.code.press(dir, this.clock) && this.onCode) this.onCode();
   }
 
   get left() {
@@ -89,6 +116,7 @@ export class Input {
   press(id, side) {
     this.touches.set(id, side);
     this.last = side;
+    this.tap(side);
   }
 
   release(id) {
@@ -109,6 +137,9 @@ export class Input {
     this.stick.dy = 0;
     this.axis = 0;
     this.revHeld = false;
+    this.code.reset();
+    this.heldT = 0;
+    this.axisReady = true;
   }
 
   sideOf(x) {
@@ -116,8 +147,8 @@ export class Input {
   }
 
   key(code, down) {
-    if (code === 'ArrowLeft' || code === 'KeyA') { this.keyL = down; if (down) this.last = 'L'; return true; }
-    if (code === 'ArrowRight' || code === 'KeyD') { this.keyR = down; if (down) this.last = 'R'; return true; }
+    if (code === 'ArrowLeft' || code === 'KeyA') { this.keyL = down; if (down) { this.last = 'L'; this.tap('L'); } return true; }
+    if (code === 'ArrowRight' || code === 'KeyD') { this.keyR = down; if (down) { this.last = 'R'; this.tap('R'); } return true; }
     return false;
   }
 

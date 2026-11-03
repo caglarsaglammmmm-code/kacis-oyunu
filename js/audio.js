@@ -1,5 +1,6 @@
 // Tüm sesler Web Audio ile üretilir; harici dosya yok.
 import { CONFIG } from './config.js';
+import { loudest } from './police.js';
 
 // Motor karakterleri. harm: ana sesin harmonikleri, sub: yarım perde gövde, high: çift perde vızıltı,
 // air: emiş gürültüsü, rough: tırtıl derinliği, roughRate: tırtılın ateşleme frekansına oranı, lp: süzgeç alt ve üst sınırı
@@ -165,6 +166,7 @@ export class AudioEngine {
     // Dört farklı siren: her tür en yakın aracına göre ayrı çalar
     // Perde yaklaşma hızına göre kayar (Doppler hissi)
     this.voices = {};
+    this.sirenMask = new Uint8Array(CONFIG.sirens.length);
     const makeVoice = (name, type, center) => {
       const osc = ctx.createOscillator();
       osc.type = type;
@@ -341,10 +343,11 @@ export class AudioEngine {
     const sec = now / 1000;
     const S = game.sirens;
     const quiet = game.ghostT > 0 ? 0.35 : 1;
+    const mask = loudest(S, CONFIG.pursuit.maxSirens, this.sirenMask);
     const setVoice = (name, freq, gate = 1) => {
       const v = this.voices[name];
       const d = S[CONFIG.sirens.indexOf(name)];
-      if (on && d < 1300 && gate) {
+      if (on && d < 1300 && gate && mask[CONFIG.sirens.indexOf(name)]) {
         const vol = 1 - d / 1300;
         v.osc.frequency.setTargetAtTime(freq * doppler, t, 0.02);
         v.gain.gain.setTargetAtTime((0.018 + vol * vol * 0.062) * quiet, t, 0.04);
@@ -634,6 +637,12 @@ export class AudioEngine {
   tankFire() {
     this.burst(0.55, 700, 0.8, 'lowpass', 70);
     this.tone(90, 0.4, 0.5, 'sine', 40);
+  }
+
+  // Gizli ödül: yükselen dört nota, kapanışta iki inen nota
+  cheat(on) {
+    const notes = on ? [523, 659, 784, 1047] : [659, 440];
+    notes.forEach((f, i) => this.tone(f, 0.16, 0.2, 'triangle', f * 1.01, i * 0.09));
   }
 
   splash() { this.burst(0.4, 2400, 0.3, 'highpass', 600); }

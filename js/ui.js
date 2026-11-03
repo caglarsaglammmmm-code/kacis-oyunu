@@ -230,6 +230,14 @@ export class UI {
     el.classList.add('run');
   }
 
+  cheatMessage(on) {
+    const el = $('cheat-msg');
+    el.firstElementChild.textContent = on ? CONFIG.cheat.messageOn : CONFIG.cheat.messageOff;
+    el.classList.remove('run');
+    void el.offsetWidth;
+    el.classList.add('run');
+  }
+
   alienAlert() {
     const el = $('alert');
     el.textContent = CONFIG.difficulty.aliensAlert;

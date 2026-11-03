@@ -744,3 +744,11 @@ body:not(.has3d) .garage3d { background: linear-gradient(160deg, #15183a, #0a0c1
 .paint-row { display: flex; align-items: center; gap: 10px; }
 #garage-paints { flex: 0 0 auto; max-width: 74%; }
 .paint-row small { flex: 1 1 0; min-width: 0; }
+
+/* v13: gizli mesaj ve küçük gösterge. Dokunuşları almaz, oyunu bölmez */
+#cheat-msg { position: fixed; left: 16px; right: 16px; top: 40%; text-align: center; opacity: 0; pointer-events: none; z-index: 30; }
+#cheat-msg span { display: inline-block; padding: 12px 20px; border-radius: 14px; background: rgba(10,12,20,.72); border: 1px solid rgba(255,210,63,.55); color: #ffe14d; font: 700 clamp(19px, 5.4vw, 30px)/1.25 Pixelify, sans-serif; text-shadow: 0 2px 0 rgba(0,0,0,.6); }
+#cheat-msg.run { animation: cheatmsg 2.6s ease-in-out both; }
+@keyframes cheatmsg { 0% { opacity: 0; transform: translateY(10px); } 12%, 82% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-6px); } }
+#cheat-badge { position: absolute; left: 50%; top: calc(var(--safe-t) + 56px); transform: translateX(-50%); padding: 2px 8px; border-radius: 8px; background: rgba(10,12,20,.4); color: rgba(255,225,77,.8); font: 700 13px/1.3 Pixelify, sans-serif; letter-spacing: .5px; white-space: nowrap; text-shadow: none; }
+#cheat-badge[hidden] { display: none; }

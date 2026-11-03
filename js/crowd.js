@@ -196,7 +196,7 @@ export class Crowd {
       const dx = h.x - p.x;
       const dy = h.y - p.y;
       const reach = (h.len + p.len) * 0.62;
-      if (g.state === 'play' && dx * dx + dy * dy < reach * reach) {
+      if (g.state === 'play' && !g.cheat && dx * dx + dy * dy < reach * reach) {
         const y = h.y;
         const rv = g.collideCars(p, h);
         h.y = y; h.vy = 0;
@@ -474,6 +474,7 @@ export class Crowd {
   }
 
   checkHit(p, b, isPlayer) {
+    if (isPlayer && this.g.cheat) return false;
     const r = b.len * 0.44 + 7;
     const dx = p.x - b.x;
     const dy = p.y - b.y;
@@ -640,7 +641,7 @@ export class Crowd {
 
     // Oyuncuyla çarpışma
     if (g.state === 'play' && far < (n.len + p.len) * 0.8) {
-      const rv = g.collideCars(p, n);
+      const rv = g.cheat ? 0 : g.collideCars(p, n);
       if (rv > 30) this.hitNpc(n, rv, true);
     }
     // Polislerle çarpışma

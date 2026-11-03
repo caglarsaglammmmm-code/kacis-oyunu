@@ -68,11 +68,35 @@ function rectSign(r) {
 
 // Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
 const signOut = { x: 0, y: 0, w: 0, h: 0 };
+const CHUNK_FIT = (CHUNK + 0.6) / CHUNK; // Zemin parçaları ek yeri kapansın diye bu kadar büyük çizilir
+
+// Yüksek binada tabela çatının ortasındadır: gündüz, gece ve ışıltı aynı kutuyu kullanır
+function roofSignBox(r, img) {
+  const w = Math.min((r.tX1 - r.tX0) * 0.92, (img.width / img.height) * 38);
+  const h = (w / img.width) * img.height;
+  signOut.w = w;
+  signOut.h = h;
+  signOut.x = (r.tX0 + r.tX1) / 2 - w / 2;
+  signOut.y = (r.tY0 + r.tY1) / 2 - h / 2;
+  return signOut;
+}
+
+// Alçak binada tabela zemin parçasına işlenmiştir: gece katmanı aynı ölçeğe oturur, çift görünmez
+function groundSignBox(r, img, c) {
+  const b = signBox(r, img);
+  b.x = c.x + (b.x - c.x) * CHUNK_FIT;
+  b.y = c.y + (b.y - c.y) * CHUNK_FIT;
+  b.w *= CHUNK_FIT;
+  b.h *= CHUNK_FIT;
+  return b;
+}
 function signBox(r, img) {
   const size = r.signSize ?? 1;
   const hTarget = [18, 24, 32, 46][size] ?? 24;
   const maxW = size === 3 ? r.w * 0.94 : r.w - 6;
-  const w = Math.min(maxW, (img.width / img.height) * hTarget);
+  // Dar binada tabela sığacak kadar küçülür, cepheden taşmaz
+  const fit = Math.min(hTarget, Math.max(10, r.h - 9));
+  const w = Math.min(maxW, (img.width / img.height) * fit);
   const h = (w / img.width) * img.height;
   signOut.w = w;
   signOut.h = h;
@@ -102,6 +126,7 @@ export class Renderer {
     this.playerSprite = null;
     this.playerId = '';
     this.lod = { slices: 6, balcony: 1, night: 2, speedLines: true, fireSmoke: true };
+    this.tallList = [];
     this.syncBakes = 0; // Görünür parça hazır değilse kare beklemiştir: ölçüm için
     this.queue = []; // Sprite işleri kare bütçesiyle yapılır
     this.makeSprites();
@@ -267,59 +292,83 @@ export class Renderer {
   }
 
   // Kameraya göre yukarı uzanan binalar: taban sabit, çatı kameradan dışa kayar ve büyür
+  // Görünen yüksek binalar uzaktan yakına sıralanır: yakın olan uzak olanı örter.
+  // Çatı izdüşümü binada saklanır, tabela ve ışıltı buradan okur
+  collectTalls(game, c0x, c1x, c0y, c1y) {
+    const cam = game.cam;
+    const cx = cam.x; const cy = cam.y;
+    const mx = cam.halfW + 120; const my = cam.halfH + 120;
+    const list = this.tallList;
+    let n = 0;
+    for (let gy = c0y - 1; gy <= c1y + 1; gy++) {
+      for (let gx = c0x - 1; gx <= c1x + 1; gx++) {
+        const c = game.world.chunks.get((gx + 32768) * 65536 + (gy + 32768));
+        if (!c) continue;
+        for (let ti = 0; ti < c.talls.length; ti++) {
+          const r = c.talls[ti];
+          if (!r.alive || r.x + r.w < cx - mx || r.x > cx + mx || r.y + r.h < cy - my || r.y > cy + my) continue;
+          const k = r.tall;
+          r.tX0 = r.x + (r.x - cx) * k; r.tX1 = r.x + r.w + (r.x + r.w - cx) * k;
+          r.tY0 = r.y + (r.y - cy) * k; r.tY1 = r.y + r.h + (r.y + r.h - cy) * k;
+          const dx = cx < r.x ? r.x - cx : cx > r.x + r.w ? cx - r.x - r.w : 0;
+          const dy = cy < r.y ? r.y - cy : cy > r.y + r.h ? cy - r.y - r.h : 0;
+          r.tDist = dx * dx + dy * dy;
+          list[n++] = r;
+        }
+      }
+    }
+    list.length = n;
+    for (let i = 1; i < n; i++) {
+      const r = list[i];
+      let j = i - 1;
+      while (j >= 0 && list[j].tDist < r.tDist) { list[j + 1] = list[j]; j--; }
+      list[j + 1] = r;
+    }
+    for (let i = 0; i < n; i++) list[i].tSeq = i;
+  }
+
   drawTalls(game, c0x, c1x, c0y, c1y) {
     const ctx = this.ctx;
     const cam = game.cam;
     const cx = cam.x; const cy = cam.y;
     const N = this.lod.slices;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
-    const mx = cam.halfW + 120; const my = cam.halfH + 120;
-    for (let gy = c0y - 1; gy <= c1y + 1; gy++) {
-      for (let gx = c0x - 1; gx <= c1x + 1; gx++) {
-        const key = (gx + 32768) * 65536 + (gy + 32768);
-        const c = game.world.chunks.get(key);
-        if (!c) continue;
-        for (let ti = 0; ti < c.talls.length; ti++) {
-          const r = c.talls[ti];
-          if (!r.alive) continue;
-          const k = r.tall;
-          if (r.x + r.w < cx - mx || r.x > cx + mx || r.y + r.h < cy - my || r.y > cy + my) continue;
-          const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
-          const X0 = x0 + (x0 - cx) * k; const X1 = x1 + (x1 - cx) * k;
-          const Y0 = y0 + (y0 - cy) * k; const Y1 = y1 + (y1 - cy) * k;
-          const tex = this.walls[r.seed % this.walls.length];
-          // Güney ve kuzey duvarları
-          if (cy > y1 || cy < y0) {
-            const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
-            ctx.globalAlpha = 1;
-            for (let t = 0; t < N; t++) {
-              const a = t / N; const b = (t + 1) / N;
-              const xa = x0 + (X0 - x0) * b; const xb = x1 + (X1 - x1) * b;
-              const ya = fromY + (toY - fromY) * a; const yb = fromY + (toY - fromY) * b;
-              ctx.drawImage(tex.n, 0, 192 * (1 - b), Math.min(96, r.w), 192 / N, xa, Math.min(ya, yb) - 0.4, xb - xa, Math.abs(yb - ya) + 0.8);
-            }
-            if (cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
-          }
-          // Doğu ve batı duvarları
-          if (cx > x1 || cx < x0) {
-            const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
-            for (let t = 0; t < N; t++) {
-              const a = t / N; const b = (t + 1) / N;
-              const ya = y0 + (Y0 - y0) * b; const yb = y1 + (Y1 - y1) * b;
-              const xa = fromX + (toX - fromX) * a; const xc = fromX + (toX - fromX) * b;
-              ctx.drawImage(tex.e, 192 * (1 - b), 0, 192 / N, Math.min(96, r.h), Math.min(xa, xc) - 0.4, ya, Math.abs(xc - xa) + 0.8, yb - ya);
-            }
-            ctx.fillStyle = 'rgba(0,0,20,.16)';
-            ctx.beginPath(); ctx.moveTo(fromX, y0); ctx.lineTo(toX, Y0); ctx.lineTo(toX, Y1); ctx.lineTo(fromX, y1); ctx.closePath(); ctx.fill();
-          }
-          ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
-          if (r.sign) {
-            const img = rectSign(r);
-            const w = Math.min((X1 - X0) * 0.92, (img.width / img.height) * 38);
-            const h = (w / img.width) * img.height;
-            ctx.drawImage(img, (X0 + X1) / 2 - w / 2, (Y0 + Y1) / 2 - h / 2, w, h);
-          }
+    this.collectTalls(game, c0x, c1x, c0y, c1y);
+    const list = this.tallList;
+    for (let ti = 0; ti < list.length; ti++) {
+      const r = list[ti];
+      const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
+      const X0 = r.tX0; const X1 = r.tX1; const Y0 = r.tY0; const Y1 = r.tY1;
+      const tex = this.walls[r.seed % this.walls.length];
+      // Güney ve kuzey duvarları
+      if (cy > y1 || cy < y0) {
+        const fromY = cy > y1 ? y1 : y0; const toY = cy > y1 ? Y1 : Y0;
+        ctx.globalAlpha = 1;
+        for (let t = 0; t < N; t++) {
+          const a = t / N; const b = (t + 1) / N;
+          const xa = x0 + (X0 - x0) * b; const xb = x1 + (X1 - x1) * b;
+          const ya = fromY + (toY - fromY) * a; const yb = fromY + (toY - fromY) * b;
+          ctx.drawImage(tex.n, 0, 192 * (1 - b), Math.min(96, r.w), 192 / N, xa, Math.min(ya, yb) - 0.4, xb - xa, Math.abs(yb - ya) + 0.8);
         }
+        if (cy < y0) { ctx.fillStyle = 'rgba(0,0,20,.28)'; ctx.fillRect(Math.min(x0, X0), Y0, Math.max(x1, X1) - Math.min(x0, X0), y0 - Y0); }
+      }
+      // Doğu ve batı duvarları
+      if (cx > x1 || cx < x0) {
+        const fromX = cx > x1 ? x1 : x0; const toX = cx > x1 ? X1 : X0;
+        for (let t = 0; t < N; t++) {
+          const a = t / N; const b = (t + 1) / N;
+          const ya = y0 + (Y0 - y0) * b; const yb = y1 + (Y1 - y1) * b;
+          const xa = fromX + (toX - fromX) * a; const xc = fromX + (toX - fromX) * b;
+          ctx.drawImage(tex.e, 192 * (1 - b), 0, 192 / N, Math.min(96, r.h), Math.min(xa, xc) - 0.4, ya, Math.abs(xc - xa) + 0.8, yb - ya);
+        }
+        ctx.fillStyle = 'rgba(0,0,20,.16)';
+        ctx.beginPath(); ctx.moveTo(fromX, y0); ctx.lineTo(toX, Y0); ctx.lineTo(toX, Y1); ctx.lineTo(fromX, y1); ctx.closePath(); ctx.fill();
+      }
+      ctx.drawImage(this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
+      if (r.sign) {
+        const img = rectSign(r);
+        const b = roofSignBox(r, img);
+        ctx.drawImage(img, b.x, b.y, b.w, b.h);
       }
     }
   }
@@ -1330,6 +1379,7 @@ export class Renderer {
     this.drawUfos(game, now, vx0, vx1, vy0, vy1);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawNight(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now);
+    this.drawPhasing(game);
     this.drawSirens(game, now, vx0, vx1, vy0, vy1);
     this.drawWaves(game);
     this.drawFloats(game);
@@ -1610,6 +1660,7 @@ export class Renderer {
             ctx.drawImage(sp.lamp, l.x - 70, l.y - 70, 140, 140);
           } else if (l.kind === 1) {
             if (!l.rect.alive || (l.rect.seed + i) % 4 === 0 || night <= l.at) continue; // Bazı evlerde ışık kapalı
+            if (l.rect.tall > 0 && game.cam.y <= l.rect.y + l.rect.h) continue; // Bu açıda cephe görünmez, ışık çatıya binmesin
             ctx.globalAlpha = Math.min(1, (night - l.at) / 0.16) * 0.85; // Her pencere kendi sırasında yanar
             ctx.drawImage(sp.win, l.x, l.y, l.w, l.h);
           } else if (l.kind === 2) {
@@ -1620,47 +1671,27 @@ export class Renderer {
         }
       }
     }
-    ctx.globalCompositeOperation = 'source-over';
-    // Tabelalar gece aydınlık kalır
-    ctx.globalAlpha = night * 0.9;
+    // Tabelalar gece aydınlık kalır. Alçak binalarınki zemindeki yerinde, yüksek binalarınki çatıda
     for (let cy = c0y; cy <= c1y; cy++) {
       for (let cx = c0x; cx <= c1x; cx++) {
         const c = game.world.chunk(cx, cy);
         for (let i = 0; i < c.lightCount; i++) {
           const l = c.lights[i];
-          if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1) continue;
-          const r = l.rect;
-          const img = rectSign(r);
-          const b = signBox(r, img);
-          ctx.drawImage(img, b.x, b.y, b.w, b.h);
+          if (l.kind < 2 || !l.rect.alive || l.rect.tall > 0 || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1 + 40) continue;
+          const img = rectSign(l.rect);
+          this.litSign(l.rect, img, groundSignBox(l.rect, img, c), night, now, 0, true);
         }
       }
     }
-    // Tabela ışıltısı ve yola düşen yansıması
-    ctx.globalCompositeOperation = 'lighter';
-    for (let cy = c0y; this.lod.night > 0 && cy <= c1y; cy++) {
-      for (let cx = c0x; cx <= c1x; cx++) {
-        const c = game.world.chunk(cx, cy);
-        for (let i = 0; i < c.lightCount; i++) {
-          const l = c.lights[i];
-          if (l.kind < 2 || !l.rect.alive || l.x + l.w < x0 || l.x > x1 || l.y + l.h < y0 || l.y > y1 + 40) continue;
-          const r = l.rect;
-          const img = rectSign(r);
-          const b = signBox(r, img);
-          const halo = signHalo(r.signColor);
-          const led = signKind(r.sign) === 'led';
-          const flick = led ? 0.82 + 0.18 * Math.sin(now * 0.02 + r.seed) : 1;
-          ctx.globalAlpha = night * 0.6 * flick;
-          ctx.drawImage(img, b.x, b.y, b.w, b.h);
-          ctx.globalAlpha = night * 0.5 * flick;
-          ctx.drawImage(halo, b.x - 26, b.y - 22, b.w + 52, b.h + 44);
-          if (this.lod.night < 2) continue;
-          ctx.globalAlpha = night * 0.3;
-          ctx.drawImage(halo, r.x - 6, r.y + r.h - 2, r.w + 12, 40);
-        }
-      }
+    const talls = this.tallList;
+    for (let i = 0; i < talls.length; i++) {
+      const r = talls[i];
+      if (!r.sign || r.tX1 < x0 || r.tX0 > x1 || r.tY1 < y0 || r.tY0 > y1) continue;
+      const img = rectSign(r);
+      this.litSign(r, img, roofSignBox(r, img), night, now, i + 1, game.cam.y > r.y + r.h);
     }
     // Araç farları
+    ctx.globalCompositeOperation = 'lighter';
     ctx.globalAlpha = night;
     const beam = sp.beam;
     const bw = beam.width / SPR;
@@ -1695,6 +1726,77 @@ export class Renderer {
       ctx.drawImage(sp.moon, W * 0.62, 12, 44, 44);
       ctx.globalCompositeOperation = 'source-over';
     }
+    ctx.globalAlpha = 1;
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
+  // Tek tabelanın gece hâli: yazı, tam arkasında ışıltı, yola düşen yansıma.
+  // from: tallList içinde bu tabelayı örtebilecek ilk bina. Örtenlerin izdüşümü kırpılır
+  litSign(r, img, b, night, now, from, reflect) {
+    const ctx = this.ctx;
+    const x = b.x; const y = b.y; const w = b.w; const h = b.h;
+    const bottom = reflect ? Math.max(y + h + 22, r.y + r.h + 38) : y + h + 22;
+    const clipped = this.clipOccluders(x - 26, y - 22, w + 52, bottom - y + 22, from);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = night * 0.9;
+    ctx.drawImage(img, x, y, w, h);
+    if (this.lod.night > 0) {
+      const halo = signHalo(r.signColor);
+      const flick = signKind(r.sign) === 'led' ? 0.82 + 0.18 * Math.sin(now * 0.02 + r.seed) : 1;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = night * 0.6 * flick;
+      ctx.drawImage(img, x, y, w, h);
+      ctx.globalAlpha = night * 0.5 * flick;
+      ctx.drawImage(halo, x - 26, y - 22, w + 52, h + 44);
+      if (reflect && this.lod.night >= 2) {
+        ctx.globalAlpha = night * 0.3;
+        ctx.drawImage(halo, r.x - 6, r.y + r.h - 2, r.w + 12, 40);
+      }
+    }
+    if (clipped) ctx.restore();
+  }
+
+  // Kutunun üstüne binen yüksek bina gövdelerini (taban ve çatının dış zarfı) çizim alanından çıkarır
+  clipOccluders(x, y, w, h, from) {
+    const ctx = this.ctx;
+    const list = this.tallList;
+    let clipped = false;
+    for (let i = from; i < list.length; i++) {
+      const r = list[i];
+      const x0 = r.x; const x1 = r.x + r.w; const y0 = r.y; const y1 = r.y + r.h;
+      const minX = Math.min(x0, r.tX0); const maxX = Math.max(x1, r.tX1);
+      const minY = Math.min(y0, r.tY0); const maxY = Math.max(y1, r.tY1);
+      if (maxX <= x || minX >= x + w || maxY <= y || minY >= y + h) continue;
+      if (!clipped) { ctx.save(); clipped = true; }
+      ctx.beginPath();
+      ctx.rect(x - 400, y - 400, w + 800, h + 800);
+      const top = r.tY0 < y0; const bot = r.tY1 > y1; const left = r.tX0 < x0; const right = r.tX1 > x1;
+      ctx.moveTo(top ? r.tX0 : x0, minY);
+      ctx.lineTo(top ? r.tX1 : x1, minY);
+      ctx.lineTo(maxX, right ? r.tY0 : y0);
+      ctx.lineTo(maxX, right ? r.tY1 : y1);
+      ctx.lineTo(bot ? r.tX1 : x1, maxY);
+      ctx.lineTo(bot ? r.tX0 : x0, maxY);
+      ctx.lineTo(minX, left ? r.tY1 : y1);
+      ctx.lineTo(minX, left ? r.tY0 : y0);
+      ctx.closePath();
+      ctx.clip('evenodd');
+    }
+    return clipped;
+  }
+
+  // Hilede bina içinden geçen araç kaybolmaz: en üstte yarı saydam görünür
+  drawPhasing(game) {
+    if (!game.phasing || game.state !== 'play') return;
+    const ctx = this.ctx;
+    const p = game.player;
+    const img = this.playerSprite;
+    const k = p.len / game.carSpec.len;
+    const w = (img.wu || img.width / SPR) * k;
+    const h = (img.hu || img.height / SPR) * k;
+    this.place(p.x, p.y, p.a);
+    ctx.globalAlpha = 0.72;
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
     ctx.globalAlpha = 1;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
