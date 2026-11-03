@@ -2,7 +2,7 @@
 import { paintPixelCar } from './pixelcars.js';
 import { CONFIG, MAX_STARS } from './config.js';
 import { paintPower, POWER_LOOK } from './art.js';
-import { tx, txNum, getLang, LANGS } from './i18n/index.js';
+import { tx, txNum, getLang, LANGS, DEVELOPER } from './i18n/index.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -25,6 +25,7 @@ function fitOne(el) {
   }
 }
 
+const SPLASH_MS = 800;
 const SCREENS = ['menu', 'garage', 'settings', 'howto', 'over', 'pause'];
 
 export class UI {
@@ -197,14 +198,16 @@ export class UI {
     return (Array.isArray(names) && names[i]) || (car.paints[i] || car.paints[0]).name;
   }
 
+  // Açılış: koyu zeminde geliştirici yazısı, yumuşak belirip kaybolur (0,8 sn). Oyun arkada yüklenir
   splash(done) {
     const el = $('splash');
+    $('splash-text').textContent = tx('splash', { name: DEVELOPER });
     el.hidden = false;
     el.classList.add('play');
     setTimeout(() => {
       el.hidden = true;
       done();
-    }, 700);
+    }, SPLASH_MS);
   }
 
   buildStars() {

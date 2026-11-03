@@ -59,7 +59,7 @@ test('sıra doğru girilince tamamlanır, süre aşımı ve yanlış yön başa 
   const c = new CheatCode();
   let t = 0;
   const all = (gap) => { let done = false; for (const d of SEQ) { t += gap; done = c.press(d, t); } return done; };
-  assert.equal(SEQ.join(''), 'LLRRLRLR');
+  assert.equal(SEQ.join(''), 'LLRRLRLRLLRR');
   assert.equal(all(0.5), true);
   assert.equal(all(2.0), false, 'süre aşımı');
   c.reset();
@@ -77,8 +77,17 @@ for (const [mode, tap] of [['zones', tapZones], ['wheel', tapWheel], ['stick', t
     const n = countOf(i);
     for (const d of SEQ) tap(i, d);
     assert.equal(n(), 1, 'doğru kod');
-    for (const d of 'LRLRLRLR') tap(i, d);
+    for (const d of 'LRLRLRLRLRLR') tap(i, d);
     assert.equal(n(), 1, 'yanlış kod');
+    wait(i, 2.1);
+    for (const d of 'LLRRLRLR') tap(i, d);
+    wait(i, 2.1);
+    assert.equal(n(), 1, 'eski 8 basışlık kod açmaz');
+    for (const d of 'LLRRLRLRL') tap(i, d);
+    tap(i, 'R'); // Araya yanlış basış
+    for (const d of 'LRR') tap(i, d);
+    assert.equal(n(), 1, 'araya yanlış basış girince açmaz');
+    wait(i, 2.1);
     wait(i, 2);
     for (const d of SEQ.slice(0, 4)) tap(i, d);
     wait(i, 2.0);
@@ -293,3 +302,19 @@ for (const [mode, tap] of [['zones', tapZones], ['wheel', tapWheel], ['stick', t
     }
   });
 }
+
+test('12 basışlık kod: eski 8 basışlık kod açmaz, tam kod açar ve ikinci kez kapatır', () => {
+  assert.equal(SEQ.length, 12);
+  const c = new CheatCode();
+  let t = 0;
+  for (const d of 'LLRRLRLR') { t += 0.3; assert.equal(c.press(d, t), false); }
+  t += 2.0;
+  assert.equal(c.press('L', t), false, 'eski kodun ardı süre aşımı');
+  const g = play();
+  const i = makeInput('zones');
+  i.onCode = () => g.toggleCheat();
+  for (const d of SEQ) tapKeys(i, d);
+  assert.equal(g.cheat, true, 'açtı');
+  for (const d of SEQ) tapKeys(i, d);
+  assert.equal(g.cheat, false, 'ikinci kez kapattı');
+});

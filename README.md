@@ -79,8 +79,10 @@ Fontlar SIL Open Font License ile dağıtılır; lisanslar `fonts/` içindedir.
 
 ## İki sürüm, tek kod
 
-- `play` (varsayılan): Drift Lab, Play Store. Yalnız uydurma marka, okul ve kurum adları.
-- `arkadas`: Penci Zorn, arkadaşlara APK ve Pages kökü. Gerçek adlar.
+İki sürümün uygulama adı (Drift Lab) ve ikonu aynıdır, yalnız oyun içindeki adlar ayrılır.
+
+- `play` (varsayılan): Play Store, `dist/DriftLab-PlayStore.aab`. Yalnız uydurma marka, okul ve kurum adları.
+- `arkadas`: arkadaşlara APK ve Pages kökü, `dist/DriftLab-Arkadas.apk`. Gerçek adlar.
 
 Adlar `names/tablo.mjs` içinde, her yer için `gercek` ve `uydurma` sütunuyla durur. Bu dosya oyuna kopyalanmaz:
 `tools/names.mjs` seçilen sütunla `js/names.js` üretir (depodaki kopya Play sürümüdür).

@@ -1,6 +1,6 @@
 // İki sürümün web dosyalarını hazırlar. Aynı kod, farklı isim tablosu sütunu ve kimlik.
 //   play    : Drift Lab, Play Store, uydurma isimler (varsayılan)
-//   arkadas : Penci Zorn, arkadaşlara APK ve Pages kökü, gerçek isimler
+//   arkadas : arkadaşlara APK ve Pages kökü, gerçek isimler. Uygulama adı ve ikonu Play ile aynı: Drift Lab
 // node tools/flavor.mjs <play|arkadas> <çıktı klasörü> [--pages]
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,8 +11,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases';
 
 export const FLAVOR_INFO = {
-  play: { app: 'Drift Lab', cache: 'drift-lab', apk: 'DriftLab.apk' },
-  arkadas: { app: 'Penci Zorn', cache: 'penci-zorn', apk: 'PenciZorn.apk', apkUrl: `${REPO}/latest/download/PenciZorn.apk` },
+  play: { app: 'Drift Lab', cache: 'drift-lab', apk: 'DriftLab-PlayStore.apk' },
+  // Önbellek adı eski kurulumlar için korunur, görünen ad Drift Lab
+  arkadas: { app: 'Drift Lab', cache: 'penci-zorn', apk: 'DriftLab-Arkadas.apk', apkUrl: `${REPO}/latest/download/DriftLab-Arkadas.apk` },
 };
 
 export async function buildWeb(flavor, out, { pages = false } = {}) {
@@ -28,17 +29,13 @@ export async function buildWeb(flavor, out, { pages = false } = {}) {
   fs.writeFileSync(path.join(out, 'js', 'names.js'), await namesSource(flavor));
   let html = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
   if (flavor !== 'play') {
-    html = html.replaceAll('Drift Lab', info.app)
-      .replace(/href="https:\/\/github\.com\/[^"]*DriftLab\.apk"/, `href="${info.apkUrl}"`);
-    if (fs.existsSync(path.join(root, 'flavors', flavor, 'icons'))) {
-      fs.cpSync(path.join(root, 'flavors', flavor, 'icons'), path.join(out, 'icons'), { recursive: true });
-    }
+    html = html.replace(/href="https:\/\/github\.com\/[^"]*\.apk"/, `href="${info.apkUrl}"`);
   }
   if (pages) {
     const sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8').replace(/'drift-lab-v/, `'${info.cache}-v`);
     fs.writeFileSync(path.join(out, 'sw.js'), sw);
-    const manifest = flavor === 'play' ? path.join(root, 'manifest.json') : path.join(root, 'flavors', flavor, 'manifest.json');
-    fs.copyFileSync(manifest, path.join(out, 'manifest.json'));
+    // Ad ve ikonlar iki sürümde aynı manifestten gelir
+    fs.copyFileSync(path.join(root, 'manifest.json'), path.join(out, 'manifest.json'));
   } else {
     // APK dosyaları içinde taşır: manifest ve service worker gerekmez
     html = html.replace(/<link rel="manifest"[^>]*>\r?\n/, '');

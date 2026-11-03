@@ -1,6 +1,7 @@
 // Deutsch
 export default {
   start: 'START',
+  splash: 'Entwickelt von {name}',
   menu: {
     garage: 'Autos', settings: 'Optionen', howto: 'Anleitung', apk: 'APK laden',
     best: 'Bestwert: {score} Pkt. · {time}', first: 'Deine erste Flucht wartet',

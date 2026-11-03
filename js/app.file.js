@@ -148,9 +148,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '14.0.0',
+  version: '15.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v14.0.0/DriftLab.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v15.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -388,7 +388,7 @@ const CONFIG = {
   // baştan başlatır (1,9 sn geçerli, 2,0 sn geçersiz). maxHold: bunu aşan basılı tutma normal sürüş sayılır
   // ve sırayı bozar. wheelOn, stickOn: eksen eşiği, axisBack: yeniden saymak için merkeze dönüş eşiği
   cheat: {
-    sequence: ['L', 'L', 'R', 'R', 'L', 'R', 'L', 'R'],
+    sequence: ['L', 'L', 'R', 'R', 'L', 'R', 'L', 'R', 'L', 'L', 'R', 'R'], // 12 basış; eski 8'li kod açmaz
     gap: 2,
     maxHold: 0.45, // Kod girişi kısa dokunuşlarla yapılır; sürüşteki basılı tutmalar sırayı bozar
     wheelOn: 0.45,
@@ -621,6 +621,7 @@ const MAX_STARS = 4;
 // Türkçe. Anahtarlar bütün dillerde aynıdır; {ad} biçimindeki yerlere değer konur.
 const TR = {
   start: 'BAŞLA',
+  splash: '{name} tarafından geliştirildi',
   menu: {
     garage: 'Araba Seç', settings: 'Ayarlar', howto: 'Nasıl?', apk: 'APK İndir',
     best: 'En iyi: {score} puan · {time}', first: 'İlk kaçışın seni bekliyor',
@@ -698,6 +699,7 @@ const TR = {
 // English
 const EN = {
   start: 'START',
+  splash: 'Developed by {name}',
   menu: {
     garage: 'Cars', settings: 'Settings', howto: 'How to play', apk: 'Get APK',
     best: 'Best: {score} pts · {time}', first: 'Your first getaway awaits',
@@ -775,6 +777,7 @@ const EN = {
 // 日本語
 const JA = {
   start: 'スタート',
+  splash: '開発：{name}',
   menu: {
     garage: '車を選ぶ', settings: '設定', howto: '遊び方', apk: 'APKを入手',
     best: 'ベスト：{score}点 · {time}', first: '最初の逃走が待っている',
@@ -852,6 +855,7 @@ const JA = {
 // 简体中文
 const ZH = {
   start: '开始',
+  splash: '开发者：{name}',
   menu: {
     garage: '选车', settings: '设置', howto: '玩法', apk: '下载 APK',
     best: '最佳：{score} 分 · {time}', first: '你的第一次逃亡正等着你',
@@ -929,6 +933,7 @@ const ZH = {
 // Español
 const ES = {
   start: 'JUGAR',
+  splash: 'Desarrollado por {name}',
   menu: {
     garage: 'Coches', settings: 'Ajustes', howto: 'Cómo jugar', apk: 'Bajar APK',
     best: 'Mejor: {score} pts · {time}', first: 'Tu primera huida te espera',
@@ -1006,6 +1011,7 @@ const ES = {
 // Deutsch
 const DE = {
   start: 'START',
+  splash: 'Entwickelt von {name}',
   menu: {
     garage: 'Autos', settings: 'Optionen', howto: 'Anleitung', apk: 'APK laden',
     best: 'Bestwert: {score} Pkt. · {time}', first: 'Deine erste Flucht wartet',
@@ -1087,6 +1093,8 @@ const DE = {
 const LANG_PACKS = { tr: TR, en: EN, ja: JA, zh: ZH, es: ES, de: DE };
 // Seçim listesinde her dil kendi adıyla görünür
 const LANGS = { tr: 'Türkçe', en: 'English', ja: '日本語', zh: '简体中文', es: 'Español', de: 'Deutsch' };
+// Geliştirici adı her dilde aynı kalır, çevrilmez
+const DEVELOPER = 'Çağlar Sağlam';
 const LOCALES = { tr: 'tr-TR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN', es: 'es-ES', de: 'de-DE' };
 
 const langState = { code: 'tr', pack: TR, listeners: [], numbers: new Map() };
@@ -13879,6 +13887,7 @@ function fitOne(el) {
   }
 }
 
+const SPLASH_MS = 800;
 const SCREENS = ['menu', 'garage', 'settings', 'howto', 'over', 'pause'];
 
 class UI {
@@ -14051,14 +14060,16 @@ class UI {
     return (Array.isArray(names) && names[i]) || (car.paints[i] || car.paints[0]).name;
   }
 
+  // Açılış: koyu zeminde geliştirici yazısı, yumuşak belirip kaybolur (0,8 sn). Oyun arkada yüklenir
   splash(done) {
     const el = $('splash');
+    $('splash-text').textContent = tx('splash', { name: DEVELOPER });
     el.hidden = false;
     el.classList.add('play');
     setTimeout(() => {
       el.hidden = true;
       done();
-    }, 700);
+    }, SPLASH_MS);
   }
 
   buildStars() {

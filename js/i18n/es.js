@@ -1,6 +1,7 @@
 // Español
 export default {
   start: 'JUGAR',
+  splash: 'Desarrollado por {name}',
   menu: {
     garage: 'Coches', settings: 'Ajustes', howto: 'Cómo jugar', apk: 'Bajar APK',
     best: 'Mejor: {score} pts · {time}', first: 'Tu primera huida te espera',

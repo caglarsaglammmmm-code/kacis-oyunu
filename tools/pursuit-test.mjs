@@ -28,8 +28,9 @@ const start = async (page) => { await page.evaluate(() => __drift.play()); await
 const cheat = (page) => page.evaluate(() => ({ on: __drift.game.cheat, i: __drift.input.code.i, badge: !document.getElementById('cheat-badge').hidden, msg: document.querySelector('#cheat-msg span').textContent, shown: getComputedStyle(document.getElementById('cheat-msg')).opacity }));
 const touch = (cdp, type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map((p) => ({ x: p.x, y: p.y, id: 1 })) });
 
-const SEQ = [...'LLRRLRLR'];
-const WRONG = [...'LRLRLRLR'];
+const SEQ = [...'LLRRLRLRLLRR']; // 12 basışlık kod
+const OLD = [...'LLRRLRLR']; // Eski 8'li kod artık açmaz
+const WRONG = [...'LRLRLRLRLRLR'];
 const gap = 170;
 
 async function pressAll(page, cdp, mode, seq, g) {
@@ -69,6 +70,13 @@ async function testMode(mode, mobile) {
   await pressAll(page, cdp, mode, WRONG, gap);
   ok(!(await cheat(page)).on, `${mode}: yanlış kod açmaz`);
   await page.waitForTimeout(2150);
+  await pressAll(page, cdp, mode, OLD, gap);
+  await page.waitForTimeout(400);
+  ok(!(await cheat(page)).on, `${mode}: eski 8 basışlık kod açmaz`);
+  await page.waitForTimeout(2150);
+  await pressAll(page, cdp, mode, [...SEQ.slice(0, 9), 'R', ...SEQ.slice(9)], gap);
+  ok(!(await cheat(page)).on, `${mode}: araya yanlış basış girince açmaz`);
+  await page.waitForTimeout(2150);
   await pressAll(page, cdp, mode, SEQ.slice(0, 4), gap);
   ok((await cheat(page)).i >= 3, `${mode}: sıra ilerliyor`, JSON.stringify(await cheat(page)));
   await page.waitForTimeout(2300);
@@ -89,7 +97,7 @@ async function testMode(mode, mobile) {
         if (g.cheat) g.toggleCheat();
         i.code.reset();
         let first = true;
-        for (const d of 'LLRRLRLR') { if (!first) i.clock += gap; first = false; const k = d === 'L' ? 'ArrowLeft' : 'ArrowRight'; i.key(k, true); i.key(k, false); }
+        for (const d of 'LLRRLRLRLLRR') { if (!first) i.clock += gap; first = false; const k = d === 'L' ? 'ArrowLeft' : 'ArrowRight'; i.key(k, true); i.key(k, false); }
         out[gap] = g.cheat;
       }
       if (g.cheat) g.toggleCheat();

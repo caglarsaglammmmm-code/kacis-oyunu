@@ -10,9 +10,10 @@
 const both = (v) => ({ gercek: v, uydurma: v });
 
 export const TABLO = {
-  oyun: { gercek: 'Penci Zorn', uydurma: 'Drift Lab' },
+  // Uygulama adı ve ikonu iki sürümde aynıdır
+  oyun: both('Drift Lab'),
   // Menüdeki APK düğmesi: arkadaş sürümü hep son APK'ya gider, Play sürümünde boş (config kendi adresini kullanır)
-  indir: { gercek: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/PenciZorn.apk', uydurma: '' },
+  indir: { gercek: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/DriftLab-Arkadas.apk', uydurma: '' },
 
   // Haritanın en büyük binası
   kolej: {

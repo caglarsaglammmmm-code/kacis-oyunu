@@ -1,6 +1,7 @@
 // Türkçe. Anahtarlar bütün dillerde aynıdır; {ad} biçimindeki yerlere değer konur.
 export default {
   start: 'BAŞLA',
+  splash: '{name} tarafından geliştirildi',
   menu: {
     garage: 'Araba Seç', settings: 'Ayarlar', howto: 'Nasıl?', apk: 'APK İndir',
     best: 'En iyi: {score} puan · {time}', first: 'İlk kaçışın seni bekliyor',

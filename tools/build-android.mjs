@@ -1,6 +1,7 @@
 // İki sürümü üretir: npm run android:build [play|arkadas]
-//   play    : Drift Lab, uydurma isimler, yükleme anahtarıyla imzalı AAB ve APK (Play Store)
-//   arkadas : Penci Zorn, gerçek isimler, eski kurulumların üstüne güncellenen debug imzalı APK
+//   play    : uydurma isimler, yükleme anahtarıyla imzalı dist/DriftLab-PlayStore.aab (+ .apk)
+//   arkadas : gerçek isimler, eski kurulumların üstüne güncellenen debug imzalı dist/DriftLab-Arkadas.apk
+// İkisinin de uygulama adı ve ikonu aynıdır: Drift Lab
 // JAVA_HOME ve ANDROID_HOME tanımlı değilse %LOCALAPPDATA%\\Android altındaki JDK 21 ve SDK kullanılır.
 // İmza: DRIFTLAB_KEYSTORE ve DRIFTLAB_STORE_PASSWORD ortam değişkenleri ya da depo dışındaki
 // ~/.driftlab/keystore.properties. Anahtar yoksa APK ve AAB imzasız çıkar, mağazaya yüklenmez.
@@ -41,15 +42,15 @@ for (const flavor of flavors) {
   if (flavor === 'play') {
     // cap sync www'yi yeniden okur: Play sürümü
     run(gradle, ['assemblePlayRelease', 'bundlePlayRelease', '--no-daemon'], project);
-    const apk = path.join(root, 'dist', 'DriftLab.apk');
-    const aab = path.join(root, 'dist', 'DriftLab.aab');
+    const apk = path.join(root, 'dist', 'DriftLab-PlayStore.apk');
+    const aab = path.join(root, 'dist', 'DriftLab-PlayStore.aab');
     fs.copyFileSync(path.join(root, 'android/app/build/outputs/apk/play/release/app-play-release.apk'), apk);
     fs.copyFileSync(path.join(root, 'android/app/build/outputs/bundle/playRelease/app-play-release.aab'), aab);
     console.log(`Play APK: ${apk}\nPlay AAB: ${aab}`);
   } else {
     // Arkadaş sürümü önceki APK'lar gibi bu bilgisayarın debug anahtarıyla imzalanır: telefondaki oyun silinmeden güncellenir
     run(gradle, ['assembleArkadasDebug', '--no-daemon'], project);
-    const apk = path.join(root, 'dist', 'PenciZorn.apk');
+    const apk = path.join(root, 'dist', 'DriftLab-Arkadas.apk');
     fs.copyFileSync(path.join(root, 'android/app/build/outputs/apk/arkadas/debug/app-arkadas-debug.apk'), apk);
     console.log(`Arkadaş APK: ${apk}`);
   }

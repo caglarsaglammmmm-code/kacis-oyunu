@@ -120,7 +120,27 @@ test('oyun adı her yerde Drift Lab', () => {
   assert.equal(cap.appName, 'Drift Lab');
   assert.equal(cap.appId, 'com.driftlab.game');
   assert.ok(fs.readFileSync('android/app/src/main/res/values/strings.xml', 'utf8').includes('Drift Lab'));
-  assert.ok(CONFIG.apkUrl.endsWith('/DriftLab.apk'));
+  assert.ok(CONFIG.apkUrl.endsWith('/DriftLab-PlayStore.apk'));
+});
+
+test('iki sürümün uygulama adı ve ikonu aynı', async () => {
+  const { buildWeb } = await import('../tools/flavor.mjs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const crypto = await import('node:crypto');
+  const out = {};
+  for (const f of ['play', 'arkadas']) out[f] = await buildWeb(f, fs.mkdtempSync(path.join(os.tmpdir(), `ad-${f}-`)), { pages: true });
+  const read = (f, p) => fs.readFileSync(path.join(out[f], p));
+  const hash = (b) => crypto.createHash('sha256').update(b).digest('hex');
+  assert.equal(read('play', 'manifest.json').toString(), read('arkadas', 'manifest.json').toString());
+  for (const f of ['play', 'arkadas']) assert.ok(read(f, 'index.html').toString().includes('<title>Drift Lab</title>'), f);
+  for (const ic of fs.readdirSync('icons')) assert.equal(hash(read('play', `icons/${ic}`)), hash(read('arkadas', `icons/${ic}`)), ic);
+  // Android: arkadaş sürümünün kendi ikon kaynağı yok, ana ikonlar kullanılır; ad Drift Lab
+  const flav = 'android/app/src/arkadas/res';
+  const files = fs.readdirSync(flav, { recursive: true }).map(String);
+  assert.ok(!files.some((n) => /mipmap|drawable|ic_launcher/.test(n)), files.join(','));
+  const xml = fs.readFileSync(`${flav}/values/strings.xml`, 'utf8');
+  assert.ok(xml.includes('<string name="app_name">Drift Lab</string>') && xml.includes('<string name="title_activity_main">Drift Lab</string>'));
 });
 
 test('js/app.file.js güncel (değilse: npm run bundle)', () => {
@@ -139,7 +159,9 @@ test('sw.js önbellek listesi eksiksiz', () => {
 
 test('açılış yazısı tam olarak istenen metin', () => {
   const html = fs.readFileSync('index.html', 'utf8');
-  assert.ok(html.includes('<div id="splash" hidden><p>Drift Lab</p></div>'));
+  // Açılışta oyun adı yok: geliştirici yazısı dil sisteminden gelir
+  assert.ok(html.includes('<div id="splash" hidden><p id="splash-text"></p></div>'));
+  assert.ok(!/<div id="splash"[^>]*>[^<]*<p[^>]*>[^<]*Drift Lab/.test(html));
 });
 
 test('tek dosyalık paket geçerli JavaScript (modüller arası ad çakışması yok)', () => {
