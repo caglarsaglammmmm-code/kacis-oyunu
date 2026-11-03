@@ -4,10 +4,10 @@
 // crowd: kalabalık oranı, slices: bina duvar dilimi, balcony: balkon oranı, night: 2 tam gece ışıkları,
 // 1 yansımasız, 0 yalnız temel ışık; speedLines, fireSmoke: küçük süsler.
 export const LEVELS = [
-  { name: 'yuksek', cops: 24, dpr: 1.75, pixels: 2600000, particles: 1, crowd: 1, slices: 6, balcony: 1, night: 2, speedLines: true, fireSmoke: true },
-  { name: 'orta', cops: 18, dpr: 1.5, pixels: 1600000, particles: 0.75, crowd: 1, slices: 5, balcony: 0.7, night: 2, speedLines: true, fireSmoke: true },
-  { name: 'dusuk', cops: 12, dpr: 1.25, pixels: 1100000, particles: 0.5, crowd: 0.8, slices: 4, balcony: 0.4, night: 1, speedLines: false, fireSmoke: false },
-  { name: 'en-dusuk', cops: 8, dpr: 1, pixels: 700000, particles: 0.3, crowd: 0.6, slices: 3, balcony: 0, night: 0, speedLines: false, fireSmoke: false },
+  { name: 'yuksek', cops: 24, dpr: 1.75, pixels: 2600000, particles: 1, crowd: 1, slices: 6, balcony: 1, night: 2, speedLines: true, fireSmoke: true, weather: 1 },
+  { name: 'orta', cops: 18, dpr: 1.5, pixels: 1600000, particles: 0.75, crowd: 1, slices: 5, balcony: 0.7, night: 2, speedLines: true, fireSmoke: true, weather: 0.75 },
+  { name: 'dusuk', cops: 12, dpr: 1.25, pixels: 1100000, particles: 0.5, crowd: 0.8, slices: 4, balcony: 0.4, night: 1, speedLines: false, fireSmoke: false, weather: 0.5 },
+  { name: 'en-dusuk', cops: 8, dpr: 1, pixels: 700000, particles: 0.3, crowd: 0.6, slices: 3, balcony: 0, night: 0, speedLines: false, fireSmoke: false, weather: 0.25 },
 ];
 
 export const QUALITY_MODES = ['auto', 'high', 'low'];

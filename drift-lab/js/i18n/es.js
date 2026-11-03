@@ -8,6 +8,8 @@ export default {
     maker: 'Hecho por Çağlar Sağlam', exit: 'Pulsa otra vez para salir',
   },
   aria: {
+    weather: 'Clima',
+    fire: 'Disparar', code: 'Código',
     game: 'Zona de juego', health: 'Salud', pause: 'Pausa', wanted: 'Nivel de búsqueda', damage: 'Daño', reverse: 'Marcha atrás',
     mute: 'Activar o silenciar sonido', back: 'Atrás', prev: 'Anterior', next: 'Siguiente', start: 'Jugar',
   },
@@ -61,6 +63,14 @@ export default {
   },
   alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!' },
   escape: { toast: '+{n} ¡POR LOS PELOS!', combo: 'COMBO +{n}' },
+  code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.' },
+  custom: {
+    title: 'Personalizar', paint: 'Pintura', rim: 'Llantas', led: 'Luz inferior', buy: 'Comprar · {cost}', confirm: 'Confirmar · {cost}', poor: 'Monedas insuficientes', bought: '¡Comprado!', use: 'Ya desbloqueado', ownFirst: 'Compra el coche para personalizarlo.',
+    paints: { gece: 'Negro medianoche', gumus: 'Plata brillante', kiraz: 'Rojo cereza', okyanus: 'Azul océano', zumrut: 'Verde esmeralda', limon: 'Amarillo limón', mandalina: 'Mandarina', lavanta: 'Lavanda mate', pembe: 'Rosa chicle', haki: 'Caqui mate', fume: 'Gris humo mate', bakir: 'Cobre', lacivert: 'Azul marino metalizado', neonyesil: 'Verde neón', neonpembe: 'Rosa neón', mor: 'Morado eléctrico', inci: 'Blanco perla', altin: 'Oro', krom: 'Cromo espejo', lav: 'Rojo lava' },
+    rims: { std: 'Estándar', yildiz: 'Estrella de 5 radios', cok: 'Multirradio', spor: 'Deportiva', derin: 'Plato hondo', turbin: 'Turbina', karbon: 'Carbono', altin: 'Oro' },
+    leds: { yok: 'Apagado', mavi: 'Azul neón', pembe: 'Rosa neón', mor: 'Morado', yesil: 'Verde', beyaz: 'Blanco', kirmizi: 'Rojo pulsante', buz: 'Hielo pulsante', altin: 'Oro pulsante', gokkusagi: 'Arcoíris' },
+  },
+  weather: { title: 'Clima', random: 'Aleatorio', sunny: 'Soleado', rain: 'Lluvia', snow: 'Nieve', fog: 'Niebla', ice: 'Hielo', iceWarn: '¡Carretera helada!' },
   cheat: { on: '¡Toma ya! ¡Has encontrado el truco secreto!', off: 'Truco desactivado', badge: 'TRUCO ACTIVO' },
   cars: {
     atmaca: { desc: 'El veterano de todos los barrios', paints: ['Beige de barrio', 'Rojo vino', 'Verde militar mate', 'Bicolor crema/burdeos'] },
@@ -73,5 +83,9 @@ export default {
     marmara: { desc: 'Sedán sencillo, lleno de sorpresas', paints: ['Blanco nieve', 'Rojo volcán', 'Antracita mate', 'Bicolor azul/negro'] },
     liva: { desc: 'Compacto, ágil y volador', paints: ['Azul océano', 'Naranja llama', 'Blanco mate', 'Bicolor rojo/negro'] },
     bozkir: { desc: 'Va a todas partes y nunca para', paints: ['Naranja cañón', 'Verde bosque', 'Beige arena', 'Bicolor gris/negro'] },
+    tilki: { desc: 'Coupé de derrape ligero y juguetón', paints: ['Naranja zorro','Negro noche','Gris mate','Blanco hielo'] },
+    kartal: { desc: 'Capó largo y V8 rugiente', paints: ['Azul carreras','Rojo sangre','Negro mate','Bicolor crema/verde'] },
+    volt: { desc: 'GT eléctrico, silencioso y muy rápido', paints: ['Azul plasma','Grafito','Blanco mate','Morado aurora'] },
+    kuzgun: { desc: 'Superdeportivo con lanzador de energía guiado', paints: ['Negro cuervo','Rojo neón','Titanio mate','Bicolor blanco/negro'] },
   },
 };

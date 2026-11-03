@@ -169,6 +169,79 @@ export const CAR_MODELS = {
     },
     rear(d) { for (const z of [0.9, 1.02, 1.14]) d.both(0.72, z, 0.16, 0.09, RED, 0.01); d.box(0, 0.74, 0.46, 0.13, '#f0f2f4', 0.01); d.box(0, 0.42, 1.5, 0.24, '#23272e', 0.03); d.box(0, 0.38, 0.84, 0.1, '#c2c8cf', 0.02); d.text('BOZKIR', 0.14, 1.0, CRM); },
   },
+  tilki: {
+    name: 'Tilki RS', L: 4.21, W: 1.74, H: 1.29, wb: 2.5, fo: 0.78, r: 0.31, sill: 0.13, crown: 0.04, tumble: 0.8, bowF: 0.12, bowR: 0.06, rim: 'five', smooth: 4,
+    features: ['Hafif iki kapılı drift coupe', 'Alçak burun, ince açılır far görünümü', 'Geniş çamurluk, büyük bagaj kanadı', 'Yan etek, çift egzoz', 'Kararmış cam, beş kollu jant'],
+    plan: [[0, 0.9], [0.04, 0.97], [0.5, 1], [0.96, 0.98], [1, 0.92]],
+    deck: [[0, 0.62], [0.03, 0.7], [0.32, 0.79], [0.38, 0.81], [0.8, 0.84], [0.97, 0.81], [1, 0.7]],
+    roof: [[0.36, 0.79], [0.48, 1.25], [0.66, 1.27], [0.8, 0.88], [0.82, 0.84]],
+    win: [[0.43, 0.64]], seams: [0.36, 0.66], handles: [0.6], hood: 0.33, trunk: 0.84, darkGlass: 1,
+    wing: { s: 0.96, z: 1.08, span: 1.62, chord: 0.32 }, skirt: 1, exhaust: 1,
+    bumper: { c: BLK, z: 0.36, h: 0.14, d: 0.1 },
+    stripes: [{ s0: 0, s1: 1, a: 0.08, b: 0.16 }],
+    top: [{ s0: 0.002, s1: 0.03, a: 0.48, b: 0.92, c: LED, glow: 1 }, { s0: 0.975, s1: 0.999, a: 0.3, b: 0.92, c: RED, glow: 1 }],
+    front(d) {
+      d.round(0, 0.58, 1.0, 0.18, BLK, 0.05);
+      d.both(0.62, 0.66, 0.3, 0.07, '#fff8d8', 0.03);
+      d.box(0, 0.34, 0.86, 0.1, '#050608', 0.02);
+      d.emblem(0, 0.72, 'lab');
+    },
+    rear(d) { d.both(0.58, 0.68, 0.34, 0.08, RED, 0.03); d.box(0, 0.66, 0.5, 0.12, BLK); d.text('TİLKİ', 0.14, 0.66, '#ff8a3c'); d.both(0.4, 0.3, 0.09, 0.09, '#7d858f', 0.045); },
+  },
+  kartal: {
+    name: 'Kartal 67', L: 4.78, W: 1.86, H: 1.36, wb: 2.78, fo: 0.92, r: 0.34, sill: 0.18, crown: 0.02, tumble: 0.86, bowF: 0.04, bowR: 0.02, rim: 'star',
+    features: ['Uzun kaputlu klasik güç arabası', 'Geniş ızgara, çift yuvarlak far', 'Kaputtan bagaja çift yarış şeridi', 'Krom tampon, kalın arka çamurluk', 'Yıldız jant'],
+    plan: [[0, 0.94], [0.03, 0.99], [0.5, 1], [0.97, 0.99], [1, 0.95]],
+    deck: [[0, 0.7], [0.02, 0.78], [0.42, 0.86], [0.46, 0.88], [0.86, 0.9], [0.98, 0.86], [1, 0.76]],
+    roof: [[0.45, 0.86], [0.55, 1.32], [0.73, 1.36], [0.85, 0.92], [0.87, 0.9]],
+    win: [[0.5, 0.7]], seams: [0.45, 0.72], handles: [0.66], hood: 0.44, trunk: 0.88,
+    exhaust: 1,
+    bumper: { c: '#c8ced6', z: 0.42, h: 0.1, d: 0.08 },
+    stripes: [{ s0: 0, s1: 1, a: 0.06, b: 0.18 }],
+    top: [{ s0: 0.002, s1: 0.03, a: 0.5, b: 0.94, c: LED, glow: 1 }, { s0: 0.975, s1: 0.999, a: 0.36, b: 0.94, c: RED, glow: 1 }],
+    front(d) {
+      d.round(0, 0.66, 1.3, 0.2, BLK, 0.03);
+      for (let y = -0.5; y <= 0.5; y += 0.1) d.box(y, 0.66, 0.02, 0.16, '#59616b', 0.005);
+      for (const s of [-1, 1]) { d.circ(s * 0.72, 0.68, 0.09, '#141a20'); d.circ(s * 0.72, 0.68, 0.07, LED); d.circ(s * 0.52, 0.68, 0.06, LED); }
+      d.emblem(0, 0.82, 'lab');
+    },
+    rear(d) { d.both(0.66, 0.74, 0.3, 0.09, RED, 0.02); d.box(0, 0.56, 1.5, 0.08, '#c8ced6', 0.02); d.text('KARTAL', 0.15, 0.76, CRM); d.both(0.5, 0.36, 0.08, 0.08, '#7d858f', 0.04); },
+  },
+  volt: {
+    name: 'Volt GT', L: 4.72, W: 1.92, H: 1.38, wb: 2.88, fo: 0.86, r: 0.35, sill: 0.16, crown: 0.06, tumble: 0.74, bowF: 0.22, bowR: 0.14, rim: 'turbine', smooth: 7,
+    features: ['Alçak elektrikli gran turismo', 'Kapalı ön panel, ince çizgi far', 'Arkaya akan tek parça cam tavan', 'Uzun aks, kısa çıkıntı', 'Arkada boydan boya ışık şeridi'],
+    plan: [[0, 0.84], [0.04, 0.95], [0.12, 0.99], [0.5, 1], [0.9, 0.99], [0.98, 0.94], [1, 0.86]],
+    deck: [[0, 0.6], [0.04, 0.72], [0.25, 0.83], [0.32, 0.86], [0.8, 0.9], [0.96, 0.85], [1, 0.72]],
+    roof: [[0.27, 0.84], [0.42, 1.33], [0.6, 1.38], [0.88, 1.05], [0.94, 0.9]],
+    win: [[0.36, 0.56], [0.58, 0.78]], seams: [0.3, 0.57, 0.8], handles: [], hood: 0.27, trunk: 0.93, roofBlack: 1,
+    top: [{ s0: 0.006, s1: 0.03, a: 0, b: 0.9, c: LED, glow: 1 }, { s0: 0.97, s1: 0.992, a: 0, b: 0.94, c: RED, glow: 1 }],
+    front(d) {
+      d.round(0, 0.6, 1.36, 0.22, '#161b22', 0.08);
+      d.both(0.5, 0.72, 0.56, 0.03, LED, 0.015);
+      d.box(0, 0.34, 0.9, 0.08, '#10141a', 0.03);
+      d.emblem(0, 0.66, 'lab');
+    },
+    rear(d) { d.box(0, 0.8, 1.6, 0.05, RED, 0.02); d.box(0, 0.62, 1.2, 0.14, '#10141a', 0.03); d.text('VOLT', 0.13, 0.62, '#9fe8ff'); },
+  },
+  kuzgun: {
+    name: 'Kuzgun X', L: 4.6, W: 2.0, H: 1.17, wb: 2.72, fo: 0.95, r: 0.36, sill: 0.1, crown: 0.07, tumble: 0.7, bowF: 0.3, bowR: 0.18, rim: 'multi', smooth: 7,
+    features: ['Orta motorlu süper araba', 'Ok ucu biçimli burun, ince dikey far', 'Büyük yan hava girişi, kısa kabin', 'Tavanda enerji topu fırlatıcısı (oyunda ayrı çizilir)', 'Geniş kanat, çoklu kollu jant'],
+    plan: [[0, 0.78], [0.05, 0.92], [0.2, 0.99], [0.55, 1], [0.85, 1], [0.97, 0.95], [1, 0.88]],
+    deck: [[0, 0.5], [0.05, 0.62], [0.3, 0.76], [0.36, 0.8], [0.8, 0.86], [0.96, 0.82], [1, 0.68]],
+    roof: [[0.34, 0.78], [0.46, 1.14], [0.6, 1.17], [0.8, 0.96], [0.88, 0.86]],
+    win: [[0.42, 0.62]], seams: [0.38, 0.66], handles: [], hood: 0.34, trunk: 0.86, darkGlass: 1, roofBlack: 1,
+    wing: { s: 0.95, z: 1.0, span: 1.8, chord: 0.34 }, skirt: 1, exhaust: 1,
+    bumper: { c: BLK, z: 0.3, h: 0.12, d: 0.1 },
+    stripes: [{ s0: 0, s1: 1, a: 0.04, b: 0.1 }],
+    top: [{ s0: 0.004, s1: 0.03, a: 0.42, b: 0.86, c: LED, glow: 1 }, { s0: 0.972, s1: 0.996, a: 0.2, b: 0.9, c: RED, glow: 1 }],
+    front(d) {
+      d.round(0, 0.46, 1.4, 0.16, BLK, 0.06);
+      d.both(0.66, 0.6, 0.06, 0.16, LED, 0.02); d.both(0.5, 0.56, 0.24, 0.03, LED, 0.01);
+      d.box(0, 0.28, 1.1, 0.08, '#050608', 0.02);
+      d.emblem(0, 0.62, 'lab');
+    },
+    rear(d) { d.both(0.62, 0.72, 0.36, 0.05, RED, 0.02); d.box(0, 0.5, 1.4, 0.18, BLK, 0.03); d.text('KUZGUN', 0.13, 0.72, '#ff2f6a'); d.both(0.3, 0.36, 0.1, 0.1, '#7d858f', 0.05); },
+  },
   bavar: {
     name: 'Bavar sedan', L: 4.804, W: 1.812, H: 1.44, wb: 2.85, fo: 0.79, r: 0.33, sill: 0.17, crown: 0.05, tumble: 0.77, bowF: 0.15, bowR: 0.1, rim: 'star', smooth: 4,
     features: ['Uzun kaputlu sportif sedan', 'Alçak tek parça geniş ağız', 'İnce keskin far', 'Akıcı tavan', 'Yatay ince stoplar'],

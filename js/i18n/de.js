@@ -8,6 +8,8 @@ export default {
     maker: 'Gemacht von Çağlar Sağlam', exit: 'Zum Beenden erneut drücken',
   },
   aria: {
+    weather: 'Wetter',
+    fire: 'Feuer', code: 'Code',
     game: 'Spielfeld', health: 'Zustand', pause: 'Pause', wanted: 'Fahndungsstufe', damage: 'Schaden', reverse: 'Rückwärtsgang',
     mute: 'Ton an oder aus', back: 'Zurück', prev: 'Vorheriges', next: 'Nächstes', start: 'Start',
   },
@@ -61,6 +63,14 @@ export default {
   },
   alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!' },
   escape: { toast: '+{n} HAARSCHARF!', combo: 'COMBO +{n}' },
+  code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.' },
+  custom: {
+    title: 'Anpassen', paint: 'Lack', rim: 'Felgen', led: 'Unterboden', buy: 'Kaufen · {cost}', confirm: 'Bestätigen · {cost}', poor: 'Nicht genug Münzen', bought: 'Gekauft!', use: 'Schon freigeschaltet', ownFirst: 'Kaufe zuerst das Auto, um es anzupassen.',
+    paints: { gece: 'Mitternachtsschwarz', gumus: 'Hellsilber', kiraz: 'Kirschrot', okyanus: 'Ozeanblau', zumrut: 'Smaragdgrün', limon: 'Zitronengelb', mandalina: 'Mandarine', lavanta: 'Mattes Lavendel', pembe: 'Bonbonrosa', haki: 'Mattes Khaki', fume: 'Mattes Rauchgrau', bakir: 'Kupfer', lacivert: 'Marineblau Metallic', neonyesil: 'Neongrün', neonpembe: 'Neonpink', mor: 'Elektrolila', inci: 'Perlweiß', altin: 'Gold', krom: 'Spiegelchrom', lav: 'Lavarot' },
+    rims: { std: 'Standard', yildiz: 'Fünfspeichen-Stern', cok: 'Vielspeichen', spor: 'Sport', derin: 'Tiefbett', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
+    leds: { yok: 'Aus', mavi: 'Neonblau', pembe: 'Neonpink', mor: 'Lila', yesil: 'Grün', beyaz: 'Weiß', kirmizi: 'Rot pulsierend', buz: 'Eis pulsierend', altin: 'Gold pulsierend', gokkusagi: 'Regenbogen' },
+  },
+  weather: { title: 'Wetter', random: 'Zufall', sunny: 'Sonnig', rain: 'Regen', snow: 'Schnee', fog: 'Nebel', ice: 'Glatteis', iceWarn: 'Achtung, Glatteis!' },
   cheat: { on: 'Na sieh mal einer an – du hast den Cheatcode gefunden!', off: 'Cheat aus', badge: 'CHEAT AN' },
   cars: {
     atmaca: { desc: 'Der treue Klassiker jeder Nachbarschaft', paints: ['Kiez-Beige', 'Weinrot', 'Mattes Armeegrün', 'Zweifarbig Creme/Bordeaux'] },
@@ -73,5 +83,9 @@ export default {
     marmara: { desc: 'Schlichte Limousine voller Überraschungen', paints: ['Schneeweiß', 'Vulkanrot', 'Mattes Anthrazit', 'Zweifarbig Blau/Schwarz'] },
     liva: { desc: 'Kleiner, wendiger Flitzer', paints: ['Ozeanblau', 'Flammenorange', 'Mattweiß', 'Zweifarbig Rot/Schwarz'] },
     bozkir: { desc: 'Fährt überall, hält nie an', paints: ['Canyonorange', 'Waldgrün', 'Sandbeige', 'Zweifarbig Grau/Schwarz'] },
+    tilki: { desc: 'Leichtes, verspieltes Drift-Coupé', paints: ['Fuchsorange','Nachtschwarz','Mattgrau','Eisweiß'] },
+    kartal: { desc: 'Lange Haube, grollender V8', paints: ['Rennblau','Blutrot','Mattschwarz','Zweifarbig Creme/Grün'] },
+    volt: { desc: 'Leiser, aber sehr schneller Elektro-GT', paints: ['Plasmablau','Graphit','Mattweiß','Aurora-Lila'] },
+    kuzgun: { desc: 'Supersportler mit Zielsuch-Energiewerfer', paints: ['Rabenschwarz','Neonrot','Mattes Titan','Zweifarbig Weiß/Schwarz'] },
   },
 };

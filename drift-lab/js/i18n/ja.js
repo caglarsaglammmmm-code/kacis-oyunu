@@ -8,6 +8,8 @@ export default {
     maker: '制作：Çağlar Sağlam', exit: 'もう一度押すと終了',
   },
   aria: {
+    weather: '天気',
+    fire: '発射', code: 'コード',
     game: 'ゲーム画面', health: '耐久力', pause: '一時停止', wanted: '手配レベル', damage: 'ダメージ', reverse: 'バック',
     mute: 'サウンドのオン／オフ', back: '戻る', prev: '前へ', next: '次へ', start: 'スタート',
   },
@@ -61,6 +63,14 @@ export default {
   },
   alert: { swat: 'SWAT出動！', heavy: '重装増援！', tanks: '戦車だ！', aliens: 'エイリアン襲来！' },
   escape: { toast: '+{n} ギリギリ回避！', combo: 'コンボ +{n}' },
+  code: { title: 'コード入力', apply: '適用', ok: 'コード承認！{car}がガレージに追加されたよ。', owned: 'この車はもう持っているよ。', invalid: '無効なコードです。', empty: 'まずコードを入力してね。' },
+  custom: {
+    title: 'カスタマイズ', paint: '塗装', rim: 'ホイール', led: 'アンダーネオン', buy: '購入 · {cost}', confirm: '確認 · {cost}', poor: 'コインが足りません', bought: '購入しました！', use: '解放済み', ownFirst: 'カスタマイズするには先に車を買おう。',
+    paints: { gece: 'ミッドナイトブラック', gumus: 'ブライトシルバー', kiraz: 'チェリーレッド', okyanus: 'オーシャンブルー', zumrut: 'エメラルドグリーン', limon: 'レモンイエロー', mandalina: 'タンジェリン', lavanta: 'マット・ラベンダー', pembe: 'キャンディピンク', haki: 'マット・カーキ', fume: 'マット・スモークグレー', bakir: 'カッパー', lacivert: 'ネイビーメタリック', neonyesil: 'ネオングリーン', neonpembe: 'ネオンピンク', mor: 'エレクトリックパープル', inci: 'パールホワイト', altin: 'ゴールド', krom: 'ミラークローム', lav: 'ラヴァレッド' },
+    rims: { std: 'スタンダード', yildiz: '5本スポーク', cok: 'マルチスポーク', spor: 'スポーツ', derin: 'ディープリム', turbin: 'タービン', karbon: 'カーボン', altin: 'ゴールド' },
+    leds: { yok: 'なし', mavi: 'ネオンブルー', pembe: 'ネオンピンク', mor: 'パープル', yesil: 'グリーン', beyaz: 'ホワイト', kirmizi: 'レッドパルス', buz: 'アイスパルス', altin: 'ゴールドパルス', gokkusagi: 'レインボー' },
+  },
+  weather: { title: '天気', random: 'ランダム', sunny: '晴れ', rain: '雨', snow: '雪', fog: '霧', ice: '凍結', iceWarn: '路面凍結！' },
   cheat: { on: 'やるじゃん！隠しコマンドを見つけたね！', off: 'チート解除', badge: 'チートON' },
   cars: {
     atmaca: { desc: 'どの街にもいるベテラン', paints: ['下町ベージュ', 'ワインレッド', 'マット・アーミーグリーン', '2トーン クリーム／ボルドー'] },
@@ -73,5 +83,9 @@ export default {
     marmara: { desc: '地味なセダン、でも侮れない', paints: ['スノーホワイト', 'ボルケーノレッド', 'マット・アンスラサイト', '2トーン ブルー／ブラック'] },
     liva: { desc: '小さく軽快な空飛ぶハッチバック', paints: ['オーシャンブルー', 'フレイムオレンジ', 'マットホワイト', '2トーン レッド／ブラック'] },
     bozkir: { desc: 'どこでも走り、決して止まらない', paints: ['キャニオンオレンジ', 'フォレストグリーン', 'サンドベージュ', '2トーン グレー／ブラック'] },
+    tilki: { desc: '軽くて遊び心のあるドリフトクーペ', paints: ['フォックスオレンジ','ナイトブラック','マットグレー','アイスホワイト'] },
+    kartal: { desc: 'ロングノーズに唸るV8', paints: ['レーシングブルー','ブラッドレッド','マットブラック','2トーン クリーム／グリーン'] },
+    volt: { desc: '静かで速い電動GT', paints: ['プラズマブルー','グラファイト','マットホワイト','オーロラパープル'] },
+    kuzgun: { desc: '追尾エネルギー弾を積んだスーパーカー', paints: ['レイヴンブラック','ネオンレッド','マットチタン','2トーン ホワイト／ブラック'] },
   },
 };

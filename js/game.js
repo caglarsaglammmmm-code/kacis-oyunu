@@ -17,6 +17,17 @@ const PW = CONFIG.powers;
 const AL = CONFIG.aliens;
 const PU = CONFIG.pursuit;
 const ESC = CONFIG.escape;
+const WPN = CONFIG.weapon;
+const WX = CONFIG.weather;
+
+// Hava: random ise ağırlıklı seçim, değilse ayardaki tür
+export function pickWeather(setting, rnd = Math.random) {
+  if (WX.types.includes(setting)) return setting;
+  const total = WX.types.reduce((a, k) => a + WX.weights[k], 0);
+  let r = rnd() * total;
+  for (const k of WX.types) { r -= WX.weights[k]; if (r < 0) return k; }
+  return 'sunny';
+}
 const WT = CONFIG.water;
 const tmpSirens = new Float32Array(CONFIG.sirens.length);
 const byDist = (a, b) => a.pd - b.pd;
@@ -101,6 +112,7 @@ function makeCop() {
   b.turret = 0; b.fireT = 0; b.fxT = 0; b.hurtFlash = 0;
   b.wanderT = 0; b.wx = 0; b.wy = 0;
   b.side = 1; b.roleT = 0; b.blockT = 0; b.blockA = 0; b.hold = false; b.far = false; b.pd = 0;
+  b.mhp = 100; b.byWeapon = false;
   b.escIn = false; b.escHit = false; b.escHitAt = -99; b.escEnterT = 0; b.escAt = -99; b.escX = 0; b.escY = 0;
   return b;
 }
@@ -127,6 +139,17 @@ export class Game {
     this.flankSide = 1;
     this.shots = [];
     for (let i = 0; i < 8; i++) this.shots.push({ x: 0, y: 0, t: 0, alive: false });
+    // Güdümlü mermi havuzu: oyun sırasında bellek ayrılmaz. tx/ty kısa iz
+    this.missiles = [];
+    for (let i = 0; i < WPN.maxMissiles; i++) this.missiles.push({ alive: false, x: 0, y: 0, vx: 0, vy: 0, t: 0, target: null, tx: new Float32Array(6), ty: new Float32Array(6), ti: 0 });
+    this.weapon = null;
+    // Hava: tür, yoğunluk (0-1, yumuşak geçiş) ve zemin tutuşları (oyuncu, polis). Bellek ayrılmaz
+    this.weather = 'sunny';
+    this.weatherSetting = 'random';
+    this.wk = 0;
+    this.weatherSaid = false;
+    this.surfP = CONFIG.surfaces.map((s) => ({ ...s }));
+    this.surfC = CONFIG.surfaces.map((s) => ({ ...s }));
     this.spikes = [];
     for (let i = 0; i < 6; i++) this.spikes.push({ x: 0, y: 0, a: 0, len: 0, alive: false, used: false });
     this.diff = difficultyAt(0);
@@ -203,6 +226,8 @@ export class Game {
     this.cause = '';
     while (this.cops.length) this.copPool.push(this.cops.pop());
     for (const s of this.shots) s.alive = false;
+    for (const m of this.missiles) m.alive = false;
+    this.weapon = null;
     for (const s of this.spikes) s.alive = false;
     this.fx.clear();
     this.crowd.clear();
@@ -211,11 +236,18 @@ export class Game {
     this.result = null;
   }
 
-  start(carSpec, { startTime = CONFIG.dev.startTime, god = CONFIG.dev.godMode, seed = (Math.random() * 1e9) | 0, keepWorld = false } = {}) {
+  start(carSpec, { startTime = CONFIG.dev.startTime, god = CONFIG.dev.godMode, seed = (Math.random() * 1e9) | 0, keepWorld = false, weather = 'sunny' } = {}) {
     this.carSpec = carSpec;
+    // Menüde hazırlanan dünya aynı havayla kullanılır: çizilmiş zemin yeniden işlenmez
+    if (!keepWorld || this.weatherSetting !== weather) this.weather = pickWeather(weather);
+    this.weatherSetting = weather;
+    this.wk = 0;
+    this.weatherSaid = false;
+    this.applyWeather();
     this.god = god;
     if (!keepWorld) this.world.reset(seed);
     this.resetRun(startTime);
+    this.weapon = carSpec.weapon ? { ammo: WPN.ammo, cd: 0, regenT: 0, lock: null } : null;
     this.dayT = 0;
     dayState(0, this.daylight);
     resetBody(this.player, 100, 300, Math.PI / 2, carSpec);
@@ -329,6 +361,8 @@ export class Game {
   tickPlay(dt, steer, reverse) {
     this.time += dt;
     this.runTime += dt;
+    if (this.wk < 1) { this.wk = Math.min(1, this.wk + dt / WX.fade); this.applyWeather(); }
+    if (!this.weatherSaid) { this.weatherSaid = true; this.emit('weather', this.weather); }
     if (this.heat > 0) this.heat = Math.max(0, this.heat - PU.heat.decay * dt);
     difficultyAt(this.time, this.diff, this.heat);
     this.world.update(this.player.x, this.player.y);
@@ -350,6 +384,7 @@ export class Game {
     if (this.state !== 'play') return;
     this.updateFlow(dt);
     this.updateCops(dt);
+    if (this.weapon) this.updateWeapon(dt);
     this.crowd.update(dt);
     this.director(dt);
     this.updatePowers(dt);
@@ -418,7 +453,7 @@ export class Game {
     const p = this.player;
     const g = this.world.groundAt(p.x, p.y);
     const noclip = this.cheat || this.exitOn;
-    const surf = CONFIG.surfaces[this.cheat ? GROUND.ROAD : g]; // Hile: hiçbir zemin yavaşlatmaz
+    const surf = this.cheat ? CONFIG.surfaces[GROUND.ROAD] : this.surfP[g]; // Hile: hiçbir zemin yavaşlatmaz
     // Duvara saplanınca kendiliğinden geri çıkar: tek parmakla oyun kilitlenmesin
     if (this.autoRevT > 0) {
       this.autoRevT -= dt;
@@ -843,6 +878,7 @@ export class Game {
     c.los = false; c.hitCd = 0; c.nearCd = 0; c.wakeT = 0;
     this.flankSide = -this.flankSide;
     c.side = this.flankSide; c.roleT = PU.roleTime; c.blockT = 0; c.hold = false; c.far = false;
+    c.mhp = WPN.hp[type] || WPN.hp.car; c.byWeapon = false;
     c.escIn = false; c.escHit = false; c.escHitAt = -99; c.escEnterT = 0; c.escAt = -99;
     c.turret = a; c.fireT = TK.fireEvery * 0.6; c.fxT = Math.random() * 3; c.hurtFlash = 0;
     this.cops.push(c);
@@ -949,7 +985,7 @@ export class Game {
         c.staticBody = true;
       } else {
         c.staticBody = false;
-        const surf = CONFIG.surfaces[world.groundAt(c.x, c.y)];
+        const surf = this.surfC[world.groundAt(c.x, c.y)];
         stepCar(c, c.ctlS, c.ctlT, c.drive, surf, cdt);
         const impact = this.collideWorld(c, false);
         if (impact > AI.wallMinImpact) {
@@ -964,7 +1000,7 @@ export class Game {
       if (c.hp < c.maxHp * 0.5 && Math.random() < 0.25 && this.onScreen(c.x, c.y, 60)) {
         this.fx.spawn(c.hp < c.maxHp * 0.25 ? FX.DARK : FX.SMOKE, c.x, c.y, c.vx * 0.2, c.vy * 0.2, 0.7, 11);
       }
-      if (c.hp <= 0) { this.destroyCop(i, false); continue; }
+      if (c.hp <= 0) { this.destroyCop(i, c.byWeapon); continue; }
 
       if (playing) {
         // Oyuncu ile çarpışma
@@ -1015,6 +1051,112 @@ export class Game {
     this.sirenClosing = closing;
   }
 
+  // Zemin tutuşu havaya göre, yoğunlukla yumuşakça. Polis etkinin yarısını hisseder
+  applyWeather() {
+    const g = WX.grip[this.weather] ?? 1;
+    const v = WX.speed[this.weather] ?? 1;
+    const k = this.wk;
+    for (let i = 0; i < CONFIG.surfaces.length; i++) {
+      const s = CONFIG.surfaces[i];
+      const gp = 1 - (1 - g) * k; const vp = 1 - (1 - v) * k;
+      this.surfP[i].grip = s.grip * gp; this.surfP[i].speed = s.speed * vp;
+      this.surfC[i].grip = s.grip * (1 - (1 - gp) * WX.copShare); this.surfC[i].speed = s.speed * (1 - (1 - vp) * WX.copShare);
+    }
+  }
+
+  // --- Güdümlü enerji topu ---
+  // Atış: bekleme ve cephane uygunsa burundan çıkar, varsa kilitli polisi izler. true: atıldı
+  fire() {
+    const w = this.weapon;
+    if (!w || this.state !== 'play' || w.cd > 0 || w.ammo <= 0) return false;
+    const m = this.missiles.find((k) => !k.alive);
+    if (!m) return false;
+    const p = this.player;
+    const ca = Math.cos(p.a); const sa = Math.sin(p.a);
+    m.alive = true; m.t = 0; m.ti = 0;
+    m.x = p.x + ca * p.len * 0.55; m.y = p.y + sa * p.len * 0.55;
+    m.vx = ca * WPN.speed + p.vx * 0.3; m.vy = sa * WPN.speed + p.vy * 0.3;
+    m.target = w.lock;
+    for (let i = 0; i < m.tx.length; i++) { m.tx[i] = m.x; m.ty[i] = m.y; }
+    w.ammo--;
+    w.cd = WPN.cooldown;
+    this.emit('fire');
+    return true;
+  }
+
+  // Önündeki konide en yakın polis: hedef işareti bunun üstünde
+  findLock() {
+    const p = this.player;
+    const ca = Math.cos(p.a); const sa = Math.sin(p.a);
+    const cosCone = Math.cos(WPN.cone);
+    let best = null;
+    let bd = WPN.range;
+    for (const c of this.cops) {
+      const dx = c.x - p.x; const dy = c.y - p.y;
+      const d = Math.hypot(dx, dy);
+      if (d >= bd || d < 1) continue;
+      if ((dx * ca + dy * sa) / d < cosCone) continue;
+      best = c; bd = d;
+    }
+    return best;
+  }
+
+  updateWeapon(dt) {
+    const w = this.weapon;
+    if (w.cd > 0) w.cd = Math.max(0, w.cd - dt);
+    if (w.ammo < WPN.ammo) {
+      w.regenT += dt;
+      if (w.regenT >= WPN.regen) { w.regenT = 0; w.ammo++; }
+    } else w.regenT = 0;
+    if (this.tickCount % WPN.lockEvery === 0) w.lock = this.findLock();
+    else if (w.lock && !this.cops.includes(w.lock)) w.lock = null;
+    for (const m of this.missiles) if (m.alive) this.stepMissile(m, dt);
+  }
+
+  stepMissile(m, dt) {
+    m.t += dt;
+    if (m.target && !this.cops.includes(m.target)) m.target = null; // Hedef yok olduysa düz gider
+    if (m.target) {
+      const want = Math.atan2(m.target.y - m.y, m.target.x - m.x);
+      const now = Math.atan2(m.vy, m.vx);
+      let diff = want - now;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      const a = now + Math.max(-WPN.turn * dt, Math.min(WPN.turn * dt, diff));
+      const sp = Math.hypot(m.vx, m.vy);
+      m.vx = Math.cos(a) * sp; m.vy = Math.sin(a) * sp;
+    }
+    m.x += m.vx * dt; m.y += m.vy * dt;
+    m.ti = (m.ti + 1) % m.tx.length; m.tx[m.ti] = m.x; m.ty[m.ti] = m.y;
+    // Duvara, binaya çarpınca ya da ömrü bitince söner
+    if (m.t > WPN.life || this.world.blockedAt(m.x, m.y)) {
+      m.alive = false;
+      this.fx.burst(FX.GLINT, m.x, m.y, 6, 90, 0.3, 6);
+      return;
+    }
+    const r2 = WPN.hitR * WPN.hitR;
+    for (const c of this.cops) {
+      const dx = c.x - m.x; const dy = c.y - m.y;
+      const rr = WPN.hitR + c.wid * 0.5;
+      if (dx * dx + dy * dy > Math.max(r2, rr * rr)) continue;
+      m.alive = false;
+      this.hitCop(c, m.x, m.y);
+      return;
+    }
+  }
+
+  // Her isabet sabit hasar: gereken isabet sayısı polis türüne göre (WPN.hp / WPN.damage)
+  hitCop(c, x, y) {
+    const full = WPN.hp[c.type] || WPN.hp.car;
+    c.mhp -= WPN.damage;
+    c.hp = Math.min(c.hp - (c.maxHp * WPN.damage) / full, (c.maxHp * c.mhp) / full);
+    if (c.mhp <= 0) { c.hp = -1; c.byWeapon = true; }
+    c.hurtFlash = 0.35;
+    this.fx.burst(FX.GLINT, x, y, 10, 160, 0.35, 7);
+    this.fx.burst(FX.SMOKE, x, y, 4, 60, 0.7, 12);
+    this.emit('missilehit', c.mhp <= 0 ? 1 : 0.5);
+  }
+
   // Kıl payı kaçış: polis yakın bölgeye girer, değmeden çıkarsa ödül. Ödül çıkış anında verilir
   checkEscape(c, dist) {
     const p = this.player;
@@ -1055,6 +1197,7 @@ export class Game {
     this.escapes++;
     this.escLastT = this.runTime;
     c.escAt = this.runTime;
+    if (this.weapon) this.weapon.ammo = Math.min(WPN.ammo, this.weapon.ammo + WPN.escapeAmmo);
     this.emit('escape', { amount, bonus });
     return total;
   }

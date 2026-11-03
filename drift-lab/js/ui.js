@@ -1,5 +1,6 @@
 // Menüler ve oyun içi gösterge. HUD yalnızca değer değişince DOM'a yazar.
-import { paintPixelCar } from './pixelcars.js';
+import { paintPixelCar, animatePixelCar, rimIcon } from './pixelcars.js';
+import { CUSTOM, paintOf, itemOf } from './custom.js';
 import { CONFIG, MAX_STARS } from './config.js';
 import { paintPower, POWER_LOOK } from './art.js';
 import { tx, txNum, getLang, LANGS, DEVELOPER } from './i18n/index.js';
@@ -103,6 +104,21 @@ export class UI {
     $('set-vibrate').addEventListener('change', (e) => { d.settings.vibrate = e.target.checked; this.storage.save(); a.applySettings(); });
     $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
     $('dev-start').addEventListener('change', (e) => { d.dev.startTime = Number(e.target.value); this.storage.save(); });
+    // Kod gir: metin büyük harfe çevrilir, tire ve boşluk atılır (storage.redeem)
+    const applyCode = () => {
+      const box = $('code-input');
+      const msg = $('code-msg');
+      const raw = box.value.trim();
+      const r = raw ? this.storage.redeem(raw) : 'empty';
+      const unlocked = CONFIG.codes.find((k) => k.code === raw.toUpperCase().replace(/[^0-9A-Z]/g, ''));
+      const car = unlocked && CONFIG.cars.find((c) => c.id === unlocked.car);
+      msg.textContent = tx(`code.${r}`, { car: car ? car.name : '' });
+      msg.className = `code-msg ${r === 'ok' ? 'ok' : 'err'}`;
+      if (r === 'ok') { box.value = ''; this.refreshMenu(); a.purchased(); }
+      this.fit($('settings'));
+    };
+    $('code-apply').addEventListener('click', () => { a.tap(); applyCode(); });
+    $('code-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); applyCode(); } });
     // Gizli geliştirici bölümü: sürüm yazısına 7 kez dokun
     $('version').addEventListener('click', () => {
       if (++this.devTaps >= 7) $('dev-panel').hidden = false;
@@ -194,6 +210,7 @@ export class UI {
   }
 
   paintName(car, i) {
+    if (typeof i === 'string') return tx(`custom.paints.${i}`);
     const names = tx(`cars.${car.id}.paints`);
     return (Array.isArray(names) && names[i]) || (car.paints[i] || car.paints[0]).name;
   }
@@ -412,12 +429,12 @@ export class UI {
     const owned = d.owned.includes(car.id);
     const selected = d.selected === car.id;
     const paintI = owned ? this.storage.paintIndex(car.id) : (this.gp || 0);
-    paintPixelCar($('px-car'), car, paintI);
+    this.drawPreview(car, paintI);
     const swatch = $('garage-paints');
     swatch.textContent = '';
     car.paints.forEach((p, i) => {
       const b = document.createElement('button');
-      b.className = `swatch ${p.finish}${i === paintI ? ' on' : ''}`;
+      b.className = `swatch ${p.finish}${i === paintI && !(this.prev && this.prev.kind === 'paint') ? ' on' : ''}`;
       b.style.setProperty('--c', p.color);
       b.style.setProperty('--r', p.roof || p.color);
       b.title = this.paintName(car, i);
@@ -425,12 +442,13 @@ export class UI {
       b.addEventListener('click', () => {
         this.actions.tap();
         this.gp = i;
+        this.prev = null;
         if (owned) { this.storage.setPaint(car.id, i); this.actions.carChanged(); }
         this.renderGarage();
       });
       swatch.appendChild(b);
     });
-    const pt = car.paints[paintI];
+    const pt = paintOf(car, paintI);
     $('garage-paint-name').textContent = `${this.paintName(car, paintI)} · ${tx(`garage.finish.${pt.finish}`)}${pt.roof ? ` · ${tx('garage.twoTone')}` : ''}`;
     $('garage-name').textContent = car.name;
     $('garage-desc').textContent = tx(`cars.${car.id}.desc`);
@@ -493,13 +511,120 @@ export class UI {
     });
     const on = list.children[this.gi];
     if (on) list.scrollLeft = on.offsetLeft - list.clientWidth / 2 + on.offsetWidth / 2;
+    this.renderCustom(car, owned);
     if (!$('garage').hidden) this.fit($('garage'));
+  }
+
+  // Garaj önizlemesi: kayıtlı görünüş, varsa denenen öğe üstüne. Jantlar döner
+  previewLook(car, paintI) {
+    const look = this.storage.look(car.id);
+    look.paint = paintI;
+    const p = this.prev;
+    if (p) look[p.kind] = p.id;
+    return look;
+  }
+
+  drawPreview(car, paintI) {
+    this.pvCar = car;
+    this.pvPaint = paintI;
+    const look = this.previewLook(car, paintI);
+    animatePixelCar($('px-car'), car, look.paint, look, this.pvAng || 0, (performance.now() / 1000) % 1000);
+    if (this.pvLoop) return;
+    // Yalnız garaj açıkken, saniyede 15 kare
+    let last = 0;
+    const loop = (now) => {
+      if ($('garage').hidden) { this.pvLoop = 0; return; }
+      this.pvLoop = requestAnimationFrame(loop);
+      if (now - last < 66) return;
+      last = now;
+      this.pvAng = ((this.pvAng || 0) + 0.45) % (Math.PI * 2);
+      const lk = this.previewLook(this.pvCar, this.pvPaint);
+      animatePixelCar($('px-car'), this.pvCar, lk.paint, lk, this.pvAng, now / 1000);
+    };
+    this.pvLoop = requestAnimationFrame(loop);
+  }
+
+  // Özelleştirme: Boya, Jant, Alt LED. Kilitli öğe önce denenir, sonra onayla satın alınır
+  renderCustom(car, owned) {
+    const box = $('garage-custom');
+    const grid = $('custom-grid');
+    const buy = $('custom-buy');
+    const tab = this.tab || 'paint';
+    for (const b of box.querySelectorAll('.custom-tabs button')) {
+      b.classList.toggle('on', b.dataset.tab === tab);
+      b.onclick = () => { this.actions.tap(); this.tab = b.dataset.tab; this.prev = null; this.confirm = false; this.renderGarage(); };
+    }
+    grid.textContent = '';
+    if (!owned) {
+      box.classList.add('off');
+      buy.hidden = true;
+      $('custom-name').textContent = '';
+      $('custom-msg').textContent = tx('custom.ownFirst');
+      return;
+    }
+    box.classList.remove('off');
+    const d = this.storage.data;
+    const look = this.storage.look(car.id);
+    const items = tab === 'paint' ? CUSTOM.paints : tab === 'rim' ? CUSTOM.rims : CUSTOM.leds;
+    const current = look[tab];
+    const p = this.prev && this.prev.kind === tab ? this.prev.id : null;
+    for (const it of items) {
+      const b = document.createElement('button');
+      const has = this.storage.owns(tab, it.id);
+      b.className = `chip ${tab}${it.id === (p || current) ? ' on' : ''}${has ? '' : ' locked'}`;
+      b.setAttribute('aria-label', tx(`custom.${tab}s.${it.id}`));
+      if (tab === 'paint') { b.classList.add(it.finish); b.style.setProperty('--c', it.color); }
+      else if (tab === 'rim') b.appendChild(rimIcon(it.id));
+      else { b.style.setProperty('--c', it.color || 'transparent'); if (it.fx !== 'static') b.classList.add(it.fx); if (!it.color) b.classList.add('none'); }
+      if (!has) { const tag = document.createElement('em'); tag.textContent = txNum(it.price); b.appendChild(tag); }
+      b.addEventListener('click', () => {
+        this.actions.tap();
+        this.confirm = false;
+        if (has) { this.prev = null; this.storage.setLook(car.id, tab, it.id); this.actions.carChanged(); $('custom-msg').textContent = ''; }
+        else this.prev = { kind: tab, id: it.id };
+        this.renderGarage();
+      });
+      grid.appendChild(b);
+    }
+    // Seçilen ya da denenen öğenin adı ve satın alma düğmesi
+    const sel = p || current;
+    $('custom-name').textContent = tx(`custom.${tab}s.${sel}`);
+    if (p) {
+      const it = itemOf(tab, p);
+      const enough = d.coins >= it.price;
+      buy.hidden = false;
+      buy.disabled = !enough;
+      buy.classList.toggle('confirm', !!this.confirm);
+      buy.textContent = !enough ? tx('custom.poor') : tx(this.confirm ? 'custom.confirm' : 'custom.buy', { cost: txNum(it.price) });
+      buy.onclick = () => {
+        this.actions.tap();
+        if (!this.confirm) { this.confirm = true; this.renderGarage(); return; }
+        const r = this.storage.buyItem(tab, p);
+        this.confirm = false;
+        if (r === 'ok') {
+          this.storage.setLook(car.id, tab, p);
+          this.prev = null;
+          this.actions.purchased();
+          this.actions.carChanged();
+          this.renderGarage();
+          $('custom-msg').textContent = tx('custom.bought');
+        } else {
+          $('custom-msg').textContent = tx(r === 'poor' ? 'custom.poor' : 'custom.use');
+          this.renderGarage();
+        }
+      };
+    } else {
+      buy.hidden = true;
+    }
   }
 
   stepCar(dir) {
     const n = CONFIG.cars.length;
     this.gi = (this.gi + dir + n) % n;
     this.gp = 0;
+    this.prev = null;
+    this.confirm = false;
+    $('custom-msg').textContent = '';
     this.renderGarage();
   }
 

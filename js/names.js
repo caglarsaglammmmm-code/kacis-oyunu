@@ -48,7 +48,11 @@ export const NAMES = {
   "efe": "Murat 131",
   "marmara": "Fiat Egea",
   "liva": "Renault Clio",
-  "bozkir": "Dacia Duster"
+  "bozkir": "Dacia Duster",
+  "tilki": "Tilki RS",
+  "kartal": "Kartal 67",
+  "volt": "Volt GT",
+  "kuzgun": "Kuzgun X"
  },
  "zincirler": [
   {

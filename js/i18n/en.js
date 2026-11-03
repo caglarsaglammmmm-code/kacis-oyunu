@@ -8,6 +8,8 @@ export default {
     maker: 'Made by Çağlar Sağlam', exit: 'Press again to exit',
   },
   aria: {
+    weather: 'Weather',
+    fire: 'Fire', code: 'Code',
     game: 'Game area', health: 'Health', pause: 'Pause', wanted: 'Wanted level', damage: 'Damage', reverse: 'Reverse',
     mute: 'Toggle sound', back: 'Back', prev: 'Previous', next: 'Next', start: 'Start',
   },
@@ -61,6 +63,14 @@ export default {
   },
   alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!' },
   escape: { toast: '+{n} CLOSE CALL!', combo: 'COMBO +{n}' },
+  code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.' },
+  custom: {
+    title: 'Customize', paint: 'Paint', rim: 'Rims', led: 'Underglow', buy: 'Buy · {cost}', confirm: 'Confirm · {cost}', poor: 'Not enough coins', bought: 'Purchased!', use: 'Already unlocked', ownFirst: 'Buy the car first to customize it.',
+    paints: { gece: 'Midnight Black', gumus: 'Bright Silver', kiraz: 'Cherry Red', okyanus: 'Ocean Blue', zumrut: 'Emerald Green', limon: 'Lemon Yellow', mandalina: 'Tangerine', lavanta: 'Matte Lavender', pembe: 'Candy Pink', haki: 'Matte Khaki', fume: 'Matte Smoke Gray', bakir: 'Copper', lacivert: 'Navy Metallic', neonyesil: 'Neon Green', neonpembe: 'Neon Pink', mor: 'Electric Purple', inci: 'Pearl White', altin: 'Gold', krom: 'Mirror Chrome', lav: 'Lava Red' },
+    rims: { std: 'Standard', yildiz: 'Five-Spoke Star', cok: 'Multi-Spoke', spor: 'Sport', derin: 'Deep Dish', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
+    leds: { yok: 'Off', mavi: 'Neon Blue', pembe: 'Neon Pink', mor: 'Purple', yesil: 'Green', beyaz: 'White', kirmizi: 'Red Pulse', buz: 'Ice Pulse', altin: 'Gold Pulse', gokkusagi: 'Rainbow' },
+  },
+  weather: { title: 'Weather', random: 'Random', sunny: 'Sunny', rain: 'Rainy', snow: 'Snowy', fog: 'Foggy', ice: 'Icy', iceWarn: 'Icy road!' },
   cheat: { on: 'Well, look at you! You found the cheat code!', off: 'Cheat off', badge: 'CHEAT ON' },
   cars: {
     atmaca: { desc: 'Every neighborhood’s old faithful', paints: ['Neighborhood Beige', 'Wine Red', 'Matte Army Green', 'Two-Tone Cream/Burgundy'] },
@@ -73,5 +83,9 @@ export default {
     marmara: { desc: 'Plain sedan, full of surprises', paints: ['Snow White', 'Volcano Red', 'Matte Anthracite', 'Two-Tone Blue/Black'] },
     liva: { desc: 'Small, nimble, flying hatchback', paints: ['Ocean Blue', 'Flame Orange', 'Matte White', 'Two-Tone Red/Black'] },
     bozkir: { desc: 'Goes anywhere, never stops', paints: ['Canyon Orange', 'Forest Green', 'Sand Beige', 'Two-Tone Gray/Black'] },
+    tilki: { desc: 'Light, playful drift coupe', paints: ['Fox Orange','Night Black','Matte Gray','Ice White'] },
+    kartal: { desc: 'Long hood, rumbling V8', paints: ['Racing Blue','Blood Red','Matte Black','Two-Tone Cream/Green'] },
+    volt: { desc: 'Silent but very fast electric GT', paints: ['Plasma Blue','Graphite','Matte White','Aurora Purple'] },
+    kuzgun: { desc: 'Supercar with a homing energy launcher', paints: ['Raven Black','Neon Red','Matte Titanium','Two-Tone White/Black'] },
   },
 };

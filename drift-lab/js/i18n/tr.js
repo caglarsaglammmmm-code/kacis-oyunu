@@ -8,6 +8,8 @@ export default {
     maker: 'Çağlar Sağlam tarafından yapıldı', exit: 'Çıkmak için tekrar bas',
   },
   aria: {
+    weather: 'Hava durumu',
+    fire: 'Ateş', code: 'Kod',
     game: 'Oyun alanı', health: 'Sağlık', pause: 'Duraklat', wanted: 'Arananlık', damage: 'Hasar', reverse: 'Geri vites',
     mute: 'Sesi aç veya kapat', back: 'Geri', prev: 'Önceki', next: 'Sonraki', start: 'Başla',
   },
@@ -61,6 +63,14 @@ export default {
   },
   alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!' },
   escape: { toast: '+{n} KIL PAYI!', combo: 'KOMBO +{n}' },
+  code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.' },
+  custom: {
+    title: 'Özelleştir', paint: 'Boya', rim: 'Jant', led: 'Alt LED', buy: 'Satın al · {cost}', confirm: 'Onayla · {cost}', poor: 'Yetersiz para', bought: 'Satın alındı!', use: 'Zaten açık', ownFirst: 'Özelleştirmek için önce arabayı al.',
+    paints: { gece: 'Gece Siyahı', gumus: 'Parlak Gümüş', kiraz: 'Kiraz Kırmızı', okyanus: 'Okyanus Mavisi', zumrut: 'Zümrüt Yeşili', limon: 'Limon Sarısı', mandalina: 'Mandalina', lavanta: 'Mat Lavanta', pembe: 'Şeker Pembe', haki: 'Mat Haki', fume: 'Mat Füme', bakir: 'Bakır', lacivert: 'Lacivert Metalik', neonyesil: 'Neon Yeşil', neonpembe: 'Neon Pembe', mor: 'Elektrik Moru', inci: 'İnci Beyazı', altin: 'Altın', krom: 'Ayna Krom', lav: 'Lav Kırmızısı' },
+    rims: { std: 'Standart', yildiz: 'Beş Kollu Yıldız', cok: 'Çok Kollu', spor: 'Spor', derin: 'Derin Çanak', turbin: 'Türbin', karbon: 'Karbon', altin: 'Altın' },
+    leds: { yok: 'Kapalı', mavi: 'Neon Mavi', pembe: 'Neon Pembe', mor: 'Mor', yesil: 'Yeşil', beyaz: 'Beyaz', kirmizi: 'Kırmızı Nefes', buz: 'Buz Nefesi', altin: 'Altın Nefes', gokkusagi: 'Gökkuşağı' },
+  },
+  weather: { title: 'Hava durumu', random: 'Rastgele', sunny: 'Güneşli', rain: 'Yağmurlu', snow: 'Karlı', fog: 'Sisli', ice: 'Buzlu', iceWarn: 'Yol buzlu!' },
   cheat: { on: 'Aferin, hile kodunu buldun la!', off: 'Hile kapatıldı', badge: 'HİLE AÇIK' },
   cars: {
     atmaca: { desc: 'Her mahallenin emektarı', paints: ['Mahalle Beji', 'Şarap Kırmızı', 'Mat Asker Yeşili', 'Çift Ton Krem-Bordo'] },
@@ -73,5 +83,9 @@ export default {
     marmara: { desc: 'Sade sedan, sürprizli', paints: ['Kar Beyaz', 'Volkan Kırmızı', 'Mat Antrasit', 'Çift Ton Mavi-Siyah'] },
     liva: { desc: 'Küçük, çevik, uçan hatchback', paints: ['Okyanus Mavi', 'Alev Turuncu', 'Mat Beyaz', 'Çift Ton Kırmızı-Siyah'] },
     bozkir: { desc: 'Her yerde gider, hiç durmaz', paints: ['Kanyon Turuncusu', 'Orman Yeşili', 'Kum Beji', 'Çift Ton Gri-Siyah'] },
+    tilki: { desc: 'Hafif, oynak drift coupe', paints: ['Tilki Turuncusu','Gece Siyahı','Mat Gri','Buz Beyazı'] },
+    kartal: { desc: 'Uzun kaput, gürleyen V8', paints: ['Yarış Mavisi','Kan Kırmızı','Mat Siyah','Çift Ton Krem-Yeşil'] },
+    volt: { desc: 'Sessiz ama çok hızlı elektrikli GT', paints: ['Plazma Mavi','Grafit','Mat Beyaz','Aurora Mor'] },
+    kuzgun: { desc: 'Güdümlü enerji toplu süper araba', paints: ['Kuzgun Siyahı','Neon Kırmızı','Mat Titanyum','Çift Ton Beyaz-Siyah'] },
   },
 };
