@@ -2243,16 +2243,26 @@ export class Renderer {
   drawBody(img, b, shadowScale = 1, k = 1) {
     const ctx = this.ctx;
     const sp = this.sprites.shadow;
-    ctx.globalAlpha = 0.42;
-    this.place(b.x + 5 * shadowScale, b.y + 7 * shadowScale, b.a);
-    const sw = (b.len + 6);
-    const sh = (b.wid + 4);
-    ctx.drawImage(sp, -sw / 2, -sh / 2, sw, sh);
-    ctx.globalAlpha = 1;
+    // Suya batan araç: küçülür, solar, üstü suyla kaplanır
+    const q = b.sinkT > 0 ? 1 - b.sinkT / b.sinkMax : 0;
+    if (q === 0) {
+      ctx.globalAlpha = 0.42;
+      this.place(b.x + 5 * shadowScale, b.y + 7 * shadowScale, b.a);
+      const sw = (b.len + 6);
+      const sh = (b.wid + 4);
+      ctx.drawImage(sp, -sw / 2, -sh / 2, sw, sh);
+    }
+    const kk = k * (1 - CONFIG.vehWater.shrink * q);
+    ctx.globalAlpha = 1 - 0.85 * q;
     this.place(b.x, b.y, b.a);
-    const w = (img.wu || img.width / SPR) * k;
-    const h = (img.hu || img.height / SPR) * k;
+    const w = (img.wu || img.width / SPR) * kk;
+    const h = (img.hu || img.height / SPR) * kk;
     ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    if (q > 0) {
+      ctx.globalAlpha = 0.25 + q * 0.6;
+      ctx.drawImage(this.sprites.water, -w * 0.75, -w * 0.75, w * 1.5, w * 1.5);
+    }
+    ctx.globalAlpha = 1;
   }
 
   drawPlayer(game, now = performance.now()) {
@@ -2373,53 +2383,79 @@ export class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
-  // Meteor uyarısı (yerde): kırmızı daire, nişangâh, 3 saniyede dolan halka, yanıp sönen hedef işareti
+  // Meteor nişanı (yerde): küçük ve temiz. İnce halka = çarpma dairesi, içinde nişangâh çizgileri, daralan ilerleme
+  // halkası, hafif turuncu parlama; son saniyede hızlı yanıp söner. Düşüş yaklaşınca gölge büyür
   drawMeteorWarn(game, now) {
     const ctx = this.ctx;
     const M = CONFIG.meteor;
     const R = M.radius;
+    const T = M.warn + M.fall;
     for (const m of game.meteors.list) {
       if (!m.alive) continue;
-      const k = Math.min(1, m.t / M.warn);
-      const blink = Math.floor(now / (k > 0.7 ? 90 : 170)) % 2 === 0;
+      const k = Math.min(1, m.t / T);
+      const left = T - m.t;
+      const blink = left < M.blink ? Math.floor(now / 70) % 2 === 0 : Math.floor(now / 260) % 2 === 0;
+      // Yumuşak kırmızı-turuncu parlama (önceden çizilmiş ışık)
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = (0.18 + 0.22 * k) * (blink ? 1 : 0.7);
+      ctx.drawImage(this.sprites.red, m.x - R * 1.15, m.y - R * 1.15, R * 2.3, R * 2.3);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
       ctx.beginPath(); ctx.arc(m.x, m.y, R, 0, 6.283);
-      ctx.fillStyle = `rgba(255,40,30,${0.1 + 0.16 * k})`; ctx.fill();
-      ctx.strokeStyle = 'rgba(255,70,40,.9)'; ctx.lineWidth = 3; ctx.setLineDash([14, 9]); ctx.stroke(); ctx.setLineDash([]);
-      // İlerleme halkası: 3 saniyede dolar
-      ctx.beginPath(); ctx.arc(m.x, m.y, R - 7, -Math.PI / 2, -Math.PI / 2 + k * 6.283);
-      ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 7; ctx.stroke();
-      // Nişangâh
-      ctx.strokeStyle = blink ? '#ffffff' : '#ff3b2a'; ctx.lineWidth = 3;
-      const r1 = R * 0.28; const r2 = R * 0.62;
+      ctx.fillStyle = `rgba(255,60,30,${0.06 + 0.1 * k})`; ctx.fill();
+      ctx.strokeStyle = blink ? 'rgba(255,240,220,.95)' : 'rgba(255,80,40,.9)';
+      ctx.lineWidth = 2; ctx.stroke();
+      // Daralan ilerleme halkası: dışarıdan çarpma dairesine iner, aynı anda dolar
+      const pr = R * (1.35 - 0.35 * k);
+      ctx.beginPath(); ctx.arc(m.x, m.y, pr, -Math.PI / 2, -Math.PI / 2 + k * 6.283);
+      ctx.strokeStyle = '#ffb02e'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.stroke(); ctx.lineCap = 'butt';
+      // Nişangâh: dört kısa çizgi, ortada küçük halka ve nokta
+      ctx.strokeStyle = blink ? '#ffffff' : '#ff5a36'; ctx.lineWidth = 1.6;
+      const r1 = R * 0.22; const r2 = R * 0.72;
       ctx.beginPath();
       ctx.moveTo(m.x - r2, m.y); ctx.lineTo(m.x - r1, m.y); ctx.moveTo(m.x + r1, m.y); ctx.lineTo(m.x + r2, m.y);
       ctx.moveTo(m.x, m.y - r2); ctx.lineTo(m.x, m.y - r1); ctx.moveTo(m.x, m.y + r1); ctx.lineTo(m.x, m.y + r2);
       ctx.stroke();
-      ctx.beginPath(); ctx.arc(m.x, m.y, r1 * 0.6, 0, 6.283); ctx.stroke();
-      // Yere düşen gölge büyür
-      const fall = M.fall / M.warn;
-      if (k > 1 - fall) {
-        const q = (k - (1 - fall)) / fall;
-        ctx.globalAlpha = 0.25 + 0.45 * q;
-        ctx.drawImage(this.sprites.dark, m.x - R * 0.5 * q, m.y - R * 0.35 * q, R * q, R * 0.7 * q);
+      ctx.beginPath(); ctx.arc(m.x, m.y, r1 * 0.7, 0, 6.283); ctx.stroke();
+      ctx.fillStyle = blink ? '#ffffff' : '#ff5a36'; ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
+      // Düşerken yerdeki gölge büyür
+      if (m.t > M.warn) {
+        const q = (m.t - M.warn) / M.fall;
+        ctx.globalAlpha = 0.2 + 0.5 * q;
+        ctx.drawImage(this.sprites.dark, m.x - R * 0.7 * q, m.y - R * 0.5 * q, R * 1.4 * q, R * q);
         ctx.globalAlpha = 1;
       }
     }
   }
 
-  // Düşen meteor (gökte): uyarının son anlarında yukarıdan çakılır
+  // Düşen meteor (gökte): ateşli taş, alev kuyruğu ve ışık; son M.fall sn hızlanarak çakılır
   drawMeteorSky(game, now) {
     const ctx = this.ctx;
     const M = CONFIG.meteor;
     const sp = this.sprites;
-    const fallFrom = M.warn - M.fall;
     for (const m of game.meteors.list) {
-      if (!m.alive || m.t < fallFrom) continue;
-      const q = (m.t - fallFrom) / M.fall; // 0 gökte, 1 yerde
-      const h = (1 - q) * (game.cam.halfH * 0.7 + 80); // Ekranın içinden düşer: görünür
-      const sz = 1.6 - 0.7 * q;
+      if (!m.alive || m.t < M.warn) continue;
+      const u = (m.t - M.warn) / M.fall; // 0 gökte, 1 yerde
+      const q = u * u; // Hızlanarak düşer
+      const h = (1 - q) * (game.cam.halfH * 0.7 + 80);
+      const sz = 1.25 - 0.45 * q;
       const w = 70 * sz; const hh = 110 * sz;
-      ctx.drawImage(sp.meteor, m.x - w / 2 + (1 - q) * 120, m.y - h - hh * 0.62, w, hh);
+      const x = m.x + (1 - q) * 120; const y = m.y - h;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.55 + 0.35 * q;
+      ctx.drawImage(sp.fire, x - w * 0.9, y - w * 0.9, w * 1.8, w * 1.8);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      ctx.drawImage(sp.meteor, x - w / 2, y - hh * 0.62, w, hh);
+    }
+    // Çarpma flaşı: ekranı kısa süre beyazlatır
+    if (game.flashT > 0) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = Math.min(0.75, (game.flashT / game.flashMax) * 0.75);
+      ctx.fillStyle = '#fff6e0';
+      ctx.fillRect(0, 0, this.w * this.dpr, this.h * this.dpr);
+      ctx.globalAlpha = 1;
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
     }
   }
 

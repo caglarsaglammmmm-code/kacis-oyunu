@@ -94,7 +94,7 @@ if (only.includes('meteor')) {
   await hold(page, r.x - 60, r.y + 260, -Math.PI / 2, false);
   await page.waitForTimeout(1400);
   await shot(page, 'meteor-halka');
-  await page.waitForFunction(() => __drift.game.meteors.list.some((m) => m.alive && m.t > __drift.cfg.meteor.warn - 0.3), null, { timeout: 5000 });
+  await page.waitForFunction(() => __drift.game.meteors.list.some((m) => m.alive && m.t > __drift.cfg.meteor.warn + __drift.cfg.meteor.fall - 0.3), null, { timeout: 5000 });
   await shot(page, 'meteor-dusus');
   await page.waitForTimeout(380);
   await shot(page, 'meteor-carpma');

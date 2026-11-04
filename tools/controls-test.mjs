@@ -112,7 +112,7 @@ for (const [name, w, h] of SIZES) {
   await turn(cdp, g, 179, 260);
   await settle(page, 80);
   s = await st(page);
-  ok(s.wheelA <= (130 * Math.PI) / 180 + 1e-6 && s.steer > 0.97, `${T} direksiyon 130° sınırı`, JSON.stringify(s));
+  ok(s.wheelA <= (135 * Math.PI) / 180 + 1e-6 && s.steer > 0.97, `${T} direksiyon 135° sınırı`, JSON.stringify(s));
   await touch(cdp, 'touchEnd', []);
   await settle(page, 700);
   s = await st(page);

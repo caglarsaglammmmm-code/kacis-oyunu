@@ -157,9 +157,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '21.0.0',
+  version: '22.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v21.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v22.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -174,6 +174,13 @@ const CONFIG = {
 
   input: {
     bothDelay: 0.09, // Baş parmak geçişi geri vites sanılmasın: ikisine bu kadar basılı kalınca geri
+    // DİREKSİYON: parmağın açısı basıldığı andan itibaren AÇI FARKI olarak birikir (±180° sınırında sıçramaz).
+    // maxDeg: tam kilit (±), hole: merkeze bu orandan yakın parmak yok sayılır (açı kararsız), grab: direksiyonu
+    // tutma alanı (yarıçap katı), jump: tek olayda bundan büyük açı farkı hata sayılır (derece), smooth: görünüm
+    // ve değer yumuşatması (1/sn), returnRate: bırakınca ortaya yaylı dönüş (1/sn), dead: ölü bölge (oran)
+    wheel: { maxDeg: 135, hole: 0.16, grab: 1.1, jump: 75, smooth: 28, returnRate: 9, dead: 0.03 },
+    // JOYSTICK: basılan nokta merkezdir. r yarıçap (px), dead ölü bölge (px), smooth yumuşatma (1/sn)
+    stick: { r: 54, dead: 8, smooth: 24 },
   },
 
   world: {
@@ -449,6 +456,10 @@ const CONFIG = {
 
   // Derin su: sahil, göl, gölet. Sığ suya girilir, derine düşen araç batar
   water: { sinkTime: 2.3, bubbleEvery: 0.06, shrink: 0.5, spin: 1.5, deepProbe: 6 },
+  // POLİS, SWAT, UZAYLI, TANK VE TRAFİK DE SUYA DÜŞER. Yapay zekâ suyu engel bilir; ancak suya speed'den hızlı dalan,
+  // ya da itilmiş (oyuncu çarpması, patlama, şok dalgası: pushTime sn) ve pushSpeed'den hızlı giden araç düşer.
+  // sink: batma süresi (tank tankSink), drift: batarken hız kaybı (1/sn), bubbles: kabarcık aralığı (yalnız ekrandaysa)
+  vehWater: { speed: 230, pushSpeed: 50, pushTime: 0.9, sink: 2, tankSink: 3.6, drift: 2.4, bubbles: 0.09, shrink: 0.55 },
 
   policeAI: {
     despawnDist: 1900,
@@ -476,6 +487,14 @@ const CONFIG = {
     wakeTime: 12,
     distAhead: 260,
   },
+
+  // YOL KAPATMA: DUZ_GIDIS_SURESI sn aralıksız düz giden (direksiyon straightSteer altında, dönüş hızı straightYaw altında,
+  // hız minSpeed üstünde) oyuncunun önü, yolun tüm genişliğini kaplayan polis arabalarıyla kapanır; geçilemez.
+  // Önce uyarı (warn sn), sonra araçlar lead sn ileride (minDist-maxDist arası) belirir. Oyuncu ile barikat arasında
+  // en az bir yan yol (side karo açık) yoksa kurulmaz, sonra yeniden denenir (retry). Oyuncu dönüp uzaklaşınca
+  // (leaveAngle radyan, leaveDist) ya da life sn sonra dağılır. spacing: araç aralığı, maxCars: en çok araç,
+  // cooldown: iki barikat arası, from: en erken saniye, meteorClear: bu yakında meteor varken kurulmaz
+  roadblock: { DUZ_GIDIS_SURESI: 8, straightSteer: 0.22, straightYaw: 0.35, minSpeed: 140, from: 20, lead: 3.6, warn: 1, minDist: 650, maxDist: 1900, spacing: 40, maxCars: 11, side: 3, life: 18, leaveAngle: 1.2, leaveDist: 450, cooldown: 12, meteorClear: 900, retry: 0.5 },
 
   tank: {
     fireEvery: 5.5,
@@ -590,17 +609,22 @@ const CONFIG = {
   // içine giremez. Anıt (memorial.rect), gizli geçit (secret.ramp) ve iki stadyum (stadiums.*.rect)
   protect: { memorial: 320, secret: 360, stadium: 170, bullet: 0 },
 
-  // METEOR YAĞMURU (tanklardan sonra). at: başlangıç (sn). warn: düşmeden önceki uyarı süresi, ASLA 3'ün altına inmez.
-  // radius: çarpma dairesi (içindeki oyuncu ölür, dışındaki zarar görmez), fall: uyarının son anlarında gökten düşüş.
-  // every: iki dalga arası (sn), perWave: dalgadaki meteor sayısı; ikisi de zamanla artar. max: aynı anda en çok meteor.
-  // minR / maxR: oyuncuya uzaklık bandı (hemen altına düşmez), lead: gidiş yönüne bakış (sn), aimShare: önüne düşen oranı.
-  // tankDamage: tankın aldığı hasar, shake: kamera sarsıntısı, sparks / dust: parçacık sayısı (sınırlı)
+  // METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır: çarpma anında arabanın olacağı
+  // nokta tahmin edilir (konum + hız x (warn + fall)), yol üzerinde tutulur ve kilitlenir (sonra takip etmez).
+  // Hız değişimi ya da dönüşle kaçılabilir. Dalgadaki diğerleri çevreye düşen meteorlardır (onlar da zarar verir).
+  // warn: nişanın görünmesinden düşüşün başlamasına kadar (ASLA 3'ün altına inmez), fall: gökten düşüş süresi.
+  // radius: çarpma dairesi (nişan bu kadar), minR: asıl nişan oyuncuya en az bu uzaklıkta (tam üstünde doğmaz),
+  // maxLead: hızlı araçta nişan en çok bu kadar ileride, road: tahmini nokta bu yarıçapta yola çekilir.
+  // every / perWave: dalga aralığı ve sayısı (zamanla artar), max: aynı anda en çok meteor.
+  // randMin / randMax: çevre meteorlarının oyuncuya uzaklığı. quake / quakeShake: çarpmada kamera sarsıntısı süresi ve gücü,
+  // flash: beyaz parlama süresi, trail: düşerken saniyede duman/alev parçası, blink: son bu kadar saniyede hızlı yanıp söner
   meteor: {
-    at: 380, warn: 3, radius: 120, fall: 0.55,
+    at: 380, warn: 3, fall: 0.7, radius: 64,
     every: [[380, 4.6], [460, 3.6], [560, 2.8], [700, 2.1]],
     perWave: [[380, 1], [450, 2], [540, 3], [680, 4]],
-    max: 7, minR: 230, maxR: 760, lead: 1.1, aimShare: 0.45,
-    tankDamage: 450, shake: 11, sparks: 14, dust: 12, crater: 70,
+    max: 7, minR: 170, maxLead: 1500, road: 80, randMin: 260, randMax: 760,
+    tankDamage: 450, shake: 12, quake: 1.5, quakeShake: 9, flash: 0.18, sparks: 16, dust: 12, crater: 52, debris: 14,
+    trail: 40, blink: 1,
   },
 
   // GİZLİ GEÇİT: ücra köşedeki (landmark 'gecit') terk edilmiş depo alanının güneydoğu köşesinde rampa.
@@ -869,6 +893,7 @@ const TR = {
     golge: { name: 'Gölge R', desc: 'Gizli geçidin hediyesi: 360° taramalı silahlı süper motosiklet', paints: ['Gece Nöbeti', 'Neon Pembe', 'Zehir Yeşili', 'Gümüş Hayalet'] },
   },
   meteor: { warn: 'Kırmızı halkadan çık: meteor geliyor!' },
+  roadblock: { warn: 'Yol kapandı! Yan yola sap' },
   secret: { guest: 'Artık {name}\'ın da misafirisiniz', found: 'Gizli bölümü buldun! Hoş geldin', gift: 'Hediye: {name} motosikleti artık garajında!' },
 };
 
@@ -970,6 +995,7 @@ const EN = {
     golge: { name: 'Shadow R', desc: 'Secret passage gift: superbike with a 360° auto-gun', paints: ['Night Watch', 'Neon Pink', 'Toxic Green', 'Silver Ghost'] },
   },
   meteor: { warn: 'Get out of the red circle: meteor incoming!' },
+  roadblock: { warn: 'Road blocked! Take a side street' },
   secret: { guest: 'You are now {name}\'s guest too', found: 'You found the secret area! Welcome', gift: 'Gift: the {name} motorcycle is now in your garage!' },
 };
 
@@ -1071,6 +1097,7 @@ const JA = {
     golge: { name: 'シャドウR', desc: '秘密の通路の贈り物：360°自動機銃付きスーパーバイク', paints: ['ナイトウォッチ', 'ネオンピンク', 'トキシックグリーン', 'シルバーゴースト'] },
   },
   meteor: { warn: '赤い円から出ろ：隕石が落ちてくる！' },
+  roadblock: { warn: '道路封鎖！脇道へ逃げろ' },
   secret: { guest: 'これであなたも{name}さんのお客様です', found: '秘密のエリアを見つけた！ようこそ', gift: 'プレゼント：バイク「{name}」がガレージに！' },
 };
 
@@ -1172,6 +1199,7 @@ const ZH = {
     golge: { name: '暗影R', desc: '秘密通道的礼物：配备360°自动机枪的超级摩托', paints: ['夜巡', '霓虹粉', '毒绿', '银色幽灵'] },
   },
   meteor: { warn: '快离开红圈：陨石来了！' },
+  roadblock: { warn: '道路被封锁！快拐进小路' },
   secret: { guest: '现在你也是{name}的客人了', found: '你发现了隐藏区域！欢迎', gift: '礼物：{name} 摩托车已进入你的车库！' },
 };
 
@@ -1273,6 +1301,7 @@ const ES = {
     golge: { name: 'Sombra R', desc: 'Regalo del pasaje secreto: superbike con ametralladora automática 360°', paints: ['Guardia nocturna', 'Rosa neón', 'Verde tóxico', 'Fantasma plateado'] },
   },
   meteor: { warn: '¡Sal del círculo rojo: viene un meteorito!' },
+  roadblock: { warn: '¡Carretera cortada! Toma una calle lateral' },
   secret: { guest: 'Ahora también eres invitado de {name}', found: '¡Encontraste la zona secreta! Bienvenido', gift: 'Regalo: ¡la moto {name} ya está en tu garaje!' },
 };
 
@@ -1374,6 +1403,7 @@ const DE = {
     golge: { name: 'Schatten R', desc: 'Geschenk des Geheimgangs: Superbike mit 360°-Automatikkanone', paints: ['Nachtwache', 'Neonpink', 'Giftgrün', 'Silbergeist'] },
   },
   meteor: { warn: 'Raus aus dem roten Kreis: Meteorit im Anflug!' },
+  roadblock: { warn: 'Straße gesperrt! Bieg in eine Seitenstraße ab' },
   secret: { guest: 'Jetzt bist du auch Gast von {name}', found: 'Du hast den geheimen Bereich gefunden! Willkommen', gift: 'Geschenk: Das Motorrad {name} steht jetzt in deiner Garage!' },
 };
 
@@ -3869,6 +3899,7 @@ function driveCop(cop, g, dt) {
     cop.ctlT = 0;
     cop.wakeT -= dt;
     const d = Math.hypot(g.player.x - cop.x, g.player.y - cop.y);
+    if (cop.roadblock) return; // Yol kapatma barikatı yerinden kalkmaz: oyun kurar ve dağıtır (game.js updateRoadblock)
     if ((d < CONFIG.barricade.wakeDist && g.ghostT <= 0) || cop.wakeT <= 0) cop.state = 'chase';
     return;
   }
@@ -4466,6 +4497,7 @@ class Crowd {
     n.kind = kind;
     n.spec = spec;
     n.state = 'drive';
+    n.sinkT = 0; n.pushT = 0;
     n.dir = dir;
     n.line = line;
     n.color = Math.floor(Math.random() * spec.colors.length);
@@ -4517,6 +4549,9 @@ class Crowd {
     const p = g.player;
     const far = Math.max(Math.abs(n.x - p.x), Math.abs(n.y - p.y));
     if (far > NP.despawn) { n.alive = false; return; }
+    // Suya düşen trafik aracı batar ve kaybolur
+    if (n.sinkT > 0) { if (g.stepSink(n, dt)) n.alive = false; return; }
+    if (n.pushT > 0) n.pushT -= dt;
     n.t += dt;
     if (n.hornT > 0) n.hornT -= dt;
 
@@ -4540,6 +4575,7 @@ class Crowd {
     // Polislerle çarpışma
     for (let i = 0; i < g.cops.length; i++) {
       const c = g.cops[i];
+      if (c.sinkT > 0) continue;
       const dx = c.x - n.x;
       const dy = c.y - n.y;
       const r = (c.len + n.len) * 0.6;
@@ -4639,6 +4675,7 @@ class Crowd {
   hitNpc(n, rv, byPlayer) {
     const g = this.g;
     if (n.state !== 'wreck') { n.state = 'wreck'; n.t = 0; }
+    n.pushT = CONFIG.vehWater.pushTime; // Çarpılan araç savrulur: su kenarındaysa düşebilir
     n.w += (Math.random() < 0.5 ? -1 : 1) * Math.min(5, rv / 90) / Math.sqrt(n.mass);
     g.fx.sparks(n.x, n.y, 8);
     g.fx.debris(n.x, n.y, n.spec.colors[n.color], 4);
@@ -4713,7 +4750,7 @@ class AutoGun {
     let bs = -1e9;
     let n = 0;
     for (const c of game.cops) {
-      if (c.hp <= 0 || !this.visible(game, c)) continue;
+      if (c.hp <= 0 || c.sinkT > 0 || !this.visible(game, c)) continue;
       if (game.world.segmentProtected(p.x, p.y, c.x, c.y)) continue;
       n++;
       const d = Math.hypot(c.x - p.x, c.y - p.y);
@@ -4794,11 +4831,14 @@ class AutoGun {
 }
 
 // --- meteor.js ---
-// METEOR YAĞMURU (tanklardan sonra). Her meteor düşmeden TAM warn saniye önce yerde nişangâh ve uyarı dairesi belirir;
-// süre dolunca meteor çakılır: içindeki oyuncu ölür, dışındaki zarar görmez. Binalar yıkılır; polis, uzaylı, tank ve
-// trafik etkilenir. Korunan alanlara (anıt, gizli geçit, stadyumlar) asla düşmez. Havuz kullanılır, sayı sınırlıdır.
+// METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır: çarpma anında arabanın olacağı
+// nokta, oyuncunun konumu, hızı ve yönünden tahmin edilir (konum + hız x (uyarı + düşüş)), yol üzerinde tutulur ve
+// KİLİTLENİR: sonra takip etmez, oyuncu hız ya da yön değiştirerek kaçabilir. Diğerleri çevreye düşen meteorlardır.
+// Uyarı en az 3 sn; düşüş sonra başlar. İçindeki oyuncu ölür, dışındaki zarar görmez. Binalar yıkılır; polis, uzaylı,
+// tank ve trafik etkilenir. Korunan alanlara (anıt, gizli geçit, stadyumlar) asla düşmez. Havuz kullanılır, sayı sınırlıdır.
 
 const MET = CONFIG.meteor;
+const MET_TOTAL = MET.warn + MET.fall; // Nişandan çarpmaya
 
 // [saniye, değer] noktaları arası doğrusal
 function meteorCurve(curve, t) {
@@ -4818,18 +4858,58 @@ function meteorRate(t) {
   return { every: meteorCurve(MET.every, t), perWave: Math.round(meteorCurve(MET.perWave, t)) };
 }
 
+// Tahmini nişan: oyuncunun gidiş yönünde, hızla orantılı uzaklıkta, yol boyunca (binaya girmeden) ve yola çekilmiş.
+// out: x, y, lead (tahmin uzaklığı). Uygun yer yoksa false
+function meteorAim(game, out) {
+  const p = game.player;
+  const w = game.world;
+  const sp = Math.hypot(p.vx, p.vy);
+  const dx = sp > 25 ? p.vx / sp : Math.cos(p.a);
+  const dy = sp > 25 ? p.vy / sp : Math.sin(p.a);
+  const lead = Math.min(MET.maxLead, sp * MET_TOTAL);
+  const want = Math.max(MET.minR, lead);
+  // Gidiş yönünde, binaya girmeden ne kadar ilerlenebilir: yol bitiyorsa nişan dönüş noktasına düşer
+  let L = 0;
+  for (let d = 20; d <= want; d += 20) {
+    if (w.blockedAt(p.x + dx * d, p.y + dy * d)) break;
+    L = d;
+  }
+  let x = p.x + dx * L; let y = p.y + dy * L;
+  // Yola çek: araba yoldan gidiyorsa nişan da yolda
+  if (w.groundAt(x, y) !== GROUND.ROAD) {
+    let best = null; let bd = 1e9;
+    for (let r = 20; r <= MET.road && !best; r += 20) {
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * Math.PI * 2;
+        const qx = x + Math.cos(a) * r; const qy = y + Math.sin(a) * r;
+        if (w.groundAt(qx, qy) !== GROUND.ROAD || w.blockedAt(qx, qy)) continue;
+        if (r < bd) { bd = r; best = [qx, qy]; }
+      }
+    }
+    if (best) [x, y] = best;
+  }
+  if (Math.hypot(x - p.x, y - p.y) < MET.minR) return false; // Tam üstünde (kaçılamaz) doğmaz
+  if (w.protectedAt(x, y, MET.radius)) return false;
+  out.x = x; out.y = y; out.lead = L;
+  return true;
+}
+
+const aimOut = { x: 0, y: 0, lead: 0 };
+
 class MeteorStorm {
   constructor() {
     this.list = [];
-    for (let i = 0; i < MET.max; i++) this.list.push({ alive: false, x: 0, y: 0, t: 0, seed: 0 });
+    for (let i = 0; i < MET.max; i++) this.list.push({ alive: false, x: 0, y: 0, t: 0, seed: 0, main: false, falling: false });
     this.reset();
   }
 
   reset() {
     this.waveT = 0.6; // Aşama başlayınca ilk meteor hemen uyarılır
     this.spawned = 0;
+    this.aimed = 0;
     this.impacts = 0;
     this.on = false;
+    this.trailT = 0;
     for (const m of this.list) m.alive = false;
   }
 
@@ -4839,56 +4919,73 @@ class MeteorStorm {
     return n;
   }
 
-  // Hedef: oyuncunun hemen altı değil, korunan alan değil, başka meteorun dairesi değil
+  clash(m, x, y) {
+    for (const o of this.list) if (o.alive && o !== m && Math.hypot(o.x - x, o.y - y) < MET.radius * 2.2) return true;
+    return false;
+  }
+
+  // Çevre meteoru: oyuncudan uzak bir halkada, korunan alan ve başka meteor dışında
   place(game, m) {
     const p = game.player;
-    const R = MET.radius;
-    const lx = p.x + p.vx * MET.lead;
-    const ly = p.y + p.vy * MET.lead;
     for (let i = 0; i < 14; i++) {
-      const aimed = Math.random() < MET.aimShare;
-      const cx = aimed ? lx : p.x;
-      const cy = aimed ? ly : p.y;
       const a = Math.random() * Math.PI * 2;
-      const r = MET.minR + Math.random() * (MET.maxR - MET.minR) * (aimed ? 0.45 : 1);
-      const x = cx + Math.cos(a) * r;
-      const y = cy + Math.sin(a) * r;
-      if (Math.hypot(x - p.x, y - p.y) < MET.minR) continue;
-      if (game.world.protectedAt(x, y, R)) continue;
-      let clash = false;
-      for (const o of this.list) if (o.alive && o !== m && Math.hypot(o.x - x, o.y - y) < R * 1.6) { clash = true; break; }
-      if (clash) continue;
+      const r = MET.randMin + Math.random() * (MET.randMax - MET.randMin);
+      const x = p.x + Math.cos(a) * r;
+      const y = p.y + Math.sin(a) * r;
+      if (game.world.protectedAt(x, y, MET.radius) || this.clash(m, x, y)) continue;
       m.x = x; m.y = y;
       return true;
     }
     return false;
   }
 
-  spawn(game) {
+  spawn(game, main) {
     const m = this.list.find((k) => !k.alive);
-    if (!m || !this.place(game, m)) return false;
+    if (!m) return false;
+    if (main) {
+      if (!meteorAim(game, aimOut) || this.clash(m, aimOut.x, aimOut.y)) return false;
+      m.x = aimOut.x; m.y = aimOut.y;
+      this.aimed++;
+    } else if (!this.place(game, m)) return false;
     m.alive = true;
+    m.main = main;
     m.t = 0;
+    m.falling = false;
     m.seed = Math.random();
     this.spawned++;
-    game.emit('meteorwarn');
+    game.emit('meteorwarn', main ? 1 : 0);
     return true;
   }
 
   update(game, dt) {
     if (game.time < MET.at) return;
     if (!this.on) { this.on = true; game.emit('meteors'); }
+    this.trailT -= dt;
+    const trail = this.trailT <= 0;
+    if (trail) this.trailT = 1 / MET.trail;
     for (const m of this.list) {
       if (!m.alive) continue;
       m.t += dt;
-      if (m.t >= MET.warn) this.impact(game, m);
+      if (!m.falling && m.t >= MET.warn) { m.falling = true; game.emit('meteorfall', m.main ? 1 : 0.5); }
+      // Düşerken alev ve duman kuyruğu (yalnız ekrandaysa, sınırlı)
+      if (m.falling && trail && game.onScreen(m.x, m.y, 200)) {
+        const q = (m.t - MET.warn) / MET.fall;
+        const h = (1 - q) * (game.cam.halfH * 0.7 + 80);
+        game.fx.spawn(FX.FIRE, m.x + (1 - q) * 120, m.y - h, 0, -30, 0.3, 14);
+        game.fx.spawn(FX.SMOKE, m.x + (1 - q) * 130, m.y - h - 10, 0, -50, 0.7, 16);
+      }
+      if (m.t >= MET_TOTAL) this.impact(game, m);
     }
     if (game.state !== 'play') return;
     this.waveT -= dt;
     if (this.waveT <= 0) {
       const r = meteorRate(game.time);
-      for (let i = 0; i < r.perWave; i++) this.spawn(game);
-      this.waveT = r.every;
+      // Asıl meteor oyuncuyu hedef alır; yolu kapanmışsa (barikat yakında) bu dalga yalnız çevreye düşer: köşeye sıkışma olmaz
+      const main = !game.roadblockNear || !game.roadblockNear();
+      let made = main ? this.spawn(game, true) : false;
+      for (let i = made ? 1 : 0; i < r.perWave; i++) this.spawn(game, false);
+      if (!made && main) this.waveT = 0.4; // Nişan yeri bulunamadı: kısa süre sonra yeniden dene
+      else this.waveT = r.every;
     }
   }
 
@@ -4897,13 +4994,22 @@ class MeteorStorm {
     this.impacts++;
     const R = MET.radius;
     const fx = game.fx;
-    fx.explosion(m.x, m.y, R * 0.9);
-    fx.burst(FX.DUST, m.x, m.y, MET.dust, 260, 1.3, 30);
-    fx.sparks(m.x, m.y, MET.sparks);
-    fx.decal(m.x, m.y, MET.crater);
     const p = game.player;
     const d = Math.hypot(p.x - m.x, p.y - m.y);
-    game.cam.shake = Math.min(18, game.cam.shake + MET.shake * Math.max(0.35, 1 - d / 1400));
+    const near = game.onScreen(m.x, m.y, 200);
+    // BAM: parlak flaş, ateş topu, şok dalgası, kıvılcım, moloz, toz, krater
+    fx.explosion(m.x, m.y, R * 1.2);
+    fx.wave(m.x, m.y, R * 4);
+    if (near) {
+      fx.burst(FX.DUST, m.x, m.y, MET.dust, 300, 1.4, 34);
+      fx.sparks(m.x, m.y, MET.sparks);
+      fx.debris(m.x, m.y, '#6b4a2e', MET.debris, 380);
+    }
+    fx.decal(m.x, m.y, MET.crater);
+    const k = Math.max(0.35, 1 - d / 1400);
+    game.cam.shake = Math.min(20, game.cam.shake + MET.shake * k);
+    if (game.quake) game.quake(MET.quake, MET.quakeShake * k);
+    if (near && game.flash) game.flash(MET.flash * k);
     game.emit('meteorhit', Math.max(0.2, Math.min(1, 900 / (d + 300))));
     if (game.state === 'play' && d < R && !game.cheat && !game.god) game.meteorKill(m.x, m.y);
     // Polis, uzaylı ve tank: içindeki patlar, tank ağır hasar alır
@@ -4913,8 +5019,10 @@ class MeteorStorm {
       if (c.type === 'tank') { c.hp -= MET.tankDamage; c.hurtFlash = 0.5; if (c.hp > 0) continue; }
       game.destroyCop(i, false);
     }
+    // Şok dalgası: çevredeki araçlar itilir (suya da düşebilirler)
+    if (game.shockwave) game.shockwave(m.x, m.y, R * 3, 420);
     game.crowd.blast(m.x, m.y, R, 0);
-    game.crushCircle(m.x, m.y, R * 0.85);
+    game.crushCircle(m.x, m.y, R * 0.9);
   }
 }
 
@@ -4934,6 +5042,8 @@ const ESC = CONFIG.escape;
 const WPN = CONFIG.weapon;
 const HPG = CONFIG.copHpGrowth;
 const SEC = CONFIG.secret;
+const VW = CONFIG.vehWater;
+const RB = CONFIG.roadblock;
 // Oyun dakikasına göre yeni polisin silah canı katı: üstel artış, tavanlı
 function copHpMul(time) { return Math.min(HPG.max, HPG.perMin ** (Math.max(0, time) / 60)); }
 // Uzaylı türü ağırlığa göre
@@ -5040,6 +5150,7 @@ function makeCop() {
   b.wanderT = 0; b.wx = 0; b.wy = 0;
   b.side = 1; b.roleT = 0; b.blockT = 0; b.blockA = 0; b.hold = false; b.far = false; b.pd = 0;
   b.mhp = 100; b.byWeapon = false;
+  b.sinkT = 0; b.sinkMax = 0; b.pushT = 0; b.roadblock = false;
   b.escIn = false; b.escHit = false; b.escHitAt = -99; b.escEnterT = 0; b.escAt = -99; b.escX = 0; b.escY = 0;
   return b;
 }
@@ -5152,6 +5263,11 @@ class Game {
     this.alienT = 0;
     this.aliensOn = startTime >= D.aliensAt;
     this.shieldT = 0; // Uzaylı geçişi ve gizli geçit dönüşü: hasar yok, araba yanıp söner
+    this.quakeT = 0; this.quakeDur = 1; this.quakeAmp = 0; // Meteor sarsıntısı: giderek azalır
+    this.flashT = 0; this.flashMax = 1; // Beyaz parlama
+    this.straightT = 0; // Aralıksız düz gidiş süresi (yol kapatma)
+    this.lastSteer = 0;
+    this.rb = { phase: 'none', t: 0, cool: 0, x: 0, y: 0, a: 0, hx: 0, hy: 0, cars: [], made: 0, retry: 0 };
     this.secretT = 0;
     this.secretZ = null;
     this.secretSeen = false;
@@ -5264,6 +5380,8 @@ class Game {
   // --- Ana adım ---
   tick(dt, steer, reverse) {
     this.tickCount++;
+    if (this.quakeT > 0) this.quakeT = Math.max(0, this.quakeT - dt);
+    if (this.flashT > 0) this.flashT = Math.max(0, this.flashT - dt);
     if (this.state === 'play') {
       this.dayT += dt;
       if (this.tickCount % 12 === 0) dayState(this.dayT, this.daylight);
@@ -5316,6 +5434,8 @@ class Game {
     this.updatePlayer(dt, steer, reverse);
     if (this.state !== 'play') return;
     if (this.checkSecret()) return;
+    this.lastSteer = steer;
+    this.updateRoadblock(dt, steer, reverse);
     this.updateMemorial();
     this.updateFlow(dt);
     this.updateCops(dt);
@@ -5697,6 +5817,12 @@ class Game {
         continue;
       }
       if (isPlayer && !this.god && isDeep(rect)) continue; // Oyuncu suya girer, batış ayrı karar verilir
+      // Diğer araçlar: yapay zekâ suyu engel bilir; hızla dalan ya da itilmiş/savrulmuş araç suya düşer
+      if (!isPlayer && isDeep(rect) && !(b.sinkT > 0)) {
+        const vn = -(b.vx * hit.nx + b.vy * hit.ny);
+        const pushed = b.pushT > 0 || b.state === 'wreck';
+        if (vn > VW.speed || (pushed && vn > VW.pushSpeed)) { this.sinkVehicle(b); return 0; }
+      }
       b.x += hit.nx * hit.depth;
       b.y += hit.ny * hit.depth;
       let impact = bounceOff(b, hit.nx, hit.ny);
@@ -5887,6 +6013,7 @@ class Game {
     c.crusher = type === 'tank';
     c.alien = isAlien(type);
     c.warpT = 0; // Uzaylı ışınlanması: belirince kısa süre yerinde
+    c.sinkT = 0; c.pushT = 0; c.roadblock = false;
     c.sirenId = spec.siren ? this.pickSiren(spec.siren) : -1;
     c.wanderT = 0;
     c.staticBody = false;
@@ -5984,6 +6111,9 @@ class Game {
 
     for (let i = this.cops.length - 1; i >= 0; i--) {
       const c = this.cops[i];
+      // Suya düşen araç batar, sonra havuza döner
+      if (c.sinkT > 0) { if (this.stepSink(c, dt)) this.removeCop(i); continue; }
+      if (c.pushT > 0) c.pushT -= dt;
       const dx = p.x - c.x;
       const dy = p.y - c.y;
       const dist = Math.hypot(dx, dy);
@@ -6023,7 +6153,7 @@ class Game {
         const surf = this.surfC[world.groundAt(c.x, c.y)];
         stepCar(c, c.ctlS, c.ctlT, c.drive, surf, cdt);
         const impact = this.collideWorld(c, false);
-        if (impact > AI.wallMinImpact) {
+        if (impact > AI.wallMinImpact && !c.roadblock) {
           c.hp -= (impact - AI.wallMinImpact) * AI.wallDamage * (40 / Math.max(40, c.spec.hp * 0.5));
           c.hurtFlash = 0.3;
         }
@@ -6075,7 +6205,7 @@ class Game {
       for (let j = i + 1; j < cops.length; j++) {
         const a = cops[i];
         const b = cops[j];
-        if ((a.far && b.far) || a.warpT > 0 || b.warpT > 0) continue;
+        if ((a.far && b.far) || a.warpT > 0 || b.warpT > 0 || a.sinkT > 0 || b.sinkT > 0) continue;
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const r = (a.len + b.len) * 0.6;
@@ -6191,7 +6321,14 @@ class Game {
     const p = this.player;
     if (c.hitCd > 0) return;
     c.hitCd = 0.5;
+    c.pushT = VW.pushTime; // Oyuncu itti: yakında su varsa düşebilir
+    c.pushedBy = 1;
     const spec = c.spec;
+    // Yol kapatma barikatı katı engeldir: çarpmayla devrilmez (yalnız silah, meteor ve patlama gücü yıkar)
+    if (c.roadblock) {
+      if (this.giantT <= 0) this.playerImpact(rv + 40, DMG.copScale, true, DMG.maxCopHit);
+      return;
+    }
     if (this.giantT > 0) {
       // Dev mod: polisi ezer, hasar almaz
       c.hp -= c.type === 'tank' ? PW.giantCrushTank : 1e6;
@@ -6243,7 +6380,7 @@ class Game {
     let far = minDist;
     for (let i = 0; i < this.cops.length; i++) {
       const c = this.cops[i];
-      if (c.type === 'tank' || this.onScreen(c.x, c.y, 120)) continue;
+      if (c.type === 'tank' || c.roadblock || this.onScreen(c.x, c.y, 120)) continue;
       const d = Math.hypot(c.x - p.x, c.y - p.y);
       if (d > far) { far = d; best = i; }
     }
@@ -6494,6 +6631,7 @@ class Game {
         if (c.type === 'tank') continue;
         if (Math.hypot(c.x - s.x, c.y - s.y) < TK.radius) c.hp -= 60;
       }
+      this.shockwave(s.x, s.y, TK.radius * 1.8, 320); // Patlama çevredekileri savurur: suya düşebilirler
       // Düştüğü bina yıkılır
       const tx = Math.floor(s.x / TILE);
       const ty = Math.floor(s.y / TILE);
@@ -6501,6 +6639,184 @@ class Game {
         this.crushRect(hit.chunk, hit.rect);
       }
     }
+  }
+
+  // --- Sarsıntı, parlama, şok dalgası ---
+  quake(dur, amp) {
+    if (amp * (dur) < this.quakeAmp * this.quakeT) return; // Daha güçlüsü sürüyorsa bozma
+    this.quakeT = dur; this.quakeDur = dur; this.quakeAmp = amp;
+  }
+
+  flash(t) {
+    this.flashT = Math.max(this.flashT, t);
+    this.flashMax = Math.max(t, 0.01);
+  }
+
+  // Çevredeki polis, uzaylı, tank ve trafik dışarı savrulur; itilmiş sayılır (suya düşebilir)
+  shockwave(x, y, R, force) {
+    const push = (b, massK) => {
+      const dx = b.x - x; const dy = b.y - y;
+      const d = Math.hypot(dx, dy);
+      if (d > R || d < 1) return;
+      const k = (force * (1 - d / R)) / massK;
+      b.vx += (dx / d) * k; b.vy += (dy / d) * k;
+      b.pushT = VW.pushTime;
+    };
+    for (const c of this.cops) if (!(c.sinkT > 0) && c.state !== 'barricade') push(c, Math.max(1, Math.sqrt(c.mass || 1)));
+    for (const n of this.crowd.npcs) if (n.alive && !(n.sinkT > 0)) push(n, Math.max(1, Math.sqrt(n.mass || 1)));
+  }
+
+  // --- Suya düşen araç: sıçrama, halka dalga, kabarcık, yavaş batma, sonra yok olur ---
+  sinkVehicle(b) {
+    b.sinkMax = b.type === 'tank' ? VW.tankSink : VW.sink;
+    b.sinkT = b.sinkMax;
+    b.vx *= 0.55; b.vy *= 0.55;
+    b.staticBody = false;
+    const near = this.onScreen(b.x, b.y, 120);
+    if (near) {
+      this.fx.burst(FX.WATER, b.x, b.y, b.type === 'tank' ? 30 : 20, 300, 0.9, 12);
+      this.fx.wave(b.x, b.y, b.type === 'tank' ? 200 : 130);
+      this.fx.wave(b.x, b.y, 70);
+    }
+    this.emit('vehsink', near ? (b.type === 'tank' ? 1 : 0.7) : 0.25);
+    // Oyuncunun ittiği polis suya düşerse devirmiş sayılır
+    if (b.pushedBy && b.pushT > 0 && this.cops.includes(b)) {
+      this.kills++;
+      this.addScore(SC.kill, b.x, b.y, SC.comboKillStep);
+    }
+  }
+
+  // Batma adımı: kayarak yavaşlar, döner, kabarcık; bitince true
+  stepSink(b, dt) {
+    b.sinkT -= dt;
+    const k = Math.exp(-VW.drift * dt);
+    b.vx *= k; b.vy *= k;
+    b.x += b.vx * dt; b.y += b.vy * dt;
+    b.a += dt * (b.type === 'tank' ? 0.3 : 0.9);
+    b.speed = Math.hypot(b.vx, b.vy);
+    b.bubT = (b.bubT || 0) - dt;
+    if (b.bubT <= 0 && this.onScreen(b.x, b.y, 60)) {
+      b.bubT = VW.bubbles;
+      this.fx.spawn(FX.WATER, b.x + (Math.random() - 0.5) * b.len * 0.8, b.y + (Math.random() - 0.5) * b.wid, 0, -30 - Math.random() * 40, 0.7, 4 + Math.random() * 5);
+      if (Math.random() < 0.08) this.fx.wave(b.x, b.y, 50 + Math.random() * 60);
+    }
+    return b.sinkT <= 0;
+  }
+
+  // --- Yol kapatma: 8 sn düz giden oyuncunun önü kapanır. Kaçış yolu varsa kurulur, dönünce dağılır ---
+  roadblockNear() {
+    const r = this.rb;
+    if (r.phase === 'none') return false;
+    return Math.hypot(this.player.x - r.x, this.player.y - r.y) < RB.meteorClear;
+  }
+
+  updateRoadblock(dt, steer) {
+    const p = this.player;
+    const r = this.rb;
+    if (r.cool > 0) r.cool -= dt;
+    // Düz gidiş: direksiyon ve dönüş hızı küçük, hız yeterli
+    const straight = Math.abs(steer) < RB.straightSteer && Math.abs(p.w || 0) < RB.straightYaw && p.speed > RB.minSpeed && p.forward > 0;
+    this.straightT = straight ? this.straightT + dt : 0;
+    if (r.phase === 'none') {
+      if (this.straightT >= RB.DUZ_GIDIS_SURESI && r.cool <= 0 && this.time >= RB.from && !this.cheat) {
+        r.retry -= dt;
+        if (r.retry <= 0) { r.retry = RB.retry; if (this.planRoadblock()) { r.phase = 'warn'; r.t = 0; this.emit('roadblock'); } }
+      }
+      return;
+    }
+    r.t += dt;
+    if (r.phase === 'warn') {
+      if (r.t >= RB.warn) { r.phase = this.buildRoadblock() ? 'up' : 'none'; r.t = 0; if (r.phase === 'none') r.cool = RB.retry; }
+      return;
+    }
+    // Kurulu: oyuncu dönüp uzaklaşınca ya da süre dolunca dağılır
+    const dx = r.x - p.x; const dy = r.y - p.y;
+    const d = Math.hypot(dx, dy) || 1;
+    const sp = p.speed || 1;
+    const away = (p.vx * dx + p.vy * dy) / (sp * d) < Math.cos(RB.leaveAngle) && d > RB.leaveDist;
+    let alive = 0;
+    for (const c of r.cars) if (this.cops.includes(c) && c.roadblock) alive++;
+    if (away || r.t > RB.life || alive === 0) this.clearRoadblock();
+  }
+
+  // Yer seçimi: gidiş yönünde, lead sn ilerideki yol; arada yan yol olmalı, korunan alan ve meteor olmamalı
+  planRoadblock() {
+    const p = this.player;
+    const w = this.world;
+    const sp = p.speed;
+    if (sp < RB.minSpeed) return false;
+    const hx = p.vx / sp; const hy = p.vy / sp;
+    // Ana eksene oturt (yollar ızgara)
+    const horiz = Math.abs(hx) > Math.abs(hy);
+    const ax = horiz ? Math.sign(hx) : 0; const ay = horiz ? 0 : Math.sign(hy);
+    const dist = Math.max(RB.minDist, Math.min(RB.maxDist, sp * (RB.lead + RB.warn)));
+    // Yol boyunca açık mı (bina yok)
+    for (let d = 40; d <= dist; d += 40) if (w.blockedAt(p.x + ax * d, p.y + ay * d)) return false;
+    const x = p.x + ax * dist; const y = p.y + ay * dist;
+    if (w.groundAt(x, y) !== GROUND.ROAD) return false;
+    if (w.protectedAt(x, y, 300)) return false;
+    for (const m of this.meteors.list) if (m.alive && Math.hypot(m.x - x, m.y - y) < RB.meteorClear) return false;
+    // Kaçış: oyuncu ile barikat arasında, yolun iki yanından birinde side karo açık bir yan yol
+    const sx = -ay; const sy = ax;
+    let escape = false;
+    for (let d = 160; d <= dist - 160 && !escape; d += 20) {
+      for (const side of [1, -1]) {
+        let ok = true;
+        for (let k = 3; k <= 3 + RB.side; k++) {
+          const qx = p.x + ax * d + sx * side * k * TILE; const qy = p.y + ay * d + sy * side * k * TILE;
+          if (w.blockedAt(qx, qy) || w.groundAt(qx, qy) === GROUND.WATER) { ok = false; break; }
+        }
+        if (ok && w.groundAt(p.x + ax * d + sx * side * 4 * TILE, p.y + ay * d + sy * side * 4 * TILE) === GROUND.ROAD) { escape = true; break; }
+      }
+    }
+    if (!escape) return false;
+    const r = this.rb;
+    r.x = x; r.y = y; r.hx = ax; r.hy = ay; r.a = Math.atan2(ay, ax);
+    return true;
+  }
+
+  // Binadan binaya, yolun ve kaldırımın tüm genişliği sıralı polis arabalarıyla kapanır
+  buildRoadblock() {
+    const r = this.rb;
+    const w = this.world;
+    const sx = -r.hy; const sy = r.hx;
+    const open = (k) => !w.blockedAt(r.x + sx * k, r.y + sy * k) && w.groundAt(r.x + sx * k, r.y + sy * k) !== GROUND.WATER;
+    let a = 0; while (a < 360 && open(a + 20)) a += 20;
+    let b = 0; while (b < 360 && open(-(b + 20))) b += 20;
+    const width = a + b + 30;
+    const n = Math.min(RB.maxCars, Math.ceil(width / RB.spacing) + 1);
+    if (n > this.copLimit - 1 || !this.makeRoom(n)) return false;
+    r.cars.length = 0;
+    const cross = Math.atan2(sy, sx);
+    for (let i = 0; i < n; i++) {
+      const off = -b - 10 + (width / Math.max(1, n - 1)) * i;
+      const c = this.spawnCop('car', 'chaser', r.x + sx * off, r.y + sy * off, cross);
+      c.state = 'barricade';
+      c.staticBody = true;
+      c.roadblock = true;
+      c.wakeT = 1e9;
+      c.mhpMax = WPN.hp.car; c.mhp = c.mhpMax; // Taramayla ~22 mermide patlar
+      r.cars.push(c);
+    }
+    r.made++;
+    this.emit('roadblockup', n);
+    return true;
+  }
+
+  clearRoadblock() {
+    const r = this.rb;
+    for (const c of r.cars) {
+      const i = this.cops.indexOf(c);
+      if (i < 0 || !c.roadblock) continue;
+      c.roadblock = false;
+      // Ekrandaysa dağılır (kovalamaya geçer), değilse kaldırılır
+      if (this.onScreen(c.x, c.y, 60)) { c.state = 'chase'; c.staticBody = false; } else this.removeCop(i);
+    }
+    r.cars.length = 0;
+    r.phase = 'none';
+    r.t = 0;
+    r.cool = RB.cooldown;
+    this.straightT = 0;
   }
 
   // --- Uzaylı işgali ---
@@ -6736,6 +7052,8 @@ class Game {
     c.y += (ty - c.y) * k;
     c.kx *= Math.exp(-9 * dt);
     c.ky *= Math.exp(-9 * dt);
+    // Meteor sarsıntısı 1-2 sn sürer, giderek azalır
+    if (this.quakeT > 0) c.shake = Math.max(c.shake, this.quakeAmp * (this.quakeT / this.quakeDur));
     if (c.shake > 0.05) {
       c.sx = (Math.random() - 0.5) * c.shake * 2 + c.kx;
       c.sy = (Math.random() - 0.5) * c.shake * 2 + c.ky;
@@ -14533,16 +14851,26 @@ class Renderer {
   drawBody(img, b, shadowScale = 1, k = 1) {
     const ctx = this.ctx;
     const sp = this.sprites.shadow;
-    ctx.globalAlpha = 0.42;
-    this.place(b.x + 5 * shadowScale, b.y + 7 * shadowScale, b.a);
-    const sw = (b.len + 6);
-    const sh = (b.wid + 4);
-    ctx.drawImage(sp, -sw / 2, -sh / 2, sw, sh);
-    ctx.globalAlpha = 1;
+    // Suya batan araç: küçülür, solar, üstü suyla kaplanır
+    const q = b.sinkT > 0 ? 1 - b.sinkT / b.sinkMax : 0;
+    if (q === 0) {
+      ctx.globalAlpha = 0.42;
+      this.place(b.x + 5 * shadowScale, b.y + 7 * shadowScale, b.a);
+      const sw = (b.len + 6);
+      const sh = (b.wid + 4);
+      ctx.drawImage(sp, -sw / 2, -sh / 2, sw, sh);
+    }
+    const kk = k * (1 - CONFIG.vehWater.shrink * q);
+    ctx.globalAlpha = 1 - 0.85 * q;
     this.place(b.x, b.y, b.a);
-    const w = (img.wu || img.width / SPR) * k;
-    const h = (img.hu || img.height / SPR) * k;
+    const w = (img.wu || img.width / SPR) * kk;
+    const h = (img.hu || img.height / SPR) * kk;
     ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    if (q > 0) {
+      ctx.globalAlpha = 0.25 + q * 0.6;
+      ctx.drawImage(this.sprites.water, -w * 0.75, -w * 0.75, w * 1.5, w * 1.5);
+    }
+    ctx.globalAlpha = 1;
   }
 
   drawPlayer(game, now = performance.now()) {
@@ -14663,53 +14991,79 @@ class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
-  // Meteor uyarısı (yerde): kırmızı daire, nişangâh, 3 saniyede dolan halka, yanıp sönen hedef işareti
+  // Meteor nişanı (yerde): küçük ve temiz. İnce halka = çarpma dairesi, içinde nişangâh çizgileri, daralan ilerleme
+  // halkası, hafif turuncu parlama; son saniyede hızlı yanıp söner. Düşüş yaklaşınca gölge büyür
   drawMeteorWarn(game, now) {
     const ctx = this.ctx;
     const M = CONFIG.meteor;
     const R = M.radius;
+    const T = M.warn + M.fall;
     for (const m of game.meteors.list) {
       if (!m.alive) continue;
-      const k = Math.min(1, m.t / M.warn);
-      const blink = Math.floor(now / (k > 0.7 ? 90 : 170)) % 2 === 0;
+      const k = Math.min(1, m.t / T);
+      const left = T - m.t;
+      const blink = left < M.blink ? Math.floor(now / 70) % 2 === 0 : Math.floor(now / 260) % 2 === 0;
+      // Yumuşak kırmızı-turuncu parlama (önceden çizilmiş ışık)
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = (0.18 + 0.22 * k) * (blink ? 1 : 0.7);
+      ctx.drawImage(this.sprites.red, m.x - R * 1.15, m.y - R * 1.15, R * 2.3, R * 2.3);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
       ctx.beginPath(); ctx.arc(m.x, m.y, R, 0, 6.283);
-      ctx.fillStyle = `rgba(255,40,30,${0.1 + 0.16 * k})`; ctx.fill();
-      ctx.strokeStyle = 'rgba(255,70,40,.9)'; ctx.lineWidth = 3; ctx.setLineDash([14, 9]); ctx.stroke(); ctx.setLineDash([]);
-      // İlerleme halkası: 3 saniyede dolar
-      ctx.beginPath(); ctx.arc(m.x, m.y, R - 7, -Math.PI / 2, -Math.PI / 2 + k * 6.283);
-      ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 7; ctx.stroke();
-      // Nişangâh
-      ctx.strokeStyle = blink ? '#ffffff' : '#ff3b2a'; ctx.lineWidth = 3;
-      const r1 = R * 0.28; const r2 = R * 0.62;
+      ctx.fillStyle = `rgba(255,60,30,${0.06 + 0.1 * k})`; ctx.fill();
+      ctx.strokeStyle = blink ? 'rgba(255,240,220,.95)' : 'rgba(255,80,40,.9)';
+      ctx.lineWidth = 2; ctx.stroke();
+      // Daralan ilerleme halkası: dışarıdan çarpma dairesine iner, aynı anda dolar
+      const pr = R * (1.35 - 0.35 * k);
+      ctx.beginPath(); ctx.arc(m.x, m.y, pr, -Math.PI / 2, -Math.PI / 2 + k * 6.283);
+      ctx.strokeStyle = '#ffb02e'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.stroke(); ctx.lineCap = 'butt';
+      // Nişangâh: dört kısa çizgi, ortada küçük halka ve nokta
+      ctx.strokeStyle = blink ? '#ffffff' : '#ff5a36'; ctx.lineWidth = 1.6;
+      const r1 = R * 0.22; const r2 = R * 0.72;
       ctx.beginPath();
       ctx.moveTo(m.x - r2, m.y); ctx.lineTo(m.x - r1, m.y); ctx.moveTo(m.x + r1, m.y); ctx.lineTo(m.x + r2, m.y);
       ctx.moveTo(m.x, m.y - r2); ctx.lineTo(m.x, m.y - r1); ctx.moveTo(m.x, m.y + r1); ctx.lineTo(m.x, m.y + r2);
       ctx.stroke();
-      ctx.beginPath(); ctx.arc(m.x, m.y, r1 * 0.6, 0, 6.283); ctx.stroke();
-      // Yere düşen gölge büyür
-      const fall = M.fall / M.warn;
-      if (k > 1 - fall) {
-        const q = (k - (1 - fall)) / fall;
-        ctx.globalAlpha = 0.25 + 0.45 * q;
-        ctx.drawImage(this.sprites.dark, m.x - R * 0.5 * q, m.y - R * 0.35 * q, R * q, R * 0.7 * q);
+      ctx.beginPath(); ctx.arc(m.x, m.y, r1 * 0.7, 0, 6.283); ctx.stroke();
+      ctx.fillStyle = blink ? '#ffffff' : '#ff5a36'; ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
+      // Düşerken yerdeki gölge büyür
+      if (m.t > M.warn) {
+        const q = (m.t - M.warn) / M.fall;
+        ctx.globalAlpha = 0.2 + 0.5 * q;
+        ctx.drawImage(this.sprites.dark, m.x - R * 0.7 * q, m.y - R * 0.5 * q, R * 1.4 * q, R * q);
         ctx.globalAlpha = 1;
       }
     }
   }
 
-  // Düşen meteor (gökte): uyarının son anlarında yukarıdan çakılır
+  // Düşen meteor (gökte): ateşli taş, alev kuyruğu ve ışık; son M.fall sn hızlanarak çakılır
   drawMeteorSky(game, now) {
     const ctx = this.ctx;
     const M = CONFIG.meteor;
     const sp = this.sprites;
-    const fallFrom = M.warn - M.fall;
     for (const m of game.meteors.list) {
-      if (!m.alive || m.t < fallFrom) continue;
-      const q = (m.t - fallFrom) / M.fall; // 0 gökte, 1 yerde
-      const h = (1 - q) * (game.cam.halfH * 0.7 + 80); // Ekranın içinden düşer: görünür
-      const sz = 1.6 - 0.7 * q;
+      if (!m.alive || m.t < M.warn) continue;
+      const u = (m.t - M.warn) / M.fall; // 0 gökte, 1 yerde
+      const q = u * u; // Hızlanarak düşer
+      const h = (1 - q) * (game.cam.halfH * 0.7 + 80);
+      const sz = 1.25 - 0.45 * q;
       const w = 70 * sz; const hh = 110 * sz;
-      ctx.drawImage(sp.meteor, m.x - w / 2 + (1 - q) * 120, m.y - h - hh * 0.62, w, hh);
+      const x = m.x + (1 - q) * 120; const y = m.y - h;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.55 + 0.35 * q;
+      ctx.drawImage(sp.fire, x - w * 0.9, y - w * 0.9, w * 1.8, w * 1.8);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      ctx.drawImage(sp.meteor, x - w / 2, y - hh * 0.62, w, hh);
+    }
+    // Çarpma flaşı: ekranı kısa süre beyazlatır
+    if (game.flashT > 0) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = Math.min(0.75, (game.flashT / game.flashMax) * 0.75);
+      ctx.fillStyle = '#fff6e0';
+      ctx.fillRect(0, 0, this.w * this.dpr, this.h * this.dpr);
+      ctx.globalAlpha = 1;
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
     }
   }
 
@@ -14966,13 +15320,11 @@ class CheatCode {
 // DOM'a dokunmaz: görünüm controls.js'tedir, burası birim testle sınanır.
 
 const CONTROLS = ['zones', 'wheel', 'stick'];
-const WHEEL_MAX = (130 * Math.PI) / 180; // Tam kilit açısı
-const WHEEL_RETURN = 11; // Bırakınca ortaya dönüş hızı
-const WHEEL_HOLE = 0.16; // Merkeze bu orandan yakın parmakta açı kararsızdır
-const WHEEL_DEAD = 0.03;
-const STICK_R = 54; // Joystick yarıçapı, px
-const STICK_DEAD = 8; // Bu kadar kayma titreme sayılır, px
-const STICK_SMOOTH = 24;
+const WH = CONFIG.input.wheel;
+const SK = CONFIG.input.stick;
+const WHEEL_MAX = (WH.maxDeg * Math.PI) / 180; // Tam kilit açısı
+const WHEEL_JUMP = (WH.jump * Math.PI) / 180;
+const STICK_R = SK.r;
 const CH = CONFIG.cheat;
 
 const wrap = (a) => {
@@ -14992,10 +15344,13 @@ class Input {
     this.bothT = 0;
     this.wheel = { cx: 0, cy: 0, r: 0 }; // Görünüm yerleşimden sonra doldurur
     this.wheelId = null;
-    this.wheelA = 0; // Direksiyon açısı, radyan
+    this.wheelA = 0; // Direksiyon açısı (parmağın biriktirdiği), radyan
+    this.wheelS = 0; // Yumuşatılmış açı: değer ve görünüm bundan
     this.wheelPrev = 0;
+    this.wheelHole = false; // Parmak merkezde: açı kararsız, çıkınca fark yeniden başlar (sıçrama olmaz)
     this.stickId = null;
-    this.stick = { on: false, x: 0, y: 0, dx: 0, dy: 0 };
+    // x, y: halkanın görünen yeri (ekrana sığar). ox, oy: değerin merkezi (parmağın bastığı nokta)
+    this.stick = { on: false, x: 0, y: 0, ox: 0, oy: 0, dx: 0, dy: 0 };
     this.axis = 0; // Yumuşatılmış analog direksiyon
     this.revHeld = false;
     this.bounds = { l: 0, t: 0, r: 1, b: 1 }; // Joystick halkası bunun dışına taşmaz
@@ -15016,15 +15371,20 @@ class Input {
   tick(dt) {
     this.bothT = this.left && this.right ? this.bothT + dt : 0;
     if (this.mode === 'wheel') {
-      if (this.wheelId === null) this.wheelA *= Math.exp(-WHEEL_RETURN * dt);
-      if (Math.abs(this.wheelA) < 0.004) this.wheelA = this.wheelId === null ? 0 : this.wheelA;
-      const v = this.wheelA / WHEEL_MAX;
-      this.axis = Math.abs(v) < WHEEL_DEAD ? 0 : v;
+      // Bırakınca yaylı dönüş; tutarken açıya düşük geçiren yumuşatma (titreme yok, kare hızından bağımsız)
+      if (this.wheelId === null) {
+        this.wheelA *= Math.exp(-WH.returnRate * dt);
+        if (Math.abs(this.wheelA) < 0.004) this.wheelA = 0;
+      }
+      this.wheelS += (this.wheelA - this.wheelS) * (1 - Math.exp(-WH.smooth * dt));
+      if (this.wheelId === null && Math.abs(this.wheelS) < 0.004) this.wheelS = 0;
+      const v = this.wheelS / WHEEL_MAX;
+      this.axis = Math.abs(v) < WH.dead ? 0 : v;
     } else if (this.mode === 'stick') {
       const s = this.stick;
       const m = Math.abs(s.dx);
-      const target = !s.on || m <= STICK_DEAD ? 0 : Math.sign(s.dx) * Math.min(1, (m - STICK_DEAD) / (STICK_R - STICK_DEAD));
-      this.axis += (target - this.axis) * (1 - Math.exp(-STICK_SMOOTH * dt));
+      const target = !s.on || m <= SK.dead ? 0 : Math.sign(s.dx) * Math.min(1, (m - SK.dead) / (SK.r - SK.dead));
+      this.axis += (target - this.axis) * (1 - Math.exp(-SK.smooth * dt));
       if (Math.abs(this.axis) < 0.005) this.axis = 0;
     }
     this.watchCode(dt);
@@ -15089,17 +15449,24 @@ class Input {
     this.keyL = false;
     this.keyR = false;
     this.bothT = 0;
-    this.wheelId = null;
+    this.resetPointers();
     this.wheelA = 0;
-    this.stickId = null;
-    this.stick.on = false;
-    this.stick.dx = 0;
-    this.stick.dy = 0;
+    this.wheelS = 0;
     this.axis = 0;
     this.revHeld = false;
     this.code.reset();
     this.heldT = 0;
     this.axisReady = true;
+  }
+
+  // Direksiyon ve joystick parmağı bırakılır (ekran döndü, yeniden yerleşim): direksiyon yaylı döner
+  resetPointers() {
+    this.wheelId = null;
+    this.wheelHole = false;
+    this.stickId = null;
+    this.stick.on = false;
+    this.stick.dx = 0;
+    this.stick.dy = 0;
   }
 
   sideOf(x) {
@@ -15121,17 +15488,22 @@ class Input {
       if (this.wheelId !== null) return false;
       const w = this.wheel;
       const dx = x - w.cx; const dy = y - w.cy;
-      if (!w.r || dx * dx + dy * dy > w.r * w.r * 1.2) return false; // Dışarıdaki dokunuş direksiyonu etkilemez
+      if (!w.r || dx * dx + dy * dy > w.r * w.r * WH.grab * WH.grab) return false; // Dışarıdaki dokunuş direksiyonu etkilemez
       this.wheelId = id;
+      // Basıldığı andaki açı başlangıçtır: direksiyon olduğu yerden devam eder, parmağın mutlak açısına atlamaz
       this.wheelPrev = Math.atan2(dy, dx);
+      this.wheelHole = dx * dx + dy * dy < w.r * w.r * WH.hole * WH.hole;
       return true;
     }
     if (this.stickId !== null || x >= this.width / 2) return false;
     const b = this.bounds;
-    const room = STICK_R + 8;
+    const room = SK.r + 8;
     const s = this.stick;
     this.stickId = id;
     s.on = true;
+    // Değerin merkezi parmağın bastığı nokta: kenara yakın basınca ilk harekette ani tam dönüş olmaz.
+    // Halka yalnız görünüşte ekrana sığacak kadar içeri alınır
+    s.ox = x; s.oy = y;
     s.x = Math.max(b.l + room, Math.min(b.r - room, x));
     s.y = Math.max(b.t + room, Math.min(b.b - room, y));
     s.dx = 0;
@@ -15147,20 +15519,24 @@ class Input {
     if (id === this.wheelId) {
       const w = this.wheel;
       const dx = x - w.cx; const dy = y - w.cy;
-      if (dx * dx + dy * dy < w.r * w.r * WHEEL_HOLE * WHEEL_HOLE) return;
+      // Merkezde açı kararsız: yok sayılır. Çıkınca fark o andan başlar (eskiden biriken fark tek seferde eklenip sıçrardı)
+      if (dx * dx + dy * dy < w.r * w.r * WH.hole * WH.hole) { this.wheelHole = true; return; }
       const a = Math.atan2(dy, dx);
-      this.wheelA = Math.max(-WHEEL_MAX, Math.min(WHEEL_MAX, this.wheelA + wrap(a - this.wheelPrev)));
+      if (this.wheelHole) { this.wheelHole = false; this.wheelPrev = a; return; }
+      const d = wrap(a - this.wheelPrev); // ±180° sınırında doğru fark
       this.wheelPrev = a;
+      if (Math.abs(d) > WHEEL_JUMP) return; // Tek olayda büyük atlama: parmak merkezden geçti ya da olay kaçtı
+      this.wheelA = Math.max(-WHEEL_MAX, Math.min(WHEEL_MAX, this.wheelA + d));
     } else if (id === this.stickId) {
       const s = this.stick;
-      s.dx = Math.max(-STICK_R, Math.min(STICK_R, x - s.x));
-      s.dy = Math.max(-STICK_R, Math.min(STICK_R, y - s.y));
+      s.dx = Math.max(-SK.r, Math.min(SK.r, x - s.ox));
+      s.dy = Math.max(-SK.r, Math.min(SK.r, y - s.oy));
     }
   }
 
   up(id) {
     this.touches.delete(id);
-    if (id === this.wheelId) this.wheelId = null;
+    if (id === this.wheelId) { this.wheelId = null; this.wheelHole = false; }
     if (id === this.stickId) {
       this.stickId = null;
       this.stick.on = false;
@@ -15194,6 +15570,8 @@ class Input {
     win.addEventListener('keydown', (e) => { if (!typing(e) && !e.repeat && this.key(e.code, true)) e.preventDefault(); });
     win.addEventListener('keyup', (e) => { if (!typing(e)) this.key(e.code, false); });
     win.addEventListener('blur', () => this.clear());
+    // Ekran döndü: direksiyonun merkezi değişir, tutuş bırakılır (yeniden basınca o andan başlar)
+    win.addEventListener('orientationchange', () => this.resetPointers());
     win.addEventListener('pagehide', () => this.clear());
     if (win.document) win.document.addEventListener('visibilitychange', () => { if (win.document.hidden) this.clear(); });
     el.addEventListener('contextmenu', (e) => e.preventDefault());
@@ -15256,8 +15634,11 @@ class ControlView {
     }
     if (!this.wheel.hidden) {
       const r = this.wheel.getBoundingClientRect();
-      inp.wheel.cx = r.left + r.width / 2;
-      inp.wheel.cy = r.top + r.height / 2;
+      const cx = r.left + r.width / 2; const cy = r.top + r.height / 2;
+      // Merkez kaydıysa (adres çubuğu gizlendi, boyut değişti) basılı parmağın açısı yeni merkeze göre yeniden başlar
+      if (inp.wheelId !== null && (Math.abs(cx - inp.wheel.cx) > 0.5 || Math.abs(cy - inp.wheel.cy) > 0.5)) inp.wheelHole = true;
+      inp.wheel.cx = cx;
+      inp.wheel.cy = cy;
       inp.wheel.r = r.width / 2;
     }
     this.needLayout = false;
@@ -15269,7 +15650,7 @@ class ControlView {
     if (this.needLayout) this.layout();
     const inp = this.input;
     if (inp.mode === 'wheel') {
-      const a = Math.round(inp.wheelA * 200) / 200;
+      const a = Math.round(inp.wheelS * 200) / 200; // Yumuşatılmış açı: titremez
       if (a !== this.lastA) {
         this.lastA = a;
         this.rim.style.transform = `rotate(${a}rad)`;
@@ -16239,11 +16620,28 @@ class AudioEngine {
   }
 
   // Meteor uyarısı: yüksekten inen ıslık. Çarpma: derin gümbürtü ve toz
-  meteorWarn() { this.tone(1700, 0.9, 0.06, 'sine', 380); }
+  // Nişan belirdi: kısa iki bip (asıl meteor daha belirgin)
+  meteorWarn(v = 1) {
+    this.tone(1320, 0.08, 0.05 + 0.04 * v, 'square', 0);
+    this.tone(990, 0.1, 0.05 + 0.04 * v, 'square', 0, 0.12);
+  }
+  // Düşüş: yüksekten inen ıslık ve alçak gürültü
+  meteorFall(v = 1) {
+    this.tone(2400, 0.7, 0.07 * v + 0.03, 'sine', 420);
+    this.burst(0.75, 300, 0.25 * v, 'lowpass', 140);
+  }
+  // Çarpma: güçlü patlama, derin gümbürtü, çatırtı
   meteorHit(v = 1) {
-    this.burst(1.1, 1100, 0.9 * v, 'lowpass', 40);
-    this.tone(70, 0.8, 0.6 * v, 'sine', 24);
-    this.burst(0.35, 3200, 0.2 * v, 'highpass', 900);
+    this.burst(1.3, 1300, 1.05 * v, 'lowpass', 38);
+    this.tone(62, 1, 0.75 * v, 'sine', 22);
+    this.tone(120, 0.35, 0.4 * v, 'square', 40);
+    this.burst(0.4, 3400, 0.28 * v, 'highpass', 800);
+  }
+  // Suya düşen araç: şlap ve batma
+  vehSink(v = 1) {
+    this.burst(0.35, 2200, 0.32 * v, 'highpass', 500);
+    this.tone(160, 0.6, 0.2 * v, 'sine', 50, 0.05);
+    this.tone(420, 0.25, 0.05 * v, 'sine', 900, 0.3);
   }
 
   // Gizli geçit: rampadan inen motor uğultusu, yankılı beton, kısa iki nota
@@ -17720,7 +18118,7 @@ function resize() {
   game.view.w = w;
   game.view.h = h;
   input.width = w;
-  controls.needLayout = true;
+  controls.needLayout = true; // Direksiyon merkezi kayarsa basılı parmak yeni merkeze göre devam eder (controls.js)
   ui.fit();
   game.updateCamera(1);
 }
@@ -17931,7 +18329,10 @@ game.onEvent = (name, v) => {
     case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
     case 'aliens': audio.alienArrive(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
     case 'meteors': audio.alert(); ui.meteorAlert(); vibrate([80, 40, 80]); break;
-    case 'meteorwarn': audio.meteorWarn(); break;
+    case 'meteorwarn': audio.meteorWarn(v); break;
+    case 'meteorfall': audio.meteorFall(v); break;
+    case 'vehsink': audio.vehSink(v); break;
+    case 'roadblock': audio.alert(); ui.toast(tx('roadblock.warn'), '#ff5a36'); vibrate([60, 40, 60]); break;
     case 'meteorhit': audio.meteorHit(v); vibrate(Math.round(30 + 60 * v)); break;
     case 'shot': audio.gunShot(); break;
     case 'gunhit': if (v >= 1) vibrate(30); break;

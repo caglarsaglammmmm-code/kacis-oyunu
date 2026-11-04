@@ -95,5 +95,6 @@ export default {
     golge: { name: 'Sombra R', desc: 'Regalo del pasaje secreto: superbike con ametralladora automática 360°', paints: ['Guardia nocturna', 'Rosa neón', 'Verde tóxico', 'Fantasma plateado'] },
   },
   meteor: { warn: '¡Sal del círculo rojo: viene un meteorito!' },
+  roadblock: { warn: '¡Carretera cortada! Toma una calle lateral' },
   secret: { guest: 'Ahora también eres invitado de {name}', found: '¡Encontraste la zona secreta! Bienvenido', gift: 'Regalo: ¡la moto {name} ya está en tu garaje!' },
 };

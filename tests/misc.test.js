@@ -240,11 +240,11 @@ test('kontrol: üç mod sola/sağa çalışır, bırakınca düzelir, dış doku
   assert.equal(w.steer, 0);
   assert.equal(w.down(1, 300, 650), true);
   assert.equal(w.down(2, 310, 650), false, 'ikinci parmak alınmaz');
-  w.move(1, 350, 700); // Saat yönünde 90 derece
-  run(w, 1);
+  for (const [x, y] of [[335, 665], [350, 700]]) w.move(1, x, y); // Saat yönünde 90 derece
+  run(w, 40); // Değer yumuşatılır
   assert.ok(Math.abs(w.wheelA - Math.PI / 2) < 0.02);
   assert.ok(Math.abs(w.steer - (Math.PI / 2) / WHEEL_MAX) < 0.02, 'açı ile orantılı');
-  for (const [x, y] of [[300, 750], [250, 700], [300, 650], [350, 700]]) w.move(1, x, y);
+  for (const [x, y] of [[335, 735], [300, 750], [265, 735], [250, 700], [265, 665], [300, 650], [335, 665], [350, 700]]) w.move(1, x, y);
   assert.equal(w.wheelA, WHEEL_MAX, 'tam kilitten öteye gitmez');
   w.up(2);
   assert.equal(w.wheelId, 1, 'başka parmak kalkınca direksiyon bırakılmaz');

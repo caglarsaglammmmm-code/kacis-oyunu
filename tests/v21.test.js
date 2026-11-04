@@ -55,14 +55,14 @@ test('meteor tanklardan sonra başlar; uyarı tam 3 sn önce; sıklık artar, uy
   let hitAt = null;
   g.onEvent = (n) => { if (n === 'meteorhit' && hitAt === null) hitAt = g.time; };
   while (m.alive) { g.player.vx = 0; g.player.vy = 0; g.tick(dt, 0, false); }
-  assert.ok(Math.abs(hitAt - warnAt - MET.warn) <= dt * 1.5, `uyarıdan çarpmaya ${(hitAt - warnAt).toFixed(3)} sn`);
+  assert.ok(Math.abs(hitAt - warnAt - MET.warn - MET.fall) <= dt * 1.5, `uyarıdan çarpmaya ${(hitAt - warnAt).toFixed(3)} sn`);
 });
 
 test('meteor: dairedeki oyuncu ölür, dışarıdaki zarar görmez; polis, uzaylı ve trafik etkilenir, tank ağır hasar alır', () => {
   // İçeride
   const g = game({ startTime: MET.at + 1, god: false });
   const m = g.meteors.list[0];
-  Object.assign(m, { alive: true, x: g.player.x + 40, y: g.player.y, t: MET.warn - dt / 2 });
+  Object.assign(m, { alive: true, x: g.player.x + 40, y: g.player.y, t: MET.warn + MET.fall - dt / 2 });
   g.tick(dt, 0, false);
   assert.equal(g.state, 'dying');
   assert.equal(g.cause, 'meteor');
@@ -70,7 +70,7 @@ test('meteor: dairedeki oyuncu ölür, dışarıdaki zarar görmez; polis, uzayl
   const h = game({ startTime: MET.at + 1, god: false });
   h.damage = 0;
   const n = h.meteors.list[0];
-  Object.assign(n, { alive: true, x: h.player.x + MET.radius + 30, y: h.player.y, t: MET.warn - dt / 2 });
+  Object.assign(n, { alive: true, x: h.player.x + MET.radius + 30, y: h.player.y, t: MET.warn + MET.fall - dt / 2 });
   const cop = h.spawnCop('car', 'chaser', n.x + 20, n.y + 10, 0);
   const alien = h.spawnCop('blob', 'chaser', n.x - 10, n.y - 30, 0);
   const tank = h.spawnCop('tank', 'chaser', n.x + 30, n.y - 40, 0);
@@ -83,7 +83,7 @@ test('meteor: dairedeki oyuncu ölür, dışarıdaki zarar görmez; polis, uzayl
   // Hile ve ölümsüzlükte ölüm yok
   const k = game({ startTime: MET.at + 1, god: false });
   k.toggleCheat();
-  Object.assign(k.meteors.list[0], { alive: true, x: k.player.x, y: k.player.y, t: MET.warn - dt / 2 });
+  Object.assign(k.meteors.list[0], { alive: true, x: k.player.x, y: k.player.y, t: MET.warn + MET.fall - dt / 2 });
   k.tick(dt, 0, false);
   assert.equal(k.state, 'play', 'hile açıkken ölmez');
 });
@@ -97,7 +97,7 @@ test('meteor çarptığı yerdeki binayı yıkar; anıta, gizli geçide ve stady
     for (let i = 0; i < c.rectCount; i++) { const r = c.rects[i]; if (r.kind === 'building' && !r.sacred && r.alive) { rect = r; ch = c; break; } }
   }
   const m = g.meteors.list[0];
-  Object.assign(m, { alive: true, x: rect.x + rect.w / 2, y: rect.y + rect.h / 2, t: MET.warn - dt / 2 });
+  Object.assign(m, { alive: true, x: rect.x + rect.w / 2, y: rect.y + rect.h / 2, t: MET.warn + MET.fall - dt / 2 });
   g.player.x = m.x + 1500; g.player.y = m.y;
   g.tick(dt, 0, false);
   assert.equal(rect.alive, false, 'bina yıkıldı');

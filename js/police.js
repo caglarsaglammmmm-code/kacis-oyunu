@@ -284,6 +284,7 @@ export function driveCop(cop, g, dt) {
     cop.ctlT = 0;
     cop.wakeT -= dt;
     const d = Math.hypot(g.player.x - cop.x, g.player.y - cop.y);
+    if (cop.roadblock) return; // Yol kapatma barikatı yerinden kalkmaz: oyun kurar ve dağıtır (game.js updateRoadblock)
     if ((d < CONFIG.barricade.wakeDist && g.ghostT <= 0) || cop.wakeT <= 0) cop.state = 'chase';
     return;
   }

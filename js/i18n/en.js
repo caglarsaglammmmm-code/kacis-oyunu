@@ -95,5 +95,6 @@ export default {
     golge: { name: 'Shadow R', desc: 'Secret passage gift: superbike with a 360° auto-gun', paints: ['Night Watch', 'Neon Pink', 'Toxic Green', 'Silver Ghost'] },
   },
   meteor: { warn: 'Get out of the red circle: meteor incoming!' },
+  roadblock: { warn: 'Road blocked! Take a side street' },
   secret: { guest: 'You are now {name}\'s guest too', found: 'You found the secret area! Welcome', gift: 'Gift: the {name} motorcycle is now in your garage!' },
 };

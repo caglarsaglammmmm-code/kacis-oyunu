@@ -714,11 +714,28 @@ export class AudioEngine {
   }
 
   // Meteor uyarısı: yüksekten inen ıslık. Çarpma: derin gümbürtü ve toz
-  meteorWarn() { this.tone(1700, 0.9, 0.06, 'sine', 380); }
+  // Nişan belirdi: kısa iki bip (asıl meteor daha belirgin)
+  meteorWarn(v = 1) {
+    this.tone(1320, 0.08, 0.05 + 0.04 * v, 'square', 0);
+    this.tone(990, 0.1, 0.05 + 0.04 * v, 'square', 0, 0.12);
+  }
+  // Düşüş: yüksekten inen ıslık ve alçak gürültü
+  meteorFall(v = 1) {
+    this.tone(2400, 0.7, 0.07 * v + 0.03, 'sine', 420);
+    this.burst(0.75, 300, 0.25 * v, 'lowpass', 140);
+  }
+  // Çarpma: güçlü patlama, derin gümbürtü, çatırtı
   meteorHit(v = 1) {
-    this.burst(1.1, 1100, 0.9 * v, 'lowpass', 40);
-    this.tone(70, 0.8, 0.6 * v, 'sine', 24);
-    this.burst(0.35, 3200, 0.2 * v, 'highpass', 900);
+    this.burst(1.3, 1300, 1.05 * v, 'lowpass', 38);
+    this.tone(62, 1, 0.75 * v, 'sine', 22);
+    this.tone(120, 0.35, 0.4 * v, 'square', 40);
+    this.burst(0.4, 3400, 0.28 * v, 'highpass', 800);
+  }
+  // Suya düşen araç: şlap ve batma
+  vehSink(v = 1) {
+    this.burst(0.35, 2200, 0.32 * v, 'highpass', 500);
+    this.tone(160, 0.6, 0.2 * v, 'sine', 50, 0.05);
+    this.tone(420, 0.25, 0.05 * v, 'sine', 900, 0.3);
   }
 
   // Gizli geçit: rampadan inen motor uğultusu, yankılı beton, kısa iki nota

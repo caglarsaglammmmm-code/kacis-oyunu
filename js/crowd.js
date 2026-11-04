@@ -581,6 +581,7 @@ export class Crowd {
     n.kind = kind;
     n.spec = spec;
     n.state = 'drive';
+    n.sinkT = 0; n.pushT = 0;
     n.dir = dir;
     n.line = line;
     n.color = Math.floor(Math.random() * spec.colors.length);
@@ -632,6 +633,9 @@ export class Crowd {
     const p = g.player;
     const far = Math.max(Math.abs(n.x - p.x), Math.abs(n.y - p.y));
     if (far > NP.despawn) { n.alive = false; return; }
+    // Suya düşen trafik aracı batar ve kaybolur
+    if (n.sinkT > 0) { if (g.stepSink(n, dt)) n.alive = false; return; }
+    if (n.pushT > 0) n.pushT -= dt;
     n.t += dt;
     if (n.hornT > 0) n.hornT -= dt;
 
@@ -655,6 +659,7 @@ export class Crowd {
     // Polislerle çarpışma
     for (let i = 0; i < g.cops.length; i++) {
       const c = g.cops[i];
+      if (c.sinkT > 0) continue;
       const dx = c.x - n.x;
       const dy = c.y - n.y;
       const r = (c.len + n.len) * 0.6;
@@ -754,6 +759,7 @@ export class Crowd {
   hitNpc(n, rv, byPlayer) {
     const g = this.g;
     if (n.state !== 'wreck') { n.state = 'wreck'; n.t = 0; }
+    n.pushT = CONFIG.vehWater.pushTime; // Çarpılan araç savrulur: su kenarındaysa düşebilir
     n.w += (Math.random() < 0.5 ? -1 : 1) * Math.min(5, rv / 90) / Math.sqrt(n.mass);
     g.fx.sparks(n.x, n.y, 8);
     g.fx.debris(n.x, n.y, n.spec.colors[n.color], 4);
