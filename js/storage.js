@@ -126,8 +126,18 @@ export class Storage {
     if (newScore) d.bestScore = result.score;
     if (newTime) d.bestTime = result.time;
     d.coins += result.coins;
+    const penalty = this.applyPenalty(result.penalty, false);
     this.save();
-    return { newScore, newTime };
+    return result.penalty ? { newScore, newTime, penalty } : { newScore, newTime };
+  }
+
+  // Para cezası (anıta saygısızlık): kalıcı paradan düşülür, 0'ın altına inmez. Düşülen miktarı döndürür
+  applyPenalty(n, save = true) {
+    const d = this.data;
+    const cut = Math.min(d.coins, Math.max(0, Math.floor(Number(n) || 0)));
+    d.coins -= cut;
+    if (save && cut) this.save();
+    return cut;
   }
 
   // Gizli kod: 'ok' açıldı, 'owned' zaten sende, 'invalid' geçersiz

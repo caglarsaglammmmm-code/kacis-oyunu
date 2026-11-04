@@ -13,6 +13,9 @@ const SC = {
   fog: { weather: 'fog', car: 'atmaca', t: 240 },
   ice: { weather: 'ice', car: 'atmaca', t: 240 },
   armed: { weather: 'rain', car: 'kuzgun', t: 240, look: true, fire: true },
+  // v20: anıtın önünde (gündüz ve gece). Eski sürümde anıt yoksa olduğu yerde ölçülür
+  anit: { weather: 'sunny', car: 'atmaca', t: 240, memorial: true },
+  anitgece: { weather: 'rain', car: 'atmaca', t: 240, memorial: true, night: true },
 };
 const rows = [];
 for (const name of only) {
@@ -33,6 +36,7 @@ for (const name of only) {
     await page.waitForFunction(() => window.__drift && !document.getElementById('menu').hidden, null, { timeout: 30000 });
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
     await page.evaluate(() => __drift.play());
+    if (s.memorial) await page.evaluate((night) => { const g = __drift.game; const b = g.world.memorialBox && g.world.memorialBox(); if (night) g.dayT = 110; if (!b) return; const p = g.player; p.x = b.x + b.w / 2; p.y = b.y + b.h + 160; p.vx = 300; p.vy = 0; p.a = 0; globalThis.__back = setInterval(() => { if (g.world.memorialDist(p.x, p.y) > 420) { p.x = b.x + b.w / 2 - 300; p.y = b.y + b.h + 160; p.vx = 300; p.vy = 0; p.a = 0; } }, 100); }, !!s.night);
     await page.evaluate((fire) => {
       const k = __drift; const g = k.game;
       globalThis.__bot = setInterval(() => {

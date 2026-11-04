@@ -11,6 +11,7 @@ export default {
     title: "Add the game to your Home Screen", s1Bottom: "Tap the Share button below", s1Top: "Tap the Share button at the top",
     s2: "Choose “Add to Home Screen”", s3: "Tap “Add”", ok: "OK", never: "Don't show again",
   },
+  memorial: { zone: 'Memorial area', penalty: '-{n} COINS', disrespect: 'Disrespect to the memorial!', over: 'MEMORIAL BREACH' },
   aria: {
     weather: 'Weather',
     fire: 'Fire', code: 'Code',

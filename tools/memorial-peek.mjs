@@ -1,0 +1,33 @@
+// Anıta hızlı bakış: genel görünüm, yakın, gece. node tools/memorial-peek.mjs [port]
+import { chromium } from 'playwright-core';
+const port = Number(process.argv[2] || 8080);
+const b = await chromium.launch({ channel: 'msedge', headless: true });
+const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: 'tr' });
+const page = await ctx.newPage();
+const errs = [];
+page.on('pageerror', (e) => errs.push(String(e)));
+page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
+await page.goto(`http://localhost:${port}/?god=1&t=0`);
+await page.waitForFunction(() => window.__drift && !document.getElementById('menu').hidden, null, { timeout: 30000 });
+await page.evaluate(() => __drift.play());
+await page.waitForTimeout(800);
+const GEN = 430; const YAK = 420;
+const hold = (dy, area) => page.evaluate(([dy, area]) => {
+  const k = __drift; const g = k.game; const bx = g.world.memorialBox();
+  if (area) k.cfg.camera.viewArea = area;
+  clearInterval(globalThis.__hold);
+  globalThis.__hold = setInterval(() => { const p = g.player; p.x = bx.x + bx.w / 2; p.y = bx.y + bx.h / 2 + dy; p.vx = 0; p.vy = 0; p.a = -Math.PI / 2; g.cops.length = 0; }, 5);
+}, [dy, area]);
+await hold(GEN, 1500);
+await page.waitForFunction(() => __drift.renderer.memorial.hi, null, { timeout: 15000 });
+await page.waitForTimeout(1200);
+await page.screenshot({ path: 'e2e-out/v20/peek-genel.png' });
+await hold(YAK, 740);
+await page.waitForTimeout(1200);
+await page.screenshot({ path: 'e2e-out/v20/peek-yakin.png' });
+await hold(GEN, 1500);
+await page.evaluate(() => { __drift.game.dayT = 110; __drift.game.dismissMemorialCard(); });
+await page.waitForTimeout(1500);
+await page.screenshot({ path: 'e2e-out/v20/peek-gece.png' });
+console.log(JSON.stringify(await page.evaluate(() => __drift.renderer.memorial.layoutAt(__drift.game.world.memorialBox()).images)), errs);
+await b.close();

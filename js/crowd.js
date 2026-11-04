@@ -370,6 +370,8 @@ export class Crowd {
     if (p.state === PED_FLY) {
       p.x += p.vx * dt;
       p.y += p.vy * dt;
+      // Savrulan yaya da anıt alanına düşmez
+      if (g.world.inMemorial(p.x, p.y, 12)) { p.x -= p.vx * dt; p.y -= p.vy * dt; p.vx = -p.vx * 0.3; p.vy = -p.vy * 0.3; }
       p.a += p.spin * dt;
       p.z += p.vz * dt;
       p.vz -= PD.gravity * dt;

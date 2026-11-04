@@ -15,7 +15,9 @@ const OLD = [
 ];
 const RE = new RegExp(`(?<![\\p{L}\\p{N}_])(${OLD.join('|')})(?![\\p{L}\\p{N}_])`, 'giu');
 // Bu dosyalar eski adları bilerek taşır ya da üçüncü taraf koddur
-const SKIP = new Set(['tools/name-scan.mjs', 'tools/build-android.mjs', 'tools/play-clean.mjs', 'tools/flavor.mjs', 'android/app/build.gradle', 'android/app/src/main/assets/capacitor.config.json']);
+const SKIP = new Set(['tools/name-scan.mjs', 'tools/build-android.mjs', 'tools/play-clean.mjs', 'tools/flavor.mjs', 'android/app/build.gradle', 'android/app/src/main/assets/capacitor.config.json',
+  // Atatürk anıtı: Gençliğe Hitabe ve imza bilerek her iki sürümde de yer alır (kullanıcı isteği)
+  'js/memorial.js', 'js/app.file.js', 'sw.js', 'tools/memorial-test.mjs', 'tests/memorial.test.js']);
 // names, flavors ve android/app/src/arkadas: gerçek isimli sürümün kaynağı, Play paketine girmez
 const SKIP_DIR = /(^|\/)(names|flavors|arkadas|node_modules|\.git|\.gradle|build|e2e-out|vendor|fonts|dist|gradle|www|capacitor-cordova-android-plugins|public)(\/|$)/;
 const TEXT = /\.(js|mjs|html|css|json|md|xml|gradle|properties|java|txt|pro|svg)$/i;

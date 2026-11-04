@@ -20,7 +20,7 @@ export async function buildWeb(flavor, out, { pages = false } = {}) {
   const info = FLAVOR_INFO[flavor];
   if (!info) throw new Error(`Bilinmeyen sürüm: ${flavor}`);
   fs.rmSync(out, { recursive: true, force: true });
-  for (const entry of ['index.html', 'privacy.html', 'css', 'fonts', 'icons', 'js', 'assets']) {
+  for (const entry of ['index.html', 'privacy.html', 'css', 'fonts', 'icons', 'js', 'assets', 'gorseller/ataturk']) {
     fs.cpSync(path.join(root, entry), path.join(out, entry), {
       recursive: true,
       filter: (source) => !source.endsWith('app.file.js') && !source.endsWith('.txt'),
