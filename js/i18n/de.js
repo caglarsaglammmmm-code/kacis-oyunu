@@ -7,6 +7,10 @@ export default {
     best: 'Bestwert: {score} Pkt. · {time}', first: 'Deine erste Flucht wartet',
     maker: 'Gemacht von Çağlar Sağlam', exit: 'Zum Beenden erneut drücken',
   },
+  a2hs: {
+    title: "Spiel zum Home-Bildschirm hinzufügen", s1Bottom: "Tippe unten auf „Teilen“", s1Top: "Tippe oben auf „Teilen“",
+    s2: "Wähle „Zum Home-Bildschirm“", s3: "Tippe auf „Hinzufügen“", ok: "OK", never: "Nicht mehr zeigen",
+  },
   aria: {
     weather: 'Wetter',
     fire: 'Feuer', code: 'Code',

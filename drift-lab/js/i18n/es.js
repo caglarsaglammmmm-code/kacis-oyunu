@@ -7,6 +7,10 @@ export default {
     best: 'Mejor: {score} pts · {time}', first: 'Tu primera huida te espera',
     maker: 'Hecho por Çağlar Sağlam', exit: 'Pulsa otra vez para salir',
   },
+  a2hs: {
+    title: "Añade el juego a tu pantalla de inicio", s1Bottom: "Toca el botón Compartir de abajo", s1Top: "Toca el botón Compartir de arriba",
+    s2: "Elige «Añadir a pantalla de inicio»", s3: "Toca «Añadir»", ok: "Vale", never: "No volver a mostrar",
+  },
   aria: {
     weather: 'Clima',
     fire: 'Disparar', code: 'Código',

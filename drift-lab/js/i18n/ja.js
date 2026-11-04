@@ -7,6 +7,10 @@ export default {
     best: 'ベスト：{score}点 · {time}', first: '最初の逃走が待っている',
     maker: '制作：Çağlar Sağlam', exit: 'もう一度押すと終了',
   },
+  a2hs: {
+    title: "ゲームをホーム画面に追加", s1Bottom: "下の共有ボタンをタップ", s1Top: "上の共有ボタンをタップ",
+    s2: "「ホーム画面に追加」を選ぶ", s3: "「追加」をタップ", ok: "OK", never: "今後表示しない",
+  },
   aria: {
     weather: '天気',
     fire: '発射', code: 'コード',

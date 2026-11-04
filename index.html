@@ -12,7 +12,8 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Drift Lab">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -70,6 +71,16 @@
       <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/DriftLab-Arkadas.apk" rel="noopener" data-i18n="menu.apk">APK İndir</a>
     </nav>
   </div>
+  <aside id="a2hs" class="a2hs" hidden role="dialog" aria-labelledby="a2hs-title">
+    <h3 id="a2hs-title" data-i18n="a2hs.title">Oyunu ana ekrana ekle</h3>
+    <ol>
+      <li><b>1</b><span data-a2hs-step1 data-i18n="a2hs.s1Bottom">Alttaki Paylaş düğmesine bas</span><svg class="share-ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M7 1h2v1h1v1h1v1H9v6H7V4H5V3h1V2h1zM2 6h3v2H4v5h8V8h-1V6h3v9H2z"/></svg></li>
+      <li><b>2</b><span data-i18n="a2hs.s2">Ana Ekrana Ekle'yi seç</span><svg class="share-ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h12v12H2zm2 2v8h8V4zm3 1h2v2h2v2H9v2H7V9H5V7h2z"/></svg></li>
+      <li><b>3</b><span data-i18n="a2hs.s3">Ekle'ye bas</span></li>
+    </ol>
+    <div class="acts"><button id="a2hs-ok" data-i18n="a2hs.ok">Tamam</button><button id="a2hs-never" class="ghost" data-i18n="a2hs.never">Bir daha gösterme</button></div>
+    <svg class="ptr" viewBox="0 0 12 12" aria-hidden="true"><path d="M5 0h2v6h3v2H9v1H8v1H7v1H5v-1H4V9H3V8H2V6h3z"/></svg>
+  </aside>
 </section>
 
 <section id="garage" class="screen garage3d" hidden>

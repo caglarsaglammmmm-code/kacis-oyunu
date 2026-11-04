@@ -7,6 +7,10 @@ export default {
     best: 'En iyi: {score} puan · {time}', first: 'İlk kaçışın seni bekliyor',
     maker: 'Çağlar Sağlam tarafından yapıldı', exit: 'Çıkmak için tekrar bas',
   },
+  a2hs: {
+    title: "Oyunu ana ekrana ekle", s1Bottom: "Alttaki Paylaş düğmesine bas", s1Top: "Üstteki Paylaş düğmesine bas",
+    s2: "Ana Ekrana Ekle'yi seç", s3: "Ekle'ye bas", ok: "Tamam", never: "Bir daha gösterme",
+  },
   aria: {
     weather: 'Hava durumu',
     fire: 'Ateş', code: 'Kod',

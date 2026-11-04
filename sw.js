@@ -1,5 +1,5 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'penci-zorn-v18';
+const CACHE = 'penci-zorn-v19';
 const ASSETS = [
   './',
   'index.html',
@@ -9,6 +9,7 @@ const ASSETS = [
   'js/names.js',
   'js/config.js',
   'js/custom.js',
+  'js/a2hs.js',
   'js/i18n/index.js',
   'js/i18n/tr.js',
   'js/i18n/en.js',
@@ -46,6 +47,7 @@ const ASSETS = [
   'js/transition.js',
   'js/main.js',
   'icons/icon-192.png',
+  'icons/apple-touch-icon.png',
   'icons/icon-512.png',
   'icons/icon-maskable-192.png',
   'icons/icon-maskable-512.png',

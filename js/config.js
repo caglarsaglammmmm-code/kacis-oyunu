@@ -17,9 +17,9 @@ export const BUILD = {
 
 export const CONFIG = {
   name: NAMES.oyun,
-  version: '18.0.0',
+  version: '19.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v18.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v19.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -415,6 +415,9 @@ export const CONFIG = {
   // ZAMANLA ARTAN POLİS CANI (silah canı, bütün arabalarda). Yeni doğan polisin canı = hp * min(max, perMin ^ dakika).
   // Sahadaki polisler değişmez. %12 / dk: 2. dk 1,25x, 5. dk 1,76x, ~9,7. dk'dan sonra 3x tavan
   copHpGrowth: { perMin: 1.12, max: 3 },
+
+  // iPhone/iPad ana ekrana ekle rehberi: delay menü açıldıktan sonra kartın görünme gecikmesi (sn), key kayıt anahtarı
+  a2hs: { delay: 1.2, key: 'drift-lab-a2hs' },
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
   // Yeni kod eklemek için satır eklenir. car: açılan araba

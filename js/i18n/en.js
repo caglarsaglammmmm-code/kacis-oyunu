@@ -7,6 +7,10 @@ export default {
     best: 'Best: {score} pts · {time}', first: 'Your first getaway awaits',
     maker: 'Made by Çağlar Sağlam', exit: 'Press again to exit',
   },
+  a2hs: {
+    title: "Add the game to your Home Screen", s1Bottom: "Tap the Share button below", s1Top: "Tap the Share button at the top",
+    s2: "Choose “Add to Home Screen”", s3: "Tap “Add”", ok: "OK", never: "Don't show again",
+  },
   aria: {
     weather: 'Weather',
     fire: 'Fire', code: 'Code',

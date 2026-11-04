@@ -12,6 +12,7 @@ import { loadAtlas } from './sheet.js';
 import { PHASE, FALL_AT, TOTAL, dropCurve } from './transition.js';
 import { Quality, guessLevel, LEVELS } from './quality.js';
 import { setLang, detectLang, getLang, tx } from './i18n/index.js';
+import { initA2hs } from './a2hs.js';
 
 const STEP = 1 / 60;
 const canvas = document.getElementById('game');
@@ -272,6 +273,8 @@ const ui = new UI(storage, {
   menuHidden() { cover.stop(); },
   purchased() { audio.purchase(); vibrate([30, 30, 60]); },
 });
+// iPhone/iPad: ana ekrana ekle rehberi (yalnız iOS Safari/Chrome, ana ekrandan açılmamışsa)
+initA2hs(() => audio.unlock());
 
 let wakeLock = null;
 async function keepAwake(on) {
