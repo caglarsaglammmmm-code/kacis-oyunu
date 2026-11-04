@@ -95,5 +95,6 @@ export default {
     golge: { name: 'Schatten R', desc: 'Geschenk des Geheimgangs: Superbike mit 360°-Automatikkanone', paints: ['Nachtwache', 'Neonpink', 'Giftgrün', 'Silbergeist'] },
   },
   meteor: { warn: 'Raus aus dem roten Kreis: Meteorit im Anflug!' },
+  roadblock: { warn: 'Straße gesperrt! Bieg in eine Seitenstraße ab' },
   secret: { guest: 'Jetzt bist du auch Gast von {name}', found: 'Du hast den geheimen Bereich gefunden! Willkommen', gift: 'Geschenk: Das Motorrad {name} steht jetzt in deiner Garage!' },
 };

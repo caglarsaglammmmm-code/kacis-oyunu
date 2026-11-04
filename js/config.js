@@ -17,9 +17,9 @@ export const BUILD = {
 
 export const CONFIG = {
   name: NAMES.oyun,
-  version: '21.0.0',
+  version: '22.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v21.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v22.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -34,6 +34,13 @@ export const CONFIG = {
 
   input: {
     bothDelay: 0.09, // Baş parmak geçişi geri vites sanılmasın: ikisine bu kadar basılı kalınca geri
+    // DİREKSİYON: parmağın açısı basıldığı andan itibaren AÇI FARKI olarak birikir (±180° sınırında sıçramaz).
+    // maxDeg: tam kilit (±), hole: merkeze bu orandan yakın parmak yok sayılır (açı kararsız), grab: direksiyonu
+    // tutma alanı (yarıçap katı), jump: tek olayda bundan büyük açı farkı hata sayılır (derece), smooth: görünüm
+    // ve değer yumuşatması (1/sn), returnRate: bırakınca ortaya yaylı dönüş (1/sn), dead: ölü bölge (oran)
+    wheel: { maxDeg: 135, hole: 0.16, grab: 1.1, jump: 75, smooth: 28, returnRate: 9, dead: 0.03 },
+    // JOYSTICK: basılan nokta merkezdir. r yarıçap (px), dead ölü bölge (px), smooth yumuşatma (1/sn)
+    stick: { r: 54, dead: 8, smooth: 24 },
   },
 
   world: {
@@ -309,6 +316,10 @@ export const CONFIG = {
 
   // Derin su: sahil, göl, gölet. Sığ suya girilir, derine düşen araç batar
   water: { sinkTime: 2.3, bubbleEvery: 0.06, shrink: 0.5, spin: 1.5, deepProbe: 6 },
+  // POLİS, SWAT, UZAYLI, TANK VE TRAFİK DE SUYA DÜŞER. Yapay zekâ suyu engel bilir; ancak suya speed'den hızlı dalan,
+  // ya da itilmiş (oyuncu çarpması, patlama, şok dalgası: pushTime sn) ve pushSpeed'den hızlı giden araç düşer.
+  // sink: batma süresi (tank tankSink), drift: batarken hız kaybı (1/sn), bubbles: kabarcık aralığı (yalnız ekrandaysa)
+  vehWater: { speed: 230, pushSpeed: 50, pushTime: 0.9, sink: 2, tankSink: 3.6, drift: 2.4, bubbles: 0.09, shrink: 0.55 },
 
   policeAI: {
     despawnDist: 1900,
@@ -336,6 +347,14 @@ export const CONFIG = {
     wakeTime: 12,
     distAhead: 260,
   },
+
+  // YOL KAPATMA: DUZ_GIDIS_SURESI sn aralıksız düz giden (direksiyon straightSteer altında, dönüş hızı straightYaw altında,
+  // hız minSpeed üstünde) oyuncunun önü, yolun tüm genişliğini kaplayan polis arabalarıyla kapanır; geçilemez.
+  // Önce uyarı (warn sn), sonra araçlar lead sn ileride (minDist-maxDist arası) belirir. Oyuncu ile barikat arasında
+  // en az bir yan yol (side karo açık) yoksa kurulmaz, sonra yeniden denenir (retry). Oyuncu dönüp uzaklaşınca
+  // (leaveAngle radyan, leaveDist) ya da life sn sonra dağılır. spacing: araç aralığı, maxCars: en çok araç,
+  // cooldown: iki barikat arası, from: en erken saniye, meteorClear: bu yakında meteor varken kurulmaz
+  roadblock: { DUZ_GIDIS_SURESI: 8, straightSteer: 0.22, straightYaw: 0.35, minSpeed: 140, from: 20, lead: 3.6, warn: 1, minDist: 650, maxDist: 1900, spacing: 40, maxCars: 11, side: 3, life: 18, leaveAngle: 1.2, leaveDist: 450, cooldown: 12, meteorClear: 900, retry: 0.5 },
 
   tank: {
     fireEvery: 5.5,
@@ -450,17 +469,22 @@ export const CONFIG = {
   // içine giremez. Anıt (memorial.rect), gizli geçit (secret.ramp) ve iki stadyum (stadiums.*.rect)
   protect: { memorial: 320, secret: 360, stadium: 170, bullet: 0 },
 
-  // METEOR YAĞMURU (tanklardan sonra). at: başlangıç (sn). warn: düşmeden önceki uyarı süresi, ASLA 3'ün altına inmez.
-  // radius: çarpma dairesi (içindeki oyuncu ölür, dışındaki zarar görmez), fall: uyarının son anlarında gökten düşüş.
-  // every: iki dalga arası (sn), perWave: dalgadaki meteor sayısı; ikisi de zamanla artar. max: aynı anda en çok meteor.
-  // minR / maxR: oyuncuya uzaklık bandı (hemen altına düşmez), lead: gidiş yönüne bakış (sn), aimShare: önüne düşen oranı.
-  // tankDamage: tankın aldığı hasar, shake: kamera sarsıntısı, sparks / dust: parçacık sayısı (sınırlı)
+  // METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır: çarpma anında arabanın olacağı
+  // nokta tahmin edilir (konum + hız x (warn + fall)), yol üzerinde tutulur ve kilitlenir (sonra takip etmez).
+  // Hız değişimi ya da dönüşle kaçılabilir. Dalgadaki diğerleri çevreye düşen meteorlardır (onlar da zarar verir).
+  // warn: nişanın görünmesinden düşüşün başlamasına kadar (ASLA 3'ün altına inmez), fall: gökten düşüş süresi.
+  // radius: çarpma dairesi (nişan bu kadar), minR: asıl nişan oyuncuya en az bu uzaklıkta (tam üstünde doğmaz),
+  // maxLead: hızlı araçta nişan en çok bu kadar ileride, road: tahmini nokta bu yarıçapta yola çekilir.
+  // every / perWave: dalga aralığı ve sayısı (zamanla artar), max: aynı anda en çok meteor.
+  // randMin / randMax: çevre meteorlarının oyuncuya uzaklığı. quake / quakeShake: çarpmada kamera sarsıntısı süresi ve gücü,
+  // flash: beyaz parlama süresi, trail: düşerken saniyede duman/alev parçası, blink: son bu kadar saniyede hızlı yanıp söner
   meteor: {
-    at: 380, warn: 3, radius: 120, fall: 0.55,
+    at: 380, warn: 3, fall: 0.7, radius: 64,
     every: [[380, 4.6], [460, 3.6], [560, 2.8], [700, 2.1]],
     perWave: [[380, 1], [450, 2], [540, 3], [680, 4]],
-    max: 7, minR: 230, maxR: 760, lead: 1.1, aimShare: 0.45,
-    tankDamage: 450, shake: 11, sparks: 14, dust: 12, crater: 70,
+    max: 7, minR: 170, maxLead: 1500, road: 80, randMin: 260, randMax: 760,
+    tankDamage: 450, shake: 12, quake: 1.5, quakeShake: 9, flash: 0.18, sparks: 16, dust: 12, crater: 52, debris: 14,
+    trail: 40, blink: 1,
   },
 
   // GİZLİ GEÇİT: ücra köşedeki (landmark 'gecit') terk edilmiş depo alanının güneydoğu köşesinde rampa.

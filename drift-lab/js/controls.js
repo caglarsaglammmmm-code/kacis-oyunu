@@ -53,8 +53,11 @@ export class ControlView {
     }
     if (!this.wheel.hidden) {
       const r = this.wheel.getBoundingClientRect();
-      inp.wheel.cx = r.left + r.width / 2;
-      inp.wheel.cy = r.top + r.height / 2;
+      const cx = r.left + r.width / 2; const cy = r.top + r.height / 2;
+      // Merkez kaydıysa (adres çubuğu gizlendi, boyut değişti) basılı parmağın açısı yeni merkeze göre yeniden başlar
+      if (inp.wheelId !== null && (Math.abs(cx - inp.wheel.cx) > 0.5 || Math.abs(cy - inp.wheel.cy) > 0.5)) inp.wheelHole = true;
+      inp.wheel.cx = cx;
+      inp.wheel.cy = cy;
       inp.wheel.r = r.width / 2;
     }
     this.needLayout = false;
@@ -66,7 +69,7 @@ export class ControlView {
     if (this.needLayout) this.layout();
     const inp = this.input;
     if (inp.mode === 'wheel') {
-      const a = Math.round(inp.wheelA * 200) / 200;
+      const a = Math.round(inp.wheelS * 200) / 200; // Yumuşatılmış açı: titremez
       if (a !== this.lastA) {
         this.lastA = a;
         this.rim.style.transform = `rotate(${a}rad)`;

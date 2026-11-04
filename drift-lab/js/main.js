@@ -102,7 +102,7 @@ function resize() {
   game.view.w = w;
   game.view.h = h;
   input.width = w;
-  controls.needLayout = true;
+  controls.needLayout = true; // Direksiyon merkezi kayarsa basılı parmak yeni merkeze göre devam eder (controls.js)
   ui.fit();
   game.updateCamera(1);
 }
@@ -313,7 +313,10 @@ game.onEvent = (name, v) => {
     case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
     case 'aliens': audio.alienArrive(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
     case 'meteors': audio.alert(); ui.meteorAlert(); vibrate([80, 40, 80]); break;
-    case 'meteorwarn': audio.meteorWarn(); break;
+    case 'meteorwarn': audio.meteorWarn(v); break;
+    case 'meteorfall': audio.meteorFall(v); break;
+    case 'vehsink': audio.vehSink(v); break;
+    case 'roadblock': audio.alert(); ui.toast(tx('roadblock.warn'), '#ff5a36'); vibrate([60, 40, 60]); break;
     case 'meteorhit': audio.meteorHit(v); vibrate(Math.round(30 + 60 * v)); break;
     case 'shot': audio.gunShot(); break;
     case 'gunhit': if (v >= 1) vibrate(30); break;

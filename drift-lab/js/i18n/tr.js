@@ -95,5 +95,6 @@ export default {
     golge: { name: 'Gölge R', desc: 'Gizli geçidin hediyesi: 360° taramalı silahlı süper motosiklet', paints: ['Gece Nöbeti', 'Neon Pembe', 'Zehir Yeşili', 'Gümüş Hayalet'] },
   },
   meteor: { warn: 'Kırmızı halkadan çık: meteor geliyor!' },
+  roadblock: { warn: 'Yol kapandı! Yan yola sap' },
   secret: { guest: 'Artık {name}\'ın da misafirisiniz', found: 'Gizli bölümü buldun! Hoş geldin', gift: 'Hediye: {name} motosikleti artık garajında!' },
 };

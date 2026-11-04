@@ -22,6 +22,8 @@ const ESC = CONFIG.escape;
 const WPN = CONFIG.weapon;
 const HPG = CONFIG.copHpGrowth;
 const SEC = CONFIG.secret;
+const VW = CONFIG.vehWater;
+const RB = CONFIG.roadblock;
 // Oyun dakikasına göre yeni polisin silah canı katı: üstel artış, tavanlı
 export function copHpMul(time) { return Math.min(HPG.max, HPG.perMin ** (Math.max(0, time) / 60)); }
 // Uzaylı türü ağırlığa göre
@@ -128,6 +130,7 @@ function makeCop() {
   b.wanderT = 0; b.wx = 0; b.wy = 0;
   b.side = 1; b.roleT = 0; b.blockT = 0; b.blockA = 0; b.hold = false; b.far = false; b.pd = 0;
   b.mhp = 100; b.byWeapon = false;
+  b.sinkT = 0; b.sinkMax = 0; b.pushT = 0; b.roadblock = false;
   b.escIn = false; b.escHit = false; b.escHitAt = -99; b.escEnterT = 0; b.escAt = -99; b.escX = 0; b.escY = 0;
   return b;
 }
@@ -240,6 +243,11 @@ export class Game {
     this.alienT = 0;
     this.aliensOn = startTime >= D.aliensAt;
     this.shieldT = 0; // Uzaylı geçişi ve gizli geçit dönüşü: hasar yok, araba yanıp söner
+    this.quakeT = 0; this.quakeDur = 1; this.quakeAmp = 0; // Meteor sarsıntısı: giderek azalır
+    this.flashT = 0; this.flashMax = 1; // Beyaz parlama
+    this.straightT = 0; // Aralıksız düz gidiş süresi (yol kapatma)
+    this.lastSteer = 0;
+    this.rb = { phase: 'none', t: 0, cool: 0, x: 0, y: 0, a: 0, hx: 0, hy: 0, cars: [], made: 0, retry: 0 };
     this.secretT = 0;
     this.secretZ = null;
     this.secretSeen = false;
@@ -352,6 +360,8 @@ export class Game {
   // --- Ana adım ---
   tick(dt, steer, reverse) {
     this.tickCount++;
+    if (this.quakeT > 0) this.quakeT = Math.max(0, this.quakeT - dt);
+    if (this.flashT > 0) this.flashT = Math.max(0, this.flashT - dt);
     if (this.state === 'play') {
       this.dayT += dt;
       if (this.tickCount % 12 === 0) dayState(this.dayT, this.daylight);
@@ -404,6 +414,8 @@ export class Game {
     this.updatePlayer(dt, steer, reverse);
     if (this.state !== 'play') return;
     if (this.checkSecret()) return;
+    this.lastSteer = steer;
+    this.updateRoadblock(dt, steer, reverse);
     this.updateMemorial();
     this.updateFlow(dt);
     this.updateCops(dt);
@@ -785,6 +797,12 @@ export class Game {
         continue;
       }
       if (isPlayer && !this.god && isDeep(rect)) continue; // Oyuncu suya girer, batış ayrı karar verilir
+      // Diğer araçlar: yapay zekâ suyu engel bilir; hızla dalan ya da itilmiş/savrulmuş araç suya düşer
+      if (!isPlayer && isDeep(rect) && !(b.sinkT > 0)) {
+        const vn = -(b.vx * hit.nx + b.vy * hit.ny);
+        const pushed = b.pushT > 0 || b.state === 'wreck';
+        if (vn > VW.speed || (pushed && vn > VW.pushSpeed)) { this.sinkVehicle(b); return 0; }
+      }
       b.x += hit.nx * hit.depth;
       b.y += hit.ny * hit.depth;
       let impact = bounceOff(b, hit.nx, hit.ny);
@@ -975,6 +993,7 @@ export class Game {
     c.crusher = type === 'tank';
     c.alien = isAlien(type);
     c.warpT = 0; // Uzaylı ışınlanması: belirince kısa süre yerinde
+    c.sinkT = 0; c.pushT = 0; c.roadblock = false;
     c.sirenId = spec.siren ? this.pickSiren(spec.siren) : -1;
     c.wanderT = 0;
     c.staticBody = false;
@@ -1072,6 +1091,9 @@ export class Game {
 
     for (let i = this.cops.length - 1; i >= 0; i--) {
       const c = this.cops[i];
+      // Suya düşen araç batar, sonra havuza döner
+      if (c.sinkT > 0) { if (this.stepSink(c, dt)) this.removeCop(i); continue; }
+      if (c.pushT > 0) c.pushT -= dt;
       const dx = p.x - c.x;
       const dy = p.y - c.y;
       const dist = Math.hypot(dx, dy);
@@ -1111,7 +1133,7 @@ export class Game {
         const surf = this.surfC[world.groundAt(c.x, c.y)];
         stepCar(c, c.ctlS, c.ctlT, c.drive, surf, cdt);
         const impact = this.collideWorld(c, false);
-        if (impact > AI.wallMinImpact) {
+        if (impact > AI.wallMinImpact && !c.roadblock) {
           c.hp -= (impact - AI.wallMinImpact) * AI.wallDamage * (40 / Math.max(40, c.spec.hp * 0.5));
           c.hurtFlash = 0.3;
         }
@@ -1163,7 +1185,7 @@ export class Game {
       for (let j = i + 1; j < cops.length; j++) {
         const a = cops[i];
         const b = cops[j];
-        if ((a.far && b.far) || a.warpT > 0 || b.warpT > 0) continue;
+        if ((a.far && b.far) || a.warpT > 0 || b.warpT > 0 || a.sinkT > 0 || b.sinkT > 0) continue;
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const r = (a.len + b.len) * 0.6;
@@ -1279,7 +1301,14 @@ export class Game {
     const p = this.player;
     if (c.hitCd > 0) return;
     c.hitCd = 0.5;
+    c.pushT = VW.pushTime; // Oyuncu itti: yakında su varsa düşebilir
+    c.pushedBy = 1;
     const spec = c.spec;
+    // Yol kapatma barikatı katı engeldir: çarpmayla devrilmez (yalnız silah, meteor ve patlama gücü yıkar)
+    if (c.roadblock) {
+      if (this.giantT <= 0) this.playerImpact(rv + 40, DMG.copScale, true, DMG.maxCopHit);
+      return;
+    }
     if (this.giantT > 0) {
       // Dev mod: polisi ezer, hasar almaz
       c.hp -= c.type === 'tank' ? PW.giantCrushTank : 1e6;
@@ -1331,7 +1360,7 @@ export class Game {
     let far = minDist;
     for (let i = 0; i < this.cops.length; i++) {
       const c = this.cops[i];
-      if (c.type === 'tank' || this.onScreen(c.x, c.y, 120)) continue;
+      if (c.type === 'tank' || c.roadblock || this.onScreen(c.x, c.y, 120)) continue;
       const d = Math.hypot(c.x - p.x, c.y - p.y);
       if (d > far) { far = d; best = i; }
     }
@@ -1582,6 +1611,7 @@ export class Game {
         if (c.type === 'tank') continue;
         if (Math.hypot(c.x - s.x, c.y - s.y) < TK.radius) c.hp -= 60;
       }
+      this.shockwave(s.x, s.y, TK.radius * 1.8, 320); // Patlama çevredekileri savurur: suya düşebilirler
       // Düştüğü bina yıkılır
       const tx = Math.floor(s.x / TILE);
       const ty = Math.floor(s.y / TILE);
@@ -1589,6 +1619,184 @@ export class Game {
         this.crushRect(hit.chunk, hit.rect);
       }
     }
+  }
+
+  // --- Sarsıntı, parlama, şok dalgası ---
+  quake(dur, amp) {
+    if (amp * (dur) < this.quakeAmp * this.quakeT) return; // Daha güçlüsü sürüyorsa bozma
+    this.quakeT = dur; this.quakeDur = dur; this.quakeAmp = amp;
+  }
+
+  flash(t) {
+    this.flashT = Math.max(this.flashT, t);
+    this.flashMax = Math.max(t, 0.01);
+  }
+
+  // Çevredeki polis, uzaylı, tank ve trafik dışarı savrulur; itilmiş sayılır (suya düşebilir)
+  shockwave(x, y, R, force) {
+    const push = (b, massK) => {
+      const dx = b.x - x; const dy = b.y - y;
+      const d = Math.hypot(dx, dy);
+      if (d > R || d < 1) return;
+      const k = (force * (1 - d / R)) / massK;
+      b.vx += (dx / d) * k; b.vy += (dy / d) * k;
+      b.pushT = VW.pushTime;
+    };
+    for (const c of this.cops) if (!(c.sinkT > 0) && c.state !== 'barricade') push(c, Math.max(1, Math.sqrt(c.mass || 1)));
+    for (const n of this.crowd.npcs) if (n.alive && !(n.sinkT > 0)) push(n, Math.max(1, Math.sqrt(n.mass || 1)));
+  }
+
+  // --- Suya düşen araç: sıçrama, halka dalga, kabarcık, yavaş batma, sonra yok olur ---
+  sinkVehicle(b) {
+    b.sinkMax = b.type === 'tank' ? VW.tankSink : VW.sink;
+    b.sinkT = b.sinkMax;
+    b.vx *= 0.55; b.vy *= 0.55;
+    b.staticBody = false;
+    const near = this.onScreen(b.x, b.y, 120);
+    if (near) {
+      this.fx.burst(FX.WATER, b.x, b.y, b.type === 'tank' ? 30 : 20, 300, 0.9, 12);
+      this.fx.wave(b.x, b.y, b.type === 'tank' ? 200 : 130);
+      this.fx.wave(b.x, b.y, 70);
+    }
+    this.emit('vehsink', near ? (b.type === 'tank' ? 1 : 0.7) : 0.25);
+    // Oyuncunun ittiği polis suya düşerse devirmiş sayılır
+    if (b.pushedBy && b.pushT > 0 && this.cops.includes(b)) {
+      this.kills++;
+      this.addScore(SC.kill, b.x, b.y, SC.comboKillStep);
+    }
+  }
+
+  // Batma adımı: kayarak yavaşlar, döner, kabarcık; bitince true
+  stepSink(b, dt) {
+    b.sinkT -= dt;
+    const k = Math.exp(-VW.drift * dt);
+    b.vx *= k; b.vy *= k;
+    b.x += b.vx * dt; b.y += b.vy * dt;
+    b.a += dt * (b.type === 'tank' ? 0.3 : 0.9);
+    b.speed = Math.hypot(b.vx, b.vy);
+    b.bubT = (b.bubT || 0) - dt;
+    if (b.bubT <= 0 && this.onScreen(b.x, b.y, 60)) {
+      b.bubT = VW.bubbles;
+      this.fx.spawn(FX.WATER, b.x + (Math.random() - 0.5) * b.len * 0.8, b.y + (Math.random() - 0.5) * b.wid, 0, -30 - Math.random() * 40, 0.7, 4 + Math.random() * 5);
+      if (Math.random() < 0.08) this.fx.wave(b.x, b.y, 50 + Math.random() * 60);
+    }
+    return b.sinkT <= 0;
+  }
+
+  // --- Yol kapatma: 8 sn düz giden oyuncunun önü kapanır. Kaçış yolu varsa kurulur, dönünce dağılır ---
+  roadblockNear() {
+    const r = this.rb;
+    if (r.phase === 'none') return false;
+    return Math.hypot(this.player.x - r.x, this.player.y - r.y) < RB.meteorClear;
+  }
+
+  updateRoadblock(dt, steer) {
+    const p = this.player;
+    const r = this.rb;
+    if (r.cool > 0) r.cool -= dt;
+    // Düz gidiş: direksiyon ve dönüş hızı küçük, hız yeterli
+    const straight = Math.abs(steer) < RB.straightSteer && Math.abs(p.w || 0) < RB.straightYaw && p.speed > RB.minSpeed && p.forward > 0;
+    this.straightT = straight ? this.straightT + dt : 0;
+    if (r.phase === 'none') {
+      if (this.straightT >= RB.DUZ_GIDIS_SURESI && r.cool <= 0 && this.time >= RB.from && !this.cheat) {
+        r.retry -= dt;
+        if (r.retry <= 0) { r.retry = RB.retry; if (this.planRoadblock()) { r.phase = 'warn'; r.t = 0; this.emit('roadblock'); } }
+      }
+      return;
+    }
+    r.t += dt;
+    if (r.phase === 'warn') {
+      if (r.t >= RB.warn) { r.phase = this.buildRoadblock() ? 'up' : 'none'; r.t = 0; if (r.phase === 'none') r.cool = RB.retry; }
+      return;
+    }
+    // Kurulu: oyuncu dönüp uzaklaşınca ya da süre dolunca dağılır
+    const dx = r.x - p.x; const dy = r.y - p.y;
+    const d = Math.hypot(dx, dy) || 1;
+    const sp = p.speed || 1;
+    const away = (p.vx * dx + p.vy * dy) / (sp * d) < Math.cos(RB.leaveAngle) && d > RB.leaveDist;
+    let alive = 0;
+    for (const c of r.cars) if (this.cops.includes(c) && c.roadblock) alive++;
+    if (away || r.t > RB.life || alive === 0) this.clearRoadblock();
+  }
+
+  // Yer seçimi: gidiş yönünde, lead sn ilerideki yol; arada yan yol olmalı, korunan alan ve meteor olmamalı
+  planRoadblock() {
+    const p = this.player;
+    const w = this.world;
+    const sp = p.speed;
+    if (sp < RB.minSpeed) return false;
+    const hx = p.vx / sp; const hy = p.vy / sp;
+    // Ana eksene oturt (yollar ızgara)
+    const horiz = Math.abs(hx) > Math.abs(hy);
+    const ax = horiz ? Math.sign(hx) : 0; const ay = horiz ? 0 : Math.sign(hy);
+    const dist = Math.max(RB.minDist, Math.min(RB.maxDist, sp * (RB.lead + RB.warn)));
+    // Yol boyunca açık mı (bina yok)
+    for (let d = 40; d <= dist; d += 40) if (w.blockedAt(p.x + ax * d, p.y + ay * d)) return false;
+    const x = p.x + ax * dist; const y = p.y + ay * dist;
+    if (w.groundAt(x, y) !== GROUND.ROAD) return false;
+    if (w.protectedAt(x, y, 300)) return false;
+    for (const m of this.meteors.list) if (m.alive && Math.hypot(m.x - x, m.y - y) < RB.meteorClear) return false;
+    // Kaçış: oyuncu ile barikat arasında, yolun iki yanından birinde side karo açık bir yan yol
+    const sx = -ay; const sy = ax;
+    let escape = false;
+    for (let d = 160; d <= dist - 160 && !escape; d += 20) {
+      for (const side of [1, -1]) {
+        let ok = true;
+        for (let k = 3; k <= 3 + RB.side; k++) {
+          const qx = p.x + ax * d + sx * side * k * TILE; const qy = p.y + ay * d + sy * side * k * TILE;
+          if (w.blockedAt(qx, qy) || w.groundAt(qx, qy) === GROUND.WATER) { ok = false; break; }
+        }
+        if (ok && w.groundAt(p.x + ax * d + sx * side * 4 * TILE, p.y + ay * d + sy * side * 4 * TILE) === GROUND.ROAD) { escape = true; break; }
+      }
+    }
+    if (!escape) return false;
+    const r = this.rb;
+    r.x = x; r.y = y; r.hx = ax; r.hy = ay; r.a = Math.atan2(ay, ax);
+    return true;
+  }
+
+  // Binadan binaya, yolun ve kaldırımın tüm genişliği sıralı polis arabalarıyla kapanır
+  buildRoadblock() {
+    const r = this.rb;
+    const w = this.world;
+    const sx = -r.hy; const sy = r.hx;
+    const open = (k) => !w.blockedAt(r.x + sx * k, r.y + sy * k) && w.groundAt(r.x + sx * k, r.y + sy * k) !== GROUND.WATER;
+    let a = 0; while (a < 360 && open(a + 20)) a += 20;
+    let b = 0; while (b < 360 && open(-(b + 20))) b += 20;
+    const width = a + b + 30;
+    const n = Math.min(RB.maxCars, Math.ceil(width / RB.spacing) + 1);
+    if (n > this.copLimit - 1 || !this.makeRoom(n)) return false;
+    r.cars.length = 0;
+    const cross = Math.atan2(sy, sx);
+    for (let i = 0; i < n; i++) {
+      const off = -b - 10 + (width / Math.max(1, n - 1)) * i;
+      const c = this.spawnCop('car', 'chaser', r.x + sx * off, r.y + sy * off, cross);
+      c.state = 'barricade';
+      c.staticBody = true;
+      c.roadblock = true;
+      c.wakeT = 1e9;
+      c.mhpMax = WPN.hp.car; c.mhp = c.mhpMax; // Taramayla ~22 mermide patlar
+      r.cars.push(c);
+    }
+    r.made++;
+    this.emit('roadblockup', n);
+    return true;
+  }
+
+  clearRoadblock() {
+    const r = this.rb;
+    for (const c of r.cars) {
+      const i = this.cops.indexOf(c);
+      if (i < 0 || !c.roadblock) continue;
+      c.roadblock = false;
+      // Ekrandaysa dağılır (kovalamaya geçer), değilse kaldırılır
+      if (this.onScreen(c.x, c.y, 60)) { c.state = 'chase'; c.staticBody = false; } else this.removeCop(i);
+    }
+    r.cars.length = 0;
+    r.phase = 'none';
+    r.t = 0;
+    r.cool = RB.cooldown;
+    this.straightT = 0;
   }
 
   // --- Uzaylı işgali ---
@@ -1824,6 +2032,8 @@ export class Game {
     c.y += (ty - c.y) * k;
     c.kx *= Math.exp(-9 * dt);
     c.ky *= Math.exp(-9 * dt);
+    // Meteor sarsıntısı 1-2 sn sürer, giderek azalır
+    if (this.quakeT > 0) c.shake = Math.max(c.shake, this.quakeAmp * (this.quakeT / this.quakeDur));
     if (c.shake > 0.05) {
       c.sx = (Math.random() - 0.5) * c.shake * 2 + c.kx;
       c.sy = (Math.random() - 0.5) * c.shake * 2 + c.ky;

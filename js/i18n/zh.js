@@ -95,5 +95,6 @@ export default {
     golge: { name: '暗影R', desc: '秘密通道的礼物：配备360°自动机枪的超级摩托', paints: ['夜巡', '霓虹粉', '毒绿', '银色幽灵'] },
   },
   meteor: { warn: '快离开红圈：陨石来了！' },
+  roadblock: { warn: '道路被封锁！快拐进小路' },
   secret: { guest: '现在你也是{name}的客人了', found: '你发现了隐藏区域！欢迎', gift: '礼物：{name} 摩托车已进入你的车库！' },
 };

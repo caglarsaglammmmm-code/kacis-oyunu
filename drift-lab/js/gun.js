@@ -61,7 +61,7 @@ export class AutoGun {
     let bs = -1e9;
     let n = 0;
     for (const c of game.cops) {
-      if (c.hp <= 0 || !this.visible(game, c)) continue;
+      if (c.hp <= 0 || c.sinkT > 0 || !this.visible(game, c)) continue;
       if (game.world.segmentProtected(p.x, p.y, c.x, c.y)) continue;
       n++;
       const d = Math.hypot(c.x - p.x, c.y - p.y);

@@ -7,13 +7,11 @@ import { CONFIG } from './config.js';
 import { CheatCode } from './cheat.js';
 
 export const CONTROLS = ['zones', 'wheel', 'stick'];
-export const WHEEL_MAX = (130 * Math.PI) / 180; // Tam kilit açısı
-const WHEEL_RETURN = 11; // Bırakınca ortaya dönüş hızı
-const WHEEL_HOLE = 0.16; // Merkeze bu orandan yakın parmakta açı kararsızdır
-const WHEEL_DEAD = 0.03;
-const STICK_R = 54; // Joystick yarıçapı, px
-const STICK_DEAD = 8; // Bu kadar kayma titreme sayılır, px
-const STICK_SMOOTH = 24;
+const WH = CONFIG.input.wheel;
+const SK = CONFIG.input.stick;
+export const WHEEL_MAX = (WH.maxDeg * Math.PI) / 180; // Tam kilit açısı
+const WHEEL_JUMP = (WH.jump * Math.PI) / 180;
+export const STICK_R = SK.r;
 const CH = CONFIG.cheat;
 
 const wrap = (a) => {
@@ -33,10 +31,13 @@ export class Input {
     this.bothT = 0;
     this.wheel = { cx: 0, cy: 0, r: 0 }; // Görünüm yerleşimden sonra doldurur
     this.wheelId = null;
-    this.wheelA = 0; // Direksiyon açısı, radyan
+    this.wheelA = 0; // Direksiyon açısı (parmağın biriktirdiği), radyan
+    this.wheelS = 0; // Yumuşatılmış açı: değer ve görünüm bundan
     this.wheelPrev = 0;
+    this.wheelHole = false; // Parmak merkezde: açı kararsız, çıkınca fark yeniden başlar (sıçrama olmaz)
     this.stickId = null;
-    this.stick = { on: false, x: 0, y: 0, dx: 0, dy: 0 };
+    // x, y: halkanın görünen yeri (ekrana sığar). ox, oy: değerin merkezi (parmağın bastığı nokta)
+    this.stick = { on: false, x: 0, y: 0, ox: 0, oy: 0, dx: 0, dy: 0 };
     this.axis = 0; // Yumuşatılmış analog direksiyon
     this.revHeld = false;
     this.bounds = { l: 0, t: 0, r: 1, b: 1 }; // Joystick halkası bunun dışına taşmaz
@@ -57,15 +58,20 @@ export class Input {
   tick(dt) {
     this.bothT = this.left && this.right ? this.bothT + dt : 0;
     if (this.mode === 'wheel') {
-      if (this.wheelId === null) this.wheelA *= Math.exp(-WHEEL_RETURN * dt);
-      if (Math.abs(this.wheelA) < 0.004) this.wheelA = this.wheelId === null ? 0 : this.wheelA;
-      const v = this.wheelA / WHEEL_MAX;
-      this.axis = Math.abs(v) < WHEEL_DEAD ? 0 : v;
+      // Bırakınca yaylı dönüş; tutarken açıya düşük geçiren yumuşatma (titreme yok, kare hızından bağımsız)
+      if (this.wheelId === null) {
+        this.wheelA *= Math.exp(-WH.returnRate * dt);
+        if (Math.abs(this.wheelA) < 0.004) this.wheelA = 0;
+      }
+      this.wheelS += (this.wheelA - this.wheelS) * (1 - Math.exp(-WH.smooth * dt));
+      if (this.wheelId === null && Math.abs(this.wheelS) < 0.004) this.wheelS = 0;
+      const v = this.wheelS / WHEEL_MAX;
+      this.axis = Math.abs(v) < WH.dead ? 0 : v;
     } else if (this.mode === 'stick') {
       const s = this.stick;
       const m = Math.abs(s.dx);
-      const target = !s.on || m <= STICK_DEAD ? 0 : Math.sign(s.dx) * Math.min(1, (m - STICK_DEAD) / (STICK_R - STICK_DEAD));
-      this.axis += (target - this.axis) * (1 - Math.exp(-STICK_SMOOTH * dt));
+      const target = !s.on || m <= SK.dead ? 0 : Math.sign(s.dx) * Math.min(1, (m - SK.dead) / (SK.r - SK.dead));
+      this.axis += (target - this.axis) * (1 - Math.exp(-SK.smooth * dt));
       if (Math.abs(this.axis) < 0.005) this.axis = 0;
     }
     this.watchCode(dt);
@@ -130,17 +136,24 @@ export class Input {
     this.keyL = false;
     this.keyR = false;
     this.bothT = 0;
-    this.wheelId = null;
+    this.resetPointers();
     this.wheelA = 0;
-    this.stickId = null;
-    this.stick.on = false;
-    this.stick.dx = 0;
-    this.stick.dy = 0;
+    this.wheelS = 0;
     this.axis = 0;
     this.revHeld = false;
     this.code.reset();
     this.heldT = 0;
     this.axisReady = true;
+  }
+
+  // Direksiyon ve joystick parmağı bırakılır (ekran döndü, yeniden yerleşim): direksiyon yaylı döner
+  resetPointers() {
+    this.wheelId = null;
+    this.wheelHole = false;
+    this.stickId = null;
+    this.stick.on = false;
+    this.stick.dx = 0;
+    this.stick.dy = 0;
   }
 
   sideOf(x) {
@@ -162,17 +175,22 @@ export class Input {
       if (this.wheelId !== null) return false;
       const w = this.wheel;
       const dx = x - w.cx; const dy = y - w.cy;
-      if (!w.r || dx * dx + dy * dy > w.r * w.r * 1.2) return false; // Dışarıdaki dokunuş direksiyonu etkilemez
+      if (!w.r || dx * dx + dy * dy > w.r * w.r * WH.grab * WH.grab) return false; // Dışarıdaki dokunuş direksiyonu etkilemez
       this.wheelId = id;
+      // Basıldığı andaki açı başlangıçtır: direksiyon olduğu yerden devam eder, parmağın mutlak açısına atlamaz
       this.wheelPrev = Math.atan2(dy, dx);
+      this.wheelHole = dx * dx + dy * dy < w.r * w.r * WH.hole * WH.hole;
       return true;
     }
     if (this.stickId !== null || x >= this.width / 2) return false;
     const b = this.bounds;
-    const room = STICK_R + 8;
+    const room = SK.r + 8;
     const s = this.stick;
     this.stickId = id;
     s.on = true;
+    // Değerin merkezi parmağın bastığı nokta: kenara yakın basınca ilk harekette ani tam dönüş olmaz.
+    // Halka yalnız görünüşte ekrana sığacak kadar içeri alınır
+    s.ox = x; s.oy = y;
     s.x = Math.max(b.l + room, Math.min(b.r - room, x));
     s.y = Math.max(b.t + room, Math.min(b.b - room, y));
     s.dx = 0;
@@ -188,20 +206,24 @@ export class Input {
     if (id === this.wheelId) {
       const w = this.wheel;
       const dx = x - w.cx; const dy = y - w.cy;
-      if (dx * dx + dy * dy < w.r * w.r * WHEEL_HOLE * WHEEL_HOLE) return;
+      // Merkezde açı kararsız: yok sayılır. Çıkınca fark o andan başlar (eskiden biriken fark tek seferde eklenip sıçrardı)
+      if (dx * dx + dy * dy < w.r * w.r * WH.hole * WH.hole) { this.wheelHole = true; return; }
       const a = Math.atan2(dy, dx);
-      this.wheelA = Math.max(-WHEEL_MAX, Math.min(WHEEL_MAX, this.wheelA + wrap(a - this.wheelPrev)));
+      if (this.wheelHole) { this.wheelHole = false; this.wheelPrev = a; return; }
+      const d = wrap(a - this.wheelPrev); // ±180° sınırında doğru fark
       this.wheelPrev = a;
+      if (Math.abs(d) > WHEEL_JUMP) return; // Tek olayda büyük atlama: parmak merkezden geçti ya da olay kaçtı
+      this.wheelA = Math.max(-WHEEL_MAX, Math.min(WHEEL_MAX, this.wheelA + d));
     } else if (id === this.stickId) {
       const s = this.stick;
-      s.dx = Math.max(-STICK_R, Math.min(STICK_R, x - s.x));
-      s.dy = Math.max(-STICK_R, Math.min(STICK_R, y - s.y));
+      s.dx = Math.max(-SK.r, Math.min(SK.r, x - s.ox));
+      s.dy = Math.max(-SK.r, Math.min(SK.r, y - s.oy));
     }
   }
 
   up(id) {
     this.touches.delete(id);
-    if (id === this.wheelId) this.wheelId = null;
+    if (id === this.wheelId) { this.wheelId = null; this.wheelHole = false; }
     if (id === this.stickId) {
       this.stickId = null;
       this.stick.on = false;
@@ -235,6 +257,8 @@ export class Input {
     win.addEventListener('keydown', (e) => { if (!typing(e) && !e.repeat && this.key(e.code, true)) e.preventDefault(); });
     win.addEventListener('keyup', (e) => { if (!typing(e)) this.key(e.code, false); });
     win.addEventListener('blur', () => this.clear());
+    // Ekran döndü: direksiyonun merkezi değişir, tutuş bırakılır (yeniden basınca o andan başlar)
+    win.addEventListener('orientationchange', () => this.resetPointers());
     win.addEventListener('pagehide', () => this.clear());
     if (win.document) win.document.addEventListener('visibilitychange', () => { if (win.document.hidden) this.clear(); });
     el.addEventListener('contextmenu', (e) => e.preventDefault());
