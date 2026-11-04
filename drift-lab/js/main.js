@@ -13,6 +13,7 @@ import { PHASE, FALL_AT, TOTAL, dropCurve } from './transition.js';
 import { Quality, guessLevel, LEVELS } from './quality.js';
 import { setLang, detectLang, getLang, tx } from './i18n/index.js';
 import { initA2hs, isIOS } from './a2hs.js';
+import { MemorialCard } from './memorial.js';
 
 const STEP = 1 / 60;
 const canvas = document.getElementById('game');
@@ -251,6 +252,7 @@ function pause() {
 
 function resume() {
   paused = false;
+  game.mem.reading = false; // Kart kapandıysa yakındaysa yeniden açılır
   audio.resume();
   ui.hideAll();
   last = 0;
@@ -275,6 +277,8 @@ const ui = new UI(storage, {
 });
 // iPhone/iPad: ana ekrana ekle rehberi (yalnız iOS Safari/Chrome, ana ekrandan açılmamışsa)
 initA2hs(() => audio.unlock());
+// Gençliğe Hitabe okuma kartı: anıta yaklaşınca açılır, uzaklaşınca ya da dokununca kapanır
+const memorialCard = new MemorialCard(document.getElementById('memorial-card'), () => game.dismissMemorialCard());
 
 let wakeLock = null;
 async function keepAwake(on) {
@@ -318,9 +322,14 @@ game.onEvent = (name, v) => {
     case 'tankfire': audio.tankFire(); vibrate(30); break;
     case 'tankhit': audio.explosion(0.5 + 0.4 * v); vibrate(70); break;
     case 'alert': audio.alert(); ui.alert(v); vibrate([60, 40, 60]); break;
+    case 'memorialwarn': ui.toast(tx('memorial.zone'), '#ffd34d'); break;
+    case 'memorialread': memorialCard.show(!!v); break;
+    case 'memorialfail': ui.memorialFail(v); memorialCard.show(false); vibrate([160, 60, 260]); break;
     case 'gameover': {
       rememberQuality();
-      const record = game.result.cheated ? { newScore: false, newTime: false } : storage.recordRun(game.result);
+      // Hileli koşu rekor ve kazanç saymaz; anıt cezası yine de düşülür
+      const record = game.result.cheated ? { newScore: false, newTime: false, penalty: storage.applyPenalty(game.result.penalty) } : storage.recordRun(game.result);
+      memorialCard.show(false);
       ui.setHud(false);
       ui.over(game.result, record);
       keepAwake(false);
@@ -375,6 +384,10 @@ function frame(now) {
   audio.update(game, !paused, now);
   controls.update();
 
+  if (memorialCard.open) {
+    if (paused || game.state !== 'play') memorialCard.show(false);
+    else memorialCard.tick(elapsed);
+  }
   hudT -= elapsed;
   if (hudT <= 0 && game.state === 'play') {
     hudT = 0.1;
@@ -467,6 +480,6 @@ function boot() {
 }
 
 // Test ve geliştirici erişimi
-globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover, quality, LEVELS, controls, audio };
+globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover, quality, LEVELS, controls, audio, memorialCard };
 
 boot();

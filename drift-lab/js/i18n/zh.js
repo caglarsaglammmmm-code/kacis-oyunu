@@ -11,6 +11,7 @@ export default {
     title: "将游戏添加到主屏幕", s1Bottom: "点按下方的分享按钮", s1Top: "点按上方的分享按钮",
     s2: "选择“添加到主屏幕”", s3: "点按“添加”", ok: "好的", never: "不再显示",
   },
+  memorial: { zone: '纪念碑区域', penalty: '-{n} 金币', disrespect: '对纪念碑不敬！', over: '闯入纪念碑区域' },
   aria: {
     weather: '天气',
     fire: '开火', code: '代码',

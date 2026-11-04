@@ -335,6 +335,16 @@ export class UI {
     el.classList.add('run');
   }
 
+  // Anıta saygısızlık: büyük kırmızı yazı, ardından normal oyun bitti ekranı
+  memorialFail(n) {
+    const el = $('memorial-msg');
+    el.firstElementChild.textContent = tx('memorial.penalty', { n });
+    el.lastElementChild.textContent = tx('memorial.disrespect');
+    el.classList.remove('run');
+    void el.offsetWidth;
+    el.classList.add('run');
+  }
+
   alienAlert() {
     const el = $('alert');
     el.textContent = tx('alert.aliens');
@@ -402,11 +412,16 @@ export class UI {
 
   over(result, record) {
     const d = this.storage.data;
-    $('over-title').textContent = tx(record.newScore ? 'over.record' : result.cause === 'water' ? 'over.sunk' : 'over.caught');
-    $('over-title').classList.toggle('record', record.newScore);
+    const memorial = result.cause === 'memorial';
+    $('memorial-msg').classList.remove('run'); // Oyun bitti ekranı açılınca ceza yazısı kalkar
+    $('over-title').textContent = tx(memorial ? 'memorial.over' : record.newScore ? 'over.record' : result.cause === 'water' ? 'over.sunk' : 'over.caught');
+    $('over-title').classList.toggle('record', record.newScore && !memorial);
+    $('over-title').classList.toggle('memorial', memorial);
     $('over-score').textContent = txNum(result.score);
     $('over-time').textContent = formatTime(result.time);
-    $('over-coins').textContent = `+${result.coins}`;
+    // Anıt cezası: düşülen para eksiyle gösterilir (hiç para yoksa 0)
+    $('over-coins').textContent = memorial ? `-${record.penalty || 0}` : `+${result.coins}`;
+    $('over-coins').classList.toggle('minus', memorial);
     $('over-kills').textContent = result.kills;
     $('over-broken').textContent = result.broken;
     $('over-near').textContent = result.nearMisses;

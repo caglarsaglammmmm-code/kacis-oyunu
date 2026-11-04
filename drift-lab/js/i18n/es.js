@@ -11,6 +11,7 @@ export default {
     title: "Añade el juego a tu pantalla de inicio", s1Bottom: "Toca el botón Compartir de abajo", s1Top: "Toca el botón Compartir de arriba",
     s2: "Elige «Añadir a pantalla de inicio»", s3: "Toca «Añadir»", ok: "Vale", never: "No volver a mostrar",
   },
+  memorial: { zone: 'Zona del monumento', penalty: '-{n} MONEDAS', disrespect: '¡Falta de respeto al monumento!', over: 'MONUMENTO INVADIDO' },
   aria: {
     weather: 'Clima',
     fire: 'Disparar', code: 'Código',

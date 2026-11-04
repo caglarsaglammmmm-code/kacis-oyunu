@@ -870,3 +870,26 @@ html[lang="ja"] #alert, html[lang="zh-CN"] #alert, html[lang="ja"] #toast, html[
   .a2hs { left: calc(var(--cover-w, 50vw) / 2); bottom: calc(var(--safe-b) + 34px); width: min(340px, calc(var(--cover-w, 50vw) - 24px)); padding: 8px 10px; }
   .a2hs ol { gap: 3px; margin-bottom: 6px; }
 }
+
+/* v20: Cumhuriyet Meydanı anıtı. Gençliğe Hitabe okuma kartı ve anıt cezası yazısı */
+@font-face { font-family: 'Playfair Display'; font-weight: 400; src: url(../fonts/playfair-display-latin-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Playfair Display'; font-weight: 400; src: url(../fonts/playfair-display-latin-ext-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
+@font-face { font-family: 'Playfair Display'; font-weight: 700; src: url(../fonts/playfair-display-latin-700-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
+@font-face { font-family: 'Playfair Display'; font-weight: 700; src: url(../fonts/playfair-display-latin-ext-700-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
+.memorial-card { position: fixed; left: 50%; top: calc(var(--safe-t) + 84px); transform: translateX(-50%); width: min(560px, calc(100vw - 24px)); box-sizing: border-box; padding: 10px 16px 12px; border-radius: 12px; background: rgba(16, 15, 20, .66); border: 1px solid rgba(214, 178, 92, .7); box-shadow: 0 6px 22px rgba(0, 0, 0, .35); color: #f3eee2; z-index: 7; font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; animation: mcIn .5s ease-out both; cursor: pointer; }
+.memorial-card[hidden] { display: none; }
+.memorial-card header { display: flex; align-items: baseline; justify-content: center; gap: 10px; border-bottom: 1px solid rgba(214, 178, 92, .45); padding-bottom: 6px; margin-bottom: 6px; }
+.memorial-card h3 { margin: 0; font: 700 21px/1.2 'Playfair Display', Georgia, serif; color: #f1d27f; letter-spacing: .01em; }
+.memorial-card header span { font: 400 16px/1.2 'Playfair Display', Georgia, serif; color: #d9c79a; }
+.memorial-card .mc-body { height: clamp(84px, 21vh, 190px); overflow: hidden; -webkit-mask-image: linear-gradient(transparent 0, #000 10px, #000 calc(100% - 14px), transparent 100%); mask-image: linear-gradient(transparent 0, #000 10px, #000 calc(100% - 14px), transparent 100%); }
+.memorial-card .mc-text p { margin: 0 0 10px; font: 400 17px/1.55 'Playfair Display', Georgia, serif; text-align: left; overflow-wrap: break-word; }
+.memorial-card .mc-text .mc-sign { margin: 4px 0 18px; text-align: right; font-weight: 700; color: #f1d27f; font-size: 16px; }
+@keyframes mcIn { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (orientation: landscape) and (max-height: 520px) { .memorial-card { top: calc(var(--safe-t) + 8px); width: min(520px, 56vw); } .memorial-card .mc-body { height: clamp(80px, 34vh, 170px); } }
+@media (prefers-reduced-motion: reduce) { .memorial-card { animation: none; } }
+#memorial-msg { position: fixed; left: 0; right: 0; margin: 0 auto; width: fit-content; max-width: calc(100vw - 24px); box-sizing: border-box; top: 30%; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 20px; border-radius: 14px; background: rgba(20, 4, 6, .55); pointer-events: none; opacity: 0; z-index: 8; text-align: center; }
+#memorial-msg b { font: 400 clamp(34px, 11vw, 60px)/1 Bungee, var(--pxt), sans-serif; color: #ff2b2b; text-shadow: 0 3px 0 #5a0000, 0 0 14px rgba(255, 40, 40, .45); }
+#memorial-msg small { font: 800 clamp(18px, 5.4vw, 28px)/1.15 Nunito, var(--pxt), sans-serif; color: #ff4a4a; text-shadow: 0 2px 0 rgba(0, 0, 0, .7); overflow-wrap: anywhere; }
+#memorial-msg.run { animation: memMsg 3.2s ease-out both; }
+@keyframes memMsg { 0% { opacity: 0; transform: scale(1.4); } 10% { opacity: 1; transform: scale(1); } 82% { opacity: 1; } 100% { opacity: 0; } }
+#over-coins.minus { color: #ff4a4a; }

@@ -11,6 +11,7 @@ export default {
     title: "Oyunu ana ekrana ekle", s1Bottom: "Alttaki Paylaş düğmesine bas", s1Top: "Üstteki Paylaş düğmesine bas",
     s2: "Ana Ekrana Ekle'yi seç", s3: "Ekle'ye bas", ok: "Tamam", never: "Bir daha gösterme",
   },
+  memorial: { zone: 'Anıt alanı', penalty: '-{n} PARA', disrespect: 'Anıta saygısızlık!', over: 'ANIT ALANI İHLALİ' },
   aria: {
     weather: 'Hava durumu',
     fire: 'Ateş', code: 'Kod',

@@ -9,6 +9,7 @@ import { rimIcon } from './pixelcars.js';
 import { paintPad, tallArt, landmarkSign } from './landmarks.js';
 import { paintBuilding2, shadowOf } from './buildings.js';
 import { FX } from './effects.js';
+import { MemorialArt, bakeMemorialPad } from './memorial.js';
 import { signKind, paintDoner, paintPromo, paintDancer, paintBalcony, paintWashing, paintMoon, paintStars, rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintUfo, paintRover, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
 
 const PF = CONFIG.perf;
@@ -211,6 +212,7 @@ export class Renderer {
     this.tallList = [];
     this.syncBakes = 0; // Görünür parça hazır değilse kare beklemiştir: ölçüm için
     this.queue = []; // Sprite işleri kare bütçesiyle yapılır
+    this.memorial = new MemorialArt(); // Cumhuriyet Meydanı anıtı: önbellekli, yakında ayrıntılı
     this.makeSprites();
   }
 
@@ -1192,6 +1194,7 @@ export class Renderer {
     for (let i = 0; i < c.padCount; i++) {
       const p = c.pads[i];
       if (p.w <= 0 || p.h <= 0) continue; // Otoban bandında kalan saha iptal edilmiştir
+      if (p.kind === 'anit') { bakeMemorialPad(g, c.x + (p.tx + 1) * TILE, c.y + p.ty * TILE, (p.w - 2) * TILE, p.h * TILE * 0.7); continue; }
       const x = c.x + p.tx * TILE + 3;
       const y = c.y + p.ty * TILE + 3;
       const w = p.w * TILE - 6;
@@ -1472,6 +1475,17 @@ export class Renderer {
       this.stepJob(PF.bakeBudget);
     }
     this.stepQueue(2);
+
+    // Cumhuriyet Meydanı anıtı: yer zeminin üstünde, her şeyin altında. Görünmüyorsa çizilmez
+    const mb = world.memorialBox();
+    this.memBox = null;
+    if (mb) {
+      this.memorial.update(world.memorialDist(cam.x, cam.y));
+      if (mb.x < vx1 && mb.x + mb.w > vx0 && mb.y < vy1 && mb.y + mb.h > vy0) {
+        this.memBox = mb;
+        this.memorial.draw(ctx, mb, now, s);
+      }
+    }
 
     this.drawDecals(game, vx0, vx1, vy0, vy1);
     this.drawSkids(game, vx0, vx1, vy0, vy1);
@@ -1764,6 +1778,7 @@ export class Renderer {
     if (night < 0.05) return;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
     const sp = this.sprites;
+    if (this.memBox) this.memorial.drawNight(ctx, this.memBox, now, this.s, night, sp.lamp);
     ctx.globalCompositeOperation = 'lighter';
     const wet = game.weather === 'rain' || game.weather === 'ice';
     for (let cy = c0y; cy <= c1y; cy++) {

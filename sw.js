@@ -1,5 +1,5 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'penci-zorn-v19.0.1';
+const CACHE = 'penci-zorn-v20.0.0';
 const ASSETS = [
   './',
   'index.html',
@@ -10,6 +10,11 @@ const ASSETS = [
   'js/config.js',
   'js/custom.js',
   'js/a2hs.js',
+  'js/memorial.js',
+  'gorseller/ataturk/ataturk-1.jpeg',
+  'gorseller/ataturk/ataturk-2.jpeg',
+  'gorseller/ataturk/ataturk-3.jpeg',
+  'gorseller/ataturk/ataturk-4.jpeg',
   'js/i18n/index.js',
   'js/i18n/tr.js',
   'js/i18n/en.js',
@@ -86,6 +91,10 @@ const ASSETS = [
   'fonts/nunito-latin-ext-800-normal.woff2',
   'fonts/playfair-display-latin-400-italic.woff2',
   'fonts/playfair-display-latin-ext-400-italic.woff2',
+  'fonts/playfair-display-latin-400-normal.woff2',
+  'fonts/playfair-display-latin-ext-400-normal.woff2',
+  'fonts/playfair-display-latin-700-normal.woff2',
+  'fonts/playfair-display-latin-ext-700-normal.woff2',
 ];
 
 self.addEventListener('install', (event) => {

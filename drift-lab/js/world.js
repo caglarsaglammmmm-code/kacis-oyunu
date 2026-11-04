@@ -109,6 +109,7 @@ export class World {
     this.kolej = null;
     this.marks = null;
     this.sites = null;
+    this.memo = undefined; // Anıt alanının dünya kutusu (memorialBox)
     this.chunks = new Map();
     this.free = [];
     this.onRelease = null; // Çizim tarafı önbelleği geri alır
@@ -130,6 +131,7 @@ export class World {
     this.kolej = null;
     this.marks = null;
     this.sites = null;
+    this.memo = undefined;
   }
 
   release(c) {
@@ -238,6 +240,40 @@ export class World {
     const c = this.chunk(cx, cy);
     const id = c.rectAt[(ty - cy * CT) * CT + (tx - cx * CT)];
     return id > 0 && c.rects[id - 1].sacred;
+  }
+
+  // Cumhuriyet Meydanı'ndaki korunan bölümün dünya kutusu. Chunk yüklenmeden de bilinir (yer tohumdan hesaplanır)
+  memorialBox() {
+    if (this.memo !== undefined) return this.memo;
+    const m = this.landmarkList().find((k) => k.id === 'anit');
+    const R = CONFIG.memorial.rect;
+    this.memo = m ? { x: m.cx * CHUNK + R[0] * TILE, y: m.cy * CHUNK + R[1] * TILE, w: (R[2] - R[0]) * TILE, h: (R[3] - R[1]) * TILE, cx: m.cx, cy: m.cy } : null;
+    return this.memo;
+  }
+
+  // Nokta korunan bölümün (margin kadar genişletilmiş) içinde mi
+  inMemorial(x, y, margin = 0) {
+    const b = this.memorialBox();
+    return !!b && x > b.x - margin && x < b.x + b.w + margin && y > b.y - margin && y < b.y + b.h + margin;
+  }
+
+  // Korunan bölümün kenarına uzaklık (içerideyse 0)
+  memorialDist(x, y) {
+    const b = this.memorialBox();
+    if (!b) return Infinity;
+    const dx = Math.max(b.x - x, 0, x - b.x - b.w);
+    const dy = Math.max(b.y - y, 0, y - b.y - b.h);
+    return Math.hypot(dx, dy);
+  }
+
+  // Daire korunan bölüme değiyor mu; out: nx, ny, depth (dışarı itme yönü)
+  memorialHit(x, y, r, out) {
+    const b = this.memorialBox();
+    if (!b || x < b.x - r - 1 || x > b.x + b.w + r + 1 || y < b.y - r - 1 || y > b.y + b.h + r + 1) return false;
+    const depth = circleRect(x, y, r, b.x, b.y, b.w, b.h, this.tmp);
+    if (depth <= 0) return false;
+    out.nx = this.tmp.nx; out.ny = this.tmp.ny; out.depth = depth;
+    return true;
   }
 
   // Dairenin en derin temasını bulur; out: nx, ny, depth, rect, chunk
@@ -406,7 +442,7 @@ export class World {
     // Kayıt yeniden kullanılır: önceki binanın tabela görüntüsü kalmasın (render.js rectSign önbelleği)
     r.signImg = null;
     r.landmark = ''; r.signArt = ''; r.roofSignH = 0; r.noRoofSign = false; r.variant = '';
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false;
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false; r.memorial = false;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -1162,6 +1198,8 @@ export class World {
       this.sign(this.addRect(c, 'building', 26, 4, 30, 7, 5, B.BAGEVI, '#f0e6d2'), K.meram, '#5c3a22', 1);
       this.scatter(c, PROP.TREE, 34, [GROUND.DIRT]);
       this.scatter(c, PROP.BUSH, 12, [GROUND.DIRT]);
+    } else if (id === 'anit') {
+      this.fillMemorial(c);
     } else {
       // Okullar: ad isim tablosunda, renkler uydurma ve genel
       const look = { serife: ['#efe2c0', '#c8261e'], ted: ['#f2f2f2', '#c1121f'], gundogdu: ['#ffe08a', '#1f3a68'] }[id];
@@ -1179,6 +1217,27 @@ export class World {
       this.fence(c, [[15, 20]], [], '#3a3d44');
       this.scatter(c, PROP.TREE, 30, [GROUND.GRASS]);
     }
+  }
+
+  // Cumhuriyet Meydanı: geniş taş meydan, ortada korunan anıt bölümü, iki yanda ağaçlı çimenlik,
+  // güneyde basamaklar ve banklar. Anıtın kendisi js/memorial.js içinde önbellekli çizilir
+  fillMemorial(c) {
+    const [x0, y0, x1, y1] = CONFIG.memorial.rect;
+    this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
+    this.setGround(c, ART + 1, ART + 2, x0 - 1, CT - 2, GROUND.GRASS);
+    this.setGround(c, x1 + 1, ART + 2, CT - 1, CT - 2, GROUND.GRASS);
+    const r = this.addRect(c, 'memorial', x0, y0, x1, y1, 0, BUILD.ANIT, '#e9e4d8');
+    r.sacred = true; // Hiçbir şey yıkamaz
+    r.memorial = true; // Hiç kimse giremez
+    this.addPad(c, 'anit', x0 - 1, y1, x1 - x0 + 2, 3); // Basamaklar
+    for (let y = ART + 3; y < CT - 2; y += 3) {
+      this.addProp(c, PROP.TREE, c.x + (ART + 1.6) * TILE, c.y + (y + 0.5) * TILE);
+      this.addProp(c, PROP.TREE, c.x + (CT - 1.6) * TILE, c.y + (y + 0.5) * TILE);
+    }
+    for (let x = x0 + 1; x < x1 - 1; x += 3) this.addProp(c, PROP.BENCH, c.x + (x + 0.5) * TILE, c.y + (CT - 1.4) * TILE);
+    // Çevre aydınlatması: korunan bölümün köşelerinde ve güney kenarında
+    const L = (tx, ty) => this.addLight(c, 0, c.x + tx * TILE, c.y + ty * TILE, 0, 0, null);
+    for (const [tx, ty] of [[x0 - 0.6, y0 - 0.6], [x1 + 0.6, y0 - 0.6], [x0 - 0.6, y1 + 0.6], [x1 + 0.6, y1 + 0.6], [(x0 + x1) / 2, y0 - 1.2]]) L(tx, ty);
   }
 
   fillPark(c) {

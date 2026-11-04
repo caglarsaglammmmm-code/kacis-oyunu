@@ -22,6 +22,7 @@ const HPG = CONFIG.copHpGrowth;
 // Oyun dakikasına göre yeni polisin silah canı katı: üstel artış, tavanlı
 export function copHpMul(time) { return Math.min(HPG.max, HPG.perMin ** (Math.max(0, time) / 60)); }
 const WX = CONFIG.weather;
+const MEM = CONFIG.memorial;
 
 // Hava: random ise ağırlıklı seçim, değilse ayardaki tür
 export function pickWeather(setting, rnd = Math.random) {
@@ -192,6 +193,8 @@ export class Game {
     this.escCombo = 0;
     this.escLastT = -99;
     this.cheat = false; // Kaydedilmez, her koşu kapalı başlar
+    this.penalty = 0; // Anıta saygısızlık cezası (para)
+    this.mem = { warned: false, reading: false, dismissed: false, dist: Infinity };
     this.cheatUsed = false;
     this.phasing = false;
     this.exitOn = false;
@@ -385,6 +388,7 @@ export class Game {
 
     this.updatePlayer(dt, steer, reverse);
     if (this.state !== 'play') return;
+    this.updateMemorial();
     this.updateFlow(dt);
     this.updateCops(dt);
     if (this.weapon) this.updateWeapon(dt);
@@ -481,6 +485,12 @@ export class Game {
     }
 
     if (noclip) {
+      // Hile açıkken de anıt alanı katı engeldir: içeri girilmez, ceza ve patlama olmaz
+      if (this.world.memorialHit(p.x, p.y, p.len * 0.5, hit)) {
+        p.x += hit.nx * hit.depth;
+        p.y += hit.ny * hit.depth;
+        bounceOff(p, hit.nx, hit.ny);
+      }
       this.phasing = this.world.circleHit(p.x, p.y, p.wid * 0.6, hit);
       if (this.exitOn) this.stepExit(dt);
     } else {
@@ -659,13 +669,59 @@ export class Game {
     this.emit('explosion', 1);
   }
 
+  // Anıta saygısızlık: çizgi film tarzı büyük ateş topu ve duman, oyun hemen biter, para cezası
+  // nx, ny: korunan bölümden dışarı yön. Ateş topu anıtın üstüne taşmasın diye o yöne kaydırılır
+  memorialFail(nx = 0, ny = 1) {
+    if (this.state !== 'play') return;
+    this.cause = 'memorial';
+    this.penalty = MEM.penalty;
+    const p = this.player;
+    p.vx = 0; p.vy = 0; p.speed = 0;
+    this.state = 'dying';
+    this.dyingT = DMG.dyingTime * 1.4;
+    this.stage = 4;
+    const ex = p.x + nx * MEM.explosionShift;
+    const ey = p.y + ny * MEM.explosionShift;
+    this.fx.explosion(ex, ey, MEM.explosion);
+    this.fx.burst(FX.DARK, ex, ey, 16, 90, 1.6, 26);
+    this.fx.debris(p.x, p.y, this.carSpec.color, 14, 260);
+    this.cam.shake = 22;
+    this.hitFlash = 1;
+    this.closeMemorialCard();
+    this.emit('explosion', 1);
+    this.emit('memorialfail', MEM.penalty);
+  }
+
+  // Anıt uyarısı ve okuma kartı: yalnızca uzaklık hesaplanır, kart DOM tarafında
+  updateMemorial() {
+    const p = this.player;
+    const m = this.mem;
+    const d = this.world.memorialDist(p.x, p.y);
+    m.dist = d;
+    if (!m.warned && d < MEM.warnDist) { m.warned = true; this.emit('memorialwarn'); } else if (m.warned && d > MEM.warnReset) m.warned = false;
+    if (m.dismissed && d > MEM.readClose) m.dismissed = false;
+    const want = !m.dismissed && (d < MEM.readDist || (m.reading && d <= MEM.readClose));
+    if (want !== m.reading) { m.reading = want; this.emit('memorialread', want ? 1 : 0); }
+  }
+
+  // Kart dokununca kapanır; uzaklaşıp yeniden yaklaşınca tekrar açılır
+  dismissMemorialCard() {
+    this.mem.dismissed = true;
+    this.closeMemorialCard();
+  }
+
+  closeMemorialCard() {
+    if (this.mem.reading) { this.mem.reading = false; this.emit('memorialread', 0); }
+  }
+
   finish() {
     this.state = 'over';
     if (this.giantT > 0) this.setGiant(false);
     // Hile kullanılan koşu kazandırmaz, rekor saymaz
     // Kıl payı paraları ayrıca eklenir; geri kalan kazanç earnMul ile yumuşatılır
     const base = this.coins - this.escCoins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
-    const earned = this.cheatUsed ? 0 : Math.round(base * SC.earnMul) + this.escCoins;
+    const memorial = this.cause === 'memorial';
+    const earned = this.cheatUsed || memorial ? 0 : Math.round(base * SC.earnMul) + this.escCoins;
     this.result = {
       score: Math.floor(this.score),
       time: this.time,
@@ -676,6 +732,7 @@ export class Game {
       nearMisses: this.nearMisses,
       cause: this.cause,
       cheated: this.cheatUsed,
+      penalty: memorial ? this.penalty : 0, // Kalıcı paradan düşülür (storage, 0'ın altına inmez)
     };
     this.emit('gameover');
   }
@@ -691,6 +748,11 @@ export class Game {
       const cy = b.y + Math.sin(b.a) * off * sign;
       if (!this.world.circleHit(cx, cy, r, hit)) continue;
       const rect = hit.rect;
+      // Anıt alanına girmeye çalışan oyuncu: araba patlar, ceza. Ölümsüzlükte (geliştirici) yalnızca duvar
+      if (rect.memorial && isPlayer && !this.god && this.state === 'play') {
+        this.memorialFail(hit.nx, hit.ny);
+        return 0;
+      }
       if (b.crusher && !isWaterRect(rect) && !rect.sacred) {
         this.crushRect(hit.chunk, rect);
         continue;
@@ -884,6 +946,8 @@ export class Game {
     c.mhpMax = (WPN.hp[type] || WPN.hp.car) * copHpMul(this.time); c.mhp = c.mhpMax; c.byWeapon = false;
     c.escIn = false; c.escHit = false; c.escHitAt = -99; c.escEnterT = 0; c.escAt = -99;
     c.turret = a; c.fireT = TK.fireEvery * 0.6; c.fxT = Math.random() * 3; c.hurtFlash = 0;
+    // Hiçbir araç anıt alanında doğmaz (uçanlar dahil)
+    if (this.world.memorialHit(c.x, c.y, c.len * 0.6 + 20, hit)) { c.x += hit.nx * hit.depth; c.y += hit.ny * hit.depth; }
     this.cops.push(c);
     return c;
   }
@@ -1274,6 +1338,12 @@ export class Game {
     c.vy += ((dy / d) * want - c.vy) * k;
     c.x += c.vx * dt;
     c.y += c.vy * dt;
+    // Uçan araçlar anıt alanının üstünden geçmez
+    if (this.world.memorialHit(c.x, c.y, c.len * 0.6 + 20, hit)) {
+      c.x += hit.nx * hit.depth; c.y += hit.ny * hit.depth;
+      const vn = c.vx * hit.nx + c.vy * hit.ny;
+      if (vn < 0) { c.vx -= vn * hit.nx; c.vy -= vn * hit.ny; }
+    }
     c.a += dt * 2;
     const bx = p.x - c.x;
     const by = p.y - c.y;
@@ -1535,6 +1605,8 @@ export class Game {
     s.t = 0;
     s.x = p.x + p.vx * TK.lead;
     s.y = p.y + p.vy * TK.lead;
+    // Top mermisi anıt alanına düşmez: hedef korunan bölümün dışına kayar
+    if (this.world.memorialHit(s.x, s.y, TK.radius * 0.7, hit)) { s.x += hit.nx * hit.depth; s.y += hit.ny * hit.depth; }
     const mx = c.x + Math.cos(c.turret) * 62;
     const my = c.y + Math.sin(c.turret) * 62;
     this.fx.burst(FX.FIRE, mx, my, 8, 100, 0.25, 14);

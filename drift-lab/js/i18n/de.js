@@ -11,6 +11,7 @@ export default {
     title: "Spiel zum Home-Bildschirm hinzufügen", s1Bottom: "Tippe unten auf „Teilen“", s1Top: "Tippe oben auf „Teilen“",
     s2: "Wähle „Zum Home-Bildschirm“", s3: "Tippe auf „Hinzufügen“", ok: "OK", never: "Nicht mehr zeigen",
   },
+  memorial: { zone: 'Denkmalbereich', penalty: '-{n} MÜNZEN', disrespect: 'Respektlosigkeit gegenüber dem Denkmal!', over: 'DENKMAL MISSACHTET' },
   aria: {
     weather: 'Wetter',
     fire: 'Feuer', code: 'Code',

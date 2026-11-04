@@ -17,9 +17,9 @@ export const BUILD = {
 
 export const CONFIG = {
   name: NAMES.oyun,
-  version: '19.0.1',
+  version: '20.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v19.0.1/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v20.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -66,6 +66,7 @@ export const CONFIG = {
       { id: 'serife', ring: [2, 5] }, { id: 'bedesten', ring: [3, 7] }, { id: 'kongre', ring: [4, 8] },
       { id: 'kule', ring: [4, 8] }, { id: 'kulturpark', ring: [4, 9] }, { id: 'ted', ring: [5, 10] },
       { id: 'gundogdu', ring: [5, 10] }, { id: 'meram', ring: [6, 11] },
+      { id: 'anit', ring: [2, 4] }, // Cumhuriyet Meydanı ve anıt (CONFIG.memorial, js/memorial.js)
     ],
     // Yüksek özel yapıların yükseklik payı (sıradan binalar en çok tall.height[1])
     landmarkHeight: { kolej: 0.46, kule: 0.95 },
@@ -412,12 +413,25 @@ export const CONFIG = {
   // turn: güdüm dönüş hızı, life: ömür (sn), lockEvery: hedef arama sıklığı (kare)
   weapon: { fireEvery: 3.0, damage: 22, hp: { car: 100, fast: 100, moto: 80, advanced: 110, swat: 300, tank: 400, rover: 150, ufo: 250 }, armor: { swat: 0.7, tank: 0.6 }, maxMissiles: 3, speed: 760, turn: 5.5, life: 2.4, range: 620, cone: 0.62, hitR: 30, lockEvery: 6 },
 
-  // ZAMANLA ARTAN POLİS CANI (silah canı, bütün arabalarda). Yeni doğan polisin canı = hp * min(max, perMin ^ dakika).
+  // ZAMANLA ARTAN POLİS CANI (silah canı, bütün arabalarda). Yeni çıkan polisin canı = hp * min(max, perMin ^ dakika).
   // Sahadaki polisler değişmez. %12 / dk: 2. dk 1,25x, 5. dk 1,76x, ~9,7. dk'dan sonra 3x tavan
   copHpGrowth: { perMin: 1.12, max: 3 },
 
   // iPhone/iPad ana ekrana ekle rehberi: delay menü açıldıktan sonra kartın görünme gecikmesi (sn), key kayıt anahtarı
   a2hs: { delay: 1.2, key: 'drift-lab-a2hs' },
+  // Cumhuriyet Meydanı anıtı (js/memorial.js). Korunan bölüm (rect) herkese katı engeldir; oyuncu girmeye çalışırsa araba patlar.
+  // rect: chunk içindeki karo sınırı [x0, y0, x1, y1]. Uzaklıklar korunan bölümün kenarından dünya birimiyle
+  memorial: {
+    rect: [9, 5, 26, 24],
+    warnDist: 170, warnReset: 330, // "Anıt alanı" uyarısı, yeniden uyarı için uzaklaşma
+    readDist: 560, readClose: 760, // Okuma kartı açılır / kapanır
+    penalty: 30, // Para cezası (0'ın altına inmez)
+    explosion: 115, explosionShift: 70, // Patlama yarıçapı; ateş topu anıttan dışarı bu kadar kayar
+    scroll: { delay: 2.4, speed: 16 }, // Kartta bekleme (sn) ve kayma hızı (px/sn)
+    // Önbellekli çizim: yakında yüksek çözünürlük, uzakta sade. Ölçek: dünya birimi başına piksel
+    art: { hiScale: 1.6, loScale: 0.5, hiNear: 2000, hiFree: 3600, loFree: 5200, hiMinPx: 0.9 },
+    flag: { slices: 9, wave: 2.4, amp: 0.09 },
+  },
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
   // Yeni kod eklemek için satır eklenir. car: açılan araba

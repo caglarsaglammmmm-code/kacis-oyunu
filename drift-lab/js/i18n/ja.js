@@ -11,6 +11,7 @@ export default {
     title: "ゲームをホーム画面に追加", s1Bottom: "下の共有ボタンをタップ", s1Top: "上の共有ボタンをタップ",
     s2: "「ホーム画面に追加」を選ぶ", s3: "「追加」をタップ", ok: "OK", never: "今後表示しない",
   },
+  memorial: { zone: '記念碑エリア', penalty: '-{n} コイン', disrespect: '記念碑への不敬行為！', over: '記念碑エリア侵入' },
   aria: {
     weather: '天気',
     fire: '発射', code: 'コード',
