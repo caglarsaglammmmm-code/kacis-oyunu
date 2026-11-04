@@ -12,7 +12,7 @@ import { loadAtlas } from './sheet.js';
 import { PHASE, FALL_AT, TOTAL, dropCurve } from './transition.js';
 import { Quality, guessLevel, LEVELS } from './quality.js';
 import { setLang, detectLang, getLang, tx } from './i18n/index.js';
-import { initA2hs } from './a2hs.js';
+import { initA2hs, isIOS } from './a2hs.js';
 
 const STEP = 1 / 60;
 const canvas = document.getElementById('game');
@@ -421,7 +421,7 @@ globalThis.__gameBack = handleBack;
 
 function boot() {
   const native = !!(globalThis.Capacitor && globalThis.Capacitor.isNativePlatform && globalThis.Capacitor.isNativePlatform());
-  ui.setApkButton(!native, CONFIG.apkUrl);
+  ui.setApkButton(!native && !isIOS(navigator), CONFIG.apkUrl); // iPhone/iPad APK kuramaz
   // Telefona kurulu web sürümünde de geri tuşu oyunu kapatmasın
   if (!native && location.protocol !== 'file:') {
     history.pushState({ kacis: 1 }, '');

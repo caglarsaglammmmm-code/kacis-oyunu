@@ -6,12 +6,17 @@ import { tx } from './i18n/index.js';
 
 const A2 = CONFIG.a2hs;
 
+// iPhone/iPad/iPod mu (iPadOS masaüstü kimliği dahil). APK orada kurulamaz: indirme düğmesi gizlenir
+export function isIOS(nav) {
+  const ua = (nav && nav.userAgent) || '';
+  return /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && ((nav && nav.maxTouchPoints) || 0) > 1);
+}
+
 // null: gösterme. Aksi halde { browser, share }: share = Paylaş düğmesinin yeri ('bottom' | 'top')
 export function a2hsPlatform(nav, win) {
   const ua = (nav && nav.userAgent) || '';
   const ipadDesktop = /Macintosh/.test(ua) && (nav.maxTouchPoints || 0) > 1; // iPadOS masaüstü kimliğiyle gelir
-  const ios = /iPhone|iPad|iPod/.test(ua) || ipadDesktop;
-  if (!ios) return null;
+  if (!isIOS(nav)) return null;
   const mm = (q) => { try { return !!(win.matchMedia && win.matchMedia(q).matches); } catch { return false; } };
   if (nav.standalone === true || mm('(display-mode: standalone)') || mm('(display-mode: fullscreen)')) return null;
   try { if (win.Capacitor && win.Capacitor.isNativePlatform && win.Capacitor.isNativePlatform()) return null; } catch { /* yok */ }
