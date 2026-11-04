@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const MODULES = ['names', 'config', 'i18n/tr', 'i18n/en', 'i18n/ja', 'i18n/zh', 'i18n/es', 'i18n/de', 'i18n/index', 'physics', 'world', 'effects', 'police', 'crowd', 'gun', 'meteor', 'game', 'art', 'landmarks', 'cars', 'buildings', 'carsheet', 'sheet', 'carmodels', 'car3d', 'menu3d', 'custom', 'memorial', 'stadium', 'render', 'cheat', 'input', 'controls', 'storage', 'audio', 'pixelcars', 'secret', 'pixelmenu', 'ui', 'transition', 'quality', 'a2hs', 'main'];
+const MODULES = ['names', 'config', 'i18n/tr', 'i18n/en', 'i18n/ja', 'i18n/zh', 'i18n/es', 'i18n/de', 'i18n/index', 'physics', 'world', 'effects', 'police', 'crowd', 'gun', 'meteor', 'game', 'art', 'landmarks', 'cars', 'buildings', 'carsheet', 'sheet', 'carmodels', 'car3d', 'menu3d', 'custom', 'memorial', 'stadium', 'snow', 'render', 'cheat', 'input', 'controls', 'storage', 'audio', 'pixelcars', 'secret', 'pixelmenu', 'ui', 'transition', 'quality', 'a2hs', 'main'];
 
 export function buildBundle() {
   const parts = MODULES.map((name) => {

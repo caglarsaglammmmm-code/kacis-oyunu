@@ -166,7 +166,7 @@ export class MeteorStorm {
     const p = game.player;
     const d = Math.hypot(p.x - m.x, p.y - m.y);
     const near = game.onScreen(m.x, m.y, 200);
-    // BAM: parlak flaş, ateş topu, şok dalgası, kıvılcım, moloz, toz, krater
+    // BAM: parlak flaş, ateş topu, basınç dalgası, kıvılcım, moloz, toz, krater
     fx.explosion(m.x, m.y, R * 1.2);
     fx.wave(m.x, m.y, R * 4);
     if (near) {
@@ -188,7 +188,7 @@ export class MeteorStorm {
       if (c.type === 'tank') { c.hp -= MET.tankDamage; c.hurtFlash = 0.5; if (c.hp > 0) continue; }
       game.destroyCop(i, false);
     }
-    // Şok dalgası: çevredeki araçlar itilir (suya da düşebilirler)
+    // Basınç dalgası: çevredeki araçlar itilir (suya da düşebilirler)
     if (game.shockwave) game.shockwave(m.x, m.y, R * 3, 420);
     game.crowd.blast(m.x, m.y, R, 0);
     game.crushCircle(m.x, m.y, R * 0.9);

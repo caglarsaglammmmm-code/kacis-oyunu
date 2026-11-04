@@ -70,10 +70,12 @@ export default {
   escape: { toast: '+{n} HAARSCHARF!', combo: 'COMBO +{n}' },
   code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.' },
   custom: {
-    title: 'Anpassen', paint: 'Lack', rim: 'Felgen', led: 'Unterboden', buy: 'Kaufen · {cost}', confirm: 'Bestätigen · {cost}', poor: 'Nicht genug Münzen', bought: 'Gekauft!', use: 'Schon freigeschaltet', ownFirst: 'Kaufe zuerst das Auto, um es anzupassen.',
+    title: 'Anpassen', paint: 'Lack', rim: 'Felgen', led: 'Unterboden', exhaust: 'Auspuff', listen: 'Anhören', buy: 'Kaufen · {cost}', confirm: 'Bestätigen · {cost}', poor: 'Nicht genug Münzen', bought: 'Gekauft!', use: 'Schon freigeschaltet', ownFirst: 'Kaufe zuerst das Auto, um es anzupassen.',
     paints: { gece: 'Mitternachtsschwarz', gumus: 'Hellsilber', kiraz: 'Kirschrot', okyanus: 'Ozeanblau', zumrut: 'Smaragdgrün', limon: 'Zitronengelb', mandalina: 'Mandarine', lavanta: 'Mattes Lavendel', pembe: 'Bonbonrosa', haki: 'Mattes Khaki', fume: 'Mattes Rauchgrau', bakir: 'Kupfer', lacivert: 'Marineblau Metallic', neonyesil: 'Neongrün', neonpembe: 'Neonpink', mor: 'Elektrolila', inci: 'Perlweiß', altin: 'Gold', krom: 'Spiegelchrom', lav: 'Lavarot' },
     rims: { std: 'Standard', yildiz: 'Fünfspeichen-Stern', cok: 'Vielspeichen', spor: 'Sport', derin: 'Tiefbett', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
     leds: { yok: 'Aus', mavi: 'Neonblau', pembe: 'Neonpink', mor: 'Lila', yesil: 'Grün', beyaz: 'Weiß', kirmizi: 'Rot pulsierend', buz: 'Eis pulsierend', altin: 'Gold pulsierend', gokkusagi: 'Regenbogen' },
+    exhausts: { std: 'Serie', v8: 'Grollender V8', patlamali: 'Fehlzündung', turbo: 'Turbo', spor: 'Sport hell', derin: 'Tiefer Bass' },
+    exhaustInfo: { std: 'Ab Werk, ausgewogener Klang', v8: 'Dicker, grollender Achtzylinder', patlamali: 'Knallt beim Gaswegnehmen', turbo: 'Hohes Pfeifen und Abblasen', spor: 'Scharfer, hochdrehender Schrei', derin: 'Bodenerschütternder tiefer Bass' },
   },
   weather: { title: 'Wetter', random: 'Zufall', sunny: 'Sonnig', rain: 'Regen', snow: 'Schnee', fog: 'Nebel', ice: 'Glatteis', iceWarn: 'Achtung, Glatteis!' },
   cheat: { on: 'Na sieh mal einer an – du hast den Cheatcode gefunden!', off: 'Cheat aus', badge: 'CHEAT AN' },

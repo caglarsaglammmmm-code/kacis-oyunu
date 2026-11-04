@@ -8,6 +8,7 @@ import { Crowd } from './crowd.js';
 import { tx } from './i18n/index.js';
 import { AutoGun, gunHp } from './gun.js';
 import { MeteorStorm } from './meteor.js';
+import { engineRpm } from './audio.js';
 
 const D = CONFIG.difficulty;
 const DMG = CONFIG.damage;
@@ -532,6 +533,7 @@ export class Game {
     }
     this.collideProps(p, true);
     this.driftEffects(dt, g);
+    this.updateBackfire(dt);
 
     if (this.hitFlash > 0 && Math.random() < 0.02) this.fx.sparks(p.x, p.y, 2);
     // Sığ suda sıçrama, kumda toz
@@ -539,6 +541,33 @@ export class Game {
       if (g === GROUND.SHALLOW) this.fx.spawn(FX.WATER, p.x, p.y, -p.vx * 0.15 + (Math.random() - 0.5) * 90, -p.vy * 0.15 + (Math.random() - 0.5) * 90, 0.5, 9);
       else if (g === GROUND.SAND || g === GROUND.DIRT) this.fx.spawn(FX.DUST, p.x, p.y, p.vx * 0.1, p.vy * 0.1, 0.6, 11);
     }
+  }
+
+  // Egzoz patlaması: gaz bırakınca ya da vites atarken, araç başına şans (egzozPatlamaSansi) x egzoz çarpanı.
+  // Egzozdan küçük alev ve kıvılcım; sesi main.js'te (backfire olayı)
+  updateBackfire(dt) {
+    const p = this.player;
+    const spec = this.carSpec;
+    const ch = spec.egzozPatlamaSansi || 0;
+    if (this.bfCd > 0) this.bfCd -= dt;
+    if (!ch || !spec.engine) return;
+    const k = Math.min(1.1, p.speed / spec.maxSpeed);
+    const gear = engineRpm(spec.engine, k).gear;
+    const gas = p.gas ?? 1;
+    const lift = (this.bfGas ?? 1) >= 0.8 && gas < 0.6 && k > 0.35;
+    const shift = gear > (this.bfGear ?? gear) && k > 0.3;
+    this.bfGas = gas; this.bfGear = gear;
+    if (!(lift || shift) || this.bfCd > 0) return;
+    const ex = CONFIG.custom.exhausts.find((x) => x.id === (this.look && this.look.exhaust)) || CONFIG.custom.exhausts[0];
+    if (Math.random() >= Math.min(0.95, ch * ex.pops)) return;
+    this.bfCd = 0.35;
+    const n = 2 + Math.floor(Math.random() * 3);
+    const ca = Math.cos(p.a); const sa = Math.sin(p.a);
+    const ex0 = p.x - ca * p.len * 0.55; const ey0 = p.y - sa * p.len * 0.55;
+    for (let i = 0; i < 3; i++) this.fx.spawn(FX.FIRE, ex0, ey0, -ca * 90 + (Math.random() - 0.5) * 40, -sa * 90 + (Math.random() - 0.5) * 40, 0.22, 7 + i * 2);
+    this.fx.sparks(ex0, ey0, 3, -ca, -sa);
+    this.backfires = (this.backfires || 0) + 1;
+    this.emit('backfire', n);
   }
 
   driftEffects(dt, ground) {
@@ -1621,7 +1650,7 @@ export class Game {
     }
   }
 
-  // --- Sarsıntı, parlama, şok dalgası ---
+  // --- Sarsıntı, parlama, basınç dalgası ---
   quake(dur, amp) {
     if (amp * (dur) < this.quakeAmp * this.quakeT) return; // Daha güçlüsü sürüyorsa bozma
     this.quakeT = dur; this.quakeDur = dur; this.quakeAmp = amp;

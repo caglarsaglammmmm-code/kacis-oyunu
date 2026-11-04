@@ -167,7 +167,7 @@ test('su: polis, SWAT, uzaylı, tank ve trafik itilince ya da hızla dalınca su
   console.log('# batma süreleri (sn)', JSON.stringify(times));
 });
 
-test('su: oyuncu polisi suya itebilir (çarpma itmiş sayılır); şok dalgası da iter', () => {
+test('su: oyuncu polisi suya itebilir (çarpma itmiş sayılır); basınç dalgası da iter', () => {
   const g = game({ god: true });
   const w = findWater(g);
   const c = g.spawnCop('car', 'chaser', w.x - 40, w.y + w.h / 2, 0);
@@ -180,7 +180,7 @@ test('su: oyuncu polisi suya itebilir (çarpma itmiş sayılır); şok dalgası 
   const d = g.spawnCop('swat', 'chaser', w.x - 120, w.y + w.h / 2, 0);
   d.vx = 0; d.vy = 0;
   g.shockwave(w.x - 220, w.y + w.h / 2, 300, 420);
-  assert.ok(d.pushT > 0 && d.vx > 30, 'şok dalgası savurur');
+  assert.ok(d.pushT > 0 && d.vx > 30, 'basınç dalgası savurur');
 });
 
 // --- YOL KAPATMA ---

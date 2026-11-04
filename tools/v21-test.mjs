@@ -120,7 +120,7 @@ if (only.includes('secret')) {
   await page.waitForTimeout(350);
   await shot(page, 'gecit-inis');
   await page.waitForTimeout(1300);
-  const s = await page.evaluate(() => ({ text: document.querySelector('#secret b').textContent, gift: document.querySelector('#secret small').textContent, shown: !document.getElementById('secret').hidden, owned: __drift.storage.data.owned.includes('golge'), secret: __drift.storage.data.secret }));
+  const s = await page.evaluate(() => ({ text: document.querySelector('#secret-msg b').textContent, gift: document.querySelector('#secret-msg small').textContent, shown: !document.getElementById('secret').hidden, owned: __drift.storage.data.owned.includes('golge'), secret: __drift.storage.data.secret }));
   await shot(page, 'gecit-garaj');
   console.log('gizli geçit', JSON.stringify(s));
   const flavor = await page.evaluate(() => fetch('js/names.js').then((r) => r.text()).then((t) => (t.includes("'arkadas'") ? 'arkadas' : 'play')));
@@ -242,7 +242,7 @@ if (only.includes('lang')) {
       return title;
     });
     await page.waitForTimeout(1500);
-    const fitS = await page.evaluate(() => { const e = document.querySelector('#secret .secret-text'); const r = e.getBoundingClientRect(); return r.left >= -1 && r.right <= innerWidth + 1; });
+    const fitS = await page.evaluate(() => { const e = document.getElementById('secret-msg'); const r = e.getBoundingClientRect(); return r.left >= -1 && r.right <= innerWidth + 1; });
     await shot(page, `dil-${lang}-gizli`);
     ok(sc && fitS, `${lang}: gizli bölüm yazısı`, sc);
     console.log(lang, '|', t.text, '|', m, '|', toast, '|', sc);

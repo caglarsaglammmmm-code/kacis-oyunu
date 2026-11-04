@@ -157,9 +157,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '22.0.0',
+  version: '23.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v22.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v23.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -303,20 +303,20 @@ const CONFIG = {
   // Sıra önemli: pahalılaştıkça hız, kayma ve dayanıklılık artar.
   // engine: motor sesi. kind ses karakteri (js/audio.js ENGINE_KINDS), cyl silindir, idle-red devir aralığı, gears vites
   cars: [
-    { id: 'atmaca', paints: [{ name: 'Mahalle Beji', color: '#d9d4c7', finish: 'gloss' }, { name: 'Şarap Kırmızı', color: '#8e1b24', finish: 'metal' }, { name: 'Mat Asker Yeşili', color: '#4d5a3a', finish: 'matte' }, { name: 'Çift Ton Krem-Bordo', color: '#e6dcc2', finish: 'gloss', roof: '#6d1620' }], finish: 'gloss', name: NAMES.arabalar.atmaca, cost: 0, desc: 'Her mahallenin emektarı', shape: 'atmaca', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { kind: 'old', cyl: 4, idle: 800, red: 5000, gears: 4, gain: 1 } },
-    { id: 'motor', paints: [{ name: 'Yarış Kırmızı', color: '#e8352e', finish: 'gloss', accent: '#ffe14d' }, { name: 'Elektrik Mavi', color: '#0a7cff', finish: 'metal', accent: '#ffffff' }, { name: 'Mat Siyah', color: '#1b1d22', finish: 'matte', accent: '#ff7a00' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl', accent: '#e8352e' }], finish: 'gloss', name: NAMES.arabalar.motor, cost: 100, desc: 'Dar sokakların kralı', shape: 'moto', maxSpeed: 445, accel: 610, turnRate: 3.3, grip: 4.5, driftGrip: 1.1, durability: 1.05, mass: 0.9, len: 36, wid: 16, color: '#e8352e', accent: '#ffe14d', engine: { kind: 'moto', cyl: 4, idle: 1500, red: 12500, gears: 6, gain: 0.8 } },
-    { id: 'granit', paints: [{ name: 'Gece Mavisi', color: '#1f3a68', finish: 'metal' }, { name: 'Kor Turuncu', color: '#e8551e', finish: 'metal' }, { name: 'Mat Gümüş', color: '#a7aeb7', finish: 'matte' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl' }], finish: 'metal', name: NAMES.arabalar.granit, cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'granit', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { kind: 'diesel', cyl: 4, idle: 750, red: 4300, gears: 6, gain: 1 } },
-    { id: 'elektra', paints: [{ name: 'Anadolu Kırmızı', color: '#b3122a', finish: 'metal' }, { name: 'Fırtına Grisi', color: '#4a5560', finish: 'metal' }, { name: 'Mat Toprak', color: '#8a6a4a', finish: 'matte' }, { name: 'Buz Mavisi', color: '#bcd9e6', finish: 'pearl' }], finish: 'metal', name: NAMES.arabalar.elektra, cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'elektra', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { kind: 'ev', cyl: 6, idle: 0, red: 24000, gears: 1, gain: 0.7 } },
-    { id: 'simsek', paints: [{ name: 'Mat Siyah Sarı Şerit', color: '#111318', finish: 'matte', accent: '#ffd23f' }, { name: 'Ateş Turuncu', color: '#ff5a12', finish: 'gloss', accent: '#111318' }, { name: 'Neon Yeşil', color: '#39d353', finish: 'gloss', accent: '#111318' }, { name: 'Mor Metalik', color: '#6a2bd9', finish: 'metal', accent: '#21d4fd' }], finish: 'matte', name: NAMES.arabalar.simsek, cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'simsek', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { kind: 'turbo', cyl: 4, idle: 950, red: 7400, gears: 5, gain: 1 } },
-    { id: 'cinar', paints: [{ name: 'Efsane Turuncu', color: '#e8782a', finish: 'gloss', accent: '#f6efe0' }, { name: 'Bebek Mavisi', color: '#7ec6e8', finish: 'gloss', accent: '#f6efe0' }, { name: 'Çift Ton Krem-Vişne', color: '#ead9b0', finish: 'gloss', roof: '#8a1f2f' }, { name: 'Mat Zeytin', color: '#6b6b3a', finish: 'matte', accent: '#f6efe0' }], finish: 'gloss', name: NAMES.arabalar.cinar, cost: 680, desc: 'Klasik efsane', shape: 'cinar', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { kind: 'old', cyl: 3, idle: 700, red: 4600, gears: 4, gain: 1.05 } },
-    { id: 'efe', paints: [{ name: 'Boğaz Mavisi', color: '#2f6fb0', finish: 'gloss' }, { name: 'Haki', color: '#75805a', finish: 'matte' }, { name: 'Gümüş', color: '#b9c1ca', finish: 'metal' }, { name: 'Çift Ton Bej-Kahve', color: '#dcc9a4', finish: 'gloss', roof: '#5c3a22' }], finish: 'gloss', name: NAMES.arabalar.efe, cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'efe', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { kind: 'old', cyl: 6, idle: 650, red: 5200, gears: 4, gain: 1 } },
-    { id: 'marmara', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: NAMES.arabalar.marmara, cost: 1200, desc: 'Sade sedan, sürprizli', shape: 'marmara', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { kind: 'inline', cyl: 4, idle: 800, red: 6400, gears: 5, gain: 1 } },
-    { id: 'liva', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: NAMES.arabalar.liva, cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'liva', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { kind: 'thin', cyl: 3, idle: 950, red: 7200, gears: 5, gain: 0.95 } },
-    { id: 'bozkir', paints: [{ name: 'Kanyon Turuncusu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: NAMES.arabalar.bozkir, cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'bozkir', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { kind: 'v8', cyl: 8, idle: 620, red: 5800, gears: 5, gain: 1.15 } },
-    { id: 'tilki', paints: [{ name: 'Tilki Turuncusu', color: '#ff6a1a', finish: 'gloss', accent: '#111318' }, { name: 'Gece Siyahı', color: '#111318', finish: 'gloss', accent: '#ff6a1a' }, { name: 'Mat Gri', color: '#5a6068', finish: 'matte', accent: '#ffd23f' }, { name: 'Buz Beyazı', color: '#eef3f8', finish: 'pearl', accent: '#2b6fd6' }], finish: 'gloss', name: NAMES.arabalar.tilki, cost: 2400, desc: 'Hafif, oynak drift coupe', shape: 'tilki', maxSpeed: 572, accel: 720, turnRate: 3.72, grip: 5.0, driftGrip: 0.68, durability: 1.66, mass: 1.05, len: 46, wid: 24, color: '#ff6a1a', accent: '#111318', engine: { kind: 'turbo', cyl: 4, idle: 1000, red: 8200, gears: 6, gain: 1.05 } },
-    { id: 'kartal', paints: [{ name: 'Yarış Mavisi', color: '#1f5fbf', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Kan Kırmızı', color: '#a3121f', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Mat Siyah', color: '#16181c', finish: 'matte', accent: '#ffd23f' }, { name: 'Çift Ton Krem-Yeşil', color: '#e8dcbc', finish: 'gloss', roof: '#2f5a3a' }], finish: 'gloss', name: NAMES.arabalar.kartal, cost: 3200, desc: 'Uzun kaput, gürleyen V8', shape: 'kartal', maxSpeed: 586, accel: 760, turnRate: 3.6, grip: 5.05, driftGrip: 0.66, durability: 1.74, mass: 1.35, len: 52, wid: 26, color: '#1f5fbf', accent: '#f4f6f8', engine: { kind: 'v8', cyl: 8, idle: 560, red: 5400, gears: 4, gain: 1.25 } },
-    { id: 'volt', paints: [{ name: 'Plazma Mavi', color: '#1fb8e8', finish: 'metal', accent: '#0c0e12' }, { name: 'Grafit', color: '#2e333b', finish: 'metal', accent: '#1fb8e8' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte', accent: '#1fb8e8' }, { name: 'Aurora Mor', color: '#6a3cd9', finish: 'pearl', accent: '#9fe8ff' }], finish: 'metal', name: NAMES.arabalar.volt, cost: 4500, desc: 'Sessiz ama çok hızlı elektrikli GT', shape: 'volt', maxSpeed: 600, accel: 860, turnRate: 3.78, grip: 5.15, driftGrip: 0.63, durability: 1.82, mass: 1.4, len: 52, wid: 26, color: '#1fb8e8', accent: '#0c0e12', engine: { kind: 'ev', cyl: 8, idle: 0, red: 26000, gears: 1, gain: 0.85 } },
-    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, desc: '360° taramalı silahlı süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 } },
+    { id: 'atmaca', paints: [{ name: 'Mahalle Beji', color: '#d9d4c7', finish: 'gloss' }, { name: 'Şarap Kırmızı', color: '#8e1b24', finish: 'metal' }, { name: 'Mat Asker Yeşili', color: '#4d5a3a', finish: 'matte' }, { name: 'Çift Ton Krem-Bordo', color: '#e6dcc2', finish: 'gloss', roof: '#6d1620' }], finish: 'gloss', name: NAMES.arabalar.atmaca, cost: 0, desc: 'Her mahallenin emektarı', shape: 'atmaca', maxSpeed: 432, accel: 520, turnRate: 3.2, grip: 4.5, driftGrip: 1.15, durability: 1, mass: 1, len: 48, wid: 24, color: '#d9d4c7', accent: '#8a1f1f', engine: { kind: 'old', cyl: 4, idle: 800, red: 5000, gears: 4, gain: 1 }, egzozPatlamaSansi: 0.05 },
+    { id: 'motor', paints: [{ name: 'Yarış Kırmızı', color: '#e8352e', finish: 'gloss', accent: '#ffe14d' }, { name: 'Elektrik Mavi', color: '#0a7cff', finish: 'metal', accent: '#ffffff' }, { name: 'Mat Siyah', color: '#1b1d22', finish: 'matte', accent: '#ff7a00' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl', accent: '#e8352e' }], finish: 'gloss', name: NAMES.arabalar.motor, cost: 100, desc: 'Dar sokakların kralı', shape: 'moto', maxSpeed: 445, accel: 610, turnRate: 3.3, grip: 4.5, driftGrip: 1.1, durability: 1.05, mass: 0.9, len: 36, wid: 16, color: '#e8352e', accent: '#ffe14d', engine: { kind: 'moto', cyl: 4, idle: 1500, red: 12500, gears: 6, gain: 0.8 }, egzozPatlamaSansi: 0.35 },
+    { id: 'granit', paints: [{ name: 'Gece Mavisi', color: '#1f3a68', finish: 'metal' }, { name: 'Kor Turuncu', color: '#e8551e', finish: 'metal' }, { name: 'Mat Gümüş', color: '#a7aeb7', finish: 'matte' }, { name: 'İnci Beyaz', color: '#f2f4f7', finish: 'pearl' }], finish: 'metal', name: NAMES.arabalar.granit, cost: 200, desc: 'Yüksek ve güvenli SUV', shape: 'granit', maxSpeed: 458, accel: 540, turnRate: 3.24, grip: 4.6, driftGrip: 1.05, durability: 1.12, mass: 1.15, len: 52, wid: 27, color: '#3b4a5c', accent: '#d7dde5', engine: { kind: 'diesel', cyl: 4, idle: 750, red: 4300, gears: 6, gain: 1 }, egzozPatlamaSansi: 0.04 },
+    { id: 'elektra', paints: [{ name: 'Anadolu Kırmızı', color: '#b3122a', finish: 'metal' }, { name: 'Fırtına Grisi', color: '#4a5560', finish: 'metal' }, { name: 'Mat Toprak', color: '#8a6a4a', finish: 'matte' }, { name: 'Buz Mavisi', color: '#bcd9e6', finish: 'pearl' }], finish: 'metal', name: NAMES.arabalar.elektra, cost: 320, desc: 'Sessiz, güçlü, elektrikli', shape: 'elektra', maxSpeed: 472, accel: 680, turnRate: 3.28, grip: 4.6, driftGrip: 1, durability: 1.18, mass: 1.2, len: 50, wid: 26, color: '#b3122a', accent: '#111418', engine: { kind: 'ev', cyl: 6, idle: 0, red: 24000, gears: 1, gain: 0.7 }, egzozPatlamaSansi: 0 },
+    { id: 'simsek', paints: [{ name: 'Mat Siyah Sarı Şerit', color: '#111318', finish: 'matte', accent: '#ffd23f' }, { name: 'Ateş Turuncu', color: '#ff5a12', finish: 'gloss', accent: '#111318' }, { name: 'Neon Yeşil', color: '#39d353', finish: 'gloss', accent: '#111318' }, { name: 'Mor Metalik', color: '#6a2bd9', finish: 'metal', accent: '#21d4fd' }], finish: 'matte', name: NAMES.arabalar.simsek, cost: 480, desc: 'Abartılı spoyler, tam tuning', shape: 'simsek', maxSpeed: 486, accel: 590, turnRate: 3.32, grip: 4.7, driftGrip: 0.95, durability: 1.24, mass: 1.1, len: 48, wid: 24, color: '#111318', accent: '#ffd23f', engine: { kind: 'turbo', cyl: 4, idle: 950, red: 7400, gears: 5, gain: 1 }, egzozPatlamaSansi: 0.6 },
+    { id: 'cinar', paints: [{ name: 'Efsane Turuncu', color: '#e8782a', finish: 'gloss', accent: '#f6efe0' }, { name: 'Bebek Mavisi', color: '#7ec6e8', finish: 'gloss', accent: '#f6efe0' }, { name: 'Çift Ton Krem-Vişne', color: '#ead9b0', finish: 'gloss', roof: '#8a1f2f' }, { name: 'Mat Zeytin', color: '#6b6b3a', finish: 'matte', accent: '#f6efe0' }], finish: 'gloss', name: NAMES.arabalar.cinar, cost: 680, desc: 'Klasik efsane', shape: 'cinar', maxSpeed: 500, accel: 600, turnRate: 3.36, grip: 4.7, driftGrip: 0.9, durability: 1.3, mass: 1.15, len: 50, wid: 24, color: '#e8782a', accent: '#f6efe0', engine: { kind: 'old', cyl: 3, idle: 700, red: 4600, gears: 4, gain: 1.05 }, egzozPatlamaSansi: 0.08 },
+    { id: 'efe', paints: [{ name: 'Boğaz Mavisi', color: '#2f6fb0', finish: 'gloss' }, { name: 'Haki', color: '#75805a', finish: 'matte' }, { name: 'Gümüş', color: '#b9c1ca', finish: 'metal' }, { name: 'Çift Ton Bej-Kahve', color: '#dcc9a4', finish: 'gloss', roof: '#5c3a22' }], finish: 'gloss', name: NAMES.arabalar.efe, cost: 920, desc: 'Çelik gibi, babadan kalma', shape: 'efe', maxSpeed: 514, accel: 610, turnRate: 3.4, grip: 4.8, driftGrip: 0.86, durability: 1.38, mass: 1.25, len: 50, wid: 25, color: '#2f6fb0', accent: '#eef1f5', engine: { kind: 'old', cyl: 6, idle: 650, red: 5200, gears: 4, gain: 1 }, egzozPatlamaSansi: 0.12 },
+    { id: 'marmara', paints: [{ name: 'Kar Beyaz', color: '#f2f2f2', finish: 'gloss' }, { name: 'Volkan Kırmızı', color: '#c1121f', finish: 'metal' }, { name: 'Mat Antrasit', color: '#3a3f47', finish: 'matte' }, { name: 'Çift Ton Mavi-Siyah', color: '#1565c0', finish: 'metal', roof: '#0b0d11' }], finish: 'metal', name: NAMES.arabalar.marmara, cost: 1200, desc: 'Sade sedan, sürprizli', shape: 'marmara', maxSpeed: 528, accel: 640, turnRate: 3.45, grip: 4.8, driftGrip: 0.82, durability: 1.46, mass: 1.25, len: 50, wid: 25, color: '#f2f2f2', accent: '#1f2933', engine: { kind: 'inline', cyl: 4, idle: 800, red: 6400, gears: 5, gain: 1 }, egzozPatlamaSansi: 0.2 },
+    { id: 'liva', paints: [{ name: 'Okyanus Mavi', color: '#1c9ad6', finish: 'metal', accent: '#ffffff' }, { name: 'Alev Turuncu', color: '#ff6a13', finish: 'metal' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte' }, { name: 'Çift Ton Kırmızı-Siyah', color: '#d3162b', finish: 'gloss', roof: '#0b0d11' }], finish: 'metal', name: NAMES.arabalar.liva, cost: 1550, desc: 'Küçük, çevik, uçan hatchback', shape: 'liva', maxSpeed: 542, accel: 680, turnRate: 3.52, grip: 4.9, driftGrip: 0.78, durability: 1.54, mass: 1.25, len: 45, wid: 24, color: '#1c9ad6', accent: '#ffffff', engine: { kind: 'thin', cyl: 3, idle: 950, red: 7200, gears: 5, gain: 0.95 }, egzozPatlamaSansi: 0.3 },
+    { id: 'bozkir', paints: [{ name: 'Kanyon Turuncusu', color: '#e8701a', finish: 'matte', accent: '#23272e' }, { name: 'Orman Yeşili', color: '#2f6b4f', finish: 'metal' }, { name: 'Kum Beji', color: '#c9b48a', finish: 'matte' }, { name: 'Çift Ton Gri-Siyah', color: '#7a838d', finish: 'metal', roof: '#0b0d11' }], finish: 'matte', name: NAMES.arabalar.bozkir, cost: 2000, desc: 'Her yerde gider, hiç durmaz', shape: 'bozkir', maxSpeed: 558, accel: 700, turnRate: 3.6, grip: 5, driftGrip: 0.74, durability: 1.62, mass: 1.5, len: 52, wid: 27, color: '#e8701a', accent: '#23272e', engine: { kind: 'v8', cyl: 8, idle: 620, red: 5800, gears: 5, gain: 1.15 }, egzozPatlamaSansi: 0.35 },
+    { id: 'tilki', paints: [{ name: 'Tilki Turuncusu', color: '#ff6a1a', finish: 'gloss', accent: '#111318' }, { name: 'Gece Siyahı', color: '#111318', finish: 'gloss', accent: '#ff6a1a' }, { name: 'Mat Gri', color: '#5a6068', finish: 'matte', accent: '#ffd23f' }, { name: 'Buz Beyazı', color: '#eef3f8', finish: 'pearl', accent: '#2b6fd6' }], finish: 'gloss', name: NAMES.arabalar.tilki, cost: 2400, desc: 'Hafif, oynak drift coupe', shape: 'tilki', maxSpeed: 572, accel: 720, turnRate: 3.72, grip: 5.0, driftGrip: 0.68, durability: 1.66, mass: 1.05, len: 46, wid: 24, color: '#ff6a1a', accent: '#111318', engine: { kind: 'turbo', cyl: 4, idle: 1000, red: 8200, gears: 6, gain: 1.05 }, egzozPatlamaSansi: 0.55 },
+    { id: 'kartal', paints: [{ name: 'Yarış Mavisi', color: '#1f5fbf', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Kan Kırmızı', color: '#a3121f', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Mat Siyah', color: '#16181c', finish: 'matte', accent: '#ffd23f' }, { name: 'Çift Ton Krem-Yeşil', color: '#e8dcbc', finish: 'gloss', roof: '#2f5a3a' }], finish: 'gloss', name: NAMES.arabalar.kartal, cost: 3200, desc: 'Uzun kaput, gürleyen V8', shape: 'kartal', maxSpeed: 586, accel: 760, turnRate: 3.6, grip: 5.05, driftGrip: 0.66, durability: 1.74, mass: 1.35, len: 52, wid: 26, color: '#1f5fbf', accent: '#f4f6f8', engine: { kind: 'v8', cyl: 8, idle: 560, red: 5400, gears: 4, gain: 1.25 }, egzozPatlamaSansi: 0.6 },
+    { id: 'volt', paints: [{ name: 'Plazma Mavi', color: '#1fb8e8', finish: 'metal', accent: '#0c0e12' }, { name: 'Grafit', color: '#2e333b', finish: 'metal', accent: '#1fb8e8' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte', accent: '#1fb8e8' }, { name: 'Aurora Mor', color: '#6a3cd9', finish: 'pearl', accent: '#9fe8ff' }], finish: 'metal', name: NAMES.arabalar.volt, cost: 4500, desc: 'Sessiz ama çok hızlı elektrikli GT', shape: 'volt', maxSpeed: 600, accel: 860, turnRate: 3.78, grip: 5.15, driftGrip: 0.63, durability: 1.82, mass: 1.4, len: 52, wid: 26, color: '#1fb8e8', accent: '#0c0e12', engine: { kind: 'ev', cyl: 8, idle: 0, red: 26000, gears: 1, gain: 0.85 }, egzozPatlamaSansi: 0 },
+    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, desc: '360° taramalı silahlı süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 }, egzozPatlamaSansi: 0.5 },
   ],
 
   damage: {
@@ -457,7 +457,7 @@ const CONFIG = {
   // Derin su: sahil, göl, gölet. Sığ suya girilir, derine düşen araç batar
   water: { sinkTime: 2.3, bubbleEvery: 0.06, shrink: 0.5, spin: 1.5, deepProbe: 6 },
   // POLİS, SWAT, UZAYLI, TANK VE TRAFİK DE SUYA DÜŞER. Yapay zekâ suyu engel bilir; ancak suya speed'den hızlı dalan,
-  // ya da itilmiş (oyuncu çarpması, patlama, şok dalgası: pushTime sn) ve pushSpeed'den hızlı giden araç düşer.
+  // ya da itilmiş (oyuncu çarpması, patlama, basınç dalgası: pushTime sn) ve pushSpeed'den hızlı giden araç düşer.
   // sink: batma süresi (tank tankSink), drift: batarken hız kaybı (1/sn), bubbles: kabarcık aralığı (yalnız ekrandaysa)
   vehWater: { speed: 230, pushSpeed: 50, pushTime: 0.9, sink: 2, tankSink: 3.6, drift: 2.4, bubbles: 0.09, shrink: 0.55 },
 
@@ -536,9 +536,28 @@ const CONFIG = {
     speed: { sunny: 1, rain: 1, snow: 0.97, fog: 1, ice: 0.98 },
     copShare: 0.5,
     fade: 3,
-    particles: { rain: 170, snow: 130 },
-    fogAlpha: 0.6,
+    particles: { rain: 170, snow: 150 },
+    fogAlpha: 0.08, // Sis yalnız ekran kenarlarında; orta açık kalır (renkler solmaz)
+    // RENK KORUMA: dünyaya genel örtü en fazla %8-10. fogFlat: sisin tüm ekrana düz katkısı, rainTint: ıslak zemin koyuluğu,
+    // iceTint: buzlu yol mavi tonu. Kar ve buz zemini beyazlatmaz; yalnız üst yüzeylere işlenir (CONFIG.snow)
+    fogFlat: 0.025, rainTint: 0.06, iceTint: 0.02,
+    // Yağan kar katmanları: share pay, size boyut (px), alpha, fall düşüş hızı, sway salınım
+    flakes: [
+      { share: 0.45, size: [1, 1.6], alpha: 0.34, fall: 38, sway: 10 },
+      { share: 0.35, size: [1.8, 2.8], alpha: 0.52, fall: 64, sway: 18 },
+      { share: 0.2, size: [3.4, 5.2], alpha: 0.74, fall: 96, sway: 26 },
+    ],
+    wind: 14, // Karın yana kayması (px/sn)
   },
+
+  // KAR (yalnız kar havasında): çatı karı oyun süresince kalınlaşır. start: başlangıç kalınlığı (0-1), grow: tam kalınlığa
+  // kadar saniye, steps: kalınlık adımı (her adımda çatılar arka planda yeniden işlenir), edge: çatı kenar payı,
+  // gap: kar yığınları arası çatı rengi boşluğu, bare: boş kalan (rüzgârın süpürdüğü) hücre oranı, alpha: kar opaklığı,
+  // cacheScale: yüksek bina önbelleği ölçeği, near: ayrıntı uzaklığı
+  snow: { start: 0.35, grow: 150, steps: 4, edge: 5, gap: 14, bare: 0.3, alpha: 0.93, cacheScale: 0.8, near: 1100, cache: 90 },
+  // BUZ SARKITLARI (buzlu havada): len uzunluk, width genişlik, gap gruplar arası boşluk, glints bina başına parıltı,
+  // drip damlama hızı, near: canlı parıltı ve damla bu uzaklıkta, maxFx: karede en çok parıltı/damla
+  icicles: { len: [7, 22], width: [3, 5.2], gap: [3, 14], glints: 4, drip: 1.6, near: 900, maxFx: 32 },
 
   // ÖZELLEŞTİRME: satın alınan öğe kalıcıdır ve bütün arabalarda ücretsiz seçilir; seçim araba başına kaydedilir.
   // Fiyatı 0 olan öğe baştan açıktır. finish: gloss parlak, metal metalik, matte mat, pearl inci
@@ -568,6 +587,18 @@ const CONFIG = {
       { id: 'altin', price: 180, color: '#ffc93c', fx: 'breathe' }, { id: 'gokkusagi', price: 300, color: '#ff2fa0', fx: 'rainbow' },
     ],
     ledAlpha: 0.5, ledNight: 0.45, // Gündüz ve gece ek parlaklığı
+    // EGZOZ SESİ: her biri EGZOZ_FIYATI para, Standart ücretsiz. Çarpanlar motor sesine uygulanır (js/audio.js):
+    // pitch perde, sub alt bas, rough egzoz vuruşu ("bam bam"), bright tiz pay, lp süzgeç açıklığı, gain ses, drive bozulma,
+    // pops egzoz patlaması şansı katı, turbo turbo ıslığı ve boşalma, tip garajdaki egzoz ucu (pixelcars.js)
+    EGZOZ_FIYATI: 1000,
+    exhausts: [
+      { id: 'std', price: 0, pitch: 1, sub: 1, rough: 1, bright: 1, lp: 1, gain: 1, drive: 1, pops: 1, turbo: 0, tip: 'std', color: '#9aa3ad' },
+      { id: 'v8', price: 1000, pitch: 0.82, sub: 1.55, rough: 1.7, bright: 0.85, lp: 0.85, gain: 1.22, drive: 1.35, pops: 1.3, turbo: 0, tip: 'dual', color: '#d7dde5' },
+      { id: 'patlamali', price: 1000, pitch: 0.95, sub: 1.2, rough: 1.4, bright: 1.1, lp: 1.05, gain: 1.12, drive: 1.5, pops: 4, turbo: 0, tip: 'flame', color: '#ff7a1a' },
+      { id: 'turbo', price: 1000, pitch: 1.06, sub: 0.95, rough: 0.8, bright: 1.25, lp: 1.25, gain: 1.08, drive: 1.1, pops: 1, turbo: 1, tip: 'big', color: '#7fd9ff' },
+      { id: 'spor', price: 1000, pitch: 1.25, sub: 0.7, rough: 0.9, bright: 1.7, lp: 1.55, gain: 1.05, drive: 1.25, pops: 1.6, turbo: 0, tip: 'quad', color: '#ffd23f' },
+      { id: 'derin', price: 1000, pitch: 0.7, sub: 1.9, rough: 1.25, bright: 0.65, lp: 0.7, gain: 1.28, drive: 1.2, pops: 0.8, turbo: 0, tip: 'wide', color: '#4a4f57' },
+    ],
   },
 
   // 360° OTOMATİK TARAMALI SİLAH (weapon: true olan araçlar: 42-66 arabası ve gizli motosiklet; js/gun.js ortak).
@@ -627,10 +658,17 @@ const CONFIG = {
     trail: 40, blink: 1,
   },
 
+  // MOTOR SESİ (bütün araçlar): pitch taban frekans katı (düşük = ağır), sub alt bas katmanı, drive yumuşak bozulma,
+  // rough egzoz vuruşu derinliği, gain toplam ses, shift vites vuruşu, maxVoices aynı anda en çok kısa ses,
+  // limiter çıkış sınırlayıcı (bozulma olmasın): threshold dB, ratio, attack/release sn, ceiling son kazanç
+  sound: { pitch: 0.74, sub: 0.55, drive: 1.6, rough: 0.16, gain: 1.45, shift: 0.32, maxVoices: 26, popGap: 0.08, popFlame: 0.7,
+    limiter: { threshold: -12, knee: 6, ratio: 14, attack: 0.002, release: 0.22, ceiling: 0.9 } },
+
   // GİZLİ GEÇİT: ücra köşedeki (landmark 'gecit') terk edilmiş depo alanının güneydoğu köşesinde rampa.
   // ramp: chunk içindeki karo kutusu [x0, y0, x1, y1]. Girince bodrum sahnesi (scene sn), sonra oyuna dönülür.
   // minSpeed: rampaya bu hızla girilince tetiklenir, shield: dönüşte hasar almama süresi
-  secret: { ramp: [27, 27, 30, 30], scene: 3.2, slide: 0.9, minSpeed: 30, shield: 3 },
+  // GIZLI_YAZI_SURESI: karşılama yazısının ekranda kalma süresi (sn, 5-10 arası), oyunu engellemez
+  secret: { ramp: [27, 27, 30, 30], scene: 3.2, slide: 0.9, minSpeed: 30, shield: 3, GIZLI_YAZI_SURESI: 7 },
 
   // İKİ STADYUM (js/stadium.js çizer). rect: chunk içindeki karo kutusu. Yıkılmaz, katı, polis ve trafik dolanır.
   // Adlar isim tablosunda (NAMES.stadyum). art: önbellekli çizim ölçekleri, fans: taraftar siluetleri bu yakında
@@ -643,7 +681,7 @@ const CONFIG = {
 
   // GİZLİ MOTOSİKLET: satılmaz, galeride, dükkânda ve kod bölümünde görünmez. Yalnız gizli geçidi bulan oyuncunun
   // garajında belirir (storage.secret). Silahı 42-66 arabasıyla aynıdır (weapon: true, js/gun.js)
-  secretCar: { id: 'golge', secret: true, weapon: true, paints: [{ name: 'Gece Nöbeti', color: '#111321', finish: 'gloss', accent: '#21e6ff' }, { name: 'Neon Pembe', color: '#1a0f1f', finish: 'gloss', accent: '#ff2fa0' }, { name: 'Zehir Yeşili', color: '#0f1a14', finish: 'matte', accent: '#39ff7a' }, { name: 'Gümüş Hayalet', color: '#c9d1dc', finish: 'metal', accent: '#7a2cff' }], finish: 'gloss', name: 'Gölge R', cost: 0, desc: 'Gizli geçidin hediyesi', shape: 'golge', maxSpeed: 650, accel: 1000, turnRate: 4.1, grip: 5.4, driftGrip: 0.9, durability: 1.5, mass: 0.8, len: 38, wid: 16, color: '#111321', accent: '#21e6ff', engine: { kind: 'beast', cyl: 2, idle: 950, red: 11500, gears: 6, gain: 1.75 } },
+  secretCar: { id: 'golge', secret: true, weapon: true, paints: [{ name: 'Gece Nöbeti', color: '#111321', finish: 'gloss', accent: '#21e6ff' }, { name: 'Neon Pembe', color: '#1a0f1f', finish: 'gloss', accent: '#ff2fa0' }, { name: 'Zehir Yeşili', color: '#0f1a14', finish: 'matte', accent: '#39ff7a' }, { name: 'Gümüş Hayalet', color: '#c9d1dc', finish: 'metal', accent: '#7a2cff' }], finish: 'gloss', name: 'Gölge R', cost: 0, desc: 'Gizli geçidin hediyesi', shape: 'golge', maxSpeed: 650, accel: 1000, turnRate: 4.1, grip: 5.4, driftGrip: 0.9, durability: 1.5, mass: 0.8, len: 38, wid: 16, color: '#111321', accent: '#21e6ff', engine: { kind: 'beast', cyl: 2, idle: 950, red: 11500, gears: 6, gain: 1.75 }, egzozPatlamaSansi: 0.85 },
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
   // Yeni kod eklemek için satır eklenir. car: açılan araba
@@ -868,10 +906,12 @@ const TR = {
   escape: { toast: '+{n} KIL PAYI!', combo: 'KOMBO +{n}' },
   code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.' },
   custom: {
-    title: 'Özelleştir', paint: 'Boya', rim: 'Jant', led: 'Alt LED', buy: 'Satın al · {cost}', confirm: 'Onayla · {cost}', poor: 'Yetersiz para', bought: 'Satın alındı!', use: 'Zaten açık', ownFirst: 'Özelleştirmek için önce arabayı al.',
+    title: 'Özelleştir', paint: 'Boya', rim: 'Jant', led: 'Alt LED', exhaust: 'Egzoz', listen: 'Dinle', buy: 'Satın al · {cost}', confirm: 'Onayla · {cost}', poor: 'Yetersiz para', bought: 'Satın alındı!', use: 'Zaten açık', ownFirst: 'Özelleştirmek için önce arabayı al.',
     paints: { gece: 'Gece Siyahı', gumus: 'Parlak Gümüş', kiraz: 'Kiraz Kırmızı', okyanus: 'Okyanus Mavisi', zumrut: 'Zümrüt Yeşili', limon: 'Limon Sarısı', mandalina: 'Mandalina', lavanta: 'Mat Lavanta', pembe: 'Şeker Pembe', haki: 'Mat Haki', fume: 'Mat Füme', bakir: 'Bakır', lacivert: 'Lacivert Metalik', neonyesil: 'Neon Yeşil', neonpembe: 'Neon Pembe', mor: 'Elektrik Moru', inci: 'İnci Beyazı', altin: 'Altın', krom: 'Ayna Krom', lav: 'Lav Kırmızısı' },
     rims: { std: 'Standart', yildiz: 'Beş Kollu Yıldız', cok: 'Çok Kollu', spor: 'Spor', derin: 'Derin Çanak', turbin: 'Türbin', karbon: 'Karbon', altin: 'Altın' },
     leds: { yok: 'Kapalı', mavi: 'Neon Mavi', pembe: 'Neon Pembe', mor: 'Mor', yesil: 'Yeşil', beyaz: 'Beyaz', kirmizi: 'Kırmızı Nefes', buz: 'Buz Nefesi', altin: 'Altın Nefes', gokkusagi: 'Gökkuşağı' },
+    exhausts: { std: 'Standart', v8: 'Gür V8', patlamali: 'Patlamalı', turbo: 'Turbo', spor: 'Spor Tiz', derin: 'Derin Bas' },
+    exhaustInfo: { std: 'Fabrika çıkışı, dengeli ses', v8: 'Kalın, gürleyen sekiz silindir', patlamali: 'Gaz bırakınca sık sık pat pat pop', turbo: 'Tiz ıslık ve boşalma sesi', spor: 'Yüksek devirde keskin, tiz çığlık', derin: 'Yeri titreten derin bas' },
   },
   weather: { title: 'Hava durumu', random: 'Rastgele', sunny: 'Güneşli', rain: 'Yağmurlu', snow: 'Karlı', fog: 'Sisli', ice: 'Buzlu', iceWarn: 'Yol buzlu!' },
   cheat: { on: 'Aferin, hile kodunu buldun la!', off: 'Hile kapatıldı', badge: 'HİLE AÇIK' },
@@ -970,10 +1010,12 @@ const EN = {
   escape: { toast: '+{n} CLOSE CALL!', combo: 'COMBO +{n}' },
   code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.' },
   custom: {
-    title: 'Customize', paint: 'Paint', rim: 'Rims', led: 'Underglow', buy: 'Buy · {cost}', confirm: 'Confirm · {cost}', poor: 'Not enough coins', bought: 'Purchased!', use: 'Already unlocked', ownFirst: 'Buy the car first to customize it.',
+    title: 'Customize', paint: 'Paint', rim: 'Rims', led: 'Underglow', exhaust: 'Exhaust', listen: 'Listen', buy: 'Buy · {cost}', confirm: 'Confirm · {cost}', poor: 'Not enough coins', bought: 'Purchased!', use: 'Already unlocked', ownFirst: 'Buy the car first to customize it.',
     paints: { gece: 'Midnight Black', gumus: 'Bright Silver', kiraz: 'Cherry Red', okyanus: 'Ocean Blue', zumrut: 'Emerald Green', limon: 'Lemon Yellow', mandalina: 'Tangerine', lavanta: 'Matte Lavender', pembe: 'Candy Pink', haki: 'Matte Khaki', fume: 'Matte Smoke Gray', bakir: 'Copper', lacivert: 'Navy Metallic', neonyesil: 'Neon Green', neonpembe: 'Neon Pink', mor: 'Electric Purple', inci: 'Pearl White', altin: 'Gold', krom: 'Mirror Chrome', lav: 'Lava Red' },
     rims: { std: 'Standard', yildiz: 'Five-Spoke Star', cok: 'Multi-Spoke', spor: 'Sport', derin: 'Deep Dish', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
     leds: { yok: 'Off', mavi: 'Neon Blue', pembe: 'Neon Pink', mor: 'Purple', yesil: 'Green', beyaz: 'White', kirmizi: 'Red Pulse', buz: 'Ice Pulse', altin: 'Gold Pulse', gokkusagi: 'Rainbow' },
+    exhausts: { std: 'Stock', v8: 'Rumbling V8', patlamali: 'Popper', turbo: 'Turbo', spor: 'Sport Scream', derin: 'Deep Bass' },
+    exhaustInfo: { std: 'Factory fitted, balanced sound', v8: 'Thick, roaring eight cylinders', patlamali: 'Pops and bangs whenever you lift off', turbo: 'High whistle and blow-off', spor: 'Sharp, high-revving scream', derin: 'Ground-shaking deep bass' },
   },
   weather: { title: 'Weather', random: 'Random', sunny: 'Sunny', rain: 'Rainy', snow: 'Snowy', fog: 'Foggy', ice: 'Icy', iceWarn: 'Icy road!' },
   cheat: { on: 'Well, look at you! You found the cheat code!', off: 'Cheat off', badge: 'CHEAT ON' },
@@ -1072,10 +1114,12 @@ const JA = {
   escape: { toast: '+{n} ギリギリ回避！', combo: 'コンボ +{n}' },
   code: { title: 'コード入力', apply: '適用', ok: 'コード承認！{car}がガレージに追加されたよ。', owned: 'この車はもう持っているよ。', invalid: '無効なコードです。', empty: 'まずコードを入力してね。' },
   custom: {
-    title: 'カスタマイズ', paint: '塗装', rim: 'ホイール', led: 'アンダーネオン', buy: '購入 · {cost}', confirm: '確認 · {cost}', poor: 'コインが足りません', bought: '購入しました！', use: '解放済み', ownFirst: 'カスタマイズするには先に車を買おう。',
+    title: 'カスタマイズ', paint: '塗装', rim: 'ホイール', led: 'アンダーネオン', exhaust: 'マフラー', listen: '試聴', buy: '購入 · {cost}', confirm: '確認 · {cost}', poor: 'コインが足りません', bought: '購入しました！', use: '解放済み', ownFirst: 'カスタマイズするには先に車を買おう。',
     paints: { gece: 'ミッドナイトブラック', gumus: 'ブライトシルバー', kiraz: 'チェリーレッド', okyanus: 'オーシャンブルー', zumrut: 'エメラルドグリーン', limon: 'レモンイエロー', mandalina: 'タンジェリン', lavanta: 'マット・ラベンダー', pembe: 'キャンディピンク', haki: 'マット・カーキ', fume: 'マット・スモークグレー', bakir: 'カッパー', lacivert: 'ネイビーメタリック', neonyesil: 'ネオングリーン', neonpembe: 'ネオンピンク', mor: 'エレクトリックパープル', inci: 'パールホワイト', altin: 'ゴールド', krom: 'ミラークローム', lav: 'ラヴァレッド' },
     rims: { std: 'スタンダード', yildiz: '5本スポーク', cok: 'マルチスポーク', spor: 'スポーツ', derin: 'ディープリム', turbin: 'タービン', karbon: 'カーボン', altin: 'ゴールド' },
     leds: { yok: 'なし', mavi: 'ネオンブルー', pembe: 'ネオンピンク', mor: 'パープル', yesil: 'グリーン', beyaz: 'ホワイト', kirmizi: 'レッドパルス', buz: 'アイスパルス', altin: 'ゴールドパルス', gokkusagi: 'レインボー' },
+    exhausts: { std: 'ノーマル', v8: '轟音V8', patlamali: 'アフターファイア', turbo: 'ターボ', spor: 'スポーツ高音', derin: '重低音' },
+    exhaustInfo: { std: 'メーカー純正のバランスの良い音', v8: '太く轟く8気筒サウンド', patlamali: 'アクセルを戻すとパンパン鳴る', turbo: '甲高いタービン音とブローオフ', spor: '高回転で鋭く響く高音', derin: '地面を揺らす重低音' },
   },
   weather: { title: '天気', random: 'ランダム', sunny: '晴れ', rain: '雨', snow: '雪', fog: '霧', ice: '凍結', iceWarn: '路面凍結！' },
   cheat: { on: 'やるじゃん！隠しコマンドを見つけたね！', off: 'チート解除', badge: 'チートON' },
@@ -1174,10 +1218,12 @@ const ZH = {
   escape: { toast: '+{n} 惊险脱身！', combo: '连击 +{n}' },
   code: { title: '输入代码', apply: '确定', ok: '代码已接受！{car} 已加入你的车库。', owned: '这辆车你已经有了。', invalid: '无效代码。', empty: '请先输入代码。' },
   custom: {
-    title: '改装', paint: '涂装', rim: '轮毂', led: '底盘灯', buy: '购买 · {cost}', confirm: '确认 · {cost}', poor: '金币不足', bought: '购买成功！', use: '已解锁', ownFirst: '先购买这辆车才能改装。',
+    title: '改装', paint: '涂装', rim: '轮毂', led: '底盘灯', exhaust: '排气', listen: '试听', buy: '购买 · {cost}', confirm: '确认 · {cost}', poor: '金币不足', bought: '购买成功！', use: '已解锁', ownFirst: '先购买这辆车才能改装。',
     paints: { gece: '午夜黑', gumus: '亮银', kiraz: '樱桃红', okyanus: '海洋蓝', zumrut: '祖母绿', limon: '柠檬黄', mandalina: '橘橙', lavanta: '哑光薰衣草', pembe: '糖果粉', haki: '哑光卡其', fume: '哑光烟灰', bakir: '古铜', lacivert: '藏青金属', neonyesil: '霓虹绿', neonpembe: '霓虹粉', mor: '电光紫', inci: '珍珠白', altin: '金色', krom: '镜面铬', lav: '熔岩红' },
     rims: { std: '标准', yildiz: '五辐星形', cok: '多辐', spor: '运动', derin: '深唇', turbin: '涡轮', karbon: '碳纤维', altin: '金色' },
     leds: { yok: '关闭', mavi: '霓虹蓝', pembe: '霓虹粉', mor: '紫色', yesil: '绿色', beyaz: '白色', kirmizi: '红色呼吸', buz: '冰蓝呼吸', altin: '金色呼吸', gokkusagi: '彩虹' },
+    exhausts: { std: '原厂', v8: '轰鸣V8', patlamali: '回火爆鸣', turbo: '涡轮', spor: '运动高音', derin: '深沉低音' },
+    exhaustInfo: { std: '原厂配置，声音均衡', v8: '浑厚轰鸣的八缸声浪', patlamali: '松油门时噼啪回火', turbo: '尖锐的涡轮啸叫与泄压声', spor: '高转速下尖锐的嘶吼', derin: '震撼地面的深沉低音' },
   },
   weather: { title: '天气', random: '随机', sunny: '晴天', rain: '雨天', snow: '雪天', fog: '雾天', ice: '结冰', iceWarn: '路面结冰！' },
   cheat: { on: '可以啊，你找到作弊码了！', off: '作弊已关闭', badge: '作弊已开启' },
@@ -1276,10 +1322,12 @@ const ES = {
   escape: { toast: '+{n} ¡POR LOS PELOS!', combo: 'COMBO +{n}' },
   code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.' },
   custom: {
-    title: 'Personalizar', paint: 'Pintura', rim: 'Llantas', led: 'Luz inferior', buy: 'Comprar · {cost}', confirm: 'Confirmar · {cost}', poor: 'Monedas insuficientes', bought: '¡Comprado!', use: 'Ya desbloqueado', ownFirst: 'Compra el coche para personalizarlo.',
+    title: 'Personalizar', paint: 'Pintura', rim: 'Llantas', led: 'Luz inferior', exhaust: 'Escape', listen: 'Escuchar', buy: 'Comprar · {cost}', confirm: 'Confirmar · {cost}', poor: 'Monedas insuficientes', bought: '¡Comprado!', use: 'Ya desbloqueado', ownFirst: 'Compra el coche para personalizarlo.',
     paints: { gece: 'Negro medianoche', gumus: 'Plata brillante', kiraz: 'Rojo cereza', okyanus: 'Azul océano', zumrut: 'Verde esmeralda', limon: 'Amarillo limón', mandalina: 'Mandarina', lavanta: 'Lavanda mate', pembe: 'Rosa chicle', haki: 'Caqui mate', fume: 'Gris humo mate', bakir: 'Cobre', lacivert: 'Azul marino metalizado', neonyesil: 'Verde neón', neonpembe: 'Rosa neón', mor: 'Morado eléctrico', inci: 'Blanco perla', altin: 'Oro', krom: 'Cromo espejo', lav: 'Rojo lava' },
     rims: { std: 'Estándar', yildiz: 'Estrella de 5 radios', cok: 'Multirradio', spor: 'Deportiva', derin: 'Plato hondo', turbin: 'Turbina', karbon: 'Carbono', altin: 'Oro' },
     leds: { yok: 'Apagado', mavi: 'Azul neón', pembe: 'Rosa neón', mor: 'Morado', yesil: 'Verde', beyaz: 'Blanco', kirmizi: 'Rojo pulsante', buz: 'Hielo pulsante', altin: 'Oro pulsante', gokkusagi: 'Arcoíris' },
+    exhausts: { std: 'Estándar', v8: 'V8 Rugiente', patlamali: 'Petardeo', turbo: 'Turbo', spor: 'Deportivo agudo', derin: 'Bajo profundo' },
+    exhaustInfo: { std: 'De fábrica, sonido equilibrado', v8: 'Ocho cilindros gruesos y rugientes', patlamali: 'Petardea al soltar el acelerador', turbo: 'Silbido agudo y soplido de válvula', spor: 'Grito agudo a altas revoluciones', derin: 'Bajo profundo que hace temblar el suelo' },
   },
   weather: { title: 'Clima', random: 'Aleatorio', sunny: 'Soleado', rain: 'Lluvia', snow: 'Nieve', fog: 'Niebla', ice: 'Hielo', iceWarn: '¡Carretera helada!' },
   cheat: { on: '¡Toma ya! ¡Has encontrado el truco secreto!', off: 'Truco desactivado', badge: 'TRUCO ACTIVO' },
@@ -1378,10 +1426,12 @@ const DE = {
   escape: { toast: '+{n} HAARSCHARF!', combo: 'COMBO +{n}' },
   code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.' },
   custom: {
-    title: 'Anpassen', paint: 'Lack', rim: 'Felgen', led: 'Unterboden', buy: 'Kaufen · {cost}', confirm: 'Bestätigen · {cost}', poor: 'Nicht genug Münzen', bought: 'Gekauft!', use: 'Schon freigeschaltet', ownFirst: 'Kaufe zuerst das Auto, um es anzupassen.',
+    title: 'Anpassen', paint: 'Lack', rim: 'Felgen', led: 'Unterboden', exhaust: 'Auspuff', listen: 'Anhören', buy: 'Kaufen · {cost}', confirm: 'Bestätigen · {cost}', poor: 'Nicht genug Münzen', bought: 'Gekauft!', use: 'Schon freigeschaltet', ownFirst: 'Kaufe zuerst das Auto, um es anzupassen.',
     paints: { gece: 'Mitternachtsschwarz', gumus: 'Hellsilber', kiraz: 'Kirschrot', okyanus: 'Ozeanblau', zumrut: 'Smaragdgrün', limon: 'Zitronengelb', mandalina: 'Mandarine', lavanta: 'Mattes Lavendel', pembe: 'Bonbonrosa', haki: 'Mattes Khaki', fume: 'Mattes Rauchgrau', bakir: 'Kupfer', lacivert: 'Marineblau Metallic', neonyesil: 'Neongrün', neonpembe: 'Neonpink', mor: 'Elektrolila', inci: 'Perlweiß', altin: 'Gold', krom: 'Spiegelchrom', lav: 'Lavarot' },
     rims: { std: 'Standard', yildiz: 'Fünfspeichen-Stern', cok: 'Vielspeichen', spor: 'Sport', derin: 'Tiefbett', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
     leds: { yok: 'Aus', mavi: 'Neonblau', pembe: 'Neonpink', mor: 'Lila', yesil: 'Grün', beyaz: 'Weiß', kirmizi: 'Rot pulsierend', buz: 'Eis pulsierend', altin: 'Gold pulsierend', gokkusagi: 'Regenbogen' },
+    exhausts: { std: 'Serie', v8: 'Grollender V8', patlamali: 'Fehlzündung', turbo: 'Turbo', spor: 'Sport hell', derin: 'Tiefer Bass' },
+    exhaustInfo: { std: 'Ab Werk, ausgewogener Klang', v8: 'Dicker, grollender Achtzylinder', patlamali: 'Knallt beim Gaswegnehmen', turbo: 'Hohes Pfeifen und Abblasen', spor: 'Scharfer, hochdrehender Schrei', derin: 'Bodenerschütternder tiefer Bass' },
   },
   weather: { title: 'Wetter', random: 'Zufall', sunny: 'Sonnig', rain: 'Regen', snow: 'Schnee', fog: 'Nebel', ice: 'Glatteis', iceWarn: 'Achtung, Glatteis!' },
   cheat: { on: 'Na sieh mal einer an – du hast den Cheatcode gefunden!', off: 'Cheat aus', badge: 'CHEAT AN' },
@@ -4997,7 +5047,7 @@ class MeteorStorm {
     const p = game.player;
     const d = Math.hypot(p.x - m.x, p.y - m.y);
     const near = game.onScreen(m.x, m.y, 200);
-    // BAM: parlak flaş, ateş topu, şok dalgası, kıvılcım, moloz, toz, krater
+    // BAM: parlak flaş, ateş topu, basınç dalgası, kıvılcım, moloz, toz, krater
     fx.explosion(m.x, m.y, R * 1.2);
     fx.wave(m.x, m.y, R * 4);
     if (near) {
@@ -5019,7 +5069,7 @@ class MeteorStorm {
       if (c.type === 'tank') { c.hp -= MET.tankDamage; c.hurtFlash = 0.5; if (c.hp > 0) continue; }
       game.destroyCop(i, false);
     }
-    // Şok dalgası: çevredeki araçlar itilir (suya da düşebilirler)
+    // Basınç dalgası: çevredeki araçlar itilir (suya da düşebilirler)
     if (game.shockwave) game.shockwave(m.x, m.y, R * 3, 420);
     game.crowd.blast(m.x, m.y, R, 0);
     game.crushCircle(m.x, m.y, R * 0.9);
@@ -5552,6 +5602,7 @@ class Game {
     }
     this.collideProps(p, true);
     this.driftEffects(dt, g);
+    this.updateBackfire(dt);
 
     if (this.hitFlash > 0 && Math.random() < 0.02) this.fx.sparks(p.x, p.y, 2);
     // Sığ suda sıçrama, kumda toz
@@ -5559,6 +5610,33 @@ class Game {
       if (g === GROUND.SHALLOW) this.fx.spawn(FX.WATER, p.x, p.y, -p.vx * 0.15 + (Math.random() - 0.5) * 90, -p.vy * 0.15 + (Math.random() - 0.5) * 90, 0.5, 9);
       else if (g === GROUND.SAND || g === GROUND.DIRT) this.fx.spawn(FX.DUST, p.x, p.y, p.vx * 0.1, p.vy * 0.1, 0.6, 11);
     }
+  }
+
+  // Egzoz patlaması: gaz bırakınca ya da vites atarken, araç başına şans (egzozPatlamaSansi) x egzoz çarpanı.
+  // Egzozdan küçük alev ve kıvılcım; sesi main.js'te (backfire olayı)
+  updateBackfire(dt) {
+    const p = this.player;
+    const spec = this.carSpec;
+    const ch = spec.egzozPatlamaSansi || 0;
+    if (this.bfCd > 0) this.bfCd -= dt;
+    if (!ch || !spec.engine) return;
+    const k = Math.min(1.1, p.speed / spec.maxSpeed);
+    const gear = engineRpm(spec.engine, k).gear;
+    const gas = p.gas ?? 1;
+    const lift = (this.bfGas ?? 1) >= 0.8 && gas < 0.6 && k > 0.35;
+    const shift = gear > (this.bfGear ?? gear) && k > 0.3;
+    this.bfGas = gas; this.bfGear = gear;
+    if (!(lift || shift) || this.bfCd > 0) return;
+    const ex = CONFIG.custom.exhausts.find((x) => x.id === (this.look && this.look.exhaust)) || CONFIG.custom.exhausts[0];
+    if (Math.random() >= Math.min(0.95, ch * ex.pops)) return;
+    this.bfCd = 0.35;
+    const n = 2 + Math.floor(Math.random() * 3);
+    const ca = Math.cos(p.a); const sa = Math.sin(p.a);
+    const ex0 = p.x - ca * p.len * 0.55; const ey0 = p.y - sa * p.len * 0.55;
+    for (let i = 0; i < 3; i++) this.fx.spawn(FX.FIRE, ex0, ey0, -ca * 90 + (Math.random() - 0.5) * 40, -sa * 90 + (Math.random() - 0.5) * 40, 0.22, 7 + i * 2);
+    this.fx.sparks(ex0, ey0, 3, -ca, -sa);
+    this.backfires = (this.backfires || 0) + 1;
+    this.emit('backfire', n);
   }
 
   driftEffects(dt, ground) {
@@ -6641,7 +6719,7 @@ class Game {
     }
   }
 
-  // --- Sarsıntı, parlama, şok dalgası ---
+  // --- Sarsıntı, parlama, basınç dalgası ---
   quake(dur, amp) {
     if (amp * (dur) < this.quakeAmp * this.quakeT) return; // Daha güçlüsü sürüyorsa bozma
     this.quakeT = dur; this.quakeDur = dur; this.quakeAmp = amp;
@@ -11668,8 +11746,9 @@ function paintOf(car, sel) {
 
 const rimOf = (id) => CUSTOM.rims.find((k) => k.id === id) || CUSTOM.rims[0];
 const ledOf = (id) => CUSTOM.leds.find((k) => k.id === id) || CUSTOM.leds[0];
+const exhaustItem = (id) => CUSTOM.exhausts.find((k) => k.id === id) || CUSTOM.exhausts[0];
 
-const LIST = { paint: 'paints', rim: 'rims', led: 'leds' };
+const LIST = { paint: 'paints', rim: 'rims', led: 'leds', exhaust: 'exhausts' };
 function itemOf(kind, id) {
   const list = CUSTOM[LIST[kind]];
   return list ? list.find((k) => k.id === id) || null : null;
@@ -12618,6 +12697,221 @@ class Stadiums {
   }
 }
 
+// --- snow.js ---
+// KAR VE BUZ: yalnız üst yüzeyler. Çatılara kalın, kabarık kar örtüsü; çatı nesnelerine, tabelaların üst kenarına,
+// ağaçlara ve park halindeki arabalara ince kar. Buzlu havada çatı kenarlarında buz sarkıtları. Yol, kaldırım, duvar ve
+// tabela renkleri hiç değişmez. Çizimler binaya özel ve önbellekli: chunk önbelleğine bir kez işlenir (alçak binalar),
+// yüksek binalarda binaya özel küçük tuval saklanır. Anıt alanı ve stadyumlar bina değildir: kar almaz.
+
+const SNW = CONFIG.snow;
+const SNW_TAU = Math.PI * 2;
+
+// Tohumdan tekrarlanabilir sayı dizisi: aynı bina her çizimde aynı karı alır
+function snwRand(seed) {
+  let s = (seed * 2654435761) >>> 0 || 1;
+  return () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
+}
+
+function snwCanvas(w, h) {
+  if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(Math.max(1, Math.ceil(w)), Math.max(1, Math.ceil(h)));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h));
+  return c;
+}
+
+// Kalın kar örtüsü bu stillerde (düz çatılı şehir binaları); diğerleri (kubbe, değirmen, kule) yalnız hafif serpinti alır
+const SNW_FLAT = new Set([0, 1, 2, 3, 4, 5, 6, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 35, 36, 37, 38, 39, 40, 41, 42, 44, 45, 17, 13, 15]);
+function snowFlat(r) { return SNW_FLAT.has(r.style); }
+
+// Kar kalınlığı 0..1: oyun süresince yavaşça artar, adım adım (önbellek az yenilenir)
+function snowLevel(runTime) {
+  const k = Math.min(1, SNW.start + (1 - SNW.start) * (runTime / SNW.grow));
+  return Math.round(k * SNW.steps) / SNW.steps;
+}
+
+// Çatı karı: tek bir beyaz örtü değil, kabarık kar yığınları. Yığınların arasında ve kenarda çatı rengi belli olur
+// (şehir renkli kalır), kalınlaştıkça yığınlar büyür. Kenar gölgeli ve hacimli, üst-sol ışıklı
+function paintRoofSnow(g, x, y, w, h, level, seed, flat = true) {
+  if (w < 12 || h < 10) return;
+  const rnd = snwRand(seed + 7);
+  const m = Math.max(3, (flat ? SNW.edge : SNW.edge * 2) * (1.6 - level * 0.7)); // Kenar payı: çatı rengi bandı
+  const X = x + m; const Y = y + m; const W = w - m * 2; const H = h - m * 2;
+  if (W < 6 || H < 6) return;
+  const a = flat ? SNW.alpha : SNW.alpha * 0.6;
+  // Yığın ızgarası: büyük çatıda birkaç yığın; aralık kalınlıkla daralır
+  const nx = Math.max(1, Math.round(W / 70)); const ny = Math.max(1, Math.round(H / 70));
+  const gap = (flat ? SNW.gap : SNW.gap * 1.6) * (1.25 - level * 0.75);
+  const cw = W / nx; const ch = H / ny;
+  const bump = 2.4 + level * 3;
+  for (let j = 0; j < ny; j++) {
+    for (let i = 0; i < nx; i++) {
+      // Bazı hücreler boş kalır (rüzgâr süpürmüş), kalınlıkla azalır
+      if (nx * ny > 2 && rnd() < SNW.bare * (1 - level * 0.8)) continue;
+      const jx = (rnd() - 0.5) * gap; const jy = (rnd() - 0.5) * gap;
+      const bx = X + i * cw + gap / 2 + jx * 0.5; const by = Y + j * ch + gap / 2 + jy * 0.5;
+      const bw = cw - gap * (0.6 + rnd() * 0.6); const bh = ch - gap * (0.6 + rnd() * 0.6);
+      if (bw < 8 || bh < 8) continue;
+      // Kar gövdesi: üst-sol ışıklı, alt-sağ kenarı içeride gölgeli (hacim). Gölge çatı rengine taşmaz: renk solmaz
+      const grd = g.createLinearGradient(bx, by, bx + bw, by + bh);
+      grd.addColorStop(0, `rgba(255,255,255,${a.toFixed(3)})`);
+      grd.addColorStop(0.55, `rgba(245,249,255,${a.toFixed(3)})`);
+      grd.addColorStop(0.85, `rgba(222,232,246,${a.toFixed(3)})`);
+      grd.addColorStop(1, `rgba(186,202,226,${a.toFixed(3)})`);
+      g.fillStyle = grd;
+      snwBlob(g, bx, by, bw, bh, bump, snwRand(seed + i * 13 + j * 7));
+      g.fill();
+      // Yumuşak tümsek ışığı
+      g.fillStyle = `rgba(255,255,255,${(0.6 * a).toFixed(3)})`;
+      g.beginPath(); g.ellipse(bx + bw * (0.25 + rnd() * 0.3), by + bh * (0.25 + rnd() * 0.3), Math.min(bw, bh) * 0.22, Math.min(bw, bh) * 0.13, -0.5, 0, SNW_TAU); g.fill();
+    }
+  }
+}
+
+// Kenarı tümsekli dikdörtgen
+function snwBlob(g, x, y, w, h, bump, rnd) {
+  g.beginPath();
+  const r = Math.min(6, w / 4, h / 4);
+  g.moveTo(x + r, y);
+  const edge = (x0, y0, x1, y1, nx, ny) => {
+    const L = Math.hypot(x1 - x0, y1 - y0);
+    const n = Math.max(2, Math.floor(L / 9));
+    for (let i = 1; i <= n; i++) {
+      const t = i / n; const tm = (i - 0.5) / n;
+      const b = bump * (0.4 + rnd() * 0.6);
+      g.quadraticCurveTo(x0 + (x1 - x0) * tm + nx * b, y0 + (y1 - y0) * tm + ny * b, x0 + (x1 - x0) * t, y0 + (y1 - y0) * t);
+    }
+  };
+  edge(x + r, y, x + w - r, y, 0, -1);
+  g.quadraticCurveTo(x + w, y, x + w, y + r);
+  edge(x + w, y + r, x + w, y + h - r, 1, 0);
+  g.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  edge(x + w - r, y + h, x + r, y + h, 0, 1);
+  g.quadraticCurveTo(x, y + h, x, y + h - r);
+  edge(x, y + h - r, x, y + r, -1, 0);
+  g.quadraticCurveTo(x, y, x + r, y);
+  g.closePath();
+}
+
+// Çatı nesnelerinin (baca, klima, su deposu) üstünde kar birikintisi: roofClutter ile aynı yerler
+function paintClutterSnow(g, r, level) {
+  const n = 1 + (r.seed % 3);
+  const wall = 12;
+  g.fillStyle = `rgba(255,255,255,${(0.75 + 0.2 * level).toFixed(3)})`;
+  for (let i = 0; i < n; i++) {
+    const px = r.x + 10 + ((r.seed * (i + 2) * 17) % Math.max(1, r.w - 22));
+    const py = r.y + 9 + ((r.seed * (i + 4) * 23) % Math.max(1, r.h - wall - 24));
+    g.beginPath(); g.ellipse(px - 1, py - 1.5, 4 + level, 2.4 + level * 0.8, -0.6, 0, SNW_TAU); g.fill();
+  }
+  if (r.seed % 2 === 0 && r.w > 60) g.fillRect(r.x + r.w - 26, r.y + 5, 15, 2 + level * 1.5);
+}
+
+// Tabelanın üst kenarında ince kar çizgisi (yazı kendi renginde kalır)
+function paintSignSnow(g, x, y, w, level) {
+  g.fillStyle = 'rgba(255,255,255,.92)';
+  const t = 1.4 + level * 1.6;
+  g.beginPath();
+  g.moveTo(x, y + 0.5);
+  for (let k = 0; k <= 6; k++) g.quadraticCurveTo(x + (w * (k + 0.5)) / 7, y - t * (0.6 + ((k * 7) % 5) / 10), x + (w * (k + 1)) / 7, y + 0.5);
+  g.lineTo(x + w, y + 1.2); g.lineTo(x, y + 1.2);
+  g.closePath(); g.fill();
+}
+
+// BUZ SARKITLARI: kenar boyunca düzensiz gruplar, sivri uç, yarı saydam açık mavi-beyaz, parlak yansıma çizgisi
+// Tek sarkıt görüntüsü bir kez çizilir (birkaç boy), sonra yalnız kopyalanır: önbellek hazırlığı ucuz kalır
+const SNW_ICE = [];
+function snwIcicle(drip) {
+  const k = drip ? 1 : 0;
+  if (SNW_ICE[k]) return SNW_ICE[k];
+  const W = 12; const H = 52; const sc = 4;
+  const c = snwCanvas(W * sc, (H + 6) * sc);
+  const g = c.getContext('2d');
+  g.scale(sc, sc);
+  const gr = g.createLinearGradient(0, 0, 0, H);
+  gr.addColorStop(0, 'rgba(235,248,255,.95)');
+  gr.addColorStop(0.55, 'rgba(180,225,255,.7)');
+  gr.addColorStop(1, 'rgba(160,215,255,.35)');
+  g.fillStyle = gr;
+  g.beginPath();
+  g.moveTo(0, 0);
+  g.quadraticCurveTo(W * 0.28, H * 0.55, W / 2, H);
+  g.quadraticCurveTo(W * 0.72, H * 0.55, W, 0);
+  g.closePath(); g.fill();
+  g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(W * 0.35, 2); g.lineTo(W * 0.45, H * 0.7); g.stroke();
+  if (drip) { g.fillStyle = 'rgba(200,236,255,.85)'; g.beginPath(); g.ellipse(W / 2, H + 3, 2.2, 3, 0, 0, SNW_TAU); g.fill(); }
+  SNW_ICE[k] = c;
+  return c;
+}
+
+// BUZ SARKITLARI: kenar boyunca düzensiz gruplar, farklı boy, sivri uç, yarı saydam açık mavi-beyaz, parlak yansıma çizgisi
+function paintIcicles(g, x, y, w, seed, scale = 1) {
+  const I = CONFIG.icicles;
+  const rnd = snwRand(seed + 31);
+  let px = x + 2 + rnd() * 4;
+  while (px < x + w - 3) {
+    // Grup: birkaç sarkıt yan yana, sonra boşluk
+    const group = 2 + Math.floor(rnd() * 4);
+    for (let k = 0; k < group && px < x + w - 3; k++) {
+      const wd = (I.width[0] + rnd() * (I.width[1] - I.width[0])) * scale;
+      const len = (I.len[0] + rnd() * rnd() * (I.len[1] - I.len[0])) * scale;
+      const drip = rnd() < 0.35;
+      g.drawImage(snwIcicle(drip), px - wd / 2, y, wd, len * (58 / 52));
+      px += wd * (0.8 + rnd() * 0.9);
+    }
+    px += (I.gap[0] + rnd() * (I.gap[1] - I.gap[0])) * scale;
+  }
+  // Kenarı kaplayan ince buz şeridi
+  g.fillStyle = 'rgba(220,244,255,.7)';
+  g.fillRect(x, y - 1, w, 2);
+}
+
+// Sarkıtların göz kırpan ışıkları ve damlaları için kenar noktaları (canlı katman, binaya özel)
+// Konumlar kenarın başına göre (göreli): binaya bir kez hesaplanıp saklanır, her karede üretilmez
+function icicleTips(w, seed) {
+  const rnd = snwRand(seed + 97);
+  const out = [];
+  const n = Math.min(CONFIG.icicles.glints, Math.max(1, Math.floor(w / 26)));
+  for (let i = 0; i < n; i++) out.push({ x: 4 + rnd() * (w - 8), y: 4 + rnd() * 6, ph: rnd() * SNW_TAU, sp: 0.6 + rnd() * 0.9 });
+  return out;
+}
+
+// Yüksek bina çatısı için binaya özel önbellek: kar ya da sarkıt (anahtar: bina, boyut, kalınlık)
+class RoofCache {
+  constructor(max) { this.map = new Map(); this.max = max; }
+
+  get(key, w, h, paint) {
+    let c = this.map.get(key);
+    if (c) { this.map.delete(key); this.map.set(key, c); return c; } // En son kullanılan sona
+    const k = SNW.cacheScale;
+    c = snwCanvas(w * k, h * k);
+    const g = c.getContext('2d');
+    g.scale(k, k);
+    paint(g);
+    this.map.set(key, c);
+    if (this.map.size > this.max) this.map.delete(this.map.keys().next().value);
+    return c;
+  }
+
+  clear() { this.map.clear(); }
+}
+
+// Ağaç tepesi ve park halindeki araba için küçük kar sprite'ları
+function paintTreeSnow(g, R) {
+  const grd = g.createRadialGradient(-R * 0.25, -R * 0.35, 1, 0, -R * 0.1, R);
+  grd.addColorStop(0, 'rgba(255,255,255,.95)'); grd.addColorStop(0.7, 'rgba(240,246,255,.75)'); grd.addColorStop(1, 'rgba(230,240,255,0)');
+  g.fillStyle = grd;
+  g.beginPath(); g.ellipse(-R * 0.15, -R * 0.25, R * 0.7, R * 0.55, -0.3, 0, SNW_TAU); g.fill();
+  g.beginPath(); g.ellipse(R * 0.3, -R * 0.05, R * 0.35, R * 0.3, 0.4, 0, SNW_TAU); g.fill();
+}
+
+function paintCarSnow(g, L, W) {
+  g.fillStyle = 'rgba(255,255,255,.88)';
+  g.beginPath(); g.ellipse(-L * 0.05, 0, L * 0.26, W * 0.33, 0, 0, SNW_TAU); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.6)';
+  g.beginPath(); g.ellipse(L * 0.28, 0, L * 0.1, W * 0.3, 0, 0, SNW_TAU); g.fill();
+}
+
+
 // --- render.js ---
 // Canvas çizimi. Sprite'lar açılışta koddan üretilir; sadece ekrandaki nesneler çizilir.
 
@@ -12823,6 +13117,9 @@ class Renderer {
     this.queue = []; // Sprite işleri kare bütçesiyle yapılır
     this.memorial = new MemorialArt(); // Cumhuriyet Meydanı anıtı: önbellekli, yakında ayrıntılı
     this.stadiums = new Stadiums(); // İki stadyum: önbellekli, uzakta sade
+    this.roofCache = new RoofCache(CONFIG.snow.cache); // Yüksek bina çatı karı ve sarkıtları: binaya özel önbellek
+    this.snowLv = 0; // Çatı karı kalınlığı (adımlı)
+    this.tips = [];
     this.makeSprites();
   }
 
@@ -13039,7 +13336,18 @@ class Renderer {
       ctx.globalAlpha = 1;
       this.tallWalls(r, tex, art, cx, cy, N, true);
       ctx.drawImage(art ? art.roof : this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
-      if (this.weather === 'snow') { ctx.fillStyle = 'rgba(248,251,255,.5)'; ctx.fillRect(X0 + 3, Y0 + 3, X1 - X0 - 6, Y1 - Y0 - 6); }
+      // Kar ve buz: binaya özel önbellek (çatı tuvali bir kez çizilir). Yalnız oyuncuya yakın binada
+      if (this.weather === 'snow' || this.weather === 'ice') {
+        const near = Math.hypot((X0 + X1) / 2 - cx, (Y0 + Y1) / 2 - cy) < CONFIG.snow.near;
+        const W = X1 - X0; const H = Y1 - Y0;
+        if (this.weather === 'snow') {
+          const img = this.roofCache.get(`s${r.seed}:${Math.round(W)}:${Math.round(H)}:${this.snowLv}:${near ? 1 : 0}`, W, H, (g) => paintRoofSnow(g, 0, 0, W, H, this.snowLv, r.seed, true));
+          ctx.drawImage(img, X0, Y0, W, H);
+        } else if (near) {
+          const img = this.roofCache.get(`i${r.seed}:${Math.round(W)}`, W, 22, (g) => paintIcicles(g, 1, 2, W - 2, r.seed));
+          ctx.drawImage(img, X0, Y1 - 2, W, 22);
+        }
+      }
       if (r.sign && !r.noRoofSign) {
         const img = rectSign(r);
         const b = roofSignBox(r, img);
@@ -13211,6 +13519,9 @@ class Renderer {
     s.orb = glow(48, [[0, 'rgba(255,255,255,1)'], [0.25, 'rgba(120,240,255,.95)'], [0.6, 'rgba(255,60,200,.45)'], [1, 'rgba(255,40,180,0)']]);
     s.reticle = reticleSprite();
     s.launcher = sprite(26, 14, (g) => { g.fillStyle = '#16181e'; rr(g, -8, -5, 14, 10, 3); g.fill(); g.fillStyle = '#2a2f38'; g.fillRect(2, -2.2, 10, 1.8); g.fillRect(2, 0.4, 10, 1.8); g.fillStyle = '#ffd23f'; g.fillRect(11, -2.4, 1.6, 4.8); g.fillStyle = '#21e6ff'; g.fillRect(-6, -1, 4, 2); });
+    s.flake = glow(16, [[0, 'rgba(255,255,255,1)'], [0.45, 'rgba(255,255,255,.75)'], [1, 'rgba(255,255,255,0)']]);
+    s.snowTree = sprite(40, 40, (g) => paintTreeSnow(g, 17));
+    s.snowCar = sprite(50, 26, (g) => paintCarSnow(g, 46, 22));
     s.glint = glow(32, [[0, 'rgba(255,255,220,1)'], [0.4, 'rgba(255,215,70,.8)'], [1, 'rgba(255,200,0,0)']]);
 
     const prop = (w, h, paint) => sprite(w, h, paint);
@@ -13502,6 +13813,7 @@ class Renderer {
       if (r.kind === 'wall') this.bakeWall(g, r);
     }
     if (this.weather === 'snow' || this.weather === 'ice') this.bakeWeather(g, c);
+    c.snowLv = this.snowLv;
     c.dirty = false;
     this.job = null;
     return true;
@@ -13926,9 +14238,12 @@ class Renderer {
   }
 
   bakeBuilding(g, r) {
-    if (paintBuilding2(g, r)) { this.bakeSign(g, r); return; }
-    if (r.style >= 7) { paintSpecial(g, r); this.bakeSign(g, r); return; }
-    this.bakeRoof(g, r);
+    if (!paintBuilding2(g, r)) {
+      if (r.style >= 7) paintSpecial(g, r);
+      else this.bakeRoof(g, r);
+    }
+    // Kar yalnız çatıda: duvar (güney cephe bandı), tabela ve yazı kendi renginde kalır. Yüksek binanın çatısı drawTalls'ta
+    if (this.weather === 'snow' && r.tall <= 0 && r.style < 46) paintRoofSnow(g, r.x, r.y, r.w, r.h - 10, this.snowLv, r.seed, snowFlat(r));
     this.bakeSign(g, r);
   }
 
@@ -14039,11 +14354,16 @@ class Renderer {
 
   // Tabela, uydu çanağı, güneş paneli ve balkon çamaşırı
   bakeSign(g, r) {
-    if (r.style === 0 || r.style === 1 || r.style === 2 || r.style === 3 || r.style === 5 || r.style === BUILD.APARTMENT) roofClutter(g, r);
+    const snow = this.weather === 'snow';
+    if (r.style === 0 || r.style === 1 || r.style === 2 || r.style === 3 || r.style === 5 || r.style === BUILD.APARTMENT) {
+      roofClutter(g, r);
+      if (snow && r.tall <= 0) paintClutterSnow(g, r, this.snowLv); // Baca, klima, su deposu üstünde kar birikintisi
+    }
     if (!r.sign || r.tall > 0) return; // Yüksek binanın tabelası çatıda, her karede çizilir
     const img = rectSign(r);
     const b = signBox(r, img);
     g.drawImage(img, b.x, b.y, b.w, b.h);
+    if (snow) paintSignSnow(g, b.x, b.y, b.w, this.snowLv); // Tabelanın üst kenarında ince kar
   }
 
   bakeWall(g, r) {
@@ -14104,8 +14424,12 @@ class Renderer {
     }
     // Görünmeden önce hazırla: kaydırmada takılma olmasın (karede en fazla 1)
     // Telefonda takılma olmasın diye dört karede bir
+    // Çatı karı zamanla kalınlaşır: adım değişince görünen chunk'lar arka planda (takılmadan) yeniden işlenir
+    const lv = this.weather === 'snow' ? snowLevel(game.runTime) : 0;
+    if (lv !== this.snowLv) { this.snowLv = lv; this.roofCache.clear(); }
     if (game.state === 'play' || game.state === 'drop') {
       if (!this.job) this.prebake(game, c0x, c1x, c0y, c1y);
+      if (!this.job && this.weather === 'snow') this.restale(game, c0x, c1x, c0y, c1y);
       this.stepJob(PF.bakeBudget);
     }
     this.stepQueue(2);
@@ -14140,6 +14464,7 @@ class Renderer {
     this.drawBalconies(game, now, c0x, c1x, c0y, c1y, false); // Alçak binalar yüksek binaların altında kalır
     this.drawTalls(game, c0x, c1x, c0y, c1y);
     this.drawBalconies(game, now, c0x, c1x, c0y, c1y, true);
+    this.drawIceFx(game, now, c0x, c1x, c0y, c1y);
     if (game.weapon) this.drawWeapon(game, now);
     this.drawMeteorSky(game, now);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
@@ -14190,6 +14515,14 @@ class Renderer {
     for (let x = c0x; x <= c1x; x++) {
       const c = game.world.chunk(x, cy);
       if (!c.canvas || c.dirty) { c.lastSeen = this.frameId; this.startJob(c); return; }
+    }
+  }
+
+  // Kar kalınlığı değişmiş chunk'ı sıraya al (karede en çok biri)
+  restale(game, c0x, c1x, c0y, c1y) {
+    for (let y = c0y; y <= c1y; y++) for (let x = c0x; x <= c1x; x++) {
+      const c = game.world.chunk(x, y);
+      if (c.canvas && !c.dirty && c.snowLv !== this.snowLv) { this.startJob(c); return; }
     }
   }
 
@@ -14290,6 +14623,7 @@ class Renderer {
     const ctx = this.ctx;
     const sp = this.sprites;
     const world = game.world;
+    const snowy = this.weather === 'snow' && game.wk > 0.3;
     for (let cy = c0y; cy <= c1y; cy++) {
       for (let cx = c0x; cx <= c1x; cx++) {
         const c = world.chunk(cx, cy);
@@ -14341,9 +14675,13 @@ class Renderer {
           if (pr.rot) {
             this.place(pr.x, pr.y, pr.rot);
             ctx.drawImage(img, -w / 2, -h / 2, w, h);
+            if (snowy && pr.kind === PROP.PARKED) ctx.drawImage(sp.snowCar, -w * 0.5, -h * 0.5, w, h);
           } else {
             ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
             ctx.drawImage(img, pr.x - w / 2, pr.y - h / 2, w, h);
+            // Ağaç tepesi ve park halindeki araba üstünde ince kar
+            if (snowy && (pr.kind === PROP.TREE || pr.kind === PROP.PINE || pr.kind === PROP.PALM)) ctx.drawImage(sp.snowTree, pr.x - w * 0.42, pr.y - h * 0.48, w * 0.84, h * 0.84);
+            else if (snowy && pr.kind === PROP.PARKED) ctx.drawImage(sp.snowCar, pr.x - w * 0.5, pr.y - h * 0.5, w, h);
           }
         }
       }
@@ -14699,37 +15037,34 @@ class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
-  // Kar ve buz zemine bir kez işlenir: yol kenarı ve çatılar beyazlar, buzlu yol parlar
+  // Kar ve buz: zemin BEYAZLATILMAZ (yol, kaldırım, çim kendi renginde). Buzlu yolda yalnız ince parlak çizgiler,
+  // binaların çatı kenarında buz sarkıtları. Kar havasında çatı karı bakeBuilding içinde işlenir
   bakeWeather(g, c) {
-    const snow = this.weather === 'snow';
+    if (this.weather !== 'ice') return;
+    g.fillStyle = 'rgba(255,255,255,.32)';
     for (let y = 0; y < CT; y++) {
       for (let x = 0; x < CT; x++) {
         const t = c.ground[y * CT + x];
-        if (t === GROUND.WATER) continue;
         const road = t === GROUND.ROAD || t === GROUND.ALLEY || t === GROUND.TRACK;
-        if (snow) {
-          if (road) continue;
-          g.fillStyle = 'rgba(244,248,255,.62)';
-        } else {
-          g.fillStyle = road ? 'rgba(190,228,255,.3)' : 'rgba(236,246,255,.28)';
-        }
-        g.fillRect(c.x + x * TILE, c.y + y * TILE, TILE, TILE);
-        if (!snow && road && ((x * 7 + y * 3) % 5 === 0)) {
-          g.fillStyle = 'rgba(255,255,255,.35)';
-          g.fillRect(c.x + x * TILE + 6, c.y + y * TILE + 10, 22, 3);
-        }
+        if (road && ((x * 7 + y * 3) % 5 === 0)) g.fillRect(c.x + x * TILE + 6, c.y + y * TILE + 10, 22, 2.5);
       }
     }
-    if (!snow) return;
-    g.fillStyle = 'rgba(250,252,255,.55)';
     for (let i = 0; i < c.rectCount; i++) {
       const r = c.rects[i];
-      if (r.alive && r.kind === 'building') { rr(g, r.x + 3, r.y + 3, r.w - 6, r.h - 6, 4); g.fill(); }
+      if (r.alive && r.kind === 'building' && r.tall <= 0 && r.style < 46 && r.w > 30) paintIcicles(g, r.x + 2, r.y + r.h - 1, r.w - 4, r.seed);
     }
   }
 
+  // Anıt alanının ekrandaki kutusu (cihaz pikseli): hava efektleri buraya çizilmez
+  memScreen() {
+    const b = this.memBox;
+    if (!b) return null;
+    const x0 = this.ox + b.x * this.s; const y0 = this.oy + b.y * this.s;
+    return { x0, y0, x1: x0 + b.w * this.s, y1: y0 + b.h * this.s };
+  }
+
   // Ekran katmanı: yağmur çizgileri, kar taneleri, sis. Havuzlu, kaliteye göre sayılı, ekran dışı çizilmez
-  // Sis: canvas yerine CSS katmanı. Tarayıcı birleştirir, her karede tam ekran çizim yok
+  // Sis: canvas yerine CSS katmanı. Yalnız ekran kenarlarında, orta açık; renkleri soldurmaz. Anıt görünürken sis yok
   fogLayer(game) {
     if (typeof document === 'undefined') return;
     const on = game.weather === 'fog' && game.state !== 'attract';
@@ -14742,20 +15077,29 @@ class Renderer {
       el.innerHTML = '<i></i><i></i>';
       Object.assign(el.style, { position: 'fixed', inset: '0', pointerEvents: 'none' });
       const [a, b] = el.children;
-      Object.assign(a.style, { position: 'absolute', inset: '0', background: 'radial-gradient(circle 62vmax at 50% 50%, rgba(210,214,222,0) 13%, rgba(210,214,222,.55) 61%, rgba(210,214,222,.95) 100%)', opacity: '0' });
+      Object.assign(a.style, { position: 'absolute', inset: '0', background: 'radial-gradient(circle 62vmax at 50% 50%, rgba(210,214,222,0) 42%, rgba(210,214,222,.6) 82%, rgba(210,214,222,.9) 100%)', opacity: '0' });
       Object.assign(b.style, { position: 'absolute', inset: '0', background: '#d2d6de', opacity: '0' });
       this.canvas.after(el);
       this.fogV = [-1, -1, ''];
     }
     const night = game.daylight.k;
-    const wk = on ? game.wk : 0;
+    const wk = on && !this.memBox ? game.wk : 0;
     const ga = Math.round(100 * wk * CONFIG.weather.fogAlpha * (1 - night * 0.55)) / 100;
-    const fa = Math.round(100 * wk * 0.18) / 100;
+    const fa = Math.round(100 * wk * CONFIG.weather.fogFlat) / 100;
     const col = night > 0.5 ? '#141822' : '#d2d6de';
     const v = this.fogV; const [a, b] = el.children;
     if (v[0] !== ga) { v[0] = ga; a.style.opacity = String(ga); }
     if (v[1] !== fa) { v[1] = fa; b.style.opacity = String(fa); }
     if (v[2] !== col) { v[2] = col; b.style.background = col; }
+  }
+
+  // Tam ekran ton: anıt kutusu dışarıda bırakılır (delikli dikdörtgen)
+  tint(color, W, H) {
+    const ctx = this.ctx;
+    const m = this.memScreen();
+    ctx.fillStyle = color;
+    if (!m) { ctx.fillRect(0, 0, W, H); return; }
+    ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.rect(m.x0, m.y0, m.x1 - m.x0, m.y1 - m.y0); ctx.fill('evenodd');
   }
 
   drawWeather(game, now) {
@@ -14766,12 +15110,24 @@ class Renderer {
     const k = game.wk * (this.lod.weather ?? 1);
     const W = this.w * this.dpr; const H = this.h * this.dpr;
     const P = CONFIG.weather;
+    const m = this.memScreen();
+    const inMem = (x, y) => m && x > m.x0 && x < m.x1 && y > m.y0 && y < m.y1;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (w === 'rain' || w === 'snow') {
       const max = P.particles[w];
       const n = Math.round(max * k);
-      const wp = this.wp || (this.wp = { x: new Float32Array(200), y: new Float32Array(200), v: new Float32Array(200), cx: 0, cy: 0, t: now });
-      if (!wp.init) { for (let i = 0; i < 200; i++) { wp.x[i] = Math.random() * W; wp.y[i] = Math.random() * H; wp.v[i] = 0.6 + Math.random() * 0.8; } wp.init = true; }
+      const N = 200;
+      const wp = this.wp || (this.wp = { x: new Float32Array(N), y: new Float32Array(N), v: new Float32Array(N), l: new Uint8Array(N), cx: 0, cy: 0, t: now });
+      if (!wp.init) {
+        for (let i = 0; i < N; i++) {
+          wp.x[i] = Math.random() * W; wp.y[i] = Math.random() * H; wp.v[i] = Math.random();
+          // Katman: uzak küçük ve soluk, yakın büyük ve belirgin
+          const u = Math.random(); let acc = 0; let L = 0;
+          for (let q = 0; q < P.flakes.length; q++) { acc += P.flakes[q].share; if (u <= acc) { L = q; break; } L = q; }
+          wp.l[i] = L;
+        }
+        wp.init = true;
+      }
       const dt = Math.min(0.05, (now - wp.t) / 1000); wp.t = now;
       // Kamera kayınca taneler de kayar: dünyaya bağlı his
       const s = this.s;
@@ -14783,34 +15139,86 @@ class Renderer {
         ctx.lineWidth = 1.3 * this.dpr;
         ctx.beginPath();
         for (let i = 0; i < n; i++) {
-          wp.y[i] += 900 * this.dpr * wp.v[i] * dt; wp.x[i] += 180 * this.dpr * dt;
+          const v = 0.6 + wp.v[i] * 0.8;
+          wp.y[i] += 900 * this.dpr * v * dt; wp.x[i] += 180 * this.dpr * dt;
           if (shift) { wp.x[i] -= mx * 0.6; wp.y[i] -= my * 0.6; }
           if (wp.y[i] > H) wp.y[i] -= H; if (wp.y[i] < 0) wp.y[i] += H;
           if (wp.x[i] > W) wp.x[i] -= W; if (wp.x[i] < 0) wp.x[i] += W;
-          const L = 14 * this.dpr * wp.v[i];
+          if (inMem(wp.x[i], wp.y[i])) continue;
+          const L = 14 * this.dpr * v;
           ctx.moveTo(wp.x[i], wp.y[i]); ctx.lineTo(wp.x[i] - L * 0.2, wp.y[i] - L);
         }
         ctx.stroke();
-        // Islak zemin: hafif koyu, mavi ton
-        ctx.fillStyle = `rgba(20,36,64,${(0.12 * game.wk).toFixed(3)})`;
-        ctx.fillRect(0, 0, W, H);
+        // Islak zemin: çok hafif koyu mavi ton (renkleri soldurmaz)
+        this.tint(`rgba(20,36,64,${(P.rainTint * game.wk).toFixed(3)})`, W, H);
       } else {
-        ctx.fillStyle = 'rgba(255,255,255,.85)';
         const tt = now / 1000;
+        const night = game.daylight.k;
+        const sp = this.sprites.flake;
         for (let i = 0; i < n; i++) {
-          wp.y[i] += 70 * this.dpr * wp.v[i] * dt;
-          wp.x[i] += Math.sin(tt * 1.3 + i) * 22 * this.dpr * dt;
-          if (shift) { wp.x[i] -= mx * 0.8; wp.y[i] -= my * 0.8; }
+          const F = P.flakes[wp.l[i]];
+          const v = 0.75 + wp.v[i] * 0.5;
+          wp.y[i] += F.fall * this.dpr * v * dt;
+          wp.x[i] += (Math.sin(tt * (0.7 + wp.v[i]) + i) * F.sway + P.wind) * this.dpr * dt;
+          // Yakındaki katman kamerayla daha çok kayar: derinlik
+          if (shift) { const pk = 0.55 + wp.l[i] * 0.2; wp.x[i] -= mx * pk; wp.y[i] -= my * pk; }
           if (wp.y[i] > H) wp.y[i] -= H; if (wp.y[i] < 0) wp.y[i] += H;
           if (wp.x[i] > W) wp.x[i] -= W; if (wp.x[i] < 0) wp.x[i] += W;
-          const r = (1.2 + wp.v[i] * 1.4) * this.dpr;
-          ctx.fillRect(wp.x[i], wp.y[i], r, r);
+          if (inMem(wp.x[i], wp.y[i])) continue;
+          const r = (F.size[0] + (F.size[1] - F.size[0]) * wp.v[i]) * this.dpr;
+          // Gece ışıkta parıldar: bazı taneler kısa süre parlar
+          const glit = night > 0.3 && ((i * 37 + Math.floor(tt * 3)) % 23 === 0) ? 1.6 : 1;
+          ctx.globalAlpha = Math.min(1, F.alpha * glit);
+          // Uzak katman küçük ve ucuz (kare), yakın katmanlar yumuşak tane
+          if (wp.l[i] === 0) { ctx.fillStyle = '#ffffff'; ctx.fillRect(wp.x[i] - r * 0.5, wp.y[i] - r * 0.5, r, r); }
+          else ctx.drawImage(sp, wp.x[i] - r, wp.y[i] - r, r * 2, r * 2);
         }
+        ctx.globalAlpha = 1;
       }
     } else if (w === 'ice') {
-      ctx.fillStyle = `rgba(170,215,255,${(0.08 * game.wk).toFixed(3)})`;
-      ctx.fillRect(0, 0, W, H);
+      this.tint(`rgba(170,215,255,${(P.iceTint * game.wk).toFixed(3)})`, W, H);
     }
+    ctx.globalAlpha = 1;
+  }
+
+  // Buz sarkıtlarının canlı katmanı: göz kırpan parıltılar ve düşen küçük damlalar. Yalnız yakındaki binalarda, sınırlı
+  drawIceFx(game, now, c0x, c1x, c0y, c1y) {
+    if (this.weather !== 'ice' || game.wk < 0.3) return;
+    const I = CONFIG.icicles;
+    const ctx = this.ctx;
+    const cam = game.cam;
+    const t = now / 1000;
+    const night = game.daylight.k;
+    let budget = I.maxFx;
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+    ctx.globalCompositeOperation = 'lighter';
+    const tip = (r, x, y, w) => {
+      const key = r.seed * 4096 + Math.round(w);
+      if (r.iceKey !== key) { r.iceKey = key; r.iceTips = icicleTips(w, r.seed); }
+      for (const p of r.iceTips) {
+        if (budget-- <= 0) return;
+        const px = x + p.x; const py = y + p.y;
+        const tw = Math.max(0, Math.sin(t * p.sp * 2.2 + p.ph));
+        const a = tw ** 6; // Arada bir göz kırpan ışık
+        if (a > 0.05) { ctx.globalAlpha = a * (0.7 + 0.3 * night); ctx.drawImage(this.sprites.glint, px - 5, py - 5, 10, 10); }
+        // Damla: uçtan düşer, kaybolur
+        const u = (t * I.drip * p.sp + p.ph) % 1;
+        if (u < 0.5) { ctx.globalAlpha = (1 - u * 2) * 0.8; ctx.fillStyle = '#d8f2ff'; ctx.fillRect(px - 0.6, py + 6 + u * 22, 1.2, 2.2); }
+      }
+    };
+    for (let cy = c0y; cy <= c1y && budget > 0; cy++) {
+      for (let cx = c0x; cx <= c1x && budget > 0; cx++) {
+        const c = game.world.chunk(cx, cy);
+        for (let i = 0; i < c.rectCount && budget > 0; i++) {
+          const r = c.rects[i];
+          if (!r.alive || r.kind !== 'building' || r.style >= 46 || r.w <= 30) continue;
+          if (Math.abs(r.x + r.w / 2 - cam.x) > I.near || Math.abs(r.y + r.h - cam.y) > I.near) continue;
+          if (r.tall > 0 && r.tX0 !== undefined) tip(r, r.tX0, r.tY1 - 2, r.tX1 - r.tX0);
+          else tip(r, r.x + 2, r.y + r.h - 1, r.w - 4);
+        }
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
   }
 
@@ -15689,8 +16097,8 @@ function defaultSave() {
     dev: { god: false, startTime: 0 },
     tutorial: false,
     paints: {},
-    custom: {}, // araba -> { rim, led }
-    unlocked: { paints: [], rims: [], leds: [] }, // satın alınan özelleştirmeler
+    custom: {}, // araba -> { rim, led, exhaust }
+    unlocked: { paints: [], rims: [], leds: [], exhausts: [] }, // satın alınan özelleştirmeler
     secret: false, // Gizli geçit bulundu: gizli motosiklet garajda
   };
 }
@@ -15734,7 +16142,7 @@ function sanitize(data) {
     }
   }
   if (data.unlocked && typeof data.unlocked === 'object') {
-    for (const [kind, key] of [['paint', 'paints'], ['rim', 'rims'], ['led', 'leds']]) {
+    for (const [kind, key] of [['paint', 'paints'], ['rim', 'rims'], ['led', 'leds'], ['exhaust', 'exhausts']]) {
       const list = Array.isArray(data.unlocked[key]) ? data.unlocked[key] : [];
       d.unlocked[key] = [...new Set(list.filter((id) => itemOf(kind, id)))];
     }
@@ -15751,7 +16159,7 @@ function sanitize(data) {
       const v = data.custom[c.id];
       if (!v || typeof v !== 'object') continue;
       const ok = (kind, key, id) => itemOf(kind, id) && (itemOf(kind, id).price === 0 || d.unlocked[key].includes(id));
-      d.custom[c.id] = { rim: ok('rim', 'rims', v.rim) ? v.rim : 'std', led: ok('led', 'leds', v.led) ? v.led : 'yok' };
+      d.custom[c.id] = { rim: ok('rim', 'rims', v.rim) ? v.rim : 'std', led: ok('led', 'leds', v.led) ? v.led : 'yok', exhaust: ok('exhaust', 'exhausts', v.exhaust) ? v.exhaust : 'std' };
     }
   }
   return d;
@@ -15850,7 +16258,7 @@ class Storage {
   // Seçili arabanın görünüşü: boya, jant, alt LED
   look(id) {
     const c = this.data.custom[id] || {};
-    return { paint: this.paintIndex(id), rim: c.rim || 'std', led: c.led || 'yok' };
+    return { paint: this.paintIndex(id), rim: c.rim || 'std', led: c.led || 'yok', exhaust: c.exhaust || 'std' };
   }
 
   owns(kind, id) {
@@ -15880,7 +16288,7 @@ class Storage {
       return true;
     }
     if (!this.owns(kind, id)) return false;
-    const c = this.data.custom[carId] || (this.data.custom[carId] = { rim: 'std', led: 'yok' });
+    const c = this.data.custom[carId] || (this.data.custom[carId] = { rim: 'std', led: 'yok', exhaust: 'std' });
     c[kind] = id;
     this.save();
     return true;
@@ -15924,6 +16332,23 @@ const ENGINE_KINDS = {
   // Gizli motosiklet: çift silindir, çok derin ve gür gövde, kalın tırtıl; gaz bırakınca egzoz patlar (pops)
   beast: { harm: [1, 0.95, 0.9, 0.72, 0.6, 0.48, 0.36], sub: 1.05, high: 0.24, air: 0.14, rough: 0.42, roughRate: 0.5, lp: [300, 3400], pops: true },
 };
+
+const SND = CONFIG.sound;
+// Egzoz profili (mağazadan): motor sesine uygulanan çarpanlar
+const exhaustOf = (id) => CONFIG.custom.exhausts.find((x) => x.id === id) || CONFIG.custom.exhausts[0];
+// Yumuşak bozulma eğrisi: harmonik zenginlik, kırpmadan (tanh)
+const SND_CURVES = new Map();
+function sndCurve(drive) {
+  const key = Math.round(drive * 20);
+  let c = SND_CURVES.get(key);
+  if (c) return c;
+  c = new Float32Array(1024);
+  const k = key / 20;
+  const norm = Math.tanh(k);
+  for (let i = 0; i < 1024; i++) { const x = (i / 1023) * 2 - 1; c[i] = Math.tanh(k * x) / norm; }
+  SND_CURVES.set(key, c);
+  return c;
+}
 
 // Hız oranından devir ve vites: vites büyüdükçe devir düşer, tepe devre ulaşınca sıradaki vitese atar
 function engineRpm(e, k) {
@@ -15974,9 +16399,18 @@ class AudioEngine {
     this.ctx = ctx;
     this.master = ctx.createGain();
     this.master.gain.value = this.enabled ? this.volume : 0;
+    // Çıkış sınırlayıcı: toplam ses yükseldi, bozulma (kırpma) olmasın
     const comp = ctx.createDynamicsCompressor();
+    const L = SND.limiter;
+    comp.threshold.value = L.threshold; comp.knee.value = L.knee; comp.ratio.value = L.ratio;
+    comp.attack.value = L.attack; comp.release.value = L.release;
     this.master.connect(comp);
-    comp.connect(ctx.destination);
+    const ceil = ctx.createGain();
+    ceil.gain.value = L.ceiling;
+    comp.connect(ceil);
+    this.limiter = comp;
+    ceil.connect(ctx.destination);
+    this.shots = 0; // Aynı anda çalan kısa ses sayısı
 
     // Beyaz gürültü tamponu: drift, çarpma, patlama
     const len = ctx.sampleRate * 2;
@@ -15993,9 +16427,31 @@ class AudioEngine {
     this.engFilter.frequency.value = 500;
     this.engRough = ctx.createGain();
     this.engRough.gain.value = 1;
+    // Filtre -> egzoz vuruşu (tırtıl) -> yumuşak bozulma -> çıkış. Alt bas katmanı filtreyi atlar: dolgun gövde
+    this.engShaper = ctx.createWaveShaper();
+    this.engShaper.curve = sndCurve(SND.drive);
+    this.engShaper.oversample = 'none';
     this.engFilter.connect(this.engRough);
-    this.engRough.connect(this.engGain);
+    this.engRough.connect(this.engShaper);
+    this.engShaper.connect(this.engGain);
     this.engGain.connect(this.master);
+    const sub = ctx.createOscillator();
+    sub.type = 'sine';
+    const subG = ctx.createGain();
+    subG.gain.value = 0;
+    sub.connect(subG);
+    subG.connect(this.engRough);
+    sub.start();
+    this.eng4 = { o: sub, g: subG };
+    // Turbo ıslığı (yalnız turbo egzozda)
+    const tw = ctx.createOscillator();
+    tw.type = 'sine';
+    const twG = ctx.createGain();
+    twG.gain.value = 0;
+    tw.connect(twG);
+    twG.connect(this.engGain);
+    tw.start();
+    this.turbo = { o: tw, g: twG };
     const layer = (type) => {
       const o = ctx.createOscillator();
       o.type = type;
@@ -16122,11 +16578,15 @@ class AudioEngine {
     this.radioT = 6;
   }
 
-  setEngine(e) {
+  setEngine(e, exhaust = 'std') {
     this.engine = e;
+    this.exId = exhaust;
+    const X = exhaustOf(exhaust);
+    this.ex = X;
     if (!this.eng1) return;
     const K = ENGINE_KINDS[e.kind] || ENGINE_KINDS.inline;
     this.kind = K;
+    this.engShaper.curve = sndCurve(SND.drive * X.drive * (K.drive || 1));
     if (!this.waves[e.kind]) {
       const real = new Float32Array(K.harm.length + 1);
       const imag = new Float32Array(K.harm.length + 1);
@@ -16135,16 +16595,18 @@ class AudioEngine {
     }
     this.eng1.o.setPeriodicWave(this.waves[e.kind]);
     const t = this.ctx.currentTime;
-    this.eng2.g.gain.setTargetAtTime(K.sub, t, 0.02);
-    this.eng3.g.gain.setTargetAtTime(K.high, t, 0.02);
-    this.lfoGain.gain.setTargetAtTime(K.rough * 0.5, t, 0.02);
+    this.eng2.g.gain.setTargetAtTime(Math.min(1.6, K.sub * X.sub + 0.2), t, 0.02);
+    this.eng3.g.gain.setTargetAtTime(K.high * X.bright, t, 0.02);
+    this.eng4.g.gain.setTargetAtTime(SND.sub * X.sub * (e.kind === 'ev' ? 0.35 : 1), t, 0.02);
+    this.lfoGain.gain.setTargetAtTime(Math.min(0.85, (K.rough * 0.5 + SND.rough) * X.rough), t, 0.02);
     this.engAir.gain.setTargetAtTime(K.air, t, 0.02);
   }
 
   // Motor ön izlemesi: rev gazlama, start kontak ve çalışma
-  preview(e, mode = 'rev') {
+  preview(e, mode = 'rev', exhaust = 'std') {
     if (!this.ctx || !this.enabled) return;
-    this.setEngine(e);
+    this.setEngine(e, exhaust);
+    this.pvExhaust = exhaust;
     this.pv = { mode, at: this.ctx.currentTime, len: mode === 'start' ? 1.5 : 1.25 };
     if (mode === 'start') {
       // Marş dişlisi: hızlı tekrar eden kısa vuruşlar
@@ -16228,34 +16690,47 @@ class AudioEngine {
     if (this.pv) {
       const s = this.previewState(this.pv, t);
       if (s && !(on && this.pv.mode !== 'start')) { k = s.k; gas = s.gas; vol = Math.max(vol * 0.6, s.vol); }
-      if (!s) { this.pv = null; if (this.engine !== game.carSpec.engine) this.setEngine(game.carSpec.engine); }
+      if (!s) { this.pv = null; this.pvExhaust = null; }
     }
+    // Oyundaki araç ve takılı egzoz (ön izleme bitince geri döner)
+    const want = (game.look && game.look.exhaust) || 'std';
+    if (!this.pv && (this.engine !== game.carSpec.engine || this.exId !== want)) this.setEngine(game.carSpec.engine, want);
     const e = this.engine;
     const K = this.kind;
     // Kayarken tekerlek boşa döner: devir fırlar
     const spin = on && p.drifting ? 0.09 : 0;
     const state = engineRpm(e, k + spin);
     if (state.gear !== this.gear) {
-      if (state.gear > this.gear) this.shiftT = t + 0.09; // Vites atarken gaz bir an kesilir
+      if (state.gear > this.gear) {
+        this.shiftT = t + 0.09; // Vites atarken gaz bir an kesilir
+        // Vites vuruşu: tok, kısa
+        if (on && e.kind !== 'ev') { this.tone(58, 0.14, SND.shift * vol, 'sine', 34); this.burst(0.07, 420, 0.12 * vol, 'lowpass', 120); }
+      }
       this.gear = state.gear;
     }
     const cut = t < this.shiftT ? 0.45 : 1;
     const rpm = state.rpm * (gas < 0.2 ? 0.86 : 1);
-    const f0 = Math.max(18, (rpm / 60) * (e.cyl / 2));
+    const X = this.ex || exhaustOf('std');
+    // Daha ağır ve derin: taban frekans düşük, alt bas ayrı katman
+    const f0 = Math.max(16, (rpm / 60) * (e.cyl / 2) * SND.pitch * X.pitch);
     const ratio = Math.min(1, rpm / e.red);
     const glide = t < this.shiftT ? 0.03 : 0.07;
     this.eng1.o.frequency.setTargetAtTime(f0, t, glide);
     this.eng2.o.frequency.setTargetAtTime(f0 / 2, t, glide);
     this.eng3.o.frequency.setTargetAtTime(f0 * 2, t, glide);
+    this.eng4.o.frequency.setTargetAtTime(Math.max(26, f0 / 2), t, glide);
     this.lfo.frequency.setTargetAtTime(Math.max(4, f0 * K.roughRate), t, 0.08);
     this.engAirF.frequency.setTargetAtTime(500 + 1900 * ratio, t, 0.08);
-    this.engFilter.frequency.setTargetAtTime(K.lp[0] + (K.lp[1] - K.lp[0]) * ratio * (0.35 + 0.65 * gas), t, 0.07);
-    this.engGain.gain.setTargetAtTime(vol * (0.05 + 0.05 * ratio + 0.05 * gas) * e.gain * cut, t, 0.05);
-    // Geri tepme: gaz bırakılınca yüksek devirde egzoz patlamaları
-    if (K.pops && on) {
-      if ((this.lastGas ?? 1) >= 0.8 && gas < 0.6 && ratio > 0.35) this.backfire(3 + Math.floor(Math.random() * 3));
-      else if (gas < 0.6 && ratio > 0.5 && Math.random() < 0.05) this.backfire(1);
-    }
+    this.engFilter.frequency.setTargetAtTime((K.lp[0] + (K.lp[1] - K.lp[0]) * ratio * (0.35 + 0.65 * gas)) * X.lp, t, 0.07);
+    // Gaz verince güçlü yükselme
+    this.engGain.gain.setTargetAtTime(vol * (0.05 + 0.05 * ratio + 0.07 * gas) * e.gain * SND.gain * X.gain * cut, t, 0.05);
+    // Turbo: devirle yükselen ıslık, gaz bırakınca boşalma
+    if (X.turbo) {
+      this.turbo.o.frequency.setTargetAtTime(1600 + 3400 * ratio, t, 0.1);
+      this.turbo.g.gain.setTargetAtTime(vol * X.turbo * 0.035 * gas * ratio, t, 0.08);
+      if (on && (this.lastGas ?? 1) >= 0.8 && gas < 0.6 && ratio > 0.3) this.burst(0.35, 3400, 0.14 * vol, 'bandpass', 700);
+    } else if (this.turboOn) this.turbo.g.gain.setTargetAtTime(0, t, 0.05);
+    this.turboOn = !!X.turbo;
     this.lastGas = gas;
 
     // Ara sıra sokak sesleri
@@ -16316,9 +16791,16 @@ class AudioEngine {
     this.lastNow = now;
   }
 
+  // Kısa ses sınırı: aynı anda en çok SND.maxVoices
+  voice(node, end) {
+    this.shots++;
+    node.onended = () => { this.shots--; };
+    node.stop(end);
+  }
+
   burst(duration, freq, gain, type = 'lowpass', sweepTo = 0) {
     const c = this.ctx;
-    if (!c || !this.enabled) return;
+    if (!c || !this.enabled || this.shots >= SND.maxVoices) return;
     const t = c.currentTime;
     const src = c.createBufferSource();
     src.buffer = this.noise;
@@ -16336,12 +16818,12 @@ class AudioEngine {
     f.connect(g);
     g.connect(this.master);
     src.start(t, Math.random());
-    src.stop(t + duration + 0.02);
+    this.voice(src, t + duration + 0.02);
   }
 
   tone(freq, duration, gain, type = 'sine', slideTo = 0, delay = 0) {
     const c = this.ctx;
-    if (!c || !this.enabled) return;
+    if (!c || !this.enabled || this.shots >= SND.maxVoices) return;
     const t = c.currentTime + delay;
     const o = c.createOscillator();
     o.type = type;
@@ -16354,7 +16836,7 @@ class AudioEngine {
     o.connect(g);
     g.connect(this.master);
     o.start(t);
-    o.stop(t + duration + 0.02);
+    this.voice(o, t + duration + 0.02);
   }
 
   // Suya düşüş: gümbürtü, sıçrama ve yükselen kabarcıklar
@@ -16597,11 +17079,14 @@ class AudioEngine {
   spike() { this.tone(900, 0.5, 0.14, 'sawtooth', 100); this.burst(0.3, 3200, 0.3, 'highpass'); }
 
   // Egzoz patlaması: kısa, tok, aralıklı
+  // Egzoz patlaması: "pat, pat, pop" (oyun karar verir: game.js backfire olayı)
   backfire(n) {
+    let d = 0;
     for (let i = 0; i < n; i++) {
-      const d = i * (0.06 + Math.random() * 0.07);
-      this.tone(70 + Math.random() * 40, 0.07, 0.42, 'square', 34, d);
-      setTimeout(() => this.burst(0.06, 900 + Math.random() * 500, 0.5, 'lowpass', 120), d * 1000);
+      const last = i === n - 1;
+      this.tone(last ? 54 : 72 + Math.random() * 36, last ? 0.12 : 0.07, last ? 0.5 : 0.38, 'square', 30, d);
+      setTimeout(() => this.burst(last ? 0.1 : 0.06, last ? 700 : 900 + Math.random() * 500, last ? 0.6 : 0.45, 'lowpass', 110), d * 1000);
+      d += SND.popGap + Math.random() * SND.popGap;
     }
   }
 
@@ -16663,6 +17148,24 @@ class AudioEngine {
 // --- pixelcars.js ---
 // Garaj arabaları: yandan görünüş, kod ile piksel piksel çizilir. Marka rozeti yoktur.
 // Her araç 120x48 mantıksal tuval, CSS ile keskin büyütülür. Boya, jant ve alt LED görünüşe uygulanır.
+
+// Egzoz ucu (arka, yere yakın): mağazadaki egzoza göre biçim ve renk; patlamalıda küçük alev
+function pxExhaust(g, x, y, id, t = 0) {
+  const it = exhaustItem(id || 'std');
+  const c = it.color;
+  const tipAt = (yy, w, h) => { g.fillStyle = '#14161b'; g.fillRect(x - w, yy - 1, w + 1, h + 2); g.fillStyle = c; g.fillRect(x - w + 1, yy, w, h); g.fillStyle = '#f4f7fa'; g.fillRect(x - w + 1, yy, w, 1); };
+  if (it.tip === 'dual') { tipAt(y - 2, 4, 2); tipAt(y + 1, 4, 2); }
+  else if (it.tip === 'quad') { tipAt(y - 3, 3, 1); tipAt(y - 1, 3, 1); tipAt(y + 1, 3, 1); tipAt(y + 3, 3, 1); }
+  else if (it.tip === 'big') tipAt(y - 2, 4, 4);
+  else if (it.tip === 'wide') tipAt(y - 1, 6, 3);
+  else if (it.tip !== 'flame') tipAt(y, 3, 2);
+  if (it.tip === 'flame') {
+    tipAt(y, 4, 2);
+    const on = Math.floor(t * 8) % 2;
+    g.fillStyle = on ? '#ffb020' : '#ff3a10'; g.fillRect(x - 7, y, 3, 2);
+    g.fillStyle = '#fff3a8'; g.fillRect(x - 5, y + (on ? 0 : 1), 1, 1);
+  }
+}
 const PXC_W = 120;
 const PXC_H = 48;
 
@@ -16802,8 +17305,8 @@ function pxDrawCar(g, car, paint, look = { rim: 'std', led: 'yok', ang: 0, t: 0 
       if (x % 2 === 0 && x > 20 && x < 100) { g.fillStyle = '#7a1a7a'; g.fillRect(x, 46, 1, 1); }
     }
   }
-  if (car.shape === 'moto') { pxMoto(g, paint, look); return; }
-  if (car.shape === 'golge') { pxGolge(g, paint, look); return; }
+  if (car.shape === 'moto') { pxMoto(g, paint, look); pxExhaust(g, 18, 33, look.exhaust, look.t); return; }
+  if (car.shape === 'golge') { pxGolge(g, paint, look); pxExhaust(g, 26, 34, look.exhaust, look.t); return; }
   const S = PX_SHAPES[car.shape] || PX_SHAPES.atmaca;
   const body = [[S.x0, S.sill], [S.x0, S.deck + 3], [S.x0 + 3, S.deck], [S.cr, S.deck], [S.rr, S.roof], [S.rf, S.roof], [S.cf, S.hood], [S.x1 - 8, S.hood + 2], [S.x1, S.hood + 6], [S.x1, S.sill]];
   const belt = Math.max(S.deck, S.hood) + 1;
@@ -16870,12 +17373,13 @@ function pxDrawCar(g, car, paint, look = { rim: 'std', led: 'yok', ang: 0, t: 0 
   }
   pxWheel(g, S.w[0], S.sill + 1, S.r, accent, look.rim, look.ang);
   pxWheel(g, S.w[1], S.sill + 1, S.r, accent, look.rim, look.ang);
+  pxExhaust(g, S.x0 + 1, S.sill - 2, look.exhaust, look.t);
 }
 
 const pxCache = new Map();
 function pixelCar(car, paintIdx = 0, look = null) {
   const paint = paintOf(car, paintIdx);
-  const key = `${car.id}:${paintIdx}:${look ? `${look.rim}:${look.led}` : ''}`;
+  const key = `${car.id}:${paintIdx}:${look ? `${look.rim}:${look.led}:${look.exhaust || 'std'}` : ''}`;
   if (pxCache.has(key)) return pxCache.get(key);
   const c = document.createElement('canvas');
   c.width = PXC_W; c.height = PXC_H;
@@ -16921,8 +17425,9 @@ function rimIcon(rim, ang = 0.3) {
 const SCN = CONFIG.secret;
 
 class SecretScene {
-  constructor(el) {
+  constructor(el, msg = null) {
     this.el = el;
+    this.msg = msg; // Karşılama yazısı: sahneden ayrı, GIZLI_YAZI_SURESI saniye
     this.canvas = el ? el.querySelector('canvas') : null;
     this.raf = 0;
     this.t0 = 0;
@@ -16931,9 +17436,8 @@ class SecretScene {
 
   play(title, gift, first) {
     if (!this.el) return;
-    this.el.querySelector('b').textContent = title;
-    this.el.querySelector('small').textContent = gift;
     this.el.classList.toggle('first', !!first);
+    this.showText(title, gift);
     this.el.hidden = false;
     this.el.style.setProperty('--scene', `${SCN.scene}s`);
     this.el.style.setProperty('--slide', `${SCN.slide}s`);
@@ -16951,6 +17455,21 @@ class SecretScene {
     this.raf = requestAnimationFrame(loop);
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.hide(), (SCN.scene + 0.4) * 1000);
+  }
+
+  // Yazı oyuna dönüldükten sonra da ekranda kalır (5-10 sn), sonra yumuşakça kaybolur
+  showText(title, gift) {
+    const m = this.msg;
+    if (!m) return;
+    const t = Math.max(5, Math.min(10, SCN.GIZLI_YAZI_SURESI));
+    m.querySelector('b').textContent = title;
+    m.querySelector('small').textContent = gift;
+    m.style.setProperty('--msg-t', `${t}s`);
+    m.classList.remove('run');
+    void m.offsetWidth;
+    m.classList.add('run');
+    clearTimeout(this.msgTimer);
+    this.msgTimer = setTimeout(() => m.classList.remove('run'), (t + 0.2) * 1000);
   }
 
   hide() {
@@ -17791,7 +18310,7 @@ class UI {
     box.classList.remove('off');
     const d = this.storage.data;
     const look = this.storage.look(car.id);
-    const items = tab === 'paint' ? CUSTOM.paints : tab === 'rim' ? CUSTOM.rims : CUSTOM.leds;
+    const items = tab === 'paint' ? CUSTOM.paints : tab === 'rim' ? CUSTOM.rims : tab === 'led' ? CUSTOM.leds : CUSTOM.exhausts;
     const current = look[tab];
     const p = this.prev && this.prev.kind === tab ? this.prev.id : null;
     for (const it of items) {
@@ -17801,12 +18320,13 @@ class UI {
       b.setAttribute('aria-label', tx(`custom.${tab}s.${it.id}`));
       if (tab === 'paint') { b.classList.add(it.finish); b.style.setProperty('--c', it.color); }
       else if (tab === 'rim') b.appendChild(rimIcon(it.id));
+      else if (tab === 'exhaust') { const ic = document.createElement('i'); ic.className = `pipe ${it.tip}`; ic.style.setProperty('--c', it.color); b.appendChild(ic); }
       else { b.style.setProperty('--c', it.color || 'transparent'); if (it.fx !== 'static') b.classList.add(it.fx); if (!it.color) b.classList.add('none'); }
       if (!has) { const tag = document.createElement('em'); tag.textContent = txNum(it.price); b.appendChild(tag); }
       b.addEventListener('click', () => {
         this.actions.tap();
         this.confirm = false;
-        if (has) { this.prev = null; this.storage.setLook(car.id, tab, it.id); this.actions.carChanged(); $('custom-msg').textContent = ''; }
+        if (has) { this.prev = null; this.storage.setLook(car.id, tab, it.id); this.actions.carChanged(); $('custom-msg').textContent = ''; if (tab === 'exhaust') this.fitExhaust(); }
         else this.prev = { kind: tab, id: it.id };
         this.renderGarage();
       });
@@ -17814,7 +18334,13 @@ class UI {
     }
     // Seçilen ya da denenen öğenin adı ve satın alma düğmesi
     const sel = p || current;
-    $('custom-name').textContent = tab === 'paint' && typeof sel === 'number' ? this.paintName(car, sel) : tx(`custom.${tab}s.${sel}`);
+    $('custom-name').textContent = tab === 'paint' && typeof sel === 'number' ? this.paintName(car, sel)
+      : tab === 'exhaust' ? `${tx(`custom.exhausts.${sel}`)} · ${tx(`custom.exhaustInfo.${sel}`)}` : tx(`custom.${tab}s.${sel}`);
+    // Egzoz: satın almadan önce dinle
+    const listen = $('custom-listen');
+    listen.hidden = tab !== 'exhaust';
+    listen.parentElement.classList.toggle('ex', tab === 'exhaust');
+    listen.onclick = () => { this.actions.listen(car, sel); };
     if (p) {
       const it = itemOf(tab, p);
       const enough = d.coins >= it.price;
@@ -17829,6 +18355,7 @@ class UI {
         this.confirm = false;
         if (r === 'ok') {
           this.storage.setLook(car.id, tab, p);
+          if (tab === 'exhaust') this.fitExhaust();
           this.prev = null;
           this.actions.purchased();
           this.actions.carChanged();
@@ -17842,6 +18369,15 @@ class UI {
     } else {
       buy.hidden = true;
     }
+  }
+
+  // Egzoz takılınca garajdaki araçta kısa titreme ve egzoz ucunda parlama
+  fitExhaust() {
+    const el = $('px-car');
+    el.classList.remove('fit');
+    void el.offsetWidth;
+    el.classList.add('fit');
+    this.actions.listen(this.storage.garageCars()[this.gi], this.storage.look(this.storage.garageCars()[this.gi].id).exhaust);
   }
 
   stepCar(dir) {
@@ -18289,13 +18825,14 @@ const ui = new UI(storage, {
   menuShown() { cover.start(); },
   menuHidden() { cover.stop(); },
   purchased() { audio.purchase(); vibrate([30, 30, 60]); },
+  listen(car, exhaust) { audio.unlock(); audio.preview(car.engine, 'rev', exhaust || 'std'); },
 });
 // iPhone/iPad: ana ekrana ekle rehberi (yalnız iOS Safari/Chrome, ana ekrandan açılmamışsa)
 initA2hs(() => audio.unlock());
 // Gençliğe Hitabe okuma kartı: anıta yaklaşınca açılır, uzaklaşınca ya da dokununca kapanır
 const memorialCard = new MemorialCard(document.getElementById('memorial-card'), () => game.dismissMemorialCard());
 // Gizli geçit: bodrum sahnesi ve karşılama yazısı. Arkadaş sürümünde ev sahibinin adı, Play sürümünde genel yazı
-const secretScene = new SecretScene(document.getElementById('secret'));
+const secretScene = new SecretScene(document.getElementById('secret'), document.getElementById('secret-msg'));
 
 let wakeLock = null;
 async function keepAwake(on) {
@@ -18332,6 +18869,7 @@ game.onEvent = (name, v) => {
     case 'meteorwarn': audio.meteorWarn(v); break;
     case 'meteorfall': audio.meteorFall(v); break;
     case 'vehsink': audio.vehSink(v); break;
+    case 'backfire': audio.backfire(v); break;
     case 'roadblock': audio.alert(); ui.toast(tx('roadblock.warn'), '#ff5a36'); vibrate([60, 40, 60]); break;
     case 'meteorhit': audio.meteorHit(v); vibrate(Math.round(30 + 60 * v)); break;
     case 'shot': audio.gunShot(); break;

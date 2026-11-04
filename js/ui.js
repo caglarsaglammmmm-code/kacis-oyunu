@@ -597,7 +597,7 @@ export class UI {
     box.classList.remove('off');
     const d = this.storage.data;
     const look = this.storage.look(car.id);
-    const items = tab === 'paint' ? CUSTOM.paints : tab === 'rim' ? CUSTOM.rims : CUSTOM.leds;
+    const items = tab === 'paint' ? CUSTOM.paints : tab === 'rim' ? CUSTOM.rims : tab === 'led' ? CUSTOM.leds : CUSTOM.exhausts;
     const current = look[tab];
     const p = this.prev && this.prev.kind === tab ? this.prev.id : null;
     for (const it of items) {
@@ -607,12 +607,13 @@ export class UI {
       b.setAttribute('aria-label', tx(`custom.${tab}s.${it.id}`));
       if (tab === 'paint') { b.classList.add(it.finish); b.style.setProperty('--c', it.color); }
       else if (tab === 'rim') b.appendChild(rimIcon(it.id));
+      else if (tab === 'exhaust') { const ic = document.createElement('i'); ic.className = `pipe ${it.tip}`; ic.style.setProperty('--c', it.color); b.appendChild(ic); }
       else { b.style.setProperty('--c', it.color || 'transparent'); if (it.fx !== 'static') b.classList.add(it.fx); if (!it.color) b.classList.add('none'); }
       if (!has) { const tag = document.createElement('em'); tag.textContent = txNum(it.price); b.appendChild(tag); }
       b.addEventListener('click', () => {
         this.actions.tap();
         this.confirm = false;
-        if (has) { this.prev = null; this.storage.setLook(car.id, tab, it.id); this.actions.carChanged(); $('custom-msg').textContent = ''; }
+        if (has) { this.prev = null; this.storage.setLook(car.id, tab, it.id); this.actions.carChanged(); $('custom-msg').textContent = ''; if (tab === 'exhaust') this.fitExhaust(); }
         else this.prev = { kind: tab, id: it.id };
         this.renderGarage();
       });
@@ -620,7 +621,13 @@ export class UI {
     }
     // Seçilen ya da denenen öğenin adı ve satın alma düğmesi
     const sel = p || current;
-    $('custom-name').textContent = tab === 'paint' && typeof sel === 'number' ? this.paintName(car, sel) : tx(`custom.${tab}s.${sel}`);
+    $('custom-name').textContent = tab === 'paint' && typeof sel === 'number' ? this.paintName(car, sel)
+      : tab === 'exhaust' ? `${tx(`custom.exhausts.${sel}`)} · ${tx(`custom.exhaustInfo.${sel}`)}` : tx(`custom.${tab}s.${sel}`);
+    // Egzoz: satın almadan önce dinle
+    const listen = $('custom-listen');
+    listen.hidden = tab !== 'exhaust';
+    listen.parentElement.classList.toggle('ex', tab === 'exhaust');
+    listen.onclick = () => { this.actions.listen(car, sel); };
     if (p) {
       const it = itemOf(tab, p);
       const enough = d.coins >= it.price;
@@ -635,6 +642,7 @@ export class UI {
         this.confirm = false;
         if (r === 'ok') {
           this.storage.setLook(car.id, tab, p);
+          if (tab === 'exhaust') this.fitExhaust();
           this.prev = null;
           this.actions.purchased();
           this.actions.carChanged();
@@ -648,6 +656,15 @@ export class UI {
     } else {
       buy.hidden = true;
     }
+  }
+
+  // Egzoz takılınca garajdaki araçta kısa titreme ve egzoz ucunda parlama
+  fitExhaust() {
+    const el = $('px-car');
+    el.classList.remove('fit');
+    void el.offsetWidth;
+    el.classList.add('fit');
+    this.actions.listen(this.storage.garageCars()[this.gi], this.storage.look(this.storage.garageCars()[this.gi].id).exhaust);
   }
 
   stepCar(dir) {

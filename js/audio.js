@@ -19,6 +19,23 @@ export const ENGINE_KINDS = {
   beast: { harm: [1, 0.95, 0.9, 0.72, 0.6, 0.48, 0.36], sub: 1.05, high: 0.24, air: 0.14, rough: 0.42, roughRate: 0.5, lp: [300, 3400], pops: true },
 };
 
+const SND = CONFIG.sound;
+// Egzoz profili (mağazadan): motor sesine uygulanan çarpanlar
+export const exhaustOf = (id) => CONFIG.custom.exhausts.find((x) => x.id === id) || CONFIG.custom.exhausts[0];
+// Yumuşak bozulma eğrisi: harmonik zenginlik, kırpmadan (tanh)
+const SND_CURVES = new Map();
+function sndCurve(drive) {
+  const key = Math.round(drive * 20);
+  let c = SND_CURVES.get(key);
+  if (c) return c;
+  c = new Float32Array(1024);
+  const k = key / 20;
+  const norm = Math.tanh(k);
+  for (let i = 0; i < 1024; i++) { const x = (i / 1023) * 2 - 1; c[i] = Math.tanh(k * x) / norm; }
+  SND_CURVES.set(key, c);
+  return c;
+}
+
 // Hız oranından devir ve vites: vites büyüdükçe devir düşer, tepe devre ulaşınca sıradaki vitese atar
 export function engineRpm(e, k) {
   const n = e.gears;
@@ -68,9 +85,18 @@ export class AudioEngine {
     this.ctx = ctx;
     this.master = ctx.createGain();
     this.master.gain.value = this.enabled ? this.volume : 0;
+    // Çıkış sınırlayıcı: toplam ses yükseldi, bozulma (kırpma) olmasın
     const comp = ctx.createDynamicsCompressor();
+    const L = SND.limiter;
+    comp.threshold.value = L.threshold; comp.knee.value = L.knee; comp.ratio.value = L.ratio;
+    comp.attack.value = L.attack; comp.release.value = L.release;
     this.master.connect(comp);
-    comp.connect(ctx.destination);
+    const ceil = ctx.createGain();
+    ceil.gain.value = L.ceiling;
+    comp.connect(ceil);
+    this.limiter = comp;
+    ceil.connect(ctx.destination);
+    this.shots = 0; // Aynı anda çalan kısa ses sayısı
 
     // Beyaz gürültü tamponu: drift, çarpma, patlama
     const len = ctx.sampleRate * 2;
@@ -87,9 +113,31 @@ export class AudioEngine {
     this.engFilter.frequency.value = 500;
     this.engRough = ctx.createGain();
     this.engRough.gain.value = 1;
+    // Filtre -> egzoz vuruşu (tırtıl) -> yumuşak bozulma -> çıkış. Alt bas katmanı filtreyi atlar: dolgun gövde
+    this.engShaper = ctx.createWaveShaper();
+    this.engShaper.curve = sndCurve(SND.drive);
+    this.engShaper.oversample = 'none';
     this.engFilter.connect(this.engRough);
-    this.engRough.connect(this.engGain);
+    this.engRough.connect(this.engShaper);
+    this.engShaper.connect(this.engGain);
     this.engGain.connect(this.master);
+    const sub = ctx.createOscillator();
+    sub.type = 'sine';
+    const subG = ctx.createGain();
+    subG.gain.value = 0;
+    sub.connect(subG);
+    subG.connect(this.engRough);
+    sub.start();
+    this.eng4 = { o: sub, g: subG };
+    // Turbo ıslığı (yalnız turbo egzozda)
+    const tw = ctx.createOscillator();
+    tw.type = 'sine';
+    const twG = ctx.createGain();
+    twG.gain.value = 0;
+    tw.connect(twG);
+    twG.connect(this.engGain);
+    tw.start();
+    this.turbo = { o: tw, g: twG };
     const layer = (type) => {
       const o = ctx.createOscillator();
       o.type = type;
@@ -216,11 +264,15 @@ export class AudioEngine {
     this.radioT = 6;
   }
 
-  setEngine(e) {
+  setEngine(e, exhaust = 'std') {
     this.engine = e;
+    this.exId = exhaust;
+    const X = exhaustOf(exhaust);
+    this.ex = X;
     if (!this.eng1) return;
     const K = ENGINE_KINDS[e.kind] || ENGINE_KINDS.inline;
     this.kind = K;
+    this.engShaper.curve = sndCurve(SND.drive * X.drive * (K.drive || 1));
     if (!this.waves[e.kind]) {
       const real = new Float32Array(K.harm.length + 1);
       const imag = new Float32Array(K.harm.length + 1);
@@ -229,16 +281,18 @@ export class AudioEngine {
     }
     this.eng1.o.setPeriodicWave(this.waves[e.kind]);
     const t = this.ctx.currentTime;
-    this.eng2.g.gain.setTargetAtTime(K.sub, t, 0.02);
-    this.eng3.g.gain.setTargetAtTime(K.high, t, 0.02);
-    this.lfoGain.gain.setTargetAtTime(K.rough * 0.5, t, 0.02);
+    this.eng2.g.gain.setTargetAtTime(Math.min(1.6, K.sub * X.sub + 0.2), t, 0.02);
+    this.eng3.g.gain.setTargetAtTime(K.high * X.bright, t, 0.02);
+    this.eng4.g.gain.setTargetAtTime(SND.sub * X.sub * (e.kind === 'ev' ? 0.35 : 1), t, 0.02);
+    this.lfoGain.gain.setTargetAtTime(Math.min(0.85, (K.rough * 0.5 + SND.rough) * X.rough), t, 0.02);
     this.engAir.gain.setTargetAtTime(K.air, t, 0.02);
   }
 
   // Motor ön izlemesi: rev gazlama, start kontak ve çalışma
-  preview(e, mode = 'rev') {
+  preview(e, mode = 'rev', exhaust = 'std') {
     if (!this.ctx || !this.enabled) return;
-    this.setEngine(e);
+    this.setEngine(e, exhaust);
+    this.pvExhaust = exhaust;
     this.pv = { mode, at: this.ctx.currentTime, len: mode === 'start' ? 1.5 : 1.25 };
     if (mode === 'start') {
       // Marş dişlisi: hızlı tekrar eden kısa vuruşlar
@@ -322,34 +376,47 @@ export class AudioEngine {
     if (this.pv) {
       const s = this.previewState(this.pv, t);
       if (s && !(on && this.pv.mode !== 'start')) { k = s.k; gas = s.gas; vol = Math.max(vol * 0.6, s.vol); }
-      if (!s) { this.pv = null; if (this.engine !== game.carSpec.engine) this.setEngine(game.carSpec.engine); }
+      if (!s) { this.pv = null; this.pvExhaust = null; }
     }
+    // Oyundaki araç ve takılı egzoz (ön izleme bitince geri döner)
+    const want = (game.look && game.look.exhaust) || 'std';
+    if (!this.pv && (this.engine !== game.carSpec.engine || this.exId !== want)) this.setEngine(game.carSpec.engine, want);
     const e = this.engine;
     const K = this.kind;
     // Kayarken tekerlek boşa döner: devir fırlar
     const spin = on && p.drifting ? 0.09 : 0;
     const state = engineRpm(e, k + spin);
     if (state.gear !== this.gear) {
-      if (state.gear > this.gear) this.shiftT = t + 0.09; // Vites atarken gaz bir an kesilir
+      if (state.gear > this.gear) {
+        this.shiftT = t + 0.09; // Vites atarken gaz bir an kesilir
+        // Vites vuruşu: tok, kısa
+        if (on && e.kind !== 'ev') { this.tone(58, 0.14, SND.shift * vol, 'sine', 34); this.burst(0.07, 420, 0.12 * vol, 'lowpass', 120); }
+      }
       this.gear = state.gear;
     }
     const cut = t < this.shiftT ? 0.45 : 1;
     const rpm = state.rpm * (gas < 0.2 ? 0.86 : 1);
-    const f0 = Math.max(18, (rpm / 60) * (e.cyl / 2));
+    const X = this.ex || exhaustOf('std');
+    // Daha ağır ve derin: taban frekans düşük, alt bas ayrı katman
+    const f0 = Math.max(16, (rpm / 60) * (e.cyl / 2) * SND.pitch * X.pitch);
     const ratio = Math.min(1, rpm / e.red);
     const glide = t < this.shiftT ? 0.03 : 0.07;
     this.eng1.o.frequency.setTargetAtTime(f0, t, glide);
     this.eng2.o.frequency.setTargetAtTime(f0 / 2, t, glide);
     this.eng3.o.frequency.setTargetAtTime(f0 * 2, t, glide);
+    this.eng4.o.frequency.setTargetAtTime(Math.max(26, f0 / 2), t, glide);
     this.lfo.frequency.setTargetAtTime(Math.max(4, f0 * K.roughRate), t, 0.08);
     this.engAirF.frequency.setTargetAtTime(500 + 1900 * ratio, t, 0.08);
-    this.engFilter.frequency.setTargetAtTime(K.lp[0] + (K.lp[1] - K.lp[0]) * ratio * (0.35 + 0.65 * gas), t, 0.07);
-    this.engGain.gain.setTargetAtTime(vol * (0.05 + 0.05 * ratio + 0.05 * gas) * e.gain * cut, t, 0.05);
-    // Geri tepme: gaz bırakılınca yüksek devirde egzoz patlamaları
-    if (K.pops && on) {
-      if ((this.lastGas ?? 1) >= 0.8 && gas < 0.6 && ratio > 0.35) this.backfire(3 + Math.floor(Math.random() * 3));
-      else if (gas < 0.6 && ratio > 0.5 && Math.random() < 0.05) this.backfire(1);
-    }
+    this.engFilter.frequency.setTargetAtTime((K.lp[0] + (K.lp[1] - K.lp[0]) * ratio * (0.35 + 0.65 * gas)) * X.lp, t, 0.07);
+    // Gaz verince güçlü yükselme
+    this.engGain.gain.setTargetAtTime(vol * (0.05 + 0.05 * ratio + 0.07 * gas) * e.gain * SND.gain * X.gain * cut, t, 0.05);
+    // Turbo: devirle yükselen ıslık, gaz bırakınca boşalma
+    if (X.turbo) {
+      this.turbo.o.frequency.setTargetAtTime(1600 + 3400 * ratio, t, 0.1);
+      this.turbo.g.gain.setTargetAtTime(vol * X.turbo * 0.035 * gas * ratio, t, 0.08);
+      if (on && (this.lastGas ?? 1) >= 0.8 && gas < 0.6 && ratio > 0.3) this.burst(0.35, 3400, 0.14 * vol, 'bandpass', 700);
+    } else if (this.turboOn) this.turbo.g.gain.setTargetAtTime(0, t, 0.05);
+    this.turboOn = !!X.turbo;
     this.lastGas = gas;
 
     // Ara sıra sokak sesleri
@@ -410,9 +477,16 @@ export class AudioEngine {
     this.lastNow = now;
   }
 
+  // Kısa ses sınırı: aynı anda en çok SND.maxVoices
+  voice(node, end) {
+    this.shots++;
+    node.onended = () => { this.shots--; };
+    node.stop(end);
+  }
+
   burst(duration, freq, gain, type = 'lowpass', sweepTo = 0) {
     const c = this.ctx;
-    if (!c || !this.enabled) return;
+    if (!c || !this.enabled || this.shots >= SND.maxVoices) return;
     const t = c.currentTime;
     const src = c.createBufferSource();
     src.buffer = this.noise;
@@ -430,12 +504,12 @@ export class AudioEngine {
     f.connect(g);
     g.connect(this.master);
     src.start(t, Math.random());
-    src.stop(t + duration + 0.02);
+    this.voice(src, t + duration + 0.02);
   }
 
   tone(freq, duration, gain, type = 'sine', slideTo = 0, delay = 0) {
     const c = this.ctx;
-    if (!c || !this.enabled) return;
+    if (!c || !this.enabled || this.shots >= SND.maxVoices) return;
     const t = c.currentTime + delay;
     const o = c.createOscillator();
     o.type = type;
@@ -448,7 +522,7 @@ export class AudioEngine {
     o.connect(g);
     g.connect(this.master);
     o.start(t);
-    o.stop(t + duration + 0.02);
+    this.voice(o, t + duration + 0.02);
   }
 
   // Suya düşüş: gümbürtü, sıçrama ve yükselen kabarcıklar
@@ -691,11 +765,14 @@ export class AudioEngine {
   spike() { this.tone(900, 0.5, 0.14, 'sawtooth', 100); this.burst(0.3, 3200, 0.3, 'highpass'); }
 
   // Egzoz patlaması: kısa, tok, aralıklı
+  // Egzoz patlaması: "pat, pat, pop" (oyun karar verir: game.js backfire olayı)
   backfire(n) {
+    let d = 0;
     for (let i = 0; i < n; i++) {
-      const d = i * (0.06 + Math.random() * 0.07);
-      this.tone(70 + Math.random() * 40, 0.07, 0.42, 'square', 34, d);
-      setTimeout(() => this.burst(0.06, 900 + Math.random() * 500, 0.5, 'lowpass', 120), d * 1000);
+      const last = i === n - 1;
+      this.tone(last ? 54 : 72 + Math.random() * 36, last ? 0.12 : 0.07, last ? 0.5 : 0.38, 'square', 30, d);
+      setTimeout(() => this.burst(last ? 0.1 : 0.06, last ? 700 : 900 + Math.random() * 500, last ? 0.6 : 0.45, 'lowpass', 110), d * 1000);
+      d += SND.popGap + Math.random() * SND.popGap;
     }
   }
 

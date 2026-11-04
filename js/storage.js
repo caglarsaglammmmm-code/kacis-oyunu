@@ -15,8 +15,8 @@ export function defaultSave() {
     dev: { god: false, startTime: 0 },
     tutorial: false,
     paints: {},
-    custom: {}, // araba -> { rim, led }
-    unlocked: { paints: [], rims: [], leds: [] }, // satın alınan özelleştirmeler
+    custom: {}, // araba -> { rim, led, exhaust }
+    unlocked: { paints: [], rims: [], leds: [], exhausts: [] }, // satın alınan özelleştirmeler
     secret: false, // Gizli geçit bulundu: gizli motosiklet garajda
   };
 }
@@ -60,7 +60,7 @@ export function sanitize(data) {
     }
   }
   if (data.unlocked && typeof data.unlocked === 'object') {
-    for (const [kind, key] of [['paint', 'paints'], ['rim', 'rims'], ['led', 'leds']]) {
+    for (const [kind, key] of [['paint', 'paints'], ['rim', 'rims'], ['led', 'leds'], ['exhaust', 'exhausts']]) {
       const list = Array.isArray(data.unlocked[key]) ? data.unlocked[key] : [];
       d.unlocked[key] = [...new Set(list.filter((id) => itemOf(kind, id)))];
     }
@@ -77,7 +77,7 @@ export function sanitize(data) {
       const v = data.custom[c.id];
       if (!v || typeof v !== 'object') continue;
       const ok = (kind, key, id) => itemOf(kind, id) && (itemOf(kind, id).price === 0 || d.unlocked[key].includes(id));
-      d.custom[c.id] = { rim: ok('rim', 'rims', v.rim) ? v.rim : 'std', led: ok('led', 'leds', v.led) ? v.led : 'yok' };
+      d.custom[c.id] = { rim: ok('rim', 'rims', v.rim) ? v.rim : 'std', led: ok('led', 'leds', v.led) ? v.led : 'yok', exhaust: ok('exhaust', 'exhausts', v.exhaust) ? v.exhaust : 'std' };
     }
   }
   return d;
@@ -176,7 +176,7 @@ export class Storage {
   // Seçili arabanın görünüşü: boya, jant, alt LED
   look(id) {
     const c = this.data.custom[id] || {};
-    return { paint: this.paintIndex(id), rim: c.rim || 'std', led: c.led || 'yok' };
+    return { paint: this.paintIndex(id), rim: c.rim || 'std', led: c.led || 'yok', exhaust: c.exhaust || 'std' };
   }
 
   owns(kind, id) {
@@ -206,7 +206,7 @@ export class Storage {
       return true;
     }
     if (!this.owns(kind, id)) return false;
-    const c = this.data.custom[carId] || (this.data.custom[carId] = { rim: 'std', led: 'yok' });
+    const c = this.data.custom[carId] || (this.data.custom[carId] = { rim: 'std', led: 'yok', exhaust: 'std' });
     c[kind] = id;
     this.save();
     return true;

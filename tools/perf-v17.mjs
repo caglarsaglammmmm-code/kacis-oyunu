@@ -20,6 +20,9 @@ const SC = {
   yogun: { weather: 'sunny', car: 'kuzgun', t: 400, heavy: true },
   stadyum: { weather: 'sunny', car: 'atmaca', t: 240, stadium: true },
   stadyumgece: { weather: 'sunny', car: 'atmaca', t: 240, stadium: true, night: true },
+  // v23: yoğun sahne kar ve buz altında (çatı karı, sarkıtlar, çok araç, ateş, ses)
+  karyogun: { weather: 'snow', car: 'kuzgun', t: 400, heavy: true },
+  buzyogun: { weather: 'ice', car: 'kuzgun', t: 400, heavy: true },
 };
 const rows = [];
 for (const name of only) {
