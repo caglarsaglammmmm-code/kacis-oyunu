@@ -273,13 +273,14 @@ const ui = new UI(storage, {
   menuShown() { cover.start(); },
   menuHidden() { cover.stop(); },
   purchased() { audio.purchase(); vibrate([30, 30, 60]); },
+  listen(car, exhaust) { audio.unlock(); audio.preview(car.engine, 'rev', exhaust || 'std'); },
 });
 // iPhone/iPad: ana ekrana ekle rehberi (yalnız iOS Safari/Chrome, ana ekrandan açılmamışsa)
 initA2hs(() => audio.unlock());
 // Gençliğe Hitabe okuma kartı: anıta yaklaşınca açılır, uzaklaşınca ya da dokununca kapanır
 const memorialCard = new MemorialCard(document.getElementById('memorial-card'), () => game.dismissMemorialCard());
 // Gizli geçit: bodrum sahnesi ve karşılama yazısı. Arkadaş sürümünde ev sahibinin adı, Play sürümünde genel yazı
-const secretScene = new SecretScene(document.getElementById('secret'));
+const secretScene = new SecretScene(document.getElementById('secret'), document.getElementById('secret-msg'));
 
 let wakeLock = null;
 async function keepAwake(on) {
@@ -316,6 +317,7 @@ game.onEvent = (name, v) => {
     case 'meteorwarn': audio.meteorWarn(v); break;
     case 'meteorfall': audio.meteorFall(v); break;
     case 'vehsink': audio.vehSink(v); break;
+    case 'backfire': audio.backfire(v); break;
     case 'roadblock': audio.alert(); ui.toast(tx('roadblock.warn'), '#ff5a36'); vibrate([60, 40, 60]); break;
     case 'meteorhit': audio.meteorHit(v); vibrate(Math.round(30 + 60 * v)); break;
     case 'shot': audio.gunShot(); break;

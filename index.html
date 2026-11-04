@@ -51,7 +51,8 @@
 <div id="cheat-msg"><span></span></div>
 <div id="escape-msg" aria-live="polite"><b></b><small></small></div>
 <div id="memorial-msg" role="alert"><b></b><small></small></div>
-<div id="secret" class="secret" hidden aria-live="polite"><canvas></canvas><div class="secret-text"><b></b><small></small></div></div>
+<div id="secret" class="secret" hidden><canvas></canvas></div>
+<div id="secret-msg" class="secret-text" aria-live="polite"><b></b><small></small></div>
 <aside id="memorial-card" class="memorial-card" hidden lang="tr" aria-live="polite"></aside>
 
 <section id="menu" class="screen menu" hidden>
@@ -99,9 +100,9 @@
       <p id="garage-desc"></p>
       <div class="paint-row"><div id="garage-paints"></div><small id="garage-paint-name"></small></div>
       <div id="garage-custom" class="custom">
-        <div class="custom-tabs" role="tablist"><button data-tab="paint" data-i18n="custom.paint">Boya</button><button data-tab="rim" data-i18n="custom.rim">Jant</button><button data-tab="led" data-i18n="custom.led">Alt LED</button></div>
+        <div class="custom-tabs" role="tablist"><button data-tab="paint" data-i18n="custom.paint">Boya</button><button data-tab="rim" data-i18n="custom.rim">Jant</button><button data-tab="led" data-i18n="custom.led">Alt LED</button><button data-tab="exhaust" data-i18n="custom.exhaust">Egzoz</button></div>
         <div id="custom-grid" class="custom-grid"></div>
-        <div class="custom-foot"><small id="custom-name"></small><button id="custom-buy" class="btn" hidden></button></div>
+        <div class="custom-foot"><small id="custom-name"></small><button id="custom-listen" class="btn listen" hidden data-i18n="custom.listen">Dinle</button><button id="custom-buy" class="btn" hidden></button></div>
         <p id="custom-msg" class="custom-msg" aria-live="polite"></p>
       </div>
       <div id="garage-stats"></div>

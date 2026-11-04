@@ -15,8 +15,9 @@ export function paintOf(car, sel) {
 
 export const rimOf = (id) => CUSTOM.rims.find((k) => k.id === id) || CUSTOM.rims[0];
 export const ledOf = (id) => CUSTOM.leds.find((k) => k.id === id) || CUSTOM.leds[0];
+export const exhaustItem = (id) => CUSTOM.exhausts.find((k) => k.id === id) || CUSTOM.exhausts[0];
 
-const LIST = { paint: 'paints', rim: 'rims', led: 'leds' };
+const LIST = { paint: 'paints', rim: 'rims', led: 'leds', exhaust: 'exhausts' };
 export function itemOf(kind, id) {
   const list = CUSTOM[LIST[kind]];
   return list ? list.find((k) => k.id === id) || null : null;

@@ -1,5 +1,5 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'penci-zorn-v22.0.0';
+const CACHE = 'penci-zorn-v23.0.0';
 const ASSETS = [
   './',
   'index.html',
@@ -15,6 +15,7 @@ const ASSETS = [
   'js/meteor.js',
   'js/stadium.js',
   'js/secret.js',
+  'js/snow.js',
   'gorseller/ataturk/ataturk-1.jpeg',
   'gorseller/ataturk/ataturk-2.jpeg',
   'gorseller/ataturk/ataturk-3.jpeg',

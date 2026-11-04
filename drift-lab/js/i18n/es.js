@@ -70,10 +70,12 @@ export default {
   escape: { toast: '+{n} ¡POR LOS PELOS!', combo: 'COMBO +{n}' },
   code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.' },
   custom: {
-    title: 'Personalizar', paint: 'Pintura', rim: 'Llantas', led: 'Luz inferior', buy: 'Comprar · {cost}', confirm: 'Confirmar · {cost}', poor: 'Monedas insuficientes', bought: '¡Comprado!', use: 'Ya desbloqueado', ownFirst: 'Compra el coche para personalizarlo.',
+    title: 'Personalizar', paint: 'Pintura', rim: 'Llantas', led: 'Luz inferior', exhaust: 'Escape', listen: 'Escuchar', buy: 'Comprar · {cost}', confirm: 'Confirmar · {cost}', poor: 'Monedas insuficientes', bought: '¡Comprado!', use: 'Ya desbloqueado', ownFirst: 'Compra el coche para personalizarlo.',
     paints: { gece: 'Negro medianoche', gumus: 'Plata brillante', kiraz: 'Rojo cereza', okyanus: 'Azul océano', zumrut: 'Verde esmeralda', limon: 'Amarillo limón', mandalina: 'Mandarina', lavanta: 'Lavanda mate', pembe: 'Rosa chicle', haki: 'Caqui mate', fume: 'Gris humo mate', bakir: 'Cobre', lacivert: 'Azul marino metalizado', neonyesil: 'Verde neón', neonpembe: 'Rosa neón', mor: 'Morado eléctrico', inci: 'Blanco perla', altin: 'Oro', krom: 'Cromo espejo', lav: 'Rojo lava' },
     rims: { std: 'Estándar', yildiz: 'Estrella de 5 radios', cok: 'Multirradio', spor: 'Deportiva', derin: 'Plato hondo', turbin: 'Turbina', karbon: 'Carbono', altin: 'Oro' },
     leds: { yok: 'Apagado', mavi: 'Azul neón', pembe: 'Rosa neón', mor: 'Morado', yesil: 'Verde', beyaz: 'Blanco', kirmizi: 'Rojo pulsante', buz: 'Hielo pulsante', altin: 'Oro pulsante', gokkusagi: 'Arcoíris' },
+    exhausts: { std: 'Estándar', v8: 'V8 Rugiente', patlamali: 'Petardeo', turbo: 'Turbo', spor: 'Deportivo agudo', derin: 'Bajo profundo' },
+    exhaustInfo: { std: 'De fábrica, sonido equilibrado', v8: 'Ocho cilindros gruesos y rugientes', patlamali: 'Petardea al soltar el acelerador', turbo: 'Silbido agudo y soplido de válvula', spor: 'Grito agudo a altas revoluciones', derin: 'Bajo profundo que hace temblar el suelo' },
   },
   weather: { title: 'Clima', random: 'Aleatorio', sunny: 'Soleado', rain: 'Lluvia', snow: 'Nieve', fog: 'Niebla', ice: 'Hielo', iceWarn: '¡Carretera helada!' },
   cheat: { on: '¡Toma ya! ¡Has encontrado el truco secreto!', off: 'Truco desactivado', badge: 'TRUCO ACTIVO' },

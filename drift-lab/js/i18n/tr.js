@@ -70,10 +70,12 @@ export default {
   escape: { toast: '+{n} KIL PAYI!', combo: 'KOMBO +{n}' },
   code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.' },
   custom: {
-    title: 'Özelleştir', paint: 'Boya', rim: 'Jant', led: 'Alt LED', buy: 'Satın al · {cost}', confirm: 'Onayla · {cost}', poor: 'Yetersiz para', bought: 'Satın alındı!', use: 'Zaten açık', ownFirst: 'Özelleştirmek için önce arabayı al.',
+    title: 'Özelleştir', paint: 'Boya', rim: 'Jant', led: 'Alt LED', exhaust: 'Egzoz', listen: 'Dinle', buy: 'Satın al · {cost}', confirm: 'Onayla · {cost}', poor: 'Yetersiz para', bought: 'Satın alındı!', use: 'Zaten açık', ownFirst: 'Özelleştirmek için önce arabayı al.',
     paints: { gece: 'Gece Siyahı', gumus: 'Parlak Gümüş', kiraz: 'Kiraz Kırmızı', okyanus: 'Okyanus Mavisi', zumrut: 'Zümrüt Yeşili', limon: 'Limon Sarısı', mandalina: 'Mandalina', lavanta: 'Mat Lavanta', pembe: 'Şeker Pembe', haki: 'Mat Haki', fume: 'Mat Füme', bakir: 'Bakır', lacivert: 'Lacivert Metalik', neonyesil: 'Neon Yeşil', neonpembe: 'Neon Pembe', mor: 'Elektrik Moru', inci: 'İnci Beyazı', altin: 'Altın', krom: 'Ayna Krom', lav: 'Lav Kırmızısı' },
     rims: { std: 'Standart', yildiz: 'Beş Kollu Yıldız', cok: 'Çok Kollu', spor: 'Spor', derin: 'Derin Çanak', turbin: 'Türbin', karbon: 'Karbon', altin: 'Altın' },
     leds: { yok: 'Kapalı', mavi: 'Neon Mavi', pembe: 'Neon Pembe', mor: 'Mor', yesil: 'Yeşil', beyaz: 'Beyaz', kirmizi: 'Kırmızı Nefes', buz: 'Buz Nefesi', altin: 'Altın Nefes', gokkusagi: 'Gökkuşağı' },
+    exhausts: { std: 'Standart', v8: 'Gür V8', patlamali: 'Patlamalı', turbo: 'Turbo', spor: 'Spor Tiz', derin: 'Derin Bas' },
+    exhaustInfo: { std: 'Fabrika çıkışı, dengeli ses', v8: 'Kalın, gürleyen sekiz silindir', patlamali: 'Gaz bırakınca sık sık pat pat pop', turbo: 'Tiz ıslık ve boşalma sesi', spor: 'Yüksek devirde keskin, tiz çığlık', derin: 'Yeri titreten derin bas' },
   },
   weather: { title: 'Hava durumu', random: 'Rastgele', sunny: 'Güneşli', rain: 'Yağmurlu', snow: 'Karlı', fog: 'Sisli', ice: 'Buzlu', iceWarn: 'Yol buzlu!' },
   cheat: { on: 'Aferin, hile kodunu buldun la!', off: 'Hile kapatıldı', badge: 'HİLE AÇIK' },

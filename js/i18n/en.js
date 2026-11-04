@@ -70,10 +70,12 @@ export default {
   escape: { toast: '+{n} CLOSE CALL!', combo: 'COMBO +{n}' },
   code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.' },
   custom: {
-    title: 'Customize', paint: 'Paint', rim: 'Rims', led: 'Underglow', buy: 'Buy · {cost}', confirm: 'Confirm · {cost}', poor: 'Not enough coins', bought: 'Purchased!', use: 'Already unlocked', ownFirst: 'Buy the car first to customize it.',
+    title: 'Customize', paint: 'Paint', rim: 'Rims', led: 'Underglow', exhaust: 'Exhaust', listen: 'Listen', buy: 'Buy · {cost}', confirm: 'Confirm · {cost}', poor: 'Not enough coins', bought: 'Purchased!', use: 'Already unlocked', ownFirst: 'Buy the car first to customize it.',
     paints: { gece: 'Midnight Black', gumus: 'Bright Silver', kiraz: 'Cherry Red', okyanus: 'Ocean Blue', zumrut: 'Emerald Green', limon: 'Lemon Yellow', mandalina: 'Tangerine', lavanta: 'Matte Lavender', pembe: 'Candy Pink', haki: 'Matte Khaki', fume: 'Matte Smoke Gray', bakir: 'Copper', lacivert: 'Navy Metallic', neonyesil: 'Neon Green', neonpembe: 'Neon Pink', mor: 'Electric Purple', inci: 'Pearl White', altin: 'Gold', krom: 'Mirror Chrome', lav: 'Lava Red' },
     rims: { std: 'Standard', yildiz: 'Five-Spoke Star', cok: 'Multi-Spoke', spor: 'Sport', derin: 'Deep Dish', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
     leds: { yok: 'Off', mavi: 'Neon Blue', pembe: 'Neon Pink', mor: 'Purple', yesil: 'Green', beyaz: 'White', kirmizi: 'Red Pulse', buz: 'Ice Pulse', altin: 'Gold Pulse', gokkusagi: 'Rainbow' },
+    exhausts: { std: 'Stock', v8: 'Rumbling V8', patlamali: 'Popper', turbo: 'Turbo', spor: 'Sport Scream', derin: 'Deep Bass' },
+    exhaustInfo: { std: 'Factory fitted, balanced sound', v8: 'Thick, roaring eight cylinders', patlamali: 'Pops and bangs whenever you lift off', turbo: 'High whistle and blow-off', spor: 'Sharp, high-revving scream', derin: 'Ground-shaking deep bass' },
   },
   weather: { title: 'Weather', random: 'Random', sunny: 'Sunny', rain: 'Rainy', snow: 'Snowy', fog: 'Foggy', ice: 'Icy', iceWarn: 'Icy road!' },
   cheat: { on: 'Well, look at you! You found the cheat code!', off: 'Cheat off', badge: 'CHEAT ON' },

@@ -6,8 +6,9 @@ import { pixelCar } from './pixelcars.js';
 const SCN = CONFIG.secret;
 
 export class SecretScene {
-  constructor(el) {
+  constructor(el, msg = null) {
     this.el = el;
+    this.msg = msg; // Karşılama yazısı: sahneden ayrı, GIZLI_YAZI_SURESI saniye
     this.canvas = el ? el.querySelector('canvas') : null;
     this.raf = 0;
     this.t0 = 0;
@@ -16,9 +17,8 @@ export class SecretScene {
 
   play(title, gift, first) {
     if (!this.el) return;
-    this.el.querySelector('b').textContent = title;
-    this.el.querySelector('small').textContent = gift;
     this.el.classList.toggle('first', !!first);
+    this.showText(title, gift);
     this.el.hidden = false;
     this.el.style.setProperty('--scene', `${SCN.scene}s`);
     this.el.style.setProperty('--slide', `${SCN.slide}s`);
@@ -36,6 +36,21 @@ export class SecretScene {
     this.raf = requestAnimationFrame(loop);
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.hide(), (SCN.scene + 0.4) * 1000);
+  }
+
+  // Yazı oyuna dönüldükten sonra da ekranda kalır (5-10 sn), sonra yumuşakça kaybolur
+  showText(title, gift) {
+    const m = this.msg;
+    if (!m) return;
+    const t = Math.max(5, Math.min(10, SCN.GIZLI_YAZI_SURESI));
+    m.querySelector('b').textContent = title;
+    m.querySelector('small').textContent = gift;
+    m.style.setProperty('--msg-t', `${t}s`);
+    m.classList.remove('run');
+    void m.offsetWidth;
+    m.classList.add('run');
+    clearTimeout(this.msgTimer);
+    this.msgTimer = setTimeout(() => m.classList.remove('run'), (t + 0.2) * 1000);
   }
 
   hide() {

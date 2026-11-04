@@ -70,10 +70,12 @@ export default {
   escape: { toast: '+{n} ギリギリ回避！', combo: 'コンボ +{n}' },
   code: { title: 'コード入力', apply: '適用', ok: 'コード承認！{car}がガレージに追加されたよ。', owned: 'この車はもう持っているよ。', invalid: '無効なコードです。', empty: 'まずコードを入力してね。' },
   custom: {
-    title: 'カスタマイズ', paint: '塗装', rim: 'ホイール', led: 'アンダーネオン', buy: '購入 · {cost}', confirm: '確認 · {cost}', poor: 'コインが足りません', bought: '購入しました！', use: '解放済み', ownFirst: 'カスタマイズするには先に車を買おう。',
+    title: 'カスタマイズ', paint: '塗装', rim: 'ホイール', led: 'アンダーネオン', exhaust: 'マフラー', listen: '試聴', buy: '購入 · {cost}', confirm: '確認 · {cost}', poor: 'コインが足りません', bought: '購入しました！', use: '解放済み', ownFirst: 'カスタマイズするには先に車を買おう。',
     paints: { gece: 'ミッドナイトブラック', gumus: 'ブライトシルバー', kiraz: 'チェリーレッド', okyanus: 'オーシャンブルー', zumrut: 'エメラルドグリーン', limon: 'レモンイエロー', mandalina: 'タンジェリン', lavanta: 'マット・ラベンダー', pembe: 'キャンディピンク', haki: 'マット・カーキ', fume: 'マット・スモークグレー', bakir: 'カッパー', lacivert: 'ネイビーメタリック', neonyesil: 'ネオングリーン', neonpembe: 'ネオンピンク', mor: 'エレクトリックパープル', inci: 'パールホワイト', altin: 'ゴールド', krom: 'ミラークローム', lav: 'ラヴァレッド' },
     rims: { std: 'スタンダード', yildiz: '5本スポーク', cok: 'マルチスポーク', spor: 'スポーツ', derin: 'ディープリム', turbin: 'タービン', karbon: 'カーボン', altin: 'ゴールド' },
     leds: { yok: 'なし', mavi: 'ネオンブルー', pembe: 'ネオンピンク', mor: 'パープル', yesil: 'グリーン', beyaz: 'ホワイト', kirmizi: 'レッドパルス', buz: 'アイスパルス', altin: 'ゴールドパルス', gokkusagi: 'レインボー' },
+    exhausts: { std: 'ノーマル', v8: '轟音V8', patlamali: 'アフターファイア', turbo: 'ターボ', spor: 'スポーツ高音', derin: '重低音' },
+    exhaustInfo: { std: 'メーカー純正のバランスの良い音', v8: '太く轟く8気筒サウンド', patlamali: 'アクセルを戻すとパンパン鳴る', turbo: '甲高いタービン音とブローオフ', spor: '高回転で鋭く響く高音', derin: '地面を揺らす重低音' },
   },
   weather: { title: '天気', random: 'ランダム', sunny: '晴れ', rain: '雨', snow: '雪', fog: '霧', ice: '凍結', iceWarn: '路面凍結！' },
   cheat: { on: 'やるじゃん！隠しコマンドを見つけたね！', off: 'チート解除', badge: 'チートON' },

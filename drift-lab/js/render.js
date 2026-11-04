@@ -11,6 +11,7 @@ import { paintBuilding2, shadowOf } from './buildings.js';
 import { FX } from './effects.js';
 import { MemorialArt, bakeMemorialPad } from './memorial.js';
 import { Stadiums } from './stadium.js';
+import { snowLevel, snowFlat, paintRoofSnow, paintClutterSnow, paintSignSnow, paintIcicles, icicleTips, RoofCache, paintTreeSnow, paintCarSnow } from './snow.js';
 import { signKind, paintDoner, paintPromo, paintDancer, paintBalcony, paintWashing, paintMoon, paintStars, rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintAlien, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
 
 const PF = CONFIG.perf;
@@ -215,6 +216,9 @@ export class Renderer {
     this.queue = []; // Sprite işleri kare bütçesiyle yapılır
     this.memorial = new MemorialArt(); // Cumhuriyet Meydanı anıtı: önbellekli, yakında ayrıntılı
     this.stadiums = new Stadiums(); // İki stadyum: önbellekli, uzakta sade
+    this.roofCache = new RoofCache(CONFIG.snow.cache); // Yüksek bina çatı karı ve sarkıtları: binaya özel önbellek
+    this.snowLv = 0; // Çatı karı kalınlığı (adımlı)
+    this.tips = [];
     this.makeSprites();
   }
 
@@ -431,7 +435,18 @@ export class Renderer {
       ctx.globalAlpha = 1;
       this.tallWalls(r, tex, art, cx, cy, N, true);
       ctx.drawImage(art ? art.roof : this.roofs[(r.seed >> 2) % this.roofs.length], X0, Y0, X1 - X0, Y1 - Y0);
-      if (this.weather === 'snow') { ctx.fillStyle = 'rgba(248,251,255,.5)'; ctx.fillRect(X0 + 3, Y0 + 3, X1 - X0 - 6, Y1 - Y0 - 6); }
+      // Kar ve buz: binaya özel önbellek (çatı tuvali bir kez çizilir). Yalnız oyuncuya yakın binada
+      if (this.weather === 'snow' || this.weather === 'ice') {
+        const near = Math.hypot((X0 + X1) / 2 - cx, (Y0 + Y1) / 2 - cy) < CONFIG.snow.near;
+        const W = X1 - X0; const H = Y1 - Y0;
+        if (this.weather === 'snow') {
+          const img = this.roofCache.get(`s${r.seed}:${Math.round(W)}:${Math.round(H)}:${this.snowLv}:${near ? 1 : 0}`, W, H, (g) => paintRoofSnow(g, 0, 0, W, H, this.snowLv, r.seed, true));
+          ctx.drawImage(img, X0, Y0, W, H);
+        } else if (near) {
+          const img = this.roofCache.get(`i${r.seed}:${Math.round(W)}`, W, 22, (g) => paintIcicles(g, 1, 2, W - 2, r.seed));
+          ctx.drawImage(img, X0, Y1 - 2, W, 22);
+        }
+      }
       if (r.sign && !r.noRoofSign) {
         const img = rectSign(r);
         const b = roofSignBox(r, img);
@@ -603,6 +618,9 @@ export class Renderer {
     s.orb = glow(48, [[0, 'rgba(255,255,255,1)'], [0.25, 'rgba(120,240,255,.95)'], [0.6, 'rgba(255,60,200,.45)'], [1, 'rgba(255,40,180,0)']]);
     s.reticle = reticleSprite();
     s.launcher = sprite(26, 14, (g) => { g.fillStyle = '#16181e'; rr(g, -8, -5, 14, 10, 3); g.fill(); g.fillStyle = '#2a2f38'; g.fillRect(2, -2.2, 10, 1.8); g.fillRect(2, 0.4, 10, 1.8); g.fillStyle = '#ffd23f'; g.fillRect(11, -2.4, 1.6, 4.8); g.fillStyle = '#21e6ff'; g.fillRect(-6, -1, 4, 2); });
+    s.flake = glow(16, [[0, 'rgba(255,255,255,1)'], [0.45, 'rgba(255,255,255,.75)'], [1, 'rgba(255,255,255,0)']]);
+    s.snowTree = sprite(40, 40, (g) => paintTreeSnow(g, 17));
+    s.snowCar = sprite(50, 26, (g) => paintCarSnow(g, 46, 22));
     s.glint = glow(32, [[0, 'rgba(255,255,220,1)'], [0.4, 'rgba(255,215,70,.8)'], [1, 'rgba(255,200,0,0)']]);
 
     const prop = (w, h, paint) => sprite(w, h, paint);
@@ -894,6 +912,7 @@ export class Renderer {
       if (r.kind === 'wall') this.bakeWall(g, r);
     }
     if (this.weather === 'snow' || this.weather === 'ice') this.bakeWeather(g, c);
+    c.snowLv = this.snowLv;
     c.dirty = false;
     this.job = null;
     return true;
@@ -1318,9 +1337,12 @@ export class Renderer {
   }
 
   bakeBuilding(g, r) {
-    if (paintBuilding2(g, r)) { this.bakeSign(g, r); return; }
-    if (r.style >= 7) { paintSpecial(g, r); this.bakeSign(g, r); return; }
-    this.bakeRoof(g, r);
+    if (!paintBuilding2(g, r)) {
+      if (r.style >= 7) paintSpecial(g, r);
+      else this.bakeRoof(g, r);
+    }
+    // Kar yalnız çatıda: duvar (güney cephe bandı), tabela ve yazı kendi renginde kalır. Yüksek binanın çatısı drawTalls'ta
+    if (this.weather === 'snow' && r.tall <= 0 && r.style < 46) paintRoofSnow(g, r.x, r.y, r.w, r.h - 10, this.snowLv, r.seed, snowFlat(r));
     this.bakeSign(g, r);
   }
 
@@ -1431,11 +1453,16 @@ export class Renderer {
 
   // Tabela, uydu çanağı, güneş paneli ve balkon çamaşırı
   bakeSign(g, r) {
-    if (r.style === 0 || r.style === 1 || r.style === 2 || r.style === 3 || r.style === 5 || r.style === BUILD.APARTMENT) roofClutter(g, r);
+    const snow = this.weather === 'snow';
+    if (r.style === 0 || r.style === 1 || r.style === 2 || r.style === 3 || r.style === 5 || r.style === BUILD.APARTMENT) {
+      roofClutter(g, r);
+      if (snow && r.tall <= 0) paintClutterSnow(g, r, this.snowLv); // Baca, klima, su deposu üstünde kar birikintisi
+    }
     if (!r.sign || r.tall > 0) return; // Yüksek binanın tabelası çatıda, her karede çizilir
     const img = rectSign(r);
     const b = signBox(r, img);
     g.drawImage(img, b.x, b.y, b.w, b.h);
+    if (snow) paintSignSnow(g, b.x, b.y, b.w, this.snowLv); // Tabelanın üst kenarında ince kar
   }
 
   bakeWall(g, r) {
@@ -1496,8 +1523,12 @@ export class Renderer {
     }
     // Görünmeden önce hazırla: kaydırmada takılma olmasın (karede en fazla 1)
     // Telefonda takılma olmasın diye dört karede bir
+    // Çatı karı zamanla kalınlaşır: adım değişince görünen chunk'lar arka planda (takılmadan) yeniden işlenir
+    const lv = this.weather === 'snow' ? snowLevel(game.runTime) : 0;
+    if (lv !== this.snowLv) { this.snowLv = lv; this.roofCache.clear(); }
     if (game.state === 'play' || game.state === 'drop') {
       if (!this.job) this.prebake(game, c0x, c1x, c0y, c1y);
+      if (!this.job && this.weather === 'snow') this.restale(game, c0x, c1x, c0y, c1y);
       this.stepJob(PF.bakeBudget);
     }
     this.stepQueue(2);
@@ -1532,6 +1563,7 @@ export class Renderer {
     this.drawBalconies(game, now, c0x, c1x, c0y, c1y, false); // Alçak binalar yüksek binaların altında kalır
     this.drawTalls(game, c0x, c1x, c0y, c1y);
     this.drawBalconies(game, now, c0x, c1x, c0y, c1y, true);
+    this.drawIceFx(game, now, c0x, c1x, c0y, c1y);
     if (game.weapon) this.drawWeapon(game, now);
     this.drawMeteorSky(game, now);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
@@ -1582,6 +1614,14 @@ export class Renderer {
     for (let x = c0x; x <= c1x; x++) {
       const c = game.world.chunk(x, cy);
       if (!c.canvas || c.dirty) { c.lastSeen = this.frameId; this.startJob(c); return; }
+    }
+  }
+
+  // Kar kalınlığı değişmiş chunk'ı sıraya al (karede en çok biri)
+  restale(game, c0x, c1x, c0y, c1y) {
+    for (let y = c0y; y <= c1y; y++) for (let x = c0x; x <= c1x; x++) {
+      const c = game.world.chunk(x, y);
+      if (c.canvas && !c.dirty && c.snowLv !== this.snowLv) { this.startJob(c); return; }
     }
   }
 
@@ -1682,6 +1722,7 @@ export class Renderer {
     const ctx = this.ctx;
     const sp = this.sprites;
     const world = game.world;
+    const snowy = this.weather === 'snow' && game.wk > 0.3;
     for (let cy = c0y; cy <= c1y; cy++) {
       for (let cx = c0x; cx <= c1x; cx++) {
         const c = world.chunk(cx, cy);
@@ -1733,9 +1774,13 @@ export class Renderer {
           if (pr.rot) {
             this.place(pr.x, pr.y, pr.rot);
             ctx.drawImage(img, -w / 2, -h / 2, w, h);
+            if (snowy && pr.kind === PROP.PARKED) ctx.drawImage(sp.snowCar, -w * 0.5, -h * 0.5, w, h);
           } else {
             ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
             ctx.drawImage(img, pr.x - w / 2, pr.y - h / 2, w, h);
+            // Ağaç tepesi ve park halindeki araba üstünde ince kar
+            if (snowy && (pr.kind === PROP.TREE || pr.kind === PROP.PINE || pr.kind === PROP.PALM)) ctx.drawImage(sp.snowTree, pr.x - w * 0.42, pr.y - h * 0.48, w * 0.84, h * 0.84);
+            else if (snowy && pr.kind === PROP.PARKED) ctx.drawImage(sp.snowCar, pr.x - w * 0.5, pr.y - h * 0.5, w, h);
           }
         }
       }
@@ -2091,37 +2136,34 @@ export class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
-  // Kar ve buz zemine bir kez işlenir: yol kenarı ve çatılar beyazlar, buzlu yol parlar
+  // Kar ve buz: zemin BEYAZLATILMAZ (yol, kaldırım, çim kendi renginde). Buzlu yolda yalnız ince parlak çizgiler,
+  // binaların çatı kenarında buz sarkıtları. Kar havasında çatı karı bakeBuilding içinde işlenir
   bakeWeather(g, c) {
-    const snow = this.weather === 'snow';
+    if (this.weather !== 'ice') return;
+    g.fillStyle = 'rgba(255,255,255,.32)';
     for (let y = 0; y < CT; y++) {
       for (let x = 0; x < CT; x++) {
         const t = c.ground[y * CT + x];
-        if (t === GROUND.WATER) continue;
         const road = t === GROUND.ROAD || t === GROUND.ALLEY || t === GROUND.TRACK;
-        if (snow) {
-          if (road) continue;
-          g.fillStyle = 'rgba(244,248,255,.62)';
-        } else {
-          g.fillStyle = road ? 'rgba(190,228,255,.3)' : 'rgba(236,246,255,.28)';
-        }
-        g.fillRect(c.x + x * TILE, c.y + y * TILE, TILE, TILE);
-        if (!snow && road && ((x * 7 + y * 3) % 5 === 0)) {
-          g.fillStyle = 'rgba(255,255,255,.35)';
-          g.fillRect(c.x + x * TILE + 6, c.y + y * TILE + 10, 22, 3);
-        }
+        if (road && ((x * 7 + y * 3) % 5 === 0)) g.fillRect(c.x + x * TILE + 6, c.y + y * TILE + 10, 22, 2.5);
       }
     }
-    if (!snow) return;
-    g.fillStyle = 'rgba(250,252,255,.55)';
     for (let i = 0; i < c.rectCount; i++) {
       const r = c.rects[i];
-      if (r.alive && r.kind === 'building') { rr(g, r.x + 3, r.y + 3, r.w - 6, r.h - 6, 4); g.fill(); }
+      if (r.alive && r.kind === 'building' && r.tall <= 0 && r.style < 46 && r.w > 30) paintIcicles(g, r.x + 2, r.y + r.h - 1, r.w - 4, r.seed);
     }
   }
 
+  // Anıt alanının ekrandaki kutusu (cihaz pikseli): hava efektleri buraya çizilmez
+  memScreen() {
+    const b = this.memBox;
+    if (!b) return null;
+    const x0 = this.ox + b.x * this.s; const y0 = this.oy + b.y * this.s;
+    return { x0, y0, x1: x0 + b.w * this.s, y1: y0 + b.h * this.s };
+  }
+
   // Ekran katmanı: yağmur çizgileri, kar taneleri, sis. Havuzlu, kaliteye göre sayılı, ekran dışı çizilmez
-  // Sis: canvas yerine CSS katmanı. Tarayıcı birleştirir, her karede tam ekran çizim yok
+  // Sis: canvas yerine CSS katmanı. Yalnız ekran kenarlarında, orta açık; renkleri soldurmaz. Anıt görünürken sis yok
   fogLayer(game) {
     if (typeof document === 'undefined') return;
     const on = game.weather === 'fog' && game.state !== 'attract';
@@ -2134,20 +2176,29 @@ export class Renderer {
       el.innerHTML = '<i></i><i></i>';
       Object.assign(el.style, { position: 'fixed', inset: '0', pointerEvents: 'none' });
       const [a, b] = el.children;
-      Object.assign(a.style, { position: 'absolute', inset: '0', background: 'radial-gradient(circle 62vmax at 50% 50%, rgba(210,214,222,0) 13%, rgba(210,214,222,.55) 61%, rgba(210,214,222,.95) 100%)', opacity: '0' });
+      Object.assign(a.style, { position: 'absolute', inset: '0', background: 'radial-gradient(circle 62vmax at 50% 50%, rgba(210,214,222,0) 42%, rgba(210,214,222,.6) 82%, rgba(210,214,222,.9) 100%)', opacity: '0' });
       Object.assign(b.style, { position: 'absolute', inset: '0', background: '#d2d6de', opacity: '0' });
       this.canvas.after(el);
       this.fogV = [-1, -1, ''];
     }
     const night = game.daylight.k;
-    const wk = on ? game.wk : 0;
+    const wk = on && !this.memBox ? game.wk : 0;
     const ga = Math.round(100 * wk * CONFIG.weather.fogAlpha * (1 - night * 0.55)) / 100;
-    const fa = Math.round(100 * wk * 0.18) / 100;
+    const fa = Math.round(100 * wk * CONFIG.weather.fogFlat) / 100;
     const col = night > 0.5 ? '#141822' : '#d2d6de';
     const v = this.fogV; const [a, b] = el.children;
     if (v[0] !== ga) { v[0] = ga; a.style.opacity = String(ga); }
     if (v[1] !== fa) { v[1] = fa; b.style.opacity = String(fa); }
     if (v[2] !== col) { v[2] = col; b.style.background = col; }
+  }
+
+  // Tam ekran ton: anıt kutusu dışarıda bırakılır (delikli dikdörtgen)
+  tint(color, W, H) {
+    const ctx = this.ctx;
+    const m = this.memScreen();
+    ctx.fillStyle = color;
+    if (!m) { ctx.fillRect(0, 0, W, H); return; }
+    ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.rect(m.x0, m.y0, m.x1 - m.x0, m.y1 - m.y0); ctx.fill('evenodd');
   }
 
   drawWeather(game, now) {
@@ -2158,12 +2209,24 @@ export class Renderer {
     const k = game.wk * (this.lod.weather ?? 1);
     const W = this.w * this.dpr; const H = this.h * this.dpr;
     const P = CONFIG.weather;
+    const m = this.memScreen();
+    const inMem = (x, y) => m && x > m.x0 && x < m.x1 && y > m.y0 && y < m.y1;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     if (w === 'rain' || w === 'snow') {
       const max = P.particles[w];
       const n = Math.round(max * k);
-      const wp = this.wp || (this.wp = { x: new Float32Array(200), y: new Float32Array(200), v: new Float32Array(200), cx: 0, cy: 0, t: now });
-      if (!wp.init) { for (let i = 0; i < 200; i++) { wp.x[i] = Math.random() * W; wp.y[i] = Math.random() * H; wp.v[i] = 0.6 + Math.random() * 0.8; } wp.init = true; }
+      const N = 200;
+      const wp = this.wp || (this.wp = { x: new Float32Array(N), y: new Float32Array(N), v: new Float32Array(N), l: new Uint8Array(N), cx: 0, cy: 0, t: now });
+      if (!wp.init) {
+        for (let i = 0; i < N; i++) {
+          wp.x[i] = Math.random() * W; wp.y[i] = Math.random() * H; wp.v[i] = Math.random();
+          // Katman: uzak küçük ve soluk, yakın büyük ve belirgin
+          const u = Math.random(); let acc = 0; let L = 0;
+          for (let q = 0; q < P.flakes.length; q++) { acc += P.flakes[q].share; if (u <= acc) { L = q; break; } L = q; }
+          wp.l[i] = L;
+        }
+        wp.init = true;
+      }
       const dt = Math.min(0.05, (now - wp.t) / 1000); wp.t = now;
       // Kamera kayınca taneler de kayar: dünyaya bağlı his
       const s = this.s;
@@ -2175,34 +2238,86 @@ export class Renderer {
         ctx.lineWidth = 1.3 * this.dpr;
         ctx.beginPath();
         for (let i = 0; i < n; i++) {
-          wp.y[i] += 900 * this.dpr * wp.v[i] * dt; wp.x[i] += 180 * this.dpr * dt;
+          const v = 0.6 + wp.v[i] * 0.8;
+          wp.y[i] += 900 * this.dpr * v * dt; wp.x[i] += 180 * this.dpr * dt;
           if (shift) { wp.x[i] -= mx * 0.6; wp.y[i] -= my * 0.6; }
           if (wp.y[i] > H) wp.y[i] -= H; if (wp.y[i] < 0) wp.y[i] += H;
           if (wp.x[i] > W) wp.x[i] -= W; if (wp.x[i] < 0) wp.x[i] += W;
-          const L = 14 * this.dpr * wp.v[i];
+          if (inMem(wp.x[i], wp.y[i])) continue;
+          const L = 14 * this.dpr * v;
           ctx.moveTo(wp.x[i], wp.y[i]); ctx.lineTo(wp.x[i] - L * 0.2, wp.y[i] - L);
         }
         ctx.stroke();
-        // Islak zemin: hafif koyu, mavi ton
-        ctx.fillStyle = `rgba(20,36,64,${(0.12 * game.wk).toFixed(3)})`;
-        ctx.fillRect(0, 0, W, H);
+        // Islak zemin: çok hafif koyu mavi ton (renkleri soldurmaz)
+        this.tint(`rgba(20,36,64,${(P.rainTint * game.wk).toFixed(3)})`, W, H);
       } else {
-        ctx.fillStyle = 'rgba(255,255,255,.85)';
         const tt = now / 1000;
+        const night = game.daylight.k;
+        const sp = this.sprites.flake;
         for (let i = 0; i < n; i++) {
-          wp.y[i] += 70 * this.dpr * wp.v[i] * dt;
-          wp.x[i] += Math.sin(tt * 1.3 + i) * 22 * this.dpr * dt;
-          if (shift) { wp.x[i] -= mx * 0.8; wp.y[i] -= my * 0.8; }
+          const F = P.flakes[wp.l[i]];
+          const v = 0.75 + wp.v[i] * 0.5;
+          wp.y[i] += F.fall * this.dpr * v * dt;
+          wp.x[i] += (Math.sin(tt * (0.7 + wp.v[i]) + i) * F.sway + P.wind) * this.dpr * dt;
+          // Yakındaki katman kamerayla daha çok kayar: derinlik
+          if (shift) { const pk = 0.55 + wp.l[i] * 0.2; wp.x[i] -= mx * pk; wp.y[i] -= my * pk; }
           if (wp.y[i] > H) wp.y[i] -= H; if (wp.y[i] < 0) wp.y[i] += H;
           if (wp.x[i] > W) wp.x[i] -= W; if (wp.x[i] < 0) wp.x[i] += W;
-          const r = (1.2 + wp.v[i] * 1.4) * this.dpr;
-          ctx.fillRect(wp.x[i], wp.y[i], r, r);
+          if (inMem(wp.x[i], wp.y[i])) continue;
+          const r = (F.size[0] + (F.size[1] - F.size[0]) * wp.v[i]) * this.dpr;
+          // Gece ışıkta parıldar: bazı taneler kısa süre parlar
+          const glit = night > 0.3 && ((i * 37 + Math.floor(tt * 3)) % 23 === 0) ? 1.6 : 1;
+          ctx.globalAlpha = Math.min(1, F.alpha * glit);
+          // Uzak katman küçük ve ucuz (kare), yakın katmanlar yumuşak tane
+          if (wp.l[i] === 0) { ctx.fillStyle = '#ffffff'; ctx.fillRect(wp.x[i] - r * 0.5, wp.y[i] - r * 0.5, r, r); }
+          else ctx.drawImage(sp, wp.x[i] - r, wp.y[i] - r, r * 2, r * 2);
         }
+        ctx.globalAlpha = 1;
       }
     } else if (w === 'ice') {
-      ctx.fillStyle = `rgba(170,215,255,${(0.08 * game.wk).toFixed(3)})`;
-      ctx.fillRect(0, 0, W, H);
+      this.tint(`rgba(170,215,255,${(P.iceTint * game.wk).toFixed(3)})`, W, H);
     }
+    ctx.globalAlpha = 1;
+  }
+
+  // Buz sarkıtlarının canlı katmanı: göz kırpan parıltılar ve düşen küçük damlalar. Yalnız yakındaki binalarda, sınırlı
+  drawIceFx(game, now, c0x, c1x, c0y, c1y) {
+    if (this.weather !== 'ice' || game.wk < 0.3) return;
+    const I = CONFIG.icicles;
+    const ctx = this.ctx;
+    const cam = game.cam;
+    const t = now / 1000;
+    const night = game.daylight.k;
+    let budget = I.maxFx;
+    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+    ctx.globalCompositeOperation = 'lighter';
+    const tip = (r, x, y, w) => {
+      const key = r.seed * 4096 + Math.round(w);
+      if (r.iceKey !== key) { r.iceKey = key; r.iceTips = icicleTips(w, r.seed); }
+      for (const p of r.iceTips) {
+        if (budget-- <= 0) return;
+        const px = x + p.x; const py = y + p.y;
+        const tw = Math.max(0, Math.sin(t * p.sp * 2.2 + p.ph));
+        const a = tw ** 6; // Arada bir göz kırpan ışık
+        if (a > 0.05) { ctx.globalAlpha = a * (0.7 + 0.3 * night); ctx.drawImage(this.sprites.glint, px - 5, py - 5, 10, 10); }
+        // Damla: uçtan düşer, kaybolur
+        const u = (t * I.drip * p.sp + p.ph) % 1;
+        if (u < 0.5) { ctx.globalAlpha = (1 - u * 2) * 0.8; ctx.fillStyle = '#d8f2ff'; ctx.fillRect(px - 0.6, py + 6 + u * 22, 1.2, 2.2); }
+      }
+    };
+    for (let cy = c0y; cy <= c1y && budget > 0; cy++) {
+      for (let cx = c0x; cx <= c1x && budget > 0; cx++) {
+        const c = game.world.chunk(cx, cy);
+        for (let i = 0; i < c.rectCount && budget > 0; i++) {
+          const r = c.rects[i];
+          if (!r.alive || r.kind !== 'building' || r.style >= 46 || r.w <= 30) continue;
+          if (Math.abs(r.x + r.w / 2 - cam.x) > I.near || Math.abs(r.y + r.h - cam.y) > I.near) continue;
+          if (r.tall > 0 && r.tX0 !== undefined) tip(r, r.tX0, r.tY1 - 2, r.tX1 - r.tX0);
+          else tip(r, r.x + 2, r.y + r.h - 1, r.w - 4);
+        }
+      }
+    }
+    ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
   }
 

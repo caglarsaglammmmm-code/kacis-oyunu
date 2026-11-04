@@ -1,6 +1,24 @@
 // Garaj arabaları: yandan görünüş, kod ile piksel piksel çizilir. Marka rozeti yoktur.
 // Her araç 120x48 mantıksal tuval, CSS ile keskin büyütülür. Boya, jant ve alt LED görünüşe uygulanır.
-import { paintOf, ledOf } from './custom.js';
+import { paintOf, ledOf, exhaustItem } from './custom.js';
+
+// Egzoz ucu (arka, yere yakın): mağazadaki egzoza göre biçim ve renk; patlamalıda küçük alev
+function pxExhaust(g, x, y, id, t = 0) {
+  const it = exhaustItem(id || 'std');
+  const c = it.color;
+  const tipAt = (yy, w, h) => { g.fillStyle = '#14161b'; g.fillRect(x - w, yy - 1, w + 1, h + 2); g.fillStyle = c; g.fillRect(x - w + 1, yy, w, h); g.fillStyle = '#f4f7fa'; g.fillRect(x - w + 1, yy, w, 1); };
+  if (it.tip === 'dual') { tipAt(y - 2, 4, 2); tipAt(y + 1, 4, 2); }
+  else if (it.tip === 'quad') { tipAt(y - 3, 3, 1); tipAt(y - 1, 3, 1); tipAt(y + 1, 3, 1); tipAt(y + 3, 3, 1); }
+  else if (it.tip === 'big') tipAt(y - 2, 4, 4);
+  else if (it.tip === 'wide') tipAt(y - 1, 6, 3);
+  else if (it.tip !== 'flame') tipAt(y, 3, 2);
+  if (it.tip === 'flame') {
+    tipAt(y, 4, 2);
+    const on = Math.floor(t * 8) % 2;
+    g.fillStyle = on ? '#ffb020' : '#ff3a10'; g.fillRect(x - 7, y, 3, 2);
+    g.fillStyle = '#fff3a8'; g.fillRect(x - 5, y + (on ? 0 : 1), 1, 1);
+  }
+}
 const PXC_W = 120;
 const PXC_H = 48;
 
@@ -140,8 +158,8 @@ function pxDrawCar(g, car, paint, look = { rim: 'std', led: 'yok', ang: 0, t: 0 
       if (x % 2 === 0 && x > 20 && x < 100) { g.fillStyle = '#7a1a7a'; g.fillRect(x, 46, 1, 1); }
     }
   }
-  if (car.shape === 'moto') { pxMoto(g, paint, look); return; }
-  if (car.shape === 'golge') { pxGolge(g, paint, look); return; }
+  if (car.shape === 'moto') { pxMoto(g, paint, look); pxExhaust(g, 18, 33, look.exhaust, look.t); return; }
+  if (car.shape === 'golge') { pxGolge(g, paint, look); pxExhaust(g, 26, 34, look.exhaust, look.t); return; }
   const S = PX_SHAPES[car.shape] || PX_SHAPES.atmaca;
   const body = [[S.x0, S.sill], [S.x0, S.deck + 3], [S.x0 + 3, S.deck], [S.cr, S.deck], [S.rr, S.roof], [S.rf, S.roof], [S.cf, S.hood], [S.x1 - 8, S.hood + 2], [S.x1, S.hood + 6], [S.x1, S.sill]];
   const belt = Math.max(S.deck, S.hood) + 1;
@@ -208,12 +226,13 @@ function pxDrawCar(g, car, paint, look = { rim: 'std', led: 'yok', ang: 0, t: 0 
   }
   pxWheel(g, S.w[0], S.sill + 1, S.r, accent, look.rim, look.ang);
   pxWheel(g, S.w[1], S.sill + 1, S.r, accent, look.rim, look.ang);
+  pxExhaust(g, S.x0 + 1, S.sill - 2, look.exhaust, look.t);
 }
 
 const pxCache = new Map();
 export function pixelCar(car, paintIdx = 0, look = null) {
   const paint = paintOf(car, paintIdx);
-  const key = `${car.id}:${paintIdx}:${look ? `${look.rim}:${look.led}` : ''}`;
+  const key = `${car.id}:${paintIdx}:${look ? `${look.rim}:${look.led}:${look.exhaust || 'std'}` : ''}`;
   if (pxCache.has(key)) return pxCache.get(key);
   const c = document.createElement('canvas');
   c.width = PXC_W; c.height = PXC_H;
