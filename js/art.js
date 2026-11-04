@@ -394,34 +394,58 @@ export function paintPed(g, shirt, skin, hair, step, acc = 0) {
   if (acc === 4) { g.fillStyle = '#7a4e2a'; g.fillRect(-1.5, 3.8, 3.4, 2.4); }
 }
 
-// Uçan daire: üstten yuvarlak gövde, cam kubbe, dönen ışıklar, içinde yeşil pilot
-export function paintUfo(g, spec) {
-  const R = spec.len / 2;
-  const grd = g.createRadialGradient(-R * 0.3, -R * 0.3, 2, 0, 0, R);
-  grd.addColorStop(0, '#d9e4ec'); grd.addColorStop(0.55, '#7f93a6'); grd.addColorStop(1, '#3b4757');
-  g.fillStyle = grd; g.beginPath(); g.arc(0, 0, R, 0, 7); g.fill();
-  g.strokeStyle = '#1c2530'; g.lineWidth = 1.4; g.stroke();
-  g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1; g.beginPath(); g.arc(0, 0, R * 0.74, 0, 7); g.stroke();
-  for (let i = 0; i < 10; i++) { const a = (i / 10) * 6.283; g.fillStyle = i % 2 ? '#39ff9c' : '#ffe14d'; g.beginPath(); g.arc(Math.cos(a) * R * 0.86, Math.sin(a) * R * 0.86, 3.2, 0, 7); g.fill(); }
-  const dome = g.createRadialGradient(-5, -6, 1, 0, 0, R * 0.46);
-  dome.addColorStop(0, '#d8fff0'); dome.addColorStop(1, '#2fb88a');
-  g.fillStyle = dome; g.beginPath(); g.arc(0, 0, R * 0.46, 0, 7); g.fill();
-  g.fillStyle = '#4de08a'; g.beginPath(); g.ellipse(0, 0, 8, 10, 0, 0, 7); g.fill();
-  g.fillStyle = '#10151c'; g.beginPath(); g.ellipse(-3, -2.4, 2.1, 3.2, 0.4, 0, 7); g.ellipse(3, -2.4, 2.1, 3.2, -0.4, 0, 7); g.fill();
+// Uzaylı arabaları: çizgi film tarzı, uydurma. Üç tip: dart (ok burunlu, hızlı), blob (jöle gövdeli), crab (kıskaçlı, ağır).
+// Her biri parlak kenar ışığı, cam kubbe ve içinde iri gözlü pilotla; normal polisten belirgin farklı görünür
+function alienPilot(g, x, y, r, skin, eyes = 1) {
+  g.fillStyle = skin; g.beginPath(); g.ellipse(x, y, r * 0.8, r, 0, 0, 7); g.fill();
+  const n = eyes;
+  for (let i = 0; i < n; i++) {
+    const ey = n === 1 ? 0 : (i - (n - 1) / 2) * r * 0.7;
+    g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x + r * 0.25, y + ey, r * (n === 1 ? 0.5 : 0.32), 0, 7); g.fill();
+    g.fillStyle = '#10151c'; g.beginPath(); g.arc(x + r * 0.38, y + ey, r * (n === 1 ? 0.24 : 0.16), 0, 7); g.fill();
+  }
 }
 
-// Uzaylı aracı: yerden yüksek, parlak yeşil çizgili, sivri burunlu
-export function paintRover(g, spec) {
+export function paintAlien(g, spec, kind) {
   const L = spec.len / 2; const H = spec.wid / 2;
-  g.fillStyle = 'rgba(57,255,156,.28)'; rr(g, -L - 4, -H - 4, spec.len + 8, spec.wid + 8, 12); g.fill();
-  const c = g.createLinearGradient(0, -H, 0, H);
-  c.addColorStop(0, '#5a3d9a'); c.addColorStop(0.5, '#2c1d58'); c.addColorStop(1, '#170e33');
-  g.fillStyle = c;
-  g.beginPath(); g.moveTo(L + 3, 0); g.quadraticCurveTo(L * 0.4, -H * 1.2, -L * 0.6, -H); g.lineTo(-L, -H * 0.5); g.lineTo(-L, H * 0.5); g.lineTo(-L * 0.6, H); g.quadraticCurveTo(L * 0.4, H * 1.2, L + 3, 0); g.closePath(); g.fill();
-  g.strokeStyle = '#39ff9c'; g.lineWidth = 1.6; g.stroke();
-  g.fillStyle = '#a0ffd8'; g.beginPath(); g.ellipse(L * 0.1, 0, L * 0.34, H * 0.46, 0, 0, 7); g.fill();
-  g.fillStyle = '#39ff9c'; g.fillRect(-L * 0.8, -H * 0.72, L * 0.7, 1.6); g.fillRect(-L * 0.8, H * 0.72 - 1.6, L * 0.7, 1.6);
-  g.fillStyle = '#ff2ad4'; g.beginPath(); g.arc(-L, -H * 0.4, 2.2, 0, 7); g.arc(-L, H * 0.4, 2.2, 0, 7); g.fill();
+  const glowC = spec.glow; const body = spec.body;
+  // Yere vuran ışık halesi
+  g.fillStyle = glowC; g.globalAlpha = 0.22; rr(g, -L - 5, -H - 5, spec.len + 10, spec.wid + 10, 14); g.fill(); g.globalAlpha = 1;
+  const grad = g.createLinearGradient(0, -H, 0, H);
+  grad.addColorStop(0, shade(body, 0.35)); grad.addColorStop(0.5, body); grad.addColorStop(1, shade(body, -0.45));
+  g.fillStyle = grad;
+  g.strokeStyle = glowC; g.lineWidth = 1.8;
+  if (kind === 'dart') {
+    // Ok burun, arkada iki kanatçık
+    g.beginPath(); g.moveTo(L + 4, 0); g.quadraticCurveTo(L * 0.3, -H * 1.15, -L * 0.7, -H); g.lineTo(-L - 2, -H * 1.1); g.lineTo(-L * 0.8, -H * 0.3);
+    g.lineTo(-L * 0.8, H * 0.3); g.lineTo(-L - 2, H * 1.1); g.lineTo(-L * 0.7, H); g.quadraticCurveTo(L * 0.3, H * 1.15, L + 4, 0); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = glowC; g.fillRect(-L * 0.6, -H * 0.62, L * 0.9, 1.6); g.fillRect(-L * 0.6, H * 0.62 - 1.6, L * 0.9, 1.6);
+    g.fillStyle = 'rgba(190,255,230,.85)'; g.beginPath(); g.ellipse(L * 0.12, 0, L * 0.36, H * 0.5, 0, 0, 7); g.fill();
+    alienPilot(g, L * 0.1, 0, H * 0.36, '#59e07a', 1);
+  } else if (kind === 'blob') {
+    // Jöle gövde: yuvarlak, kabarcıklı, iki göz sapı
+    g.beginPath(); g.ellipse(0, 0, L, H, 0, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.28)';
+    for (const [x, y, r] of [[-L * 0.5, -H * 0.4, 3], [-L * 0.2, H * 0.5, 2.2], [L * 0.45, -H * 0.55, 2.6], [-L * 0.65, H * 0.15, 1.8]]) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+    g.fillStyle = 'rgba(255,200,250,.8)'; g.beginPath(); g.ellipse(L * 0.05, 0, L * 0.42, H * 0.52, 0, 0, 7); g.fill();
+    alienPilot(g, L * 0.05, 0, H * 0.38, '#ff8ad8', 2);
+    g.strokeStyle = '#ffd6f4'; g.lineWidth = 1.3;
+    g.beginPath(); g.moveTo(L * 0.5, -H * 0.3); g.lineTo(L + 3, -H * 0.62); g.moveTo(L * 0.5, H * 0.3); g.lineTo(L + 3, H * 0.62); g.stroke();
+    g.fillStyle = glowC; g.beginPath(); g.arc(L + 3, -H * 0.62, 2.4, 0, 7); g.arc(L + 3, H * 0.62, 2.4, 0, 7); g.fill();
+  } else {
+    // Yengeç: geniş gövde, önde iki kıskaç, yanlarda bacak ışıkları
+    g.beginPath(); g.moveTo(L * 0.62, -H * 0.8); g.lineTo(-L * 0.8, -H); g.lineTo(-L, -H * 0.5); g.lineTo(-L, H * 0.5); g.lineTo(-L * 0.8, H); g.lineTo(L * 0.62, H * 0.8); g.quadraticCurveTo(L * 0.9, 0, L * 0.62, -H * 0.8); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = shade(body, -0.25); g.strokeStyle = glowC; g.lineWidth = 1.4;
+    for (const sy of [-1, 1]) {
+      g.beginPath(); g.moveTo(L * 0.5, sy * H * 0.55); g.quadraticCurveTo(L + 6, sy * H * 1.1, L + 4, sy * H * 0.22); g.lineTo(L * 0.82, sy * H * 0.42); g.closePath(); g.fill(); g.stroke();
+    }
+    g.fillStyle = glowC;
+    for (let k = 0; k < 3; k++) { const x = -L * 0.6 + k * L * 0.45; g.fillRect(x, -H - 2, 4, 2); g.fillRect(x, H, 4, 2); }
+    g.fillStyle = 'rgba(255,240,180,.8)'; g.beginPath(); g.ellipse(-L * 0.05, 0, L * 0.4, H * 0.5, 0, 0, 7); g.fill();
+    alienPilot(g, -L * 0.05, 0, H * 0.34, '#ffb347', 3);
+  }
+  // Arka itici
+  g.fillStyle = '#ff2ad4'; g.beginPath(); g.arc(-L, -H * 0.35, 2.2, 0, 7); g.arc(-L, H * 0.35, 2.2, 0, 7); g.fill();
 }
 
 // --- Güç simgeleri ---

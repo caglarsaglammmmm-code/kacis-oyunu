@@ -31,7 +31,7 @@ export default {
   },
   dev: {
     title: 'Developer', god: 'Invincible', start: 'Start time',
-    t0: '0 s', t45: '45 s (before SWAT)', t195: '195 s (before backup)', t275: '275 s (before tanks)', t280: '280 s (tanks)',
+    t0: '0 s', t45: '45 s (before SWAT)', t195: '195 s (before backup)', t275: '295 s (before tanks)', t280: '300 s (tanks)',
   },
   howto: {
     title: 'How to Play',
@@ -56,7 +56,7 @@ export default {
   },
   pause: { title: 'Paused', resume: 'Resume', menu: 'Main menu' },
   over: {
-    caught: 'BUSTED!', sunk: 'SUNK!', record: 'NEW RECORD!',
+    caught: 'BUSTED!', sunk: 'SUNK!', meteor: 'METEOR STRIKE!', record: 'NEW RECORD!',
     score: 'Score', time: 'Time', coins: 'Coins', kills: 'Police wrecked', broken: 'Objects smashed', near: 'Close calls', drift: 'Drift',
     seconds: '{n} s', best: 'Best score: {score} · Longest run: {time}', retry: 'Try again', menu: 'Main menu',
   },
@@ -66,7 +66,7 @@ export default {
     stick: ['Left half', 'press and slide', 'Joystick', 'appears under your thumb', 'Hold REV', 'reverse'],
     rev: 'REV',
   },
-  alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!' },
+  alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!', meteors: 'METEOR SHOWER!' },
   escape: { toast: '+{n} CLOSE CALL!', combo: 'COMBO +{n}' },
   code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.' },
   custom: {
@@ -91,6 +91,9 @@ export default {
     tilki: { desc: 'Light, playful drift coupe', paints: ['Fox Orange','Night Black','Matte Gray','Ice White'] },
     kartal: { desc: 'Long hood, rumbling V8', paints: ['Racing Blue','Blood Red','Matte Black','Two-Tone Cream/Green'] },
     volt: { desc: 'Silent but very fast electric GT', paints: ['Plasma Blue','Graphite','Matte White','Aurora Purple'] },
-    kuzgun: { desc: 'Supercar with a homing energy launcher', paints: ['Raven Black','Neon Red','Matte Titanium','Two-Tone White/Black'] },
+    kuzgun: { desc: 'Supercar with a 360° auto-gun', paints: ['Raven Black','Neon Red','Matte Titanium','Two-Tone White/Black'] },
+    golge: { name: 'Shadow R', desc: 'Secret passage gift: superbike with a 360° auto-gun', paints: ['Night Watch', 'Neon Pink', 'Toxic Green', 'Silver Ghost'] },
   },
+  meteor: { warn: 'Get out of the red circle: meteor incoming!' },
+  secret: { guest: 'You are now {name}\'s guest too', found: 'You found the secret area! Welcome', gift: 'Gift: the {name} motorcycle is now in your garage!' },
 };

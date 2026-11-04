@@ -10,7 +10,8 @@ import { paintPad, tallArt, landmarkSign } from './landmarks.js';
 import { paintBuilding2, shadowOf } from './buildings.js';
 import { FX } from './effects.js';
 import { MemorialArt, bakeMemorialPad } from './memorial.js';
-import { signKind, paintDoner, paintPromo, paintDancer, paintBalcony, paintWashing, paintMoon, paintStars, rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintUfo, paintRover, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
+import { Stadiums } from './stadium.js';
+import { signKind, paintDoner, paintPromo, paintDancer, paintBalcony, paintWashing, paintMoon, paintStars, rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintAlien, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
 
 const PF = CONFIG.perf;
 const SPR = 3; // Sprite ölçeği: arabalar yakın çekimde de keskin kalsın
@@ -213,6 +214,7 @@ export class Renderer {
     this.syncBakes = 0; // Görünür parça hazır değilse kare beklemiştir: ölçüm için
     this.queue = []; // Sprite işleri kare bütçesiyle yapılır
     this.memorial = new MemorialArt(); // Cumhuriyet Meydanı anıtı: önbellekli, yakında ayrıntılı
+    this.stadiums = new Stadiums(); // İki stadyum: önbellekli, uzakta sade
     this.makeSprites();
   }
 
@@ -571,9 +573,21 @@ export class Renderer {
     s.swat = sprite(P.swat.len + 8, P.swat.wid + 8, (g) => paintSwat(g, P.swat));
     s.tank = sprite(P.tank.len + 8, P.tank.wid + 8, (g) => paintTankHull(g, P.tank));
     s.turret = sprite(150, 50, paintTurret);
-    const AL = CONFIG.aliens;
-    s.ufo = sprite(AL.ufo.len + 10, AL.ufo.len + 10, (g) => paintUfo(g, AL.ufo));
-    s.rover = sprite(AL.rover.len + 16, AL.rover.wid + 16, (g) => paintRover(g, AL.rover));
+    // Uzaylı arabaları: türe göre ayrı görünüş
+    for (const [k, spec] of Object.entries(CONFIG.aliens.types)) s[k] = sprite(spec.len + 18, spec.wid + 18, (g) => paintAlien(g, spec, k));
+    // Meteor: kızgın kaya, alev kuyruğu yukarıda (gökten iner)
+    s.meteor = sprite(70, 110, (g) => {
+      const tail = g.createLinearGradient(0, -52, 0, 6);
+      tail.addColorStop(0, 'rgba(255,90,20,0)'); tail.addColorStop(0.6, 'rgba(255,150,40,.75)'); tail.addColorStop(1, 'rgba(255,240,180,.95)');
+      g.fillStyle = tail; g.beginPath(); g.moveTo(-9, -52); g.lineTo(9, -52); g.lineTo(20, 4); g.lineTo(-20, 4); g.closePath(); g.fill();
+      const rock = g.createRadialGradient(-6, 0, 3, 0, 8, 24);
+      rock.addColorStop(0, '#ffcf6b'); rock.addColorStop(0.35, '#a0522d'); rock.addColorStop(1, '#3a2418');
+      g.fillStyle = rock; g.beginPath();
+      for (let i = 0; i < 11; i++) { const a = (i / 11) * 6.283; const q = 19 + (i % 3) * 3; g[i ? 'lineTo' : 'moveTo'](Math.cos(a) * q, 10 + Math.sin(a) * q); }
+      g.closePath(); g.fill();
+      g.strokeStyle = '#ffb347'; g.lineWidth = 1.4; g.stroke();
+      g.fillStyle = 'rgba(40,20,10,.6)'; g.beginPath(); g.arc(6, 14, 4, 0, 7); g.arc(-7, 6, 3, 0, 7); g.fill();
+    });
     s.shadow = sprite(60, 34, (g) => {
       g.fillStyle = 'rgba(0,0,0,1)';
       rr(g, -28, -15, 56, 30, 9);
@@ -588,7 +602,7 @@ export class Renderer {
     s.water = glow(64, [[0, 'rgba(235,250,255,.9)'], [1, 'rgba(180,230,255,0)']]);
     s.orb = glow(48, [[0, 'rgba(255,255,255,1)'], [0.25, 'rgba(120,240,255,.95)'], [0.6, 'rgba(255,60,200,.45)'], [1, 'rgba(255,40,180,0)']]);
     s.reticle = reticleSprite();
-    s.launcher = sprite(22, 14, (g) => { g.fillStyle = '#16181e'; rr(g, -9, -5, 18, 10, 3); g.fill(); g.fillStyle = '#2a2f38'; g.fillRect(-2, -3, 12, 6); g.fillStyle = '#ff2f6a'; g.fillRect(8, -2, 3, 4); g.fillStyle = '#21e6ff'; g.fillRect(-7, -1, 4, 2); });
+    s.launcher = sprite(26, 14, (g) => { g.fillStyle = '#16181e'; rr(g, -8, -5, 14, 10, 3); g.fill(); g.fillStyle = '#2a2f38'; g.fillRect(2, -2.2, 10, 1.8); g.fillRect(2, 0.4, 10, 1.8); g.fillStyle = '#ffd23f'; g.fillRect(11, -2.4, 1.6, 4.8); g.fillStyle = '#21e6ff'; g.fillRect(-6, -1, 4, 2); });
     s.glint = glow(32, [[0, 'rgba(255,255,220,1)'], [0.4, 'rgba(255,215,70,.8)'], [1, 'rgba(255,200,0,0)']]);
 
     const prop = (w, h, paint) => sprite(w, h, paint);
@@ -1190,11 +1204,23 @@ export class Renderer {
   }
 
   // Açık alanlar: spor sahaları, avlu, otopark, ambulans alanı, okul bahçesi
+  // Gizli geçit rampası: neredeyse görünmez. Hafif koyu zemin, soluk eğim çizgileri, köşede karanlık bir boşluk
+  bakeRamp(g, x, y, w, h) {
+    const grd = g.createLinearGradient(x, y, x + w, y + h);
+    grd.addColorStop(0, 'rgba(0,0,0,0)'); grd.addColorStop(0.55, 'rgba(20,16,12,.10)'); grd.addColorStop(1, 'rgba(8,6,5,.26)');
+    g.fillStyle = grd; g.fillRect(x, y, w, h);
+    g.strokeStyle = 'rgba(30,24,18,.10)'; g.lineWidth = 1.2;
+    for (let k = 1; k < 5; k++) { const u = k / 5; g.beginPath(); g.moveTo(x + w * u, y + h); g.lineTo(x + w, y + h * u); g.stroke(); }
+    g.fillStyle = 'rgba(6,5,4,.22)';
+    g.beginPath(); g.moveTo(x + w, y + h * 0.62); g.lineTo(x + w, y + h); g.lineTo(x + w * 0.62, y + h); g.closePath(); g.fill();
+  }
+
   bakePads(g, c) {
     for (let i = 0; i < c.padCount; i++) {
       const p = c.pads[i];
       if (p.w <= 0 || p.h <= 0) continue; // Otoban bandında kalan saha iptal edilmiştir
       if (p.kind === 'anit') { bakeMemorialPad(g, c.x + (p.tx + 1) * TILE, c.y + p.ty * TILE, (p.w - 2) * TILE, p.h * TILE * 0.7); continue; }
+      if (p.kind === 'gecit') { this.bakeRamp(g, c.x + p.tx * TILE, c.y + p.ty * TILE, p.w * TILE, p.h * TILE); continue; }
       const x = c.x + p.tx * TILE + 3;
       const y = c.y + p.ty * TILE + 3;
       const w = p.w * TILE - 6;
@@ -1486,17 +1512,18 @@ export class Renderer {
         this.memorial.draw(ctx, mb, now, s);
       }
     }
+    this.stadiums.draw(ctx, world, cam, vx0, vx1, vy0, vy1, now, s);
 
     this.drawDecals(game, vx0, vx1, vy0, vy1);
     this.drawSkids(game, vx0, vx1, vy0, vy1);
     this.drawSpikes(game);
     this.drawShots(game, now);
+    this.drawMeteorWarn(game, now);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, false);
     this.drawPeds(game, vx0, vx1, vy0, vy1, false);
     this.drawNpcs(game, vx0, vx1, vy0, vy1);
     this.drawHighway(game, vx0, vx1, vy0, vy1);
     this.drawCops(game, now, vx0, vx1, vy0, vy1);
-    if (game.weapon) this.drawWeapon(game, now);
     if (game.state !== 'dying' && game.state !== 'over') this.drawPlayer(game, now);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, true);
     this.drawPeds(game, vx0, vx1, vy0, vy1, true);
@@ -1505,7 +1532,8 @@ export class Renderer {
     this.drawBalconies(game, now, c0x, c1x, c0y, c1y, false); // Alçak binalar yüksek binaların altında kalır
     this.drawTalls(game, c0x, c1x, c0y, c1y);
     this.drawBalconies(game, now, c0x, c1x, c0y, c1y, true);
-    this.drawUfos(game, now, vx0, vx1, vy0, vy1);
+    if (game.weapon) this.drawWeapon(game, now);
+    this.drawMeteorSky(game, now);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawNight(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now);
     this.drawPhasing(game);
@@ -1779,6 +1807,7 @@ export class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
     const sp = this.sprites;
     if (this.memBox) this.memorial.drawNight(ctx, this.memBox, now, this.s, night, sp.lamp);
+    this.stadiums.drawNight(ctx, now, night, sp.lamp);
     ctx.globalCompositeOperation = 'lighter';
     const wet = game.weather === 'rain' || game.weather === 'ice';
     for (let cy = c0y; cy <= c1y; cy++) {
@@ -1853,7 +1882,7 @@ export class Renderer {
     if (game.state === 'play') this.drawLed(game, night * CUSTOM.ledNight / CUSTOM.ledAlpha, now, true);
     ctx.globalAlpha = night;
     ctx.globalCompositeOperation = 'lighter';
-    for (let i = 0; i < game.cops.length; i++) { const c = game.cops[i]; if (c.type !== 'tank' && !c.flying) head(c); }
+    for (let i = 0; i < game.cops.length; i++) { const c = game.cops[i]; if (c.type !== 'tank' && !c.alien) head(c); }
     for (let i = 0; i < game.crowd.npcs.length; i++) { const n = game.crowd.npcs[i]; if (n.alive && n.state === 'drive') head(n); }
     for (let i = 0; i < game.crowd.hw.length; i++) { const n = game.crowd.hw[i]; if (n.alive) head(n); }
     ctx.globalCompositeOperation = 'source-over';
@@ -1967,34 +1996,31 @@ export class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
-  // Güdümlü enerji topu: iz, parlak top, hedef işareti. Hepsi önceden çizilmiş görüntü
+  // Taramalı silah: kısa, ince iz çizgileri (en çok maxTracers), namlu parlaması. Tek yol, tek çizim
   drawWeapon(game, now) {
     const ctx = this.ctx;
-    const sp = this.sprites;
+    const gun = game.gun;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
     ctx.globalCompositeOperation = 'lighter';
-    for (const m of game.missiles) {
-      if (!m.alive) continue;
-      for (let k = 1; k < m.tx.length; k++) {
-        const i = (m.ti - k + m.tx.length) % m.tx.length;
-        const q = 1 - k / m.tx.length;
-        ctx.globalAlpha = 0.55 * q;
-        const r = 6 + 8 * q;
-        ctx.drawImage(sp.orb, m.tx[i] - r, m.ty[i] - r, r * 2, r * 2);
-      }
+    ctx.beginPath();
+    let n = 0;
+    const L = 0.022; // İz uzunluğu (sn)
+    for (const b of gun.bullets) {
+      if (!b.alive || n >= CONFIG.weapon.maxTracers) continue;
+      ctx.moveTo(b.x - b.vx * L, b.y - b.vy * L); ctx.lineTo(b.x, b.y);
+      n++;
+    }
+    ctx.strokeStyle = 'rgba(255,214,90,.95)'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,235,.9)'; ctx.lineWidth = 1; ctx.stroke();
+    if (gun.flash > 0 && game.state === 'play') {
+      const p = game.player;
+      const x = p.x + Math.cos(gun.aim) * 16; const y = p.y + Math.sin(gun.aim) * 16;
+      ctx.globalAlpha = Math.min(1, gun.flash / 0.06);
+      ctx.drawImage(this.sprites.glint, x - 9, y - 9, 18, 18);
       ctx.globalAlpha = 1;
-      ctx.drawImage(sp.orb, m.x - 16, m.y - 16, 32, 32);
     }
     ctx.globalCompositeOperation = 'source-over';
-    const lock = game.weapon.lock;
-    if (lock && game.state === 'play') {
-      const r = Math.max(lock.len, lock.wid) * 0.8;
-      ctx.globalAlpha = game.weapon.cd <= 0.4 ? 0.95 : 0.6; // Atışa yakın daha belirgin
-      this.place(lock.x, lock.y, now * 0.003);
-      ctx.drawImage(sp.reticle, -r, -r, r * 2, r * 2);
-      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
-    }
-    ctx.globalAlpha = 1;
+    ctx.lineCap = 'butt';
   }
 
   // Alt LED: önceden çizilmiş yumuşak ışık, yere yansır. Gece drawNight içinde ikinci kez, daha parlak
@@ -2281,6 +2307,29 @@ export class Renderer {
       ctx.globalAlpha = 1;
     }
     if (game.ghostT > 0) ctx.globalAlpha = 0.5;
+    // Koruma (uzaylı geçişi, gizli geçit dönüşü): hafif yanıp sönme ve ince kalkan halkası
+    if (game.shieldT > 0) {
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.35 + 0.25 * Math.sin(now * 0.02);
+      const R = p.len * 1.15;
+      ctx.drawImage(this.sprites.auras[2], p.x - R, p.y - R, R * 2, R * 2);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = Math.floor(now / 110) % 2 ? 0.55 : 1;
+    }
+    // Gizli geçit: araba rampadan aşağı kayar, küçülür ve kararır
+    const down = game.secretProgress();
+    if (game.state === 'secret') {
+      const q = k * (1 - 0.45 * down);
+      this.place(p.x, p.y, p.a);
+      ctx.globalAlpha = Math.max(0, 1 - down * 0.95);
+      const w = (this.playerSprite.wu || this.playerSprite.width / SPR) * q;
+      const h = (this.playerSprite.hu || this.playerSprite.height / SPR) * q;
+      ctx.drawImage(this.playerSprite, -w / 2, -h / 2, w, h);
+      ctx.globalAlpha = 1;
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      return;
+    }
     const sink = game.sinkProgress();
     if (sink > 0) {
       // Çizgi film batışı: küçülür, maviye gömülür
@@ -2310,8 +2359,8 @@ export class Renderer {
     ctx.globalAlpha = 1;
     this.drawRims(game, now);
     if (game.weapon) {
-      const lock = game.weapon.lock;
-      const a = lock ? Math.atan2(lock.y - p.y, lock.x - p.x) : p.a;
+      // 360° taret: son hedefe döner, hedef yoksa ileri
+      const a = game.gun.target ? game.gun.aim : p.a;
       this.place(p.x - Math.cos(p.a) * p.len * 0.08, p.y - Math.sin(p.a) * p.len * 0.08, a);
       const lw = this.sprites.launcher.width / SPR; const lh = this.sprites.launcher.height / SPR;
       ctx.drawImage(this.sprites.launcher, -lw / 2, -lh / 2, lw, lh);
@@ -2324,29 +2373,54 @@ export class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
-  // Uçan daireler en üstte: gölgesi yerde, ışını oyuncunun üstünde
-  drawUfos(game, now, x0, x1, y0, y1) {
+  // Meteor uyarısı (yerde): kırmızı daire, nişangâh, 3 saniyede dolan halka, yanıp sönen hedef işareti
+  drawMeteorWarn(game, now) {
     const ctx = this.ctx;
-    const sp = this.sprites;
-    for (const c of game.cops) {
-      if (!c.flying || c.x < x0 - 200 || c.x > x1 + 200 || c.y < y0 - 200 || c.y > y1 + 200) continue;
-      const R = c.len / 2;
-      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
-      ctx.globalAlpha = 0.3;
-      ctx.drawImage(sp.dark, c.x + 16, c.y + 44, R * 2.1, R * 1.6);
-      if (c.beam) {
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = 0.5 + 0.2 * Math.sin(now * 0.03);
-        ctx.fillStyle = '#39ff9c';
-        ctx.beginPath(); ctx.moveTo(c.x - 16, c.y); ctx.lineTo(c.x + 16, c.y); ctx.lineTo(game.player.x + 42, game.player.y); ctx.lineTo(game.player.x - 42, game.player.y); ctx.closePath(); ctx.fill();
-        ctx.globalCompositeOperation = 'source-over';
+    const M = CONFIG.meteor;
+    const R = M.radius;
+    for (const m of game.meteors.list) {
+      if (!m.alive) continue;
+      const k = Math.min(1, m.t / M.warn);
+      const blink = Math.floor(now / (k > 0.7 ? 90 : 170)) % 2 === 0;
+      ctx.beginPath(); ctx.arc(m.x, m.y, R, 0, 6.283);
+      ctx.fillStyle = `rgba(255,40,30,${0.1 + 0.16 * k})`; ctx.fill();
+      ctx.strokeStyle = 'rgba(255,70,40,.9)'; ctx.lineWidth = 3; ctx.setLineDash([14, 9]); ctx.stroke(); ctx.setLineDash([]);
+      // İlerleme halkası: 3 saniyede dolar
+      ctx.beginPath(); ctx.arc(m.x, m.y, R - 7, -Math.PI / 2, -Math.PI / 2 + k * 6.283);
+      ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 7; ctx.stroke();
+      // Nişangâh
+      ctx.strokeStyle = blink ? '#ffffff' : '#ff3b2a'; ctx.lineWidth = 3;
+      const r1 = R * 0.28; const r2 = R * 0.62;
+      ctx.beginPath();
+      ctx.moveTo(m.x - r2, m.y); ctx.lineTo(m.x - r1, m.y); ctx.moveTo(m.x + r1, m.y); ctx.lineTo(m.x + r2, m.y);
+      ctx.moveTo(m.x, m.y - r2); ctx.lineTo(m.x, m.y - r1); ctx.moveTo(m.x, m.y + r1); ctx.lineTo(m.x, m.y + r2);
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(m.x, m.y, r1 * 0.6, 0, 6.283); ctx.stroke();
+      // Yere düşen gölge büyür
+      const fall = M.fall / M.warn;
+      if (k > 1 - fall) {
+        const q = (k - (1 - fall)) / fall;
+        ctx.globalAlpha = 0.25 + 0.45 * q;
+        ctx.drawImage(this.sprites.dark, m.x - R * 0.5 * q, m.y - R * 0.35 * q, R * q, R * 0.7 * q);
+        ctx.globalAlpha = 1;
       }
-      ctx.globalAlpha = 1;
-      this.place(c.x, c.y - 10, c.a);
-      const w = sp.ufo.width / SPR;
-      ctx.drawImage(sp.ufo, -w / 2, -w / 2, w, w);
     }
-    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
+  // Düşen meteor (gökte): uyarının son anlarında yukarıdan çakılır
+  drawMeteorSky(game, now) {
+    const ctx = this.ctx;
+    const M = CONFIG.meteor;
+    const sp = this.sprites;
+    const fallFrom = M.warn - M.fall;
+    for (const m of game.meteors.list) {
+      if (!m.alive || m.t < fallFrom) continue;
+      const q = (m.t - fallFrom) / M.fall; // 0 gökte, 1 yerde
+      const h = (1 - q) * (game.cam.halfH * 0.7 + 80); // Ekranın içinden düşer: görünür
+      const sz = 1.6 - 0.7 * q;
+      const w = 70 * sz; const hh = 110 * sz;
+      ctx.drawImage(sp.meteor, m.x - w / 2 + (1 - q) * 120, m.y - h - hh * 0.62, w, hh);
+    }
   }
 
   drawCops(game, now, x0, x1, y0, y1) {
@@ -2355,7 +2429,19 @@ export class Renderer {
     for (const c of game.cops) {
       if (c.flying) continue;
       if (c.x < x0 - 80 || c.x > x1 + 80 || c.y < y0 - 80 || c.y > y1 + 80) continue;
-      this.drawBody(sp[c.type], c, c.type === 'tank' ? 1.6 : 1);
+      if (c.alien) {
+        // Işınlanma sütunu ve yerdeki parıltı
+        ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+        ctx.globalCompositeOperation = 'lighter';
+        const pulse = 0.55 + 0.25 * Math.sin(now * 0.008 + c.id);
+        ctx.globalAlpha = c.warpT > 0 ? 0.9 : 0.35 * pulse;
+        const R = c.len * (c.warpT > 0 ? 1.4 : 0.95);
+        ctx.drawImage(sp.auras[1], c.x - R, c.y - R, R * 2, R * 2);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = c.warpT > 0 ? Math.max(0.15, 1 - c.warpT / CONFIG.aliens.wake) : 1;
+        this.drawBody(sp[c.type], c, 1);
+        ctx.globalAlpha = 1;
+      } else this.drawBody(sp[c.type], c, c.type === 'tank' ? 1.6 : 1);
       if (c.type === 'tank') {
         this.place(c.x, c.y, c.turret);
         const w = sp.turret.width / SPR;
@@ -2434,7 +2520,7 @@ export class Renderer {
     const sp = this.sprites;
     ctx.globalCompositeOperation = 'lighter';
     for (const c of game.cops) {
-      if (c.type === 'tank' || c.flying || c.type === 'rover' || game.ghostT > 0) continue;
+      if (c.type === 'tank' || c.alien || game.ghostT > 0) continue;
       if (c.x < x0 - 90 || c.x > x1 + 90 || c.y < y0 - 90 || c.y > y1 + 90) continue;
       const on = Math.floor(now / 130 + c.id) % 2 === 0;
       const side = c.wid * 0.5;

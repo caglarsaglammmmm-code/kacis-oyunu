@@ -432,8 +432,34 @@ function kamyonet(g, l, w, c, a, fin) {
   mirrors(g, L * 0.3, H * 0.98, '#16181c');
 }
 
+// Gölge R (gizli motosiklet): dar, uzun, keskin kaporta; neon şeritler, ışıklı jantlar, çift egzoz
+function golge(g, l, w, c, a, fin) {
+  const L = l / 2;
+  // Işıklı jantlar: neon halka
+  for (const x of [L * 0.62, -L * 0.7]) {
+    g.fillStyle = '#07080c'; rr(g, x - 6.5, -2.6, 13, 5.2, 2.2); g.fill();
+    g.strokeStyle = a; g.lineWidth = 1.1; rr(g, x - 6, -2.2, 12, 4.4, 2); g.stroke();
+  }
+  smooth(g, [[L * 1.02, 0], [L * 0.62, 3.6], [L * 0.1, 5.6], [-L * 0.42, 4.2], [-L * 0.86, 2.4], [-L * 0.95, 0]]);
+  fillHull(g, coat(g, 5.6, c, fin), 'rgba(0,0,0,.8)');
+  // Neon kenar şeritleri ve sırt çizgisi
+  g.strokeStyle = a; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(L * 0.92, 0.6); g.lineTo(L * 0.2, 4.4); g.lineTo(-L * 0.6, 3.2); g.moveTo(L * 0.92, -0.6); g.lineTo(L * 0.2, -4.4); g.lineTo(-L * 0.6, -3.2); g.stroke();
+  g.fillStyle = a; g.fillRect(-L * 0.1, -0.7, L * 0.8, 1.4);
+  // Cam grenaj, sele, gidon
+  g.fillStyle = '#1b2a3a'; g.beginPath(); g.ellipse(L * 0.42, 0, 3.4, 3, 0, 0, 7); g.fill();
+  g.fillStyle = '#0b0c10'; rr(g, -L * 0.42, -2.6, 8, 5.2, 2); g.fill();
+  g.strokeStyle = '#c9d2dc'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(L * 0.3, -6.6); g.lineTo(L * 0.3, 6.6); g.stroke();
+  g.fillStyle = a; g.fillRect(L * 0.3 - 1, -7.6, 2, 2); g.fillRect(L * 0.3 - 1, 5.6, 2, 2);
+  // Çift egzoz, arka stop, ön far
+  g.fillStyle = '#9aa3ad'; g.fillRect(-L - 1.5, -3.6, 5, 1.6); g.fillRect(-L - 1.5, 2, 5, 1.6);
+  g.fillStyle = '#ff2346'; g.fillRect(-L * 0.98, -1.4, 1.6, 2.8);
+  g.fillStyle = '#e8fbff'; g.fillRect(L - 0.6, -1.6, 2, 3.2);
+  lamps(g, L - 1, [0], 2.4, 2.6, '#e6fbff');
+}
+
 const MODELS = {
-  atmaca, motor: moto, moto, simsek, efe, cinar, marmara, liva, suv, granit: suv, bozkir, elektra,
+  atmaca, motor: moto, moto, golge, simsek, efe, cinar, marmara, liva, suv, granit: suv, bozkir, elektra,
   bavar, aurum, stella, volta, pusula, dalga, lale, vadi, kamyonet,
 };
 

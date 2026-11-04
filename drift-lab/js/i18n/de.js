@@ -31,7 +31,7 @@ export default {
   },
   dev: {
     title: 'Entwickler', god: 'Unbesiegbar', start: 'Startzeit',
-    t0: '0 s', t45: '45 s (vor SWAT)', t195: '195 s (vor Verstärkung)', t275: '275 s (vor Panzern)', t280: '280 s (Panzer)',
+    t0: '0 s', t45: '45 s (vor SWAT)', t195: '195 s (vor Verstärkung)', t275: '295 s (vor Panzern)', t280: '300 s (Panzer)',
   },
   howto: {
     title: 'So wird gespielt',
@@ -56,7 +56,7 @@ export default {
   },
   pause: { title: 'Pausiert', resume: 'Weiter', menu: 'Hauptmenü' },
   over: {
-    caught: 'ERWISCHT!', sunk: 'VERSENKT!', record: 'NEUER REKORD!',
+    caught: 'ERWISCHT!', sunk: 'VERSENKT!', meteor: 'METEORITENTREFFER!', record: 'NEUER REKORD!',
     score: 'Punkte', time: 'Zeit', coins: 'Münzen', kills: 'Polizei erledigt', broken: 'Zerstörte Objekte', near: 'Knappe Manöver', drift: 'Drift',
     seconds: '{n} s', best: 'Bestwert: {score} · Längste Fahrt: {time}', retry: 'Nochmal', menu: 'Hauptmenü',
   },
@@ -66,7 +66,7 @@ export default {
     stick: ['Linke Hälfte', 'drücken und ziehen', 'Joystick', 'erscheint unter dem Daumen', 'RÜCK halten', 'Rückwärts'],
     rev: 'RÜCK',
   },
-  alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!' },
+  alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!', meteors: 'METEORITENHAGEL!' },
   escape: { toast: '+{n} HAARSCHARF!', combo: 'COMBO +{n}' },
   code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.' },
   custom: {
@@ -91,6 +91,9 @@ export default {
     tilki: { desc: 'Leichtes, verspieltes Drift-Coupé', paints: ['Fuchsorange','Nachtschwarz','Mattgrau','Eisweiß'] },
     kartal: { desc: 'Lange Haube, grollender V8', paints: ['Rennblau','Blutrot','Mattschwarz','Zweifarbig Creme/Grün'] },
     volt: { desc: 'Leiser, aber sehr schneller Elektro-GT', paints: ['Plasmablau','Graphit','Mattweiß','Aurora-Lila'] },
-    kuzgun: { desc: 'Supersportler mit Zielsuch-Energiewerfer', paints: ['Rabenschwarz','Neonrot','Mattes Titan','Zweifarbig Weiß/Schwarz'] },
+    kuzgun: { desc: 'Supersportler mit 360°-Automatikkanone', paints: ['Rabenschwarz','Neonrot','Mattes Titan','Zweifarbig Weiß/Schwarz'] },
+    golge: { name: 'Schatten R', desc: 'Geschenk des Geheimgangs: Superbike mit 360°-Automatikkanone', paints: ['Nachtwache', 'Neonpink', 'Giftgrün', 'Silbergeist'] },
   },
+  meteor: { warn: 'Raus aus dem roten Kreis: Meteorit im Anflug!' },
+  secret: { guest: 'Jetzt bist du auch Gast von {name}', found: 'Du hast den geheimen Bereich gefunden! Willkommen', gift: 'Geschenk: Das Motorrad {name} steht jetzt in deiner Garage!' },
 };

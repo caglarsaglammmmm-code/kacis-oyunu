@@ -31,7 +31,7 @@ export default {
   },
   dev: {
     title: 'Desarrollador', god: 'Invencible', start: 'Tiempo inicial',
-    t0: '0 s', t45: '45 s (antes del SWAT)', t195: '195 s (antes de refuerzos)', t275: '275 s (antes de tanques)', t280: '280 s (tanques)',
+    t0: '0 s', t45: '45 s (antes del SWAT)', t195: '195 s (antes de refuerzos)', t275: '295 s (antes de tanques)', t280: '300 s (tanques)',
   },
   howto: {
     title: 'Cómo jugar',
@@ -56,7 +56,7 @@ export default {
   },
   pause: { title: 'En pausa', resume: 'Continuar', menu: 'Menú principal' },
   over: {
-    caught: '¡TE PILLARON!', sunk: '¡HUNDIDO!', record: '¡NUEVO RÉCORD!',
+    caught: '¡TE PILLARON!', sunk: '¡HUNDIDO!', meteor: '¡IMPACTO DE METEORITO!', record: '¡NUEVO RÉCORD!',
     score: 'Puntos', time: 'Tiempo', coins: 'Monedas', kills: 'Policías derribados', broken: 'Objetos rotos', near: 'Por los pelos', drift: 'Derrape',
     seconds: '{n} s', best: 'Mejor puntuación: {score} · Mayor tiempo: {time}', retry: 'Reintentar', menu: 'Menú principal',
   },
@@ -66,7 +66,7 @@ export default {
     stick: ['Mitad izq.', 'pulsa y desliza', 'Joystick', 'aparece bajo tu dedo', 'Mantén ATRÁS', 'marcha atrás'],
     rev: 'ATRÁS',
   },
-  alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!' },
+  alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!', meteors: '¡LLUVIA DE METEORITOS!' },
   escape: { toast: '+{n} ¡POR LOS PELOS!', combo: 'COMBO +{n}' },
   code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.' },
   custom: {
@@ -91,6 +91,9 @@ export default {
     tilki: { desc: 'Coupé de derrape ligero y juguetón', paints: ['Naranja zorro','Negro noche','Gris mate','Blanco hielo'] },
     kartal: { desc: 'Capó largo y V8 rugiente', paints: ['Azul carreras','Rojo sangre','Negro mate','Bicolor crema/verde'] },
     volt: { desc: 'GT eléctrico, silencioso y muy rápido', paints: ['Azul plasma','Grafito','Blanco mate','Morado aurora'] },
-    kuzgun: { desc: 'Superdeportivo con lanzador de energía guiado', paints: ['Negro cuervo','Rojo neón','Titanio mate','Bicolor blanco/negro'] },
+    kuzgun: { desc: 'Superdeportivo con ametralladora automática 360°', paints: ['Negro cuervo','Rojo neón','Titanio mate','Bicolor blanco/negro'] },
+    golge: { name: 'Sombra R', desc: 'Regalo del pasaje secreto: superbike con ametralladora automática 360°', paints: ['Guardia nocturna', 'Rosa neón', 'Verde tóxico', 'Fantasma plateado'] },
   },
+  meteor: { warn: '¡Sal del círculo rojo: viene un meteorito!' },
+  secret: { guest: 'Ahora también eres invitado de {name}', found: '¡Encontraste la zona secreta! Bienvenido', gift: 'Regalo: ¡la moto {name} ya está en tu garaje!' },
 };

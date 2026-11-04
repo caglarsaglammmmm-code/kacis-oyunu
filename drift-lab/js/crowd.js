@@ -475,6 +475,16 @@ export class Crowd {
     }
   }
 
+  // Araçtan kaçan yaya kenara sıçrar; yalnız boş zemine (binanın ya da anıt alanının içine itilmez)
+  nudge(p, dx, dy, dist) {
+    const d = Math.hypot(dx, dy) || 1;
+    const w = this.g.world;
+    for (const k of [1, 0.6, 0.3]) {
+      const x = p.x + (dx / d) * dist * k; const y = p.y + (dy / d) * dist * k;
+      if (!w.blockedAt(x, y) && !w.inMemorial(x, y, 12)) { p.x = x; p.y = y; return; }
+    }
+  }
+
   checkHit(p, b, isPlayer) {
     if (isPlayer && this.g.cheat) return false;
     const r = b.len * 0.44 + 7;
@@ -484,9 +494,7 @@ export class Crowd {
     const speed = Math.hypot(b.vx, b.vy);
     // Çocuk, yaşlı, bebek arabası ve tekerlekli sandalye: araç asla değmez, kenara çekilirler
     if (p.info.safe) {
-      const d = Math.hypot(dx, dy) || 1;
-      p.x += (dx / d) * 34;
-      p.y += (dy / d) * 34;
+      this.nudge(p, dx, dy, 34);
       p.a = Math.atan2(dy, dx);
       p.state = PED_RUN;
       p.turnT = 1.4;
@@ -494,9 +502,7 @@ export class Crowd {
     }
     // Kedi ezilmez: son anda sıçrar
     if (p.info.dodge) {
-      const d = Math.hypot(dx, dy) || 1;
-      p.x += (dx / d) * 34;
-      p.y += (dy / d) * 34;
+      this.nudge(p, dx, dy, 34);
       p.a = Math.atan2(dy, dx);
       p.state = PED_RUN;
       p.turnT = 1.4;
@@ -518,7 +524,7 @@ export class Crowd {
     return true;
   }
 
-  blast(x, y, R) {
+  blast(x, y, R, shake = 22) {
     for (const p of this.peds) {
       if (!p.alive || p.state === PED_FLY || p.info.dodge || p.info.safe) continue;
       if (Math.hypot(p.x - x, p.y - y) < R * 0.6) this.launch(p, { x, y, vx: 0, vy: 0 }, true);
@@ -528,7 +534,7 @@ export class Crowd {
       if (!n.alive) continue;
       if (Math.hypot(n.x - x, n.y - y) < R) this.explodeNpc(n);
     }
-    g.cam.shake = Math.max(g.cam.shake, 22);
+    g.cam.shake = Math.max(g.cam.shake, shake);
   }
 
   explodeNpc(n) {

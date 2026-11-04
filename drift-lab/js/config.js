@@ -17,9 +17,9 @@ export const BUILD = {
 
 export const CONFIG = {
   name: NAMES.oyun,
-  version: '20.0.0',
+  version: '21.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v20.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v21.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -28,7 +28,7 @@ export const CONFIG = {
 
   // Geliştirici kısayolları. Adres çubuğundan da verilebilir: ?t=280&god=1
   dev: {
-    startTime: 0, // Oyun bu saniyeden başlar (ör. 280 = tanklar)
+    startTime: 0, // Oyun bu saniyeden başlar (ör. 225 = uzaylılar, 300 = tanklar, 380 = meteor)
     godMode: false, // Ölümsüzlük. Ayarlarda sürüm yazısına 7 kez dokununca da açılır
   },
 
@@ -67,6 +67,9 @@ export const CONFIG = {
       { id: 'kule', ring: [4, 8] }, { id: 'kulturpark', ring: [4, 9] }, { id: 'ted', ring: [5, 10] },
       { id: 'gundogdu', ring: [5, 10] }, { id: 'meram', ring: [6, 11] },
       { id: 'anit', ring: [2, 4] }, // Cumhuriyet Meydanı ve anıt (CONFIG.memorial, js/memorial.js)
+      // İki stadyum (CONFIG.stadiums, js/stadium.js). apart: diğerinden en az bu kadar chunk uzakta
+      { id: 'yozgat', ring: [3, 6] }, { id: 'konyastad', ring: [6, 10], apart: ['yozgat', 5] },
+      { id: 'gecit', ring: [11, 14] }, // Ücra köşedeki terk edilmiş depo alanı (CONFIG.secret)
     ],
     // Yüksek özel yapıların yükseklik payı (sıradan binalar en çok tall.height[1])
     landmarkHeight: { kolej: 0.46, kule: 0.95 },
@@ -166,7 +169,7 @@ export const CONFIG = {
     { id: 'tilki', paints: [{ name: 'Tilki Turuncusu', color: '#ff6a1a', finish: 'gloss', accent: '#111318' }, { name: 'Gece Siyahı', color: '#111318', finish: 'gloss', accent: '#ff6a1a' }, { name: 'Mat Gri', color: '#5a6068', finish: 'matte', accent: '#ffd23f' }, { name: 'Buz Beyazı', color: '#eef3f8', finish: 'pearl', accent: '#2b6fd6' }], finish: 'gloss', name: NAMES.arabalar.tilki, cost: 2400, desc: 'Hafif, oynak drift coupe', shape: 'tilki', maxSpeed: 572, accel: 720, turnRate: 3.72, grip: 5.0, driftGrip: 0.68, durability: 1.66, mass: 1.05, len: 46, wid: 24, color: '#ff6a1a', accent: '#111318', engine: { kind: 'turbo', cyl: 4, idle: 1000, red: 8200, gears: 6, gain: 1.05 } },
     { id: 'kartal', paints: [{ name: 'Yarış Mavisi', color: '#1f5fbf', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Kan Kırmızı', color: '#a3121f', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Mat Siyah', color: '#16181c', finish: 'matte', accent: '#ffd23f' }, { name: 'Çift Ton Krem-Yeşil', color: '#e8dcbc', finish: 'gloss', roof: '#2f5a3a' }], finish: 'gloss', name: NAMES.arabalar.kartal, cost: 3200, desc: 'Uzun kaput, gürleyen V8', shape: 'kartal', maxSpeed: 586, accel: 760, turnRate: 3.6, grip: 5.05, driftGrip: 0.66, durability: 1.74, mass: 1.35, len: 52, wid: 26, color: '#1f5fbf', accent: '#f4f6f8', engine: { kind: 'v8', cyl: 8, idle: 560, red: 5400, gears: 4, gain: 1.25 } },
     { id: 'volt', paints: [{ name: 'Plazma Mavi', color: '#1fb8e8', finish: 'metal', accent: '#0c0e12' }, { name: 'Grafit', color: '#2e333b', finish: 'metal', accent: '#1fb8e8' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte', accent: '#1fb8e8' }, { name: 'Aurora Mor', color: '#6a3cd9', finish: 'pearl', accent: '#9fe8ff' }], finish: 'metal', name: NAMES.arabalar.volt, cost: 4500, desc: 'Sessiz ama çok hızlı elektrikli GT', shape: 'volt', maxSpeed: 600, accel: 860, turnRate: 3.78, grip: 5.15, driftGrip: 0.63, durability: 1.82, mass: 1.4, len: 52, wid: 26, color: '#1fb8e8', accent: '#0c0e12', engine: { kind: 'ev', cyl: 8, idle: 0, red: 26000, gears: 1, gain: 0.85 } },
-    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, desc: 'Güdümlü enerji toplu süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 } },
+    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, desc: '360° taramalı silahlı süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 } },
   ],
 
   damage: {
@@ -195,16 +198,17 @@ export const CONFIG = {
     dyingTime: 1.7, // Patlamadan skor ekranına geçiş
   },
 
+  // AŞAMA SIRASI: polis -> SWAT (swatAt) -> ağır takviye (advancedAt) -> uzaylılar (aliensAt) -> tanklar (tanksAt) -> meteor (meteor.at)
   difficulty: {
     swatAt: 50,
     advancedAt: 200,
-    tanksAt: 280,
-    aliensAt: 225, // 200-250 sn arası: uzaylı işgali başlar. Oyun burada gerçekten zorlaşır
+    tanksAt: 300,
+    aliensAt: 225, // Uzaylı arabaları gelir (CONFIG.aliens)
     firstSpawnAt: 5,
     // [saniye, değer] noktaları arasında doğrusal artar, yani her saniye biraz zorlaşır.
     // Polis sayısı, hızı ve davranışları aşağıdaki pursuit bölümündedir
     hpCurve: [[0, 1], [50, 1], [200, 1.9], [280, 2.3], [600, 3.5]],
-    powerCurve: [[0, 0.65], [30, 0.8], [50, 0.9], [200, 1.25], [280, 1.4], [600, 1.8]],
+    powerCurve: [[0, 0.65], [30, 0.8], [50, 0.9], [200, 1.25], [300, 1.32], [600, 1.55]], // Geç aşamada yumuşak: tank ve meteor zaten zorlaştırır
     maxActive: 24, // Mutlak üst sınır (barikat ve tank dahil). Cihaz sınırı quality.js ve pursuit.phoneCap
     swatShare: [[50, 0.15], [200, 0.3], [280, 0.25]],
     motoFrom: 15,
@@ -212,8 +216,8 @@ export const CONFIG = {
     fastFrom: 25,
     fastShare: [[25, 0.12], [50, 0.2], [200, 0.22]],
     advancedShare: [[200, 0.3], [280, 0.5]],
-    tankCount: [[280, 1], [340, 2], [420, 3], [600, 4]],
-    tankInterval: 22,
+    tankCount: [[300, 1], [380, 2], [500, 3]], // Aynı anda en çok tank: yavaş ama çok güçlü, kaçılabilir
+    tankInterval: 26,
   },
 
   // ZORLUK EĞRİSİ: polis baskısının tüm ayarları burada. [saniye, değer] noktaları arası doğrusaldır.
@@ -221,7 +225,7 @@ export const CONFIG = {
   pursuit: {
     countMul: 1, // 0.7 kolay, 1 normal, 1.3 zor
     speedMul: 1,
-    policeCurve: [[0, 1], [15, 2], [30, 3], [60, 7], [120, 12], [180, 16], [240, 20], [300, 24]],
+    policeCurve: [[0, 1], [15, 2], [30, 3], [60, 7], [120, 12], [180, 16], [240, 20], [300, 24], [380, 20]], // Meteor aşamasında baskıyı meteorlar kurar
     spawnCurve: [[0, 6], [30, 4.5], [60, 2.8], [120, 1.8], [200, 1.2], [280, 0.9], [420, 0.7]],
     speedCurve: [[0, 0.93], [60, 0.97], [120, 1], [240, 1.04], [360, 1.07]],
     speedRatioMax: 0.97, // Polis son hızı oyuncu hızının bu oranını geçemez: düz yolda kaçılır
@@ -233,7 +237,7 @@ export const CONFIG = {
     // Arananlık: oyuncunun yaptıkları süreye saniye olarak eklenir, durulunca söner
     heat: { kill: 5, nearMiss: 1, prop: 0.2, max: 60, decay: 0.3, from: 45 }, // from: bu saniyeden önce etkisiz, başlangıç kolay kalır
     // Adalet: oyuncunun çevresine aynı anda bu kadar polis girer, fazlası geride bekler
-    closeCurve: [[0, 2], [120, 3], [240, 4], [360, 5]],
+    closeCurve: [[0, 2], [120, 3], [240, 4]],
     closeR: 260,
     frontMax: 2, // Önünde aynı anda en çok bu kadar polis yaklaşır
     frontR: 360,
@@ -281,19 +285,23 @@ export const CONFIG = {
   },
 
   // On ayrı polis sireni ve iki uzaylı sesi. Her araç o an boşta olan sireni seçer
-  sirens: ['wail', 'yelp', 'hilo', 'chirp', 'euro', 'rumble', 'horn', 'bip', 'pulse', 'warble', 'ufo', 'zap'],
+  sirens: ['wail', 'yelp', 'hilo', 'chirp', 'euro', 'rumble', 'horn', 'bip', 'pulse', 'warble', 'warp', 'zap'],
 
-  // Uzaylılar: bu aşamada oyuncudan HIZLIDIR, kaçmak zordur. Eşikler ve güç burada
+  // UZAYLI ARABALARI (çizgi film tarzı, uydurma). Güç sırası: polis < SWAT < uzaylı < tank (hp, ram, mass).
+  // Hepsi oyuncudan YAVAŞTIR (speed < 1, pursuit.speedRatioMax ile de sınırlı): düz yolda kaçılır.
+  // intro: "UZAYLILAR GELDİ!" yazısının süresi, shield: geçişte oyuncunun hasar almadığı süre (sn).
+  // Geçişte wave kadar uzaylı ekran kenarına (edge: ekran yarı boyutuna oran) her yönden aynı anda ışınlanır; hiçbiri
+  // oyuncuya safeR'den yakın doğmaz (ilk saniyelerde yetişemez). wake: belirdikten sonra yerinde bekleme (ışınlanma).
+  // cap: aynı anda en çok uzaylı [saniye, sayı]; phoneCap / desktopCap cihaz tavanı. spawnEvery: eksilen yenisi
   aliens: {
-    ufoCount: [[225, 1], [260, 2], [320, 3], [420, 4]], // [saniye, aynı anda en çok]
-    roverCount: [[225, 2], [250, 4], [300, 6], [420, 9]],
-    spawnEvery: 4.5,
-    ufo: { hp: 240, mass: 9, speed: 1.06, accel: 760, turnRate: 6, grip: 20, driftGrip: 20, len: 74, wid: 74, ram: 0, smart: 1, siren: 'ufo' },
-    rover: { hp: 110, mass: 1.7, speed: 1.02, accel: 860, turnRate: 4.6, grip: 13, driftGrip: 9, len: 46, wid: 28, ram: 0.75, smart: 1, siren: 'zap' },
-    beamRange: 105, // Işın dairesi
-    beamDps: 6, // Işın altında saniyede hasar
-    beamPull: 300, // Oyuncuyu merkeze çekme
-    beamSlow: 0.55, // Işın altında hız kaybı (saniyede oran)
+    intro: 3, shield: 3, wave: 6, safeR: 420, edge: 0.95, wake: 1.2,
+    cap: [[225, 6], [270, 7], [300, 5], [380, 4]], phoneCap: 8, desktopCap: 10, // Tanklar gelince işgal seyrelir
+    spawnEvery: 3.2,
+    types: {
+      dart: { weight: 1.2, hp: 180, mass: 1.8, speed: 0.95, accel: 700, turnRate: 3.9, grip: 11, driftGrip: 6, len: 50, wid: 26, ram: 1.1, smart: 0.9, siren: 'zap', glow: '#39ff9c', body: '#5a3d9a' },
+      blob: { weight: 1, hp: 230, mass: 2.6, speed: 0.9, accel: 620, turnRate: 3.3, grip: 10, driftGrip: 6, len: 54, wid: 34, ram: 1.3, smart: 0.85, siren: 'warp', glow: '#ff4fd8', body: '#1f8a6a' },
+      crab: { weight: 0.7, hp: 320, mass: 3.8, speed: 0.85, accel: 520, turnRate: 2.7, grip: 10, driftGrip: 7, len: 62, wid: 40, ram: 1.55, smart: 0.75, siren: 'warp', glow: '#ffd23f', body: '#7a2a52' },
+    },
   },
 
   // Oyuncu aracının altındaki ışık: NPC'lerden ayrılır
@@ -403,15 +411,20 @@ export const CONFIG = {
     ledAlpha: 0.5, ledNight: 0.45, // Gündüz ve gece ek parlaklığı
   },
 
-  // GÜDÜMLÜ ENERJİ TOPU (yalnız weapon: true olan araba). Cephane sınırsız, ateş otomatik.
-  // fireEvery (SILAH_ATES_ARALIGI): iki atış arası (sn). Önündeki konide hedef yoksa atmaz; hedef çıkınca
-  // süre dolmuşsa hemen atar. Boşluk tuşu da yalnız süre dolmuşsa atar, aralığı kısaltmaz.
-  // damage (SILAH_HASAR): her isabetin sabit hasarı. hp: oyunun başındaki silah canı (polis türüne göre).
-  // armor: zırhlı araçlara giden hasarın katı (SWAT ve tank bu silahtan az etkilenir).
-  // Gereken isabet = tavan(hp / (damage * armor)): normal polis 100/22 = 5, SWAT 300/(22*0,7) = 20, tank 31.
-  // maxMissiles: aynı anda en çok mermi, range/cone: kilit menzili ve önde yarım koni açısı (radyan),
-  // turn: güdüm dönüş hızı, life: ömür (sn), lockEvery: hedef arama sıklığı (kare)
-  weapon: { fireEvery: 3.0, damage: 22, hp: { car: 100, fast: 100, moto: 80, advanced: 110, swat: 300, tank: 400, rover: 150, ufo: 250 }, armor: { swat: 0.7, tank: 0.6 }, maxMissiles: 3, speed: 760, turn: 5.5, life: 2.4, range: 620, cone: 0.62, hitR: 30, lockEvery: 6 },
+  // 360° OTOMATİK TARAMALI SİLAH (weapon: true olan araçlar: 42-66 arabası ve gizli motosiklet; js/gun.js ortak).
+  // Araç hangi yöne bakarsa baksın EKRANDA GÖRÜNEN düşmanlara ateş eder; ekran dışına ateş etmez. Düğme yok, cephane sınırsız.
+  // rate: saniyede mermi (5-10 arası). damage: her merminin sabit hasarı. hp: oyunun başındaki silah canı (tür başına).
+  // Gereken mermi = tavan(hp / damage): polis 22, hızlı polis 22, motor 20, gelişmiş 30, SWAT 55, uzaylı 75/80/88, tank 120.
+  // Yeni çıkanların canı zamanla artar (copHpGrowth), yani bu sayılar en azdır.
+  // speed: mermi hızı, life: ömür (sn), inset: hedefin ekran kenarından bu kadar içeride olması gerekir,
+  // maxBullets: havuz, maxTracers: aynı anda çizilen iz, hitR: isabet payı.
+  // Hedef: önce tehlikeli ve yakın olana ama bekleyen her hedefin önceliği zamanla artar (wait), takılıp kalmaz
+  weapon: {
+    rate: 7, damage: 10, speed: 1500, life: 0.75, inset: 8, maxBullets: 24, maxTracers: 18, hitR: 10, spread: 0.035,
+    hp: { car: 220, fast: 220, moto: 200, advanced: 300, swat: 550, dart: 750, blob: 800, crab: 880, tank: 1200 },
+    danger: { car: 1, fast: 1.1, moto: 0.9, advanced: 1.3, swat: 1.5, dart: 1.7, blob: 1.8, crab: 1.9, tank: 2.2 },
+    wait: 3.2, near: 900, maxSparks: 3,
+  },
 
   // ZAMANLA ARTAN POLİS CANI (silah canı, bütün arabalarda). Yeni çıkan polisin canı = hp * min(max, perMin ^ dakika).
   // Sahadaki polisler değişmez. %12 / dk: 2. dk 1,25x, 5. dk 1,76x, ~9,7. dk'dan sonra 3x tavan
@@ -432,6 +445,41 @@ export const CONFIG = {
     art: { hiScale: 1.6, loScale: 0.5, hiNear: 2000, hiFree: 3600, loFree: 5200, hiMinPx: 0.9 },
     flag: { slices: 9, wave: 2.4, amp: 0.09 },
   },
+
+  // KORUNAN ALANLAR: meteor, tank mermisi, silah mermisi, barikat ve doğma bu kutuların (margin kadar genişletilmiş)
+  // içine giremez. Anıt (memorial.rect), gizli geçit (secret.ramp) ve iki stadyum (stadiums.*.rect)
+  protect: { memorial: 320, secret: 360, stadium: 170, bullet: 0 },
+
+  // METEOR YAĞMURU (tanklardan sonra). at: başlangıç (sn). warn: düşmeden önceki uyarı süresi, ASLA 3'ün altına inmez.
+  // radius: çarpma dairesi (içindeki oyuncu ölür, dışındaki zarar görmez), fall: uyarının son anlarında gökten düşüş.
+  // every: iki dalga arası (sn), perWave: dalgadaki meteor sayısı; ikisi de zamanla artar. max: aynı anda en çok meteor.
+  // minR / maxR: oyuncuya uzaklık bandı (hemen altına düşmez), lead: gidiş yönüne bakış (sn), aimShare: önüne düşen oranı.
+  // tankDamage: tankın aldığı hasar, shake: kamera sarsıntısı, sparks / dust: parçacık sayısı (sınırlı)
+  meteor: {
+    at: 380, warn: 3, radius: 120, fall: 0.55,
+    every: [[380, 4.6], [460, 3.6], [560, 2.8], [700, 2.1]],
+    perWave: [[380, 1], [450, 2], [540, 3], [680, 4]],
+    max: 7, minR: 230, maxR: 760, lead: 1.1, aimShare: 0.45,
+    tankDamage: 450, shake: 11, sparks: 14, dust: 12, crater: 70,
+  },
+
+  // GİZLİ GEÇİT: ücra köşedeki (landmark 'gecit') terk edilmiş depo alanının güneydoğu köşesinde rampa.
+  // ramp: chunk içindeki karo kutusu [x0, y0, x1, y1]. Girince bodrum sahnesi (scene sn), sonra oyuna dönülür.
+  // minSpeed: rampaya bu hızla girilince tetiklenir, shield: dönüşte hasar almama süresi
+  secret: { ramp: [27, 27, 30, 30], scene: 3.2, slide: 0.9, minSpeed: 30, shield: 3 },
+
+  // İKİ STADYUM (js/stadium.js çizer). rect: chunk içindeki karo kutusu. Yıkılmaz, katı, polis ve trafik dolanır.
+  // Adlar isim tablosunda (NAMES.stadyum). art: önbellekli çizim ölçekleri, fans: taraftar siluetleri bu yakında
+  stadiums: {
+    yozgat: { rect: [11, 9, 23, 20], cap: 15000 },
+    konya: { rect: [6, 6, 28, 26], cap: 42000 },
+    art: { hiScale: 1.25, loScale: 0.32, hiNear: 1900, hiFree: 3600, loFree: 6000 },
+    fans: 900, flagWave: 2.2,
+  },
+
+  // GİZLİ MOTOSİKLET: satılmaz, galeride, dükkânda ve kod bölümünde görünmez. Yalnız gizli geçidi bulan oyuncunun
+  // garajında belirir (storage.secret). Silahı 42-66 arabasıyla aynıdır (weapon: true, js/gun.js)
+  secretCar: { id: 'golge', secret: true, weapon: true, paints: [{ name: 'Gece Nöbeti', color: '#111321', finish: 'gloss', accent: '#21e6ff' }, { name: 'Neon Pembe', color: '#1a0f1f', finish: 'gloss', accent: '#ff2fa0' }, { name: 'Zehir Yeşili', color: '#0f1a14', finish: 'matte', accent: '#39ff7a' }, { name: 'Gümüş Hayalet', color: '#c9d1dc', finish: 'metal', accent: '#7a2cff' }], finish: 'gloss', name: 'Gölge R', cost: 0, desc: 'Gizli geçidin hediyesi', shape: 'golge', maxSpeed: 650, accel: 1000, turnRate: 4.1, grip: 5.4, driftGrip: 0.9, durability: 1.5, mass: 0.8, len: 38, wid: 16, color: '#111321', accent: '#21e6ff', engine: { kind: 'beast', cyl: 2, idle: 950, red: 11500, gears: 6, gain: 1.75 } },
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
   // Yeni kod eklemek için satır eklenir. car: açılan araba
@@ -567,7 +615,7 @@ export const CONFIG = {
 // Hız çarpanlarını uygula: yukarıdaki sayılar temel değerdir, ayar speedScale üzerinden yapılır
 {
   const S = CONFIG.speedScale;
-  for (const c of CONFIG.cars) c.maxSpeed = Math.round(c.maxSpeed * S.player);
+  for (const c of [...CONFIG.cars, CONFIG.secretCar]) c.maxSpeed = Math.round(c.maxSpeed * S.player);
   for (const t of Object.values(CONFIG.npc.types)) t.cruise = Math.round(t.cruise * S.npc);
   const H = CONFIG.highwayTraffic;
   H.speed = H.speed.map((v) => Math.round(v * S.highway));
@@ -577,3 +625,8 @@ export const CONFIG = {
 
 // Yıldız seviyesi: başlangıçta 1, her eşikte artar
 export const MAX_STARS = 4;
+
+// Araç bul: satılık arabalar ve gizli motosiklet
+export function carById(id) {
+  return CONFIG.cars.find((c) => c.id === id) || (CONFIG.secretCar.id === id ? CONFIG.secretCar : null);
+}

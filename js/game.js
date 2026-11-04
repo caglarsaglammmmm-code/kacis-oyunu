@@ -6,6 +6,8 @@ import { Effects, FX } from './effects.js';
 import { FlowField, driveCop, planBarricade, newPlan } from './police.js';
 import { Crowd } from './crowd.js';
 import { tx } from './i18n/index.js';
+import { AutoGun, gunHp } from './gun.js';
+import { MeteorStorm } from './meteor.js';
 
 const D = CONFIG.difficulty;
 const DMG = CONFIG.damage;
@@ -19,8 +21,18 @@ const PU = CONFIG.pursuit;
 const ESC = CONFIG.escape;
 const WPN = CONFIG.weapon;
 const HPG = CONFIG.copHpGrowth;
+const SEC = CONFIG.secret;
 // Oyun dakikasına göre yeni polisin silah canı katı: üstel artış, tavanlı
 export function copHpMul(time) { return Math.min(HPG.max, HPG.perMin ** (Math.max(0, time) / 60)); }
+// Uzaylı türü ağırlığa göre
+const ALIEN_TYPES = Object.keys(AL.types);
+export function pickAlien(r) {
+  const total = ALIEN_TYPES.reduce((a, k) => a + AL.types[k].weight, 0);
+  let x = r * total;
+  for (const k of ALIEN_TYPES) { x -= AL.types[k].weight; if (x < 0) return k; }
+  return ALIEN_TYPES[0];
+}
+export const isAlien = (type) => !!AL.types[type];
 const WX = CONFIG.weather;
 const MEM = CONFIG.memorial;
 
@@ -70,8 +82,7 @@ export function difficultyAt(t, out = {}, heat = 0) {
   out.fastShare = t >= D.fastFrom ? interp(D.fastShare, t) : 0;
   out.tanks = t >= D.tanksAt ? Math.round(interp(D.tankCount, t)) : 0;
   out.barricadeEvery = t >= BAR.from ? interp(PU.barricadeCurve, h) : Infinity;
-  out.ufos = t >= D.aliensAt ? Math.round(interp(AL.ufoCount, t)) : 0;
-  out.rovers = t >= D.aliensAt ? Math.round(interp(AL.roverCount, t)) : 0;
+  out.aliens = t >= D.aliensAt ? Math.round(interp(AL.cap, t)) : 0;
   return out;
 }
 
@@ -143,10 +154,11 @@ export class Game {
     this.flankSide = 1;
     this.shots = [];
     for (let i = 0; i < 8; i++) this.shots.push({ x: 0, y: 0, t: 0, alive: false });
-    // Güdümlü mermi havuzu: oyun sırasında bellek ayrılmaz. tx/ty kısa iz
-    this.missiles = [];
-    for (let i = 0; i < WPN.maxMissiles; i++) this.missiles.push({ alive: false, x: 0, y: 0, vx: 0, vy: 0, t: 0, target: null, tx: new Float32Array(6), ty: new Float32Array(6), ti: 0 });
+    // 360° taramalı silah (weapon: true olan araçlar) ve meteor yağmuru: havuzlu, oyun sırasında bellek ayrılmaz
+    this.gun = new AutoGun();
     this.weapon = null;
+    this.meteors = new MeteorStorm();
+    this.alienLimit = AL.desktopCap; // Dokunmatikte main.js telefon tavanını verir
     // Hava: tür, yoğunluk (0-1, yumuşak geçiş) ve zemin tutuşları (oyuncu, polis). Bellek ayrılmaz
     this.weather = 'sunny';
     this.weatherSetting = 'random';
@@ -227,13 +239,18 @@ export class Game {
     this.sirenClosing = 0;
     this.alienT = 0;
     this.aliensOn = startTime >= D.aliensAt;
+    this.shieldT = 0; // Uzaylı geçişi ve gizli geçit dönüşü: hasar yok, araba yanıp söner
+    this.secretT = 0;
+    this.secretZ = null;
+    this.secretSeen = false;
     this.sinkT = 0;
     this.bubbleT = 0;
     this.cause = '';
     while (this.cops.length) this.copPool.push(this.cops.pop());
     for (const s of this.shots) s.alive = false;
-    for (const m of this.missiles) m.alive = false;
+    this.gun.reset();
     this.weapon = null;
+    this.meteors.reset();
     for (const s of this.spikes) s.alive = false;
     this.fx.clear();
     this.crowd.clear();
@@ -253,7 +270,7 @@ export class Game {
     this.god = god;
     if (!keepWorld) this.world.reset(seed);
     this.resetRun(startTime);
-    this.weapon = carSpec.weapon ? { cd: 0, lock: null, shots: 0 } : null;
+    this.weapon = carSpec.weapon ? this.gun : null;
     this.dayT = 0;
     dayState(0, this.daylight);
     resetBody(this.player, 100, 300, Math.PI / 2, carSpec);
@@ -351,6 +368,7 @@ export class Game {
     else if (this.state === 'play') this.tickPlay(dt, steer, reverse);
     else if (this.state === 'dying') this.tickDying(dt);
     else if (this.state === 'sinking') this.tickSinking(dt);
+    else if (this.state === 'secret') this.tickSecret(dt);
     this.fx.update(dt);
     this.updateCamera(dt);
   }
@@ -380,18 +398,18 @@ export class Game {
       }
       this.lastStage = this.diff.stage;
     }
-    if (!this.aliensOn && this.time >= D.aliensAt) {
-      this.aliensOn = true;
-      this.warnT = 3;
-      this.emit('aliens');
-    }
+    if (!this.aliensOn && this.time >= D.aliensAt) this.alienInvasion();
+    if (this.shieldT > 0) this.shieldT = Math.max(0, this.shieldT - dt);
 
     this.updatePlayer(dt, steer, reverse);
     if (this.state !== 'play') return;
+    if (this.checkSecret()) return;
     this.updateMemorial();
     this.updateFlow(dt);
     this.updateCops(dt);
-    if (this.weapon) this.updateWeapon(dt);
+    if (this.weapon) this.gun.update(this, dt);
+    this.meteors.update(this, dt);
+    if (this.state !== 'play') return;
     this.crowd.update(dt);
     this.director(dt);
     this.updatePowers(dt);
@@ -415,6 +433,8 @@ export class Game {
     this.updateCops(dt * 0.5);
     this.crowd.update(dt);
     this.updateShots(dt);
+    if (this.weapon) this.gun.update(this, dt);
+    this.meteors.update(this, dt);
     if (this.hitFlash > 0) this.hitFlash -= dt * 3;
     if (this.dyingT <= 0) this.finish();
   }
@@ -606,7 +626,7 @@ export class Game {
   }
 
   hurt(amount) {
-    if (this.god || this.giantT > 0 || this.cheat) return;
+    if (this.god || this.giantT > 0 || this.cheat || this.shieldT > 0) return;
     this.damage = Math.min(DMG.stages[3], this.damage + amount);
     if (amount >= 2) this.sinceHit = 0;
     if (this.burning) this.burnT = DMG.burnTime;
@@ -622,7 +642,7 @@ export class Game {
       }
       this.burnT -= dt;
       if (this.burnT > 0) {
-        if (!this.god && this.giantT <= 0 && !this.cheat) this.damage += DMG.burnRate * dt;
+        if (!this.god && this.giantT <= 0 && !this.cheat && this.shieldT <= 0) this.damage += DMG.burnRate * dt;
       } else {
         this.damage = Math.max(DMG.regenFloor, this.damage - DMG.regenRate * dt);
       }
@@ -652,6 +672,13 @@ export class Game {
     }
 
     if (this.damage >= DMG.stages[3] && !this.cheat) this.explodePlayer();
+  }
+
+  // Meteorun dairesinde kalan araba: çizgi film patlaması
+  meteorKill() {
+    if (this.state !== 'play') return;
+    this.explodePlayer();
+    this.cause = 'meteor';
   }
 
   explodePlayer() {
@@ -775,6 +802,29 @@ export class Game {
       }
     }
     return best;
+  }
+
+  // Daire içindeki sıradan binalar yıkılır (meteor). Kutsal ve korunan yapılara dokunulmaz. En çok max bina
+  crushCircle(x, y, r, max = 5) {
+    let n = 0;
+    const c0x = Math.floor((x - r) / CHUNK); const c1x = Math.floor((x + r) / CHUNK);
+    const c0y = Math.floor((y - r) / CHUNK); const c1y = Math.floor((y + r) / CHUNK);
+    for (let cy = c0y; cy <= c1y; cy++) {
+      for (let cx = c0x; cx <= c1x; cx++) {
+        const c = this.world.chunk(cx, cy);
+        for (let i = 0; i < c.rectCount && n < max; i++) {
+          const rect = c.rects[i];
+          if (!rect.alive || rect.sacred || rect.kind !== 'building') continue;
+          const qx = Math.max(rect.x, Math.min(x, rect.x + rect.w)) - x;
+          const qy = Math.max(rect.y, Math.min(y, rect.y + rect.h)) - y;
+          if (qx * qx + qy * qy > r * r) continue;
+          if (this.world.protectedAt(rect.x + rect.w / 2, rect.y + rect.h / 2, 0)) continue;
+          this.crushRect(c, rect);
+          n++;
+        }
+      }
+    }
+    return n;
   }
 
   crushRect(chunk, rect) {
@@ -913,7 +963,7 @@ export class Game {
 
   // --- Polis ---
   spawnCop(type, role, x, y, a) {
-    const spec = CONFIG.police[type] || AL[type];
+    const spec = CONFIG.police[type] || AL.types[type];
     const c = this.copPool.pop() || makeCop();
     const d = this.diff;
     resetBody(c, x, y, a, spec);
@@ -923,8 +973,8 @@ export class Game {
     c.role = role;
     c.state = 'chase';
     c.crusher = type === 'tank';
-    c.flying = type === 'ufo';
-    c.beam = 0;
+    c.alien = isAlien(type);
+    c.warpT = 0; // Uzaylı ışınlanması: belirince kısa süre yerinde
     c.sirenId = spec.siren ? this.pickSiren(spec.siren) : -1;
     c.wanderT = 0;
     c.staticBody = false;
@@ -943,10 +993,10 @@ export class Game {
     c.los = false; c.hitCd = 0; c.nearCd = 0; c.wakeT = 0;
     this.flankSide = -this.flankSide;
     c.side = this.flankSide; c.roleT = PU.roleTime; c.blockT = 0; c.hold = false; c.far = false;
-    c.mhpMax = (WPN.hp[type] || WPN.hp.car) * copHpMul(this.time); c.mhp = c.mhpMax; c.byWeapon = false;
+    c.mhpMax = gunHp(type, this.time); c.mhp = c.mhpMax; c.byWeapon = false; c.aimAt = -99;
     c.escIn = false; c.escHit = false; c.escHitAt = -99; c.escEnterT = 0; c.escAt = -99;
     c.turret = a; c.fireT = TK.fireEvery * 0.6; c.fxT = Math.random() * 3; c.hurtFlash = 0;
-    // Hiçbir araç anıt alanında doğmaz (uçanlar dahil)
+    // Hiçbir araç anıt alanında doğmaz
     if (this.world.memorialHit(c.x, c.y, c.len * 0.6 + 20, hit)) { c.x += hit.nx * hit.depth; c.y += hit.ny * hit.depth; }
     this.cops.push(c);
     return c;
@@ -959,7 +1009,7 @@ export class Game {
     const use = new Array(n).fill(0);
     for (const c of this.cops) if (c.sirenId >= 0) use[c.sirenId]++;
     const p = CONFIG.sirens.indexOf(pref);
-    if (pref === 'ufo' || pref === 'zap') return p; // Uzaylıların sesi kendine özgü
+    if (pref === 'warp' || pref === 'zap') return p; // Uzaylıların sesi kendine özgü
     const police = n - 2;
     let min = 1e9;
     for (let i = 0; i < police; i++) if (use[i] < min) min = use[i];
@@ -978,13 +1028,13 @@ export class Game {
 
   destroyCop(i, byPlayer) {
     const c = this.cops[i];
-    const size = c.type === 'tank' ? 120 : c.type === 'swat' ? 70 : c.type === 'ufo' ? 110 : 52;
+    const size = c.type === 'tank' ? 120 : c.type === 'swat' ? 70 : c.alien ? 80 : 52;
     this.fx.explosion(c.x, c.y, size);
-    this.fx.debris(c.x, c.y, c.type === 'tank' ? '#5d6b3a' : c.type === 'ufo' || c.type === 'rover' ? '#39ff9c' : '#2f4c8a', 12, 280);
+    this.fx.debris(c.x, c.y, c.type === 'tank' ? '#5d6b3a' : c.alien ? c.spec.glow : '#2f4c8a', 12, 280);
     this.fx.debris(c.x, c.y, '#f4f4f4', 6, 240);
     this.kills++;
     this.addHeat(PU.heat.kill);
-    this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.type === 'ufo' ? 6 : c.type === 'rover' ? 3 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
+    this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.alien ? 4 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
     if (Math.random() < 0.6) this.world.dropCoin(c.x, c.y);
     const near = Math.hypot(c.x - this.player.x, c.y - this.player.y) < 500;
     this.emit('copdown', near ? 1 : 0.4);
@@ -1032,7 +1082,7 @@ export class Game {
         continue;
       }
       // Uzak ve görünmeyen polis seyrek hesaplanır: adım büyür, sonuç aynı yola çıkar
-      c.far = dist > PU.farDist && !c.flying && !this.onScreen(c.x, c.y, 200);
+      c.far = dist > PU.farDist && !this.onScreen(c.x, c.y, 200);
       if (c.far && (this.tickCount + c.id) % PU.farStep !== 0) {
         if (playing) {
           if (dist < nearest) nearest = dist;
@@ -1041,14 +1091,20 @@ export class Game {
         continue;
       }
       const cdt = c.far ? dt * PU.farStep : dt;
+      // Işınlanan uzaylı belirene kadar yerinde bekler
+      if (c.warpT > 0) {
+        c.warpT -= cdt;
+        c.vx = 0; c.vy = 0; c.speed = 0;
+        if (Math.random() < 0.4 && this.onScreen(c.x, c.y, 40)) this.fx.spawn(FX.GLINT, c.x + (Math.random() - 0.5) * c.len, c.y + (Math.random() - 0.5) * c.len, 0, -40, 0.45, 6);
+        if (playing && dist < nearest) nearest = dist;
+        continue;
+      }
       driveCop(c, this, cdt);
       if (c.hitCd > 0) c.hitCd -= cdt;
       if (c.nearCd > 0) c.nearCd -= cdt;
       c.fxT += cdt;
 
-      if (c.flying) {
-        this.updateUfo(c, dt, playing);
-      } else if (c.state === 'barricade') {
+      if (c.state === 'barricade') {
         c.staticBody = true;
       } else {
         c.staticBody = false;
@@ -1072,7 +1128,7 @@ export class Game {
       if (playing) {
         // Oyuncu ile çarpışma
         // Hilede polis görünür ve kovalar ama değemez
-        if (!c.flying && dist < (c.len + p.len) * 0.75 && this.ghostT <= 0 && !this.cheat) {
+        if (dist < (c.len + p.len) * 0.75 && this.ghostT <= 0 && !this.cheat) {
           const rv = this.collideCars(p, c);
           if (rv > 0) c.escHitAt = this.runTime; // Değdi: bu geçiş kıl payı sayılmaz
           if (rv > 1) this.copContact(c, rv, i);
@@ -1091,7 +1147,7 @@ export class Game {
             this.emit('nearmiss');
           }
         }
-        if (!c.flying) this.checkEscape(c, dist);
+        this.checkEscape(c, dist);
         if (dist < nearest) {
           nearest = dist;
           closing = (dx * (c.vx - p.vx) + dy * (c.vy - p.vy)) / (dist || 1);
@@ -1107,7 +1163,7 @@ export class Game {
       for (let j = i + 1; j < cops.length; j++) {
         const a = cops[i];
         const b = cops[j];
-        if (a.flying || b.flying || (a.far && b.far)) continue;
+        if ((a.far && b.far) || a.warpT > 0 || b.warpT > 0) continue;
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const r = (a.len + b.len) * 0.6;
@@ -1131,100 +1187,24 @@ export class Game {
     }
   }
 
-  // --- Güdümlü enerji topu ---
-  // Atış: bekleme süresi dolmuşsa burundan çıkar, varsa kilitli polisi izler. Cephane sınırsız. true: atıldı
-  fire() {
-    const w = this.weapon;
-    if (!w || this.state !== 'play' || w.cd > 0) return false;
-    const m = this.missiles.find((k) => !k.alive);
-    if (!m) return false;
-    const p = this.player;
-    const ca = Math.cos(p.a); const sa = Math.sin(p.a);
-    m.alive = true; m.t = 0; m.ti = 0;
-    m.x = p.x + ca * p.len * 0.55; m.y = p.y + sa * p.len * 0.55;
-    m.vx = ca * WPN.speed + p.vx * 0.3; m.vy = sa * WPN.speed + p.vy * 0.3;
-    m.target = w.lock;
-    for (let i = 0; i < m.tx.length; i++) { m.tx[i] = m.x; m.ty[i] = m.y; }
-    w.shots++;
-    w.cd += WPN.fireEvery; // Taşan süre korunur: atışlar eşit aralıklı
-    if (w.cd <= 0) w.cd = WPN.fireEvery;
-    this.emit('fire');
-    return true;
-  }
-
-  // Önündeki konide en yakın polis: hedef işareti bunun üstünde
-  findLock() {
-    const p = this.player;
-    const ca = Math.cos(p.a); const sa = Math.sin(p.a);
-    const cosCone = Math.cos(WPN.cone);
-    let best = null;
-    let bd = WPN.range;
-    for (const c of this.cops) {
-      const dx = c.x - p.x; const dy = c.y - p.y;
-      const d = Math.hypot(dx, dy);
-      if (d >= bd || d < 1) continue;
-      if ((dx * ca + dy * sa) / d < cosCone) continue;
-      best = c; bd = d;
-    }
-    return best;
-  }
-
-  updateWeapon(dt) {
-    const w = this.weapon;
-    if (w.cd > 0) w.cd -= dt;
-    // Hazırken her kare hedef aranır: hedef çıkınca hemen atılır. Beklerken seyrek aranır
-    if (w.cd <= 0 || this.tickCount % WPN.lockEvery === 0) w.lock = this.findLock();
-    else if (w.lock && !this.cops.includes(w.lock)) w.lock = null;
-    if (w.cd <= 0) {
-      if (w.lock && this.state === 'play') this.fire();
-      else w.cd = Math.max(w.cd, -dt); // Hedef yokken beklenen süre birikmez
-    }
-    for (const m of this.missiles) if (m.alive) this.stepMissile(m, dt);
-  }
-
-  stepMissile(m, dt) {
-    m.t += dt;
-    if (m.target && !this.cops.includes(m.target)) m.target = null; // Hedef yok olduysa düz gider
-    if (m.target) {
-      const want = Math.atan2(m.target.y - m.y, m.target.x - m.x);
-      const now = Math.atan2(m.vy, m.vx);
-      let diff = want - now;
-      while (diff > Math.PI) diff -= Math.PI * 2;
-      while (diff < -Math.PI) diff += Math.PI * 2;
-      const a = now + Math.max(-WPN.turn * dt, Math.min(WPN.turn * dt, diff));
-      const sp = Math.hypot(m.vx, m.vy);
-      m.vx = Math.cos(a) * sp; m.vy = Math.sin(a) * sp;
-    }
-    m.x += m.vx * dt; m.y += m.vy * dt;
-    m.ti = (m.ti + 1) % m.tx.length; m.tx[m.ti] = m.x; m.ty[m.ti] = m.y;
-    // Duvara, binaya çarpınca ya da ömrü bitince söner
-    if (m.t > WPN.life || this.world.blockedAt(m.x, m.y)) {
-      m.alive = false;
-      this.fx.burst(FX.GLINT, m.x, m.y, 6, 90, 0.3, 6);
-      return;
-    }
-    const r2 = WPN.hitR * WPN.hitR;
-    for (const c of this.cops) {
-      const dx = c.x - m.x; const dy = c.y - m.y;
-      const rr = WPN.hitR + c.wid * 0.5;
-      if (dx * dx + dy * dy > Math.max(r2, rr * rr)) continue;
-      m.alive = false;
-      this.hitCop(c, m.x, m.y);
-      return;
-    }
-  }
-
-  // Her isabet sabit hasar (zırhlıda azaltılmış). Gereken isabet = can / hasar
+  // --- 360° taramalı silah (js/gun.js): isabet ---
+  // Her mermi sabit hasar. Silah canı (mhp) biterse araç patlar; çarpışma canı (hp) da aynı oranda düşer: duman, yanıp sönme
   hitCop(c, x, y) {
-    const full = c.mhpMax || WPN.hp[c.type] || WPN.hp.car;
-    const dmg = WPN.damage * (WPN.armor[c.type] ?? 1);
-    c.mhp -= dmg;
-    c.hp = Math.min(c.hp - (c.maxHp * dmg) / full, (c.maxHp * c.mhp) / full);
+    const full = c.mhpMax || gunHp(c.type, this.time);
+    c.mhp -= WPN.damage;
+    c.hp = Math.min(c.hp - (c.maxHp * WPN.damage) / full, (c.maxHp * c.mhp) / full);
     if (c.mhp <= 0) { c.hp = -1; c.byWeapon = true; }
-    c.hurtFlash = 0.35;
-    this.fx.burst(FX.GLINT, x, y, 10, 160, 0.35, 7);
-    this.fx.burst(FX.SMOKE, x, y, 4, 60, 0.7, 12);
-    this.emit('missilehit', c.mhp <= 0 ? 1 : 0.5);
+    c.hurtFlash = 0.12;
+    return c.mhp <= 0;
+  }
+
+  gunHit(c, x, y) {
+    const dead = this.hitCop(c, x, y);
+    if (this.onScreen(x, y, 40)) {
+      this.fx.burst(FX.GLINT, x, y, WPN.maxSparks, 150, 0.22, 5);
+      if (Math.random() < 0.25) this.fx.spawn(FX.SMOKE, x, y, c.vx * 0.2, c.vy * 0.2, 0.5, 8);
+    }
+    this.emit('gunhit', dead ? 1 : 0.3);
   }
 
   // Kıl payı kaçış: polis yakın bölgeye girer, değmeden çıkarsa ödül. Ödül çıkış anında verilir
@@ -1252,7 +1232,7 @@ export class Game {
   // Yalnız polis gerçekten kovalarken, oyuncu hızla ileri giderken; hile ve görünmezlikte yok
   escapeEligible(c) {
     const p = this.player;
-    if (this.state !== 'play' || this.cheat || this.ghostT > 0 || c.flying) return false;
+    if (this.state !== 'play' || this.cheat || this.ghostT > 0 || c.warpT > 0) return false;
     if (c.state !== 'chase' && c.state !== 'block' && c.state !== 'barricade') return false;
     return p.speed >= ESC.minSpeed && p.forward > 0 && this.autoRevT <= 0;
   }
@@ -1280,7 +1260,7 @@ export class Game {
     const fy = Math.sin(p.a);
     for (const c of this.cops) {
       c.hold = false;
-      if (c.flying || c.type === 'tank' || c.state === 'barricade') continue;
+      if (c.type === 'tank' || c.state === 'barricade') continue;
       c.pd = Math.hypot(c.x - p.x, c.y - p.y);
       if (c.pd < PU.closeR) near.push(c);
     }
@@ -1288,7 +1268,7 @@ export class Game {
     for (let i = this.diff.closeMax; i < near.length; i++) near[i].hold = true;
     let front = 0;
     for (const c of this.cops) {
-      if (c.flying || c.type === 'tank' || c.state === 'barricade' || c.pd >= PU.frontR) continue;
+      if (c.type === 'tank' || c.state === 'barricade' || c.pd >= PU.frontR) continue;
       if ((c.x - p.x) * fx + (c.y - p.y) * fy < 0) continue;
       front++;
       if (front > PU.frontMax) c.hold = true;
@@ -1324,44 +1304,6 @@ export class Game {
     }
   }
 
-  // Uçan daire: binaların üstünden düz gelir, üstüne çıkınca ışınla çeker ve hasar verir
-  updateUfo(c, dt, playing) {
-    const p = this.player;
-    const dx = p.x + p.vx * 0.35 - c.x;
-    const dy = p.y + p.vy * 0.35 - c.y;
-    const d = Math.hypot(dx, dy) || 1;
-    const top = c.drive.maxSpeed;
-    const slow = this.ghostT > 0 ? 0.25 : 1;
-    const want = Math.min(top, d * 3.2) * slow;
-    const k = 1 - Math.exp(-3.4 * dt);
-    c.vx += ((dx / d) * want - c.vx) * k;
-    c.vy += ((dy / d) * want - c.vy) * k;
-    c.x += c.vx * dt;
-    c.y += c.vy * dt;
-    // Uçan araçlar anıt alanının üstünden geçmez
-    if (this.world.memorialHit(c.x, c.y, c.len * 0.6 + 20, hit)) {
-      c.x += hit.nx * hit.depth; c.y += hit.ny * hit.depth;
-      const vn = c.vx * hit.nx + c.vy * hit.ny;
-      if (vn < 0) { c.vx -= vn * hit.nx; c.vy -= vn * hit.ny; }
-    }
-    c.a += dt * 2;
-    const bx = p.x - c.x;
-    const by = p.y - c.y;
-    const bd = Math.hypot(bx, by);
-    c.beam = playing && this.ghostT <= 0 && !this.cheat && bd < AL.beamRange ? 1 : 0;
-    if (c.beam) {
-      p.vx -= (bx / (bd + 1)) * AL.beamPull * dt;
-      p.vy -= (by / (bd + 1)) * AL.beamPull * dt;
-      const keep = 1 - AL.beamSlow * dt;
-      p.vx *= keep;
-      p.vy *= keep;
-      this.hurt((AL.beamDps * dt) / this.carSpec.durability);
-      this.sinceHit = 0;
-      this.hitFlash = Math.max(this.hitFlash, 0.25);
-      if (Math.random() < 0.3) this.fx.spawn(FX.GLINT, p.x + (Math.random() - 0.5) * 60, p.y + (Math.random() - 0.5) * 60, 0, 0, 0.4, 5);
-    }
-  }
-
   // --- Yönetmen: doğma, barikat, tank ---
   countRole(role) {
     let n = 0;
@@ -1371,6 +1313,9 @@ export class Game {
 
   pickRole(r) {
     const d = this.diff;
+    // Gizli geçidin çevresinde yol kapatılmaz: yalnız kovalayan
+    const z = this.world.zone('secret');
+    if (z && Math.hypot(this.player.x - (z.x + z.w / 2), this.player.y - (z.y + z.h / 2)) < z.margin + 900) return 'chaser';
     let s = d.interceptShare;
     if (r < s) return this.countRole('interceptor') < PU.maxInterceptors ? 'interceptor' : 'chaser';
     s += d.blockShare;
@@ -1386,7 +1331,7 @@ export class Game {
     let far = minDist;
     for (let i = 0; i < this.cops.length; i++) {
       const c = this.cops[i];
-      if (c.type === 'tank' || c.flying || this.onScreen(c.x, c.y, 120)) continue;
+      if (c.type === 'tank' || this.onScreen(c.x, c.y, 120)) continue;
       const d = Math.hypot(c.x - p.x, c.y - p.y);
       if (d > far) { far = d; best = i; }
     }
@@ -1470,18 +1415,14 @@ export class Game {
       }
     }
 
-    if (d.ufos > 0) {
+    // Uzaylılar: eksilen yenisiyle, ekran dışından ve güvenli uzaklıktan gelir; sayısı tavanlı
+    if (d.aliens > 0 && this.aliensOn) {
       this.alienT -= dt;
       if (this.alienT <= 0) {
         this.alienT = AL.spawnEvery;
-        const min = this.viewRadius() + 160;
-        const heading = Math.atan2(p.vy, p.vx) + (Math.random() - 0.5) * 2.6;
-        if (this.countType('ufo') < Math.min(d.ufos, Math.ceil(this.copLimit * 0.2)) && this.makeRoom(1)) {
-          // Daire binaya takılmaz, önünden gelir
-          this.spawnCop('ufo', 'chaser', p.x + Math.cos(heading) * min, p.y + Math.sin(heading) * min, 0);
-        }
-        if (this.countType('rover') < Math.min(d.rovers, Math.ceil(this.copLimit * 0.4)) && this.makeRoom(1) && this.findSpawn(spawnPt, min, min + 300, true)) {
-          this.spawnCop('rover', Math.random() < 0.5 ? 'flanker' : 'chaser', spawnPt.x, spawnPt.y, Math.atan2(p.y - spawnPt.y, p.x - spawnPt.x));
+        const min = Math.max(AL.safeR, this.viewRadius() + AI.viewMargin);
+        if (this.countAliens() < this.alienCap() && this.makeRoom(1) && this.findSpawn(spawnPt, min, min + 420, Math.random() < 0.5)) {
+          this.spawnCop(pickAlien(Math.random()), Math.random() < 0.4 ? 'flanker' : 'chaser', spawnPt.x, spawnPt.y, Math.atan2(p.y - spawnPt.y, p.x - spawnPt.x));
         }
       }
     }
@@ -1534,6 +1475,7 @@ export class Game {
     const py = p.y + hy * dist;
     const world = this.world;
     if (world.groundAt(px, py) !== GROUND.ROAD) return false;
+    if (world.protectedAt(px, py, 260)) return false; // Gizli geçit, anıt ve stadyum önü kapatılmaz
 
     // Yol ekseni gidiş yönündedir; enine tarayıp kenarları bul
     const horizontal = Math.abs(hx) > Math.abs(hy);
@@ -1607,6 +1549,8 @@ export class Game {
     s.y = p.y + p.vy * TK.lead;
     // Top mermisi anıt alanına düşmez: hedef korunan bölümün dışına kayar
     if (this.world.memorialHit(s.x, s.y, TK.radius * 0.7, hit)) { s.x += hit.nx * hit.depth; s.y += hit.ny * hit.depth; }
+    // Gizli geçit ve stadyumlar da korunur: hedef oradaysa bu atış yapılmaz
+    if (this.world.protectedAt(s.x, s.y, TK.radius * 0.5) && !this.world.inMemorial(s.x, s.y, TK.radius)) { s.alive = false; c.fireT = 1; return; }
     const mx = c.x + Math.cos(c.turret) * 62;
     const my = c.y + Math.sin(c.turret) * 62;
     this.fx.burst(FX.FIRE, mx, my, 8, 100, 0.25, 14);
@@ -1645,6 +1589,105 @@ export class Game {
         this.crushRect(hit.chunk, hit.rect);
       }
     }
+  }
+
+  // --- Uzaylı işgali ---
+  alienCap() {
+    return Math.min(this.diff.aliens, this.alienLimit, this.copLimit);
+  }
+
+  countAliens() {
+    let n = 0;
+    for (const c of this.cops) if (c.alien) n++;
+    return n;
+  }
+
+  // Geçiş anı: büyük yazı (DOM), 3 sn koruma, ekranın her yanından aynı anda ışınlanan uzaylılar.
+  // Hiçbiri oyuncuya safeR'den yakın doğmaz ve wake süresi yerinde bekler: ilk saniyelerde yetişemez
+  alienInvasion() {
+    this.aliensOn = true;
+    this.warnT = AL.intro;
+    this.shieldT = Math.max(this.shieldT, AL.shield);
+    this.alienT = AL.spawnEvery;
+    const p = this.player;
+    const n = Math.min(AL.wave, this.alienCap());
+    const off = Math.random() * Math.PI * 2;
+    const ex = this.cam.halfW * AL.edge;
+    const ey = this.cam.halfH * AL.edge;
+    let made = 0;
+    for (let i = 0; i < n; i++) {
+      const a = off + (i / n) * Math.PI * 2;
+      const ca = Math.cos(a); const sa = Math.sin(a);
+      // Ekran kenarındaki elips, en az safeR
+      const er = 1 / Math.sqrt((ca * ca) / (ex * ex) + (sa * sa) / (ey * ey));
+      const r0 = Math.max(AL.safeR, er);
+      if (!this.makeRoom(1)) break;
+      for (let k = 0; k < 14; k++) {
+        const r = r0 + k * 34;
+        const x = this.cam.x + ca * r; const y = this.cam.y + sa * r;
+        if (Math.hypot(x - p.x, y - p.y) < AL.safeR) continue;
+        const g = this.world.groundAt(x, y);
+        if (g === GROUND.WATER || this.world.blockedAt(x, y) || this.world.protectedAt(x, y, 30, false)) continue;
+        if (this.world.circleHit(x, y, 30, hit)) continue;
+        const c = this.spawnCop(pickAlien(Math.random()), i % 3 === 2 ? 'flanker' : 'chaser', x, y, Math.atan2(p.y - y, p.x - x));
+        c.warpT = AL.wake;
+        this.fx.burst(FX.GLINT, x, y, 10, 160, 0.6, 8);
+        this.fx.wave(x, y, 90);
+        made++;
+        break;
+      }
+    }
+    this.emit('aliens', made);
+    return made;
+  }
+
+  // --- Gizli geçit: rampaya girince bodrum sahnesi, motosiklet hediyesi (kayıt main.js'te) ---
+  checkSecret() {
+    const z = this.world.zone('secret');
+    if (!z) return false;
+    const p = this.player;
+    if (p.x < z.x || p.x > z.x + z.w || p.y < z.y || p.y > z.y + z.h || p.speed < SEC.minSpeed) return false;
+    this.state = 'secret';
+    this.secretT = 0;
+    this.secretZ = z;
+    this.secretSeen = true;
+    this.secretFrom = { x: p.x, y: p.y, a: p.a };
+    this.closeMemorialCard();
+    this.emit('secret');
+    return true;
+  }
+
+  // Rampadan aşağı kayış (slide sn), sonra yeraltı garajı sahnesi; zaman ve kovalama bu sırada durur
+  tickSecret(dt) {
+    this.secretT += dt;
+    const p = this.player;
+    const z = this.secretZ;
+    const k = Math.min(1, this.secretT / SEC.slide);
+    const cx = z.x + z.w * 0.62; const cy = z.y + z.h * 0.62;
+    p.x = this.secretFrom.x + (cx - this.secretFrom.x) * k;
+    p.y = this.secretFrom.y + (cy - this.secretFrom.y) * k;
+    p.vx = 0; p.vy = 0; p.speed = 0;
+    this.world.update(p.x, p.y);
+    if (this.secretT >= SEC.scene) this.leaveSecret();
+  }
+
+  secretProgress() {
+    return this.state === 'secret' ? Math.min(1, this.secretT / SEC.slide) : 0;
+  }
+
+  // Dönüş: rampanın kuzeybatısındaki boşlukta, depoya dönük, kısa koruma. Yakındaki polis dağılmış olur
+  leaveSecret() {
+    const z = this.secretZ;
+    const p = this.player;
+    p.x = z.x - 70; p.y = z.y - 70; p.a = -Math.PI * 0.75;
+    p.vx = Math.cos(p.a) * 160; p.vy = Math.sin(p.a) * 160; p.speed = 160; p.w = 0;
+    for (let i = this.cops.length - 1; i >= 0; i--) {
+      const c = this.cops[i];
+      if (Math.hypot(c.x - p.x, c.y - p.y) < 900 && c.type !== 'tank') this.removeCop(i);
+    }
+    this.shieldT = Math.max(this.shieldT, SEC.shield);
+    this.state = 'play';
+    this.emit('secretexit');
   }
 
   // --- Özel güçler ---

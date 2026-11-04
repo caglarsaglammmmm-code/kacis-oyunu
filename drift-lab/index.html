@@ -51,6 +51,7 @@
 <div id="cheat-msg"><span></span></div>
 <div id="escape-msg" aria-live="polite"><b></b><small></small></div>
 <div id="memorial-msg" role="alert"><b></b><small></small></div>
+<div id="secret" class="secret" hidden aria-live="polite"><canvas></canvas><div class="secret-text"><b></b><small></small></div></div>
 <aside id="memorial-card" class="memorial-card" hidden lang="tr" aria-live="polite"></aside>
 
 <section id="menu" class="screen menu" hidden>
@@ -70,7 +71,7 @@
         <button id="btn-settings" class="tile t-set"><svg viewBox="0 0 24 24"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5zM19.4 13l2-1.5-2-3.4-2.3.9a7 7 0 0 0-1.7-1L15 5h-4l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 1.7 1L11 22h4l.4-2.5a7 7 0 0 0 1.7-1l2.3.9 2-3.4-2-1.5a7 7 0 0 0 0-2z" transform="translate(0 -1.5)"/></svg><span data-i18n="menu.settings">Ayarlar</span></button>
         <button id="btn-howto" class="tile t-how"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm1 14h-2v-2h2zm2-7c0 2-3 2-3 4h-2c0-3 3-3 3-4.500A1.500 1.500 0 0 0 10 9H8a4 4 0 0 1 7 1z"/></svg><span data-i18n="menu.howto">Nasıl?</span></button>
       </div>
-      <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v20.0.0/DriftLab-PlayStore.apk" rel="noopener" data-i18n="menu.apk">APK İndir</a>
+      <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v21.0.0/DriftLab-PlayStore.apk" rel="noopener" data-i18n="menu.apk">APK İndir</a>
     </nav>
   </div>
   <aside id="a2hs" class="a2hs" hidden role="dialog" aria-labelledby="a2hs-title">
@@ -126,7 +127,7 @@
       <label class="toggle"><span data-i18n="dev.god">Ölümsüzlük</span><input id="dev-god" type="checkbox"><i></i></label>
       <label class="select"><span data-i18n="dev.start">Başlangıç süresi</span>
         <select id="dev-start">
-          <option value="0" data-i18n="dev.t0">0 sn</option><option value="45" data-i18n="dev.t45">45 sn (SWAT öncesi)</option><option value="195" data-i18n="dev.t195">195 sn (takviye öncesi)</option><option value="275" data-i18n="dev.t275">275 sn (tank öncesi)</option><option value="280" data-i18n="dev.t280">280 sn (tanklar)</option>
+          <option value="0" data-i18n="dev.t0">0 sn</option><option value="45" data-i18n="dev.t45">45 sn (SWAT öncesi)</option><option value="195" data-i18n="dev.t195">195 sn (takviye öncesi)</option><option value="295" data-i18n="dev.t275">295 sn (tank öncesi)</option><option value="300" data-i18n="dev.t280">300 sn (tanklar)</option>
         </select>
       </label>
     </div>

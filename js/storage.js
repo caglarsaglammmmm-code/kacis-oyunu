@@ -1,5 +1,5 @@
 // En yüksek skor, coin, arabalar ve ayarlar localStorage'da.
-import { CONFIG } from './config.js';
+import { CONFIG, carById } from './config.js';
 import { itemOf } from './custom.js';
 
 const KEY = 'drift-lab-v1';
@@ -17,6 +17,7 @@ export function defaultSave() {
     paints: {},
     custom: {}, // araba -> { rim, led }
     unlocked: { paints: [], rims: [], leds: [] }, // satın alınan özelleştirmeler
+    secret: false, // Gizli geçit bulundu: gizli motosiklet garajda
   };
 }
 
@@ -28,10 +29,13 @@ export function sanitize(data) {
   d.bestScore = num(data.bestScore);
   d.bestTime = num(data.bestTime);
   d.coins = Math.floor(num(data.coins));
+  d.secret = data.secret === true;
   if (Array.isArray(data.owned)) {
-    const valid = data.owned.filter((id) => CONFIG.cars.some((c) => c.id === id));
+    // Gizli motosiklet yalnız geçidi bulanda geçerli
+    const valid = data.owned.filter((id) => CONFIG.cars.some((c) => c.id === id) || (d.secret && id === CONFIG.secretCar.id));
     d.owned = [...new Set([CONFIG.cars[0].id, ...valid])];
   }
+  if (d.secret && !d.owned.includes(CONFIG.secretCar.id)) d.owned.push(CONFIG.secretCar.id);
   if (d.owned.includes(data.selected)) d.selected = data.selected;
   if (data.settings) {
     d.settings.sound = data.settings.sound !== false;
@@ -50,7 +54,7 @@ export function sanitize(data) {
   }
   d.tutorial = data.tutorial === true;
   if (data.paints && typeof data.paints === 'object') {
-    for (const c of CONFIG.cars) {
+    for (const c of [...CONFIG.cars, CONFIG.secretCar]) {
       const i = data.paints[c.id];
       if (Number.isInteger(i) && i >= 0 && i < c.paints.length) d.paints[c.id] = i;
     }
@@ -63,13 +67,13 @@ export function sanitize(data) {
   }
   // Genel boya seçimi yalnız satın alınmışsa geçerli
   if (data.paints && typeof data.paints === 'object') {
-    for (const c of CONFIG.cars) {
+    for (const c of [...CONFIG.cars, CONFIG.secretCar]) {
       const i = data.paints[c.id];
       if (typeof i === 'string' && d.unlocked.paints.includes(i)) d.paints[c.id] = i;
     }
   }
   if (data.custom && typeof data.custom === 'object') {
-    for (const c of CONFIG.cars) {
+    for (const c of [...CONFIG.cars, CONFIG.secretCar]) {
       const v = data.custom[c.id];
       if (!v || typeof v !== 'object') continue;
       const ok = (kind, key, id) => itemOf(kind, id) && (itemOf(kind, id).price === 0 || d.unlocked[key].includes(id));
@@ -115,7 +119,22 @@ export class Storage {
   }
 
   selectedCar() {
-    return CONFIG.cars.find((c) => c.id === this.data.selected) || CONFIG.cars[0];
+    return carById(this.data.selected) || CONFIG.cars[0];
+  }
+
+  // Gizli geçit bulundu: motosiklet kalıcı olarak garaja girer. true: ilk kez açıldı
+  unlockSecret() {
+    const d = this.data;
+    const first = !d.secret;
+    d.secret = true;
+    if (!d.owned.includes(CONFIG.secretCar.id)) d.owned.push(CONFIG.secretCar.id);
+    this.save();
+    return first;
+  }
+
+  // Garajda gezilen araçlar: satılık arabalar; gizli motosiklet yalnız bulunduysa (bulmayanda hiçbir iz yok)
+  garageCars() {
+    return this.data.secret ? [...CONFIG.cars, CONFIG.secretCar] : CONFIG.cars;
   }
 
   // Sonucu işler, rekor bilgisini döndürür

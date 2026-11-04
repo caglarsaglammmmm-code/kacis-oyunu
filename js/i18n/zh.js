@@ -31,7 +31,7 @@ export default {
   },
   dev: {
     title: '开发者', god: '无敌', start: '开始时间',
-    t0: '0 秒', t45: '45 秒（SWAT 前）', t195: '195 秒（增援前）', t275: '275 秒（坦克前）', t280: '280 秒（坦克）',
+    t0: '0 秒', t45: '45 秒（SWAT 前）', t195: '195 秒（增援前）', t275: '295 秒（坦克前）', t280: '300 秒（坦克）',
   },
   howto: {
     title: '玩法说明',
@@ -56,7 +56,7 @@ export default {
   },
   pause: { title: '已暂停', resume: '继续', menu: '主菜单' },
   over: {
-    caught: '被抓了！', sunk: '沉没了！', record: '新纪录！',
+    caught: '被抓了！', sunk: '沉没了！', meteor: '被陨石击中！', record: '新纪录！',
     score: '得分', time: '时间', coins: '金币', kills: '击毁警车', broken: '撞毁物品', near: '惊险闪避', drift: '漂移',
     seconds: '{n} 秒', best: '最高分：{score} · 最长时间：{time}', retry: '再来一次', menu: '主菜单',
   },
@@ -66,7 +66,7 @@ export default {
     stick: ['左半屏', '按住滑动', '摇杆', '出现在手指下', '按住“倒车”', '倒车'],
     rev: '倒车',
   },
-  alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！' },
+  alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！', meteors: '流星雨来袭！' },
   escape: { toast: '+{n} 惊险脱身！', combo: '连击 +{n}' },
   code: { title: '输入代码', apply: '确定', ok: '代码已接受！{car} 已加入你的车库。', owned: '这辆车你已经有了。', invalid: '无效代码。', empty: '请先输入代码。' },
   custom: {
@@ -91,6 +91,9 @@ export default {
     tilki: { desc: '轻巧灵活的漂移跑车', paints: ['狐狸橙','夜幕黑','哑光灰','冰雪白'] },
     kartal: { desc: '长车头，轰鸣的 V8', paints: ['赛道蓝','血红','哑光黑','双色 奶白/绿'] },
     volt: { desc: '安静却极快的电动 GT', paints: ['等离子蓝','石墨灰','哑光白','极光紫'] },
-    kuzgun: { desc: '搭载追踪能量炮的超跑', paints: ['渡鸦黑','霓虹红','哑光钛','双色 白/黑'] },
+    kuzgun: { desc: '配备360°自动机枪的超跑', paints: ['渡鸦黑','霓虹红','哑光钛','双色 白/黑'] },
+    golge: { name: '暗影R', desc: '秘密通道的礼物：配备360°自动机枪的超级摩托', paints: ['夜巡', '霓虹粉', '毒绿', '银色幽灵'] },
   },
+  meteor: { warn: '快离开红圈：陨石来了！' },
+  secret: { guest: '现在你也是{name}的客人了', found: '你发现了隐藏区域！欢迎', gift: '礼物：{name} 摩托车已进入你的车库！' },
 };

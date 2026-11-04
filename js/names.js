@@ -126,5 +126,10 @@ export const NAMES = {
   "ishani": "Grand Bazaar İş Hanı",
   "otel": "Pera Palas Oteli",
   "doner": "Maydanoz Döner"
- }
+ },
+ "stadyum": {
+  "yozgat": "YOZGAT ŞEHİR STADYUMU",
+  "konya": "KONYA BÜYÜKŞEHİR STADYUMU"
+ },
+ "misafir": "Ömer Yıldız"
 };

@@ -110,6 +110,7 @@ export class World {
     this.marks = null;
     this.sites = null;
     this.memo = undefined; // Anıt alanının dünya kutusu (memorialBox)
+    this.zoneList = null; // Korunan alanlar (zones)
     this.chunks = new Map();
     this.free = [];
     this.onRelease = null; // Çizim tarafı önbelleği geri alır
@@ -132,6 +133,7 @@ export class World {
     this.marks = null;
     this.sites = null;
     this.memo = undefined;
+    this.zoneList = null;
   }
 
   release(c) {
@@ -264,6 +266,48 @@ export class World {
     const dx = Math.max(b.x - x, 0, x - b.x - b.w);
     const dy = Math.max(b.y - y, 0, y - b.y - b.h);
     return Math.hypot(dx, dy);
+  }
+
+  // Korunan alanlar: anıt, gizli geçit rampası, iki stadyum. Chunk yüklenmeden tohumdan hesaplanır.
+  // Meteor, top ve silah mermisi, barikat ve doğma bu kutulara (kind'a göre pay) giremez
+  zones() {
+    if (this.zoneList) return this.zoneList;
+    const out = [];
+    const box = (kind, m, R) => out.push({ kind, x: m.cx * CHUNK + R[0] * TILE, y: m.cy * CHUNK + R[1] * TILE, w: (R[2] - R[0]) * TILE, h: (R[3] - R[1]) * TILE, margin: CONFIG.protect[kind] });
+    for (const m of this.landmarkList()) {
+      if (m.id === 'anit') box('memorial', m, CONFIG.memorial.rect);
+      else if (m.id === 'gecit') box('secret', m, CONFIG.secret.ramp);
+      else if (m.id === 'yozgat') box('stadium', m, CONFIG.stadiums.yozgat.rect);
+      else if (m.id === 'konyastad') box('stadium', m, CONFIG.stadiums.konya.rect);
+    }
+    this.zoneList = out;
+    return out;
+  }
+
+  zone(kind) {
+    return this.zones().find((z) => z.kind === kind) || null;
+  }
+
+  // Nokta bir korunan alanın (kendi payı + extra kadar genişletilmiş) içinde mi; varsa alanı döndürür
+  protectedAt(x, y, extra = 0, useMargin = true) {
+    for (const z of this.zones()) {
+      const m = (useMargin ? z.margin : 0) + extra;
+      if (x > z.x - m && x < z.x + z.w + m && y > z.y - m && y < z.y + z.h + m) return z;
+    }
+    return null;
+  }
+
+  // Doğru parçası korunan bir kutudan (paysız) geçiyor mu: silah hedefi seçerken
+  segmentProtected(x0, y0, x1, y1) {
+    for (const z of this.zones()) {
+      if (Math.max(x0, x1) < z.x || Math.min(x0, x1) > z.x + z.w || Math.max(y0, y1) < z.y || Math.min(y0, y1) > z.y + z.h) continue;
+      // Slab yöntemi
+      let t0 = 0; let t1 = 1;
+      const dx = x1 - x0; const dy = y1 - y0;
+      const clip = (p, q) => { if (p === 0) return q >= 0; const r = q / p; if (p < 0) { if (r > t1) return false; if (r > t0) t0 = r; } else { if (r < t0) return false; if (r < t1) t1 = r; } return true; };
+      if (clip(-dx, x0 - z.x) && clip(dx, z.x + z.w - x0) && clip(-dy, y0 - z.y) && clip(dy, z.y + z.h - y0) && t0 <= t1) return true;
+    }
+    return false;
   }
 
   // Daire korunan bölüme değiyor mu; out: nx, ny, depth (dışarı itme yönü)
@@ -442,7 +486,7 @@ export class World {
     // Kayıt yeniden kullanılır: önceki binanın tabela görüntüsü kalmasın (render.js rectSign önbelleği)
     r.signImg = null;
     r.landmark = ''; r.signArt = ''; r.roofSignH = 0; r.noRoofSign = false; r.variant = '';
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false; r.memorial = false;
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false; r.memorial = false; r.stadium = "";
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -1086,6 +1130,7 @@ export class World {
         if (Math.max(Math.abs(x), Math.abs(y)) <= 1 || isHighwayRow(y)) continue;
         if (Math.abs(sis.cx - x) < 2 && Math.abs(sis.cy - y) < 2) continue;
         if (this.marks.some((o) => Math.abs(o.cx - x) < 2 && Math.abs(o.cy - y) < 2)) continue;
+        if (m.apart && this.marks.some((o) => o.id === m.apart[0] && Math.max(Math.abs(o.cx - x), Math.abs(o.cy - y)) < m.apart[1])) continue;
         this.biomeAt(x, y, out);
         if (out.biome !== 'city' && !(m.id === 'meram' && (out.biome === 'rural' || out.biome === 'forest'))) continue;
         this.marks.push({ id: m.id, cx: x, cy: y });
@@ -1200,6 +1245,12 @@ export class World {
       this.scatter(c, PROP.BUSH, 12, [GROUND.DIRT]);
     } else if (id === 'anit') {
       this.fillMemorial(c);
+    } else if (id === 'yozgat') {
+      this.fillYozgat(c);
+    } else if (id === 'konyastad') {
+      this.fillKonyaStadium(c);
+    } else if (id === 'gecit') {
+      this.fillSecret(c);
     } else {
       // Okullar: ad isim tablosunda, renkler uydurma ve genel
       const look = { serife: ['#efe2c0', '#c8261e'], ted: ['#f2f2f2', '#c1121f'], gundogdu: ['#ffe08a', '#1f3a68'] }[id];
@@ -1238,6 +1289,67 @@ export class World {
     // Çevre aydınlatması: korunan bölümün köşelerinde ve güney kenarında
     const L = (tx, ty) => this.addLight(c, 0, c.x + tx * TILE, c.y + ty * TILE, 0, 0, null);
     for (const [tx, ty] of [[x0 - 0.6, y0 - 0.6], [x1 + 0.6, y0 - 0.6], [x0 - 0.6, y1 + 0.6], [x1 + 0.6, y1 + 0.6], [(x0 + x1) / 2, y0 - 1.2]]) L(tx, ty);
+  }
+
+  // Stadyum gövdesi: tek katı dikdörtgen, köşeleri yuvarlak, hiçbir şey yıkamaz. Çizimi js/stadium.js
+  stadiumRect(c, id, R, radius) {
+    const r = this.addRect(c, 'stadium', R[0], R[1], R[2], R[3], 0, BUILD.STADIUM, '#2a2d33');
+    r.sacred = true;
+    r.stadium = id;
+    r.corners = 15;
+    r.radius = radius;
+    return r;
+  }
+
+  // Yozgat: orta boy, çevresinde koşu pisti, güneyde otopark, iki yanda ağaçlık
+  fillYozgat(c) {
+    const R = CONFIG.stadiums.yozgat.rect;
+    this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
+    this.setGround(c, ART, ART, 7, CT, GROUND.GRASS);
+    this.setGround(c, 27, ART, CT, CT, GROUND.GRASS);
+    this.setGround(c, R[0] - 1, R[1] - 1, R[2] + 1, R[3] + 1, GROUND.TRACK);
+    this.stadiumRect(c, 'yozgat', R, 34);
+    this.addPad(c, 'parking', 8, 23, 18, 7);
+    this.scatter(c, PROP.TREE, 26, [GROUND.GRASS]);
+    for (let x = 9; x < 26; x += 4) this.addProp(c, PROP.BENCH, c.x + (x + 0.5) * TILE, c.y + 21.6 * TILE);
+    const L = (tx, ty) => this.addLight(c, 0, c.x + tx * TILE, c.y + ty * TILE, 0, 0, null);
+    for (let x = 8; x <= 26; x += 6) { L(x, 22.4); L(x, 7.4); }
+  }
+
+  // Konya: çok büyük, çevre yolu, kuzey ve güneyde geniş otopark, yeşil bayraklı çimenlik
+  fillKonyaStadium(c) {
+    const R = CONFIG.stadiums.konya.rect;
+    this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
+    this.setGround(c, ART, 27, CT, CT, GROUND.PLAZA);
+    this.setGround(c, R[0] - 1, R[1] - 1, R[2] + 1, R[3] + 1, GROUND.ROAD); // Çevre yolu
+    this.stadiumRect(c, 'konya', R, 150);
+    this.addPad(c, 'parking', 5, 27, 24, 4);
+    this.addPad(c, 'parking', 6, ART, 22, 2);
+    for (const x of [ART + 0.5, 30.5]) for (let y = 7; y < 27; y += 3) this.addProp(c, PROP.TREE, c.x + x * TILE, c.y + (y + 0.5) * TILE);
+    const L = (tx, ty) => this.addLight(c, 0, c.x + tx * TILE, c.y + ty * TILE, 0, 0, null);
+    for (let x = 6; x <= 28; x += 5.5) { L(x, 4.6); L(x, 27.4); }
+  }
+
+  // Ücra köşe: terk edilmiş depo alanı. Güneydoğu köşede, neredeyse görünmeyen bodrum rampası (CONFIG.secret.ramp)
+  fillSecret(c) {
+    const B = BUILD;
+    const [rx0, ry0, rx1, ry1] = CONFIG.secret.ramp;
+    this.setGround(c, ART, ART, CT, CT, GROUND.DIRT);
+    this.setGround(c, ART, ART, CT, 5, GROUND.ALLEY);
+    this.addRect(c, 'building', 6, 7, 16, 14, 3, B.FACTORY, '#8a8f96');
+    this.addRect(c, 'building', 19, 6, 28, 12, 3, B.FACTORY, '#7d858c');
+    this.addRect(c, 'building', 5, 18, 13, 25, 3, B.FACTORY, '#91897c');
+    this.addRect(c, 'building', 17, 17, 23, 22, 4, B.RUIN, '#8c8478');
+    this.scatter(c, PROP.BUSH, 14, [GROUND.DIRT]);
+    this.scatter(c, PROP.TREE, 8, [GROUND.DIRT]);
+    // Rampanın çevresi boş kalır: çalı ve ağaç yolu kapatmaz
+    for (let i = 0; i < c.propCount; i++) {
+      const p = c.props[i];
+      const tx = (p.x - c.x) / TILE; const ty = (p.y - c.y) / TILE;
+      if (tx > rx0 - 3 && ty > ry0 - 3) p.alive = false;
+    }
+    // Zemin çevresiyle aynı toprak: tek ipucu rampanın çok hafif gölgesi (render.js bakeRamp)
+    this.addPad(c, 'gecit', rx0, ry0, rx1 - rx0, ry1 - ry0);
   }
 
   fillPark(c) {

@@ -95,6 +95,34 @@ function ledColor(led, t) {
   return led.color;
 }
 
+// Gölge R: alçak, keskin süper motosiklet. Neon şerit, ışıklı jant halkası, çift egzoz
+function pxGolge(g, paint, look) {
+  const c = paint.color; const a = paint.accent || '#21e6ff';
+  const rect = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+  for (const x of [28, 94]) {
+    pxWheel(g, x, 37, 9, a, look.rim, look.ang);
+    // Jantın ışık halkası
+    g.fillStyle = a;
+    for (let k = 0; k < 24; k++) { const t = (k / 24) * Math.PI * 2 + (look.ang || 0); g.fillRect(Math.round(x + Math.cos(t) * 7), Math.round(37 + Math.sin(t) * 7), 1, 1); }
+  }
+  rect(30, 31, 60, 2, '#22262f');
+  // Kaporta: öne doğru alçalan keskin hat
+  g.fillStyle = c;
+  g.beginPath(); g.moveTo(40, 30); g.lineTo(52, 17); g.lineTo(78, 15); g.lineTo(100, 22); g.lineTo(98, 28); g.lineTo(80, 31); g.closePath(); g.fill();
+  rect(52, 17, 26, 2, pxTone(c, 0.4));
+  // Neon şerit
+  g.fillStyle = a;
+  for (let x = 46; x < 98; x++) g.fillRect(x, Math.round(27 - (x - 46) * 0.1), 1, 1);
+  rect(26, 20, 22, 4, '#0c0d12'); // Sele
+  rect(16, 22, 12, 3, pxTone(c, -0.2));
+  rect(14, 22, 3, 3, '#ff2346');
+  rect(84, 12, 10, 3, '#1b2a3a'); // Grenaj camı
+  rect(96, 18, 6, 4, '#e8fbff'); // Far
+  rect(90, 16, 3, 20, '#a8b4c8');
+  rect(30, 33, 26, 2, '#c9d1dc'); rect(30, 30, 18, 2, '#9aa3ad'); // Çift egzoz
+  rect(60, 30, 14, 4, '#2c313b');
+}
+
 function pxDrawCar(g, car, paint, look = { rim: 'std', led: 'yok', ang: 0, t: 0 }) {
   const led = ledOf(look.led);
   if (led.color) {
@@ -113,6 +141,7 @@ function pxDrawCar(g, car, paint, look = { rim: 'std', led: 'yok', ang: 0, t: 0 
     }
   }
   if (car.shape === 'moto') { pxMoto(g, paint, look); return; }
+  if (car.shape === 'golge') { pxGolge(g, paint, look); return; }
   const S = PX_SHAPES[car.shape] || PX_SHAPES.atmaca;
   const body = [[S.x0, S.sill], [S.x0, S.deck + 3], [S.x0 + 3, S.deck], [S.cr, S.deck], [S.rr, S.roof], [S.rf, S.roof], [S.cf, S.hood], [S.x1 - 8, S.hood + 2], [S.x1, S.hood + 6], [S.x1, S.sill]];
   const belt = Math.max(S.deck, S.hood) + 1;
