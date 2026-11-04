@@ -152,9 +152,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '19.0.0',
+  version: '19.0.1',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v19.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v19.0.1/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -15611,12 +15611,17 @@ class Quality {
 
 const A2 = CONFIG.a2hs;
 
+// iPhone/iPad/iPod mu (iPadOS masaüstü kimliği dahil). APK orada kurulamaz: indirme düğmesi gizlenir
+function isIOS(nav) {
+  const ua = (nav && nav.userAgent) || '';
+  return /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && ((nav && nav.maxTouchPoints) || 0) > 1);
+}
+
 // null: gösterme. Aksi halde { browser, share }: share = Paylaş düğmesinin yeri ('bottom' | 'top')
 function a2hsPlatform(nav, win) {
   const ua = (nav && nav.userAgent) || '';
   const ipadDesktop = /Macintosh/.test(ua) && (nav.maxTouchPoints || 0) > 1; // iPadOS masaüstü kimliğiyle gelir
-  const ios = /iPhone|iPad|iPod/.test(ua) || ipadDesktop;
-  if (!ios) return null;
+  if (!isIOS(nav)) return null;
   const mm = (q) => { try { return !!(win.matchMedia && win.matchMedia(q).matches); } catch { return false; } };
   if (nav.standalone === true || mm('(display-mode: standalone)') || mm('(display-mode: fullscreen)')) return null;
   try { if (win.Capacitor && win.Capacitor.isNativePlatform && win.Capacitor.isNativePlatform()) return null; } catch { /* yok */ }
@@ -16070,7 +16075,7 @@ globalThis.__gameBack = handleBack;
 
 function boot() {
   const native = !!(globalThis.Capacitor && globalThis.Capacitor.isNativePlatform && globalThis.Capacitor.isNativePlatform());
-  ui.setApkButton(!native, CONFIG.apkUrl);
+  ui.setApkButton(!native && !isIOS(navigator), CONFIG.apkUrl); // iPhone/iPad APK kuramaz
   // Telefona kurulu web sürümünde de geri tuşu oyunu kapatmasın
   if (!native && location.protocol !== 'file:') {
     history.pushState({ kacis: 1 }, '');

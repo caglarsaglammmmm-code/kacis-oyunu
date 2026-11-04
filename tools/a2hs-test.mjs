@@ -51,6 +51,15 @@ for (const [name, ua, share, touch] of [['iphone-safari', UA.iphoneSafari, 'bott
   await ctx.close();
 }
 
+// 1b) APK İndir düğmesi: iPhone/iPad'de (ana ekrandan açılmış olsa da) gizli, Android ve masaüstünde görünür
+for (const [name, o, want] of [['iphone', { ua: UA.iphoneSafari }, false], ['iphone-chrome', { ua: UA.iphoneChrome }, false], ['ipad', { ua: UA.ipad, w: 820, h: 1100 }, false], ['iphone-anaekran', { ua: UA.iphoneSafari, standalone: true }, false], ['android', { ua: UA.android }, true], ['masaustu', { ua: UA.desktop, touch: 0, w: 1280, h: 800 }, true]]) {
+  const { ctx, page } = await open(o);
+  const r = await page.evaluate(() => { const a = document.getElementById('btn-apk'); const k = a.getBoundingClientRect(); return { vis: !a.hidden && k.height > 0, inView: k.bottom <= innerHeight }; });
+  ok(r.vis === want, `${name}: APK İndir ${want ? 'görünür' : 'gizli'}`, JSON.stringify(r));
+  if (name === 'iphone-anaekran') await page.screenshot({ path: `${OUT}/iphone-anaekran-apksiz.png` });
+  await ctx.close();
+}
+
 // 2) Görünmez: ana ekrandan açılmış, Android, masaüstü, uygulama içi tarayıcı
 for (const [name, o] of [['standalone', { ua: UA.iphoneSafari, standalone: true }], ['android', { ua: UA.android }], ['masaustu', { ua: UA.desktop, touch: 0, w: 1280, h: 800 }], ['instagram', { ua: UA.instagram }]]) {
   const { ctx, page } = await open(o);
