@@ -37,7 +37,7 @@ function driveIn(g, b, seconds = 3) {
 }
 
 test('Gençliğe Hitabe metni kullanıcının verdiği metinle karakter karakter aynı', () => {
-  const ref = fs.readFileSync(new URL('./fixtures/hitabe.txt', import.meta.url), 'utf8');
+  const ref = fs.readFileSync(new URL('./fixtures/hitabe.txt', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
   assert.equal(HITABE.length, ref.length);
   for (let i = 0; i < ref.length; i++) assert.equal(HITABE[i], ref[i], `karakter ${i}`);
   assert.equal(HITABE, ref);

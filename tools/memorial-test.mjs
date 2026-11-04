@@ -9,7 +9,7 @@ const port = Number(process.argv[2] || 8080);
 const flavor = process.argv[3] || 'play';
 const OUT = `e2e-out/v20/${flavor}`;
 fs.mkdirSync(OUT, { recursive: true });
-const REF = fs.readFileSync('tests/fixtures/hitabe.txt', 'utf8');
+const REF = fs.readFileSync('tests/fixtures/hitabe.txt', 'utf8').replace(/\r\n/g, '\n');
 const LANGS = ['tr', 'en', 'ja', 'zh', 'es', 'de'];
 const I18N = {};
 for (const l of LANGS) I18N[l] = (await import(`../js/i18n/${l}.js`)).default.memorial;
