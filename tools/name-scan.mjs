@@ -11,13 +11,16 @@ const OLD = [
   'nevada', 'sistem koleji?', 'natura', 'do[gğ]a [sş]ehir', 'penci', 'zorn', 'pencizorn', 'kackacabilirsen', 'ka[cç] ka[cç]abilirsen',
   'maydanoz', 'pera palas', 'grand bazaar', 'hac[ıi] baba', 'pavyon', 'gece kul[uü]b[uü]', 'neon bar', 'nargile', 'tekel', 'atat[uü]rk',
   'coca.?cola', 'pepsi', 'fanta', 'shell', 'opet', 'petrol ofisi', 'turkcell', 'vodafone', 't[uü]rk telekom', 'lcw', 'koton', 'defacto',
+  '[oö]mer y[ıi]ld[ıi]z', 'yozgat [sş]ehir', 'konya b[uü]y[uü]k[sş]ehir', 'konyaspor', 'yozgatspor', 'bozokspor',
   'galatasaray', 'fenerbah[cç]e', 'be[sş]ikta[sş]', 'trabzonspor', 'trt', 'ibb', 'nike', 'adidas', 'ikea', 'starbucks', 'mcdonald', 'burger king', 'kfc', 'dominos', 'teknosa', 'boyner',
 ];
 const RE = new RegExp(`(?<![\\p{L}\\p{N}_])(${OLD.join('|')})(?![\\p{L}\\p{N}_])`, 'giu');
 // Bu dosyalar eski adları bilerek taşır ya da üçüncü taraf koddur
 const SKIP = new Set(['tools/name-scan.mjs', 'tools/build-android.mjs', 'tools/play-clean.mjs', 'tools/flavor.mjs', 'android/app/build.gradle', 'android/app/src/main/assets/capacitor.config.json',
   // Atatürk anıtı: Gençliğe Hitabe ve imza bilerek her iki sürümde de yer alır (kullanıcı isteği)
-  'js/memorial.js', 'js/app.file.js', 'sw.js', 'tools/memorial-test.mjs', 'tests/memorial.test.js']);
+  'js/memorial.js', 'js/app.file.js', 'sw.js', 'tools/memorial-test.mjs', 'tests/memorial.test.js',
+  // v21: Play sürümünde gerçek ad olmadığını kanıtlayan testler bu adları bilerek içerir
+  'tests/v21.test.js', 'tools/v21-test.mjs']);
 // names, flavors ve android/app/src/arkadas: gerçek isimli sürümün kaynağı, Play paketine girmez
 const SKIP_DIR = /(^|\/)(names|flavors|arkadas|node_modules|\.git|\.gradle|build|e2e-out|vendor|fonts|dist|gradle|www|capacitor-cordova-android-plugins|public)(\/|$)/;
 const TEXT = /\.(js|mjs|html|css|json|md|xml|gradle|properties|java|txt|pro|svg)$/i;

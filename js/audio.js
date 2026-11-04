@@ -15,6 +15,8 @@ export const ENGINE_KINDS = {
   ev: { harm: [1, 0, 0.14, 0, 0.05], sub: 0, high: 0.44, air: 0, rough: 0, roughRate: 0, lp: [1800, 6500] },
   // Yüksek devirli süper araba: sert, parlak, hızlı tepki
   super: { harm: [0.8, 0.95, 0.8, 0.62, 0.5, 0.4], sub: 0.32, high: 0.34, air: 0.08, rough: 0.05, roughRate: 0.4, lp: [520, 4400] },
+  // Gizli motosiklet: çift silindir, çok derin ve gür gövde, kalın tırtıl; gaz bırakınca egzoz patlar (pops)
+  beast: { harm: [1, 0.95, 0.9, 0.72, 0.6, 0.48, 0.36], sub: 1.05, high: 0.24, air: 0.14, rough: 0.42, roughRate: 0.5, lp: [300, 3400], pops: true },
 };
 
 // Hız oranından devir ve vites: vites büyüdükçe devir düşer, tepe devre ulaşınca sıradaki vitese atar
@@ -209,7 +211,7 @@ export class AudioEngine {
     makeVoice('bip', 'square', 1700);
     makeVoice('pulse', 'sawtooth', 900);
     makeVoice('warble', 'triangle', 1400);
-    makeVoice('ufo', 'sine', 1300);
+    makeVoice('warp', 'square', 760);
     makeVoice('zap', 'sawtooth', 2100);
     this.radioT = 6;
   }
@@ -343,6 +345,12 @@ export class AudioEngine {
     this.engAirF.frequency.setTargetAtTime(500 + 1900 * ratio, t, 0.08);
     this.engFilter.frequency.setTargetAtTime(K.lp[0] + (K.lp[1] - K.lp[0]) * ratio * (0.35 + 0.65 * gas), t, 0.07);
     this.engGain.gain.setTargetAtTime(vol * (0.05 + 0.05 * ratio + 0.05 * gas) * e.gain * cut, t, 0.05);
+    // Geri tepme: gaz bırakılınca yüksek devirde egzoz patlamaları
+    if (K.pops && on) {
+      if ((this.lastGas ?? 1) >= 0.8 && gas < 0.6 && ratio > 0.35) this.backfire(3 + Math.floor(Math.random() * 3));
+      else if (gas < 0.6 && ratio > 0.5 && Math.random() < 0.05) this.backfire(1);
+    }
+    this.lastGas = gas;
 
     // Ara sıra sokak sesleri
     if (this.ambientOn && this.enabled) {
@@ -388,7 +396,7 @@ export class AudioEngine {
     setVoice('bip', 1760, Math.floor(sec * 7) % 4 === 0 ? 1 : 0); // Megafon bip
     setVoice('pulse', 900, Math.floor(sec * 12) % 2 ? 1 : 0); // Kesik nabız
     setVoice('warble', 1050 + 340 * Math.sin(sec * 36), Math.floor(sec * 1.6) % 2 ? 1 : 0); // Titrek çift ton
-    setVoice('ufo', 880 + 620 * Math.sin(sec * 5.4) * Math.sin(sec * 0.9)); // Bilim kurgu teremin
+    setVoice('warp', 520 + 380 * Math.abs(Math.sin(sec * 9)) + 160 * Math.sin(sec * 1.7)); // Uzaylı arabası: zıplayan vınlama
     setVoice('zap', 2600 - 2100 * (sec * 3 - Math.floor(sec * 3))); // Lazer süpürmesi
 
     // Ara sıra polis telsizi ve megafon
@@ -639,16 +647,10 @@ export class AudioEngine {
   powerEnd() { this.tone(660, 0.18, 0.1, 'triangle', 240); }
 
   crunch() { this.burst(0.12, 1300, 0.22, 'bandpass', 500); }
-  // Coin: üst üste toplayınca perde yükselir
-  // Güdümlü top: yükselen vınlama; isabet: tok patlama
+  // Ateş alan araba: kısa yanma sesi
   fire() {
     this.tone(420, 0.22, 0.14, 'sawtooth', 1400);
     this.burst(0.18, 2600, 0.12, 'highpass');
-  }
-
-  missileHit(v) {
-    this.burst(0.25, 900, 0.18 + 0.12 * v, 'lowpass', 200);
-    this.tone(220, 0.16, 0.1, 'square', 90);
   }
 
   // Kıl payı kaçış: iki hızlı parlak nota
@@ -687,6 +689,45 @@ export class AudioEngine {
 
   splash() { this.burst(0.4, 2400, 0.3, 'highpass', 600); }
   spike() { this.tone(900, 0.5, 0.14, 'sawtooth', 100); this.burst(0.3, 3200, 0.3, 'highpass'); }
+
+  // Egzoz patlaması: kısa, tok, aralıklı
+  backfire(n) {
+    for (let i = 0; i < n; i++) {
+      const d = i * (0.06 + Math.random() * 0.07);
+      this.tone(70 + Math.random() * 40, 0.07, 0.42, 'square', 34, d);
+      setTimeout(() => this.burst(0.06, 900 + Math.random() * 500, 0.5, 'lowpass', 120), d * 1000);
+    }
+  }
+
+  // Taramalı silah: tık tık tık. Kısa yüksek tık ve çok kısa vuruş
+  gunShot() {
+    const c = this.ctx;
+    if (!c || !this.enabled) return;
+    this.tone(1900 + Math.random() * 300, 0.028, 0.07, 'square', 700);
+    this.tone(160, 0.04, 0.09, 'triangle', 70);
+  }
+
+  // Uzaylılar geldi: alçalan bilim kurgu çağrısı ve kısa siren
+  alienArrive() {
+    this.alert();
+    for (let i = 0; i < 4; i++) this.tone(1200 - i * 180, 0.3, 0.12, 'square', 300, 0.2 + i * 0.22);
+  }
+
+  // Meteor uyarısı: yüksekten inen ıslık. Çarpma: derin gümbürtü ve toz
+  meteorWarn() { this.tone(1700, 0.9, 0.06, 'sine', 380); }
+  meteorHit(v = 1) {
+    this.burst(1.1, 1100, 0.9 * v, 'lowpass', 40);
+    this.tone(70, 0.8, 0.6 * v, 'sine', 24);
+    this.burst(0.35, 3200, 0.2 * v, 'highpass', 900);
+  }
+
+  // Gizli geçit: rampadan inen motor uğultusu, yankılı beton, kısa iki nota
+  secretDown() {
+    this.tone(220, 0.9, 0.2, 'sawtooth', 70);
+    this.burst(0.8, 600, 0.25, 'lowpass', 90);
+    this.tone(392, 0.4, 0.12, 'triangle', 0, 1.1);
+    this.tone(587, 0.6, 0.12, 'triangle', 0, 1.35);
+  }
 
   // Eşik uyarısı: kısa yükselen siren
   alert() {

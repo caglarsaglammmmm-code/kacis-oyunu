@@ -6,6 +6,8 @@ import { paintPower, POWER_LOOK } from './art.js';
 import { tx, txNum, getLang, LANGS, DEVELOPER } from './i18n/index.js';
 
 const $ = (id) => document.getElementById(id);
+// Araç adı: gizli motosikletin adı dil dosyasında, diğerleri isim tablosunda
+const carLabel = (car) => (car.secret ? tx('cars.golge.name') : car.name);
 
 export function formatTime(t) {
   const s = Math.floor(t);
@@ -70,8 +72,8 @@ export class UI {
     click('btn-mute', () => { const d2 = this.storage.data; d2.settings.sound = !d2.settings.sound; this.storage.save(); this.syncSettings(); a.applySettings(); });
     click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
     click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
-    click('car-prev', () => { this.stepCar(-1); a.preview(CONFIG.cars[this.gi]); });
-    click('car-next', () => { this.stepCar(1); a.preview(CONFIG.cars[this.gi]); });
+    click('car-prev', () => { this.stepCar(-1); a.preview(this.storage.garageCars()[this.gi]); });
+    click('car-next', () => { this.stepCar(1); a.preview(this.storage.garageCars()[this.gi]); });
     click('btn-settings', () => { this.show('settings'); });
     click('btn-howto', () => { this.show('howto'); });
     for (const b of document.querySelectorAll('[data-back]')) {
@@ -204,7 +206,7 @@ export class UI {
     $('menu-coins').textContent = d.coins;
     $('menu-best').textContent = d.bestScore ? tx('menu.best', { score: txNum(d.bestScore), time: formatTime(d.bestTime) }) : tx('menu.first');
     const car = this.storage.selectedCar();
-    $('menu-car-name').textContent = car.name;
+    $('menu-car-name').textContent = carLabel(car);
     $('menu-car-paint').textContent = this.paintName(car, this.storage.paintIndex(car.id));
     if (!$('menu').hidden) this.fit($('menu'));
   }
@@ -307,7 +309,7 @@ export class UI {
     const text = tx(`alert.${['', 'swat', 'heavy', 'tanks'][stage] || 'tanks'}`);
     const el = $('alert');
     el.textContent = text;
-    el.classList.remove('run');
+    el.classList.remove('run', 'long');
     void el.offsetWidth; // Animasyonu baştan başlat
     el.classList.add('run');
   }
@@ -345,12 +347,27 @@ export class UI {
     el.classList.add('run');
   }
 
+  // Uzaylı geçişi: büyük okunaklı yazı tam CONFIG.aliens.intro saniye görünür, sonra kaybolur
   alienAlert() {
     const el = $('alert');
     el.textContent = tx('alert.aliens');
+    el.style.setProperty('--alert-t', `${CONFIG.aliens.intro}s`);
     el.classList.remove('run');
+    el.classList.add('long');
     void el.offsetWidth;
     el.classList.add('run');
+  }
+
+  // Meteor aşaması: büyük yazı ve kısa uyarı (kırmızı halkadan çık)
+  meteorAlert() {
+    const el = $('alert');
+    el.textContent = tx('alert.meteors');
+    el.style.setProperty('--alert-t', `${CONFIG.aliens.intro}s`);
+    el.classList.remove('run');
+    el.classList.add('long');
+    void el.offsetWidth;
+    el.classList.add('run');
+    setTimeout(() => this.toast(tx('meteor.warn'), '#ffd23f'), 1200);
   }
 
   showHint(on) {
@@ -414,7 +431,7 @@ export class UI {
     const d = this.storage.data;
     const memorial = result.cause === 'memorial';
     $('memorial-msg').classList.remove('run'); // Oyun bitti ekranı açılınca ceza yazısı kalkar
-    $('over-title').textContent = tx(memorial ? 'memorial.over' : record.newScore ? 'over.record' : result.cause === 'water' ? 'over.sunk' : 'over.caught');
+    $('over-title').textContent = tx(memorial ? 'memorial.over' : record.newScore ? 'over.record' : result.cause === 'water' ? 'over.sunk' : result.cause === 'meteor' ? 'over.meteor' : 'over.caught');
     $('over-title').classList.toggle('record', record.newScore && !memorial);
     $('over-title').classList.toggle('memorial', memorial);
     $('over-score').textContent = txNum(result.score);
@@ -437,7 +454,7 @@ export class UI {
 
   renderGarage() {
     const d = this.storage.data;
-    const cars = CONFIG.cars;
+    const cars = this.storage.garageCars();
     $('garage-coins').textContent = d.coins;
     if (this.gi === undefined) this.gi = Math.max(0, cars.findIndex((c) => c.id === d.selected));
     const car = cars[this.gi];
@@ -465,13 +482,13 @@ export class UI {
     });
     const pt = paintOf(car, paintI);
     $('garage-paint-name').textContent = `${this.paintName(car, paintI)} · ${tx(`garage.finish.${pt.finish}`)}${pt.roof ? ` · ${tx('garage.twoTone')}` : ''}`;
-    $('garage-name').textContent = car.name;
+    $('garage-name').textContent = carLabel(car);
     $('garage-desc').textContent = tx(`cars.${car.id}.desc`);
 
     const stats = $('garage-stats');
     stats.textContent = '';
-    const top = cars[cars.length - 1];
-    const base = cars[0];
+    const top = CONFIG.cars[CONFIG.cars.length - 1]; // Ölçek satılık arabalara göre
+    const base = CONFIG.cars[0];
     const stat = (label, value, text) => {
       const row = document.createElement('div');
       row.className = 'stat';
@@ -486,8 +503,8 @@ export class UI {
       row.append(t, bar, n);
       stats.appendChild(row);
     };
-    const norm = (v, a, b) => (v - a) / (b - a);
-    const range = (key) => { const v = cars.map((c) => c[key]); return [Math.min(...v), Math.max(...v)]; };
+    const norm = (v, a, b) => Math.min(1.08, (v - a) / (b - a));
+    const range = (key) => { const v = CONFIG.cars.map((c) => c[key]); return [Math.min(...v), Math.max(...v)]; };
     stat(tx('garage.speed'), norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
     stat(tx('garage.accel'), norm(car.accel, ...range('accel')), String(Math.round(car.accel / 7)));
     stat(tx('garage.grip'), norm(car.grip, ...range('grip')), String(Math.round(car.grip * 20)));
@@ -519,7 +536,7 @@ export class UI {
       paintPixelCar(art, c, this.storage.paintIndex(c.id));
       art.className = 'car-art';
       const label = document.createElement('span');
-      label.textContent = has ? c.name : `${c.cost}`;
+      label.textContent = has ? carLabel(c) : `${c.cost}`;
       b.append(art, label);
       b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.gp = 0; this.renderGarage(); this.actions.preview(c); });
       list.appendChild(b);
@@ -603,7 +620,7 @@ export class UI {
     }
     // Seçilen ya da denenen öğenin adı ve satın alma düğmesi
     const sel = p || current;
-    $('custom-name').textContent = tx(`custom.${tab}s.${sel}`);
+    $('custom-name').textContent = tab === 'paint' && typeof sel === 'number' ? this.paintName(car, sel) : tx(`custom.${tab}s.${sel}`);
     if (p) {
       const it = itemOf(tab, p);
       const enough = d.coins >= it.price;
@@ -634,7 +651,7 @@ export class UI {
   }
 
   stepCar(dir) {
-    const n = CONFIG.cars.length;
+    const n = this.storage.garageCars().length;
     this.gi = (this.gi + dir + n) % n;
     this.gp = 0;
     this.prev = null;

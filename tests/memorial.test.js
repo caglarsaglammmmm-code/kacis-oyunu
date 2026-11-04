@@ -148,25 +148,29 @@ test('polis ve trafik anıta girmez; polis çevresinden dolaşır', () => {
   for (let t = 0; t < 8; t += dt) {
     p.vx = 0; p.vy = 0; p.x = b.x + b.w / 2; p.y = b.y - 160;
     g.tick(dt, 0, false);
-    for (const c of g.cops) if (!c.flying && inside(b, c.x, c.y)) entered++;
+    for (const c of g.cops) if (inside(b, c.x, c.y)) entered++;
     for (const n of g.crowd.npcs) if (n.alive && inside(b, n.x, n.y)) entered++;
     for (const q of g.crowd.peds) if (q.alive && inside(b, q.x, q.y)) entered++;
   }
   assert.equal(entered, 0);
 });
 
-test('mermi anıt alanına girince söner; UFO ve top mermisi alanın üstüne gelmez', () => {
+test('mermi anıt alanına girince söner; uçan varlık yok, içeride doğan araç dışarı itilir; top ve meteor alana düşmez', () => {
   const { g, b } = setup({ god: true });
-  const m = g.missiles[0];
-  Object.assign(m, { alive: true, x: b.x + 20, y: b.y - 30, vx: 0, vy: 760, t: 0, target: null });
-  for (let i = 0; i < 20 && m.alive; i++) g.stepMissile(m, dt);
+  const m = g.gun.bullets[0];
+  Object.assign(m, { alive: true, x: b.x + 20, y: b.y - 30, px: b.x + 20, py: b.y - 30, vx: 0, vy: CONFIG.weapon.speed, t: 0 });
+  for (let i = 0; i < 20 && m.alive; i++) g.gun.step(g, m, dt);
   assert.equal(m.alive, false);
   assert.ok(m.y < b.y + 40, 'alanın kenarında söndü');
-  const u = g.spawnCop('ufo', 'chaser', b.x + b.w / 2, b.y + b.h / 2, 0);
-  g.player.x = b.x + b.w / 2; g.player.y = b.y + b.h / 2 + 10;
-  for (let i = 0; i < 30; i++) {
-    g.updateUfo(u, dt, true);
-    assert.ok(!g.world.inMemorial(u.x, u.y), 'UFO alanın üstünde değil');
+  assert.ok(!('ufo' in CONFIG.aliens.types), 'uçan daire yok');
+  const u = g.spawnCop('crab', 'chaser', b.x + b.w / 2, b.y + b.h / 2, 0);
+  assert.ok(!g.world.inMemorial(u.x, u.y), 'içeride doğan uzaylı dışarı itildi');
+  for (let i = 0; i < 400; i++) {
+    const p = { x: b.x + Math.random() * b.w, y: b.y + Math.random() * b.h };
+    g.player.x = p.x; g.player.y = p.y; g.player.vx = 0; g.player.vy = 0;
+    const mt = g.meteors.list[0];
+    mt.alive = false;
+    if (g.meteors.place(g, mt)) assert.ok(!g.world.inMemorial(mt.x, mt.y, CONFIG.meteor.radius), 'meteor anıta düşmez');
   }
 });
 

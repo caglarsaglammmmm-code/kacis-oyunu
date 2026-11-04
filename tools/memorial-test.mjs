@@ -238,27 +238,27 @@ for (const lang of LANGS) {
   const res = await page.evaluate(async () => {
     const g = __drift.game; const bx = g.world.memorialBox(); const p = g.player;
     const ins = (x, y) => x > bx.x && x < bx.x + bx.w && y > bx.y && y < bx.y + bx.h;
-    let inside = 0; let near = 0; let maxCops = 0; let flying = 0; let shots = 0;
-    for (let i = 0; i < 4; i++) { const c = g.spawnCop(i === 3 ? 'ufo' : 'car', 'chaser', bx.x + 100 + i * 150, bx.y + bx.h + 260, -Math.PI / 2); c.state = 'chase'; }
+    let inside = 0; let near = 0; let maxCops = 0; let flying = 0; let shots = 0; const kinds = {};
+    for (let i = 0; i < 4; i++) { const c = g.spawnCop(i === 3 ? 'blob' : 'car', 'chaser', bx.x + 100 + i * 150, bx.y + bx.h + 260, -Math.PI / 2); c.state = 'chase'; }
     const t0 = performance.now();
     while (performance.now() - t0 < 12000) {
       p.x = bx.x + bx.w / 2; p.y = bx.y - 150; p.vx = 0; p.vy = 0;
-      if (g.fire) shots += g.fire() ? 1 : 0;
       await new Promise(requestAnimationFrame);
       maxCops = Math.max(maxCops, g.cops.length);
-      for (const c of g.cops) { if (ins(c.x, c.y)) { inside++; if (c.flying) flying++; } if (Math.hypot(c.x - p.x, c.y - p.y) < 260) near++; }
-      for (const n of g.crowd.npcs) if (n.alive && ins(n.x, n.y)) inside++;
-      for (const q of g.crowd.peds) if (q.alive && ins(q.x, q.y)) inside++;
-      for (const m of g.missiles) if (m.alive && ins(m.x, m.y)) inside++;
+      for (const c of g.cops) { if (ins(c.x, c.y)) { inside++; kinds['cop:' + c.type] = (kinds['cop:' + c.type] || 0) + 1; if (c.alien) flying++; } if (Math.hypot(c.x - p.x, c.y - p.y) < 260) near++; }
+      for (const n of g.crowd.npcs) if (n.alive && ins(n.x, n.y)) { inside++; kinds.npc = (kinds.npc || 0) + 1; }
+      for (const q of g.crowd.peds) if (q.alive && ins(q.x, q.y)) { inside++; kinds['ped:' + q.state] = (kinds['ped:' + q.state] || 0) + 1; }
+      for (const m of g.gun.bullets) if (m.alive && ins(m.x, m.y)) { inside++; kinds.bullet = (kinds.bullet || 0) + 1; }
+      shots = g.gun.shots;
     }
     // Mermiyi doğrudan anıta yolla: sınırda söner
-    const m = g.missiles[0];
-    Object.assign(m, { alive: true, x: bx.x + bx.w / 2, y: bx.y + bx.h + 60, vx: 0, vy: -760, t: 0, target: null });
-    for (let i = 0; i < 30 && m.alive; i++) g.stepMissile(m, 1 / 60);
+    const m = g.gun.bullets[0];
+    Object.assign(m, { alive: true, x: bx.x + bx.w / 2, y: bx.y + bx.h + 60, px: bx.x + bx.w / 2, py: bx.y + bx.h + 60, vx: 0, vy: -__drift.cfg.weapon.speed, t: 0 });
+    for (let i = 0; i < 30 && m.alive; i++) g.gun.step(g, m, 1 / 60);
     const c = g.world.chunk(bx.cx, bx.cy); const rect = c.rects.slice(0, c.rectCount).find((r) => r.memorial);
-    return { inside, flying, near, maxCops, missileGone: !m.alive && m.y > bx.y + bx.h - 30, rectAlive: rect.alive && rect.sacred, shots };
+    return { inside, kinds, flying, near, maxCops, missileGone: !m.alive && m.y > bx.y + bx.h - 30, rectAlive: rect.alive && rect.sacred, shots };
   });
-  ok(res.inside === 0, 'polis, trafik, yaya, UFO ve mermi alana girmedi', JSON.stringify(res));
+  ok(res.inside === 0, 'polis, trafik, yaya, uzaylı ve mermi alana girmedi', JSON.stringify(res));
   ok(res.maxCops >= 3 && res.near > 0, 'polisler kovaladı ve alanın çevresinden dolaşıp oyuncuya ulaştı', JSON.stringify(res));
   ok(res.missileGone, 'anıta giden mermi sınırda söndü');
   ok(res.rectAlive, 'anıt sağlam (yıkılmaz)');

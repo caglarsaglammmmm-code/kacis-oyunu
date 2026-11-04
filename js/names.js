@@ -126,5 +126,10 @@ export const NAMES = {
   "ishani": "Merkez Çarşı İş Hanı",
   "otel": "Sahil Palas Oteli",
   "doner": "Nane Döner"
- }
+ },
+ "stadyum": {
+  "yozgat": "BOZOK ŞEHİR STADYUMU",
+  "konya": "SELÇUK ARENA"
+ },
+ "misafir": ""
 };

@@ -14,6 +14,8 @@ import { Quality, guessLevel, LEVELS } from './quality.js';
 import { setLang, detectLang, getLang, tx } from './i18n/index.js';
 import { initA2hs, isIOS } from './a2hs.js';
 import { MemorialCard } from './memorial.js';
+import { SecretScene } from './secret.js';
+import { NAMES } from './names.js';
 
 const STEP = 1 / 60;
 const canvas = document.getElementById('game');
@@ -34,12 +36,8 @@ const cover = new PixelMenu(document.getElementById('cover'));
 const curtain = document.getElementById('curtain');
 const menuEl = document.getElementById('menu');
 const cheatBadge = document.getElementById('cheat-badge');
-// Ateş otomatiktir. Boşluk yalnız silahlı arabada alınır ve bekleme süresi dolmuşsa atar
-input.onFire = (down) => {
-  const armed = !!game.weapon && game.state === 'play' && !paused;
-  if (armed && down) game.fire();
-  return armed;
-};
+// Silah tamamen otomatiktir (js/gun.js): ateş düğmesi ve tuşu yoktur
+input.onFire = () => false;
 input.onCode = () => { if (game.state === 'play' && !paused) game.toggleCheat(); };
 const params = new URLSearchParams(location.search);
 let paused = false;
@@ -91,6 +89,7 @@ function applyQuality() {
   const q = quality.settings;
   renderer.lod = q;
   game.copLimit = Math.min(q.cops, navigator.maxTouchPoints > 0 ? CONFIG.pursuit.phoneCap : q.cops);
+  game.alienLimit = navigator.maxTouchPoints > 0 ? CONFIG.aliens.phoneCap : CONFIG.aliens.desktopCap;
   game.fx.density = q.particles;
   game.crowd.limit = q.crowd;
   fitCanvas(window.innerWidth, window.innerHeight);
@@ -279,6 +278,8 @@ const ui = new UI(storage, {
 initA2hs(() => audio.unlock());
 // Gençliğe Hitabe okuma kartı: anıta yaklaşınca açılır, uzaklaşınca ya da dokununca kapanır
 const memorialCard = new MemorialCard(document.getElementById('memorial-card'), () => game.dismissMemorialCard());
+// Gizli geçit: bodrum sahnesi ve karşılama yazısı. Arkadaş sürümünde ev sahibinin adı, Play sürümünde genel yazı
+const secretScene = new SecretScene(document.getElementById('secret'));
 
 let wakeLock = null;
 async function keepAwake(on) {
@@ -310,10 +311,23 @@ game.onEvent = (name, v) => {
     case 'nearmiss': audio.nearMiss(); break;
     case 'splash': audio.splash(); break;
     case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
-    case 'aliens': audio.alert(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
+    case 'aliens': audio.alienArrive(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
+    case 'meteors': audio.alert(); ui.meteorAlert(); vibrate([80, 40, 80]); break;
+    case 'meteorwarn': audio.meteorWarn(); break;
+    case 'meteorhit': audio.meteorHit(v); vibrate(Math.round(30 + 60 * v)); break;
+    case 'shot': audio.gunShot(); break;
+    case 'gunhit': if (v >= 1) vibrate(30); break;
+    case 'secret': {
+      const first = storage.unlockSecret();
+      secretScene.play(NAMES.misafir ? tx('secret.guest', { name: NAMES.misafir }) : tx('secret.found'), tx('secret.gift', { name: tx('cars.golge.name') }), first);
+      audio.secretDown();
+      vibrate([40, 30, 40, 30, 120]);
+      ui.refreshMenu();
+      break;
+    }
+    case 'secretexit': secretScene.hide(); break;
     case 'spike': audio.spike(); vibrate(60); break;
     case 'fire': audio.fire(); vibrate(14); break;
-    case 'missilehit': audio.missileHit(v); vibrate(v >= 1 ? 45 : 18); break;
     case 'weather': if (v === 'ice') ui.toast(tx('weather.iceWarn'), '#9fe8ff'); break;
     case 'escape': audio.escape(); ui.escapeToast(v); vibrate(18); break;
     case 'cheat': audio.cheat(v); ui.cheatMessage(v); vibrate(v ? [30, 30, 30, 30, 60] : 40); break;
@@ -480,6 +494,6 @@ function boot() {
 }
 
 // Test ve geliştirici erişimi
-globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover, quality, LEVELS, controls, audio, memorialCard };
+globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover, quality, LEVELS, controls, audio, memorialCard, secretScene, toMenu, applySettings };
 
 boot();

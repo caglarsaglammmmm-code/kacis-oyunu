@@ -16,20 +16,23 @@ function game(opts = {}) {
   return g;
 }
 
-test('zorluk eşikleri: 50, 200, 280', () => {
-  assert.equal(difficultyAt(49.9).stage, 0);
-  assert.equal(difficultyAt(50).stage, 1);
-  assert.equal(difficultyAt(199).stage, 1);
-  assert.equal(difficultyAt(200).stage, 2);
-  assert.equal(difficultyAt(280).stage, 3);
-  assert.equal(difficultyAt(10).swatShare, 0, '50 sn öncesi SWAT yok');
-  assert.equal(difficultyAt(199).advancedShare, 0, '200 sn öncesi gelişmiş yok');
-  assert.equal(difficultyAt(279).tanks, 0, '280 sn öncesi tank yok');
-  assert.ok(difficultyAt(280).tanks >= 1);
+test('zorluk eşikleri ve aşama sırası: polis -> SWAT -> uzaylı -> tank -> meteor', () => {
+  const D = CONFIG.difficulty;
+  assert.ok(D.swatAt < D.aliensAt && D.aliensAt < D.tanksAt && D.tanksAt < CONFIG.meteor.at, 'sıra');
+  assert.equal(difficultyAt(D.swatAt - 0.1).stage, 0);
+  assert.equal(difficultyAt(D.swatAt).stage, 1);
+  assert.equal(difficultyAt(D.advancedAt).stage, 2);
+  assert.equal(difficultyAt(D.tanksAt).stage, 3);
+  assert.equal(difficultyAt(10).swatShare, 0, 'SWAT öncesi SWAT yok');
+  assert.equal(difficultyAt(D.advancedAt - 1).advancedShare, 0);
+  assert.equal(difficultyAt(D.tanksAt - 1).tanks, 0, 'tank öncesi tank yok');
+  assert.ok(difficultyAt(D.tanksAt).tanks >= 1);
+  assert.equal(difficultyAt(D.aliensAt - 0.1).aliens, 0, 'uzaylı öncesi uzaylı yok');
+  assert.ok(difficultyAt(D.aliensAt).aliens >= 6);
 });
 
 test('yıldızlar eşiklerde artar', () => {
-  assert.deepEqual([0, 50, 200, 280].map((t) => difficultyAt(t).stars), [1, 2, 3, 4]);
+  assert.deepEqual([0, 50, 200, CONFIG.difficulty.tanksAt].map((t) => difficultyAt(t).stars), [1, 2, 3, 4]);
 });
 
 test('zorluk 50-200 arasında her saniye artar, azalmaz', () => {
@@ -491,27 +494,54 @@ test('havuz duvar gibidir, araç içine düşmez', () => {
   assert.equal(isDeep({ kind: 'water', deep: true }), true);
 });
 
-test('uzaylılar eşikte gelir, oyuncudan hızlıdır, ışın hasar verir', () => {
+test('uzaylı arabaları: UFO yok; türler polisten güçlü, tanktan zayıf ve oyuncudan yavaş', () => {
   const A = CONFIG.aliens;
-  assert.ok(CONFIG.difficulty.aliensAt >= 200 && CONFIG.difficulty.aliensAt <= 250);
-  assert.ok(A.ufo.speed > 1 && A.rover.speed > 1, 'kaçmak zor olmalı');
-  assert.equal(difficultyAt(224).ufos, 0);
-  assert.ok(difficultyAt(230).ufos >= 1 && difficultyAt(230).rovers >= 2);
-  const g = game({ startTime: 224.9 });
-  const ev = [];
-  g.onEvent = (n) => ev.push(n);
-  for (let i = 0; i < 60 * 10; i++) g.tick(dt, 0, false);
-  assert.ok(ev.includes('aliens'));
-  assert.ok(g.cops.some((c) => c.type === 'ufo' || c.type === 'rover'), 'uzaylı doğmadı');
-  const u = g.spawnCop('ufo', 'chaser', g.player.x + 5, g.player.y, 0);
-  g.damage = 0; g.god = false; g.giantT = 0; g.ghostT = 0;
-  g.player.vx = 0; g.player.vy = 0;
-  const before = g.damage;
-  g.updateUfo(u, dt, true);
-  assert.equal(u.beam, 1);
-  assert.ok(g.damage > before);
+  const P = CONFIG.police;
+  assert.ok(!('ufo' in A) && !('ufo' in A.types) && !('rover' in A.types), 'UFO tamamen kaldırıldı');
+  assert.ok(!CONFIG.sirens.includes('ufo'), 'UFO sesi yok');
+  assert.ok(Object.keys(A.types).length >= 3, 'farklı tipler');
+  assert.ok(new Set(Object.values(A.types).map((t) => t.speed)).size >= 3, 'farklı hızlar');
+  assert.ok(new Set(Object.values(A.types).map((t) => t.hp)).size >= 3, 'farklı canlar');
+  for (const [k, t] of Object.entries(A.types)) {
+    assert.ok(t.speed < 1 && t.speed <= CONFIG.pursuit.speedRatioMax, `${k} oyuncudan yavaş`);
+    assert.ok(t.hp > P.swat.hp && t.hp < P.tank.hp, `${k}: SWAT < uzaylı < tank (can)`);
+    assert.ok(t.mass > P.car.mass && t.mass < P.tank.mass, k);
+    assert.ok(t.ram > P.car.ram && t.ram < P.tank.ram, k);
+  }
+  assert.ok(A.phoneCap >= 6 && A.phoneCap <= 10, 'telefonda 6-10');
+  assert.ok(Math.max(...A.cap.map((c) => c[1])) <= A.desktopCap);
 });
 
+test('uzaylı geçişi: yazı 3 sn, 3 sn koruma, her yönden aynı anda ve güvenli uzaklıkta doğarlar, tavan aşılmaz', () => {
+  const A = CONFIG.aliens;
+  const g = game({ startTime: CONFIG.difficulty.aliensAt - 0.05, god: false });
+  const ev = [];
+  g.onEvent = (n, v) => ev.push([n, v]);
+  g.tick(dt, 0, false); g.tick(dt, 0, false); g.tick(dt, 0, false); g.tick(dt, 0, false);
+  const e = ev.find(([n]) => n === 'aliens');
+  assert.ok(e, 'aliens olayı');
+  assert.equal(A.intro, 3);
+  assert.ok(g.shieldT > A.shield - 0.2, 'koruma başladı');
+  const al = g.cops.filter((c) => c.alien);
+  assert.ok(al.length >= 4 && al.length <= A.wave, `ilk dalga ${al.length}`);
+  const p = g.player;
+  for (const c of al) assert.ok(Math.hypot(c.x - p.x, c.y - p.y) >= A.safeR - 1, 'güvenli uzaklık');
+  // Her yönden: açılar dört çeyreğe dağılır
+  const q = new Set(al.map((c) => Math.floor(((Math.atan2(c.y - g.cam.y, c.x - g.cam.x) + Math.PI) / (Math.PI / 2)) % 4)));
+  assert.ok(q.size >= 3, 'her yönden');
+  // Koruma süresince hasar yok
+  g.hurt(50);
+  assert.equal(g.damage, 0, 'korumada hasar yok');
+  for (let i = 0; i < 60 * (A.shield + 0.2); i++) g.tick(dt, 0, false);
+  assert.equal(g.shieldT, 0, 'koruma bitti');
+  g.hurt(5);
+  assert.ok(g.damage > 0, 'koruma bitince hasar alınır');
+  for (let i = 0; i < 60 * 30; i++) {
+    g.tick(dt, 0, false);
+    if (g.state !== 'play') { g.state = 'play'; g.damage = 0; }
+    assert.ok(g.countAliens() <= g.alienCap(), 'tavan');
+  }
+});
 test('polis sirenleri çakışmaz: on polise kadar her biri ayrı ses', () => {
   const g = game();
   g.cops.length = 0;

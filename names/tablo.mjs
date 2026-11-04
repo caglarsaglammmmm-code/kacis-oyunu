@@ -95,6 +95,15 @@ export const TABLO = {
     otel: { gercek: 'Pera Palas Oteli', uydurma: 'Sahil Palas Oteli' },
     doner: { gercek: 'Maydanoz Döner', uydurma: 'Nane Döner' },
   },
+
+  // İki stadyumun tabelası. Gerçek kulüp amblemi ya da logosu iki sürümde de kullanılmaz
+  stadyum: {
+    yozgat: { gercek: 'YOZGAT ŞEHİR STADYUMU', uydurma: 'BOZOK ŞEHİR STADYUMU' },
+    konya: { gercek: 'KONYA BÜYÜKŞEHİR STADYUMU', uydurma: 'SELÇUK ARENA' },
+  },
+
+  // Gizli geçidin ev sahibi: arkadaş sürümünde gerçek kişi, Play Store sürümünde boş (genel karşılama yazısı çıkar)
+  misafir: { gercek: 'Ömer Yıldız', uydurma: '' },
 };
 
 // Play Store paketinde bulunmaması gereken adlar: tablodaki gerçek sütundan, uydurmadan farklı olanlar

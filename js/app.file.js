@@ -130,7 +130,12 @@ const NAMES = {
   "ishani": "Merkez Çarşı İş Hanı",
   "otel": "Sahil Palas Oteli",
   "doner": "Nane Döner"
- }
+ },
+ "stadyum": {
+  "yozgat": "BOZOK ŞEHİR STADYUMU",
+  "konya": "SELÇUK ARENA"
+ },
+ "misafir": ""
 };
 
 // --- config.js ---
@@ -152,9 +157,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '20.0.0',
+  version: '21.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v20.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v21.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -163,7 +168,7 @@ const CONFIG = {
 
   // Geliştirici kısayolları. Adres çubuğundan da verilebilir: ?t=280&god=1
   dev: {
-    startTime: 0, // Oyun bu saniyeden başlar (ör. 280 = tanklar)
+    startTime: 0, // Oyun bu saniyeden başlar (ör. 225 = uzaylılar, 300 = tanklar, 380 = meteor)
     godMode: false, // Ölümsüzlük. Ayarlarda sürüm yazısına 7 kez dokununca da açılır
   },
 
@@ -202,6 +207,9 @@ const CONFIG = {
       { id: 'kule', ring: [4, 8] }, { id: 'kulturpark', ring: [4, 9] }, { id: 'ted', ring: [5, 10] },
       { id: 'gundogdu', ring: [5, 10] }, { id: 'meram', ring: [6, 11] },
       { id: 'anit', ring: [2, 4] }, // Cumhuriyet Meydanı ve anıt (CONFIG.memorial, js/memorial.js)
+      // İki stadyum (CONFIG.stadiums, js/stadium.js). apart: diğerinden en az bu kadar chunk uzakta
+      { id: 'yozgat', ring: [3, 6] }, { id: 'konyastad', ring: [6, 10], apart: ['yozgat', 5] },
+      { id: 'gecit', ring: [11, 14] }, // Ücra köşedeki terk edilmiş depo alanı (CONFIG.secret)
     ],
     // Yüksek özel yapıların yükseklik payı (sıradan binalar en çok tall.height[1])
     landmarkHeight: { kolej: 0.46, kule: 0.95 },
@@ -301,7 +309,7 @@ const CONFIG = {
     { id: 'tilki', paints: [{ name: 'Tilki Turuncusu', color: '#ff6a1a', finish: 'gloss', accent: '#111318' }, { name: 'Gece Siyahı', color: '#111318', finish: 'gloss', accent: '#ff6a1a' }, { name: 'Mat Gri', color: '#5a6068', finish: 'matte', accent: '#ffd23f' }, { name: 'Buz Beyazı', color: '#eef3f8', finish: 'pearl', accent: '#2b6fd6' }], finish: 'gloss', name: NAMES.arabalar.tilki, cost: 2400, desc: 'Hafif, oynak drift coupe', shape: 'tilki', maxSpeed: 572, accel: 720, turnRate: 3.72, grip: 5.0, driftGrip: 0.68, durability: 1.66, mass: 1.05, len: 46, wid: 24, color: '#ff6a1a', accent: '#111318', engine: { kind: 'turbo', cyl: 4, idle: 1000, red: 8200, gears: 6, gain: 1.05 } },
     { id: 'kartal', paints: [{ name: 'Yarış Mavisi', color: '#1f5fbf', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Kan Kırmızı', color: '#a3121f', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Mat Siyah', color: '#16181c', finish: 'matte', accent: '#ffd23f' }, { name: 'Çift Ton Krem-Yeşil', color: '#e8dcbc', finish: 'gloss', roof: '#2f5a3a' }], finish: 'gloss', name: NAMES.arabalar.kartal, cost: 3200, desc: 'Uzun kaput, gürleyen V8', shape: 'kartal', maxSpeed: 586, accel: 760, turnRate: 3.6, grip: 5.05, driftGrip: 0.66, durability: 1.74, mass: 1.35, len: 52, wid: 26, color: '#1f5fbf', accent: '#f4f6f8', engine: { kind: 'v8', cyl: 8, idle: 560, red: 5400, gears: 4, gain: 1.25 } },
     { id: 'volt', paints: [{ name: 'Plazma Mavi', color: '#1fb8e8', finish: 'metal', accent: '#0c0e12' }, { name: 'Grafit', color: '#2e333b', finish: 'metal', accent: '#1fb8e8' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte', accent: '#1fb8e8' }, { name: 'Aurora Mor', color: '#6a3cd9', finish: 'pearl', accent: '#9fe8ff' }], finish: 'metal', name: NAMES.arabalar.volt, cost: 4500, desc: 'Sessiz ama çok hızlı elektrikli GT', shape: 'volt', maxSpeed: 600, accel: 860, turnRate: 3.78, grip: 5.15, driftGrip: 0.63, durability: 1.82, mass: 1.4, len: 52, wid: 26, color: '#1fb8e8', accent: '#0c0e12', engine: { kind: 'ev', cyl: 8, idle: 0, red: 26000, gears: 1, gain: 0.85 } },
-    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, desc: 'Güdümlü enerji toplu süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 } },
+    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, desc: '360° taramalı silahlı süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 } },
   ],
 
   damage: {
@@ -330,16 +338,17 @@ const CONFIG = {
     dyingTime: 1.7, // Patlamadan skor ekranına geçiş
   },
 
+  // AŞAMA SIRASI: polis -> SWAT (swatAt) -> ağır takviye (advancedAt) -> uzaylılar (aliensAt) -> tanklar (tanksAt) -> meteor (meteor.at)
   difficulty: {
     swatAt: 50,
     advancedAt: 200,
-    tanksAt: 280,
-    aliensAt: 225, // 200-250 sn arası: uzaylı işgali başlar. Oyun burada gerçekten zorlaşır
+    tanksAt: 300,
+    aliensAt: 225, // Uzaylı arabaları gelir (CONFIG.aliens)
     firstSpawnAt: 5,
     // [saniye, değer] noktaları arasında doğrusal artar, yani her saniye biraz zorlaşır.
     // Polis sayısı, hızı ve davranışları aşağıdaki pursuit bölümündedir
     hpCurve: [[0, 1], [50, 1], [200, 1.9], [280, 2.3], [600, 3.5]],
-    powerCurve: [[0, 0.65], [30, 0.8], [50, 0.9], [200, 1.25], [280, 1.4], [600, 1.8]],
+    powerCurve: [[0, 0.65], [30, 0.8], [50, 0.9], [200, 1.25], [300, 1.32], [600, 1.55]], // Geç aşamada yumuşak: tank ve meteor zaten zorlaştırır
     maxActive: 24, // Mutlak üst sınır (barikat ve tank dahil). Cihaz sınırı quality.js ve pursuit.phoneCap
     swatShare: [[50, 0.15], [200, 0.3], [280, 0.25]],
     motoFrom: 15,
@@ -347,8 +356,8 @@ const CONFIG = {
     fastFrom: 25,
     fastShare: [[25, 0.12], [50, 0.2], [200, 0.22]],
     advancedShare: [[200, 0.3], [280, 0.5]],
-    tankCount: [[280, 1], [340, 2], [420, 3], [600, 4]],
-    tankInterval: 22,
+    tankCount: [[300, 1], [380, 2], [500, 3]], // Aynı anda en çok tank: yavaş ama çok güçlü, kaçılabilir
+    tankInterval: 26,
   },
 
   // ZORLUK EĞRİSİ: polis baskısının tüm ayarları burada. [saniye, değer] noktaları arası doğrusaldır.
@@ -356,7 +365,7 @@ const CONFIG = {
   pursuit: {
     countMul: 1, // 0.7 kolay, 1 normal, 1.3 zor
     speedMul: 1,
-    policeCurve: [[0, 1], [15, 2], [30, 3], [60, 7], [120, 12], [180, 16], [240, 20], [300, 24]],
+    policeCurve: [[0, 1], [15, 2], [30, 3], [60, 7], [120, 12], [180, 16], [240, 20], [300, 24], [380, 20]], // Meteor aşamasında baskıyı meteorlar kurar
     spawnCurve: [[0, 6], [30, 4.5], [60, 2.8], [120, 1.8], [200, 1.2], [280, 0.9], [420, 0.7]],
     speedCurve: [[0, 0.93], [60, 0.97], [120, 1], [240, 1.04], [360, 1.07]],
     speedRatioMax: 0.97, // Polis son hızı oyuncu hızının bu oranını geçemez: düz yolda kaçılır
@@ -368,7 +377,7 @@ const CONFIG = {
     // Arananlık: oyuncunun yaptıkları süreye saniye olarak eklenir, durulunca söner
     heat: { kill: 5, nearMiss: 1, prop: 0.2, max: 60, decay: 0.3, from: 45 }, // from: bu saniyeden önce etkisiz, başlangıç kolay kalır
     // Adalet: oyuncunun çevresine aynı anda bu kadar polis girer, fazlası geride bekler
-    closeCurve: [[0, 2], [120, 3], [240, 4], [360, 5]],
+    closeCurve: [[0, 2], [120, 3], [240, 4]],
     closeR: 260,
     frontMax: 2, // Önünde aynı anda en çok bu kadar polis yaklaşır
     frontR: 360,
@@ -416,19 +425,23 @@ const CONFIG = {
   },
 
   // On ayrı polis sireni ve iki uzaylı sesi. Her araç o an boşta olan sireni seçer
-  sirens: ['wail', 'yelp', 'hilo', 'chirp', 'euro', 'rumble', 'horn', 'bip', 'pulse', 'warble', 'ufo', 'zap'],
+  sirens: ['wail', 'yelp', 'hilo', 'chirp', 'euro', 'rumble', 'horn', 'bip', 'pulse', 'warble', 'warp', 'zap'],
 
-  // Uzaylılar: bu aşamada oyuncudan HIZLIDIR, kaçmak zordur. Eşikler ve güç burada
+  // UZAYLI ARABALARI (çizgi film tarzı, uydurma). Güç sırası: polis < SWAT < uzaylı < tank (hp, ram, mass).
+  // Hepsi oyuncudan YAVAŞTIR (speed < 1, pursuit.speedRatioMax ile de sınırlı): düz yolda kaçılır.
+  // intro: "UZAYLILAR GELDİ!" yazısının süresi, shield: geçişte oyuncunun hasar almadığı süre (sn).
+  // Geçişte wave kadar uzaylı ekran kenarına (edge: ekran yarı boyutuna oran) her yönden aynı anda ışınlanır; hiçbiri
+  // oyuncuya safeR'den yakın doğmaz (ilk saniyelerde yetişemez). wake: belirdikten sonra yerinde bekleme (ışınlanma).
+  // cap: aynı anda en çok uzaylı [saniye, sayı]; phoneCap / desktopCap cihaz tavanı. spawnEvery: eksilen yenisi
   aliens: {
-    ufoCount: [[225, 1], [260, 2], [320, 3], [420, 4]], // [saniye, aynı anda en çok]
-    roverCount: [[225, 2], [250, 4], [300, 6], [420, 9]],
-    spawnEvery: 4.5,
-    ufo: { hp: 240, mass: 9, speed: 1.06, accel: 760, turnRate: 6, grip: 20, driftGrip: 20, len: 74, wid: 74, ram: 0, smart: 1, siren: 'ufo' },
-    rover: { hp: 110, mass: 1.7, speed: 1.02, accel: 860, turnRate: 4.6, grip: 13, driftGrip: 9, len: 46, wid: 28, ram: 0.75, smart: 1, siren: 'zap' },
-    beamRange: 105, // Işın dairesi
-    beamDps: 6, // Işın altında saniyede hasar
-    beamPull: 300, // Oyuncuyu merkeze çekme
-    beamSlow: 0.55, // Işın altında hız kaybı (saniyede oran)
+    intro: 3, shield: 3, wave: 6, safeR: 420, edge: 0.95, wake: 1.2,
+    cap: [[225, 6], [270, 7], [300, 5], [380, 4]], phoneCap: 8, desktopCap: 10, // Tanklar gelince işgal seyrelir
+    spawnEvery: 3.2,
+    types: {
+      dart: { weight: 1.2, hp: 180, mass: 1.8, speed: 0.95, accel: 700, turnRate: 3.9, grip: 11, driftGrip: 6, len: 50, wid: 26, ram: 1.1, smart: 0.9, siren: 'zap', glow: '#39ff9c', body: '#5a3d9a' },
+      blob: { weight: 1, hp: 230, mass: 2.6, speed: 0.9, accel: 620, turnRate: 3.3, grip: 10, driftGrip: 6, len: 54, wid: 34, ram: 1.3, smart: 0.85, siren: 'warp', glow: '#ff4fd8', body: '#1f8a6a' },
+      crab: { weight: 0.7, hp: 320, mass: 3.8, speed: 0.85, accel: 520, turnRate: 2.7, grip: 10, driftGrip: 7, len: 62, wid: 40, ram: 1.55, smart: 0.75, siren: 'warp', glow: '#ffd23f', body: '#7a2a52' },
+    },
   },
 
   // Oyuncu aracının altındaki ışık: NPC'lerden ayrılır
@@ -538,15 +551,20 @@ const CONFIG = {
     ledAlpha: 0.5, ledNight: 0.45, // Gündüz ve gece ek parlaklığı
   },
 
-  // GÜDÜMLÜ ENERJİ TOPU (yalnız weapon: true olan araba). Cephane sınırsız, ateş otomatik.
-  // fireEvery (SILAH_ATES_ARALIGI): iki atış arası (sn). Önündeki konide hedef yoksa atmaz; hedef çıkınca
-  // süre dolmuşsa hemen atar. Boşluk tuşu da yalnız süre dolmuşsa atar, aralığı kısaltmaz.
-  // damage (SILAH_HASAR): her isabetin sabit hasarı. hp: oyunun başındaki silah canı (polis türüne göre).
-  // armor: zırhlı araçlara giden hasarın katı (SWAT ve tank bu silahtan az etkilenir).
-  // Gereken isabet = tavan(hp / (damage * armor)): normal polis 100/22 = 5, SWAT 300/(22*0,7) = 20, tank 31.
-  // maxMissiles: aynı anda en çok mermi, range/cone: kilit menzili ve önde yarım koni açısı (radyan),
-  // turn: güdüm dönüş hızı, life: ömür (sn), lockEvery: hedef arama sıklığı (kare)
-  weapon: { fireEvery: 3.0, damage: 22, hp: { car: 100, fast: 100, moto: 80, advanced: 110, swat: 300, tank: 400, rover: 150, ufo: 250 }, armor: { swat: 0.7, tank: 0.6 }, maxMissiles: 3, speed: 760, turn: 5.5, life: 2.4, range: 620, cone: 0.62, hitR: 30, lockEvery: 6 },
+  // 360° OTOMATİK TARAMALI SİLAH (weapon: true olan araçlar: 42-66 arabası ve gizli motosiklet; js/gun.js ortak).
+  // Araç hangi yöne bakarsa baksın EKRANDA GÖRÜNEN düşmanlara ateş eder; ekran dışına ateş etmez. Düğme yok, cephane sınırsız.
+  // rate: saniyede mermi (5-10 arası). damage: her merminin sabit hasarı. hp: oyunun başındaki silah canı (tür başına).
+  // Gereken mermi = tavan(hp / damage): polis 22, hızlı polis 22, motor 20, gelişmiş 30, SWAT 55, uzaylı 75/80/88, tank 120.
+  // Yeni çıkanların canı zamanla artar (copHpGrowth), yani bu sayılar en azdır.
+  // speed: mermi hızı, life: ömür (sn), inset: hedefin ekran kenarından bu kadar içeride olması gerekir,
+  // maxBullets: havuz, maxTracers: aynı anda çizilen iz, hitR: isabet payı.
+  // Hedef: önce tehlikeli ve yakın olana ama bekleyen her hedefin önceliği zamanla artar (wait), takılıp kalmaz
+  weapon: {
+    rate: 7, damage: 10, speed: 1500, life: 0.75, inset: 8, maxBullets: 24, maxTracers: 18, hitR: 10, spread: 0.035,
+    hp: { car: 220, fast: 220, moto: 200, advanced: 300, swat: 550, dart: 750, blob: 800, crab: 880, tank: 1200 },
+    danger: { car: 1, fast: 1.1, moto: 0.9, advanced: 1.3, swat: 1.5, dart: 1.7, blob: 1.8, crab: 1.9, tank: 2.2 },
+    wait: 3.2, near: 900, maxSparks: 3,
+  },
 
   // ZAMANLA ARTAN POLİS CANI (silah canı, bütün arabalarda). Yeni çıkan polisin canı = hp * min(max, perMin ^ dakika).
   // Sahadaki polisler değişmez. %12 / dk: 2. dk 1,25x, 5. dk 1,76x, ~9,7. dk'dan sonra 3x tavan
@@ -567,6 +585,41 @@ const CONFIG = {
     art: { hiScale: 1.6, loScale: 0.5, hiNear: 2000, hiFree: 3600, loFree: 5200, hiMinPx: 0.9 },
     flag: { slices: 9, wave: 2.4, amp: 0.09 },
   },
+
+  // KORUNAN ALANLAR: meteor, tank mermisi, silah mermisi, barikat ve doğma bu kutuların (margin kadar genişletilmiş)
+  // içine giremez. Anıt (memorial.rect), gizli geçit (secret.ramp) ve iki stadyum (stadiums.*.rect)
+  protect: { memorial: 320, secret: 360, stadium: 170, bullet: 0 },
+
+  // METEOR YAĞMURU (tanklardan sonra). at: başlangıç (sn). warn: düşmeden önceki uyarı süresi, ASLA 3'ün altına inmez.
+  // radius: çarpma dairesi (içindeki oyuncu ölür, dışındaki zarar görmez), fall: uyarının son anlarında gökten düşüş.
+  // every: iki dalga arası (sn), perWave: dalgadaki meteor sayısı; ikisi de zamanla artar. max: aynı anda en çok meteor.
+  // minR / maxR: oyuncuya uzaklık bandı (hemen altına düşmez), lead: gidiş yönüne bakış (sn), aimShare: önüne düşen oranı.
+  // tankDamage: tankın aldığı hasar, shake: kamera sarsıntısı, sparks / dust: parçacık sayısı (sınırlı)
+  meteor: {
+    at: 380, warn: 3, radius: 120, fall: 0.55,
+    every: [[380, 4.6], [460, 3.6], [560, 2.8], [700, 2.1]],
+    perWave: [[380, 1], [450, 2], [540, 3], [680, 4]],
+    max: 7, minR: 230, maxR: 760, lead: 1.1, aimShare: 0.45,
+    tankDamage: 450, shake: 11, sparks: 14, dust: 12, crater: 70,
+  },
+
+  // GİZLİ GEÇİT: ücra köşedeki (landmark 'gecit') terk edilmiş depo alanının güneydoğu köşesinde rampa.
+  // ramp: chunk içindeki karo kutusu [x0, y0, x1, y1]. Girince bodrum sahnesi (scene sn), sonra oyuna dönülür.
+  // minSpeed: rampaya bu hızla girilince tetiklenir, shield: dönüşte hasar almama süresi
+  secret: { ramp: [27, 27, 30, 30], scene: 3.2, slide: 0.9, minSpeed: 30, shield: 3 },
+
+  // İKİ STADYUM (js/stadium.js çizer). rect: chunk içindeki karo kutusu. Yıkılmaz, katı, polis ve trafik dolanır.
+  // Adlar isim tablosunda (NAMES.stadyum). art: önbellekli çizim ölçekleri, fans: taraftar siluetleri bu yakında
+  stadiums: {
+    yozgat: { rect: [11, 9, 23, 20], cap: 15000 },
+    konya: { rect: [6, 6, 28, 26], cap: 42000 },
+    art: { hiScale: 1.25, loScale: 0.32, hiNear: 1900, hiFree: 3600, loFree: 6000 },
+    fans: 900, flagWave: 2.2,
+  },
+
+  // GİZLİ MOTOSİKLET: satılmaz, galeride, dükkânda ve kod bölümünde görünmez. Yalnız gizli geçidi bulan oyuncunun
+  // garajında belirir (storage.secret). Silahı 42-66 arabasıyla aynıdır (weapon: true, js/gun.js)
+  secretCar: { id: 'golge', secret: true, weapon: true, paints: [{ name: 'Gece Nöbeti', color: '#111321', finish: 'gloss', accent: '#21e6ff' }, { name: 'Neon Pembe', color: '#1a0f1f', finish: 'gloss', accent: '#ff2fa0' }, { name: 'Zehir Yeşili', color: '#0f1a14', finish: 'matte', accent: '#39ff7a' }, { name: 'Gümüş Hayalet', color: '#c9d1dc', finish: 'metal', accent: '#7a2cff' }], finish: 'gloss', name: 'Gölge R', cost: 0, desc: 'Gizli geçidin hediyesi', shape: 'golge', maxSpeed: 650, accel: 1000, turnRate: 4.1, grip: 5.4, driftGrip: 0.9, durability: 1.5, mass: 0.8, len: 38, wid: 16, color: '#111321', accent: '#21e6ff', engine: { kind: 'beast', cyl: 2, idle: 950, red: 11500, gears: 6, gain: 1.75 } },
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
   // Yeni kod eklemek için satır eklenir. car: açılan araba
@@ -702,7 +755,7 @@ const CONFIG = {
 // Hız çarpanlarını uygula: yukarıdaki sayılar temel değerdir, ayar speedScale üzerinden yapılır
 {
   const S = CONFIG.speedScale;
-  for (const c of CONFIG.cars) c.maxSpeed = Math.round(c.maxSpeed * S.player);
+  for (const c of [...CONFIG.cars, CONFIG.secretCar]) c.maxSpeed = Math.round(c.maxSpeed * S.player);
   for (const t of Object.values(CONFIG.npc.types)) t.cruise = Math.round(t.cruise * S.npc);
   const H = CONFIG.highwayTraffic;
   H.speed = H.speed.map((v) => Math.round(v * S.highway));
@@ -712,6 +765,11 @@ const CONFIG = {
 
 // Yıldız seviyesi: başlangıçta 1, her eşikte artar
 const MAX_STARS = 4;
+
+// Araç bul: satılık arabalar ve gizli motosiklet
+function carById(id) {
+  return CONFIG.cars.find((c) => c.id === id) || (CONFIG.secretCar.id === id ? CONFIG.secretCar : null);
+}
 
 // --- i18n/tr.js ---
 // Türkçe. Anahtarlar bütün dillerde aynıdır; {ad} biçimindeki yerlere değer konur.
@@ -747,7 +805,7 @@ const TR = {
   },
   dev: {
     title: 'Geliştirici', god: 'Ölümsüzlük', start: 'Başlangıç süresi',
-    t0: '0 sn', t45: '45 sn (SWAT öncesi)', t195: '195 sn (takviye öncesi)', t275: '275 sn (tank öncesi)', t280: '280 sn (tanklar)',
+    t0: '0 sn', t45: '45 sn (SWAT öncesi)', t195: '195 sn (takviye öncesi)', t275: '295 sn (tank öncesi)', t280: '300 sn (tanklar)',
   },
   howto: {
     title: 'Nasıl Oynanır',
@@ -772,7 +830,7 @@ const TR = {
   },
   pause: { title: 'Duraklatıldı', resume: 'Devam et', menu: 'Ana menü' },
   over: {
-    caught: 'YAKALANDIN!', sunk: 'BATTIN!', record: 'YENİ REKOR!',
+    caught: 'YAKALANDIN!', sunk: 'BATTIN!', meteor: 'METEOR ÇARPTI!', record: 'YENİ REKOR!',
     score: 'Skor', time: 'Süre', coins: 'Coin', kills: 'Devrilen polis', broken: 'Kırılan nesne', near: 'Yakın kaçış', drift: 'Drift',
     seconds: '{n} sn', best: 'En iyi skor: {score} · En uzun süre: {time}', retry: 'Tekrar dene', menu: 'Ana menü',
   },
@@ -782,7 +840,7 @@ const TR = {
     stick: ['Sol yarı', 'bas ve kaydır', 'Joystick', 'parmağının altında', 'GERİ tut', 'geri vites'],
     rev: 'GERİ',
   },
-  alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!' },
+  alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!', meteors: 'METEOR YAĞMURU!' },
   escape: { toast: '+{n} KIL PAYI!', combo: 'KOMBO +{n}' },
   code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.' },
   custom: {
@@ -807,8 +865,11 @@ const TR = {
     tilki: { desc: 'Hafif, oynak drift coupe', paints: ['Tilki Turuncusu','Gece Siyahı','Mat Gri','Buz Beyazı'] },
     kartal: { desc: 'Uzun kaput, gürleyen V8', paints: ['Yarış Mavisi','Kan Kırmızı','Mat Siyah','Çift Ton Krem-Yeşil'] },
     volt: { desc: 'Sessiz ama çok hızlı elektrikli GT', paints: ['Plazma Mavi','Grafit','Mat Beyaz','Aurora Mor'] },
-    kuzgun: { desc: 'Güdümlü enerji toplu süper araba', paints: ['Kuzgun Siyahı','Neon Kırmızı','Mat Titanyum','Çift Ton Beyaz-Siyah'] },
+    kuzgun: { desc: '360° taramalı silahlı süper araba', paints: ['Kuzgun Siyahı','Neon Kırmızı','Mat Titanyum','Çift Ton Beyaz-Siyah'] },
+    golge: { name: 'Gölge R', desc: 'Gizli geçidin hediyesi: 360° taramalı silahlı süper motosiklet', paints: ['Gece Nöbeti', 'Neon Pembe', 'Zehir Yeşili', 'Gümüş Hayalet'] },
   },
+  meteor: { warn: 'Kırmızı halkadan çık: meteor geliyor!' },
+  secret: { guest: 'Artık {name}\'ın da misafirisiniz', found: 'Gizli bölümü buldun! Hoş geldin', gift: 'Hediye: {name} motosikleti artık garajında!' },
 };
 
 // --- i18n/en.js ---
@@ -845,7 +906,7 @@ const EN = {
   },
   dev: {
     title: 'Developer', god: 'Invincible', start: 'Start time',
-    t0: '0 s', t45: '45 s (before SWAT)', t195: '195 s (before backup)', t275: '275 s (before tanks)', t280: '280 s (tanks)',
+    t0: '0 s', t45: '45 s (before SWAT)', t195: '195 s (before backup)', t275: '295 s (before tanks)', t280: '300 s (tanks)',
   },
   howto: {
     title: 'How to Play',
@@ -870,7 +931,7 @@ const EN = {
   },
   pause: { title: 'Paused', resume: 'Resume', menu: 'Main menu' },
   over: {
-    caught: 'BUSTED!', sunk: 'SUNK!', record: 'NEW RECORD!',
+    caught: 'BUSTED!', sunk: 'SUNK!', meteor: 'METEOR STRIKE!', record: 'NEW RECORD!',
     score: 'Score', time: 'Time', coins: 'Coins', kills: 'Police wrecked', broken: 'Objects smashed', near: 'Close calls', drift: 'Drift',
     seconds: '{n} s', best: 'Best score: {score} · Longest run: {time}', retry: 'Try again', menu: 'Main menu',
   },
@@ -880,7 +941,7 @@ const EN = {
     stick: ['Left half', 'press and slide', 'Joystick', 'appears under your thumb', 'Hold REV', 'reverse'],
     rev: 'REV',
   },
-  alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!' },
+  alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!', meteors: 'METEOR SHOWER!' },
   escape: { toast: '+{n} CLOSE CALL!', combo: 'COMBO +{n}' },
   code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.' },
   custom: {
@@ -905,8 +966,11 @@ const EN = {
     tilki: { desc: 'Light, playful drift coupe', paints: ['Fox Orange','Night Black','Matte Gray','Ice White'] },
     kartal: { desc: 'Long hood, rumbling V8', paints: ['Racing Blue','Blood Red','Matte Black','Two-Tone Cream/Green'] },
     volt: { desc: 'Silent but very fast electric GT', paints: ['Plasma Blue','Graphite','Matte White','Aurora Purple'] },
-    kuzgun: { desc: 'Supercar with a homing energy launcher', paints: ['Raven Black','Neon Red','Matte Titanium','Two-Tone White/Black'] },
+    kuzgun: { desc: 'Supercar with a 360° auto-gun', paints: ['Raven Black','Neon Red','Matte Titanium','Two-Tone White/Black'] },
+    golge: { name: 'Shadow R', desc: 'Secret passage gift: superbike with a 360° auto-gun', paints: ['Night Watch', 'Neon Pink', 'Toxic Green', 'Silver Ghost'] },
   },
+  meteor: { warn: 'Get out of the red circle: meteor incoming!' },
+  secret: { guest: 'You are now {name}\'s guest too', found: 'You found the secret area! Welcome', gift: 'Gift: the {name} motorcycle is now in your garage!' },
 };
 
 // --- i18n/ja.js ---
@@ -943,7 +1007,7 @@ const JA = {
   },
   dev: {
     title: '開発者', god: '無敵', start: '開始時間',
-    t0: '0秒', t45: '45秒（SWAT前）', t195: '195秒（増援前）', t275: '275秒（戦車前）', t280: '280秒（戦車）',
+    t0: '0秒', t45: '45秒（SWAT前）', t195: '195秒（増援前）', t275: '295秒（戦車前）', t280: '300秒（戦車）',
   },
   howto: {
     title: '遊び方',
@@ -968,7 +1032,7 @@ const JA = {
   },
   pause: { title: '一時停止', resume: '再開', menu: 'メインメニュー' },
   over: {
-    caught: '捕まった！', sunk: '沈没！', record: '新記録！',
+    caught: '捕まった！', sunk: '沈没！', meteor: '隕石直撃！', record: '新記録！',
     score: 'スコア', time: 'タイム', coins: 'コイン', kills: '倒した警察', broken: '壊した物', near: 'ニアミス', drift: 'ドリフト',
     seconds: '{n}秒', best: 'ベストスコア：{score} · 最長記録：{time}', retry: 'もう一度', menu: 'メインメニュー',
   },
@@ -978,7 +1042,7 @@ const JA = {
     stick: ['左半分', '押してスライド', 'スティック', '指の下に出る', '「バック」長押し', 'バック'],
     rev: 'バック',
   },
-  alert: { swat: 'SWAT出動！', heavy: '重装増援！', tanks: '戦車だ！', aliens: 'エイリアン襲来！' },
+  alert: { swat: 'SWAT出動！', heavy: '重装増援！', tanks: '戦車だ！', aliens: 'エイリアン襲来！', meteors: '隕石の雨！' },
   escape: { toast: '+{n} ギリギリ回避！', combo: 'コンボ +{n}' },
   code: { title: 'コード入力', apply: '適用', ok: 'コード承認！{car}がガレージに追加されたよ。', owned: 'この車はもう持っているよ。', invalid: '無効なコードです。', empty: 'まずコードを入力してね。' },
   custom: {
@@ -1003,8 +1067,11 @@ const JA = {
     tilki: { desc: '軽くて遊び心のあるドリフトクーペ', paints: ['フォックスオレンジ','ナイトブラック','マットグレー','アイスホワイト'] },
     kartal: { desc: 'ロングノーズに唸るV8', paints: ['レーシングブルー','ブラッドレッド','マットブラック','2トーン クリーム／グリーン'] },
     volt: { desc: '静かで速い電動GT', paints: ['プラズマブルー','グラファイト','マットホワイト','オーロラパープル'] },
-    kuzgun: { desc: '追尾エネルギー弾を積んだスーパーカー', paints: ['レイヴンブラック','ネオンレッド','マットチタン','2トーン ホワイト／ブラック'] },
+    kuzgun: { desc: '360°自動機銃付きスーパーカー', paints: ['レイヴンブラック','ネオンレッド','マットチタン','2トーン ホワイト／ブラック'] },
+    golge: { name: 'シャドウR', desc: '秘密の通路の贈り物：360°自動機銃付きスーパーバイク', paints: ['ナイトウォッチ', 'ネオンピンク', 'トキシックグリーン', 'シルバーゴースト'] },
   },
+  meteor: { warn: '赤い円から出ろ：隕石が落ちてくる！' },
+  secret: { guest: 'これであなたも{name}さんのお客様です', found: '秘密のエリアを見つけた！ようこそ', gift: 'プレゼント：バイク「{name}」がガレージに！' },
 };
 
 // --- i18n/zh.js ---
@@ -1041,7 +1108,7 @@ const ZH = {
   },
   dev: {
     title: '开发者', god: '无敌', start: '开始时间',
-    t0: '0 秒', t45: '45 秒（SWAT 前）', t195: '195 秒（增援前）', t275: '275 秒（坦克前）', t280: '280 秒（坦克）',
+    t0: '0 秒', t45: '45 秒（SWAT 前）', t195: '195 秒（增援前）', t275: '295 秒（坦克前）', t280: '300 秒（坦克）',
   },
   howto: {
     title: '玩法说明',
@@ -1066,7 +1133,7 @@ const ZH = {
   },
   pause: { title: '已暂停', resume: '继续', menu: '主菜单' },
   over: {
-    caught: '被抓了！', sunk: '沉没了！', record: '新纪录！',
+    caught: '被抓了！', sunk: '沉没了！', meteor: '被陨石击中！', record: '新纪录！',
     score: '得分', time: '时间', coins: '金币', kills: '击毁警车', broken: '撞毁物品', near: '惊险闪避', drift: '漂移',
     seconds: '{n} 秒', best: '最高分：{score} · 最长时间：{time}', retry: '再来一次', menu: '主菜单',
   },
@@ -1076,7 +1143,7 @@ const ZH = {
     stick: ['左半屏', '按住滑动', '摇杆', '出现在手指下', '按住“倒车”', '倒车'],
     rev: '倒车',
   },
-  alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！' },
+  alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！', meteors: '流星雨来袭！' },
   escape: { toast: '+{n} 惊险脱身！', combo: '连击 +{n}' },
   code: { title: '输入代码', apply: '确定', ok: '代码已接受！{car} 已加入你的车库。', owned: '这辆车你已经有了。', invalid: '无效代码。', empty: '请先输入代码。' },
   custom: {
@@ -1101,8 +1168,11 @@ const ZH = {
     tilki: { desc: '轻巧灵活的漂移跑车', paints: ['狐狸橙','夜幕黑','哑光灰','冰雪白'] },
     kartal: { desc: '长车头，轰鸣的 V8', paints: ['赛道蓝','血红','哑光黑','双色 奶白/绿'] },
     volt: { desc: '安静却极快的电动 GT', paints: ['等离子蓝','石墨灰','哑光白','极光紫'] },
-    kuzgun: { desc: '搭载追踪能量炮的超跑', paints: ['渡鸦黑','霓虹红','哑光钛','双色 白/黑'] },
+    kuzgun: { desc: '配备360°自动机枪的超跑', paints: ['渡鸦黑','霓虹红','哑光钛','双色 白/黑'] },
+    golge: { name: '暗影R', desc: '秘密通道的礼物：配备360°自动机枪的超级摩托', paints: ['夜巡', '霓虹粉', '毒绿', '银色幽灵'] },
   },
+  meteor: { warn: '快离开红圈：陨石来了！' },
+  secret: { guest: '现在你也是{name}的客人了', found: '你发现了隐藏区域！欢迎', gift: '礼物：{name} 摩托车已进入你的车库！' },
 };
 
 // --- i18n/es.js ---
@@ -1139,7 +1209,7 @@ const ES = {
   },
   dev: {
     title: 'Desarrollador', god: 'Invencible', start: 'Tiempo inicial',
-    t0: '0 s', t45: '45 s (antes del SWAT)', t195: '195 s (antes de refuerzos)', t275: '275 s (antes de tanques)', t280: '280 s (tanques)',
+    t0: '0 s', t45: '45 s (antes del SWAT)', t195: '195 s (antes de refuerzos)', t275: '295 s (antes de tanques)', t280: '300 s (tanques)',
   },
   howto: {
     title: 'Cómo jugar',
@@ -1164,7 +1234,7 @@ const ES = {
   },
   pause: { title: 'En pausa', resume: 'Continuar', menu: 'Menú principal' },
   over: {
-    caught: '¡TE PILLARON!', sunk: '¡HUNDIDO!', record: '¡NUEVO RÉCORD!',
+    caught: '¡TE PILLARON!', sunk: '¡HUNDIDO!', meteor: '¡IMPACTO DE METEORITO!', record: '¡NUEVO RÉCORD!',
     score: 'Puntos', time: 'Tiempo', coins: 'Monedas', kills: 'Policías derribados', broken: 'Objetos rotos', near: 'Por los pelos', drift: 'Derrape',
     seconds: '{n} s', best: 'Mejor puntuación: {score} · Mayor tiempo: {time}', retry: 'Reintentar', menu: 'Menú principal',
   },
@@ -1174,7 +1244,7 @@ const ES = {
     stick: ['Mitad izq.', 'pulsa y desliza', 'Joystick', 'aparece bajo tu dedo', 'Mantén ATRÁS', 'marcha atrás'],
     rev: 'ATRÁS',
   },
-  alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!' },
+  alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!', meteors: '¡LLUVIA DE METEORITOS!' },
   escape: { toast: '+{n} ¡POR LOS PELOS!', combo: 'COMBO +{n}' },
   code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.' },
   custom: {
@@ -1199,8 +1269,11 @@ const ES = {
     tilki: { desc: 'Coupé de derrape ligero y juguetón', paints: ['Naranja zorro','Negro noche','Gris mate','Blanco hielo'] },
     kartal: { desc: 'Capó largo y V8 rugiente', paints: ['Azul carreras','Rojo sangre','Negro mate','Bicolor crema/verde'] },
     volt: { desc: 'GT eléctrico, silencioso y muy rápido', paints: ['Azul plasma','Grafito','Blanco mate','Morado aurora'] },
-    kuzgun: { desc: 'Superdeportivo con lanzador de energía guiado', paints: ['Negro cuervo','Rojo neón','Titanio mate','Bicolor blanco/negro'] },
+    kuzgun: { desc: 'Superdeportivo con ametralladora automática 360°', paints: ['Negro cuervo','Rojo neón','Titanio mate','Bicolor blanco/negro'] },
+    golge: { name: 'Sombra R', desc: 'Regalo del pasaje secreto: superbike con ametralladora automática 360°', paints: ['Guardia nocturna', 'Rosa neón', 'Verde tóxico', 'Fantasma plateado'] },
   },
+  meteor: { warn: '¡Sal del círculo rojo: viene un meteorito!' },
+  secret: { guest: 'Ahora también eres invitado de {name}', found: '¡Encontraste la zona secreta! Bienvenido', gift: 'Regalo: ¡la moto {name} ya está en tu garaje!' },
 };
 
 // --- i18n/de.js ---
@@ -1237,7 +1310,7 @@ const DE = {
   },
   dev: {
     title: 'Entwickler', god: 'Unbesiegbar', start: 'Startzeit',
-    t0: '0 s', t45: '45 s (vor SWAT)', t195: '195 s (vor Verstärkung)', t275: '275 s (vor Panzern)', t280: '280 s (Panzer)',
+    t0: '0 s', t45: '45 s (vor SWAT)', t195: '195 s (vor Verstärkung)', t275: '295 s (vor Panzern)', t280: '300 s (Panzer)',
   },
   howto: {
     title: 'So wird gespielt',
@@ -1262,7 +1335,7 @@ const DE = {
   },
   pause: { title: 'Pausiert', resume: 'Weiter', menu: 'Hauptmenü' },
   over: {
-    caught: 'ERWISCHT!', sunk: 'VERSENKT!', record: 'NEUER REKORD!',
+    caught: 'ERWISCHT!', sunk: 'VERSENKT!', meteor: 'METEORITENTREFFER!', record: 'NEUER REKORD!',
     score: 'Punkte', time: 'Zeit', coins: 'Münzen', kills: 'Polizei erledigt', broken: 'Zerstörte Objekte', near: 'Knappe Manöver', drift: 'Drift',
     seconds: '{n} s', best: 'Bestwert: {score} · Längste Fahrt: {time}', retry: 'Nochmal', menu: 'Hauptmenü',
   },
@@ -1272,7 +1345,7 @@ const DE = {
     stick: ['Linke Hälfte', 'drücken und ziehen', 'Joystick', 'erscheint unter dem Daumen', 'RÜCK halten', 'Rückwärts'],
     rev: 'RÜCK',
   },
-  alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!' },
+  alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!', meteors: 'METEORITENHAGEL!' },
   escape: { toast: '+{n} HAARSCHARF!', combo: 'COMBO +{n}' },
   code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.' },
   custom: {
@@ -1297,8 +1370,11 @@ const DE = {
     tilki: { desc: 'Leichtes, verspieltes Drift-Coupé', paints: ['Fuchsorange','Nachtschwarz','Mattgrau','Eisweiß'] },
     kartal: { desc: 'Lange Haube, grollender V8', paints: ['Rennblau','Blutrot','Mattschwarz','Zweifarbig Creme/Grün'] },
     volt: { desc: 'Leiser, aber sehr schneller Elektro-GT', paints: ['Plasmablau','Graphit','Mattweiß','Aurora-Lila'] },
-    kuzgun: { desc: 'Supersportler mit Zielsuch-Energiewerfer', paints: ['Rabenschwarz','Neonrot','Mattes Titan','Zweifarbig Weiß/Schwarz'] },
+    kuzgun: { desc: 'Supersportler mit 360°-Automatikkanone', paints: ['Rabenschwarz','Neonrot','Mattes Titan','Zweifarbig Weiß/Schwarz'] },
+    golge: { name: 'Schatten R', desc: 'Geschenk des Geheimgangs: Superbike mit 360°-Automatikkanone', paints: ['Nachtwache', 'Neonpink', 'Giftgrün', 'Silbergeist'] },
   },
+  meteor: { warn: 'Raus aus dem roten Kreis: Meteorit im Anflug!' },
+  secret: { guest: 'Jetzt bist du auch Gast von {name}', found: 'Du hast den geheimen Bereich gefunden! Willkommen', gift: 'Geschenk: Das Motorrad {name} steht jetzt in deiner Garage!' },
 };
 
 // --- i18n/index.js ---
@@ -1659,6 +1735,7 @@ class World {
     this.marks = null;
     this.sites = null;
     this.memo = undefined; // Anıt alanının dünya kutusu (memorialBox)
+    this.zoneList = null; // Korunan alanlar (zones)
     this.chunks = new Map();
     this.free = [];
     this.onRelease = null; // Çizim tarafı önbelleği geri alır
@@ -1681,6 +1758,7 @@ class World {
     this.marks = null;
     this.sites = null;
     this.memo = undefined;
+    this.zoneList = null;
   }
 
   release(c) {
@@ -1813,6 +1891,48 @@ class World {
     const dx = Math.max(b.x - x, 0, x - b.x - b.w);
     const dy = Math.max(b.y - y, 0, y - b.y - b.h);
     return Math.hypot(dx, dy);
+  }
+
+  // Korunan alanlar: anıt, gizli geçit rampası, iki stadyum. Chunk yüklenmeden tohumdan hesaplanır.
+  // Meteor, top ve silah mermisi, barikat ve doğma bu kutulara (kind'a göre pay) giremez
+  zones() {
+    if (this.zoneList) return this.zoneList;
+    const out = [];
+    const box = (kind, m, R) => out.push({ kind, x: m.cx * CHUNK + R[0] * TILE, y: m.cy * CHUNK + R[1] * TILE, w: (R[2] - R[0]) * TILE, h: (R[3] - R[1]) * TILE, margin: CONFIG.protect[kind] });
+    for (const m of this.landmarkList()) {
+      if (m.id === 'anit') box('memorial', m, CONFIG.memorial.rect);
+      else if (m.id === 'gecit') box('secret', m, CONFIG.secret.ramp);
+      else if (m.id === 'yozgat') box('stadium', m, CONFIG.stadiums.yozgat.rect);
+      else if (m.id === 'konyastad') box('stadium', m, CONFIG.stadiums.konya.rect);
+    }
+    this.zoneList = out;
+    return out;
+  }
+
+  zone(kind) {
+    return this.zones().find((z) => z.kind === kind) || null;
+  }
+
+  // Nokta bir korunan alanın (kendi payı + extra kadar genişletilmiş) içinde mi; varsa alanı döndürür
+  protectedAt(x, y, extra = 0, useMargin = true) {
+    for (const z of this.zones()) {
+      const m = (useMargin ? z.margin : 0) + extra;
+      if (x > z.x - m && x < z.x + z.w + m && y > z.y - m && y < z.y + z.h + m) return z;
+    }
+    return null;
+  }
+
+  // Doğru parçası korunan bir kutudan (paysız) geçiyor mu: silah hedefi seçerken
+  segmentProtected(x0, y0, x1, y1) {
+    for (const z of this.zones()) {
+      if (Math.max(x0, x1) < z.x || Math.min(x0, x1) > z.x + z.w || Math.max(y0, y1) < z.y || Math.min(y0, y1) > z.y + z.h) continue;
+      // Slab yöntemi
+      let t0 = 0; let t1 = 1;
+      const dx = x1 - x0; const dy = y1 - y0;
+      const clip = (p, q) => { if (p === 0) return q >= 0; const r = q / p; if (p < 0) { if (r > t1) return false; if (r > t0) t0 = r; } else { if (r < t0) return false; if (r < t1) t1 = r; } return true; };
+      if (clip(-dx, x0 - z.x) && clip(dx, z.x + z.w - x0) && clip(-dy, y0 - z.y) && clip(dy, z.y + z.h - y0) && t0 <= t1) return true;
+    }
+    return false;
   }
 
   // Daire korunan bölüme değiyor mu; out: nx, ny, depth (dışarı itme yönü)
@@ -1991,7 +2111,7 @@ class World {
     // Kayıt yeniden kullanılır: önceki binanın tabela görüntüsü kalmasın (render.js rectSign önbelleği)
     r.signImg = null;
     r.landmark = ''; r.signArt = ''; r.roofSignH = 0; r.noRoofSign = false; r.variant = '';
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false; r.memorial = false;
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false; r.memorial = false; r.stadium = "";
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -2635,6 +2755,7 @@ class World {
         if (Math.max(Math.abs(x), Math.abs(y)) <= 1 || isHighwayRow(y)) continue;
         if (Math.abs(sis.cx - x) < 2 && Math.abs(sis.cy - y) < 2) continue;
         if (this.marks.some((o) => Math.abs(o.cx - x) < 2 && Math.abs(o.cy - y) < 2)) continue;
+        if (m.apart && this.marks.some((o) => o.id === m.apart[0] && Math.max(Math.abs(o.cx - x), Math.abs(o.cy - y)) < m.apart[1])) continue;
         this.biomeAt(x, y, out);
         if (out.biome !== 'city' && !(m.id === 'meram' && (out.biome === 'rural' || out.biome === 'forest'))) continue;
         this.marks.push({ id: m.id, cx: x, cy: y });
@@ -2749,6 +2870,12 @@ class World {
       this.scatter(c, PROP.BUSH, 12, [GROUND.DIRT]);
     } else if (id === 'anit') {
       this.fillMemorial(c);
+    } else if (id === 'yozgat') {
+      this.fillYozgat(c);
+    } else if (id === 'konyastad') {
+      this.fillKonyaStadium(c);
+    } else if (id === 'gecit') {
+      this.fillSecret(c);
     } else {
       // Okullar: ad isim tablosunda, renkler uydurma ve genel
       const look = { serife: ['#efe2c0', '#c8261e'], ted: ['#f2f2f2', '#c1121f'], gundogdu: ['#ffe08a', '#1f3a68'] }[id];
@@ -2787,6 +2914,67 @@ class World {
     // Çevre aydınlatması: korunan bölümün köşelerinde ve güney kenarında
     const L = (tx, ty) => this.addLight(c, 0, c.x + tx * TILE, c.y + ty * TILE, 0, 0, null);
     for (const [tx, ty] of [[x0 - 0.6, y0 - 0.6], [x1 + 0.6, y0 - 0.6], [x0 - 0.6, y1 + 0.6], [x1 + 0.6, y1 + 0.6], [(x0 + x1) / 2, y0 - 1.2]]) L(tx, ty);
+  }
+
+  // Stadyum gövdesi: tek katı dikdörtgen, köşeleri yuvarlak, hiçbir şey yıkamaz. Çizimi js/stadium.js
+  stadiumRect(c, id, R, radius) {
+    const r = this.addRect(c, 'stadium', R[0], R[1], R[2], R[3], 0, BUILD.STADIUM, '#2a2d33');
+    r.sacred = true;
+    r.stadium = id;
+    r.corners = 15;
+    r.radius = radius;
+    return r;
+  }
+
+  // Yozgat: orta boy, çevresinde koşu pisti, güneyde otopark, iki yanda ağaçlık
+  fillYozgat(c) {
+    const R = CONFIG.stadiums.yozgat.rect;
+    this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
+    this.setGround(c, ART, ART, 7, CT, GROUND.GRASS);
+    this.setGround(c, 27, ART, CT, CT, GROUND.GRASS);
+    this.setGround(c, R[0] - 1, R[1] - 1, R[2] + 1, R[3] + 1, GROUND.TRACK);
+    this.stadiumRect(c, 'yozgat', R, 34);
+    this.addPad(c, 'parking', 8, 23, 18, 7);
+    this.scatter(c, PROP.TREE, 26, [GROUND.GRASS]);
+    for (let x = 9; x < 26; x += 4) this.addProp(c, PROP.BENCH, c.x + (x + 0.5) * TILE, c.y + 21.6 * TILE);
+    const L = (tx, ty) => this.addLight(c, 0, c.x + tx * TILE, c.y + ty * TILE, 0, 0, null);
+    for (let x = 8; x <= 26; x += 6) { L(x, 22.4); L(x, 7.4); }
+  }
+
+  // Konya: çok büyük, çevre yolu, kuzey ve güneyde geniş otopark, yeşil bayraklı çimenlik
+  fillKonyaStadium(c) {
+    const R = CONFIG.stadiums.konya.rect;
+    this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
+    this.setGround(c, ART, 27, CT, CT, GROUND.PLAZA);
+    this.setGround(c, R[0] - 1, R[1] - 1, R[2] + 1, R[3] + 1, GROUND.ROAD); // Çevre yolu
+    this.stadiumRect(c, 'konya', R, 150);
+    this.addPad(c, 'parking', 5, 27, 24, 4);
+    this.addPad(c, 'parking', 6, ART, 22, 2);
+    for (const x of [ART + 0.5, 30.5]) for (let y = 7; y < 27; y += 3) this.addProp(c, PROP.TREE, c.x + x * TILE, c.y + (y + 0.5) * TILE);
+    const L = (tx, ty) => this.addLight(c, 0, c.x + tx * TILE, c.y + ty * TILE, 0, 0, null);
+    for (let x = 6; x <= 28; x += 5.5) { L(x, 4.6); L(x, 27.4); }
+  }
+
+  // Ücra köşe: terk edilmiş depo alanı. Güneydoğu köşede, neredeyse görünmeyen bodrum rampası (CONFIG.secret.ramp)
+  fillSecret(c) {
+    const B = BUILD;
+    const [rx0, ry0, rx1, ry1] = CONFIG.secret.ramp;
+    this.setGround(c, ART, ART, CT, CT, GROUND.DIRT);
+    this.setGround(c, ART, ART, CT, 5, GROUND.ALLEY);
+    this.addRect(c, 'building', 6, 7, 16, 14, 3, B.FACTORY, '#8a8f96');
+    this.addRect(c, 'building', 19, 6, 28, 12, 3, B.FACTORY, '#7d858c');
+    this.addRect(c, 'building', 5, 18, 13, 25, 3, B.FACTORY, '#91897c');
+    this.addRect(c, 'building', 17, 17, 23, 22, 4, B.RUIN, '#8c8478');
+    this.scatter(c, PROP.BUSH, 14, [GROUND.DIRT]);
+    this.scatter(c, PROP.TREE, 8, [GROUND.DIRT]);
+    // Rampanın çevresi boş kalır: çalı ve ağaç yolu kapatmaz
+    for (let i = 0; i < c.propCount; i++) {
+      const p = c.props[i];
+      const tx = (p.x - c.x) / TILE; const ty = (p.y - c.y) / TILE;
+      if (tx > rx0 - 3 && ty > ry0 - 3) p.alive = false;
+    }
+    // Zemin çevresiyle aynı toprak: tek ipucu rampanın çok hafif gölgesi (render.js bakeRamp)
+    this.addPad(c, 'gecit', rx0, ry0, rx1 - rx0, ry1 - ry0);
   }
 
   fillPark(c) {
@@ -4172,6 +4360,16 @@ class Crowd {
     }
   }
 
+  // Araçtan kaçan yaya kenara sıçrar; yalnız boş zemine (binanın ya da anıt alanının içine itilmez)
+  nudge(p, dx, dy, dist) {
+    const d = Math.hypot(dx, dy) || 1;
+    const w = this.g.world;
+    for (const k of [1, 0.6, 0.3]) {
+      const x = p.x + (dx / d) * dist * k; const y = p.y + (dy / d) * dist * k;
+      if (!w.blockedAt(x, y) && !w.inMemorial(x, y, 12)) { p.x = x; p.y = y; return; }
+    }
+  }
+
   checkHit(p, b, isPlayer) {
     if (isPlayer && this.g.cheat) return false;
     const r = b.len * 0.44 + 7;
@@ -4181,9 +4379,7 @@ class Crowd {
     const speed = Math.hypot(b.vx, b.vy);
     // Çocuk, yaşlı, bebek arabası ve tekerlekli sandalye: araç asla değmez, kenara çekilirler
     if (p.info.safe) {
-      const d = Math.hypot(dx, dy) || 1;
-      p.x += (dx / d) * 34;
-      p.y += (dy / d) * 34;
+      this.nudge(p, dx, dy, 34);
       p.a = Math.atan2(dy, dx);
       p.state = PED_RUN;
       p.turnT = 1.4;
@@ -4191,9 +4387,7 @@ class Crowd {
     }
     // Kedi ezilmez: son anda sıçrar
     if (p.info.dodge) {
-      const d = Math.hypot(dx, dy) || 1;
-      p.x += (dx / d) * 34;
-      p.y += (dy / d) * 34;
+      this.nudge(p, dx, dy, 34);
       p.a = Math.atan2(dy, dx);
       p.state = PED_RUN;
       p.turnT = 1.4;
@@ -4215,7 +4409,7 @@ class Crowd {
     return true;
   }
 
-  blast(x, y, R) {
+  blast(x, y, R, shake = 22) {
     for (const p of this.peds) {
       if (!p.alive || p.state === PED_FLY || p.info.dodge || p.info.safe) continue;
       if (Math.hypot(p.x - x, p.y - y) < R * 0.6) this.launch(p, { x, y, vx: 0, vy: 0 }, true);
@@ -4225,7 +4419,7 @@ class Crowd {
       if (!n.alive) continue;
       if (Math.hypot(n.x - x, n.y - y) < R) this.explodeNpc(n);
     }
-    g.cam.shake = Math.max(g.cam.shake, 22);
+    g.cam.shake = Math.max(g.cam.shake, shake);
   }
 
   explodeNpc(n) {
@@ -4456,6 +4650,274 @@ class Crowd {
   }
 }
 
+// --- gun.js ---
+// 360° OTOMATİK TARAMALI SİLAH: weapon: true olan bütün araçların ORTAK bileşeni (42-66 arabası ve gizli motosiklet).
+// Araç hangi yöne bakarsa baksın ekranda görünen düşmanlara sırayla ateş eder; ekran dışındakine ateş etmez.
+// Küçük hızlı mermiler, sabit hasar, sınırsız cephane, düğme yok. Mermiler havuzdan gelir: oyun sırasında bellek ayrılmaz.
+// Korunan alanlara (anıt, gizli geçit, stadyum) giren mermi kaybolur; o alanların ardındaki hedefe nişan alınmaz.
+
+const GUN = CONFIG.weapon;
+const GUN_D = CONFIG.difficulty;
+const GUN_GROW = CONFIG.copHpGrowth;
+
+// Türün oyuna ilk girdiği saniye: can artışı o andan sayılır, yani her tür ilk çıktığında tablodaki mermi sayısıyla ölür
+function gunFirstAt(type) {
+  if (type === 'swat') return GUN_D.swatAt;
+  if (type === 'advanced') return GUN_D.advancedAt;
+  if (type === 'tank') return GUN_D.tanksAt;
+  if (CONFIG.aliens.types[type]) return GUN_D.aliensAt;
+  return 0;
+}
+
+// Yeni çıkan düşmanın silah canı: temel can x zamanla artan kat (tavanlı, hiç 1'in altına inmez)
+function gunHp(type, time) {
+  const base = GUN.hp[type] || GUN.hp.car;
+  const minutes = Math.max(0, time - gunFirstAt(type)) / 60;
+  return base * Math.min(GUN_GROW.max, GUN_GROW.perMin ** minutes);
+}
+
+// Gereken mermi sayısı
+function bulletsToKill(type, time = gunFirstAt(type)) {
+  return Math.ceil(gunHp(type, time) / GUN.damage - 1e-9);
+}
+
+class AutoGun {
+  constructor() {
+    this.bullets = [];
+    for (let i = 0; i < GUN.maxBullets; i++) this.bullets.push({ alive: false, x: 0, y: 0, px: 0, py: 0, vx: 0, vy: 0, t: 0 });
+    this.reset();
+  }
+
+  reset() {
+    this.cd = 0;
+    this.shots = 0; // Atılan mermi
+    this.hits = 0; // İsabet
+    this.aim = 0; // Taretin baktığı açı
+    this.target = null;
+    this.flash = 0; // Namlu parlaması
+    this.inView = 0; // Ekrandaki hedef sayısı (son tarama)
+    this.clock = 0; // Silahın kendi saati: hedeflerin bekleme süresi buna göre
+    for (const b of this.bullets) b.alive = false;
+  }
+
+  // Hedef ekranda mı: kenardan inset kadar içeride olmalı
+  visible(game, c) {
+    const cam = game.cam;
+    return Math.abs(c.x - cam.x) < cam.halfW - GUN.inset && Math.abs(c.y - cam.y) < cam.halfH - GUN.inset;
+  }
+
+  // Öncelik: tehlike x yakınlık + bekleme. Bekleyen hedefin önceliği büyür: hepsi taranır, biri üstünde takılıp kalınmaz
+  pick(game) {
+    const p = game.player;
+    let best = null;
+    let bs = -1e9;
+    let n = 0;
+    for (const c of game.cops) {
+      if (c.hp <= 0 || !this.visible(game, c)) continue;
+      if (game.world.segmentProtected(p.x, p.y, c.x, c.y)) continue;
+      n++;
+      const d = Math.hypot(c.x - p.x, c.y - p.y);
+      const wait = Math.min(2, this.clock - c.aimAt);
+      const s = (GUN.danger[c.type] || 1) * (1 - Math.min(0.85, d / GUN.near)) + wait * GUN.wait;
+      if (s > bs) { bs = s; best = c; }
+    }
+    this.inView = n;
+    return best;
+  }
+
+  shoot(game, c) {
+    const b = this.bullets.find((k) => !k.alive);
+    if (!b) return false;
+    const p = game.player;
+    // Öne nişan: merminin varış süresi kadar hedefin ilerisi
+    const d = Math.hypot(c.x - p.x, c.y - p.y);
+    const t = d / GUN.speed;
+    const tx = c.x + c.vx * t;
+    const ty = c.y + c.vy * t;
+    const a = Math.atan2(ty - p.y, tx - p.x) + (Math.random() - 0.5) * GUN.spread;
+    const ca = Math.cos(a); const sa = Math.sin(a);
+    b.alive = true; b.t = 0;
+    b.x = p.x + ca * 12; b.y = p.y + sa * 12;
+    b.px = b.x; b.py = b.y;
+    b.vx = ca * GUN.speed; b.vy = sa * GUN.speed;
+    c.aimAt = this.clock;
+    this.aim = a;
+    this.target = c;
+    this.flash = 0.06;
+    this.shots++;
+    game.emit('shot');
+    return true;
+  }
+
+  update(game, dt) {
+    this.clock += dt;
+    if (this.flash > 0) this.flash -= dt;
+    this.cd -= dt;
+    if (game.state === 'play') {
+      // Düşük kare hızında da saniyede rate mermi: bir karede en çok üç
+      let k = 0;
+      while (this.cd <= 0 && k < 3) {
+        const c = this.pick(game);
+        if (!c || !this.shoot(game, c)) { this.cd = 0; break; } // Hedef yokken süre birikmez
+        this.cd += 1 / GUN.rate;
+        k++;
+      }
+      if (this.target && (this.target.hp <= 0 || !game.cops.includes(this.target))) this.target = null;
+    } else {
+      this.cd = Math.max(0, this.cd);
+    }
+    for (const b of this.bullets) if (b.alive) this.step(game, b, dt);
+  }
+
+  step(game, b, dt) {
+    b.t += dt;
+    b.px = b.x; b.py = b.y;
+    b.x += b.vx * dt; b.y += b.vy * dt;
+    if (b.t > GUN.life || game.world.protectedAt(b.x, b.y, GUN.hitR, false)) { b.alive = false; return; }
+    // Kare arası yol boyunca isabet: hızlı mermi hedefin içinden geçip gitmez
+    const sx = b.x - b.px; const sy = b.y - b.py;
+    const len2 = sx * sx + sy * sy || 1;
+    for (const c of game.cops) {
+      if (c.hp <= 0) continue;
+      const R = GUN.hitR + c.wid * 0.5;
+      const ox = c.x - b.px; const oy = c.y - b.py;
+      if (Math.abs(ox) > R + 40 && Math.abs(c.x - b.x) > R + 40) continue;
+      const u = Math.max(0, Math.min(1, (ox * sx + oy * sy) / len2));
+      const qx = b.px + sx * u - c.x; const qy = b.py + sy * u - c.y;
+      if (qx * qx + qy * qy > R * R) continue;
+      b.alive = false;
+      this.hits++;
+      game.gunHit(c, b.px + sx * u, b.py + sy * u);
+      return;
+    }
+  }
+}
+
+// --- meteor.js ---
+// METEOR YAĞMURU (tanklardan sonra). Her meteor düşmeden TAM warn saniye önce yerde nişangâh ve uyarı dairesi belirir;
+// süre dolunca meteor çakılır: içindeki oyuncu ölür, dışındaki zarar görmez. Binalar yıkılır; polis, uzaylı, tank ve
+// trafik etkilenir. Korunan alanlara (anıt, gizli geçit, stadyumlar) asla düşmez. Havuz kullanılır, sayı sınırlıdır.
+
+const MET = CONFIG.meteor;
+
+// [saniye, değer] noktaları arası doğrusal
+function meteorCurve(curve, t) {
+  if (t <= curve[0][0]) return curve[0][1];
+  for (let i = 1; i < curve.length; i++) {
+    if (t <= curve[i][0]) {
+      const [t0, v0] = curve[i - 1];
+      const [t1, v1] = curve[i];
+      return v0 + (v1 - v0) * ((t - t0) / (t1 - t0));
+    }
+  }
+  return curve[curve.length - 1][1];
+}
+
+// Dalga aralığı ve dalgadaki sayı: zamanla artar, uyarı süresi hiç değişmez
+function meteorRate(t) {
+  return { every: meteorCurve(MET.every, t), perWave: Math.round(meteorCurve(MET.perWave, t)) };
+}
+
+class MeteorStorm {
+  constructor() {
+    this.list = [];
+    for (let i = 0; i < MET.max; i++) this.list.push({ alive: false, x: 0, y: 0, t: 0, seed: 0 });
+    this.reset();
+  }
+
+  reset() {
+    this.waveT = 0.6; // Aşama başlayınca ilk meteor hemen uyarılır
+    this.spawned = 0;
+    this.impacts = 0;
+    this.on = false;
+    for (const m of this.list) m.alive = false;
+  }
+
+  active() {
+    let n = 0;
+    for (const m of this.list) if (m.alive) n++;
+    return n;
+  }
+
+  // Hedef: oyuncunun hemen altı değil, korunan alan değil, başka meteorun dairesi değil
+  place(game, m) {
+    const p = game.player;
+    const R = MET.radius;
+    const lx = p.x + p.vx * MET.lead;
+    const ly = p.y + p.vy * MET.lead;
+    for (let i = 0; i < 14; i++) {
+      const aimed = Math.random() < MET.aimShare;
+      const cx = aimed ? lx : p.x;
+      const cy = aimed ? ly : p.y;
+      const a = Math.random() * Math.PI * 2;
+      const r = MET.minR + Math.random() * (MET.maxR - MET.minR) * (aimed ? 0.45 : 1);
+      const x = cx + Math.cos(a) * r;
+      const y = cy + Math.sin(a) * r;
+      if (Math.hypot(x - p.x, y - p.y) < MET.minR) continue;
+      if (game.world.protectedAt(x, y, R)) continue;
+      let clash = false;
+      for (const o of this.list) if (o.alive && o !== m && Math.hypot(o.x - x, o.y - y) < R * 1.6) { clash = true; break; }
+      if (clash) continue;
+      m.x = x; m.y = y;
+      return true;
+    }
+    return false;
+  }
+
+  spawn(game) {
+    const m = this.list.find((k) => !k.alive);
+    if (!m || !this.place(game, m)) return false;
+    m.alive = true;
+    m.t = 0;
+    m.seed = Math.random();
+    this.spawned++;
+    game.emit('meteorwarn');
+    return true;
+  }
+
+  update(game, dt) {
+    if (game.time < MET.at) return;
+    if (!this.on) { this.on = true; game.emit('meteors'); }
+    for (const m of this.list) {
+      if (!m.alive) continue;
+      m.t += dt;
+      if (m.t >= MET.warn) this.impact(game, m);
+    }
+    if (game.state !== 'play') return;
+    this.waveT -= dt;
+    if (this.waveT <= 0) {
+      const r = meteorRate(game.time);
+      for (let i = 0; i < r.perWave; i++) this.spawn(game);
+      this.waveT = r.every;
+    }
+  }
+
+  impact(game, m) {
+    m.alive = false;
+    this.impacts++;
+    const R = MET.radius;
+    const fx = game.fx;
+    fx.explosion(m.x, m.y, R * 0.9);
+    fx.burst(FX.DUST, m.x, m.y, MET.dust, 260, 1.3, 30);
+    fx.sparks(m.x, m.y, MET.sparks);
+    fx.decal(m.x, m.y, MET.crater);
+    const p = game.player;
+    const d = Math.hypot(p.x - m.x, p.y - m.y);
+    game.cam.shake = Math.min(18, game.cam.shake + MET.shake * Math.max(0.35, 1 - d / 1400));
+    game.emit('meteorhit', Math.max(0.2, Math.min(1, 900 / (d + 300))));
+    if (game.state === 'play' && d < R && !game.cheat && !game.god) game.meteorKill(m.x, m.y);
+    // Polis, uzaylı ve tank: içindeki patlar, tank ağır hasar alır
+    for (let i = game.cops.length - 1; i >= 0; i--) {
+      const c = game.cops[i];
+      if (Math.hypot(c.x - m.x, c.y - m.y) > R + c.wid * 0.5) continue;
+      if (c.type === 'tank') { c.hp -= MET.tankDamage; c.hurtFlash = 0.5; if (c.hp > 0) continue; }
+      game.destroyCop(i, false);
+    }
+    game.crowd.blast(m.x, m.y, R, 0);
+    game.crushCircle(m.x, m.y, R * 0.85);
+  }
+}
+
 // --- game.js ---
 // Oyun mantığı. DOM'a dokunmaz; tarayıcısız test edilebilir.
 
@@ -4471,8 +4933,18 @@ const PU = CONFIG.pursuit;
 const ESC = CONFIG.escape;
 const WPN = CONFIG.weapon;
 const HPG = CONFIG.copHpGrowth;
+const SEC = CONFIG.secret;
 // Oyun dakikasına göre yeni polisin silah canı katı: üstel artış, tavanlı
 function copHpMul(time) { return Math.min(HPG.max, HPG.perMin ** (Math.max(0, time) / 60)); }
+// Uzaylı türü ağırlığa göre
+const ALIEN_TYPES = Object.keys(AL.types);
+function pickAlien(r) {
+  const total = ALIEN_TYPES.reduce((a, k) => a + AL.types[k].weight, 0);
+  let x = r * total;
+  for (const k of ALIEN_TYPES) { x -= AL.types[k].weight; if (x < 0) return k; }
+  return ALIEN_TYPES[0];
+}
+const isAlien = (type) => !!AL.types[type];
 const WX = CONFIG.weather;
 const MEM = CONFIG.memorial;
 
@@ -4522,8 +4994,7 @@ function difficultyAt(t, out = {}, heat = 0) {
   out.fastShare = t >= D.fastFrom ? interp(D.fastShare, t) : 0;
   out.tanks = t >= D.tanksAt ? Math.round(interp(D.tankCount, t)) : 0;
   out.barricadeEvery = t >= BAR.from ? interp(PU.barricadeCurve, h) : Infinity;
-  out.ufos = t >= D.aliensAt ? Math.round(interp(AL.ufoCount, t)) : 0;
-  out.rovers = t >= D.aliensAt ? Math.round(interp(AL.roverCount, t)) : 0;
+  out.aliens = t >= D.aliensAt ? Math.round(interp(AL.cap, t)) : 0;
   return out;
 }
 
@@ -4595,10 +5066,11 @@ class Game {
     this.flankSide = 1;
     this.shots = [];
     for (let i = 0; i < 8; i++) this.shots.push({ x: 0, y: 0, t: 0, alive: false });
-    // Güdümlü mermi havuzu: oyun sırasında bellek ayrılmaz. tx/ty kısa iz
-    this.missiles = [];
-    for (let i = 0; i < WPN.maxMissiles; i++) this.missiles.push({ alive: false, x: 0, y: 0, vx: 0, vy: 0, t: 0, target: null, tx: new Float32Array(6), ty: new Float32Array(6), ti: 0 });
+    // 360° taramalı silah (weapon: true olan araçlar) ve meteor yağmuru: havuzlu, oyun sırasında bellek ayrılmaz
+    this.gun = new AutoGun();
     this.weapon = null;
+    this.meteors = new MeteorStorm();
+    this.alienLimit = AL.desktopCap; // Dokunmatikte main.js telefon tavanını verir
     // Hava: tür, yoğunluk (0-1, yumuşak geçiş) ve zemin tutuşları (oyuncu, polis). Bellek ayrılmaz
     this.weather = 'sunny';
     this.weatherSetting = 'random';
@@ -4679,13 +5151,18 @@ class Game {
     this.sirenClosing = 0;
     this.alienT = 0;
     this.aliensOn = startTime >= D.aliensAt;
+    this.shieldT = 0; // Uzaylı geçişi ve gizli geçit dönüşü: hasar yok, araba yanıp söner
+    this.secretT = 0;
+    this.secretZ = null;
+    this.secretSeen = false;
     this.sinkT = 0;
     this.bubbleT = 0;
     this.cause = '';
     while (this.cops.length) this.copPool.push(this.cops.pop());
     for (const s of this.shots) s.alive = false;
-    for (const m of this.missiles) m.alive = false;
+    this.gun.reset();
     this.weapon = null;
+    this.meteors.reset();
     for (const s of this.spikes) s.alive = false;
     this.fx.clear();
     this.crowd.clear();
@@ -4705,7 +5182,7 @@ class Game {
     this.god = god;
     if (!keepWorld) this.world.reset(seed);
     this.resetRun(startTime);
-    this.weapon = carSpec.weapon ? { cd: 0, lock: null, shots: 0 } : null;
+    this.weapon = carSpec.weapon ? this.gun : null;
     this.dayT = 0;
     dayState(0, this.daylight);
     resetBody(this.player, 100, 300, Math.PI / 2, carSpec);
@@ -4803,6 +5280,7 @@ class Game {
     else if (this.state === 'play') this.tickPlay(dt, steer, reverse);
     else if (this.state === 'dying') this.tickDying(dt);
     else if (this.state === 'sinking') this.tickSinking(dt);
+    else if (this.state === 'secret') this.tickSecret(dt);
     this.fx.update(dt);
     this.updateCamera(dt);
   }
@@ -4832,18 +5310,18 @@ class Game {
       }
       this.lastStage = this.diff.stage;
     }
-    if (!this.aliensOn && this.time >= D.aliensAt) {
-      this.aliensOn = true;
-      this.warnT = 3;
-      this.emit('aliens');
-    }
+    if (!this.aliensOn && this.time >= D.aliensAt) this.alienInvasion();
+    if (this.shieldT > 0) this.shieldT = Math.max(0, this.shieldT - dt);
 
     this.updatePlayer(dt, steer, reverse);
     if (this.state !== 'play') return;
+    if (this.checkSecret()) return;
     this.updateMemorial();
     this.updateFlow(dt);
     this.updateCops(dt);
-    if (this.weapon) this.updateWeapon(dt);
+    if (this.weapon) this.gun.update(this, dt);
+    this.meteors.update(this, dt);
+    if (this.state !== 'play') return;
     this.crowd.update(dt);
     this.director(dt);
     this.updatePowers(dt);
@@ -4867,6 +5345,8 @@ class Game {
     this.updateCops(dt * 0.5);
     this.crowd.update(dt);
     this.updateShots(dt);
+    if (this.weapon) this.gun.update(this, dt);
+    this.meteors.update(this, dt);
     if (this.hitFlash > 0) this.hitFlash -= dt * 3;
     if (this.dyingT <= 0) this.finish();
   }
@@ -5058,7 +5538,7 @@ class Game {
   }
 
   hurt(amount) {
-    if (this.god || this.giantT > 0 || this.cheat) return;
+    if (this.god || this.giantT > 0 || this.cheat || this.shieldT > 0) return;
     this.damage = Math.min(DMG.stages[3], this.damage + amount);
     if (amount >= 2) this.sinceHit = 0;
     if (this.burning) this.burnT = DMG.burnTime;
@@ -5074,7 +5554,7 @@ class Game {
       }
       this.burnT -= dt;
       if (this.burnT > 0) {
-        if (!this.god && this.giantT <= 0 && !this.cheat) this.damage += DMG.burnRate * dt;
+        if (!this.god && this.giantT <= 0 && !this.cheat && this.shieldT <= 0) this.damage += DMG.burnRate * dt;
       } else {
         this.damage = Math.max(DMG.regenFloor, this.damage - DMG.regenRate * dt);
       }
@@ -5104,6 +5584,13 @@ class Game {
     }
 
     if (this.damage >= DMG.stages[3] && !this.cheat) this.explodePlayer();
+  }
+
+  // Meteorun dairesinde kalan araba: çizgi film patlaması
+  meteorKill() {
+    if (this.state !== 'play') return;
+    this.explodePlayer();
+    this.cause = 'meteor';
   }
 
   explodePlayer() {
@@ -5227,6 +5714,29 @@ class Game {
       }
     }
     return best;
+  }
+
+  // Daire içindeki sıradan binalar yıkılır (meteor). Kutsal ve korunan yapılara dokunulmaz. En çok max bina
+  crushCircle(x, y, r, max = 5) {
+    let n = 0;
+    const c0x = Math.floor((x - r) / CHUNK); const c1x = Math.floor((x + r) / CHUNK);
+    const c0y = Math.floor((y - r) / CHUNK); const c1y = Math.floor((y + r) / CHUNK);
+    for (let cy = c0y; cy <= c1y; cy++) {
+      for (let cx = c0x; cx <= c1x; cx++) {
+        const c = this.world.chunk(cx, cy);
+        for (let i = 0; i < c.rectCount && n < max; i++) {
+          const rect = c.rects[i];
+          if (!rect.alive || rect.sacred || rect.kind !== 'building') continue;
+          const qx = Math.max(rect.x, Math.min(x, rect.x + rect.w)) - x;
+          const qy = Math.max(rect.y, Math.min(y, rect.y + rect.h)) - y;
+          if (qx * qx + qy * qy > r * r) continue;
+          if (this.world.protectedAt(rect.x + rect.w / 2, rect.y + rect.h / 2, 0)) continue;
+          this.crushRect(c, rect);
+          n++;
+        }
+      }
+    }
+    return n;
   }
 
   crushRect(chunk, rect) {
@@ -5365,7 +5875,7 @@ class Game {
 
   // --- Polis ---
   spawnCop(type, role, x, y, a) {
-    const spec = CONFIG.police[type] || AL[type];
+    const spec = CONFIG.police[type] || AL.types[type];
     const c = this.copPool.pop() || makeCop();
     const d = this.diff;
     resetBody(c, x, y, a, spec);
@@ -5375,8 +5885,8 @@ class Game {
     c.role = role;
     c.state = 'chase';
     c.crusher = type === 'tank';
-    c.flying = type === 'ufo';
-    c.beam = 0;
+    c.alien = isAlien(type);
+    c.warpT = 0; // Uzaylı ışınlanması: belirince kısa süre yerinde
     c.sirenId = spec.siren ? this.pickSiren(spec.siren) : -1;
     c.wanderT = 0;
     c.staticBody = false;
@@ -5395,10 +5905,10 @@ class Game {
     c.los = false; c.hitCd = 0; c.nearCd = 0; c.wakeT = 0;
     this.flankSide = -this.flankSide;
     c.side = this.flankSide; c.roleT = PU.roleTime; c.blockT = 0; c.hold = false; c.far = false;
-    c.mhpMax = (WPN.hp[type] || WPN.hp.car) * copHpMul(this.time); c.mhp = c.mhpMax; c.byWeapon = false;
+    c.mhpMax = gunHp(type, this.time); c.mhp = c.mhpMax; c.byWeapon = false; c.aimAt = -99;
     c.escIn = false; c.escHit = false; c.escHitAt = -99; c.escEnterT = 0; c.escAt = -99;
     c.turret = a; c.fireT = TK.fireEvery * 0.6; c.fxT = Math.random() * 3; c.hurtFlash = 0;
-    // Hiçbir araç anıt alanında doğmaz (uçanlar dahil)
+    // Hiçbir araç anıt alanında doğmaz
     if (this.world.memorialHit(c.x, c.y, c.len * 0.6 + 20, hit)) { c.x += hit.nx * hit.depth; c.y += hit.ny * hit.depth; }
     this.cops.push(c);
     return c;
@@ -5411,7 +5921,7 @@ class Game {
     const use = new Array(n).fill(0);
     for (const c of this.cops) if (c.sirenId >= 0) use[c.sirenId]++;
     const p = CONFIG.sirens.indexOf(pref);
-    if (pref === 'ufo' || pref === 'zap') return p; // Uzaylıların sesi kendine özgü
+    if (pref === 'warp' || pref === 'zap') return p; // Uzaylıların sesi kendine özgü
     const police = n - 2;
     let min = 1e9;
     for (let i = 0; i < police; i++) if (use[i] < min) min = use[i];
@@ -5430,13 +5940,13 @@ class Game {
 
   destroyCop(i, byPlayer) {
     const c = this.cops[i];
-    const size = c.type === 'tank' ? 120 : c.type === 'swat' ? 70 : c.type === 'ufo' ? 110 : 52;
+    const size = c.type === 'tank' ? 120 : c.type === 'swat' ? 70 : c.alien ? 80 : 52;
     this.fx.explosion(c.x, c.y, size);
-    this.fx.debris(c.x, c.y, c.type === 'tank' ? '#5d6b3a' : c.type === 'ufo' || c.type === 'rover' ? '#39ff9c' : '#2f4c8a', 12, 280);
+    this.fx.debris(c.x, c.y, c.type === 'tank' ? '#5d6b3a' : c.alien ? c.spec.glow : '#2f4c8a', 12, 280);
     this.fx.debris(c.x, c.y, '#f4f4f4', 6, 240);
     this.kills++;
     this.addHeat(PU.heat.kill);
-    this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.type === 'ufo' ? 6 : c.type === 'rover' ? 3 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
+    this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.alien ? 4 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
     if (Math.random() < 0.6) this.world.dropCoin(c.x, c.y);
     const near = Math.hypot(c.x - this.player.x, c.y - this.player.y) < 500;
     this.emit('copdown', near ? 1 : 0.4);
@@ -5484,7 +5994,7 @@ class Game {
         continue;
       }
       // Uzak ve görünmeyen polis seyrek hesaplanır: adım büyür, sonuç aynı yola çıkar
-      c.far = dist > PU.farDist && !c.flying && !this.onScreen(c.x, c.y, 200);
+      c.far = dist > PU.farDist && !this.onScreen(c.x, c.y, 200);
       if (c.far && (this.tickCount + c.id) % PU.farStep !== 0) {
         if (playing) {
           if (dist < nearest) nearest = dist;
@@ -5493,14 +6003,20 @@ class Game {
         continue;
       }
       const cdt = c.far ? dt * PU.farStep : dt;
+      // Işınlanan uzaylı belirene kadar yerinde bekler
+      if (c.warpT > 0) {
+        c.warpT -= cdt;
+        c.vx = 0; c.vy = 0; c.speed = 0;
+        if (Math.random() < 0.4 && this.onScreen(c.x, c.y, 40)) this.fx.spawn(FX.GLINT, c.x + (Math.random() - 0.5) * c.len, c.y + (Math.random() - 0.5) * c.len, 0, -40, 0.45, 6);
+        if (playing && dist < nearest) nearest = dist;
+        continue;
+      }
       driveCop(c, this, cdt);
       if (c.hitCd > 0) c.hitCd -= cdt;
       if (c.nearCd > 0) c.nearCd -= cdt;
       c.fxT += cdt;
 
-      if (c.flying) {
-        this.updateUfo(c, dt, playing);
-      } else if (c.state === 'barricade') {
+      if (c.state === 'barricade') {
         c.staticBody = true;
       } else {
         c.staticBody = false;
@@ -5524,7 +6040,7 @@ class Game {
       if (playing) {
         // Oyuncu ile çarpışma
         // Hilede polis görünür ve kovalar ama değemez
-        if (!c.flying && dist < (c.len + p.len) * 0.75 && this.ghostT <= 0 && !this.cheat) {
+        if (dist < (c.len + p.len) * 0.75 && this.ghostT <= 0 && !this.cheat) {
           const rv = this.collideCars(p, c);
           if (rv > 0) c.escHitAt = this.runTime; // Değdi: bu geçiş kıl payı sayılmaz
           if (rv > 1) this.copContact(c, rv, i);
@@ -5543,7 +6059,7 @@ class Game {
             this.emit('nearmiss');
           }
         }
-        if (!c.flying) this.checkEscape(c, dist);
+        this.checkEscape(c, dist);
         if (dist < nearest) {
           nearest = dist;
           closing = (dx * (c.vx - p.vx) + dy * (c.vy - p.vy)) / (dist || 1);
@@ -5559,7 +6075,7 @@ class Game {
       for (let j = i + 1; j < cops.length; j++) {
         const a = cops[i];
         const b = cops[j];
-        if (a.flying || b.flying || (a.far && b.far)) continue;
+        if ((a.far && b.far) || a.warpT > 0 || b.warpT > 0) continue;
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const r = (a.len + b.len) * 0.6;
@@ -5583,100 +6099,24 @@ class Game {
     }
   }
 
-  // --- Güdümlü enerji topu ---
-  // Atış: bekleme süresi dolmuşsa burundan çıkar, varsa kilitli polisi izler. Cephane sınırsız. true: atıldı
-  fire() {
-    const w = this.weapon;
-    if (!w || this.state !== 'play' || w.cd > 0) return false;
-    const m = this.missiles.find((k) => !k.alive);
-    if (!m) return false;
-    const p = this.player;
-    const ca = Math.cos(p.a); const sa = Math.sin(p.a);
-    m.alive = true; m.t = 0; m.ti = 0;
-    m.x = p.x + ca * p.len * 0.55; m.y = p.y + sa * p.len * 0.55;
-    m.vx = ca * WPN.speed + p.vx * 0.3; m.vy = sa * WPN.speed + p.vy * 0.3;
-    m.target = w.lock;
-    for (let i = 0; i < m.tx.length; i++) { m.tx[i] = m.x; m.ty[i] = m.y; }
-    w.shots++;
-    w.cd += WPN.fireEvery; // Taşan süre korunur: atışlar eşit aralıklı
-    if (w.cd <= 0) w.cd = WPN.fireEvery;
-    this.emit('fire');
-    return true;
-  }
-
-  // Önündeki konide en yakın polis: hedef işareti bunun üstünde
-  findLock() {
-    const p = this.player;
-    const ca = Math.cos(p.a); const sa = Math.sin(p.a);
-    const cosCone = Math.cos(WPN.cone);
-    let best = null;
-    let bd = WPN.range;
-    for (const c of this.cops) {
-      const dx = c.x - p.x; const dy = c.y - p.y;
-      const d = Math.hypot(dx, dy);
-      if (d >= bd || d < 1) continue;
-      if ((dx * ca + dy * sa) / d < cosCone) continue;
-      best = c; bd = d;
-    }
-    return best;
-  }
-
-  updateWeapon(dt) {
-    const w = this.weapon;
-    if (w.cd > 0) w.cd -= dt;
-    // Hazırken her kare hedef aranır: hedef çıkınca hemen atılır. Beklerken seyrek aranır
-    if (w.cd <= 0 || this.tickCount % WPN.lockEvery === 0) w.lock = this.findLock();
-    else if (w.lock && !this.cops.includes(w.lock)) w.lock = null;
-    if (w.cd <= 0) {
-      if (w.lock && this.state === 'play') this.fire();
-      else w.cd = Math.max(w.cd, -dt); // Hedef yokken beklenen süre birikmez
-    }
-    for (const m of this.missiles) if (m.alive) this.stepMissile(m, dt);
-  }
-
-  stepMissile(m, dt) {
-    m.t += dt;
-    if (m.target && !this.cops.includes(m.target)) m.target = null; // Hedef yok olduysa düz gider
-    if (m.target) {
-      const want = Math.atan2(m.target.y - m.y, m.target.x - m.x);
-      const now = Math.atan2(m.vy, m.vx);
-      let diff = want - now;
-      while (diff > Math.PI) diff -= Math.PI * 2;
-      while (diff < -Math.PI) diff += Math.PI * 2;
-      const a = now + Math.max(-WPN.turn * dt, Math.min(WPN.turn * dt, diff));
-      const sp = Math.hypot(m.vx, m.vy);
-      m.vx = Math.cos(a) * sp; m.vy = Math.sin(a) * sp;
-    }
-    m.x += m.vx * dt; m.y += m.vy * dt;
-    m.ti = (m.ti + 1) % m.tx.length; m.tx[m.ti] = m.x; m.ty[m.ti] = m.y;
-    // Duvara, binaya çarpınca ya da ömrü bitince söner
-    if (m.t > WPN.life || this.world.blockedAt(m.x, m.y)) {
-      m.alive = false;
-      this.fx.burst(FX.GLINT, m.x, m.y, 6, 90, 0.3, 6);
-      return;
-    }
-    const r2 = WPN.hitR * WPN.hitR;
-    for (const c of this.cops) {
-      const dx = c.x - m.x; const dy = c.y - m.y;
-      const rr = WPN.hitR + c.wid * 0.5;
-      if (dx * dx + dy * dy > Math.max(r2, rr * rr)) continue;
-      m.alive = false;
-      this.hitCop(c, m.x, m.y);
-      return;
-    }
-  }
-
-  // Her isabet sabit hasar (zırhlıda azaltılmış). Gereken isabet = can / hasar
+  // --- 360° taramalı silah (js/gun.js): isabet ---
+  // Her mermi sabit hasar. Silah canı (mhp) biterse araç patlar; çarpışma canı (hp) da aynı oranda düşer: duman, yanıp sönme
   hitCop(c, x, y) {
-    const full = c.mhpMax || WPN.hp[c.type] || WPN.hp.car;
-    const dmg = WPN.damage * (WPN.armor[c.type] ?? 1);
-    c.mhp -= dmg;
-    c.hp = Math.min(c.hp - (c.maxHp * dmg) / full, (c.maxHp * c.mhp) / full);
+    const full = c.mhpMax || gunHp(c.type, this.time);
+    c.mhp -= WPN.damage;
+    c.hp = Math.min(c.hp - (c.maxHp * WPN.damage) / full, (c.maxHp * c.mhp) / full);
     if (c.mhp <= 0) { c.hp = -1; c.byWeapon = true; }
-    c.hurtFlash = 0.35;
-    this.fx.burst(FX.GLINT, x, y, 10, 160, 0.35, 7);
-    this.fx.burst(FX.SMOKE, x, y, 4, 60, 0.7, 12);
-    this.emit('missilehit', c.mhp <= 0 ? 1 : 0.5);
+    c.hurtFlash = 0.12;
+    return c.mhp <= 0;
+  }
+
+  gunHit(c, x, y) {
+    const dead = this.hitCop(c, x, y);
+    if (this.onScreen(x, y, 40)) {
+      this.fx.burst(FX.GLINT, x, y, WPN.maxSparks, 150, 0.22, 5);
+      if (Math.random() < 0.25) this.fx.spawn(FX.SMOKE, x, y, c.vx * 0.2, c.vy * 0.2, 0.5, 8);
+    }
+    this.emit('gunhit', dead ? 1 : 0.3);
   }
 
   // Kıl payı kaçış: polis yakın bölgeye girer, değmeden çıkarsa ödül. Ödül çıkış anında verilir
@@ -5704,7 +6144,7 @@ class Game {
   // Yalnız polis gerçekten kovalarken, oyuncu hızla ileri giderken; hile ve görünmezlikte yok
   escapeEligible(c) {
     const p = this.player;
-    if (this.state !== 'play' || this.cheat || this.ghostT > 0 || c.flying) return false;
+    if (this.state !== 'play' || this.cheat || this.ghostT > 0 || c.warpT > 0) return false;
     if (c.state !== 'chase' && c.state !== 'block' && c.state !== 'barricade') return false;
     return p.speed >= ESC.minSpeed && p.forward > 0 && this.autoRevT <= 0;
   }
@@ -5732,7 +6172,7 @@ class Game {
     const fy = Math.sin(p.a);
     for (const c of this.cops) {
       c.hold = false;
-      if (c.flying || c.type === 'tank' || c.state === 'barricade') continue;
+      if (c.type === 'tank' || c.state === 'barricade') continue;
       c.pd = Math.hypot(c.x - p.x, c.y - p.y);
       if (c.pd < PU.closeR) near.push(c);
     }
@@ -5740,7 +6180,7 @@ class Game {
     for (let i = this.diff.closeMax; i < near.length; i++) near[i].hold = true;
     let front = 0;
     for (const c of this.cops) {
-      if (c.flying || c.type === 'tank' || c.state === 'barricade' || c.pd >= PU.frontR) continue;
+      if (c.type === 'tank' || c.state === 'barricade' || c.pd >= PU.frontR) continue;
       if ((c.x - p.x) * fx + (c.y - p.y) * fy < 0) continue;
       front++;
       if (front > PU.frontMax) c.hold = true;
@@ -5776,44 +6216,6 @@ class Game {
     }
   }
 
-  // Uçan daire: binaların üstünden düz gelir, üstüne çıkınca ışınla çeker ve hasar verir
-  updateUfo(c, dt, playing) {
-    const p = this.player;
-    const dx = p.x + p.vx * 0.35 - c.x;
-    const dy = p.y + p.vy * 0.35 - c.y;
-    const d = Math.hypot(dx, dy) || 1;
-    const top = c.drive.maxSpeed;
-    const slow = this.ghostT > 0 ? 0.25 : 1;
-    const want = Math.min(top, d * 3.2) * slow;
-    const k = 1 - Math.exp(-3.4 * dt);
-    c.vx += ((dx / d) * want - c.vx) * k;
-    c.vy += ((dy / d) * want - c.vy) * k;
-    c.x += c.vx * dt;
-    c.y += c.vy * dt;
-    // Uçan araçlar anıt alanının üstünden geçmez
-    if (this.world.memorialHit(c.x, c.y, c.len * 0.6 + 20, hit)) {
-      c.x += hit.nx * hit.depth; c.y += hit.ny * hit.depth;
-      const vn = c.vx * hit.nx + c.vy * hit.ny;
-      if (vn < 0) { c.vx -= vn * hit.nx; c.vy -= vn * hit.ny; }
-    }
-    c.a += dt * 2;
-    const bx = p.x - c.x;
-    const by = p.y - c.y;
-    const bd = Math.hypot(bx, by);
-    c.beam = playing && this.ghostT <= 0 && !this.cheat && bd < AL.beamRange ? 1 : 0;
-    if (c.beam) {
-      p.vx -= (bx / (bd + 1)) * AL.beamPull * dt;
-      p.vy -= (by / (bd + 1)) * AL.beamPull * dt;
-      const keep = 1 - AL.beamSlow * dt;
-      p.vx *= keep;
-      p.vy *= keep;
-      this.hurt((AL.beamDps * dt) / this.carSpec.durability);
-      this.sinceHit = 0;
-      this.hitFlash = Math.max(this.hitFlash, 0.25);
-      if (Math.random() < 0.3) this.fx.spawn(FX.GLINT, p.x + (Math.random() - 0.5) * 60, p.y + (Math.random() - 0.5) * 60, 0, 0, 0.4, 5);
-    }
-  }
-
   // --- Yönetmen: doğma, barikat, tank ---
   countRole(role) {
     let n = 0;
@@ -5823,6 +6225,9 @@ class Game {
 
   pickRole(r) {
     const d = this.diff;
+    // Gizli geçidin çevresinde yol kapatılmaz: yalnız kovalayan
+    const z = this.world.zone('secret');
+    if (z && Math.hypot(this.player.x - (z.x + z.w / 2), this.player.y - (z.y + z.h / 2)) < z.margin + 900) return 'chaser';
     let s = d.interceptShare;
     if (r < s) return this.countRole('interceptor') < PU.maxInterceptors ? 'interceptor' : 'chaser';
     s += d.blockShare;
@@ -5838,7 +6243,7 @@ class Game {
     let far = minDist;
     for (let i = 0; i < this.cops.length; i++) {
       const c = this.cops[i];
-      if (c.type === 'tank' || c.flying || this.onScreen(c.x, c.y, 120)) continue;
+      if (c.type === 'tank' || this.onScreen(c.x, c.y, 120)) continue;
       const d = Math.hypot(c.x - p.x, c.y - p.y);
       if (d > far) { far = d; best = i; }
     }
@@ -5922,18 +6327,14 @@ class Game {
       }
     }
 
-    if (d.ufos > 0) {
+    // Uzaylılar: eksilen yenisiyle, ekran dışından ve güvenli uzaklıktan gelir; sayısı tavanlı
+    if (d.aliens > 0 && this.aliensOn) {
       this.alienT -= dt;
       if (this.alienT <= 0) {
         this.alienT = AL.spawnEvery;
-        const min = this.viewRadius() + 160;
-        const heading = Math.atan2(p.vy, p.vx) + (Math.random() - 0.5) * 2.6;
-        if (this.countType('ufo') < Math.min(d.ufos, Math.ceil(this.copLimit * 0.2)) && this.makeRoom(1)) {
-          // Daire binaya takılmaz, önünden gelir
-          this.spawnCop('ufo', 'chaser', p.x + Math.cos(heading) * min, p.y + Math.sin(heading) * min, 0);
-        }
-        if (this.countType('rover') < Math.min(d.rovers, Math.ceil(this.copLimit * 0.4)) && this.makeRoom(1) && this.findSpawn(spawnPt, min, min + 300, true)) {
-          this.spawnCop('rover', Math.random() < 0.5 ? 'flanker' : 'chaser', spawnPt.x, spawnPt.y, Math.atan2(p.y - spawnPt.y, p.x - spawnPt.x));
+        const min = Math.max(AL.safeR, this.viewRadius() + AI.viewMargin);
+        if (this.countAliens() < this.alienCap() && this.makeRoom(1) && this.findSpawn(spawnPt, min, min + 420, Math.random() < 0.5)) {
+          this.spawnCop(pickAlien(Math.random()), Math.random() < 0.4 ? 'flanker' : 'chaser', spawnPt.x, spawnPt.y, Math.atan2(p.y - spawnPt.y, p.x - spawnPt.x));
         }
       }
     }
@@ -5986,6 +6387,7 @@ class Game {
     const py = p.y + hy * dist;
     const world = this.world;
     if (world.groundAt(px, py) !== GROUND.ROAD) return false;
+    if (world.protectedAt(px, py, 260)) return false; // Gizli geçit, anıt ve stadyum önü kapatılmaz
 
     // Yol ekseni gidiş yönündedir; enine tarayıp kenarları bul
     const horizontal = Math.abs(hx) > Math.abs(hy);
@@ -6059,6 +6461,8 @@ class Game {
     s.y = p.y + p.vy * TK.lead;
     // Top mermisi anıt alanına düşmez: hedef korunan bölümün dışına kayar
     if (this.world.memorialHit(s.x, s.y, TK.radius * 0.7, hit)) { s.x += hit.nx * hit.depth; s.y += hit.ny * hit.depth; }
+    // Gizli geçit ve stadyumlar da korunur: hedef oradaysa bu atış yapılmaz
+    if (this.world.protectedAt(s.x, s.y, TK.radius * 0.5) && !this.world.inMemorial(s.x, s.y, TK.radius)) { s.alive = false; c.fireT = 1; return; }
     const mx = c.x + Math.cos(c.turret) * 62;
     const my = c.y + Math.sin(c.turret) * 62;
     this.fx.burst(FX.FIRE, mx, my, 8, 100, 0.25, 14);
@@ -6097,6 +6501,105 @@ class Game {
         this.crushRect(hit.chunk, hit.rect);
       }
     }
+  }
+
+  // --- Uzaylı işgali ---
+  alienCap() {
+    return Math.min(this.diff.aliens, this.alienLimit, this.copLimit);
+  }
+
+  countAliens() {
+    let n = 0;
+    for (const c of this.cops) if (c.alien) n++;
+    return n;
+  }
+
+  // Geçiş anı: büyük yazı (DOM), 3 sn koruma, ekranın her yanından aynı anda ışınlanan uzaylılar.
+  // Hiçbiri oyuncuya safeR'den yakın doğmaz ve wake süresi yerinde bekler: ilk saniyelerde yetişemez
+  alienInvasion() {
+    this.aliensOn = true;
+    this.warnT = AL.intro;
+    this.shieldT = Math.max(this.shieldT, AL.shield);
+    this.alienT = AL.spawnEvery;
+    const p = this.player;
+    const n = Math.min(AL.wave, this.alienCap());
+    const off = Math.random() * Math.PI * 2;
+    const ex = this.cam.halfW * AL.edge;
+    const ey = this.cam.halfH * AL.edge;
+    let made = 0;
+    for (let i = 0; i < n; i++) {
+      const a = off + (i / n) * Math.PI * 2;
+      const ca = Math.cos(a); const sa = Math.sin(a);
+      // Ekran kenarındaki elips, en az safeR
+      const er = 1 / Math.sqrt((ca * ca) / (ex * ex) + (sa * sa) / (ey * ey));
+      const r0 = Math.max(AL.safeR, er);
+      if (!this.makeRoom(1)) break;
+      for (let k = 0; k < 14; k++) {
+        const r = r0 + k * 34;
+        const x = this.cam.x + ca * r; const y = this.cam.y + sa * r;
+        if (Math.hypot(x - p.x, y - p.y) < AL.safeR) continue;
+        const g = this.world.groundAt(x, y);
+        if (g === GROUND.WATER || this.world.blockedAt(x, y) || this.world.protectedAt(x, y, 30, false)) continue;
+        if (this.world.circleHit(x, y, 30, hit)) continue;
+        const c = this.spawnCop(pickAlien(Math.random()), i % 3 === 2 ? 'flanker' : 'chaser', x, y, Math.atan2(p.y - y, p.x - x));
+        c.warpT = AL.wake;
+        this.fx.burst(FX.GLINT, x, y, 10, 160, 0.6, 8);
+        this.fx.wave(x, y, 90);
+        made++;
+        break;
+      }
+    }
+    this.emit('aliens', made);
+    return made;
+  }
+
+  // --- Gizli geçit: rampaya girince bodrum sahnesi, motosiklet hediyesi (kayıt main.js'te) ---
+  checkSecret() {
+    const z = this.world.zone('secret');
+    if (!z) return false;
+    const p = this.player;
+    if (p.x < z.x || p.x > z.x + z.w || p.y < z.y || p.y > z.y + z.h || p.speed < SEC.minSpeed) return false;
+    this.state = 'secret';
+    this.secretT = 0;
+    this.secretZ = z;
+    this.secretSeen = true;
+    this.secretFrom = { x: p.x, y: p.y, a: p.a };
+    this.closeMemorialCard();
+    this.emit('secret');
+    return true;
+  }
+
+  // Rampadan aşağı kayış (slide sn), sonra yeraltı garajı sahnesi; zaman ve kovalama bu sırada durur
+  tickSecret(dt) {
+    this.secretT += dt;
+    const p = this.player;
+    const z = this.secretZ;
+    const k = Math.min(1, this.secretT / SEC.slide);
+    const cx = z.x + z.w * 0.62; const cy = z.y + z.h * 0.62;
+    p.x = this.secretFrom.x + (cx - this.secretFrom.x) * k;
+    p.y = this.secretFrom.y + (cy - this.secretFrom.y) * k;
+    p.vx = 0; p.vy = 0; p.speed = 0;
+    this.world.update(p.x, p.y);
+    if (this.secretT >= SEC.scene) this.leaveSecret();
+  }
+
+  secretProgress() {
+    return this.state === 'secret' ? Math.min(1, this.secretT / SEC.slide) : 0;
+  }
+
+  // Dönüş: rampanın kuzeybatısındaki boşlukta, depoya dönük, kısa koruma. Yakındaki polis dağılmış olur
+  leaveSecret() {
+    const z = this.secretZ;
+    const p = this.player;
+    p.x = z.x - 70; p.y = z.y - 70; p.a = -Math.PI * 0.75;
+    p.vx = Math.cos(p.a) * 160; p.vy = Math.sin(p.a) * 160; p.speed = 160; p.w = 0;
+    for (let i = this.cops.length - 1; i >= 0; i--) {
+      const c = this.cops[i];
+      if (Math.hypot(c.x - p.x, c.y - p.y) < 900 && c.type !== 'tank') this.removeCop(i);
+    }
+    this.shieldT = Math.max(this.shieldT, SEC.shield);
+    this.state = 'play';
+    this.emit('secretexit');
   }
 
   // --- Özel güçler ---
@@ -6642,34 +7145,58 @@ function paintPed(g, shirt, skin, hair, step, acc = 0) {
   if (acc === 4) { g.fillStyle = '#7a4e2a'; g.fillRect(-1.5, 3.8, 3.4, 2.4); }
 }
 
-// Uçan daire: üstten yuvarlak gövde, cam kubbe, dönen ışıklar, içinde yeşil pilot
-function paintUfo(g, spec) {
-  const R = spec.len / 2;
-  const grd = g.createRadialGradient(-R * 0.3, -R * 0.3, 2, 0, 0, R);
-  grd.addColorStop(0, '#d9e4ec'); grd.addColorStop(0.55, '#7f93a6'); grd.addColorStop(1, '#3b4757');
-  g.fillStyle = grd; g.beginPath(); g.arc(0, 0, R, 0, 7); g.fill();
-  g.strokeStyle = '#1c2530'; g.lineWidth = 1.4; g.stroke();
-  g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1; g.beginPath(); g.arc(0, 0, R * 0.74, 0, 7); g.stroke();
-  for (let i = 0; i < 10; i++) { const a = (i / 10) * 6.283; g.fillStyle = i % 2 ? '#39ff9c' : '#ffe14d'; g.beginPath(); g.arc(Math.cos(a) * R * 0.86, Math.sin(a) * R * 0.86, 3.2, 0, 7); g.fill(); }
-  const dome = g.createRadialGradient(-5, -6, 1, 0, 0, R * 0.46);
-  dome.addColorStop(0, '#d8fff0'); dome.addColorStop(1, '#2fb88a');
-  g.fillStyle = dome; g.beginPath(); g.arc(0, 0, R * 0.46, 0, 7); g.fill();
-  g.fillStyle = '#4de08a'; g.beginPath(); g.ellipse(0, 0, 8, 10, 0, 0, 7); g.fill();
-  g.fillStyle = '#10151c'; g.beginPath(); g.ellipse(-3, -2.4, 2.1, 3.2, 0.4, 0, 7); g.ellipse(3, -2.4, 2.1, 3.2, -0.4, 0, 7); g.fill();
+// Uzaylı arabaları: çizgi film tarzı, uydurma. Üç tip: dart (ok burunlu, hızlı), blob (jöle gövdeli), crab (kıskaçlı, ağır).
+// Her biri parlak kenar ışığı, cam kubbe ve içinde iri gözlü pilotla; normal polisten belirgin farklı görünür
+function alienPilot(g, x, y, r, skin, eyes = 1) {
+  g.fillStyle = skin; g.beginPath(); g.ellipse(x, y, r * 0.8, r, 0, 0, 7); g.fill();
+  const n = eyes;
+  for (let i = 0; i < n; i++) {
+    const ey = n === 1 ? 0 : (i - (n - 1) / 2) * r * 0.7;
+    g.fillStyle = '#ffffff'; g.beginPath(); g.arc(x + r * 0.25, y + ey, r * (n === 1 ? 0.5 : 0.32), 0, 7); g.fill();
+    g.fillStyle = '#10151c'; g.beginPath(); g.arc(x + r * 0.38, y + ey, r * (n === 1 ? 0.24 : 0.16), 0, 7); g.fill();
+  }
 }
 
-// Uzaylı aracı: yerden yüksek, parlak yeşil çizgili, sivri burunlu
-function paintRover(g, spec) {
+function paintAlien(g, spec, kind) {
   const L = spec.len / 2; const H = spec.wid / 2;
-  g.fillStyle = 'rgba(57,255,156,.28)'; rr(g, -L - 4, -H - 4, spec.len + 8, spec.wid + 8, 12); g.fill();
-  const c = g.createLinearGradient(0, -H, 0, H);
-  c.addColorStop(0, '#5a3d9a'); c.addColorStop(0.5, '#2c1d58'); c.addColorStop(1, '#170e33');
-  g.fillStyle = c;
-  g.beginPath(); g.moveTo(L + 3, 0); g.quadraticCurveTo(L * 0.4, -H * 1.2, -L * 0.6, -H); g.lineTo(-L, -H * 0.5); g.lineTo(-L, H * 0.5); g.lineTo(-L * 0.6, H); g.quadraticCurveTo(L * 0.4, H * 1.2, L + 3, 0); g.closePath(); g.fill();
-  g.strokeStyle = '#39ff9c'; g.lineWidth = 1.6; g.stroke();
-  g.fillStyle = '#a0ffd8'; g.beginPath(); g.ellipse(L * 0.1, 0, L * 0.34, H * 0.46, 0, 0, 7); g.fill();
-  g.fillStyle = '#39ff9c'; g.fillRect(-L * 0.8, -H * 0.72, L * 0.7, 1.6); g.fillRect(-L * 0.8, H * 0.72 - 1.6, L * 0.7, 1.6);
-  g.fillStyle = '#ff2ad4'; g.beginPath(); g.arc(-L, -H * 0.4, 2.2, 0, 7); g.arc(-L, H * 0.4, 2.2, 0, 7); g.fill();
+  const glowC = spec.glow; const body = spec.body;
+  // Yere vuran ışık halesi
+  g.fillStyle = glowC; g.globalAlpha = 0.22; rr(g, -L - 5, -H - 5, spec.len + 10, spec.wid + 10, 14); g.fill(); g.globalAlpha = 1;
+  const grad = g.createLinearGradient(0, -H, 0, H);
+  grad.addColorStop(0, shade(body, 0.35)); grad.addColorStop(0.5, body); grad.addColorStop(1, shade(body, -0.45));
+  g.fillStyle = grad;
+  g.strokeStyle = glowC; g.lineWidth = 1.8;
+  if (kind === 'dart') {
+    // Ok burun, arkada iki kanatçık
+    g.beginPath(); g.moveTo(L + 4, 0); g.quadraticCurveTo(L * 0.3, -H * 1.15, -L * 0.7, -H); g.lineTo(-L - 2, -H * 1.1); g.lineTo(-L * 0.8, -H * 0.3);
+    g.lineTo(-L * 0.8, H * 0.3); g.lineTo(-L - 2, H * 1.1); g.lineTo(-L * 0.7, H); g.quadraticCurveTo(L * 0.3, H * 1.15, L + 4, 0); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = glowC; g.fillRect(-L * 0.6, -H * 0.62, L * 0.9, 1.6); g.fillRect(-L * 0.6, H * 0.62 - 1.6, L * 0.9, 1.6);
+    g.fillStyle = 'rgba(190,255,230,.85)'; g.beginPath(); g.ellipse(L * 0.12, 0, L * 0.36, H * 0.5, 0, 0, 7); g.fill();
+    alienPilot(g, L * 0.1, 0, H * 0.36, '#59e07a', 1);
+  } else if (kind === 'blob') {
+    // Jöle gövde: yuvarlak, kabarcıklı, iki göz sapı
+    g.beginPath(); g.ellipse(0, 0, L, H, 0, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.28)';
+    for (const [x, y, r] of [[-L * 0.5, -H * 0.4, 3], [-L * 0.2, H * 0.5, 2.2], [L * 0.45, -H * 0.55, 2.6], [-L * 0.65, H * 0.15, 1.8]]) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+    g.fillStyle = 'rgba(255,200,250,.8)'; g.beginPath(); g.ellipse(L * 0.05, 0, L * 0.42, H * 0.52, 0, 0, 7); g.fill();
+    alienPilot(g, L * 0.05, 0, H * 0.38, '#ff8ad8', 2);
+    g.strokeStyle = '#ffd6f4'; g.lineWidth = 1.3;
+    g.beginPath(); g.moveTo(L * 0.5, -H * 0.3); g.lineTo(L + 3, -H * 0.62); g.moveTo(L * 0.5, H * 0.3); g.lineTo(L + 3, H * 0.62); g.stroke();
+    g.fillStyle = glowC; g.beginPath(); g.arc(L + 3, -H * 0.62, 2.4, 0, 7); g.arc(L + 3, H * 0.62, 2.4, 0, 7); g.fill();
+  } else {
+    // Yengeç: geniş gövde, önde iki kıskaç, yanlarda bacak ışıkları
+    g.beginPath(); g.moveTo(L * 0.62, -H * 0.8); g.lineTo(-L * 0.8, -H); g.lineTo(-L, -H * 0.5); g.lineTo(-L, H * 0.5); g.lineTo(-L * 0.8, H); g.lineTo(L * 0.62, H * 0.8); g.quadraticCurveTo(L * 0.9, 0, L * 0.62, -H * 0.8); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = shade(body, -0.25); g.strokeStyle = glowC; g.lineWidth = 1.4;
+    for (const sy of [-1, 1]) {
+      g.beginPath(); g.moveTo(L * 0.5, sy * H * 0.55); g.quadraticCurveTo(L + 6, sy * H * 1.1, L + 4, sy * H * 0.22); g.lineTo(L * 0.82, sy * H * 0.42); g.closePath(); g.fill(); g.stroke();
+    }
+    g.fillStyle = glowC;
+    for (let k = 0; k < 3; k++) { const x = -L * 0.6 + k * L * 0.45; g.fillRect(x, -H - 2, 4, 2); g.fillRect(x, H, 4, 2); }
+    g.fillStyle = 'rgba(255,240,180,.8)'; g.beginPath(); g.ellipse(-L * 0.05, 0, L * 0.4, H * 0.5, 0, 0, 7); g.fill();
+    alienPilot(g, -L * 0.05, 0, H * 0.34, '#ffb347', 3);
+  }
+  // Arka itici
+  g.fillStyle = '#ff2ad4'; g.beginPath(); g.arc(-L, -H * 0.35, 2.2, 0, 7); g.arc(-L, H * 0.35, 2.2, 0, 7); g.fill();
 }
 
 // --- Güç simgeleri ---
@@ -8374,8 +8901,34 @@ function kamyonet(g, l, w, c, a, fin) {
   mirrors(g, L * 0.3, H * 0.98, '#16181c');
 }
 
+// Gölge R (gizli motosiklet): dar, uzun, keskin kaporta; neon şeritler, ışıklı jantlar, çift egzoz
+function golge(g, l, w, c, a, fin) {
+  const L = l / 2;
+  // Işıklı jantlar: neon halka
+  for (const x of [L * 0.62, -L * 0.7]) {
+    g.fillStyle = '#07080c'; rr(g, x - 6.5, -2.6, 13, 5.2, 2.2); g.fill();
+    g.strokeStyle = a; g.lineWidth = 1.1; rr(g, x - 6, -2.2, 12, 4.4, 2); g.stroke();
+  }
+  smooth(g, [[L * 1.02, 0], [L * 0.62, 3.6], [L * 0.1, 5.6], [-L * 0.42, 4.2], [-L * 0.86, 2.4], [-L * 0.95, 0]]);
+  fillHull(g, coat(g, 5.6, c, fin), 'rgba(0,0,0,.8)');
+  // Neon kenar şeritleri ve sırt çizgisi
+  g.strokeStyle = a; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(L * 0.92, 0.6); g.lineTo(L * 0.2, 4.4); g.lineTo(-L * 0.6, 3.2); g.moveTo(L * 0.92, -0.6); g.lineTo(L * 0.2, -4.4); g.lineTo(-L * 0.6, -3.2); g.stroke();
+  g.fillStyle = a; g.fillRect(-L * 0.1, -0.7, L * 0.8, 1.4);
+  // Cam grenaj, sele, gidon
+  g.fillStyle = '#1b2a3a'; g.beginPath(); g.ellipse(L * 0.42, 0, 3.4, 3, 0, 0, 7); g.fill();
+  g.fillStyle = '#0b0c10'; rr(g, -L * 0.42, -2.6, 8, 5.2, 2); g.fill();
+  g.strokeStyle = '#c9d2dc'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(L * 0.3, -6.6); g.lineTo(L * 0.3, 6.6); g.stroke();
+  g.fillStyle = a; g.fillRect(L * 0.3 - 1, -7.6, 2, 2); g.fillRect(L * 0.3 - 1, 5.6, 2, 2);
+  // Çift egzoz, arka stop, ön far
+  g.fillStyle = '#9aa3ad'; g.fillRect(-L - 1.5, -3.6, 5, 1.6); g.fillRect(-L - 1.5, 2, 5, 1.6);
+  g.fillStyle = '#ff2346'; g.fillRect(-L * 0.98, -1.4, 1.6, 2.8);
+  g.fillStyle = '#e8fbff'; g.fillRect(L - 0.6, -1.6, 2, 3.2);
+  lamps(g, L - 1, [0], 2.4, 2.6, '#e6fbff');
+}
+
 const MODELS = {
-  atmaca, motor: moto, moto, simsek, efe, cinar, marmara, liva, suv, granit: suv, bozkir, elektra,
+  atmaca, motor: moto, moto, golge, simsek, efe, cinar, marmara, liva, suv, granit: suv, bozkir, elektra,
   bavar, aurum, stella, volta, pusula, dalga, lale, vadi, kamyonet,
 };
 
@@ -11347,6 +11900,406 @@ class MemorialCard {
   }
 }
 
+// --- stadium.js ---
+// İKİ STADYUM: kodla çizilir, gerçek kulüp amblemi ya da logosu yoktur. Adlar isim tablosundan (NAMES.stadyum).
+// Yozgat: orta boy, tek katlı tamamen çatılı tribünler, kırmızı-siyah koltuklar, köşelerde 4 ışık direği, camlı localar.
+// Konya: çok büyük, "yassı futbol topu" formu, beyaz-yeşil üçgen cephe ve zar çatı; gece üçgen kenarları ışıklanır.
+// Önbellekli çizim: uzakta küçük (lo), yakında ayrıntılı (hi, karede bir parça üretilir). Bayrak ve taraftar canlıdır.
+
+const STC = CONFIG.stadiums;
+const STD_TAU = Math.PI * 2;
+
+function stdCanvas(w, h) {
+  if (typeof OffscreenCanvas !== 'undefined') return new OffscreenCanvas(Math.max(1, Math.ceil(w)), Math.max(1, Math.ceil(h)));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h));
+  return c;
+}
+
+function stdRound(g, x, y, w, h, r) {
+  g.beginPath();
+  g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r);
+  g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r);
+  g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y);
+  g.closePath();
+}
+
+// Sekizgen (yassı top) köşe noktaları
+function stdOcta(x, y, w, h, c) {
+  return [[x + c, y], [x + w - c, y], [x + w, y + c], [x + w, y + h - c], [x + w - c, y + h], [x + c, y + h], [x, y + h - c], [x, y + c]];
+}
+function stdPoly(g, pts) {
+  g.beginPath();
+  pts.forEach(([px, py], i) => (i ? g.lineTo(px, py) : g.moveTo(px, py)));
+  g.closePath();
+}
+
+function stdText(g, s, x, y, size, color, maxW) {
+  g.font = `900 ${size}px Bungee, 'Nunito', sans-serif`;
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  let k = 1;
+  const m = g.measureText(s).width;
+  if (maxW && m > maxW) k = maxW / m;
+  g.save(); g.translate(x, y); g.scale(k, 1);
+  g.fillStyle = 'rgba(0,0,0,.45)'; g.fillText(s, 1.2, 1.4);
+  g.fillStyle = color; g.fillText(s, 0, 0);
+  g.restore();
+}
+
+// Futbol sahası: çizgili çim, beyaz çizgiler, kaleler
+function stdPitch(g, x, y, w, h, grass = '#3f9a3c') {
+  const n = 10;
+  for (let i = 0; i < n; i++) { g.fillStyle = i % 2 ? grass : '#4aa846'; g.fillRect(x + (i * w) / n, y, w / n + 0.5, h); }
+  g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = Math.max(1, w * 0.006);
+  g.strokeRect(x + 4, y + 4, w - 8, h - 8);
+  g.beginPath(); g.moveTo(x + w / 2, y + 4); g.lineTo(x + w / 2, y + h - 4); g.stroke();
+  g.beginPath(); g.arc(x + w / 2, y + h / 2, h * 0.16, 0, STD_TAU); g.stroke();
+  const bw = w * 0.15; const bh = h * 0.52;
+  g.strokeRect(x + 4, y + (h - bh) / 2, bw, bh); g.strokeRect(x + w - 4 - bw, y + (h - bh) / 2, bw, bh);
+  g.strokeRect(x + 4, y + (h - bh * 0.45) / 2, bw * 0.38, bh * 0.45); g.strokeRect(x + w - 4 - bw * 0.38, y + (h - bh * 0.45) / 2, bw * 0.38, bh * 0.45);
+  g.fillStyle = '#fff'; g.fillRect(x, y + h / 2 - h * 0.06, 4, h * 0.12); g.fillRect(x + w - 4, y + h / 2 - h * 0.06, 4, h * 0.12);
+}
+
+// Koltuk sıraları: halka boyunca renk ve sıra çizgileri
+function stdSeats(g, ox, oy, ow, oh, ix, iy, iw, ih, color, line, rows) {
+  g.save();
+  g.beginPath(); g.rect(ox, oy, ow, oh); g.rect(ix, iy, iw, ih); g.clip('evenodd');
+  g.fillStyle = color; g.fillRect(ox, oy, ow, oh);
+  g.strokeStyle = line; g.lineWidth = 0.8;
+  for (let k = 1; k < rows; k++) {
+    const t = k / rows;
+    g.strokeRect(ix - (ix - ox) * t, iy - (iy - oy) * t, iw + (ow - iw) * t, ih + (oh - ih) * t);
+  }
+  g.restore();
+}
+
+// --- YOZGAT ---
+const YZ_PARTS = ['base', 'bowl', 'roof', 'details'];
+function paintYozgat(g, w, h, part, detail) {
+  const red = '#c8102e'; const black = '#141418';
+  const rim = Math.min(w, h) * 0.19; // Çatı halkası
+  const ix = rim; const iy = rim * 0.92; const iw = w - rim * 2; const ih = h - rim * 1.84;
+  if (part === 'base') {
+    // Dış cephe gölgesi ve sade kapalı paneller
+    g.fillStyle = 'rgba(0,0,0,.28)'; stdRound(g, 6, 10, w, h, 34); g.fill();
+    g.fillStyle = '#3a3c43'; stdRound(g, 0, 0, w, h, 34); g.fill();
+    stdPitch(g, ix + 22, iy + 20, iw - 44, ih - 40);
+    // Koşu pisti iç tarafta da görünür
+    g.strokeStyle = '#b5523b'; g.lineWidth = 9; g.strokeRect(ix + 13, iy + 12, iw - 26, ih - 24);
+  } else if (part === 'bowl') {
+    // Kırmızı koltuklar, siyah sıra ve merdiven çizgileri. Yanlardaki (uzun kenar) tribün biraz daha derin
+    stdSeats(g, ix - 6, iy - 10, iw + 12, ih + 20, ix + 6, iy + 4, iw - 12, ih - 8, red, 'rgba(20,4,8,.55)', detail ? 6 : 3);
+    if (detail) {
+      g.fillStyle = black;
+      for (let x = ix + 20; x < ix + iw - 10; x += 34) { g.fillRect(x, iy - 10, 2.2, 14); g.fillRect(x, iy + ih - 4, 2.2, 14); }
+      for (let y = iy + 18; y < iy + ih - 10; y += 30) { g.fillRect(ix - 6, y, 12, 2.2); g.fillRect(ix + iw - 6, y, 12, 2.2); }
+    }
+  } else if (part === 'roof') {
+    // Tamamen kapalı çatı: siyah paneller, kırmızı kenar. Uzun kenarlarda çatı daha geniş (daha yüksek tribün)
+    g.save();
+    stdRound(g, 0, 0, w, h, 34); g.rect(ix - 4, iy - 12, iw + 8, ih + 24); g.clip('evenodd');
+    const grd = g.createLinearGradient(0, 0, 0, h);
+    grd.addColorStop(0, '#26282e'); grd.addColorStop(1, '#17181c');
+    g.fillStyle = grd; g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(255,255,255,.07)'; g.lineWidth = 1.2;
+    const seams = detail ? 26 : 12;
+    for (let i = 0; i <= seams; i++) {
+      const x = (i / seams) * w;
+      g.beginPath(); g.moveTo(x, 0); g.lineTo(ix + (i / seams) * iw, iy - 12); g.moveTo(x, h); g.lineTo(ix + (i / seams) * iw, iy + ih + 12); g.stroke();
+    }
+    for (let i = 0; i <= 10; i++) {
+      const y = (i / 10) * h;
+      g.beginPath(); g.moveTo(0, y); g.lineTo(ix - 4, iy - 12 + (i / 10) * (ih + 24)); g.moveTo(w, y); g.lineTo(ix + iw + 4, iy - 12 + (i / 10) * (ih + 24)); g.stroke();
+    }
+    g.restore();
+    g.strokeStyle = red; g.lineWidth = 4; stdRound(g, 2, 2, w - 4, h - 4, 32); g.stroke();
+    g.strokeStyle = red; g.lineWidth = 2.5; g.strokeRect(ix - 4, iy - 12, iw + 8, ih + 24);
+  } else {
+    // Ana tribün (batı) camlı VIP locaları
+    const gx = ix - rim * 0.72; const gy = iy + ih * 0.18; const gh = ih * 0.64;
+    g.fillStyle = '#0e1a26'; g.fillRect(gx, gy, rim * 0.42, gh);
+    for (let k = 0; k < 9; k++) {
+      const y = gy + 3 + k * ((gh - 6) / 9);
+      const lg = g.createLinearGradient(gx, y, gx + rim * 0.42, y);
+      lg.addColorStop(0, '#8fd0ff'); lg.addColorStop(0.6, '#d8f1ff'); lg.addColorStop(1, '#6fb2e6');
+      g.fillStyle = lg; g.fillRect(gx + 2, y, rim * 0.42 - 4, (gh - 6) / 9 - 2.5);
+    }
+    // Giriş kapıları (güney cephe) ve tabela
+    g.fillStyle = '#0c0d10';
+    for (const u of [0.22, 0.5, 0.78]) g.fillRect(w * u - 16, h - 9, 32, 9);
+    g.fillStyle = red; g.fillRect(w * 0.2, h - rim * 0.62, w * 0.6, rim * 0.34);
+    stdText(g, NAMES.stadyum.yozgat, w / 2, h - rim * 0.45, rim * 0.24, '#ffffff', w * 0.56);
+    // Köşelerde 4 uzun ışık direği: gölgesi çapraz düşer
+    for (const [px, py] of [[16, 16], [w - 16, 16], [16, h - 16], [w - 16, h - 16]]) {
+      g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 4; g.beginPath(); g.moveTo(px, py); g.lineTo(px + 34, py + 46); g.stroke();
+      g.fillStyle = '#9aa2ad'; g.beginPath(); g.arc(px, py, 6, 0, STD_TAU); g.fill();
+      g.fillStyle = '#e9edf2'; g.fillRect(px - 11, py - 7, 22, 9);
+      g.fillStyle = '#fff6c8';
+      for (let k = 0; k < 4; k++) g.fillRect(px - 9 + k * 5, py - 5, 3.4, 5);
+    }
+  }
+}
+
+// --- KONYA ---
+const KN_PARTS = ['base', 'bowl', 'roof', 'facade', 'details'];
+function knGeom(w, h) {
+  const c = Math.min(w, h) * 0.2;
+  const outer = stdOcta(0, 0, w, h, c);
+  const ex = w * 0.5; const ey = h * 0.5;
+  const ia = w * 0.29; const ib = h * 0.27; // İç açıklık (elips)
+  const N = 32;
+  const ring = [];
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * STD_TAU;
+    // Dış nokta: sekizgen üzerinde, aynı açıdan
+    const dx = Math.cos(a); const dy = Math.sin(a);
+    let t = 1e9;
+    for (let k = 0; k < 8; k++) {
+      const [ax, ay] = outer[k]; const [bx, by] = outer[(k + 1) % 8];
+      const sx = bx - ax; const sy = by - ay;
+      const den = dx * sy - dy * sx;
+      if (Math.abs(den) < 1e-9) continue;
+      const u = ((ax - ex) * sy - (ay - ey) * sx) / den;
+      const v = ((ax - ex) * dy - (ay - ey) * dx) / den;
+      if (u > 0 && v >= 0 && v <= 1 && u < t) t = u;
+    }
+    ring.push({ ox: ex + dx * t, oy: ey + dy * t, ix: ex + Math.cos(a + Math.PI / N) * ia, iy: ey + Math.sin(a + Math.PI / N) * ib });
+  }
+  return { outer, ex, ey, ia, ib, ring, N };
+}
+
+function paintKonya(g, w, h, part, detail) {
+  const G = knGeom(w, h);
+  const green = '#16834a';
+  if (part === 'base') {
+    g.fillStyle = 'rgba(0,0,0,.25)'; g.save(); g.translate(8, 12); stdPoly(g, G.outer); g.fill(); g.restore();
+    g.fillStyle = '#e9eef0'; stdPoly(g, G.outer); g.fill();
+    stdPitch(g, G.ex - G.ia * 0.74, G.ey - G.ib * 0.6, G.ia * 1.48, G.ib * 1.2, '#3a9a46');
+  } else if (part === 'bowl') {
+    // Yeşil-beyaz koltuk halkası, iç açıklığın kenarında
+    g.save();
+    g.beginPath(); g.ellipse(G.ex, G.ey, G.ia * 1.02, G.ib * 1.02, 0, 0, STD_TAU);
+    g.ellipse(G.ex, G.ey, G.ia * 0.78, G.ib * 0.66, 0, 0, STD_TAU); g.clip('evenodd');
+    g.fillStyle = green; g.fillRect(0, 0, w, h);
+    const rows = detail ? 7 : 3;
+    g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 1;
+    for (let k = 1; k < rows; k++) { const t = 0.78 + (0.24 * k) / rows; g.beginPath(); g.ellipse(G.ex, G.ey, G.ia * t, G.ib * (0.66 + (0.36 * k) / rows), 0, 0, STD_TAU); g.stroke(); }
+    // Beyaz koltuklarla bölüm çizgileri
+    g.fillStyle = 'rgba(255,255,255,.75)';
+    for (let i = 0; i < 24; i++) { const a = (i / 24) * STD_TAU; g.save(); g.translate(G.ex + Math.cos(a) * G.ia * 0.9, G.ey + Math.sin(a) * G.ib * 0.84); g.rotate(a); g.fillRect(-G.ia * 0.12, -1.2, G.ia * 0.24, 2.4); g.restore(); }
+    g.restore();
+  } else if (part === 'roof') {
+    // Üçgen formlu zar çatı: dış sekizgen ile iç elips arasında üçgenler, bazıları yarı saydam
+    for (let i = 0; i < G.N; i++) {
+      const a = G.ring[i]; const b = G.ring[(i + 1) % G.N];
+      const shadeA = 0.92 + 0.08 * Math.sin(i * 1.7);
+      g.fillStyle = `rgba(${Math.round(244 * shadeA)},${Math.round(248 * shadeA)},${Math.round(246 * shadeA)},1)`;
+      stdPoly(g, [[a.ox, a.oy], [b.ox, b.oy], [a.ix, a.iy]]); g.fill();
+      g.fillStyle = i % 3 === 0 ? 'rgba(170,230,190,.62)' : 'rgba(226,236,232,.95)';
+      stdPoly(g, [[b.ox, b.oy], [b.ix, b.iy], [a.ix, a.iy]]); g.fill();
+    }
+    g.strokeStyle = 'rgba(80,110,96,.45)'; g.lineWidth = 1.1;
+    for (let i = 0; i < G.N; i++) {
+      const a = G.ring[i]; const b = G.ring[(i + 1) % G.N];
+      g.beginPath(); g.moveTo(a.ox, a.oy); g.lineTo(a.ix, a.iy); g.lineTo(b.ox, b.oy); g.moveTo(a.ix, a.iy); g.lineTo(b.ix, b.iy); g.stroke();
+    }
+    g.strokeStyle = green; g.lineWidth = 3; stdPoly(g, G.outer); g.stroke();
+  } else if (part === 'facade') {
+    // Cephe üçgen paneller (güney ve kuzey kenar bantları), bazıları yarı saydam yeşil
+    const band = 22;
+    for (const side of [0, 1]) {
+      const y0 = side ? h - band : 0;
+      const n = Math.floor(w / 26);
+      for (let i = 0; i < n; i++) {
+        const x = (i / n) * w;
+        g.fillStyle = (i + side) % 4 === 0 ? 'rgba(120,210,150,.55)' : (i % 2 ? '#f6faf8' : '#e1ebe6');
+        stdPoly(g, side ? [[x, h], [x + w / n, h], [x + w / (2 * n), y0]] : [[x, 0], [x + w / n, 0], [x + w / (2 * n), band]]);
+        g.fill();
+      }
+    }
+    // Batı ve doğu cephede cam localar; güneybatıda restoran / lounge camı
+    for (const x of [8, w - 34]) {
+      g.fillStyle = '#0f2230'; g.fillRect(x, h * 0.3, 26, h * 0.4);
+      for (let k = 0; k < 8; k++) {
+        const lg = g.createLinearGradient(x, 0, x + 26, 0);
+        lg.addColorStop(0, '#9edcff'); lg.addColorStop(1, '#e6f7ff');
+        g.fillStyle = lg; g.fillRect(x + 2, h * 0.3 + 3 + k * (h * 0.4 - 6) / 8, 22, (h * 0.4 - 6) / 8 - 3);
+      }
+    }
+    g.fillStyle = '#0f2230'; g.fillRect(w * 0.16, h - 52, w * 0.18, 22);
+    g.fillStyle = '#ffe9b0'; g.globalAlpha = 0.75; g.fillRect(w * 0.16 + 3, h - 49, w * 0.18 - 6, 16); g.globalAlpha = 1;
+  } else {
+    // Büyük giriş merdivenleri (kuzey ve güney), tabela
+    for (const y of [h - 26, 4]) {
+      for (let k = 0; k < 6; k++) { g.fillStyle = k % 2 ? '#d9dfe2' : '#c3cacf'; g.fillRect(w * 0.38, y + k * 3.6, w * 0.24, 3.6); }
+    }
+    g.fillStyle = green; g.fillRect(w * 0.3, h - 82, w * 0.4, 26);
+    stdText(g, NAMES.stadyum.konya, w / 2, h - 69, 17, '#ffffff', w * 0.38);
+  }
+}
+
+// Konya gece: panellerin değil üçgenlerin kenar ve köşe noktalarının ışığı (beyaz/yeşil çizgi). Önceden çizilir
+function paintKonyaNight(g, w, h) {
+  const G = knGeom(w, h);
+  g.lineCap = 'round';
+  for (const [lw, col] of [[6, 'rgba(60,255,150,.22)'], [2.2, 'rgba(225,255,240,.95)']]) {
+    g.strokeStyle = col; g.lineWidth = lw;
+    for (let i = 0; i < G.N; i++) {
+      const a = G.ring[i]; const b = G.ring[(i + 1) % G.N];
+      g.beginPath(); g.moveTo(a.ox, a.oy); g.lineTo(a.ix, a.iy); g.lineTo(b.ox, b.oy); g.moveTo(a.ix, a.iy); g.lineTo(b.ix, b.iy); g.stroke();
+    }
+    stdPoly(g, G.outer); g.stroke();
+  }
+  for (let i = 0; i < G.N; i++) {
+    const a = G.ring[i];
+    for (const [x, y, c] of [[a.ox, a.oy, '#ffffff'], [a.ix, a.iy, '#5dff9e']]) {
+      g.fillStyle = c; g.beginPath(); g.arc(x, y, 3.4, 0, STD_TAU); g.fill();
+    }
+  }
+}
+
+const STD_KINDS = {
+  yozgat: { parts: YZ_PARTS, paint: paintYozgat },
+  konya: { parts: KN_PARTS, paint: paintKonya },
+};
+
+// Bir stadyumun önbellekli görüntüsü
+class StadiumArt {
+  constructor(kind, w, h) {
+    this.kind = kind; this.w = w; this.h = h;
+    this.def = STD_KINDS[kind];
+    this.lo = null; this.hi = null; this.hiJob = null; this.night = null;
+    this.flag = null;
+  }
+
+  build(scale, detail) {
+    const c = stdCanvas(this.w * scale, this.h * scale);
+    const g = c.getContext('2d');
+    g.scale(scale, scale);
+    return { c, g, i: 0, detail };
+  }
+
+  update(d) {
+    const A = STC.art;
+    if (!this.lo && d < A.loFree) {
+      const j = this.build(A.loScale, false);
+      for (const p of this.def.parts) this.def.paint(j.g, this.w, this.h, p, false);
+      this.lo = j.c;
+      return;
+    }
+    if (this.lo && d > A.loFree * 1.2) this.lo = null;
+    if (!this.hi && !this.hiJob && d < A.hiNear) this.hiJob = this.build(A.hiScale, true);
+    if (this.hiJob) {
+      const j = this.hiJob;
+      this.def.paint(j.g, this.w, this.h, this.def.parts[j.i++], true);
+      if (j.i >= this.def.parts.length) { this.hi = j.c; this.hiJob = null; }
+      return;
+    }
+    if (this.kind === 'konya' && !this.night && d < A.hiNear) {
+      const j = this.build(A.hiScale * 0.5, true);
+      paintKonyaNight(j.g, this.w, this.h);
+      this.night = j.c;
+    }
+    if (this.hi && d > A.hiFree) { this.hi.width = 1; this.hi = null; if (this.night) { this.night.width = 1; this.night = null; } }
+  }
+
+  // Bayrak: Yozgat'ta Türk bayrakları, Konya'da amblemsiz yeşil bayraklar
+  flagImg() {
+    if (this.flag) return this.flag;
+    const c = stdCanvas(48, 32);
+    const g = c.getContext('2d');
+    if (this.kind === 'yozgat') paintTrFlag(g, 48, 32);
+    else { g.fillStyle = '#16834a'; g.fillRect(0, 0, 48, 32); g.fillStyle = '#ffffff'; g.fillRect(0, 24, 48, 3); }
+    this.flag = c;
+    return c;
+  }
+
+  poles(b) {
+    if (this.kind === 'yozgat') return [0.3, 0.42, 0.58, 0.7].map((u) => ({ x: b.x + b.w * u, y: b.y + b.h + 34 }));
+    return [0.2, 0.3, 0.7, 0.8].map((u) => ({ x: b.x + b.w * u, y: b.y + b.h + 30 }));
+  }
+
+  draw(ctx, b, now, px, near) {
+    const img = this.hi || this.lo;
+    if (img) ctx.drawImage(img, b.x, b.y, b.w, b.h);
+    const t = now / 1000;
+    // Bayrak direkleri ve dalgalanan bayraklar: dilimler halinde
+    const f = this.flagImg();
+    for (const [i, p] of this.poles(b).entries()) {
+      ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(p.x + 2, p.y - 2, 26, 3);
+      ctx.fillStyle = '#d8dde3'; ctx.fillRect(p.x - 1.3, p.y - 46, 2.6, 46);
+      const n = near ? 6 : 1;
+      for (let k = 0; k < n; k++) {
+        const u = k / n;
+        const dy = near ? Math.sin(t * STC.flagWave + u * 5 + i) * 2.4 * (u + 0.2) : 0;
+        ctx.drawImage(f, u * f.width, 0, f.width / n, f.height, p.x + 1.3 + u * 24, p.y - 46 + dy, 24 / n + 0.4, 16);
+      }
+    }
+    // Kapı önünde küçük taraftar siluetleri: yalnız yakında
+    if (near && px > 0.25) {
+      const gates = this.kind === 'yozgat' ? [0.22, 0.5, 0.78] : [0.42, 0.5, 0.58];
+      ctx.fillStyle = this.kind === 'yozgat' ? '#2a0b10' : '#0f3a24';
+      for (const [gi, u] of gates.entries()) {
+        for (let k = 0; k < 6; k++) {
+          const x = b.x + b.w * u - 22 + k * 8 + Math.sin(k * 3.1 + gi) * 3;
+          const y = b.y + b.h + 12 + (k % 2) * 7 + Math.abs(Math.sin(t * 3 + k + gi)) * -2;
+          ctx.beginPath(); ctx.arc(x, y - 4, 2.2, 0, STD_TAU); ctx.fill();
+          ctx.fillRect(x - 2, y - 2, 4, 6);
+        }
+      }
+    }
+  }
+
+  drawNight(ctx, b, now, night, lamp) {
+    if (night < 0.05) return;
+    ctx.globalCompositeOperation = 'lighter';
+    if (this.kind === 'yozgat') {
+      // Dört ışık direği parlar, saha aydınlanır
+      ctx.globalAlpha = night * 0.95;
+      for (const [x, y] of [[16, 16], [b.w - 16, 16], [16, b.h - 16], [b.w - 16, b.h - 16]]) ctx.drawImage(lamp, b.x + x - 110, b.y + y - 110, 220, 220);
+      ctx.globalAlpha = night * 0.32;
+      ctx.drawImage(lamp, b.x + b.w * 0.15, b.y + b.h * 0.12, b.w * 0.7, b.h * 0.76);
+    } else if (this.night) {
+      ctx.globalAlpha = night * (0.85 + 0.15 * Math.sin(now / 900));
+      ctx.drawImage(this.night, b.x, b.y, b.w, b.h);
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+}
+
+// İki stadyumu yöneten çizim: yalnız görünen çizilir, uzaklığa göre ayrıntı açılır ya da bırakılır
+class Stadiums {
+  constructor() { this.arts = new Map(); this.visible = []; }
+
+  art(z) {
+    const kind = z.w > 600 ? 'konya' : 'yozgat';
+    let a = this.arts.get(kind);
+    if (!a) { a = new StadiumArt(kind, z.w, z.h); this.arts.set(kind, a); }
+    return a;
+  }
+
+  draw(ctx, world, cam, vx0, vx1, vy0, vy1, now, px) {
+    this.visible.length = 0;
+    for (const z of world.zones()) {
+      if (z.kind !== 'stadium') continue;
+      const a = this.art(z);
+      const dx = Math.max(z.x - cam.x, 0, cam.x - z.x - z.w);
+      const dy = Math.max(z.y - cam.y, 0, cam.y - z.y - z.h);
+      const d = Math.hypot(dx, dy);
+      a.update(d);
+      if (z.x > vx1 + 60 || z.x + z.w < vx0 - 60 || z.y > vy1 + 80 || z.y + z.h < vy0 - 60) continue;
+      a.draw(ctx, z, now, px, d < STC.fans);
+      this.visible.push(z);
+    }
+  }
+
+  drawNight(ctx, now, night, lamp) {
+    for (const z of this.visible) this.art(z).drawNight(ctx, z, now, night, lamp);
+  }
+}
+
 // --- render.js ---
 // Canvas çizimi. Sprite'lar açılışta koddan üretilir; sadece ekrandaki nesneler çizilir.
 
@@ -11551,6 +12504,7 @@ class Renderer {
     this.syncBakes = 0; // Görünür parça hazır değilse kare beklemiştir: ölçüm için
     this.queue = []; // Sprite işleri kare bütçesiyle yapılır
     this.memorial = new MemorialArt(); // Cumhuriyet Meydanı anıtı: önbellekli, yakında ayrıntılı
+    this.stadiums = new Stadiums(); // İki stadyum: önbellekli, uzakta sade
     this.makeSprites();
   }
 
@@ -11909,9 +12863,21 @@ class Renderer {
     s.swat = sprite(P.swat.len + 8, P.swat.wid + 8, (g) => paintSwat(g, P.swat));
     s.tank = sprite(P.tank.len + 8, P.tank.wid + 8, (g) => paintTankHull(g, P.tank));
     s.turret = sprite(150, 50, paintTurret);
-    const AL = CONFIG.aliens;
-    s.ufo = sprite(AL.ufo.len + 10, AL.ufo.len + 10, (g) => paintUfo(g, AL.ufo));
-    s.rover = sprite(AL.rover.len + 16, AL.rover.wid + 16, (g) => paintRover(g, AL.rover));
+    // Uzaylı arabaları: türe göre ayrı görünüş
+    for (const [k, spec] of Object.entries(CONFIG.aliens.types)) s[k] = sprite(spec.len + 18, spec.wid + 18, (g) => paintAlien(g, spec, k));
+    // Meteor: kızgın kaya, alev kuyruğu yukarıda (gökten iner)
+    s.meteor = sprite(70, 110, (g) => {
+      const tail = g.createLinearGradient(0, -52, 0, 6);
+      tail.addColorStop(0, 'rgba(255,90,20,0)'); tail.addColorStop(0.6, 'rgba(255,150,40,.75)'); tail.addColorStop(1, 'rgba(255,240,180,.95)');
+      g.fillStyle = tail; g.beginPath(); g.moveTo(-9, -52); g.lineTo(9, -52); g.lineTo(20, 4); g.lineTo(-20, 4); g.closePath(); g.fill();
+      const rock = g.createRadialGradient(-6, 0, 3, 0, 8, 24);
+      rock.addColorStop(0, '#ffcf6b'); rock.addColorStop(0.35, '#a0522d'); rock.addColorStop(1, '#3a2418');
+      g.fillStyle = rock; g.beginPath();
+      for (let i = 0; i < 11; i++) { const a = (i / 11) * 6.283; const q = 19 + (i % 3) * 3; g[i ? 'lineTo' : 'moveTo'](Math.cos(a) * q, 10 + Math.sin(a) * q); }
+      g.closePath(); g.fill();
+      g.strokeStyle = '#ffb347'; g.lineWidth = 1.4; g.stroke();
+      g.fillStyle = 'rgba(40,20,10,.6)'; g.beginPath(); g.arc(6, 14, 4, 0, 7); g.arc(-7, 6, 3, 0, 7); g.fill();
+    });
     s.shadow = sprite(60, 34, (g) => {
       g.fillStyle = 'rgba(0,0,0,1)';
       rr(g, -28, -15, 56, 30, 9);
@@ -11926,7 +12892,7 @@ class Renderer {
     s.water = glow(64, [[0, 'rgba(235,250,255,.9)'], [1, 'rgba(180,230,255,0)']]);
     s.orb = glow(48, [[0, 'rgba(255,255,255,1)'], [0.25, 'rgba(120,240,255,.95)'], [0.6, 'rgba(255,60,200,.45)'], [1, 'rgba(255,40,180,0)']]);
     s.reticle = reticleSprite();
-    s.launcher = sprite(22, 14, (g) => { g.fillStyle = '#16181e'; rr(g, -9, -5, 18, 10, 3); g.fill(); g.fillStyle = '#2a2f38'; g.fillRect(-2, -3, 12, 6); g.fillStyle = '#ff2f6a'; g.fillRect(8, -2, 3, 4); g.fillStyle = '#21e6ff'; g.fillRect(-7, -1, 4, 2); });
+    s.launcher = sprite(26, 14, (g) => { g.fillStyle = '#16181e'; rr(g, -8, -5, 14, 10, 3); g.fill(); g.fillStyle = '#2a2f38'; g.fillRect(2, -2.2, 10, 1.8); g.fillRect(2, 0.4, 10, 1.8); g.fillStyle = '#ffd23f'; g.fillRect(11, -2.4, 1.6, 4.8); g.fillStyle = '#21e6ff'; g.fillRect(-6, -1, 4, 2); });
     s.glint = glow(32, [[0, 'rgba(255,255,220,1)'], [0.4, 'rgba(255,215,70,.8)'], [1, 'rgba(255,200,0,0)']]);
 
     const prop = (w, h, paint) => sprite(w, h, paint);
@@ -12528,11 +13494,23 @@ class Renderer {
   }
 
   // Açık alanlar: spor sahaları, avlu, otopark, ambulans alanı, okul bahçesi
+  // Gizli geçit rampası: neredeyse görünmez. Hafif koyu zemin, soluk eğim çizgileri, köşede karanlık bir boşluk
+  bakeRamp(g, x, y, w, h) {
+    const grd = g.createLinearGradient(x, y, x + w, y + h);
+    grd.addColorStop(0, 'rgba(0,0,0,0)'); grd.addColorStop(0.55, 'rgba(20,16,12,.10)'); grd.addColorStop(1, 'rgba(8,6,5,.26)');
+    g.fillStyle = grd; g.fillRect(x, y, w, h);
+    g.strokeStyle = 'rgba(30,24,18,.10)'; g.lineWidth = 1.2;
+    for (let k = 1; k < 5; k++) { const u = k / 5; g.beginPath(); g.moveTo(x + w * u, y + h); g.lineTo(x + w, y + h * u); g.stroke(); }
+    g.fillStyle = 'rgba(6,5,4,.22)';
+    g.beginPath(); g.moveTo(x + w, y + h * 0.62); g.lineTo(x + w, y + h); g.lineTo(x + w * 0.62, y + h); g.closePath(); g.fill();
+  }
+
   bakePads(g, c) {
     for (let i = 0; i < c.padCount; i++) {
       const p = c.pads[i];
       if (p.w <= 0 || p.h <= 0) continue; // Otoban bandında kalan saha iptal edilmiştir
       if (p.kind === 'anit') { bakeMemorialPad(g, c.x + (p.tx + 1) * TILE, c.y + p.ty * TILE, (p.w - 2) * TILE, p.h * TILE * 0.7); continue; }
+      if (p.kind === 'gecit') { this.bakeRamp(g, c.x + p.tx * TILE, c.y + p.ty * TILE, p.w * TILE, p.h * TILE); continue; }
       const x = c.x + p.tx * TILE + 3;
       const y = c.y + p.ty * TILE + 3;
       const w = p.w * TILE - 6;
@@ -12824,17 +13802,18 @@ class Renderer {
         this.memorial.draw(ctx, mb, now, s);
       }
     }
+    this.stadiums.draw(ctx, world, cam, vx0, vx1, vy0, vy1, now, s);
 
     this.drawDecals(game, vx0, vx1, vy0, vy1);
     this.drawSkids(game, vx0, vx1, vy0, vy1);
     this.drawSpikes(game);
     this.drawShots(game, now);
+    this.drawMeteorWarn(game, now);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, false);
     this.drawPeds(game, vx0, vx1, vy0, vy1, false);
     this.drawNpcs(game, vx0, vx1, vy0, vy1);
     this.drawHighway(game, vx0, vx1, vy0, vy1);
     this.drawCops(game, now, vx0, vx1, vy0, vy1);
-    if (game.weapon) this.drawWeapon(game, now);
     if (game.state !== 'dying' && game.state !== 'over') this.drawPlayer(game, now);
     this.drawProps(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now, true);
     this.drawPeds(game, vx0, vx1, vy0, vy1, true);
@@ -12843,7 +13822,8 @@ class Renderer {
     this.drawBalconies(game, now, c0x, c1x, c0y, c1y, false); // Alçak binalar yüksek binaların altında kalır
     this.drawTalls(game, c0x, c1x, c0y, c1y);
     this.drawBalconies(game, now, c0x, c1x, c0y, c1y, true);
-    this.drawUfos(game, now, vx0, vx1, vy0, vy1);
+    if (game.weapon) this.drawWeapon(game, now);
+    this.drawMeteorSky(game, now);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawNight(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now);
     this.drawPhasing(game);
@@ -13117,6 +14097,7 @@ class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
     const sp = this.sprites;
     if (this.memBox) this.memorial.drawNight(ctx, this.memBox, now, this.s, night, sp.lamp);
+    this.stadiums.drawNight(ctx, now, night, sp.lamp);
     ctx.globalCompositeOperation = 'lighter';
     const wet = game.weather === 'rain' || game.weather === 'ice';
     for (let cy = c0y; cy <= c1y; cy++) {
@@ -13191,7 +14172,7 @@ class Renderer {
     if (game.state === 'play') this.drawLed(game, night * CUSTOM.ledNight / CUSTOM.ledAlpha, now, true);
     ctx.globalAlpha = night;
     ctx.globalCompositeOperation = 'lighter';
-    for (let i = 0; i < game.cops.length; i++) { const c = game.cops[i]; if (c.type !== 'tank' && !c.flying) head(c); }
+    for (let i = 0; i < game.cops.length; i++) { const c = game.cops[i]; if (c.type !== 'tank' && !c.alien) head(c); }
     for (let i = 0; i < game.crowd.npcs.length; i++) { const n = game.crowd.npcs[i]; if (n.alive && n.state === 'drive') head(n); }
     for (let i = 0; i < game.crowd.hw.length; i++) { const n = game.crowd.hw[i]; if (n.alive) head(n); }
     ctx.globalCompositeOperation = 'source-over';
@@ -13305,34 +14286,31 @@ class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
-  // Güdümlü enerji topu: iz, parlak top, hedef işareti. Hepsi önceden çizilmiş görüntü
+  // Taramalı silah: kısa, ince iz çizgileri (en çok maxTracers), namlu parlaması. Tek yol, tek çizim
   drawWeapon(game, now) {
     const ctx = this.ctx;
-    const sp = this.sprites;
+    const gun = game.gun;
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
     ctx.globalCompositeOperation = 'lighter';
-    for (const m of game.missiles) {
-      if (!m.alive) continue;
-      for (let k = 1; k < m.tx.length; k++) {
-        const i = (m.ti - k + m.tx.length) % m.tx.length;
-        const q = 1 - k / m.tx.length;
-        ctx.globalAlpha = 0.55 * q;
-        const r = 6 + 8 * q;
-        ctx.drawImage(sp.orb, m.tx[i] - r, m.ty[i] - r, r * 2, r * 2);
-      }
+    ctx.beginPath();
+    let n = 0;
+    const L = 0.022; // İz uzunluğu (sn)
+    for (const b of gun.bullets) {
+      if (!b.alive || n >= CONFIG.weapon.maxTracers) continue;
+      ctx.moveTo(b.x - b.vx * L, b.y - b.vy * L); ctx.lineTo(b.x, b.y);
+      n++;
+    }
+    ctx.strokeStyle = 'rgba(255,214,90,.95)'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,235,.9)'; ctx.lineWidth = 1; ctx.stroke();
+    if (gun.flash > 0 && game.state === 'play') {
+      const p = game.player;
+      const x = p.x + Math.cos(gun.aim) * 16; const y = p.y + Math.sin(gun.aim) * 16;
+      ctx.globalAlpha = Math.min(1, gun.flash / 0.06);
+      ctx.drawImage(this.sprites.glint, x - 9, y - 9, 18, 18);
       ctx.globalAlpha = 1;
-      ctx.drawImage(sp.orb, m.x - 16, m.y - 16, 32, 32);
     }
     ctx.globalCompositeOperation = 'source-over';
-    const lock = game.weapon.lock;
-    if (lock && game.state === 'play') {
-      const r = Math.max(lock.len, lock.wid) * 0.8;
-      ctx.globalAlpha = game.weapon.cd <= 0.4 ? 0.95 : 0.6; // Atışa yakın daha belirgin
-      this.place(lock.x, lock.y, now * 0.003);
-      ctx.drawImage(sp.reticle, -r, -r, r * 2, r * 2);
-      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
-    }
-    ctx.globalAlpha = 1;
+    ctx.lineCap = 'butt';
   }
 
   // Alt LED: önceden çizilmiş yumuşak ışık, yere yansır. Gece drawNight içinde ikinci kez, daha parlak
@@ -13619,6 +14597,29 @@ class Renderer {
       ctx.globalAlpha = 1;
     }
     if (game.ghostT > 0) ctx.globalAlpha = 0.5;
+    // Koruma (uzaylı geçişi, gizli geçit dönüşü): hafif yanıp sönme ve ince kalkan halkası
+    if (game.shieldT > 0) {
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.35 + 0.25 * Math.sin(now * 0.02);
+      const R = p.len * 1.15;
+      ctx.drawImage(this.sprites.auras[2], p.x - R, p.y - R, R * 2, R * 2);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = Math.floor(now / 110) % 2 ? 0.55 : 1;
+    }
+    // Gizli geçit: araba rampadan aşağı kayar, küçülür ve kararır
+    const down = game.secretProgress();
+    if (game.state === 'secret') {
+      const q = k * (1 - 0.45 * down);
+      this.place(p.x, p.y, p.a);
+      ctx.globalAlpha = Math.max(0, 1 - down * 0.95);
+      const w = (this.playerSprite.wu || this.playerSprite.width / SPR) * q;
+      const h = (this.playerSprite.hu || this.playerSprite.height / SPR) * q;
+      ctx.drawImage(this.playerSprite, -w / 2, -h / 2, w, h);
+      ctx.globalAlpha = 1;
+      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+      return;
+    }
     const sink = game.sinkProgress();
     if (sink > 0) {
       // Çizgi film batışı: küçülür, maviye gömülür
@@ -13648,8 +14649,8 @@ class Renderer {
     ctx.globalAlpha = 1;
     this.drawRims(game, now);
     if (game.weapon) {
-      const lock = game.weapon.lock;
-      const a = lock ? Math.atan2(lock.y - p.y, lock.x - p.x) : p.a;
+      // 360° taret: son hedefe döner, hedef yoksa ileri
+      const a = game.gun.target ? game.gun.aim : p.a;
       this.place(p.x - Math.cos(p.a) * p.len * 0.08, p.y - Math.sin(p.a) * p.len * 0.08, a);
       const lw = this.sprites.launcher.width / SPR; const lh = this.sprites.launcher.height / SPR;
       ctx.drawImage(this.sprites.launcher, -lw / 2, -lh / 2, lw, lh);
@@ -13662,29 +14663,54 @@ class Renderer {
     ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
   }
 
-  // Uçan daireler en üstte: gölgesi yerde, ışını oyuncunun üstünde
-  drawUfos(game, now, x0, x1, y0, y1) {
+  // Meteor uyarısı (yerde): kırmızı daire, nişangâh, 3 saniyede dolan halka, yanıp sönen hedef işareti
+  drawMeteorWarn(game, now) {
     const ctx = this.ctx;
-    const sp = this.sprites;
-    for (const c of game.cops) {
-      if (!c.flying || c.x < x0 - 200 || c.x > x1 + 200 || c.y < y0 - 200 || c.y > y1 + 200) continue;
-      const R = c.len / 2;
-      ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
-      ctx.globalAlpha = 0.3;
-      ctx.drawImage(sp.dark, c.x + 16, c.y + 44, R * 2.1, R * 1.6);
-      if (c.beam) {
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.globalAlpha = 0.5 + 0.2 * Math.sin(now * 0.03);
-        ctx.fillStyle = '#39ff9c';
-        ctx.beginPath(); ctx.moveTo(c.x - 16, c.y); ctx.lineTo(c.x + 16, c.y); ctx.lineTo(game.player.x + 42, game.player.y); ctx.lineTo(game.player.x - 42, game.player.y); ctx.closePath(); ctx.fill();
-        ctx.globalCompositeOperation = 'source-over';
+    const M = CONFIG.meteor;
+    const R = M.radius;
+    for (const m of game.meteors.list) {
+      if (!m.alive) continue;
+      const k = Math.min(1, m.t / M.warn);
+      const blink = Math.floor(now / (k > 0.7 ? 90 : 170)) % 2 === 0;
+      ctx.beginPath(); ctx.arc(m.x, m.y, R, 0, 6.283);
+      ctx.fillStyle = `rgba(255,40,30,${0.1 + 0.16 * k})`; ctx.fill();
+      ctx.strokeStyle = 'rgba(255,70,40,.9)'; ctx.lineWidth = 3; ctx.setLineDash([14, 9]); ctx.stroke(); ctx.setLineDash([]);
+      // İlerleme halkası: 3 saniyede dolar
+      ctx.beginPath(); ctx.arc(m.x, m.y, R - 7, -Math.PI / 2, -Math.PI / 2 + k * 6.283);
+      ctx.strokeStyle = '#ffd23f'; ctx.lineWidth = 7; ctx.stroke();
+      // Nişangâh
+      ctx.strokeStyle = blink ? '#ffffff' : '#ff3b2a'; ctx.lineWidth = 3;
+      const r1 = R * 0.28; const r2 = R * 0.62;
+      ctx.beginPath();
+      ctx.moveTo(m.x - r2, m.y); ctx.lineTo(m.x - r1, m.y); ctx.moveTo(m.x + r1, m.y); ctx.lineTo(m.x + r2, m.y);
+      ctx.moveTo(m.x, m.y - r2); ctx.lineTo(m.x, m.y - r1); ctx.moveTo(m.x, m.y + r1); ctx.lineTo(m.x, m.y + r2);
+      ctx.stroke();
+      ctx.beginPath(); ctx.arc(m.x, m.y, r1 * 0.6, 0, 6.283); ctx.stroke();
+      // Yere düşen gölge büyür
+      const fall = M.fall / M.warn;
+      if (k > 1 - fall) {
+        const q = (k - (1 - fall)) / fall;
+        ctx.globalAlpha = 0.25 + 0.45 * q;
+        ctx.drawImage(this.sprites.dark, m.x - R * 0.5 * q, m.y - R * 0.35 * q, R * q, R * 0.7 * q);
+        ctx.globalAlpha = 1;
       }
-      ctx.globalAlpha = 1;
-      this.place(c.x, c.y - 10, c.a);
-      const w = sp.ufo.width / SPR;
-      ctx.drawImage(sp.ufo, -w / 2, -w / 2, w, w);
     }
-    ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+  }
+
+  // Düşen meteor (gökte): uyarının son anlarında yukarıdan çakılır
+  drawMeteorSky(game, now) {
+    const ctx = this.ctx;
+    const M = CONFIG.meteor;
+    const sp = this.sprites;
+    const fallFrom = M.warn - M.fall;
+    for (const m of game.meteors.list) {
+      if (!m.alive || m.t < fallFrom) continue;
+      const q = (m.t - fallFrom) / M.fall; // 0 gökte, 1 yerde
+      const h = (1 - q) * (game.cam.halfH * 0.7 + 80); // Ekranın içinden düşer: görünür
+      const sz = 1.6 - 0.7 * q;
+      const w = 70 * sz; const hh = 110 * sz;
+      ctx.drawImage(sp.meteor, m.x - w / 2 + (1 - q) * 120, m.y - h - hh * 0.62, w, hh);
+    }
   }
 
   drawCops(game, now, x0, x1, y0, y1) {
@@ -13693,7 +14719,19 @@ class Renderer {
     for (const c of game.cops) {
       if (c.flying) continue;
       if (c.x < x0 - 80 || c.x > x1 + 80 || c.y < y0 - 80 || c.y > y1 + 80) continue;
-      this.drawBody(sp[c.type], c, c.type === 'tank' ? 1.6 : 1);
+      if (c.alien) {
+        // Işınlanma sütunu ve yerdeki parıltı
+        ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
+        ctx.globalCompositeOperation = 'lighter';
+        const pulse = 0.55 + 0.25 * Math.sin(now * 0.008 + c.id);
+        ctx.globalAlpha = c.warpT > 0 ? 0.9 : 0.35 * pulse;
+        const R = c.len * (c.warpT > 0 ? 1.4 : 0.95);
+        ctx.drawImage(sp.auras[1], c.x - R, c.y - R, R * 2, R * 2);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = c.warpT > 0 ? Math.max(0.15, 1 - c.warpT / CONFIG.aliens.wake) : 1;
+        this.drawBody(sp[c.type], c, 1);
+        ctx.globalAlpha = 1;
+      } else this.drawBody(sp[c.type], c, c.type === 'tank' ? 1.6 : 1);
       if (c.type === 'tank') {
         this.place(c.x, c.y, c.turret);
         const w = sp.turret.width / SPR;
@@ -13772,7 +14810,7 @@ class Renderer {
     const sp = this.sprites;
     ctx.globalCompositeOperation = 'lighter';
     for (const c of game.cops) {
-      if (c.type === 'tank' || c.flying || c.type === 'rover' || game.ghostT > 0) continue;
+      if (c.type === 'tank' || c.alien || game.ghostT > 0) continue;
       if (c.x < x0 - 90 || c.x > x1 + 90 || c.y < y0 - 90 || c.y > y1 + 90) continue;
       const on = Math.floor(now / 130 + c.id) % 2 === 0;
       const side = c.wid * 0.5;
@@ -14272,6 +15310,7 @@ function defaultSave() {
     paints: {},
     custom: {}, // araba -> { rim, led }
     unlocked: { paints: [], rims: [], leds: [] }, // satın alınan özelleştirmeler
+    secret: false, // Gizli geçit bulundu: gizli motosiklet garajda
   };
 }
 
@@ -14283,10 +15322,13 @@ function sanitize(data) {
   d.bestScore = num(data.bestScore);
   d.bestTime = num(data.bestTime);
   d.coins = Math.floor(num(data.coins));
+  d.secret = data.secret === true;
   if (Array.isArray(data.owned)) {
-    const valid = data.owned.filter((id) => CONFIG.cars.some((c) => c.id === id));
+    // Gizli motosiklet yalnız geçidi bulanda geçerli
+    const valid = data.owned.filter((id) => CONFIG.cars.some((c) => c.id === id) || (d.secret && id === CONFIG.secretCar.id));
     d.owned = [...new Set([CONFIG.cars[0].id, ...valid])];
   }
+  if (d.secret && !d.owned.includes(CONFIG.secretCar.id)) d.owned.push(CONFIG.secretCar.id);
   if (d.owned.includes(data.selected)) d.selected = data.selected;
   if (data.settings) {
     d.settings.sound = data.settings.sound !== false;
@@ -14305,7 +15347,7 @@ function sanitize(data) {
   }
   d.tutorial = data.tutorial === true;
   if (data.paints && typeof data.paints === 'object') {
-    for (const c of CONFIG.cars) {
+    for (const c of [...CONFIG.cars, CONFIG.secretCar]) {
       const i = data.paints[c.id];
       if (Number.isInteger(i) && i >= 0 && i < c.paints.length) d.paints[c.id] = i;
     }
@@ -14318,13 +15360,13 @@ function sanitize(data) {
   }
   // Genel boya seçimi yalnız satın alınmışsa geçerli
   if (data.paints && typeof data.paints === 'object') {
-    for (const c of CONFIG.cars) {
+    for (const c of [...CONFIG.cars, CONFIG.secretCar]) {
       const i = data.paints[c.id];
       if (typeof i === 'string' && d.unlocked.paints.includes(i)) d.paints[c.id] = i;
     }
   }
   if (data.custom && typeof data.custom === 'object') {
-    for (const c of CONFIG.cars) {
+    for (const c of [...CONFIG.cars, CONFIG.secretCar]) {
       const v = data.custom[c.id];
       if (!v || typeof v !== 'object') continue;
       const ok = (kind, key, id) => itemOf(kind, id) && (itemOf(kind, id).price === 0 || d.unlocked[key].includes(id));
@@ -14370,7 +15412,22 @@ class Storage {
   }
 
   selectedCar() {
-    return CONFIG.cars.find((c) => c.id === this.data.selected) || CONFIG.cars[0];
+    return carById(this.data.selected) || CONFIG.cars[0];
+  }
+
+  // Gizli geçit bulundu: motosiklet kalıcı olarak garaja girer. true: ilk kez açıldı
+  unlockSecret() {
+    const d = this.data;
+    const first = !d.secret;
+    d.secret = true;
+    if (!d.owned.includes(CONFIG.secretCar.id)) d.owned.push(CONFIG.secretCar.id);
+    this.save();
+    return first;
+  }
+
+  // Garajda gezilen araçlar: satılık arabalar; gizli motosiklet yalnız bulunduysa (bulmayanda hiçbir iz yok)
+  garageCars() {
+    return this.data.secret ? [...CONFIG.cars, CONFIG.secretCar] : CONFIG.cars;
   }
 
   // Sonucu işler, rekor bilgisini döndürür
@@ -14483,6 +15540,8 @@ const ENGINE_KINDS = {
   ev: { harm: [1, 0, 0.14, 0, 0.05], sub: 0, high: 0.44, air: 0, rough: 0, roughRate: 0, lp: [1800, 6500] },
   // Yüksek devirli süper araba: sert, parlak, hızlı tepki
   super: { harm: [0.8, 0.95, 0.8, 0.62, 0.5, 0.4], sub: 0.32, high: 0.34, air: 0.08, rough: 0.05, roughRate: 0.4, lp: [520, 4400] },
+  // Gizli motosiklet: çift silindir, çok derin ve gür gövde, kalın tırtıl; gaz bırakınca egzoz patlar (pops)
+  beast: { harm: [1, 0.95, 0.9, 0.72, 0.6, 0.48, 0.36], sub: 1.05, high: 0.24, air: 0.14, rough: 0.42, roughRate: 0.5, lp: [300, 3400], pops: true },
 };
 
 // Hız oranından devir ve vites: vites büyüdükçe devir düşer, tepe devre ulaşınca sıradaki vitese atar
@@ -14677,7 +15736,7 @@ class AudioEngine {
     makeVoice('bip', 'square', 1700);
     makeVoice('pulse', 'sawtooth', 900);
     makeVoice('warble', 'triangle', 1400);
-    makeVoice('ufo', 'sine', 1300);
+    makeVoice('warp', 'square', 760);
     makeVoice('zap', 'sawtooth', 2100);
     this.radioT = 6;
   }
@@ -14811,6 +15870,12 @@ class AudioEngine {
     this.engAirF.frequency.setTargetAtTime(500 + 1900 * ratio, t, 0.08);
     this.engFilter.frequency.setTargetAtTime(K.lp[0] + (K.lp[1] - K.lp[0]) * ratio * (0.35 + 0.65 * gas), t, 0.07);
     this.engGain.gain.setTargetAtTime(vol * (0.05 + 0.05 * ratio + 0.05 * gas) * e.gain * cut, t, 0.05);
+    // Geri tepme: gaz bırakılınca yüksek devirde egzoz patlamaları
+    if (K.pops && on) {
+      if ((this.lastGas ?? 1) >= 0.8 && gas < 0.6 && ratio > 0.35) this.backfire(3 + Math.floor(Math.random() * 3));
+      else if (gas < 0.6 && ratio > 0.5 && Math.random() < 0.05) this.backfire(1);
+    }
+    this.lastGas = gas;
 
     // Ara sıra sokak sesleri
     if (this.ambientOn && this.enabled) {
@@ -14856,7 +15921,7 @@ class AudioEngine {
     setVoice('bip', 1760, Math.floor(sec * 7) % 4 === 0 ? 1 : 0); // Megafon bip
     setVoice('pulse', 900, Math.floor(sec * 12) % 2 ? 1 : 0); // Kesik nabız
     setVoice('warble', 1050 + 340 * Math.sin(sec * 36), Math.floor(sec * 1.6) % 2 ? 1 : 0); // Titrek çift ton
-    setVoice('ufo', 880 + 620 * Math.sin(sec * 5.4) * Math.sin(sec * 0.9)); // Bilim kurgu teremin
+    setVoice('warp', 520 + 380 * Math.abs(Math.sin(sec * 9)) + 160 * Math.sin(sec * 1.7)); // Uzaylı arabası: zıplayan vınlama
     setVoice('zap', 2600 - 2100 * (sec * 3 - Math.floor(sec * 3))); // Lazer süpürmesi
 
     // Ara sıra polis telsizi ve megafon
@@ -15107,16 +16172,10 @@ class AudioEngine {
   powerEnd() { this.tone(660, 0.18, 0.1, 'triangle', 240); }
 
   crunch() { this.burst(0.12, 1300, 0.22, 'bandpass', 500); }
-  // Coin: üst üste toplayınca perde yükselir
-  // Güdümlü top: yükselen vınlama; isabet: tok patlama
+  // Ateş alan araba: kısa yanma sesi
   fire() {
     this.tone(420, 0.22, 0.14, 'sawtooth', 1400);
     this.burst(0.18, 2600, 0.12, 'highpass');
-  }
-
-  missileHit(v) {
-    this.burst(0.25, 900, 0.18 + 0.12 * v, 'lowpass', 200);
-    this.tone(220, 0.16, 0.1, 'square', 90);
   }
 
   // Kıl payı kaçış: iki hızlı parlak nota
@@ -15155,6 +16214,45 @@ class AudioEngine {
 
   splash() { this.burst(0.4, 2400, 0.3, 'highpass', 600); }
   spike() { this.tone(900, 0.5, 0.14, 'sawtooth', 100); this.burst(0.3, 3200, 0.3, 'highpass'); }
+
+  // Egzoz patlaması: kısa, tok, aralıklı
+  backfire(n) {
+    for (let i = 0; i < n; i++) {
+      const d = i * (0.06 + Math.random() * 0.07);
+      this.tone(70 + Math.random() * 40, 0.07, 0.42, 'square', 34, d);
+      setTimeout(() => this.burst(0.06, 900 + Math.random() * 500, 0.5, 'lowpass', 120), d * 1000);
+    }
+  }
+
+  // Taramalı silah: tık tık tık. Kısa yüksek tık ve çok kısa vuruş
+  gunShot() {
+    const c = this.ctx;
+    if (!c || !this.enabled) return;
+    this.tone(1900 + Math.random() * 300, 0.028, 0.07, 'square', 700);
+    this.tone(160, 0.04, 0.09, 'triangle', 70);
+  }
+
+  // Uzaylılar geldi: alçalan bilim kurgu çağrısı ve kısa siren
+  alienArrive() {
+    this.alert();
+    for (let i = 0; i < 4; i++) this.tone(1200 - i * 180, 0.3, 0.12, 'square', 300, 0.2 + i * 0.22);
+  }
+
+  // Meteor uyarısı: yüksekten inen ıslık. Çarpma: derin gümbürtü ve toz
+  meteorWarn() { this.tone(1700, 0.9, 0.06, 'sine', 380); }
+  meteorHit(v = 1) {
+    this.burst(1.1, 1100, 0.9 * v, 'lowpass', 40);
+    this.tone(70, 0.8, 0.6 * v, 'sine', 24);
+    this.burst(0.35, 3200, 0.2 * v, 'highpass', 900);
+  }
+
+  // Gizli geçit: rampadan inen motor uğultusu, yankılı beton, kısa iki nota
+  secretDown() {
+    this.tone(220, 0.9, 0.2, 'sawtooth', 70);
+    this.burst(0.8, 600, 0.25, 'lowpass', 90);
+    this.tone(392, 0.4, 0.12, 'triangle', 0, 1.1);
+    this.tone(587, 0.6, 0.12, 'triangle', 0, 1.35);
+  }
 
   // Eşik uyarısı: kısa yükselen siren
   alert() {
@@ -15261,6 +16359,34 @@ function ledColor(led, t) {
   return led.color;
 }
 
+// Gölge R: alçak, keskin süper motosiklet. Neon şerit, ışıklı jant halkası, çift egzoz
+function pxGolge(g, paint, look) {
+  const c = paint.color; const a = paint.accent || '#21e6ff';
+  const rect = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(x, y, w, h); };
+  for (const x of [28, 94]) {
+    pxWheel(g, x, 37, 9, a, look.rim, look.ang);
+    // Jantın ışık halkası
+    g.fillStyle = a;
+    for (let k = 0; k < 24; k++) { const t = (k / 24) * Math.PI * 2 + (look.ang || 0); g.fillRect(Math.round(x + Math.cos(t) * 7), Math.round(37 + Math.sin(t) * 7), 1, 1); }
+  }
+  rect(30, 31, 60, 2, '#22262f');
+  // Kaporta: öne doğru alçalan keskin hat
+  g.fillStyle = c;
+  g.beginPath(); g.moveTo(40, 30); g.lineTo(52, 17); g.lineTo(78, 15); g.lineTo(100, 22); g.lineTo(98, 28); g.lineTo(80, 31); g.closePath(); g.fill();
+  rect(52, 17, 26, 2, pxTone(c, 0.4));
+  // Neon şerit
+  g.fillStyle = a;
+  for (let x = 46; x < 98; x++) g.fillRect(x, Math.round(27 - (x - 46) * 0.1), 1, 1);
+  rect(26, 20, 22, 4, '#0c0d12'); // Sele
+  rect(16, 22, 12, 3, pxTone(c, -0.2));
+  rect(14, 22, 3, 3, '#ff2346');
+  rect(84, 12, 10, 3, '#1b2a3a'); // Grenaj camı
+  rect(96, 18, 6, 4, '#e8fbff'); // Far
+  rect(90, 16, 3, 20, '#a8b4c8');
+  rect(30, 33, 26, 2, '#c9d1dc'); rect(30, 30, 18, 2, '#9aa3ad'); // Çift egzoz
+  rect(60, 30, 14, 4, '#2c313b');
+}
+
 function pxDrawCar(g, car, paint, look = { rim: 'std', led: 'yok', ang: 0, t: 0 }) {
   const led = ledOf(look.led);
   if (led.color) {
@@ -15279,6 +16405,7 @@ function pxDrawCar(g, car, paint, look = { rim: 'std', led: 'yok', ang: 0, t: 0 
     }
   }
   if (car.shape === 'moto') { pxMoto(g, paint, look); return; }
+  if (car.shape === 'golge') { pxGolge(g, paint, look); return; }
   const S = PX_SHAPES[car.shape] || PX_SHAPES.atmaca;
   const body = [[S.x0, S.sill], [S.x0, S.deck + 3], [S.x0 + 3, S.deck], [S.cr, S.deck], [S.rr, S.roof], [S.rf, S.roof], [S.cf, S.hood], [S.x1 - 8, S.hood + 2], [S.x1, S.hood + 6], [S.x1, S.sill]];
   const belt = Math.max(S.deck, S.hood) + 1;
@@ -15387,6 +16514,110 @@ function rimIcon(rim, ang = 0.3) {
   g.imageSmoothingEnabled = false;
   pxWheel(g, 12, 12, 10, '#ffd23f', rim, ang);
   return c;
+}
+
+// --- secret.js ---
+// Gizli geçit sahnesi (DOM): ekran kararır, kısa bir yeraltı garajı görünür (loş titreyen lambalar, borular, beton),
+// spot ışığının altında hediye motosiklet ve karşılama yazısı. Süre CONFIG.secret.scene, oyunu game.js sürdürür.
+
+const SCN = CONFIG.secret;
+
+class SecretScene {
+  constructor(el) {
+    this.el = el;
+    this.canvas = el ? el.querySelector('canvas') : null;
+    this.raf = 0;
+    this.t0 = 0;
+    this.open = false;
+  }
+
+  play(title, gift, first) {
+    if (!this.el) return;
+    this.el.querySelector('b').textContent = title;
+    this.el.querySelector('small').textContent = gift;
+    this.el.classList.toggle('first', !!first);
+    this.el.hidden = false;
+    this.el.style.setProperty('--scene', `${SCN.scene}s`);
+    this.el.style.setProperty('--slide', `${SCN.slide}s`);
+    this.el.classList.remove('run');
+    void this.el.offsetWidth;
+    this.el.classList.add('run');
+    this.open = true;
+    this.t0 = performance.now();
+    const loop = (now) => {
+      if (!this.open) return;
+      this.raf = requestAnimationFrame(loop);
+      this.draw((now - this.t0) / 1000);
+    };
+    cancelAnimationFrame(this.raf);
+    this.raf = requestAnimationFrame(loop);
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => this.hide(), (SCN.scene + 0.4) * 1000);
+  }
+
+  hide() {
+    if (!this.el) return;
+    this.open = false;
+    cancelAnimationFrame(this.raf);
+    this.el.classList.remove('run');
+    this.el.hidden = true;
+  }
+
+  draw(t) {
+    const c = this.canvas;
+    if (!c) return;
+    const W = Math.min(960, window.innerWidth); const H = Math.min(720, window.innerHeight);
+    if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+    const g = c.getContext('2d');
+    const hz = H * 0.58; // Ufuk: zemin başlangıcı
+    // Beton duvar
+    const wall = g.createLinearGradient(0, 0, 0, hz);
+    wall.addColorStop(0, '#15171b'); wall.addColorStop(1, '#2b2e33');
+    g.fillStyle = wall; g.fillRect(0, 0, W, hz);
+    g.strokeStyle = 'rgba(255,255,255,.04)'; g.lineWidth = 1;
+    for (let y = 30; y < hz; y += 34) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+    for (let x = (t * 0) % 90; x < W; x += 90) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, hz); g.stroke(); }
+    // Zemin: perspektif çizgileri, ıslak parlaklık
+    const floor = g.createLinearGradient(0, hz, 0, H);
+    floor.addColorStop(0, '#1d1f23'); floor.addColorStop(1, '#0b0c0e');
+    g.fillStyle = floor; g.fillRect(0, hz, W, H - hz);
+    g.strokeStyle = 'rgba(255,214,90,.18)'; g.lineWidth = 2;
+    for (let k = -6; k <= 6; k++) { g.beginPath(); g.moveTo(W / 2 + k * 30, hz); g.lineTo(W / 2 + k * 190, H); g.stroke(); }
+    // Kolonlar
+    for (const u of [0.12, 0.88]) {
+      const x = W * u;
+      g.fillStyle = '#24272c'; g.fillRect(x - 26, 0, 52, hz + 30);
+      g.fillStyle = 'rgba(255,214,90,.5)'; for (let y = hz - 40; y < hz + 30; y += 16) g.fillRect(x - 26, y, 52, 7);
+    }
+    // Tavanda borular
+    for (const [y, r, col] of [[26, 9, '#5a5f66'], [48, 6, '#7a4a2e'], [64, 5, '#3f5a6b']]) {
+      const pg = g.createLinearGradient(0, y - r, 0, y + r);
+      pg.addColorStop(0, col); pg.addColorStop(0.4, '#c9ced4'); pg.addColorStop(1, '#1a1c20');
+      g.fillStyle = pg; g.fillRect(0, y - r, W, r * 2);
+      g.fillStyle = 'rgba(0,0,0,.5)'; for (let x = 60; x < W; x += 180) g.fillRect(x, y - r - 2, 8, r * 2 + 4);
+    }
+    // Titreyen loş lambalar ve ışık konileri
+    for (const [i, u] of [0.3, 0.5, 0.7].entries()) {
+      const x = W * u;
+      const on = 0.55 + 0.45 * Math.abs(Math.sin(t * (7 + i * 3.1) + i)) * (Math.sin(t * 23 + i * 5) > -0.85 ? 1 : 0.2);
+      g.fillStyle = '#e8e2c8'; g.fillRect(x - 14, 72, 28, 5);
+      const cone = g.createLinearGradient(0, 77, 0, H);
+      cone.addColorStop(0, `rgba(255,236,170,${0.32 * on})`); cone.addColorStop(1, 'rgba(255,236,170,0)');
+      g.fillStyle = cone;
+      g.beginPath(); g.moveTo(x - 12, 77); g.lineTo(x + 12, 77); g.lineTo(x + 150, H); g.lineTo(x - 150, H); g.closePath(); g.fill();
+    }
+    // Spot ışığı altında motosiklet: piksel görüntü büyütülür, jantlar döner
+    const spot = g.createRadialGradient(W / 2, H * 0.8, 10, W / 2, H * 0.8, W * 0.36);
+    spot.addColorStop(0, 'rgba(33,230,255,.35)'); spot.addColorStop(1, 'rgba(33,230,255,0)');
+    g.fillStyle = spot; g.fillRect(0, hz, W, H - hz);
+    const bike = pixelCar(CONFIG.secretCar, 0, { rim: 'turbin', led: 'mavi' });
+    const bw = Math.min(W * 0.62, 520); const bh = (bw * bike.height) / bike.width;
+    const appear = Math.min(1, Math.max(0, (t - SCN.slide) / 0.6));
+    g.globalAlpha = appear;
+    g.imageSmoothingEnabled = false;
+    g.drawImage(bike, W / 2 - bw / 2, H * 0.86 - bh, bw, bh);
+    g.globalAlpha = 1;
+  }
 }
 
 // --- pixelmenu.js ---
@@ -15571,6 +16802,8 @@ class PixelMenu {
 // Menüler ve oyun içi gösterge. HUD yalnızca değer değişince DOM'a yazar.
 
 const $ = (id) => document.getElementById(id);
+// Araç adı: gizli motosikletin adı dil dosyasında, diğerleri isim tablosunda
+const carLabel = (car) => (car.secret ? tx('cars.golge.name') : car.name);
 
 function formatTime(t) {
   const s = Math.floor(t);
@@ -15635,8 +16868,8 @@ class UI {
     click('btn-mute', () => { const d2 = this.storage.data; d2.settings.sound = !d2.settings.sound; this.storage.save(); this.syncSettings(); a.applySettings(); });
     click('btn-garage', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
     click('btn-garage2', () => { this.gi = undefined; this.renderGarage(); this.show('garage'); });
-    click('car-prev', () => { this.stepCar(-1); a.preview(CONFIG.cars[this.gi]); });
-    click('car-next', () => { this.stepCar(1); a.preview(CONFIG.cars[this.gi]); });
+    click('car-prev', () => { this.stepCar(-1); a.preview(this.storage.garageCars()[this.gi]); });
+    click('car-next', () => { this.stepCar(1); a.preview(this.storage.garageCars()[this.gi]); });
     click('btn-settings', () => { this.show('settings'); });
     click('btn-howto', () => { this.show('howto'); });
     for (const b of document.querySelectorAll('[data-back]')) {
@@ -15769,7 +17002,7 @@ class UI {
     $('menu-coins').textContent = d.coins;
     $('menu-best').textContent = d.bestScore ? tx('menu.best', { score: txNum(d.bestScore), time: formatTime(d.bestTime) }) : tx('menu.first');
     const car = this.storage.selectedCar();
-    $('menu-car-name').textContent = car.name;
+    $('menu-car-name').textContent = carLabel(car);
     $('menu-car-paint').textContent = this.paintName(car, this.storage.paintIndex(car.id));
     if (!$('menu').hidden) this.fit($('menu'));
   }
@@ -15872,7 +17105,7 @@ class UI {
     const text = tx(`alert.${['', 'swat', 'heavy', 'tanks'][stage] || 'tanks'}`);
     const el = $('alert');
     el.textContent = text;
-    el.classList.remove('run');
+    el.classList.remove('run', 'long');
     void el.offsetWidth; // Animasyonu baştan başlat
     el.classList.add('run');
   }
@@ -15910,12 +17143,27 @@ class UI {
     el.classList.add('run');
   }
 
+  // Uzaylı geçişi: büyük okunaklı yazı tam CONFIG.aliens.intro saniye görünür, sonra kaybolur
   alienAlert() {
     const el = $('alert');
     el.textContent = tx('alert.aliens');
+    el.style.setProperty('--alert-t', `${CONFIG.aliens.intro}s`);
     el.classList.remove('run');
+    el.classList.add('long');
     void el.offsetWidth;
     el.classList.add('run');
+  }
+
+  // Meteor aşaması: büyük yazı ve kısa uyarı (kırmızı halkadan çık)
+  meteorAlert() {
+    const el = $('alert');
+    el.textContent = tx('alert.meteors');
+    el.style.setProperty('--alert-t', `${CONFIG.aliens.intro}s`);
+    el.classList.remove('run');
+    el.classList.add('long');
+    void el.offsetWidth;
+    el.classList.add('run');
+    setTimeout(() => this.toast(tx('meteor.warn'), '#ffd23f'), 1200);
   }
 
   showHint(on) {
@@ -15979,7 +17227,7 @@ class UI {
     const d = this.storage.data;
     const memorial = result.cause === 'memorial';
     $('memorial-msg').classList.remove('run'); // Oyun bitti ekranı açılınca ceza yazısı kalkar
-    $('over-title').textContent = tx(memorial ? 'memorial.over' : record.newScore ? 'over.record' : result.cause === 'water' ? 'over.sunk' : 'over.caught');
+    $('over-title').textContent = tx(memorial ? 'memorial.over' : record.newScore ? 'over.record' : result.cause === 'water' ? 'over.sunk' : result.cause === 'meteor' ? 'over.meteor' : 'over.caught');
     $('over-title').classList.toggle('record', record.newScore && !memorial);
     $('over-title').classList.toggle('memorial', memorial);
     $('over-score').textContent = txNum(result.score);
@@ -16002,7 +17250,7 @@ class UI {
 
   renderGarage() {
     const d = this.storage.data;
-    const cars = CONFIG.cars;
+    const cars = this.storage.garageCars();
     $('garage-coins').textContent = d.coins;
     if (this.gi === undefined) this.gi = Math.max(0, cars.findIndex((c) => c.id === d.selected));
     const car = cars[this.gi];
@@ -16030,13 +17278,13 @@ class UI {
     });
     const pt = paintOf(car, paintI);
     $('garage-paint-name').textContent = `${this.paintName(car, paintI)} · ${tx(`garage.finish.${pt.finish}`)}${pt.roof ? ` · ${tx('garage.twoTone')}` : ''}`;
-    $('garage-name').textContent = car.name;
+    $('garage-name').textContent = carLabel(car);
     $('garage-desc').textContent = tx(`cars.${car.id}.desc`);
 
     const stats = $('garage-stats');
     stats.textContent = '';
-    const top = cars[cars.length - 1];
-    const base = cars[0];
+    const top = CONFIG.cars[CONFIG.cars.length - 1]; // Ölçek satılık arabalara göre
+    const base = CONFIG.cars[0];
     const stat = (label, value, text) => {
       const row = document.createElement('div');
       row.className = 'stat';
@@ -16051,8 +17299,8 @@ class UI {
       row.append(t, bar, n);
       stats.appendChild(row);
     };
-    const norm = (v, a, b) => (v - a) / (b - a);
-    const range = (key) => { const v = cars.map((c) => c[key]); return [Math.min(...v), Math.max(...v)]; };
+    const norm = (v, a, b) => Math.min(1.08, (v - a) / (b - a));
+    const range = (key) => { const v = CONFIG.cars.map((c) => c[key]); return [Math.min(...v), Math.max(...v)]; };
     stat(tx('garage.speed'), norm(car.maxSpeed, base.maxSpeed, top.maxSpeed), String(Math.round(car.maxSpeed / 3)));
     stat(tx('garage.accel'), norm(car.accel, ...range('accel')), String(Math.round(car.accel / 7)));
     stat(tx('garage.grip'), norm(car.grip, ...range('grip')), String(Math.round(car.grip * 20)));
@@ -16084,7 +17332,7 @@ class UI {
       paintPixelCar(art, c, this.storage.paintIndex(c.id));
       art.className = 'car-art';
       const label = document.createElement('span');
-      label.textContent = has ? c.name : `${c.cost}`;
+      label.textContent = has ? carLabel(c) : `${c.cost}`;
       b.append(art, label);
       b.addEventListener('click', () => { this.actions.tap(); this.gi = i; this.gp = 0; this.renderGarage(); this.actions.preview(c); });
       list.appendChild(b);
@@ -16168,7 +17416,7 @@ class UI {
     }
     // Seçilen ya da denenen öğenin adı ve satın alma düğmesi
     const sel = p || current;
-    $('custom-name').textContent = tx(`custom.${tab}s.${sel}`);
+    $('custom-name').textContent = tab === 'paint' && typeof sel === 'number' ? this.paintName(car, sel) : tx(`custom.${tab}s.${sel}`);
     if (p) {
       const it = itemOf(tab, p);
       const enough = d.coins >= it.price;
@@ -16199,7 +17447,7 @@ class UI {
   }
 
   stepCar(dir) {
-    const n = CONFIG.cars.length;
+    const n = this.storage.garageCars().length;
     this.gi = (this.gi + dir + n) % n;
     this.gp = 0;
     this.prev = null;
@@ -16406,12 +17654,8 @@ const cover = new PixelMenu(document.getElementById('cover'));
 const curtain = document.getElementById('curtain');
 const menuEl = document.getElementById('menu');
 const cheatBadge = document.getElementById('cheat-badge');
-// Ateş otomatiktir. Boşluk yalnız silahlı arabada alınır ve bekleme süresi dolmuşsa atar
-input.onFire = (down) => {
-  const armed = !!game.weapon && game.state === 'play' && !paused;
-  if (armed && down) game.fire();
-  return armed;
-};
+// Silah tamamen otomatiktir (js/gun.js): ateş düğmesi ve tuşu yoktur
+input.onFire = () => false;
 input.onCode = () => { if (game.state === 'play' && !paused) game.toggleCheat(); };
 const params = new URLSearchParams(location.search);
 let paused = false;
@@ -16463,6 +17707,7 @@ function applyQuality() {
   const q = quality.settings;
   renderer.lod = q;
   game.copLimit = Math.min(q.cops, navigator.maxTouchPoints > 0 ? CONFIG.pursuit.phoneCap : q.cops);
+  game.alienLimit = navigator.maxTouchPoints > 0 ? CONFIG.aliens.phoneCap : CONFIG.aliens.desktopCap;
   game.fx.density = q.particles;
   game.crowd.limit = q.crowd;
   fitCanvas(window.innerWidth, window.innerHeight);
@@ -16651,6 +17896,8 @@ const ui = new UI(storage, {
 initA2hs(() => audio.unlock());
 // Gençliğe Hitabe okuma kartı: anıta yaklaşınca açılır, uzaklaşınca ya da dokununca kapanır
 const memorialCard = new MemorialCard(document.getElementById('memorial-card'), () => game.dismissMemorialCard());
+// Gizli geçit: bodrum sahnesi ve karşılama yazısı. Arkadaş sürümünde ev sahibinin adı, Play sürümünde genel yazı
+const secretScene = new SecretScene(document.getElementById('secret'));
 
 let wakeLock = null;
 async function keepAwake(on) {
@@ -16682,10 +17929,23 @@ game.onEvent = (name, v) => {
     case 'nearmiss': audio.nearMiss(); break;
     case 'splash': audio.splash(); break;
     case 'sink': audio.sink(); vibrate([80, 60, 200]); break;
-    case 'aliens': audio.alert(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
+    case 'aliens': audio.alienArrive(); ui.alienAlert(); vibrate([100, 50, 100, 50, 200]); break;
+    case 'meteors': audio.alert(); ui.meteorAlert(); vibrate([80, 40, 80]); break;
+    case 'meteorwarn': audio.meteorWarn(); break;
+    case 'meteorhit': audio.meteorHit(v); vibrate(Math.round(30 + 60 * v)); break;
+    case 'shot': audio.gunShot(); break;
+    case 'gunhit': if (v >= 1) vibrate(30); break;
+    case 'secret': {
+      const first = storage.unlockSecret();
+      secretScene.play(NAMES.misafir ? tx('secret.guest', { name: NAMES.misafir }) : tx('secret.found'), tx('secret.gift', { name: tx('cars.golge.name') }), first);
+      audio.secretDown();
+      vibrate([40, 30, 40, 30, 120]);
+      ui.refreshMenu();
+      break;
+    }
+    case 'secretexit': secretScene.hide(); break;
     case 'spike': audio.spike(); vibrate(60); break;
     case 'fire': audio.fire(); vibrate(14); break;
-    case 'missilehit': audio.missileHit(v); vibrate(v >= 1 ? 45 : 18); break;
     case 'weather': if (v === 'ice') ui.toast(tx('weather.iceWarn'), '#9fe8ff'); break;
     case 'escape': audio.escape(); ui.escapeToast(v); vibrate(18); break;
     case 'cheat': audio.cheat(v); ui.cheatMessage(v); vibrate(v ? [30, 30, 30, 30, 60] : 40); break;
@@ -16852,7 +18112,7 @@ function boot() {
 }
 
 // Test ve geliştirici erişimi
-globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover, quality, LEVELS, controls, audio, memorialCard };
+globalThis.__drift = { game, input, perf, storage, renderer, ui, play, pause, resume, cfg: CONFIG, cover, quality, LEVELS, controls, audio, memorialCard, secretScene, toMenu, applySettings };
 
 boot();
 

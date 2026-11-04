@@ -31,7 +31,7 @@ export default {
   },
   dev: {
     title: 'Geliştirici', god: 'Ölümsüzlük', start: 'Başlangıç süresi',
-    t0: '0 sn', t45: '45 sn (SWAT öncesi)', t195: '195 sn (takviye öncesi)', t275: '275 sn (tank öncesi)', t280: '280 sn (tanklar)',
+    t0: '0 sn', t45: '45 sn (SWAT öncesi)', t195: '195 sn (takviye öncesi)', t275: '295 sn (tank öncesi)', t280: '300 sn (tanklar)',
   },
   howto: {
     title: 'Nasıl Oynanır',
@@ -56,7 +56,7 @@ export default {
   },
   pause: { title: 'Duraklatıldı', resume: 'Devam et', menu: 'Ana menü' },
   over: {
-    caught: 'YAKALANDIN!', sunk: 'BATTIN!', record: 'YENİ REKOR!',
+    caught: 'YAKALANDIN!', sunk: 'BATTIN!', meteor: 'METEOR ÇARPTI!', record: 'YENİ REKOR!',
     score: 'Skor', time: 'Süre', coins: 'Coin', kills: 'Devrilen polis', broken: 'Kırılan nesne', near: 'Yakın kaçış', drift: 'Drift',
     seconds: '{n} sn', best: 'En iyi skor: {score} · En uzun süre: {time}', retry: 'Tekrar dene', menu: 'Ana menü',
   },
@@ -66,7 +66,7 @@ export default {
     stick: ['Sol yarı', 'bas ve kaydır', 'Joystick', 'parmağının altında', 'GERİ tut', 'geri vites'],
     rev: 'GERİ',
   },
-  alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!' },
+  alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!', meteors: 'METEOR YAĞMURU!' },
   escape: { toast: '+{n} KIL PAYI!', combo: 'KOMBO +{n}' },
   code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.' },
   custom: {
@@ -91,6 +91,9 @@ export default {
     tilki: { desc: 'Hafif, oynak drift coupe', paints: ['Tilki Turuncusu','Gece Siyahı','Mat Gri','Buz Beyazı'] },
     kartal: { desc: 'Uzun kaput, gürleyen V8', paints: ['Yarış Mavisi','Kan Kırmızı','Mat Siyah','Çift Ton Krem-Yeşil'] },
     volt: { desc: 'Sessiz ama çok hızlı elektrikli GT', paints: ['Plazma Mavi','Grafit','Mat Beyaz','Aurora Mor'] },
-    kuzgun: { desc: 'Güdümlü enerji toplu süper araba', paints: ['Kuzgun Siyahı','Neon Kırmızı','Mat Titanyum','Çift Ton Beyaz-Siyah'] },
+    kuzgun: { desc: '360° taramalı silahlı süper araba', paints: ['Kuzgun Siyahı','Neon Kırmızı','Mat Titanyum','Çift Ton Beyaz-Siyah'] },
+    golge: { name: 'Gölge R', desc: 'Gizli geçidin hediyesi: 360° taramalı silahlı süper motosiklet', paints: ['Gece Nöbeti', 'Neon Pembe', 'Zehir Yeşili', 'Gümüş Hayalet'] },
   },
+  meteor: { warn: 'Kırmızı halkadan çık: meteor geliyor!' },
+  secret: { guest: 'Artık {name}\'ın da misafirisiniz', found: 'Gizli bölümü buldun! Hoş geldin', gift: 'Hediye: {name} motosikleti artık garajında!' },
 };

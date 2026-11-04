@@ -116,8 +116,9 @@ test('hile açıkken ve görünmezken ödül yok; kovalamayan polisten ödül yo
   g.ghostT = 5;
   pass(g, cop(g));
   g.ghostT = 0;
-  const ufo = g.spawnCop('ufo', 'chaser', 0, 0, 0);
-  pass(g, ufo);
+  const warping = g.spawnCop('dart', 'chaser', 0, 0, 0);
+  warping.warpT = 5; // Işınlanan uzaylı henüz belirmedi: kovalamıyor
+  pass(g, warping);
   assert.equal(events.length, 0);
 });
 

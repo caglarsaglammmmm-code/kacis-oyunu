@@ -16,6 +16,10 @@ const SC = {
   // v20: anıtın önünde (gündüz ve gece). Eski sürümde anıt yoksa olduğu yerde ölçülür
   anit: { weather: 'sunny', car: 'atmaca', t: 240, memorial: true },
   anitgece: { weather: 'rain', car: 'atmaca', t: 240, memorial: true, night: true },
+  // v21: yoğun sahne (çok düşman + taramalı ateş + meteor + tank), stadyum yakını gündüz/gece
+  yogun: { weather: 'sunny', car: 'kuzgun', t: 400, heavy: true },
+  stadyum: { weather: 'sunny', car: 'atmaca', t: 240, stadium: true },
+  stadyumgece: { weather: 'sunny', car: 'atmaca', t: 240, stadium: true, night: true },
 };
 const rows = [];
 for (const name of only) {
@@ -37,6 +41,9 @@ for (const name of only) {
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
     await page.evaluate(() => __drift.play());
     if (s.memorial) await page.evaluate((night) => { const g = __drift.game; const b = g.world.memorialBox && g.world.memorialBox(); if (night) g.dayT = 110; if (!b) return; const p = g.player; p.x = b.x + b.w / 2; p.y = b.y + b.h + 160; p.vx = 300; p.vy = 0; p.a = 0; globalThis.__back = setInterval(() => { if (g.world.memorialDist(p.x, p.y) > 420) { p.x = b.x + b.w / 2 - 300; p.y = b.y + b.h + 160; p.vx = 300; p.vy = 0; p.a = 0; } }, 100); }, !!s.night);
+    if (s.stadium) await page.evaluate((night) => { const g = __drift.game; if (night) g.dayT = 110; const zs = g.world.zones ? g.world.zones().filter((z) => z.kind === 'stadium') : []; const z = zs.sort((a, b) => b.w - a.w)[0]; if (!z) return; const p = g.player; const go = () => { p.x = z.x - 60; p.y = z.y + z.h + 60; p.vx = 300; p.vy = 0; p.a = 0; }; go(); globalThis.__back = setInterval(() => { if (Math.hypot(p.x - (z.x + z.w / 2), p.y - (z.y + z.h / 2)) > z.w) go(); }, 100); }, !!s.night);
+    // Yoğun: ekranda hep 8 düşman olsun (silah sürekli ateş eder), tanklar ve meteorlar zaten var
+    if (s.heavy) await page.evaluate(() => { const g = __drift.game; const al = __drift.cfg.aliens.types ? Object.keys(__drift.cfg.aliens.types) : ['rover']; const T = ['car', 'swat', 'advanced', ...al]; globalThis.__heavy = setInterval(() => { const p = g.player; const vis = g.cops.filter((c) => g.onScreen(c.x, c.y, -20)).length; for (let i = vis; i < 8; i++) { const a = Math.random() * 6.283; g.spawnCop(T[i % T.length], 'chaser', p.x + Math.cos(a) * 220, p.y + Math.sin(a) * 300, a + Math.PI); } }, 700); });
     await page.evaluate((fire) => {
       const k = __drift; const g = k.game;
       globalThis.__bot = setInterval(() => {
@@ -51,21 +58,22 @@ for (const name of only) {
     await page.waitForTimeout(6000);
     const res = await page.evaluate(async () => {
       const k = __drift; const g = k.game; const fr = []; let last = performance.now(); let cops = 0; let n = 0;
-      const t0 = last; let shots = 0;
+      const t0 = last; let shots = 0; let meteors = 0;
       while (performance.now() - t0 < 9000) {
         await new Promise(requestAnimationFrame);
         const now = performance.now(); fr.push(now - last); last = now;
         cops += g.cops.length; n++;
-        shots = Math.max(shots, (g.missiles || []).filter((m) => m.alive !== false && m.on !== false).length);
+        shots = Math.max(shots, (g.gun ? g.gun.bullets : g.missiles || []).filter((m) => m.alive !== false && m.on !== false).length);
+        meteors = Math.max(meteors, g.meteors ? g.meteors.active() : 0);
       }
       fr.sort((a, b) => a - b);
-      return { fps: fr.length / 9, p95: fr[Math.floor(fr.length * 0.95)], cops: cops / n, level: k.quality.level, weather: g.weather || '-' };
+      return { fps: fr.length / 9, p95: fr[Math.floor(fr.length * 0.95)], cops: cops / n, level: k.quality.level, weather: g.weather || '-', shots, meteors };
     });
     runs.push({ ...res, errs: errs.length });
     await ctx.close();
   }
   const avg = (f) => runs.reduce((a, r) => a + r[f], 0) / runs.length;
-  const row = { tag, name, fps: +avg('fps').toFixed(1), p95: +avg('p95').toFixed(1), cops: +avg('cops').toFixed(1), level: runs.map((r) => r.level).join('/'), weather: runs[0].weather, errs: runs.reduce((a, r) => a + r.errs, 0) };
+  const row = { tag, name, fps: +avg('fps').toFixed(1), p95: +avg('p95').toFixed(1), cops: +avg('cops').toFixed(1), bullets: Math.max(...runs.map((r) => r.shots)), meteors: Math.max(...runs.map((r) => r.meteors)), level: runs.map((r) => r.level).join('/'), weather: runs[0].weather, errs: runs.reduce((a, r) => a + r.errs, 0) };
   rows.push(row);
   console.log(JSON.stringify(row));
 }
