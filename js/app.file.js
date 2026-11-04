@@ -152,9 +152,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '18.0.0',
+  version: '19.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v18.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v19.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -551,6 +551,9 @@ const CONFIG = {
   // Sahadaki polisler değişmez. %12 / dk: 2. dk 1,25x, 5. dk 1,76x, ~9,7. dk'dan sonra 3x tavan
   copHpGrowth: { perMin: 1.12, max: 3 },
 
+  // iPhone/iPad ana ekrana ekle rehberi: delay menü açıldıktan sonra kartın görünme gecikmesi (sn), key kayıt anahtarı
+  a2hs: { delay: 1.2, key: 'drift-lab-a2hs' },
+
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
   // Yeni kod eklemek için satır eklenir. car: açılan araba
   codes: [{ code: '4266', car: 'kuzgun' }],
@@ -706,6 +709,10 @@ const TR = {
     best: 'En iyi: {score} puan · {time}', first: 'İlk kaçışın seni bekliyor',
     maker: 'Çağlar Sağlam tarafından yapıldı', exit: 'Çıkmak için tekrar bas',
   },
+  a2hs: {
+    title: "Oyunu ana ekrana ekle", s1Bottom: "Alttaki Paylaş düğmesine bas", s1Top: "Üstteki Paylaş düğmesine bas",
+    s2: "Ana Ekrana Ekle'yi seç", s3: "Ekle'ye bas", ok: "Tamam", never: "Bir daha gösterme",
+  },
   aria: {
     weather: 'Hava durumu',
     fire: 'Ateş', code: 'Kod',
@@ -798,6 +805,10 @@ const EN = {
     garage: 'Cars', settings: 'Settings', howto: 'How to play', apk: 'Get APK',
     best: 'Best: {score} pts · {time}', first: 'Your first getaway awaits',
     maker: 'Made by Çağlar Sağlam', exit: 'Press again to exit',
+  },
+  a2hs: {
+    title: "Add the game to your Home Screen", s1Bottom: "Tap the Share button below", s1Top: "Tap the Share button at the top",
+    s2: "Choose “Add to Home Screen”", s3: "Tap “Add”", ok: "OK", never: "Don't show again",
   },
   aria: {
     weather: 'Weather',
@@ -892,6 +903,10 @@ const JA = {
     best: 'ベスト：{score}点 · {time}', first: '最初の逃走が待っている',
     maker: '制作：Çağlar Sağlam', exit: 'もう一度押すと終了',
   },
+  a2hs: {
+    title: "ゲームをホーム画面に追加", s1Bottom: "下の共有ボタンをタップ", s1Top: "上の共有ボタンをタップ",
+    s2: "「ホーム画面に追加」を選ぶ", s3: "「追加」をタップ", ok: "OK", never: "今後表示しない",
+  },
   aria: {
     weather: '天気',
     fire: '発射', code: 'コード',
@@ -984,6 +999,10 @@ const ZH = {
     garage: '选车', settings: '设置', howto: '玩法', apk: '下载 APK',
     best: '最佳：{score} 分 · {time}', first: '你的第一次逃亡正等着你',
     maker: '制作：Çağlar Sağlam', exit: '再按一次退出',
+  },
+  a2hs: {
+    title: "将游戏添加到主屏幕", s1Bottom: "点按下方的分享按钮", s1Top: "点按上方的分享按钮",
+    s2: "选择“添加到主屏幕”", s3: "点按“添加”", ok: "好的", never: "不再显示",
   },
   aria: {
     weather: '天气',
@@ -1078,6 +1097,10 @@ const ES = {
     best: 'Mejor: {score} pts · {time}', first: 'Tu primera huida te espera',
     maker: 'Hecho por Çağlar Sağlam', exit: 'Pulsa otra vez para salir',
   },
+  a2hs: {
+    title: "Añade el juego a tu pantalla de inicio", s1Bottom: "Toca el botón Compartir de abajo", s1Top: "Toca el botón Compartir de arriba",
+    s2: "Elige «Añadir a pantalla de inicio»", s3: "Toca «Añadir»", ok: "Vale", never: "No volver a mostrar",
+  },
   aria: {
     weather: 'Clima',
     fire: 'Disparar', code: 'Código',
@@ -1170,6 +1193,10 @@ const DE = {
     garage: 'Autos', settings: 'Optionen', howto: 'Anleitung', apk: 'APK laden',
     best: 'Bestwert: {score} Pkt. · {time}', first: 'Deine erste Flucht wartet',
     maker: 'Gemacht von Çağlar Sağlam', exit: 'Zum Beenden erneut drücken',
+  },
+  a2hs: {
+    title: "Spiel zum Home-Bildschirm hinzufügen", s1Bottom: "Tippe unten auf „Teilen“", s1Top: "Tippe oben auf „Teilen“",
+    s2: "Wähle „Zum Home-Bildschirm“", s3: "Tippe auf „Hinzufügen“", ok: "OK", never: "Nicht mehr zeigen",
   },
   aria: {
     weather: 'Wetter',
@@ -15577,6 +15604,62 @@ class Quality {
   }
 }
 
+// --- a2hs.js ---
+// iPhone/iPad "Ana Ekrana Ekle" rehberi. Yalnız iOS'ta Safari veya Chrome ile açılıp henüz ana ekrandan
+// (standalone) açılmamışsa ana menüde küçük bir kart gösterir. Android'de, APK içinde ve ana ekrandan açılınca görünmez.
+// "Tamam" bu açılış için gizler, "Bir daha gösterme" kalıcıdır (localStorage, erişilemezse sessizce geçer).
+
+const A2 = CONFIG.a2hs;
+
+// null: gösterme. Aksi halde { browser, share }: share = Paylaş düğmesinin yeri ('bottom' | 'top')
+function a2hsPlatform(nav, win) {
+  const ua = (nav && nav.userAgent) || '';
+  const ipadDesktop = /Macintosh/.test(ua) && (nav.maxTouchPoints || 0) > 1; // iPadOS masaüstü kimliğiyle gelir
+  const ios = /iPhone|iPad|iPod/.test(ua) || ipadDesktop;
+  if (!ios) return null;
+  const mm = (q) => { try { return !!(win.matchMedia && win.matchMedia(q).matches); } catch { return false; } };
+  if (nav.standalone === true || mm('(display-mode: standalone)') || mm('(display-mode: fullscreen)')) return null;
+  try { if (win.Capacitor && win.Capacitor.isNativePlatform && win.Capacitor.isNativePlatform()) return null; } catch { /* yok */ }
+  const chrome = /CriOS\//.test(ua);
+  const safari = !chrome && /Safari\//.test(ua) && !/FxiOS|EdgiOS|OPiOS|GSA\/|FBAN|FBAV|Instagram|Line\//.test(ua);
+  if (!chrome && !safari) return null; // Uygulama içi tarayıcılar ana ekrana ekleyemez
+  const ipad = /iPad/.test(ua) || ipadDesktop;
+  // iPhone Safari'de Paylaş alttaki çubukta; iPad Safari ve iOS Chrome'da üstte
+  return { browser: chrome ? 'chrome' : 'safari', share: chrome || ipad ? 'top' : 'bottom' };
+}
+
+function readNever() {
+  try { return globalThis.localStorage.getItem(A2.key) === 'never'; } catch { return false; }
+}
+function writeNever() {
+  try { globalThis.localStorage.setItem(A2.key, 'never'); } catch { /* özel sekme: yalnız bu açılış */ }
+}
+
+function initA2hs(onTap) {
+  const el = typeof document !== 'undefined' && document.getElementById('a2hs');
+  if (!el) return null;
+  const plat = a2hsPlatform(globalThis.navigator || {}, globalThis);
+  if (!plat || readNever()) return null;
+  el.dataset.share = plat.share;
+  const s1 = el.querySelector('[data-a2hs-step1]');
+  s1.dataset.i18n = plat.share === 'top' ? 'a2hs.s1Top' : 'a2hs.s1Bottom';
+  for (const t of el.querySelectorAll('[data-i18n]')) t.textContent = tx(t.dataset.i18n);
+  const hide = (never) => {
+    if (onTap) onTap();
+    el.hidden = true;
+    if (never) writeNever();
+  };
+  const bind = (id, never) => {
+    const b = document.getElementById(id);
+    b.addEventListener('click', (e) => { e.stopPropagation(); hide(never); });
+    b.addEventListener('pointerdown', (e) => e.stopPropagation());
+  };
+  bind('a2hs-ok', false);
+  bind('a2hs-never', true);
+  setTimeout(() => { el.hidden = false; }, A2.delay * 1000);
+  return plat;
+}
+
 // --- main.js ---
 // Giriş noktası: döngü, boyutlandırma, olayların ses ve titreşime bağlanması.
 
@@ -15839,6 +15922,8 @@ const ui = new UI(storage, {
   menuHidden() { cover.stop(); },
   purchased() { audio.purchase(); vibrate([30, 30, 60]); },
 });
+// iPhone/iPad: ana ekrana ekle rehberi (yalnız iOS Safari/Chrome, ana ekrandan açılmamışsa)
+initA2hs(() => audio.unlock());
 
 let wakeLock = null;
 async function keepAwake(on) {

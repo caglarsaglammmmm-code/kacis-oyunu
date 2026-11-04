@@ -7,6 +7,10 @@ export default {
     best: '最佳：{score} 分 · {time}', first: '你的第一次逃亡正等着你',
     maker: '制作：Çağlar Sağlam', exit: '再按一次退出',
   },
+  a2hs: {
+    title: "将游戏添加到主屏幕", s1Bottom: "点按下方的分享按钮", s1Top: "点按上方的分享按钮",
+    s2: "选择“添加到主屏幕”", s3: "点按“添加”", ok: "好的", never: "不再显示",
+  },
   aria: {
     weather: '天气',
     fire: '开火', code: '代码',
