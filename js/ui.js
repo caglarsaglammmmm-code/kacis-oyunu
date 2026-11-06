@@ -3,7 +3,8 @@ import { paintPixelCar, animatePixelCar, rimIcon } from './pixelcars.js';
 import { CUSTOM, paintOf, itemOf } from './custom.js';
 import { CONFIG, MAX_STARS } from './config.js';
 import { paintPower, POWER_LOOK } from './art.js';
-import { tx, txNum, getLang, LANGS, DEVELOPER } from './i18n/index.js';
+import { tx, txNum, getLang, LANGS } from './i18n/index.js';
+import { NAMES } from './names.js';
 
 const $ = (id) => document.getElementById(id);
 // Araç adı: gizli motosikletin adı dil dosyasında, diğerleri isim tablosunda
@@ -217,10 +218,10 @@ export class UI {
     return (Array.isArray(names) && names[i]) || (car.paints[i] || car.paints[0]).name;
   }
 
-  // Açılış: koyu zeminde geliştirici yazısı, yumuşak belirip kaybolur (0,8 sn). Oyun arkada yüklenir
+  // Açılış: koyu zeminde geliştirici yazısı (Play Store sürümünde yalnız oyunun adı), yumuşak belirip kaybolur (0,8 sn)
   splash(done) {
     const el = $('splash');
-    $('splash-text').textContent = tx('splash', { name: DEVELOPER });
+    $('splash-text').textContent = NAMES.yapimci ? tx('splash', { name: NAMES.yapimci }) : NAMES.oyun;
     el.hidden = false;
     el.classList.add('play');
     setTimeout(() => {

@@ -11,6 +11,7 @@ import { paintBuilding2, shadowOf } from './buildings.js';
 import { FX } from './effects.js';
 import { MemorialArt, bakeMemorialPad } from './memorial.js';
 import { Stadiums } from './stadium.js';
+import { NAMES } from './names.js';
 import { snowLevel, snowFlat, paintRoofSnow, paintClutterSnow, paintSignSnow, paintIcicles, icicleTips, RoofCache, paintTreeSnow, paintCarSnow } from './snow.js';
 import { signKind, paintDoner, paintPromo, paintDancer, paintBalcony, paintWashing, paintMoon, paintStars, rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintAlien, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
 
@@ -1142,8 +1143,8 @@ export class Renderer {
       g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, gx + 3, y + 1);
     };
     const h = (Math.imul(c.cx, 73856093) >>> 0) % 4;
-    pan(top + side * 0.5, ['← EDİRNE O-3', '← SARAY O-3', '← GEBZE O-4', '← ÇORLU O-3'][h]);
-    pan(bot - side * 0.5, ['ANKARA O-4 →', 'İZMİT O-4 →', 'BOLU O-4 →', 'BURSA O-5 →'][h]);
+    pan(top + side * 0.5, NAMES.yol.sol[h]);
+    pan(bot - side * 0.5, NAMES.yol.sag[h]);
     // Hız tabelası
     for (const [y, t] of [[top + 2, '120'], [bot - 2, '120']]) {
       g.fillStyle = '#fff'; g.beginPath(); g.arc(c.x + CHUNK * 0.3, y, 11, 0, 7); g.fill();
@@ -1181,7 +1182,7 @@ export class Renderer {
       g.strokeStyle = '#fff'; g.lineWidth = 1; g.strokeRect(-w / 2 + 1, -6, w - 2, 12);
       g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 0, 0.5);
     };
-    const DIR = ['← KADIKÖY', 'BEŞİKTAŞ →', '↑ TAKSİM', 'ÜSKÜDAR →', '← ŞİŞLİ', 'SARIYER →', '↑ BOĞAZ KÖPRÜSÜ', '← FATİH', 'BAKIRKÖY →'];
+    const DIR = NAMES.yol.yon;
     const h = (Math.imul(c.cx, 73856093) ^ Math.imul(c.cy, 19349663)) >>> 0;
     const list = [round('#fff', '#d0121b', String(30 + (h % 4) * 10)), tri('!'), tri('⚠'), round('#fff', '#d0121b', '50'), stop];
     const E = ART_W - 6;

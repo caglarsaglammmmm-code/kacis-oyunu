@@ -277,7 +277,7 @@ const ui = new UI(storage, {
 });
 // iPhone/iPad: ana ekrana ekle rehberi (yalnız iOS Safari/Chrome, ana ekrandan açılmamışsa)
 initA2hs(() => audio.unlock());
-// Gençliğe Hitabe okuma kartı: anıta yaklaşınca açılır, uzaklaşınca ya da dokununca kapanır
+// Anıt okuma kartı (levha metni olan sürümde): anıta yaklaşınca açılır, uzaklaşınca ya da dokununca kapanır
 const memorialCard = new MemorialCard(document.getElementById('memorial-card'), () => game.dismissMemorialCard());
 // Gizli geçit: bodrum sahnesi ve karşılama yazısı. Arkadaş sürümünde ev sahibinin adı, Play sürümünde genel yazı
 const secretScene = new SecretScene(document.getElementById('secret'), document.getElementById('secret-msg'));

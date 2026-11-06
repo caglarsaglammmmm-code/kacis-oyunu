@@ -27,7 +27,9 @@ http.createServer(async (req, res) => {
     res.end(await namesSource(flavor));
     return;
   }
-  const file = path.normalize(path.join(root, pathname === '/' ? 'index.html' : pathname));
+  // Anıt içeriği sürüme göre: arkadaş sürümünde gerçek (names/anit-gercek.js)
+  const real = flavor === 'arkadas' && pathname === '/js/memorial-data.js' ? '/names/anit-gercek.js' : pathname;
+  const file = path.normalize(path.join(root, real === '/' ? 'index.html' : real));
   if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
     res.writeHead(404).end('Bulunamadı');
     return;

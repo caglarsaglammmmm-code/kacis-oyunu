@@ -12,14 +12,14 @@ export const BUILD = {
   APARTMENT: 22, MARKET: 23, KOLEJ: 24, BAZAAR: 25, CHAIN: 26, BANK: 27, RESIDENCE: 28, OFFICE: 29, HOTEL: 30,
   HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CAFE: 40, SHOP: 41, SKYSCRAPER: 42, RUIN: 43, SITEWORK: 44, FACTORY: 45,
   // Özel yerler (js/landmarks.js çizer)
-  SERVIS: 46, MUZE: 47, SELCUK_CAMI: 48, KONGRE: 49, KULE: 50, AVM: 51, BEDESTEN: 52, BAGEVI: 53, OZEL_OKUL: 54, ANIT: 55,
+  SERVIS: 46, MUZE: 47, TEPE_CAMI: 48, KONGRE: 49, KULE: 50, AVM: 51, CARSI: 52, BAGEVI: 53, OZEL_OKUL: 54, ANIT: 55,
 };
 
 export const CONFIG = {
   name: NAMES.oyun,
-  version: '23.0.0',
+  version: '24.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v23.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -69,13 +69,13 @@ export const CONFIG = {
     // Tek seferlik özel yerler: her biri kendi chunk'ında, başlangıçtan ring kadar uzakta, birbirinden ayrı.
     // Adlar isim tablosundadır (names/tablo.mjs)
     landmarks: [
-      { id: 'mevlana', ring: [2, 5] }, { id: 'alaaddin', ring: [3, 6] }, { id: 'zafer', ring: [2, 6] },
-      { id: 'serife', ring: [2, 5] }, { id: 'bedesten', ring: [3, 7] }, { id: 'kongre', ring: [4, 8] },
-      { id: 'kule', ring: [4, 8] }, { id: 'kulturpark', ring: [4, 9] }, { id: 'ted', ring: [5, 10] },
-      { id: 'gundogdu', ring: [5, 10] }, { id: 'meram', ring: [6, 11] },
-      { id: 'anit', ring: [2, 4] }, // Cumhuriyet Meydanı ve anıt (CONFIG.memorial, js/memorial.js)
+      { id: 'muze', ring: [2, 5] }, { id: 'tepecami', ring: [3, 6] }, { id: 'meydan', ring: [2, 6] },
+      { id: 'fen', ring: [2, 5] }, { id: 'carsi', ring: [3, 7] }, { id: 'kongre', ring: [4, 8] },
+      { id: 'kule', ring: [4, 8] }, { id: 'sehirpark', ring: [4, 9] }, { id: 'kolej2', ring: [5, 10] },
+      { id: 'kolej3', ring: [5, 10] }, { id: 'baglar', ring: [6, 11] },
+      { id: 'anit', ring: [2, 4] }, // Anıt meydanı (CONFIG.memorial, js/memorial.js)
       // İki stadyum (CONFIG.stadiums, js/stadium.js). apart: diğerinden en az bu kadar chunk uzakta
-      { id: 'yozgat', ring: [3, 6] }, { id: 'konyastad', ring: [6, 10], apart: ['yozgat', 5] },
+      { id: 'kucukstad', ring: [3, 6] }, { id: 'buyukstad', ring: [6, 10], apart: ['kucukstad', 5] },
       { id: 'gecit', ring: [11, 14] }, // Ücra köşedeki terk edilmiş depo alanı (CONFIG.secret)
     ],
     // Yüksek özel yapıların yükseklik payı (sıradan binalar en çok tall.height[1])
@@ -482,7 +482,7 @@ export const CONFIG = {
 
   // iPhone/iPad ana ekrana ekle rehberi: delay menü açıldıktan sonra kartın görünme gecikmesi (sn), key kayıt anahtarı
   a2hs: { delay: 1.2, key: 'drift-lab-a2hs' },
-  // Cumhuriyet Meydanı anıtı (js/memorial.js). Korunan bölüm (rect) herkese katı engeldir; oyuncu girmeye çalışırsa araba patlar.
+  // Anıt meydanı (js/memorial.js). Korunan bölüm (rect) herkese katı engeldir; oyuncu girmeye çalışırsa araba patlar.
   // rect: chunk içindeki karo sınırı [x0, y0, x1, y1]. Uzaklıklar korunan bölümün kenarından dünya birimiyle
   memorial: {
     rect: [9, 5, 26, 24],
@@ -533,8 +533,8 @@ export const CONFIG = {
   // İKİ STADYUM (js/stadium.js çizer). rect: chunk içindeki karo kutusu. Yıkılmaz, katı, polis ve trafik dolanır.
   // Adlar isim tablosunda (NAMES.stadyum). art: önbellekli çizim ölçekleri, fans: taraftar siluetleri bu yakında
   stadiums: {
-    yozgat: { rect: [11, 9, 23, 20], cap: 15000 },
-    konya: { rect: [6, 6, 28, 26], cap: 42000 },
+    kucuk: { rect: [11, 9, 23, 20], cap: 15000 },
+    buyuk: { rect: [6, 6, 28, 26], cap: 42000 },
     art: { hiScale: 1.25, loScale: 0.32, hiNear: 1900, hiFree: 3600, loFree: 6000 },
     fans: 900, flagWave: 2.2,
   },
@@ -637,7 +637,7 @@ export const CONFIG = {
   signs: {
     bigshops: [NAMES.tekil.ishani, 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
     hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', NAMES.tekil.otel, 'Otel Saray', 'Mavi Otel'],
-    shops: [...NAMES.konya.firinlar, 'Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Piksel Oyun Salonu', 'Bit Bilgisayar', 'Telefoncu', NAMES.tekil.doner, 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Çınar Kafe'],
+    shops: [...NAMES.tarihi.firinlar, 'Usta Döner', NAMES.dukkan.saray, NAMES.dukkan.pide, NAMES.dukkan.lahmacun, NAMES.dukkan.ocak, 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Piksel Oyun Salonu', 'Bit Bilgisayar', 'Telefoncu', NAMES.tekil.doner, 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', NAMES.dukkan.kebapci, 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', NAMES.dukkan.ozocak, 'Çınar Kafe'],
     chains: Object.fromEntries(NAMES.zincirler.map((c) => [c.ad, c.renk])),
     chainIds: Object.fromEntries(NAMES.zincirler.map((c) => [c.ad, c.id])),
     banks: Object.fromEntries(NAMES.bankalar.map((b) => [b.ad, b.renk])),

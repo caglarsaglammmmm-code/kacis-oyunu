@@ -5,7 +5,7 @@ KISA AÇIKLAMA:
 Dar sokaklarda drift at, polisten kaç, garajını büyüt. İnternetsiz oynanır.
 
 TANITIM:
-Yeni: Konya'dan ilham alan yerler, dev kolej kampüsü ve 6 dil desteği!
+Yeni: tarihi şehir meydanları, iki stadyum, dev kolej kampüsü ve 6 dil desteği!
 
 UZUN AÇIKLAMA:
 Drift Lab'e hoş geldin: araba kendi gider, sen yalnızca yön verirsin.
@@ -16,7 +16,7 @@ NELER VAR
 • Üç kontrol seçeneği: Sağ / Sol dokunuş, Direksiyon ya da Joystick
 • Yüksek hızda gerçek drift hissi
 • Sonsuz şehir: mahalleler, çarşılar, dönel kavşaklar, otoban, sahil, orman, çöl
-• Konya'dan ilham alan yerler: yeşil kubbeli müze, tepe üstünde Selçuklu camisi, tramvay durakları, bedesten, Meram bağları
+• Tarihi şehir yerleri: yeşil kubbeli müze, tepe üstünde cami, tramvay durakları, kapalı çarşı, bağ evleri
 • Haritanın en büyük binası: turuncu kampüsüyle Mandalina Koleji
 • Zamanla artan polis baskısı: kovalayan, iki yandan sıkıştıran, önden gelen ve yolu kapatan polisler, barikatlar, SWAT ve tanklar
 • Belirli bir süreden sonra sürpriz uzaylı işgali
@@ -28,4 +28,4 @@ NELER VAR
 
 İnternet gerekmez. Reklam yok, hesap yok, veri toplama yok.
 
-Oyundaki marka, mağaza, okul ve araç adları kurgudur. Tarihi yapılar genel ve stilize biçimde çizilmiştir.
+Oyundaki tüm marka, mağaza, okul, stadyum, yer ve araç adları kurgudur; gerçek kişi, kurum ya da markalarla ilgisi yoktur. Yapılar genel ve stilize biçimde çizilmiştir.

@@ -92,7 +92,7 @@ test('meteor: korunan alanlara (anıt, gizli geçit, stadyum) asıl nişan da d�
   const out = { x: 0, y: 0, lead: 0 };
   let tries = 0;
   for (const z of g.world.zones()) {
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 400; i++) {
       const p = g.player;
       const a = Math.random() * 6.283;
       p.x = z.x + z.w / 2 + Math.cos(a) * (z.w / 2 + 300 + Math.random() * 500);

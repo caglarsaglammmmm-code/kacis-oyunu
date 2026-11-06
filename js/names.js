@@ -3,39 +3,75 @@
 export const FLAVOR = 'play';
 export const NAMES = {
  "oyun": "Drift Lab",
+ "yapimci": "",
  "indir": "",
  "kolej": {
   "ad": "MANDALİNA KOLEJİ",
   "ust": "MANDALİNA"
  },
  "okullar": {
-  "serife": "Anadolu Fen Okulu",
-  "ted": "Bozkır Koleji",
-  "gundogdu": "Gün Işığı Koleji"
+  "fen": "Fen Bilimleri Okulu",
+  "kolej2": "Bozkır Koleji",
+  "kolej3": "Gün Işığı Koleji"
  },
+ "ilkokul": "Çınar İlkokulu",
  "kule": "Bozkır Kulesi",
- "konya": {
-  "mevlana": "Mevlana Müzesi",
-  "alaaddin": "Alaaddin Camii",
-  "tepe": "Alaaddin Tepesi",
-  "kongre": "Selçuklu Kongre Merkezi",
-  "kulturpark": "Kültürpark",
-  "zafer": "Zafer Meydanı",
-  "bedesten": "Bedesten Çarşısı",
-  "meram": "Meram Bağları",
+ "tarihi": {
+  "muze": "Şehir Müzesi",
+  "cami": "Tepe Camii",
+  "tepe": "Yeşil Tepe",
+  "kongre": "Kongre Merkezi",
+  "park": "Şehir Parkı",
+  "meydan": "Çınar Meydanı",
+  "carsi": "Eski Çarşı",
+  "baglar": "Bağlar Bahçesi",
   "duraklar": [
-   "Alaaddin",
-   "Zafer",
-   "Mevlana",
-   "Kültürpark",
+   "Tepe",
+   "Çınar",
+   "Müze",
+   "Şehir Parkı",
    "Kongre Merkezi"
   ],
   "firinlar": [
    "Etli Ekmek Fırını",
-   "Konya Fırını",
+   "Taş Fırın",
    "Fırın Kebabı",
    "Etliekmek Salonu",
    "Bamya Çorbası"
+  ]
+ },
+ "dukkan": {
+  "saray": "Kebap Sarayı",
+  "pide": "Kayık Pide",
+  "lahmacun": "Fırın Lahmacun",
+  "ocak": "Ocakbaşı Kebapçısı",
+  "kebapci": "Tereyağlı Kebapçı",
+  "ozocak": "Öz Ocakbaşı",
+  "kelime": "ocakbaşı"
+ },
+ "yol": {
+  "sol": [
+   "← LİMAN O-1",
+   "← SAHİL O-1",
+   "← OVA O-2",
+   "← KÖPRÜ O-1"
+  ],
+  "sag": [
+   "MERKEZ O-2 →",
+   "DAĞ O-2 →",
+   "GÖL O-2 →",
+   "VADİ O-3 →"
+  ],
+  "yon": [
+   "← ÇARŞI",
+   "LİMAN →",
+   "↑ MERKEZ",
+   "SAHİL →",
+   "← ÇINARLI",
+   "TEPEBAŞI →",
+   "↑ KÖPRÜ",
+   "← ESKİ ŞEHİR",
+   "YENİ MAHALLE →"
   ]
  },
  "arabalar": {
@@ -102,7 +138,7 @@ export const NAMES = {
    "renk": "#3b3f8f"
   },
   {
-   "ad": "Anadolu Tasarruf",
+   "ad": "Kumbara Tasarruf",
    "renk": "#8a6d1f"
   },
   {
@@ -114,7 +150,7 @@ export const NAMES = {
    "renk": "#5b2a86"
   },
   {
-   "ad": "Marmara Yatırım",
+   "ad": "Liman Yatırım",
    "renk": "#0f6e84"
   }
  ],
@@ -128,8 +164,32 @@ export const NAMES = {
   "doner": "Nane Döner"
  },
  "stadyum": {
-  "yozgat": "BOZOK ŞEHİR STADYUMU",
-  "konya": "SELÇUK ARENA"
+  "kucuk": "ÇINARLI ŞEHİR STADYUMU",
+  "buyuk": "MAVİ RÜZGAR ARENA"
+ },
+ "stadRenk": {
+  "kucuk": {
+   "seat": "#138a8a",
+   "trim": "#ff6f59",
+   "fan": "#0b2e2e",
+   "flag": [
+    "#138a8a",
+    "#ff6f59"
+   ]
+  },
+  "buyuk": {
+   "main": "#6a3fb5",
+   "glass": "rgba(196,176,240,.62)",
+   "facade": "rgba(170,140,230,.55)",
+   "glow": "rgba(170,120,255,.22)",
+   "dot": "#c9a6ff",
+   "edge": "rgba(96,80,120,.45)",
+   "fan": "#24124a",
+   "flag": [
+    "#6a3fb5",
+    "#ffffff"
+   ]
+  }
  },
  "misafir": ""
 };

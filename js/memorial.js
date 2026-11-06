@@ -1,26 +1,21 @@
-// Cumhuriyet Meydanı: Atatürk anıtı. Saygılı, sade ve görkemli bir anıt; şaka ya da komik efekt yok.
+// ANIT: şehir meydanındaki korunan anıt. Saygılı, sade ve görkemli; şaka ya da komik efekt yok.
 // Anıt önbellekli tuvallere bir kez çizilir: uzakta sade (lo), yakında ayrıntılı (hi). Her karede yalnızca
 // hazır görüntü kopyalanır, üstüne dalgalanan bayraklar eklenir. Gece spot ışıklarıyla aydınlanır.
+// İçerik (fotoğraflar, levha metni, bayrak) sürüme göre ./memorial-data.js dosyasından gelir:
+//   Play Store: kurgusal heykel ve kabartmalar, yazısız levha, kurgusal şehir bayrağı (js/memorial-data.js)
+//   arkadaş   : names/anit-gercek.js (derlemede memorial-data.js yerine konur)
 // Fotoğraflar kırpılmaz ve değiştirilmez: en-boy oranı korunarak ölçeklenir ve çerçevelenir.
-// Gençliğe Hitabe, "Ne mutlu Türküm diyene!" ve imza çevrilmez; her dilde orijinal Türkçe kalır.
 // Not: js/app.file.js tüm modülleri tek kapsamda birleştirir; bu yüzden buradaki adlar MEM ön ekiyle benzersizdir.
 import { CONFIG } from './config.js';
+import { MEM_REAL, MEM_IMAGES, MEM_TITLE, MEM_YEAR, MEM_TEXT, MEM_MOTTO, MEM_SIGNATURE, paintMemFlag, paintMemStatue, paintMemEmblem } from './memorial-data.js';
+
+export { MEM_REAL, MEM_IMAGES, MEM_TITLE, MEM_YEAR, MEM_TEXT, MEM_MOTTO, MEM_SIGNATURE };
+// Eski ad: anıtın bayrağı (sürüme göre)
+export const paintTrFlag = paintMemFlag;
 
 const MEMC = CONFIG.memorial;
 const MEM_TILE = CONFIG.world.tile;
 const MEM_TAU = Math.PI * 2;
-// Fotoğraflar: gorseller/ataturk/ (kaynak: kullanıcının verdiği dört fotoğraf, kırpılmadan)
-export const MEM_IMAGES = [1, 2, 3, 4].map((n) => `gorseller/ataturk/ataturk-${n}.jpeg`);
-
-export const HITABE_TITLE = 'Gençliğe Hitabe';
-export const HITABE_YEAR = '1927';
-export const HITABE = [
-  'Ey Türk gençliği! Birinci vazifen, Türk istiklalini, Türk cumhuriyetini, ilelebet muhafaza ve müdafaa etmektir.',
-  'Mevcudiyetinin ve istikbalinin yegâne temeli budur. Bu temel, senin en kıymetli hazinendir. İstikbalde dahi, seni bu hazineden mahrum etmek isteyecek dahilî ve haricî bedhahların olacaktır. Bir gün, istiklal ve cumhuriyeti müdafaa mecburiyetine düşersen, vazifeye atılmak için içinde bulunacağın vaziyetin imkân ve şeraitini düşünmeyeceksin! Bu imkân ve şerait, çok namüsait bir mahiyette tezahür edebilir. İstiklal ve cumhuriyetine kastedecek düşmanlar, bütün dünyada emsali görülmemiş bir galibiyetin mümessili olabilirler. Cebren ve hile ile aziz vatanın bütün kaleleri zaptedilmiş, bütün tersanelerine girilmiş, bütün orduları dağıtılmış ve memleketin her köşesi bilfiil işgal edilmiş olabilir. Bütün bu şeraitten daha elîm ve daha vahim olmak üzere, memleketin dahilinde iktidara sahip olanlar gaflet ve dalâlet ve hattâ hıyanet içinde bulunabilirler. Hattâ bu iktidar sahipleri şahsî menfaatlerini, müstevlilerin siyasî emelleriyle tevhit edebilirler. Millet, fakr u zaruret içinde harap ve bîtap düşmüş olabilir.',
-  'Ey Türk istikbalinin evlâdı! İşte, bu ahval ve şerait içinde dahi vazifen, Türk istiklal ve cumhuriyetini kurtarmaktır! Muhtaç olduğun kudret, damarlarındaki asil kanda mevcuttur!',
-].join('\n');
-export const MEM_MOTTO = 'Ne mutlu Türküm diyene!';
-export const MEM_SIGNATURE = 'Gazi Mustafa Kemal Atatürk';
 
 const MEM_SERIF = "'Playfair Display', Georgia, 'Times New Roman', serif";
 
@@ -31,17 +26,17 @@ const MEM_SX = MEM_W / 680;
 const MEM_SY = MEM_H / 760;
 const memBox = (x, y, w, h, border) => ({ x: x * MEM_SX, y: y * MEM_SY, w: w * MEM_SX, h: h * MEM_SY, border });
 
-// Yerleşim (anıt içi yerel koordinat). Ortada en büyük ataturk-1; solunda 2, sağında 3, altında 4; üstünde levha
+// Yerleşim (anıt içi yerel koordinat). Ortada en büyük çerçeve; solunda 2, sağında 3, altında 4; üstünde levha
 export const MEM_LAYOUT = {
   rail: 14 * MEM_SY,
   stele: memBox(80, 22, 520, 718),
   plaque: memBox(92, 34, 496, 162),
   flag: { x: 340 * MEM_SX - 38 * MEM_SX, y: 206 * MEM_SY, w: 76 * MEM_SX, h: 50 * MEM_SY },
   slots: [
-    memBox(222, 258, 236, 236, 12), // ataturk-1: orta, en büyük
-    memBox(92, 262, 120, 228, 8), // ataturk-2: sol
-    memBox(468, 262, 120, 228, 8), // ataturk-3: sağ
-    memBox(262, 502, 156, 168, 8), // ataturk-4: alt
+    memBox(222, 258, 236, 236, 12), // 1: orta, en büyük
+    memBox(92, 262, 120, 228, 8), // 2: sol
+    memBox(468, 262, 120, 228, 8), // 3: sağ
+    memBox(262, 502, 156, 168, 8), // 4: alt
   ],
   motto: { x: 340 * MEM_SX, y: 694 * MEM_SY, size: 22 * MEM_SY },
   signature: { x: 340 * MEM_SX, y: 722 * MEM_SY, size: 16 * MEM_SY },
@@ -72,25 +67,6 @@ function memCanvas(w, h) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
   return c;
-}
-
-// Türk bayrağı: 3:2, beyaz ay ve yıldız (resmî orana göre, 1200 x 800 tasarım alanında)
-export function paintTrFlag(g, w, h, mirror = false) {
-  g.save();
-  if (mirror) { g.translate(w, 0); g.scale(-1, 1); }
-  g.scale(w / 1200, h / 800);
-  g.fillStyle = '#e30a17';
-  g.fillRect(0, 0, 1200, 800);
-  g.fillStyle = '#fff';
-  g.beginPath(); g.arc(425, 400, 200, 0, MEM_TAU); g.fill();
-  g.fillStyle = '#e30a17';
-  g.beginPath(); g.arc(475, 400, 160, 0, MEM_TAU); g.fill();
-  g.fillStyle = '#fff';
-  g.beginPath();
-  const pts = [[583.334, 400], [764.235, 458.779], [652.431, 304.894], [652.431, 495.106], [764.235, 341.221]];
-  pts.forEach(([x, y], i) => g[i ? 'lineTo' : 'moveTo'](x, y));
-  g.closePath(); g.fill();
-  g.restore();
 }
 
 function memWrap(g, text, maxW) {
@@ -133,13 +109,13 @@ function memGoldFrame(g, f, b, big) {
   g.restore();
 }
 
-// Ay yıldızlı küçük madalyon
+// Bayraklı küçük madalyon
 function memMedallion(g, x, y, r) {
   g.save();
   g.fillStyle = '#b8892e'; g.beginPath(); g.arc(x, y, r + 2.5, 0, MEM_TAU); g.fill();
   g.beginPath(); g.arc(x, y, r, 0, MEM_TAU); g.clip();
   g.translate(x - r * 1.5, y - r);
-  paintTrFlag(g, r * 3, r * 2);
+  paintMemFlag(g, r * 3, r * 2);
   g.restore();
 }
 
@@ -214,21 +190,22 @@ function memPaint(g, part, imgs, detail, frames) {
       }
     }
     g.strokeStyle = '#a58a4a'; g.lineWidth = 2; g.strokeRect(p.x + 5, p.y + 5, p.w - 10, p.h - 10);
+    if (!MEM_TITLE) { if (paintMemEmblem) paintMemEmblem(g, p); return; }
     g.textAlign = 'center'; g.textBaseline = 'middle';
     const cx = p.x + p.w / 2;
     g.fillStyle = 'rgba(255,255,255,.7)';
     g.font = `700 ${34 * MEM_SY}px ${MEM_SERIF}`;
-    g.fillText(HITABE_TITLE, cx + 1, p.y + 33 * MEM_SY + 1);
+    g.fillText(MEM_TITLE, cx + 1, p.y + 33 * MEM_SY + 1);
     g.fillStyle = '#2b2620';
-    g.fillText(HITABE_TITLE, cx, p.y + 33 * MEM_SY);
+    g.fillText(MEM_TITLE, cx, p.y + 33 * MEM_SY);
     g.font = `400 ${18 * MEM_SY}px ${MEM_SERIF}`;
     g.fillStyle = '#7a5b1e';
-    g.fillText(HITABE_YEAR, cx, p.y + 62 * MEM_SY);
+    g.fillText(MEM_YEAR, cx, p.y + 62 * MEM_SY);
     g.fillStyle = '#b8892e'; g.fillRect(cx - 60, p.y + 75 * MEM_SY, 120, 1.6);
     // Metnin başı: büyük ve net. Tamamı yaklaşınca okuma kartında kayarak gösterilir
     g.font = `400 ${15 * MEM_SY}px ${MEM_SERIF}`;
     g.fillStyle = '#2f2a24';
-    const lines = memWrap(g, HITABE, p.w - 44).slice(0, 4);
+    const lines = memWrap(g, MEM_TEXT, p.w - 44).slice(0, 4);
     lines.forEach((t, i) => g.fillText(i === lines.length - 1 ? `${t} …` : t, cx, p.y + (92 + i * 19) * MEM_SY));
     // Son satır hafifçe söner
     const fade = g.createLinearGradient(0, p.y + p.h - 32, 0, p.y + p.h - 8);
@@ -246,6 +223,9 @@ function memPaint(g, part, imgs, detail, frames) {
       g.imageSmoothingEnabled = true;
       if ('imageSmoothingQuality' in g) g.imageSmoothingQuality = 'high';
       g.drawImage(it.img, f.x, f.y, f.w, f.h);
+    } else if (paintMemStatue) {
+      // Kurgusal sürüm: fotoğraf yerine kodla çizilen heykel ve kabartmalar
+      paintMemStatue(g, f, i, detail);
     } else {
       // Fotoğraf yoksa yer tutucu: boş, sade koyu çerçeve
       g.fillStyle = '#2a2724'; g.fillRect(f.x, f.y, f.w, f.h);
@@ -262,6 +242,7 @@ function memPaint(g, part, imgs, detail, frames) {
     memMedallion(g, (L.stele.x + s4.fx) / 2 + 10, s4.fy + s4.fh / 2, 15 * MEM_SY);
     memMedallion(g, (L.stele.x + L.stele.w + s4.fx + s4.fw) / 2 - 10, s4.fy + s4.fh / 2, 15 * MEM_SY);
     g.textAlign = 'center'; g.textBaseline = 'middle';
+    if (!MEM_MOTTO && !MEM_SIGNATURE) return;
     g.font = `700 ${L.motto.size}px ${MEM_SERIF}`;
     g.fillStyle = '#e8c76c';
     g.fillText(MEM_MOTTO, L.motto.x, L.motto.y);
@@ -316,12 +297,12 @@ export class MemorialArt {
     const fontsDone = () => { this.fonts = true; };
     try {
       const f = document.fonts;
-      Promise.all([f.load(`700 34px 'Playfair Display'`, 'Gençliğe Hitabe âîû'), f.load(`400 16px 'Playfair Display'`, 'ğüşıöçİâîû')]).then(fontsDone, fontsDone);
+      Promise.all([f.load(`700 34px 'Playfair Display'`, 'Anıt ğüşıöçİâîû'), f.load(`400 16px 'Playfair Display'`, 'ğüşıöçİâîû')]).then(fontsDone, fontsDone);
       setTimeout(fontsDone, 4000);
     } catch { fontsDone(); }
   }
 
-  get ready() { return this.loaded >= 4 && this.fonts; }
+  get ready() { return this.loaded >= MEM_IMAGES.length && this.fonts; }
 
   computeFrames() {
     this.frames = MEM_LAYOUT.slots.map((slot, i) => {
@@ -333,8 +314,8 @@ export class MemorialArt {
 
   makeFlags() {
     const w = 120; const h = 80;
-    this.flag = memCanvas(w, h); paintTrFlag(this.flag.getContext('2d'), w, h);
-    this.flagM = memCanvas(w, h); paintTrFlag(this.flagM.getContext('2d'), w, h, true);
+    this.flag = memCanvas(w, h); paintMemFlag(this.flag.getContext('2d'), w, h);
+    this.flagM = memCanvas(w, h); paintMemFlag(this.flagM.getContext('2d'), w, h, true);
   }
 
   build(k, detail) {
@@ -449,8 +430,9 @@ export class MemorialArt {
       flag: { x: b.x + L.flag.x, y: b.y + L.flag.y, w: L.flag.w, h: L.flag.h },
       motto: { x: b.x + L.motto.x, y: b.y + L.motto.y, text: MEM_MOTTO },
       signature: { x: b.x + L.signature.x, y: b.y + L.signature.y, text: MEM_SIGNATURE },
-      title: HITABE_TITLE, year: HITABE_YEAR,
-      images: this.imgs.map((it) => (it ? (it.ok ? 'ok' : 'missing') : 'loading')),
+      title: MEM_TITLE, year: MEM_YEAR,
+      images: this.imgs.slice(0, MEM_IMAGES.length).map((it) => (it ? (it.ok ? 'ok' : 'missing') : 'loading')),
+      real: MEM_REAL,
       hi: !!this.hi, lo: !!this.lo,
     };
   }
@@ -468,7 +450,7 @@ export function bakeMemorialPad(g, x, y, w, h) {
   }
 }
 
-// Okuma kartı: metnin tamamı yavaşça kayar. Oyunu engellemez, dokununca kapanır.
+// Okuma kartı (yalnız levha metni olan sürümde): metnin tamamı yavaşça kayar. Oyunu engellemez, dokununca kapanır.
 // el: #memorial-card. Metin DOM'a bir kez yazılır; açıkken yalnızca kaydırma konumu değişir
 export class MemorialCard {
   constructor(el, onDismiss) {
@@ -478,15 +460,16 @@ export class MemorialCard {
     this.pos = 0;
     if (!el) return;
     el.textContent = '';
+    if (!MEM_TEXT) return; // Kurgusal sürüm: okunacak metin yok, kart açılmaz
     const head = document.createElement('header');
-    const h = document.createElement('h3'); h.textContent = HITABE_TITLE;
-    const y = document.createElement('span'); y.textContent = HITABE_YEAR;
+    const h = document.createElement('h3'); h.textContent = MEM_TITLE;
+    const y = document.createElement('span'); y.textContent = MEM_YEAR;
     head.append(h, y);
     this.body = document.createElement('div');
     this.body.className = 'mc-body';
     this.inner = document.createElement('div');
     this.inner.className = 'mc-text';
-    for (const para of HITABE.split('\n')) {
+    for (const para of MEM_TEXT.split('\n')) {
       const p = document.createElement('p'); p.textContent = para; this.inner.appendChild(p);
     }
     const foot = document.createElement('p');
@@ -500,13 +483,13 @@ export class MemorialCard {
     el.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
   }
 
-  // Karttaki Hitabe metni (test: tam metin karşılaştırması)
+  // Karttaki levha metni (test: tam metin karşılaştırması)
   text() {
     return this.inner ? [...this.inner.querySelectorAll('p:not(.mc-sign)')].map((p) => p.textContent).join('\n') : '';
   }
 
   show(on) {
-    if (!this.el || on === this.open) return;
+    if (!this.el || !this.inner || on === this.open) return;
     this.open = on;
     this.el.hidden = !on;
     if (on) { this.t = 0; this.pos = 0; this.body.scrollTop = 0; }

@@ -13,10 +13,10 @@ const { TABLO } = await import(pathToFileURL(path.resolve('names/tablo.mjs')).hr
 const col = flavor === 'arkadas' ? 'gercek' : 'uydurma';
 const WANT = {
   kolej: TABLO.kolej.ad[col],
-  mevlana: TABLO.konya.mevlana[col], alaaddin: TABLO.konya.alaaddin[col], zafer: TABLO.konya.zafer[col],
-  bedesten: TABLO.konya.bedesten[col], kongre: TABLO.konya.kongre[col], kule: TABLO.kule[col],
-  kulturpark: TABLO.konya.kulturpark[col], meram: TABLO.konya.meram[col],
-  serife: TABLO.okullar.serife[col], ted: TABLO.okullar.ted[col], gundogdu: TABLO.okullar.gundogdu[col],
+  muze: TABLO.tarihi.muze[col], tepecami: TABLO.tarihi.cami[col], meydan: TABLO.tarihi.meydan[col],
+  carsi: TABLO.tarihi.carsi[col], kongre: TABLO.tarihi.kongre[col], kule: TABLO.kule[col],
+  sehirpark: TABLO.tarihi.park[col], baglar: TABLO.tarihi.baglar[col],
+  fen: TABLO.okullar.fen[col], kolej2: TABLO.okullar.kolej2[col], kolej3: TABLO.okullar.kolej3[col],
 };
 const fails = [];
 let passes = 0;
@@ -69,7 +69,7 @@ for (const id of Object.keys(WANT)) {
 // Gerçek adların öteki sürüme karışmadığı: sayfadaki tüm tabelalarda karşı sütunun farklı adları yok
 const other = flavor === 'arkadas' ? 'uydurma' : 'gercek';
 const forbidden = Object.keys(WANT).map((id) => {
-  const t = { kolej: TABLO.kolej.ad, kule: TABLO.kule, serife: TABLO.okullar.serife, ted: TABLO.okullar.ted, gundogdu: TABLO.okullar.gundogdu }[id];
+  const t = { kolej: TABLO.kolej.ad, kule: TABLO.kule, fen: TABLO.okullar.fen, kolej2: TABLO.okullar.kolej2, kolej3: TABLO.okullar.kolej3, muze: TABLO.tarihi.muze, tepecami: TABLO.tarihi.cami, meydan: TABLO.tarihi.meydan, carsi: TABLO.tarihi.carsi, kongre: TABLO.tarihi.kongre, sehirpark: TABLO.tarihi.park, baglar: TABLO.tarihi.baglar }[id];
   return t && t[other] !== t[col] ? t[other] : null;
 }).filter(Boolean);
 const leaked = await page.evaluate((list) => {

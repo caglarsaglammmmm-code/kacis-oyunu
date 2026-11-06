@@ -871,7 +871,7 @@ html[lang="ja"] #alert, html[lang="zh-CN"] #alert, html[lang="ja"] #toast, html[
   .a2hs ol { gap: 3px; margin-bottom: 6px; }
 }
 
-/* v20: Cumhuriyet Meydanı anıtı. Gençliğe Hitabe okuma kartı ve anıt cezası yazısı */
+/* v20: anıt meydanı. Levha okuma kartı ve anıt cezası yazısı */
 @font-face { font-family: 'Playfair Display'; font-weight: 400; src: url(../fonts/playfair-display-latin-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }
 @font-face { font-family: 'Playfair Display'; font-weight: 400; src: url(../fonts/playfair-display-latin-ext-400-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0100-02BA, U+1E00-1EFF; }
 @font-face { font-family: 'Playfair Display'; font-weight: 700; src: url(../fonts/playfair-display-latin-700-normal.woff2) format('woff2'); font-display: swap; unicode-range: U+0000-00FF, U+2000-206F; }

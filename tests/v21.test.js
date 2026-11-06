@@ -206,18 +206,18 @@ test('Play sürümünde gerçek kişi adı yok; arkadaş sürümü misafir yazı
 });
 
 // --- STADYUMLAR ---
-test('iki stadyum: ayrı ve uzak bölgelerde, Konya ~3 kat büyük, katı ve yıkılmaz; tank ezemez', () => {
+test('iki stadyum: ayrı ve uzak bölgelerde, büyüğü ~3 kat büyük, katı ve yıkılmaz; tank ezemez', () => {
   const g = game({ god: true });
   const st = g.world.zones().filter((z) => z.kind === 'stadium');
   assert.equal(st.length, 2);
   const [a, b] = st.sort((p, q) => p.w * p.h - q.w * q.h);
   const ratio = (b.w * b.h) / (a.w * a.h);
-  assert.ok(ratio > 2.5 && ratio < 3.6, `Konya / Yozgat alan oranı ${ratio.toFixed(2)}`);
+  assert.ok(ratio > 2.5 && ratio < 3.6, `büyük / küçük alan oranı ${ratio.toFixed(2)}`);
   const C = CONFIG.world.tile * CONFIG.world.chunkTiles;
   assert.ok(Math.hypot(a.x - b.x, a.y - b.y) / C >= 4.5, 'birbirinden uzak');
-  // Konya yerleriyle çakışmaz: her biri kendi chunk'ında
+  // Özel yerlerle çakışmaz: her biri kendi chunk'ında
   const marks = g.world.landmarkList();
-  for (const id of ['yozgat', 'konyastad', 'gecit']) {
+  for (const id of ['kucukstad', 'buyukstad', 'gecit']) {
     const m = marks.find((k) => k.id === id);
     assert.ok(m, id);
     for (const o of marks) if (o !== m) assert.ok(Math.max(Math.abs(o.cx - m.cx), Math.abs(o.cy - m.cy)) >= 2, `${id} ile ${o.id} ayrı`);
@@ -244,8 +244,8 @@ test('iki stadyum: ayrı ve uzak bölgelerde, Konya ~3 kat büyük, katı ve yı
 
 test('stadyum adları isim tablosundan: Play sürümünde gerçek ad yok, arkadaş sürümünde gerçek ad', async () => {
   const { NAMES } = await import('../js/names.js');
-  assert.equal(NAMES.stadyum.yozgat, 'BOZOK ŞEHİR STADYUMU');
-  assert.equal(NAMES.stadyum.konya, 'SELÇUK ARENA');
+  assert.equal(NAMES.stadyum.kucuk, 'ÇINARLI ŞEHİR STADYUMU');
+  assert.equal(NAMES.stadyum.buyuk, 'MAVİ RÜZGAR ARENA');
   const { namesSource } = await import('../tools/names.mjs');
   const ark = await namesSource('arkadas');
   assert.ok(ark.includes('YOZGAT ŞEHİR STADYUMU') && ark.includes('KONYA BÜYÜKŞEHİR STADYUMU'));

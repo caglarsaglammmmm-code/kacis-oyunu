@@ -277,8 +277,8 @@ export class World {
     for (const m of this.landmarkList()) {
       if (m.id === 'anit') box('memorial', m, CONFIG.memorial.rect);
       else if (m.id === 'gecit') box('secret', m, CONFIG.secret.ramp);
-      else if (m.id === 'yozgat') box('stadium', m, CONFIG.stadiums.yozgat.rect);
-      else if (m.id === 'konyastad') box('stadium', m, CONFIG.stadiums.konya.rect);
+      else if (m.id === 'kucukstad') box('stadium', m, CONFIG.stadiums.kucuk.rect);
+      else if (m.id === 'buyukstad') box('stadium', m, CONFIG.stadiums.buyuk.rect);
     }
     this.zoneList = out;
     return out;
@@ -444,7 +444,7 @@ export class World {
     else if (t === 'cami') this.fillDense(c, 'mahalle', { style: BUILD.MOSQUE, w: 12, h: 12, color: '#c7cdd3', pad: 'courtyard', sign: '' });
     else if (t === 'stadyum') this.fillDense(c, 'mahalle', { style: BUILD.STADIUM, w: 18, h: 16, color: '#58606b', sign: '' });
     else if (t === 'hastane') this.fillDense(c, 'mahalle', { style: BUILD.HOSPITAL, w: 13, h: 10, color: '#f1f5f8', pad: 'ambulance', sign: 'Şehir Hastanesi' });
-    else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: 'Cumhuriyet İlkokulu' });
+    else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: NAMES.ilkokul });
     else if (t === 'spor') this.fillDense(c, 'mahalle', { sport: true });
     else if (t === 'golet') this.fillDense(c, 'mahalle', { pond: true });
     else if (t === 'insaat' || t === 'harabe' || t === 'sanayi') this.fillZone(c, t);
@@ -1132,7 +1132,7 @@ export class World {
         if (this.marks.some((o) => Math.abs(o.cx - x) < 2 && Math.abs(o.cy - y) < 2)) continue;
         if (m.apart && this.marks.some((o) => o.id === m.apart[0] && Math.max(Math.abs(o.cx - x), Math.abs(o.cy - y)) < m.apart[1])) continue;
         this.biomeAt(x, y, out);
-        if (out.biome !== 'city' && !(m.id === 'meram' && (out.biome === 'rural' || out.biome === 'forest'))) continue;
+        if (out.biome !== 'city' && !(m.id === 'baglar' && (out.biome === 'rural' || out.biome === 'forest'))) continue;
         this.marks.push({ id: m.id, cx: x, cy: y });
         break;
       }
@@ -1157,12 +1157,12 @@ export class World {
   }
 
   fillLandmark(c, id) {
-    const K = NAMES.konya;
+    const K = NAMES.tarihi;
     const D = K.duraklar;
     const B = BUILD;
-    if (id === 'mevlana') {
+    if (id === 'muze') {
       this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
-      this.sign(this.addRect(c, 'building', 7, 6, 27, 16, 3, B.MUZE, '#dcccaa'), K.mevlana, '#0b7f69', 2);
+      this.sign(this.addRect(c, 'building', 7, 6, 27, 16, 3, B.MUZE, '#dcccaa'), K.muze, '#0b7f69', 2);
       this.setGround(c, 6, 18, 14, 28, GROUND.GRASS);
       this.addPad(c, 'gul', 6, 18, 8, 10);
       this.setGround(c, 21, 18, 29, 28, GROUND.GRASS);
@@ -1172,7 +1172,7 @@ export class World {
       this.scatter(c, PROP.TREE, 14, [GROUND.GRASS]);
       for (let k = 7; k < 28; k += 4) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 17.3 * TILE);
       this.tram(c, D[2]);
-    } else if (id === 'alaaddin') {
+    } else if (id === 'tepecami') {
       this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
       this.addPad(c, 'hill', 7, 7, 21, 21);
       // Tepenin çevresinde yürüyüş halkası ve çay bahçeleri
@@ -1180,28 +1180,28 @@ export class World {
         const d = Math.hypot(x + 0.5 - 17.5, y + 0.5 - 17.5);
         if (d > 11.2 && d < 12.6) c.ground[y * CT + x] = GROUND.PLAZA;
       }
-      this.sign(this.addRect(c, 'building', 13, 12, 23, 19, 3, B.SELCUK_CAMI, '#c9b99a'), K.alaaddin, '#4a7870', 2);
+      this.sign(this.addRect(c, 'building', 13, 12, 23, 19, 3, B.TEPE_CAMI, '#c9b99a'), K.cami, '#4a7870', 2);
       this.sign(this.addRect(c, 'building', 26, 26, 29, 29, 4, B.ANIT, '#b5523b'), K.tepe, '#2f6b4f', 1).variant = 'kosk';
       this.scatter(c, PROP.TREE, 40, [GROUND.GRASS]);
       this.scatter(c, PROP.UMBRELLA, 10, [GROUND.PLAZA]);
       this.scatter(c, PROP.CHAIRS, 8, [GROUND.PLAZA]);
       this.tram(c, D[0]);
-    } else if (id === 'zafer') {
+    } else if (id === 'meydan') {
       this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
       this.addPad(c, 'yildiz', 9, 9, 17, 17);
-      this.sign(this.addRect(c, 'building', 15, 15, 20, 20, 2, B.ANIT, '#b9ad98'), K.zafer, '#a8323a', 1);
+      this.sign(this.addRect(c, 'building', 15, 15, 20, 20, 2, B.ANIT, '#b9ad98'), K.meydan, '#a8323a', 1);
       for (const [x, y] of [[6, 6], [27, 6], [6, 27], [27, 27]]) this.addRect(c, 'water', x, y, x + 2, y + 2, 10, 2, '#3aa7e8');
-      // Güney kenarında Konya fırınları
+      // Güney kenarında fırınlar
       K.firinlar.slice(0, 4).forEach((n, i) => this.sign(this.addRect(c, 'building', 5 + i * 6, 28, 10 + i * 6, 31, 3, B.SHOP, '#a8733f'), n, '#c8261e', 1));
       this.scatter(c, PROP.BENCH, 12, [GROUND.PLAZA]);
       this.scatter(c, PROP.SIMITCART, 3, [GROUND.PLAZA]);
       this.scatter(c, PROP.UNCLES, 4, [GROUND.PLAZA]);
       this.tram(c, D[1]);
-    } else if (id === 'bedesten') {
+    } else if (id === 'carsi') {
       this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
-      this.sign(this.addRect(c, 'building', 5, 6, 30, 10, 3, B.BEDESTEN, '#c6b28c'), K.bedesten, '#7a2a18', 2);
-      this.addRect(c, 'building', 5, 13, 30, 17, 3, B.BEDESTEN, '#c6b28c');
-      this.addRect(c, 'building', 5, 20, 30, 24, 3, B.BEDESTEN, '#c6b28c');
+      this.sign(this.addRect(c, 'building', 5, 6, 30, 10, 3, B.CARSI, '#c6b28c'), K.carsi, '#7a2a18', 2);
+      this.addRect(c, 'building', 5, 13, 30, 17, 3, B.CARSI, '#c6b28c');
+      this.addRect(c, 'building', 5, 20, 30, 24, 3, B.CARSI, '#c6b28c');
       K.firinlar.forEach((n, i) => this.sign(this.addRect(c, 'building', 5 + i * 5, 27, 9 + i * 5, 31, 3, B.SHOP, '#a8733f'), n, '#c8261e', 1));
       this.scatter(c, PROP.STALL, 14, [GROUND.PLAZA]);
       this.scatter(c, PROP.UNCLES, 3, [GROUND.PLAZA]);
@@ -1221,18 +1221,18 @@ export class World {
       this.addRect(c, 'building', 6, 13, 29, 22, 3, B.AVM, '#aab3bb');
       this.addPad(c, 'parking', 5, 24, 26, 6);
       this.scatter(c, PROP.BENCH, 6, [GROUND.PLAZA]);
-    } else if (id === 'kulturpark') {
+    } else if (id === 'sehirpark') {
       this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
       this.setGround(c, 16, ART, 19, CT, GROUND.PLAZA);
       this.setGround(c, ART, 16, CT, 19, GROUND.PLAZA);
       this.addRect(c, 'water', 6, 6, 13, 12, 6, 0, '#3aa7e8'); // Havuz: araba düşmez
       this.setGround(c, 21, 20, 30, 28, GROUND.PLAZA);
       this.addPad(c, 'amfi', 21, 20, 9, 8);
-      this.sign(this.addRect(c, 'building', 16, 16, 19, 19, 4, B.ANIT, '#b5523b'), K.kulturpark, '#2f6b4f', 1).variant = 'kosk';
+      this.sign(this.addRect(c, 'building', 16, 16, 19, 19, 4, B.ANIT, '#b5523b'), K.park, '#2f6b4f', 1).variant = 'kosk';
       this.scatter(c, PROP.TREE, 50, [GROUND.GRASS]);
       this.scatter(c, PROP.BENCH, 14, [GROUND.GRASS, GROUND.PLAZA]);
       this.tram(c, D[3]);
-    } else if (id === 'meram') {
+    } else if (id === 'baglar') {
       this.setGround(c, ART, ART, CT, CT, GROUND.DIRT);
       this.addPad(c, 'bag', 4, 4, 13, 12);
       this.addPad(c, 'bag', 19, 18, 12, 12);
@@ -1240,20 +1240,20 @@ export class World {
       for (const [x, y] of [[19, 6], [24, 10], [6, 20], [11, 25]]) {
         this.addRect(c, 'building', x, y, x + 3, y + 3, 5, B.BAGEVI, '#f0e6d2');
       }
-      this.sign(this.addRect(c, 'building', 26, 4, 30, 7, 5, B.BAGEVI, '#f0e6d2'), K.meram, '#5c3a22', 1);
+      this.sign(this.addRect(c, 'building', 26, 4, 30, 7, 5, B.BAGEVI, '#f0e6d2'), K.baglar, '#5c3a22', 1);
       this.scatter(c, PROP.TREE, 34, [GROUND.DIRT]);
       this.scatter(c, PROP.BUSH, 12, [GROUND.DIRT]);
     } else if (id === 'anit') {
       this.fillMemorial(c);
-    } else if (id === 'yozgat') {
-      this.fillYozgat(c);
-    } else if (id === 'konyastad') {
-      this.fillKonyaStadium(c);
+    } else if (id === 'kucukstad') {
+      this.fillSmallStadium(c);
+    } else if (id === 'buyukstad') {
+      this.fillBigStadium(c);
     } else if (id === 'gecit') {
       this.fillSecret(c);
     } else {
       // Okullar: ad isim tablosunda, renkler uydurma ve genel
-      const look = { serife: ['#efe2c0', '#c8261e'], ted: ['#f2f2f2', '#c1121f'], gundogdu: ['#ffe08a', '#1f3a68'] }[id];
+      const look = { fen: ['#efe2c0', '#c8261e'], kolej2: ['#f2f2f2', '#c1121f'], kolej3: ['#ffe08a', '#1f3a68'] }[id];
       this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
       const r = this.sign(this.addRect(c, 'building', 7, 6, 27, 14, 3, B.OZEL_OKUL, look[0]), NAMES.okullar[id], look[1], 3);
       r.signColor = look[1];
@@ -1301,14 +1301,14 @@ export class World {
     return r;
   }
 
-  // Yozgat: orta boy, çevresinde koşu pisti, güneyde otopark, iki yanda ağaçlık
-  fillYozgat(c) {
-    const R = CONFIG.stadiums.yozgat.rect;
+  // Küçük stadyum: orta boy, çevresinde koşu pisti, güneyde otopark, iki yanda ağaçlık
+  fillSmallStadium(c) {
+    const R = CONFIG.stadiums.kucuk.rect;
     this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
     this.setGround(c, ART, ART, 7, CT, GROUND.GRASS);
     this.setGround(c, 27, ART, CT, CT, GROUND.GRASS);
     this.setGround(c, R[0] - 1, R[1] - 1, R[2] + 1, R[3] + 1, GROUND.TRACK);
-    this.stadiumRect(c, 'yozgat', R, 34);
+    this.stadiumRect(c, 'kucuk', R, 34);
     this.addPad(c, 'parking', 8, 23, 18, 7);
     this.scatter(c, PROP.TREE, 26, [GROUND.GRASS]);
     for (let x = 9; x < 26; x += 4) this.addProp(c, PROP.BENCH, c.x + (x + 0.5) * TILE, c.y + 21.6 * TILE);
@@ -1316,13 +1316,13 @@ export class World {
     for (let x = 8; x <= 26; x += 6) { L(x, 22.4); L(x, 7.4); }
   }
 
-  // Konya: çok büyük, çevre yolu, kuzey ve güneyde geniş otopark, yeşil bayraklı çimenlik
-  fillKonyaStadium(c) {
-    const R = CONFIG.stadiums.konya.rect;
+  // Büyük stadyum: çok büyük, çevre yolu, kuzey ve güneyde geniş otopark, yeşil bayraklı çimenlik
+  fillBigStadium(c) {
+    const R = CONFIG.stadiums.buyuk.rect;
     this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
     this.setGround(c, ART, 27, CT, CT, GROUND.PLAZA);
     this.setGround(c, R[0] - 1, R[1] - 1, R[2] + 1, R[3] + 1, GROUND.ROAD); // Çevre yolu
-    this.stadiumRect(c, 'konya', R, 150);
+    this.stadiumRect(c, 'buyuk', R, 150);
     this.addPad(c, 'parking', 5, 27, 24, 4);
     this.addPad(c, 'parking', 6, ART, 22, 2);
     for (const x of [ART + 0.5, 30.5]) for (let y = 7; y < 27; y += 3) this.addProp(c, PROP.TREE, c.x + x * TILE, c.y + (y + 0.5) * TILE);

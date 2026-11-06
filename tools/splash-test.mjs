@@ -1,13 +1,17 @@
 // Açılış ekranı: oyun adı yok, geliştirici yazısı görünüyor, 1 saniyeden kısa, sonra ana ekran.
 // Her karede (rAF) durum kaydedilir, birkaç kare ekran görüntüsü olarak saklanır.
-// node tools/splash-test.mjs [port]   Çıktı: e2e-out/v15/acilis
+// node tools/splash-test.mjs [port] [play|arkadas]   Çıktı: e2e-out/v15/acilis
+// Play Store sürümünde açılışta yalnız oyunun adı (Drift Lab) yazar; arkadaş sürümünde geliştirici yazısı
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
 
 const port = Number(process.argv[2] || 8080);
 const OUT = 'e2e-out/v15/acilis';
 fs.mkdirSync(OUT, { recursive: true });
-const WANT = { tr: 'Çağlar Sağlam tarafından geliştirildi', en: 'Developed by Çağlar Sağlam', de: 'Entwickelt von Çağlar Sağlam', ja: '開発：Çağlar Sağlam' };
+const flavor = process.argv[3] || 'play';
+const WANT = flavor === 'arkadas'
+  ? { tr: 'Çağlar Sağlam tarafından geliştirildi', en: 'Developed by Çağlar Sağlam', de: 'Entwickelt von Çağlar Sağlam', ja: '開発：Çağlar Sağlam' }
+  : { tr: 'Drift Lab', en: 'Drift Lab', de: 'Drift Lab', ja: 'Drift Lab' };
 const fails = [];
 let passes = 0;
 const ok = (c, n, e = '') => { if (c) passes++; else { fails.push(`${n} ${e}`); console.log('HATA', n, e); } };
@@ -48,7 +52,8 @@ for (const [lang, want] of Object.entries(WANT)) {
     const dur = shown.length ? shown.at(-1).t - shown[0].t : 0;
     ok(shown.length > 5, `${lang} ${sname}: açılış ekranı göründü`, String(shown.length));
     ok(shown.every((e) => e.text === want), `${lang} ${sname}: yazı "${want}"`, [...new Set(shown.map((e) => e.text))].join(' | '));
-    ok(shown.every((e) => !/drift\s*lab/i.test(e.all)), `${lang} ${sname}: oyun adı yazısı yok`);
+    if (flavor === 'arkadas') ok(shown.every((e) => !/drift\s*lab/i.test(e.all)), `${lang} ${sname}: oyun adı yazısı yok`);
+    else ok(shown.every((e) => !/ça?ğlar|sağlam/i.test(e.all)), `${lang} ${sname}: açılışta gerçek ad yok`);
     ok(Math.max(...shown.map((e) => e.op)) > 0.95, `${lang} ${sname}: tam okunur`);
     ok(dur > 500 && dur < 1000, `${lang} ${sname}: süre 1 sn'den kısa`, `${Math.round(dur)} ms`);
     ok(visible.length && visible[0].op < 0.6 && visible.at(-1).op < 0.6, `${lang} ${sname}: yumuşak belirip kaybolur`);

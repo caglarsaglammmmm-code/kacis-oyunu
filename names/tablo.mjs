@@ -12,6 +12,9 @@ const both = (v) => ({ gercek: v, uydurma: v });
 export const TABLO = {
   // Uygulama adı ve ikonu iki sürümde aynıdır
   oyun: both('Drift Lab'),
+  // Açılış ekranındaki geliştirici adı: Play Store sürümünde yok, açılış yalnız oyunun adını gösterir.
+  // (Ana menünün altındaki yapımcı satırı iki sürümde de durur: js/i18n/*.js menu.maker)
+  yapimci: { gercek: 'Çağlar Sağlam', uydurma: '' },
   // Menüdeki APK düğmesi: arkadaş sürümü hep son APK'ya gider, Play sürümünde boş (config kendi adresini kullanır)
   indir: { gercek: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/DriftLab-Arkadas.apk', uydurma: '' },
 
@@ -21,28 +24,49 @@ export const TABLO = {
     ust: { gercek: 'SİSTEM', uydurma: 'MANDALİNA' },
   },
 
-  // Konya: özel ve devlet okulları
+  // Özel ve devlet okulları
   okullar: {
-    serife: { gercek: 'Şerife Akkanat Ortaokulu', uydurma: 'Anadolu Fen Okulu' },
-    ted: { gercek: 'TED Konya Koleji', uydurma: 'Bozkır Koleji' },
-    gundogdu: { gercek: 'Gündoğdu Koleji', uydurma: 'Gün Işığı Koleji' },
+    fen: { gercek: 'Şerife Akkanat Ortaokulu', uydurma: 'Fen Bilimleri Okulu' },
+    kolej2: { gercek: 'TED Konya Koleji', uydurma: 'Bozkır Koleji' },
+    kolej3: { gercek: 'Gündoğdu Koleji', uydurma: 'Gün Işığı Koleji' },
   },
+  // Mahalle ilkokulunun tabelası
+  ilkokul: { gercek: 'Cumhuriyet İlkokulu', uydurma: 'Çınar İlkokulu' },
 
-  // Konya: özel yapı
+  // Özel yapı
   kule: { gercek: 'Selçuklu Kulesi', uydurma: 'Bozkır Kulesi' },
 
-  // Konya: tarihi ve kamu yapıları, iki sürümde aynı
-  konya: {
-    mevlana: both('Mevlana Müzesi'),
-    alaaddin: both('Alaaddin Camii'),
-    tepe: both('Alaaddin Tepesi'),
-    kongre: both('Selçuklu Kongre Merkezi'),
-    kulturpark: both('Kültürpark'),
-    zafer: both('Zafer Meydanı'),
-    bedesten: both('Bedesten Çarşısı'),
-    meram: both('Meram Bağları'),
-    duraklar: both(['Alaaddin', 'Zafer', 'Mevlana', 'Kültürpark', 'Kongre Merkezi']),
-    firinlar: both(['Etli Ekmek Fırını', 'Konya Fırını', 'Fırın Kebabı', 'Etliekmek Salonu', 'Bamya Çorbası']),
+  // Tarihi ve kamu yapıları: arkadaş sürümünde gerçek yer adları, Play Store sürümünde genel adlar
+  tarihi: {
+    muze: { gercek: 'Mevlana Müzesi', uydurma: 'Şehir Müzesi' },
+    cami: { gercek: 'Alaaddin Camii', uydurma: 'Tepe Camii' },
+    tepe: { gercek: 'Alaaddin Tepesi', uydurma: 'Yeşil Tepe' },
+    kongre: { gercek: 'Selçuklu Kongre Merkezi', uydurma: 'Kongre Merkezi' },
+    park: { gercek: 'Kültürpark', uydurma: 'Şehir Parkı' },
+    meydan: { gercek: 'Zafer Meydanı', uydurma: 'Çınar Meydanı' },
+    carsi: { gercek: 'Bedesten Çarşısı', uydurma: 'Eski Çarşı' },
+    baglar: { gercek: 'Meram Bağları', uydurma: 'Bağlar Bahçesi' },
+    duraklar: { gercek: ['Alaaddin', 'Zafer', 'Mevlana', 'Kültürpark', 'Kongre Merkezi'], uydurma: ['Tepe', 'Çınar', 'Müze', 'Şehir Parkı', 'Kongre Merkezi'] },
+    firinlar: { gercek: ['Etli Ekmek Fırını', 'Konya Fırını', 'Fırın Kebabı', 'Etliekmek Salonu', 'Bamya Çorbası'], uydurma: ['Etli Ekmek Fırını', 'Taş Fırın', 'Fırın Kebabı', 'Etliekmek Salonu', 'Bamya Çorbası'] },
+  },
+
+  // Şehir ve yemek adı taşıyan dükkânlar (Play Store sürümünde yer adı yok)
+  dukkan: {
+    saray: { gercek: 'İskender Sarayı', uydurma: 'Kebap Sarayı' },
+    pide: { gercek: 'Karadeniz Pide', uydurma: 'Kayık Pide' },
+    lahmacun: { gercek: 'Urfa Lahmacun', uydurma: 'Fırın Lahmacun' },
+    ocak: { gercek: 'Adana Kebapçısı', uydurma: 'Ocakbaşı Kebapçısı' },
+    kebapci: { gercek: 'İskenderci', uydurma: 'Tereyağlı Kebapçı' },
+    ozocak: { gercek: 'Öz Urfa Kebap', uydurma: 'Öz Ocakbaşı' },
+    // Tabela rengini seçen anahtar kelime (döner/kebap grubu)
+    kelime: { gercek: 'iskender', uydurma: 'ocakbaşı' },
+  },
+
+  // Yol tabelaları: otoyol köprüsü (sol/sağ) ve kavşak yön levhaları
+  yol: {
+    sol: { gercek: ['← EDİRNE O-3', '← SARAY O-3', '← GEBZE O-4', '← ÇORLU O-3'], uydurma: ['← LİMAN O-1', '← SAHİL O-1', '← OVA O-2', '← KÖPRÜ O-1'] },
+    sag: { gercek: ['ANKARA O-4 →', 'İZMİT O-4 →', 'BOLU O-4 →', 'BURSA O-5 →'], uydurma: ['MERKEZ O-2 →', 'DAĞ O-2 →', 'GÖL O-2 →', 'VADİ O-3 →'] },
+    yon: { gercek: ['← KADIKÖY', 'BEŞİKTAŞ →', '↑ TAKSİM', 'ÜSKÜDAR →', '← ŞİŞLİ', 'SARIYER →', '↑ BOĞAZ KÖPRÜSÜ', '← FATİH', 'BAKIRKÖY →'], uydurma: ['← ÇARŞI', 'LİMAN →', '↑ MERKEZ', 'SAHİL →', '← ÇINARLI', 'TEPEBAŞI →', '↑ KÖPRÜ', '← ESKİ ŞEHİR', 'YENİ MAHALLE →'] },
   },
 
   // Araç adları: kimlik (id) değişmez, yalnızca görünen ad
@@ -78,10 +102,10 @@ export const TABLO = {
 
   bankalar: [
     { ad: { gercek: 'Akbank', uydurma: 'Yıldız Bankası' }, renk: { gercek: '#d0121b', uydurma: '#3b3f8f' } },
-    { ad: { gercek: 'İş Bankası', uydurma: 'Anadolu Tasarruf' }, renk: { gercek: '#0a4ea2', uydurma: '#8a6d1f' } },
+    { ad: { gercek: 'İş Bankası', uydurma: 'Kumbara Tasarruf' }, renk: { gercek: '#0a4ea2', uydurma: '#8a6d1f' } },
     { ad: { gercek: 'Ziraat Bankası', uydurma: 'Bereket Bankası' }, renk: { gercek: '#c8102e', uydurma: '#6b8e23' } },
     { ad: { gercek: 'Garanti BBVA', uydurma: 'Güven Kredi' }, renk: { gercek: '#0f7a45', uydurma: '#5b2a86' } },
-    { ad: { gercek: 'Yapı Kredi', uydurma: 'Marmara Yatırım' }, renk: { gercek: '#1b2f6b', uydurma: '#0f6e84' } },
+    { ad: { gercek: 'Yapı Kredi', uydurma: 'Liman Yatırım' }, renk: { gercek: '#1b2f6b', uydurma: '#0f6e84' } },
   ],
 
   siteler: {
@@ -98,8 +122,20 @@ export const TABLO = {
 
   // İki stadyumun tabelası. Gerçek kulüp amblemi ya da logosu iki sürümde de kullanılmaz
   stadyum: {
-    yozgat: { gercek: 'YOZGAT ŞEHİR STADYUMU', uydurma: 'BOZOK ŞEHİR STADYUMU' },
-    konya: { gercek: 'KONYA BÜYÜKŞEHİR STADYUMU', uydurma: 'SELÇUK ARENA' },
+    kucuk: { gercek: 'YOZGAT ŞEHİR STADYUMU', uydurma: 'ÇINARLI ŞEHİR STADYUMU' },
+    buyuk: { gercek: 'KONYA BÜYÜKŞEHİR STADYUMU', uydurma: 'MAVİ RÜZGAR ARENA' },
+  },
+  // Stadyum renkleri: Play Store sürümünde hiçbir kulübün renk düzeni kullanılmaz (turkuaz-mercan, mor-lila)
+  //   seat: koltuk, trim: çatı kenarı, fan: taraftar, flag: [zemin, şerit] ya da 'anit' (anıtın bayrağı)
+  stadRenk: {
+    kucuk: {
+      gercek: { seat: '#c8102e', trim: '#c8102e', fan: '#2a0b10', flag: 'anit' },
+      uydurma: { seat: '#138a8a', trim: '#ff6f59', fan: '#0b2e2e', flag: ['#138a8a', '#ff6f59'] },
+    },
+    buyuk: {
+      gercek: { main: '#16834a', glass: 'rgba(170,230,190,.62)', facade: 'rgba(120,210,150,.55)', glow: 'rgba(60,255,150,.22)', dot: '#5dff9e', edge: 'rgba(80,110,96,.45)', fan: '#0f3a24', flag: ['#16834a', '#ffffff'] },
+      uydurma: { main: '#6a3fb5', glass: 'rgba(196,176,240,.62)', facade: 'rgba(170,140,230,.55)', glow: 'rgba(170,120,255,.22)', dot: '#c9a6ff', edge: 'rgba(96,80,120,.45)', fan: '#24124a', flag: ['#6a3fb5', '#ffffff'] },
+    },
   },
 
   // Gizli geçidin ev sahibi: arkadaş sürümünde gerçek kişi, Play Store sürümünde boş (genel karşılama yazısı çıkar)

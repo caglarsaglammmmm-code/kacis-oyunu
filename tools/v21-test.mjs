@@ -175,7 +175,7 @@ if (only.includes('stadium')) {
   await play(page);
   const zs = await page.evaluate(() => __drift.game.world.zones().filter((z) => z.kind === 'stadium').map((z) => ({ x: z.x, y: z.y, w: z.w, h: z.h })));
   for (const z of zs) {
-    const name = z.w > 600 ? 'konya' : 'yozgat';
+    const name = z.w > 600 ? 'buyuk' : 'kucuk';
     await page.evaluate((a) => { __drift.cfg.camera.viewArea = a; }, z.w > 600 ? 1500 : 1050);
     await hold(page, z.x + z.w / 2, z.y + z.h + 110, -Math.PI / 2);
     await page.evaluate(() => { __drift.game.dayT = 0; });

@@ -318,7 +318,7 @@ function kolej(g, r) {
 
 // --- v5: tek tek kimlikli binalar ---
 const SHOP_LOOK = [
-  [/döner|dönerci|kebap|iskender|ciğer|çiğköfte/i, { wall: '#7a2a18', awn: ['#c8261e', '#ffd23f'], fx: 'spit' }],
+  [new RegExp(`döner|dönerci|kebap|${NAMES.dukkan.kelime}|ciğer|çiğköfte`, 'i'), { wall: '#7a2a18', awn: ['#c8261e', '#ffd23f'], fx: 'spit' }],
   [/pide|lahmacun|börek|fırın|ekmek/i, { wall: '#a8733f', awn: ['#d97706', '#fff4d8'], fx: 'oven' }],
   [/eczane/i, { wall: '#f4f6f4', awn: ['#d0121b', '#ffffff'], fx: 'cross' }],
   [/kuaför|berber/i, { wall: '#2d3a55', awn: ['#1d6fb8', '#ffffff'], fx: 'pole' }],
@@ -714,9 +714,9 @@ export function shadowOf(r) {
     case S.STADIUM: return 1;
     case S.MUZE: case S.OZEL_OKUL: return 2.2;
     case S.ANIT: return 2.6;
-    case S.SELCUK_CAMI: case S.KONGRE: return 1.8;
+    case S.TEPE_CAMI: case S.KONGRE: return 1.8;
     case S.AVM: return 1.5;
-    case S.BEDESTEN: return 1.2;
+    case S.CARSI: return 1.2;
     case S.SERVIS: return 0.8;
     case S.BAGEVI: return 0.6;
     default: return 1;

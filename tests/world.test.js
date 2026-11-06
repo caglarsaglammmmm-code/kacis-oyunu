@@ -255,7 +255,7 @@ test('Türkiye teması: tabelalar, market, çay ocağı, Çınar Kafe, amcalar, 
       for (let i = 0; i < c.streetCount; i++) if (c.streets[i].width === 2) narrow++;
     }
   }
-  for (const s of ['Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Çınar Kafe', 'Bakkal', 'Kahveci']) assert.ok(signs.has(s), s);
+  for (const s of ['Dönerci', 'Tereyağlı Kebapçı', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Çınar Kafe', 'Bakkal', 'Kahveci']) assert.ok(signs.has(s), s);
   for (const s of ['Pazarcık Market', 'Ucuzlar', 'Sepet Market', 'Yıldız Mağazaları', 'Dörtyol Market', 'Teknoloji Durağı', 'Yapı Dünyası', 'Köşe Bakkal', 'Yıldız Bankası', 'Güven Kredi', 'Nane Döner', 'Soslu Döner', 'Eczane', 'Fırın']) assert.ok(signs.has(s), s);
   assert.ok(![...signs].some((s) => /AVM/.test(s)), 'AVM yok');
   for (const p of ['CHAIRS', 'UNCLES', 'SIMITCART', 'STALL', 'LAUNDRY']) assert.ok(props.has(PROP[p]), p);

@@ -17,8 +17,9 @@ const OLD = [
 const RE = new RegExp(`(?<![\\p{L}\\p{N}_])(${OLD.join('|')})(?![\\p{L}\\p{N}_])`, 'giu');
 // Bu dosyalar eski adları bilerek taşır ya da üçüncü taraf koddur
 const SKIP = new Set(['tools/name-scan.mjs', 'tools/build-android.mjs', 'tools/play-clean.mjs', 'tools/flavor.mjs', 'android/app/build.gradle', 'android/app/src/main/assets/capacitor.config.json',
-  // Atatürk anıtı: Gençliğe Hitabe ve imza bilerek her iki sürümde de yer alır (kullanıcı isteği)
-  'js/memorial.js', 'js/app.file.js', 'sw.js', 'tools/memorial-test.mjs', 'tests/memorial.test.js',
+  // Gerçek anıt içeriği yalnız arkadaş sürümünde (names/anit-gercek.js, names klasörü taranmaz).
+  // Testler ve araçlar gerçek adı bilerek içerir; js/memorial.js ve js/memorial-data.js (Play) taranır
+  'js/app.file.js', 'sw.js', 'tools/memorial-test.mjs', 'tests/memorial.test.js', 'tools/play-clean.mjs',
   // v21: Play sürümünde gerçek ad olmadığını kanıtlayan testler bu adları bilerek içerir
   'tests/v21.test.js', 'tools/v21-test.mjs']);
 // names, flavors ve android/app/src/arkadas: gerçek isimli sürümün kaynağı, Play paketine girmez

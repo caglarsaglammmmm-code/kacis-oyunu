@@ -2,6 +2,10 @@
 // Tüm araçlar burun +x yönünde çizilir.
 import { BUILD } from './config.js';
 import { paintTr } from './cars.js';
+import { NAMES } from './names.js';
+
+// Ahşap tabela alan yeme-içme dükkânları (yemek adının kelimesi isim tablosunda)
+const WOOD_SIGN = new RegExp(`döner|kebap|pide|lahmacun|${NAMES.dukkan.kelime}|ciğer|börek|lokanta|kafe|çay|kahve|tost|tatlı|fırın|ocağı|köfte`, 'i');
 
 export function rr(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -842,7 +846,7 @@ export function signKind(text) {
   if (/bank|kredi|tasarruf|yatırım|hastane|ilkokul|kolej/i.test(text)) return 'corp';
   if (/teknoloji|oyun|piksel|bilgisayar|telefon/i.test(text)) return 'led';
   if (/market|bakkal|manav|gross|mağaza|ucuzlar|büfe|bayii|dünyası/i.test(text)) return 'vivid';
-  if (/döner|kebap|pide|lahmacun|iskender|ciğer|börek|lokanta|kafe|çay|kahve|tost|tatlı|fırın|ocağı|köfte/i.test(text)) return 'wood';
+  if (WOOD_SIGN.test(text)) return 'wood';
   if (/otel|hotel|rezidans|residence|palas|sitesi/i.test(text)) return 'lux';
   return 'box';
 }

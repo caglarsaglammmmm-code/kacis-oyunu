@@ -11,8 +11,6 @@ import DE from './de.js';
 export const LANG_PACKS = { tr: TR, en: EN, ja: JA, zh: ZH, es: ES, de: DE };
 // Seçim listesinde her dil kendi adıyla görünür
 export const LANGS = { tr: 'Türkçe', en: 'English', ja: '日本語', zh: '简体中文', es: 'Español', de: 'Deutsch' };
-// Geliştirici adı her dilde aynı kalır, çevrilmez
-export const DEVELOPER = 'Çağlar Sağlam';
 export const LOCALES = { tr: 'tr-TR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN', es: 'es-ES', de: 'de-DE' };
 
 const langState = { code: 'tr', pack: TR, listeners: [], numbers: new Map() };

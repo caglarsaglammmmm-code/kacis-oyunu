@@ -1,10 +1,14 @@
-// İKİ STADYUM: kodla çizilir, gerçek kulüp amblemi ya da logosu yoktur. Adlar isim tablosundan (NAMES.stadyum).
-// Yozgat: orta boy, tek katlı tamamen çatılı tribünler, kırmızı-siyah koltuklar, köşelerde 4 ışık direği, camlı localar.
-// Konya: çok büyük, "yassı futbol topu" formu, beyaz-yeşil üçgen cephe ve zar çatı; gece üçgen kenarları ışıklanır.
+// İKİ STADYUM: kodla çizilir, gerçek kulüp amblemi ya da logosu yoktur. Adlar ve renkler isim tablosundan
+// (NAMES.stadyum, NAMES.stadRenk): Play Store sürümünde hiçbir kulübün renk düzeni kullanılmaz.
+// Küçük: orta boy, tek katlı tamamen çatılı tribünler, köşelerde 4 ışık direği, camlı localar.
+// Büyük: çok büyük, "yassı futbol topu" formu, üçgen cephe ve zar çatı; gece üçgen kenarları ışıklanır.
 // Önbellekli çizim: uzakta küçük (lo), yakında ayrıntılı (hi, karede bir parça üretilir). Bayrak ve taraftar canlıdır.
 import { CONFIG } from './config.js';
 import { NAMES } from './names.js';
-import { paintTrFlag } from './memorial.js';
+import { paintMemFlag } from './memorial-data.js';
+
+const SM_COL = NAMES.stadRenk.kucuk;
+const BG_COL = NAMES.stadRenk.buyuk;
 
 const STC = CONFIG.stadiums;
 const STD_TAU = Math.PI * 2;
@@ -74,10 +78,10 @@ function stdSeats(g, ox, oy, ow, oh, ix, iy, iw, ih, color, line, rows) {
   g.restore();
 }
 
-// --- YOZGAT ---
-const YZ_PARTS = ['base', 'bowl', 'roof', 'details'];
-function paintYozgat(g, w, h, part, detail) {
-  const red = '#c8102e'; const black = '#141418';
+// --- KÜÇÜK STADYUM ---
+const SM_PARTS = ['base', 'bowl', 'roof', 'details'];
+function paintSmall(g, w, h, part, detail) {
+  const red = SM_COL.seat; const trim = SM_COL.trim; const black = '#141418';
   const rim = Math.min(w, h) * 0.19; // Çatı halkası
   const ix = rim; const iy = rim * 0.92; const iw = w - rim * 2; const ih = h - rim * 1.84;
   if (part === 'base') {
@@ -113,8 +117,8 @@ function paintYozgat(g, w, h, part, detail) {
       g.beginPath(); g.moveTo(0, y); g.lineTo(ix - 4, iy - 12 + (i / 10) * (ih + 24)); g.moveTo(w, y); g.lineTo(ix + iw + 4, iy - 12 + (i / 10) * (ih + 24)); g.stroke();
     }
     g.restore();
-    g.strokeStyle = red; g.lineWidth = 4; stdRound(g, 2, 2, w - 4, h - 4, 32); g.stroke();
-    g.strokeStyle = red; g.lineWidth = 2.5; g.strokeRect(ix - 4, iy - 12, iw + 8, ih + 24);
+    g.strokeStyle = trim; g.lineWidth = 4; stdRound(g, 2, 2, w - 4, h - 4, 32); g.stroke();
+    g.strokeStyle = trim; g.lineWidth = 2.5; g.strokeRect(ix - 4, iy - 12, iw + 8, ih + 24);
   } else {
     // Ana tribün (batı) camlı VIP locaları
     const gx = ix - rim * 0.72; const gy = iy + ih * 0.18; const gh = ih * 0.64;
@@ -128,8 +132,8 @@ function paintYozgat(g, w, h, part, detail) {
     // Giriş kapıları (güney cephe) ve tabela
     g.fillStyle = '#0c0d10';
     for (const u of [0.22, 0.5, 0.78]) g.fillRect(w * u - 16, h - 9, 32, 9);
-    g.fillStyle = red; g.fillRect(w * 0.2, h - rim * 0.62, w * 0.6, rim * 0.34);
-    stdText(g, NAMES.stadyum.yozgat, w / 2, h - rim * 0.45, rim * 0.24, '#ffffff', w * 0.56);
+    g.fillStyle = trim; g.fillRect(w * 0.2, h - rim * 0.62, w * 0.6, rim * 0.34);
+    stdText(g, NAMES.stadyum.kucuk, w / 2, h - rim * 0.45, rim * 0.24, '#ffffff', w * 0.56);
     // Köşelerde 4 uzun ışık direği: gölgesi çapraz düşer
     for (const [px, py] of [[16, 16], [w - 16, 16], [16, h - 16], [w - 16, h - 16]]) {
       g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 4; g.beginPath(); g.moveTo(px, py); g.lineTo(px + 34, py + 46); g.stroke();
@@ -141,9 +145,9 @@ function paintYozgat(g, w, h, part, detail) {
   }
 }
 
-// --- KONYA ---
-const KN_PARTS = ['base', 'bowl', 'roof', 'facade', 'details'];
-function knGeom(w, h) {
+// --- BÜYÜK STADYUM ---
+const BG_PARTS = ['base', 'bowl', 'roof', 'facade', 'details'];
+function bgGeom(w, h) {
   const c = Math.min(w, h) * 0.2;
   const outer = stdOcta(0, 0, w, h, c);
   const ex = w * 0.5; const ey = h * 0.5;
@@ -169,15 +173,15 @@ function knGeom(w, h) {
   return { outer, ex, ey, ia, ib, ring, N };
 }
 
-function paintKonya(g, w, h, part, detail) {
-  const G = knGeom(w, h);
-  const green = '#16834a';
+function paintBig(g, w, h, part, detail) {
+  const G = bgGeom(w, h);
+  const green = BG_COL.main;
   if (part === 'base') {
     g.fillStyle = 'rgba(0,0,0,.25)'; g.save(); g.translate(8, 12); stdPoly(g, G.outer); g.fill(); g.restore();
     g.fillStyle = '#e9eef0'; stdPoly(g, G.outer); g.fill();
     stdPitch(g, G.ex - G.ia * 0.74, G.ey - G.ib * 0.6, G.ia * 1.48, G.ib * 1.2, '#3a9a46');
   } else if (part === 'bowl') {
-    // Yeşil-beyaz koltuk halkası, iç açıklığın kenarında
+    // İki renkli koltuk halkası, iç açıklığın kenarında
     g.save();
     g.beginPath(); g.ellipse(G.ex, G.ey, G.ia * 1.02, G.ib * 1.02, 0, 0, STD_TAU);
     g.ellipse(G.ex, G.ey, G.ia * 0.78, G.ib * 0.66, 0, 0, STD_TAU); g.clip('evenodd');
@@ -196,24 +200,24 @@ function paintKonya(g, w, h, part, detail) {
       const shadeA = 0.92 + 0.08 * Math.sin(i * 1.7);
       g.fillStyle = `rgba(${Math.round(244 * shadeA)},${Math.round(248 * shadeA)},${Math.round(246 * shadeA)},1)`;
       stdPoly(g, [[a.ox, a.oy], [b.ox, b.oy], [a.ix, a.iy]]); g.fill();
-      g.fillStyle = i % 3 === 0 ? 'rgba(170,230,190,.62)' : 'rgba(226,236,232,.95)';
+      g.fillStyle = i % 3 === 0 ? BG_COL.glass : 'rgba(226,236,232,.95)';
       stdPoly(g, [[b.ox, b.oy], [b.ix, b.iy], [a.ix, a.iy]]); g.fill();
     }
-    g.strokeStyle = 'rgba(80,110,96,.45)'; g.lineWidth = 1.1;
+    g.strokeStyle = BG_COL.edge; g.lineWidth = 1.1;
     for (let i = 0; i < G.N; i++) {
       const a = G.ring[i]; const b = G.ring[(i + 1) % G.N];
       g.beginPath(); g.moveTo(a.ox, a.oy); g.lineTo(a.ix, a.iy); g.lineTo(b.ox, b.oy); g.moveTo(a.ix, a.iy); g.lineTo(b.ix, b.iy); g.stroke();
     }
     g.strokeStyle = green; g.lineWidth = 3; stdPoly(g, G.outer); g.stroke();
   } else if (part === 'facade') {
-    // Cephe üçgen paneller (güney ve kuzey kenar bantları), bazıları yarı saydam yeşil
+    // Cephe üçgen paneller (güney ve kuzey kenar bantları), bazıları yarı saydam renkli
     const band = 22;
     for (const side of [0, 1]) {
       const y0 = side ? h - band : 0;
       const n = Math.floor(w / 26);
       for (let i = 0; i < n; i++) {
         const x = (i / n) * w;
-        g.fillStyle = (i + side) % 4 === 0 ? 'rgba(120,210,150,.55)' : (i % 2 ? '#f6faf8' : '#e1ebe6');
+        g.fillStyle = (i + side) % 4 === 0 ? BG_COL.facade : (i % 2 ? '#f6faf8' : '#e1ebe6');
         stdPoly(g, side ? [[x, h], [x + w / n, h], [x + w / (2 * n), y0]] : [[x, 0], [x + w / n, 0], [x + w / (2 * n), band]]);
         g.fill();
       }
@@ -235,15 +239,15 @@ function paintKonya(g, w, h, part, detail) {
       for (let k = 0; k < 6; k++) { g.fillStyle = k % 2 ? '#d9dfe2' : '#c3cacf'; g.fillRect(w * 0.38, y + k * 3.6, w * 0.24, 3.6); }
     }
     g.fillStyle = green; g.fillRect(w * 0.3, h - 82, w * 0.4, 26);
-    stdText(g, NAMES.stadyum.konya, w / 2, h - 69, 17, '#ffffff', w * 0.38);
+    stdText(g, NAMES.stadyum.buyuk, w / 2, h - 69, 17, '#ffffff', w * 0.38);
   }
 }
 
-// Konya gece: panellerin değil üçgenlerin kenar ve köşe noktalarının ışığı (beyaz/yeşil çizgi). Önceden çizilir
-function paintKonyaNight(g, w, h) {
-  const G = knGeom(w, h);
+// Büyük stadyum gece: panellerin değil üçgenlerin kenar ve köşe noktalarının ışığı. Önceden çizilir
+function paintBigNight(g, w, h) {
+  const G = bgGeom(w, h);
   g.lineCap = 'round';
-  for (const [lw, col] of [[6, 'rgba(60,255,150,.22)'], [2.2, 'rgba(225,255,240,.95)']]) {
+  for (const [lw, col] of [[6, BG_COL.glow], [2.2, 'rgba(225,255,240,.95)']]) {
     g.strokeStyle = col; g.lineWidth = lw;
     for (let i = 0; i < G.N; i++) {
       const a = G.ring[i]; const b = G.ring[(i + 1) % G.N];
@@ -253,15 +257,15 @@ function paintKonyaNight(g, w, h) {
   }
   for (let i = 0; i < G.N; i++) {
     const a = G.ring[i];
-    for (const [x, y, c] of [[a.ox, a.oy, '#ffffff'], [a.ix, a.iy, '#5dff9e']]) {
+    for (const [x, y, c] of [[a.ox, a.oy, '#ffffff'], [a.ix, a.iy, BG_COL.dot]]) {
       g.fillStyle = c; g.beginPath(); g.arc(x, y, 3.4, 0, STD_TAU); g.fill();
     }
   }
 }
 
 const STD_KINDS = {
-  yozgat: { parts: YZ_PARTS, paint: paintYozgat },
-  konya: { parts: KN_PARTS, paint: paintKonya },
+  kucuk: { parts: SM_PARTS, paint: paintSmall },
+  buyuk: { parts: BG_PARTS, paint: paintBig },
 };
 
 // Bir stadyumun önbellekli görüntüsü
@@ -296,27 +300,28 @@ class StadiumArt {
       if (j.i >= this.def.parts.length) { this.hi = j.c; this.hiJob = null; }
       return;
     }
-    if (this.kind === 'konya' && !this.night && d < A.hiNear) {
+    if (this.kind === 'buyuk' && !this.night && d < A.hiNear) {
       const j = this.build(A.hiScale * 0.5, true);
-      paintKonyaNight(j.g, this.w, this.h);
+      paintBigNight(j.g, this.w, this.h);
       this.night = j.c;
     }
     if (this.hi && d > A.hiFree) { this.hi.width = 1; this.hi = null; if (this.night) { this.night.width = 1; this.night = null; } }
   }
 
-  // Bayrak: Yozgat'ta Türk bayrakları, Konya'da amblemsiz yeşil bayraklar
+  // Bayrak: amblemsiz, renkler isim tablosunda ('anit': anıtın bayrağı)
   flagImg() {
     if (this.flag) return this.flag;
     const c = stdCanvas(48, 32);
     const g = c.getContext('2d');
-    if (this.kind === 'yozgat') paintTrFlag(g, 48, 32);
-    else { g.fillStyle = '#16834a'; g.fillRect(0, 0, 48, 32); g.fillStyle = '#ffffff'; g.fillRect(0, 24, 48, 3); }
+    const fl = (this.kind === 'kucuk' ? SM_COL : BG_COL).flag;
+    if (fl === 'anit') paintMemFlag(g, 48, 32);
+    else { g.fillStyle = fl[0]; g.fillRect(0, 0, 48, 32); g.fillStyle = fl[1]; g.fillRect(0, 24, 48, 3); }
     this.flag = c;
     return c;
   }
 
   poles(b) {
-    if (this.kind === 'yozgat') return [0.3, 0.42, 0.58, 0.7].map((u) => ({ x: b.x + b.w * u, y: b.y + b.h + 34 }));
+    if (this.kind === 'kucuk') return [0.3, 0.42, 0.58, 0.7].map((u) => ({ x: b.x + b.w * u, y: b.y + b.h + 34 }));
     return [0.2, 0.3, 0.7, 0.8].map((u) => ({ x: b.x + b.w * u, y: b.y + b.h + 30 }));
   }
 
@@ -338,8 +343,8 @@ class StadiumArt {
     }
     // Kapı önünde küçük taraftar siluetleri: yalnız yakında
     if (near && px > 0.25) {
-      const gates = this.kind === 'yozgat' ? [0.22, 0.5, 0.78] : [0.42, 0.5, 0.58];
-      ctx.fillStyle = this.kind === 'yozgat' ? '#2a0b10' : '#0f3a24';
+      const gates = this.kind === 'kucuk' ? [0.22, 0.5, 0.78] : [0.42, 0.5, 0.58];
+      ctx.fillStyle = this.kind === 'kucuk' ? SM_COL.fan : BG_COL.fan;
       for (const [gi, u] of gates.entries()) {
         for (let k = 0; k < 6; k++) {
           const x = b.x + b.w * u - 22 + k * 8 + Math.sin(k * 3.1 + gi) * 3;
@@ -354,7 +359,7 @@ class StadiumArt {
   drawNight(ctx, b, now, night, lamp) {
     if (night < 0.05) return;
     ctx.globalCompositeOperation = 'lighter';
-    if (this.kind === 'yozgat') {
+    if (this.kind === 'kucuk') {
       // Dört ışık direği parlar, saha aydınlanır
       ctx.globalAlpha = night * 0.95;
       for (const [x, y] of [[16, 16], [b.w - 16, 16], [16, b.h - 16], [b.w - 16, b.h - 16]]) ctx.drawImage(lamp, b.x + x - 110, b.y + y - 110, 220, 220);
@@ -374,7 +379,7 @@ export class Stadiums {
   constructor() { this.arts = new Map(); this.visible = []; }
 
   art(z) {
-    const kind = z.w > 600 ? 'konya' : 'yozgat';
+    const kind = z.w > 600 ? 'buyuk' : 'kucuk';
     let a = this.arts.get(kind);
     if (!a) { a = new StadiumArt(kind, z.w, z.h); this.arts.set(kind, a); }
     return a;

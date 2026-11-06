@@ -1,4 +1,4 @@
-// Özel yerler: kolej, Konya yapıları, okullar. Kodla çizilir, gerçek logo ya da marka kullanılmaz.
+// Özel yerler: kolej, tarihi yapılar, okullar. Kodla çizilir, gerçek logo ya da marka kullanılmaz.
 // Zemin çizimleri chunk önbelleğine bir kez işlenir. Yüksek yapıların (kolej, kule) duvar, çatı ve
 // gece pencere dokuları ilk görüldüğünde bir kez üretilir, sonra yalnızca kopyalanır.
 import { BUILD } from './config.js';
@@ -120,7 +120,7 @@ function muze(g, r) {
 }
 
 // Selçuklu camisi (tepe üstünde): taş gövde, düz ahşap çatı çizgileri, piramit külahlı türbe
-function selcukCami(g, r) {
+function tepeCami(g, r) {
   const { x, y, w, h } = r;
   g.fillStyle = '#a8977a'; rr(g, x, y, w, h, 5); g.fill();
   g.fillStyle = '#c9b99a'; rr(g, x + 4, y + 4, w - 8, h - 12, 4); g.fill();
@@ -170,8 +170,8 @@ function avm(g, r) {
   g.fillStyle = '#d0121b'; g.fillRect(x + w * 0.4, y + h - 12, w * 0.2, 8);
 }
 
-// Bedesten: uzun taş sıra, üstünde dizi dizi küçük kubbe
-function bedesten(g, r) {
+// Kapalı çarşı: uzun taş sıra, üstünde dizi dizi küçük kubbe
+function kapaliCarsi(g, r) {
   const { x, y, w, h } = r;
   g.fillStyle = '#9d8a6c'; rr(g, x, y, w, h, 4); g.fill();
   g.fillStyle = '#c6b28c'; rr(g, x + 3, y + 3, w - 6, h - 12, 3); g.fill();
@@ -235,10 +235,10 @@ export function paintLandmark(g, r) {
   switch (r.style) {
     case S.SERVIS: servis(g, r); return true;
     case S.MUZE: muze(g, r); return true;
-    case S.SELCUK_CAMI: selcukCami(g, r); return true;
+    case S.TEPE_CAMI: tepeCami(g, r); return true;
     case S.KONGRE: kongre(g, r); return true;
     case S.AVM: avm(g, r); return true;
-    case S.BEDESTEN: bedesten(g, r); return true;
+    case S.CARSI: kapaliCarsi(g, r); return true;
     case S.BAGEVI: bagevi(g, r); return true;
     case S.OZEL_OKUL: ozelOkul(g, r); return true;
     case S.ANIT: anit(g, r); return true;

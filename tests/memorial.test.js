@@ -6,7 +6,10 @@ import { CONFIG } from '../js/config.js';
 import { Game } from '../js/game.js';
 import { World, TILE } from '../js/world.js';
 import { Storage } from '../js/storage.js';
-import { HITABE, HITABE_TITLE, HITABE_YEAR, MEM_MOTTO, MEM_SIGNATURE, MEM_LAYOUT, memFitFrame } from '../js/memorial.js';
+import { MEM_LAYOUT, memFitFrame } from '../js/memorial.js';
+// Gerçek anıt içeriği yalnız arkadaş sürümünde (names/anit-gercek.js); Play Store sürümü kurgusal (js/memorial-data.js)
+import { MEM_TEXT, MEM_TITLE, MEM_YEAR, MEM_MOTTO, MEM_SIGNATURE, MEM_IMAGES, MEM_REAL } from '../names/anit-gercek.js';
+import * as PLAY_MEM from '../js/memorial-data.js';
 
 const dt = 1 / 60;
 const MC = CONFIG.memorial;
@@ -36,16 +39,28 @@ function driveIn(g, b, seconds = 3) {
   for (let t = 0; t < seconds && g.state === 'play'; t += dt) g.tick(dt, 0, false);
 }
 
-test('Gençliğe Hitabe metni kullanıcının verdiği metinle karakter karakter aynı', () => {
+test('Play Store anıtı kurgusal: gerçek kişi adı, fotoğraf ve Hitabe metni yok; heykel ve kurgusal bayrak var', () => {
+  assert.equal(PLAY_MEM.MEM_REAL, false);
+  assert.equal(PLAY_MEM.MEM_IMAGES.length, 0);
+  for (const k of ['MEM_TEXT', 'MEM_TITLE', 'MEM_YEAR', 'MEM_MOTTO', 'MEM_SIGNATURE']) assert.equal(PLAY_MEM[k], '', k);
+  assert.equal(typeof PLAY_MEM.paintMemStatue, 'function');
+  assert.equal(typeof PLAY_MEM.paintMemEmblem, 'function');
+  const src = fs.readFileSync(new URL('../js/memorial-data.js', import.meta.url), 'utf8') + fs.readFileSync(new URL('../js/memorial.js', import.meta.url), 'utf8');
+  assert.ok(!/atat[uü]rk|mustafa|kemal|hitabe|gençli|ataturk-d|#e30a17/i.test(src), 'Play kaynağında gerçek anıt izi yok');
+});
+
+test('arkadaş sürümü: Gençliğe Hitabe metni kullanıcının verdiği metinle karakter karakter aynı', () => {
+  assert.equal(MEM_REAL, true);
+  assert.equal(MEM_IMAGES.length, 4);
   const ref = fs.readFileSync(new URL('./fixtures/hitabe.txt', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
-  assert.equal(HITABE.length, ref.length);
-  for (let i = 0; i < ref.length; i++) assert.equal(HITABE[i], ref[i], `karakter ${i}`);
-  assert.equal(HITABE, ref);
-  assert.equal(HITABE_TITLE, 'Gençliğe Hitabe');
-  assert.equal(HITABE_YEAR, '1927');
+  assert.equal(MEM_TEXT.length, ref.length);
+  for (let i = 0; i < ref.length; i++) assert.equal(MEM_TEXT[i], ref[i], `karakter ${i}`);
+  assert.equal(MEM_TEXT, ref);
+  assert.equal(MEM_TITLE, 'Gençliğe Hitabe');
+  assert.equal(MEM_YEAR, '1927');
   assert.equal(MEM_MOTTO, 'Ne mutlu Türküm diyene!');
   assert.equal(MEM_SIGNATURE, 'Gazi Mustafa Kemal Atatürk');
-  for (const ch of ['â', 'î', 'ğ', 'ş', 'ı', 'İ', 'ü', 'ö', 'ç']) assert.ok(HITABE.includes(ch), ch);
+  for (const ch of ['â', 'î', 'ğ', 'ş', 'ı', 'İ', 'ü', 'ö', 'ç']) assert.ok(MEM_TEXT.includes(ch), ch);
 });
 
 test('anıt her tohumda şehirde tek bir yerde; korunan bölüm geçilmez ve kutsal', () => {

@@ -7,39 +7,75 @@
 const FLAVOR = 'play';
 const NAMES = {
  "oyun": "Drift Lab",
+ "yapimci": "",
  "indir": "",
  "kolej": {
   "ad": "MANDALİNA KOLEJİ",
   "ust": "MANDALİNA"
  },
  "okullar": {
-  "serife": "Anadolu Fen Okulu",
-  "ted": "Bozkır Koleji",
-  "gundogdu": "Gün Işığı Koleji"
+  "fen": "Fen Bilimleri Okulu",
+  "kolej2": "Bozkır Koleji",
+  "kolej3": "Gün Işığı Koleji"
  },
+ "ilkokul": "Çınar İlkokulu",
  "kule": "Bozkır Kulesi",
- "konya": {
-  "mevlana": "Mevlana Müzesi",
-  "alaaddin": "Alaaddin Camii",
-  "tepe": "Alaaddin Tepesi",
-  "kongre": "Selçuklu Kongre Merkezi",
-  "kulturpark": "Kültürpark",
-  "zafer": "Zafer Meydanı",
-  "bedesten": "Bedesten Çarşısı",
-  "meram": "Meram Bağları",
+ "tarihi": {
+  "muze": "Şehir Müzesi",
+  "cami": "Tepe Camii",
+  "tepe": "Yeşil Tepe",
+  "kongre": "Kongre Merkezi",
+  "park": "Şehir Parkı",
+  "meydan": "Çınar Meydanı",
+  "carsi": "Eski Çarşı",
+  "baglar": "Bağlar Bahçesi",
   "duraklar": [
-   "Alaaddin",
-   "Zafer",
-   "Mevlana",
-   "Kültürpark",
+   "Tepe",
+   "Çınar",
+   "Müze",
+   "Şehir Parkı",
    "Kongre Merkezi"
   ],
   "firinlar": [
    "Etli Ekmek Fırını",
-   "Konya Fırını",
+   "Taş Fırın",
    "Fırın Kebabı",
    "Etliekmek Salonu",
    "Bamya Çorbası"
+  ]
+ },
+ "dukkan": {
+  "saray": "Kebap Sarayı",
+  "pide": "Kayık Pide",
+  "lahmacun": "Fırın Lahmacun",
+  "ocak": "Ocakbaşı Kebapçısı",
+  "kebapci": "Tereyağlı Kebapçı",
+  "ozocak": "Öz Ocakbaşı",
+  "kelime": "ocakbaşı"
+ },
+ "yol": {
+  "sol": [
+   "← LİMAN O-1",
+   "← SAHİL O-1",
+   "← OVA O-2",
+   "← KÖPRÜ O-1"
+  ],
+  "sag": [
+   "MERKEZ O-2 →",
+   "DAĞ O-2 →",
+   "GÖL O-2 →",
+   "VADİ O-3 →"
+  ],
+  "yon": [
+   "← ÇARŞI",
+   "LİMAN →",
+   "↑ MERKEZ",
+   "SAHİL →",
+   "← ÇINARLI",
+   "TEPEBAŞI →",
+   "↑ KÖPRÜ",
+   "← ESKİ ŞEHİR",
+   "YENİ MAHALLE →"
   ]
  },
  "arabalar": {
@@ -106,7 +142,7 @@ const NAMES = {
    "renk": "#3b3f8f"
   },
   {
-   "ad": "Anadolu Tasarruf",
+   "ad": "Kumbara Tasarruf",
    "renk": "#8a6d1f"
   },
   {
@@ -118,7 +154,7 @@ const NAMES = {
    "renk": "#5b2a86"
   },
   {
-   "ad": "Marmara Yatırım",
+   "ad": "Liman Yatırım",
    "renk": "#0f6e84"
   }
  ],
@@ -132,8 +168,32 @@ const NAMES = {
   "doner": "Nane Döner"
  },
  "stadyum": {
-  "yozgat": "BOZOK ŞEHİR STADYUMU",
-  "konya": "SELÇUK ARENA"
+  "kucuk": "ÇINARLI ŞEHİR STADYUMU",
+  "buyuk": "MAVİ RÜZGAR ARENA"
+ },
+ "stadRenk": {
+  "kucuk": {
+   "seat": "#138a8a",
+   "trim": "#ff6f59",
+   "fan": "#0b2e2e",
+   "flag": [
+    "#138a8a",
+    "#ff6f59"
+   ]
+  },
+  "buyuk": {
+   "main": "#6a3fb5",
+   "glass": "rgba(196,176,240,.62)",
+   "facade": "rgba(170,140,230,.55)",
+   "glow": "rgba(170,120,255,.22)",
+   "dot": "#c9a6ff",
+   "edge": "rgba(96,80,120,.45)",
+   "fan": "#24124a",
+   "flag": [
+    "#6a3fb5",
+    "#ffffff"
+   ]
+  }
  },
  "misafir": ""
 };
@@ -152,14 +212,14 @@ const BUILD = {
   APARTMENT: 22, MARKET: 23, KOLEJ: 24, BAZAAR: 25, CHAIN: 26, BANK: 27, RESIDENCE: 28, OFFICE: 29, HOTEL: 30,
   HOSPITAL: 31, SCHOOL: 32, MOSQUE: 33, STADIUM: 34, SITE_BLOCK: 35, GECEKONDU: 36, VILLA: 37, ISHANI: 38, SHOPROW: 39, CAFE: 40, SHOP: 41, SKYSCRAPER: 42, RUIN: 43, SITEWORK: 44, FACTORY: 45,
   // Özel yerler (js/landmarks.js çizer)
-  SERVIS: 46, MUZE: 47, SELCUK_CAMI: 48, KONGRE: 49, KULE: 50, AVM: 51, BEDESTEN: 52, BAGEVI: 53, OZEL_OKUL: 54, ANIT: 55,
+  SERVIS: 46, MUZE: 47, TEPE_CAMI: 48, KONGRE: 49, KULE: 50, AVM: 51, CARSI: 52, BAGEVI: 53, OZEL_OKUL: 54, ANIT: 55,
 };
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '23.0.0',
+  version: '24.0.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v23.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.0.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -209,13 +269,13 @@ const CONFIG = {
     // Tek seferlik özel yerler: her biri kendi chunk'ında, başlangıçtan ring kadar uzakta, birbirinden ayrı.
     // Adlar isim tablosundadır (names/tablo.mjs)
     landmarks: [
-      { id: 'mevlana', ring: [2, 5] }, { id: 'alaaddin', ring: [3, 6] }, { id: 'zafer', ring: [2, 6] },
-      { id: 'serife', ring: [2, 5] }, { id: 'bedesten', ring: [3, 7] }, { id: 'kongre', ring: [4, 8] },
-      { id: 'kule', ring: [4, 8] }, { id: 'kulturpark', ring: [4, 9] }, { id: 'ted', ring: [5, 10] },
-      { id: 'gundogdu', ring: [5, 10] }, { id: 'meram', ring: [6, 11] },
-      { id: 'anit', ring: [2, 4] }, // Cumhuriyet Meydanı ve anıt (CONFIG.memorial, js/memorial.js)
+      { id: 'muze', ring: [2, 5] }, { id: 'tepecami', ring: [3, 6] }, { id: 'meydan', ring: [2, 6] },
+      { id: 'fen', ring: [2, 5] }, { id: 'carsi', ring: [3, 7] }, { id: 'kongre', ring: [4, 8] },
+      { id: 'kule', ring: [4, 8] }, { id: 'sehirpark', ring: [4, 9] }, { id: 'kolej2', ring: [5, 10] },
+      { id: 'kolej3', ring: [5, 10] }, { id: 'baglar', ring: [6, 11] },
+      { id: 'anit', ring: [2, 4] }, // Anıt meydanı (CONFIG.memorial, js/memorial.js)
       // İki stadyum (CONFIG.stadiums, js/stadium.js). apart: diğerinden en az bu kadar chunk uzakta
-      { id: 'yozgat', ring: [3, 6] }, { id: 'konyastad', ring: [6, 10], apart: ['yozgat', 5] },
+      { id: 'kucukstad', ring: [3, 6] }, { id: 'buyukstad', ring: [6, 10], apart: ['kucukstad', 5] },
       { id: 'gecit', ring: [11, 14] }, // Ücra köşedeki terk edilmiş depo alanı (CONFIG.secret)
     ],
     // Yüksek özel yapıların yükseklik payı (sıradan binalar en çok tall.height[1])
@@ -622,7 +682,7 @@ const CONFIG = {
 
   // iPhone/iPad ana ekrana ekle rehberi: delay menü açıldıktan sonra kartın görünme gecikmesi (sn), key kayıt anahtarı
   a2hs: { delay: 1.2, key: 'drift-lab-a2hs' },
-  // Cumhuriyet Meydanı anıtı (js/memorial.js). Korunan bölüm (rect) herkese katı engeldir; oyuncu girmeye çalışırsa araba patlar.
+  // Anıt meydanı (js/memorial.js). Korunan bölüm (rect) herkese katı engeldir; oyuncu girmeye çalışırsa araba patlar.
   // rect: chunk içindeki karo sınırı [x0, y0, x1, y1]. Uzaklıklar korunan bölümün kenarından dünya birimiyle
   memorial: {
     rect: [9, 5, 26, 24],
@@ -673,8 +733,8 @@ const CONFIG = {
   // İKİ STADYUM (js/stadium.js çizer). rect: chunk içindeki karo kutusu. Yıkılmaz, katı, polis ve trafik dolanır.
   // Adlar isim tablosunda (NAMES.stadyum). art: önbellekli çizim ölçekleri, fans: taraftar siluetleri bu yakında
   stadiums: {
-    yozgat: { rect: [11, 9, 23, 20], cap: 15000 },
-    konya: { rect: [6, 6, 28, 26], cap: 42000 },
+    kucuk: { rect: [11, 9, 23, 20], cap: 15000 },
+    buyuk: { rect: [6, 6, 28, 26], cap: 42000 },
     art: { hiScale: 1.25, loScale: 0.32, hiNear: 1900, hiFree: 3600, loFree: 6000 },
     fans: 900, flagWave: 2.2,
   },
@@ -777,7 +837,7 @@ const CONFIG = {
   signs: {
     bigshops: [NAMES.tekil.ishani, 'Merkez İş Merkezi', 'Kristal Plaza', 'Boğaz Tower', 'Anadolu Plaza', 'Sultan Rezidans', 'Lale Rezidans', 'Marmara Residence', 'Mavi Kule', 'Atlas Tower'],
     hotels: ['Grand Otel', 'Otel Boğaz', 'Park Hotel', NAMES.tekil.otel, 'Otel Saray', 'Mavi Otel'],
-    shops: [...NAMES.konya.firinlar, 'Usta Döner', 'İskender Sarayı', 'Karadeniz Pide', 'Urfa Lahmacun', 'Adana Kebapçısı', 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Piksel Oyun Salonu', 'Bit Bilgisayar', 'Telefoncu', NAMES.tekil.doner, 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', 'İskenderci', 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', 'Öz Urfa Kebap', 'Çınar Kafe'],
+    shops: [...NAMES.tarihi.firinlar, 'Usta Döner', NAMES.dukkan.saray, NAMES.dukkan.pide, NAMES.dukkan.lahmacun, NAMES.dukkan.ocak, 'Nöbetçi Eczane', 'Ekmek Fırını', 'Bayan Kuaförü', 'Erkek Berberi', 'Köşe Büfe', 'Köşe Bayii', 'Piksel Oyun Salonu', 'Bit Bilgisayar', 'Telefoncu', NAMES.tekil.doner, 'Soslu Döner', 'Eczane', 'Fırın', 'Dönerci', NAMES.dukkan.kebapci, 'Pideci', 'Lahmacun', 'Kebapçı', 'Büfe', 'Çay Ocağı', 'Kuaför', 'Tost Evi', 'Bakkal', 'Kahveci', 'Çınar Kafe', 'Berber', 'Lokanta', 'Börekçi', 'Kasap', 'Manav', 'Züccaciye', 'Kırtasiye', 'Emlakçı', 'Terzi', 'Tuhafiye', 'Ciğerci', 'Tatlıcı', 'Çiğköfte', 'Tamirci', 'Oto Yıkama', 'Usta Dönerci', 'Hacı Usta Pide', 'Kardeşler Bakkal', 'Büfe 7/24', 'Mahalle Çay Ocağı', NAMES.dukkan.ozocak, 'Çınar Kafe'],
     chains: Object.fromEntries(NAMES.zincirler.map((c) => [c.ad, c.renk])),
     chainIds: Object.fromEntries(NAMES.zincirler.map((c) => [c.ad, c.id])),
     banks: Object.fromEntries(NAMES.bankalar.map((b) => [b.ad, b.renk])),
@@ -1465,8 +1525,6 @@ const DE = {
 const LANG_PACKS = { tr: TR, en: EN, ja: JA, zh: ZH, es: ES, de: DE };
 // Seçim listesinde her dil kendi adıyla görünür
 const LANGS = { tr: 'Türkçe', en: 'English', ja: '日本語', zh: '简体中文', es: 'Español', de: 'Deutsch' };
-// Geliştirici adı her dilde aynı kalır, çevrilmez
-const DEVELOPER = 'Çağlar Sağlam';
 const LOCALES = { tr: 'tr-TR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN', es: 'es-ES', de: 'de-DE' };
 
 const langState = { code: 'tr', pack: TR, listeners: [], numbers: new Map() };
@@ -1982,8 +2040,8 @@ class World {
     for (const m of this.landmarkList()) {
       if (m.id === 'anit') box('memorial', m, CONFIG.memorial.rect);
       else if (m.id === 'gecit') box('secret', m, CONFIG.secret.ramp);
-      else if (m.id === 'yozgat') box('stadium', m, CONFIG.stadiums.yozgat.rect);
-      else if (m.id === 'konyastad') box('stadium', m, CONFIG.stadiums.konya.rect);
+      else if (m.id === 'kucukstad') box('stadium', m, CONFIG.stadiums.kucuk.rect);
+      else if (m.id === 'buyukstad') box('stadium', m, CONFIG.stadiums.buyuk.rect);
     }
     this.zoneList = out;
     return out;
@@ -2149,7 +2207,7 @@ class World {
     else if (t === 'cami') this.fillDense(c, 'mahalle', { style: BUILD.MOSQUE, w: 12, h: 12, color: '#c7cdd3', pad: 'courtyard', sign: '' });
     else if (t === 'stadyum') this.fillDense(c, 'mahalle', { style: BUILD.STADIUM, w: 18, h: 16, color: '#58606b', sign: '' });
     else if (t === 'hastane') this.fillDense(c, 'mahalle', { style: BUILD.HOSPITAL, w: 13, h: 10, color: '#f1f5f8', pad: 'ambulance', sign: 'Şehir Hastanesi' });
-    else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: 'Cumhuriyet İlkokulu' });
+    else if (t === 'okul') this.fillDense(c, 'mahalle', { style: BUILD.SCHOOL, w: 12, h: 6, color: '#e8cf9a', pad: 'yard', sign: NAMES.ilkokul });
     else if (t === 'spor') this.fillDense(c, 'mahalle', { sport: true });
     else if (t === 'golet') this.fillDense(c, 'mahalle', { pond: true });
     else if (t === 'insaat' || t === 'harabe' || t === 'sanayi') this.fillZone(c, t);
@@ -2837,7 +2895,7 @@ class World {
         if (this.marks.some((o) => Math.abs(o.cx - x) < 2 && Math.abs(o.cy - y) < 2)) continue;
         if (m.apart && this.marks.some((o) => o.id === m.apart[0] && Math.max(Math.abs(o.cx - x), Math.abs(o.cy - y)) < m.apart[1])) continue;
         this.biomeAt(x, y, out);
-        if (out.biome !== 'city' && !(m.id === 'meram' && (out.biome === 'rural' || out.biome === 'forest'))) continue;
+        if (out.biome !== 'city' && !(m.id === 'baglar' && (out.biome === 'rural' || out.biome === 'forest'))) continue;
         this.marks.push({ id: m.id, cx: x, cy: y });
         break;
       }
@@ -2862,12 +2920,12 @@ class World {
   }
 
   fillLandmark(c, id) {
-    const K = NAMES.konya;
+    const K = NAMES.tarihi;
     const D = K.duraklar;
     const B = BUILD;
-    if (id === 'mevlana') {
+    if (id === 'muze') {
       this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
-      this.sign(this.addRect(c, 'building', 7, 6, 27, 16, 3, B.MUZE, '#dcccaa'), K.mevlana, '#0b7f69', 2);
+      this.sign(this.addRect(c, 'building', 7, 6, 27, 16, 3, B.MUZE, '#dcccaa'), K.muze, '#0b7f69', 2);
       this.setGround(c, 6, 18, 14, 28, GROUND.GRASS);
       this.addPad(c, 'gul', 6, 18, 8, 10);
       this.setGround(c, 21, 18, 29, 28, GROUND.GRASS);
@@ -2877,7 +2935,7 @@ class World {
       this.scatter(c, PROP.TREE, 14, [GROUND.GRASS]);
       for (let k = 7; k < 28; k += 4) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 17.3 * TILE);
       this.tram(c, D[2]);
-    } else if (id === 'alaaddin') {
+    } else if (id === 'tepecami') {
       this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
       this.addPad(c, 'hill', 7, 7, 21, 21);
       // Tepenin çevresinde yürüyüş halkası ve çay bahçeleri
@@ -2885,28 +2943,28 @@ class World {
         const d = Math.hypot(x + 0.5 - 17.5, y + 0.5 - 17.5);
         if (d > 11.2 && d < 12.6) c.ground[y * CT + x] = GROUND.PLAZA;
       }
-      this.sign(this.addRect(c, 'building', 13, 12, 23, 19, 3, B.SELCUK_CAMI, '#c9b99a'), K.alaaddin, '#4a7870', 2);
+      this.sign(this.addRect(c, 'building', 13, 12, 23, 19, 3, B.TEPE_CAMI, '#c9b99a'), K.cami, '#4a7870', 2);
       this.sign(this.addRect(c, 'building', 26, 26, 29, 29, 4, B.ANIT, '#b5523b'), K.tepe, '#2f6b4f', 1).variant = 'kosk';
       this.scatter(c, PROP.TREE, 40, [GROUND.GRASS]);
       this.scatter(c, PROP.UMBRELLA, 10, [GROUND.PLAZA]);
       this.scatter(c, PROP.CHAIRS, 8, [GROUND.PLAZA]);
       this.tram(c, D[0]);
-    } else if (id === 'zafer') {
+    } else if (id === 'meydan') {
       this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
       this.addPad(c, 'yildiz', 9, 9, 17, 17);
-      this.sign(this.addRect(c, 'building', 15, 15, 20, 20, 2, B.ANIT, '#b9ad98'), K.zafer, '#a8323a', 1);
+      this.sign(this.addRect(c, 'building', 15, 15, 20, 20, 2, B.ANIT, '#b9ad98'), K.meydan, '#a8323a', 1);
       for (const [x, y] of [[6, 6], [27, 6], [6, 27], [27, 27]]) this.addRect(c, 'water', x, y, x + 2, y + 2, 10, 2, '#3aa7e8');
-      // Güney kenarında Konya fırınları
+      // Güney kenarında fırınlar
       K.firinlar.slice(0, 4).forEach((n, i) => this.sign(this.addRect(c, 'building', 5 + i * 6, 28, 10 + i * 6, 31, 3, B.SHOP, '#a8733f'), n, '#c8261e', 1));
       this.scatter(c, PROP.BENCH, 12, [GROUND.PLAZA]);
       this.scatter(c, PROP.SIMITCART, 3, [GROUND.PLAZA]);
       this.scatter(c, PROP.UNCLES, 4, [GROUND.PLAZA]);
       this.tram(c, D[1]);
-    } else if (id === 'bedesten') {
+    } else if (id === 'carsi') {
       this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
-      this.sign(this.addRect(c, 'building', 5, 6, 30, 10, 3, B.BEDESTEN, '#c6b28c'), K.bedesten, '#7a2a18', 2);
-      this.addRect(c, 'building', 5, 13, 30, 17, 3, B.BEDESTEN, '#c6b28c');
-      this.addRect(c, 'building', 5, 20, 30, 24, 3, B.BEDESTEN, '#c6b28c');
+      this.sign(this.addRect(c, 'building', 5, 6, 30, 10, 3, B.CARSI, '#c6b28c'), K.carsi, '#7a2a18', 2);
+      this.addRect(c, 'building', 5, 13, 30, 17, 3, B.CARSI, '#c6b28c');
+      this.addRect(c, 'building', 5, 20, 30, 24, 3, B.CARSI, '#c6b28c');
       K.firinlar.forEach((n, i) => this.sign(this.addRect(c, 'building', 5 + i * 5, 27, 9 + i * 5, 31, 3, B.SHOP, '#a8733f'), n, '#c8261e', 1));
       this.scatter(c, PROP.STALL, 14, [GROUND.PLAZA]);
       this.scatter(c, PROP.UNCLES, 3, [GROUND.PLAZA]);
@@ -2926,18 +2984,18 @@ class World {
       this.addRect(c, 'building', 6, 13, 29, 22, 3, B.AVM, '#aab3bb');
       this.addPad(c, 'parking', 5, 24, 26, 6);
       this.scatter(c, PROP.BENCH, 6, [GROUND.PLAZA]);
-    } else if (id === 'kulturpark') {
+    } else if (id === 'sehirpark') {
       this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
       this.setGround(c, 16, ART, 19, CT, GROUND.PLAZA);
       this.setGround(c, ART, 16, CT, 19, GROUND.PLAZA);
       this.addRect(c, 'water', 6, 6, 13, 12, 6, 0, '#3aa7e8'); // Havuz: araba düşmez
       this.setGround(c, 21, 20, 30, 28, GROUND.PLAZA);
       this.addPad(c, 'amfi', 21, 20, 9, 8);
-      this.sign(this.addRect(c, 'building', 16, 16, 19, 19, 4, B.ANIT, '#b5523b'), K.kulturpark, '#2f6b4f', 1).variant = 'kosk';
+      this.sign(this.addRect(c, 'building', 16, 16, 19, 19, 4, B.ANIT, '#b5523b'), K.park, '#2f6b4f', 1).variant = 'kosk';
       this.scatter(c, PROP.TREE, 50, [GROUND.GRASS]);
       this.scatter(c, PROP.BENCH, 14, [GROUND.GRASS, GROUND.PLAZA]);
       this.tram(c, D[3]);
-    } else if (id === 'meram') {
+    } else if (id === 'baglar') {
       this.setGround(c, ART, ART, CT, CT, GROUND.DIRT);
       this.addPad(c, 'bag', 4, 4, 13, 12);
       this.addPad(c, 'bag', 19, 18, 12, 12);
@@ -2945,20 +3003,20 @@ class World {
       for (const [x, y] of [[19, 6], [24, 10], [6, 20], [11, 25]]) {
         this.addRect(c, 'building', x, y, x + 3, y + 3, 5, B.BAGEVI, '#f0e6d2');
       }
-      this.sign(this.addRect(c, 'building', 26, 4, 30, 7, 5, B.BAGEVI, '#f0e6d2'), K.meram, '#5c3a22', 1);
+      this.sign(this.addRect(c, 'building', 26, 4, 30, 7, 5, B.BAGEVI, '#f0e6d2'), K.baglar, '#5c3a22', 1);
       this.scatter(c, PROP.TREE, 34, [GROUND.DIRT]);
       this.scatter(c, PROP.BUSH, 12, [GROUND.DIRT]);
     } else if (id === 'anit') {
       this.fillMemorial(c);
-    } else if (id === 'yozgat') {
-      this.fillYozgat(c);
-    } else if (id === 'konyastad') {
-      this.fillKonyaStadium(c);
+    } else if (id === 'kucukstad') {
+      this.fillSmallStadium(c);
+    } else if (id === 'buyukstad') {
+      this.fillBigStadium(c);
     } else if (id === 'gecit') {
       this.fillSecret(c);
     } else {
       // Okullar: ad isim tablosunda, renkler uydurma ve genel
-      const look = { serife: ['#efe2c0', '#c8261e'], ted: ['#f2f2f2', '#c1121f'], gundogdu: ['#ffe08a', '#1f3a68'] }[id];
+      const look = { fen: ['#efe2c0', '#c8261e'], kolej2: ['#f2f2f2', '#c1121f'], kolej3: ['#ffe08a', '#1f3a68'] }[id];
       this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
       const r = this.sign(this.addRect(c, 'building', 7, 6, 27, 14, 3, B.OZEL_OKUL, look[0]), NAMES.okullar[id], look[1], 3);
       r.signColor = look[1];
@@ -3006,14 +3064,14 @@ class World {
     return r;
   }
 
-  // Yozgat: orta boy, çevresinde koşu pisti, güneyde otopark, iki yanda ağaçlık
-  fillYozgat(c) {
-    const R = CONFIG.stadiums.yozgat.rect;
+  // Küçük stadyum: orta boy, çevresinde koşu pisti, güneyde otopark, iki yanda ağaçlık
+  fillSmallStadium(c) {
+    const R = CONFIG.stadiums.kucuk.rect;
     this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
     this.setGround(c, ART, ART, 7, CT, GROUND.GRASS);
     this.setGround(c, 27, ART, CT, CT, GROUND.GRASS);
     this.setGround(c, R[0] - 1, R[1] - 1, R[2] + 1, R[3] + 1, GROUND.TRACK);
-    this.stadiumRect(c, 'yozgat', R, 34);
+    this.stadiumRect(c, 'kucuk', R, 34);
     this.addPad(c, 'parking', 8, 23, 18, 7);
     this.scatter(c, PROP.TREE, 26, [GROUND.GRASS]);
     for (let x = 9; x < 26; x += 4) this.addProp(c, PROP.BENCH, c.x + (x + 0.5) * TILE, c.y + 21.6 * TILE);
@@ -3021,13 +3079,13 @@ class World {
     for (let x = 8; x <= 26; x += 6) { L(x, 22.4); L(x, 7.4); }
   }
 
-  // Konya: çok büyük, çevre yolu, kuzey ve güneyde geniş otopark, yeşil bayraklı çimenlik
-  fillKonyaStadium(c) {
-    const R = CONFIG.stadiums.konya.rect;
+  // Büyük stadyum: çok büyük, çevre yolu, kuzey ve güneyde geniş otopark, yeşil bayraklı çimenlik
+  fillBigStadium(c) {
+    const R = CONFIG.stadiums.buyuk.rect;
     this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
     this.setGround(c, ART, 27, CT, CT, GROUND.PLAZA);
     this.setGround(c, R[0] - 1, R[1] - 1, R[2] + 1, R[3] + 1, GROUND.ROAD); // Çevre yolu
-    this.stadiumRect(c, 'konya', R, 150);
+    this.stadiumRect(c, 'buyuk', R, 150);
     this.addPad(c, 'parking', 5, 27, 24, 4);
     this.addPad(c, 'parking', 6, ART, 22, 2);
     for (const x of [ART + 0.5, 30.5]) for (let y = 7; y < 27; y += 3) this.addProp(c, PROP.TREE, c.x + x * TILE, c.y + (y + 0.5) * TILE);
@@ -7150,6 +7208,9 @@ class Game {
 // Koddan üretilen çizimler: lüks araba, polis çeşitleri, sivil araçlar, yayalar, güçler, binalar.
 // Tüm araçlar burun +x yönünde çizilir.
 
+// Ahşap tabela alan yeme-içme dükkânları (yemek adının kelimesi isim tablosunda)
+const WOOD_SIGN = new RegExp(`döner|kebap|pide|lahmacun|${NAMES.dukkan.kelime}|ciğer|börek|lokanta|kafe|çay|kahve|tost|tatlı|fırın|ocağı|köfte`, 'i');
+
 function rr(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -7989,7 +8050,7 @@ function signKind(text) {
   if (/bank|kredi|tasarruf|yatırım|hastane|ilkokul|kolej/i.test(text)) return 'corp';
   if (/teknoloji|oyun|piksel|bilgisayar|telefon/i.test(text)) return 'led';
   if (/market|bakkal|manav|gross|mağaza|ucuzlar|büfe|bayii|dünyası/i.test(text)) return 'vivid';
-  if (/döner|kebap|pide|lahmacun|iskender|ciğer|börek|lokanta|kafe|çay|kahve|tost|tatlı|fırın|ocağı|köfte/i.test(text)) return 'wood';
+  if (WOOD_SIGN.test(text)) return 'wood';
   if (/otel|hotel|rezidans|residence|palas|sitesi/i.test(text)) return 'lux';
   return 'box';
 }
@@ -8360,7 +8421,7 @@ function paintStars(g, seed) {
 }
 
 // --- landmarks.js ---
-// Özel yerler: kolej, Konya yapıları, okullar. Kodla çizilir, gerçek logo ya da marka kullanılmaz.
+// Özel yerler: kolej, tarihi yapılar, okullar. Kodla çizilir, gerçek logo ya da marka kullanılmaz.
 // Zemin çizimleri chunk önbelleğine bir kez işlenir. Yüksek yapıların (kolej, kule) duvar, çatı ve
 // gece pencere dokuları ilk görüldüğünde bir kez üretilir, sonra yalnızca kopyalanır.
 
@@ -8480,7 +8541,7 @@ function muze(g, r) {
 }
 
 // Selçuklu camisi (tepe üstünde): taş gövde, düz ahşap çatı çizgileri, piramit külahlı türbe
-function selcukCami(g, r) {
+function tepeCami(g, r) {
   const { x, y, w, h } = r;
   g.fillStyle = '#a8977a'; rr(g, x, y, w, h, 5); g.fill();
   g.fillStyle = '#c9b99a'; rr(g, x + 4, y + 4, w - 8, h - 12, 4); g.fill();
@@ -8530,8 +8591,8 @@ function avm(g, r) {
   g.fillStyle = '#d0121b'; g.fillRect(x + w * 0.4, y + h - 12, w * 0.2, 8);
 }
 
-// Bedesten: uzun taş sıra, üstünde dizi dizi küçük kubbe
-function bedesten(g, r) {
+// Kapalı çarşı: uzun taş sıra, üstünde dizi dizi küçük kubbe
+function kapaliCarsi(g, r) {
   const { x, y, w, h } = r;
   g.fillStyle = '#9d8a6c'; rr(g, x, y, w, h, 4); g.fill();
   g.fillStyle = '#c6b28c'; rr(g, x + 3, y + 3, w - 6, h - 12, 3); g.fill();
@@ -8595,10 +8656,10 @@ function paintLandmark(g, r) {
   switch (r.style) {
     case S.SERVIS: servis(g, r); return true;
     case S.MUZE: muze(g, r); return true;
-    case S.SELCUK_CAMI: selcukCami(g, r); return true;
+    case S.TEPE_CAMI: tepeCami(g, r); return true;
     case S.KONGRE: kongre(g, r); return true;
     case S.AVM: avm(g, r); return true;
-    case S.BEDESTEN: bedesten(g, r); return true;
+    case S.CARSI: kapaliCarsi(g, r); return true;
     case S.BAGEVI: bagevi(g, r); return true;
     case S.OZEL_OKUL: ozelOkul(g, r); return true;
     case S.ANIT: anit(g, r); return true;
@@ -9733,7 +9794,7 @@ function kolej(g, r) {
 
 // --- v5: tek tek kimlikli binalar ---
 const SHOP_LOOK = [
-  [/döner|dönerci|kebap|iskender|ciğer|çiğköfte/i, { wall: '#7a2a18', awn: ['#c8261e', '#ffd23f'], fx: 'spit' }],
+  [new RegExp(`döner|dönerci|kebap|${NAMES.dukkan.kelime}|ciğer|çiğköfte`, 'i'), { wall: '#7a2a18', awn: ['#c8261e', '#ffd23f'], fx: 'spit' }],
   [/pide|lahmacun|börek|fırın|ekmek/i, { wall: '#a8733f', awn: ['#d97706', '#fff4d8'], fx: 'oven' }],
   [/eczane/i, { wall: '#f4f6f4', awn: ['#d0121b', '#ffffff'], fx: 'cross' }],
   [/kuaför|berber/i, { wall: '#2d3a55', awn: ['#1d6fb8', '#ffffff'], fx: 'pole' }],
@@ -10129,9 +10190,9 @@ function shadowOf(r) {
     case S.STADIUM: return 1;
     case S.MUZE: case S.OZEL_OKUL: return 2.2;
     case S.ANIT: return 2.6;
-    case S.SELCUK_CAMI: case S.KONGRE: return 1.8;
+    case S.TEPE_CAMI: case S.KONGRE: return 1.8;
     case S.AVM: return 1.5;
-    case S.BEDESTEN: return 1.2;
+    case S.CARSI: return 1.2;
     case S.SERVIS: return 0.8;
     case S.BAGEVI: return 0.6;
     default: return 1;
@@ -11770,29 +11831,164 @@ function refPaintIndex(car) {
   return best;
 }
 
+// --- memorial-data.js ---
+// Anıt içeriği: PLAY STORE sürümü (kurgusal). Şehir meydanındaki kurgusal bir heykel: gerçek kişi, fotoğraf,
+// gerçek metin ya da gerçek bayrak yoktur. Her şey kodla çizilir, yazı yoktur (dil gerektirmez).
+// Arkadaş sürümünde bu dosyanın yerine names/anit-gercek.js konur (tools/flavor.mjs, tools/serve.mjs).
+// Not: js/app.file.js tüm modülleri tek kapsamda birleştirir; buradaki adlar MEMD ön ekiyle benzersizdir.
+const MEM_REAL = false;
+const MEM_IMAGES = [];
+const MEM_TITLE = '';
+const MEM_YEAR = '';
+const MEM_TEXT = '';
+const MEM_MOTTO = '';
+const MEM_SIGNATURE = '';
+
+const MEMD_TAU = Math.PI * 2;
+
+// Kurgusal şehir bayrağı (3:2): lacivert zemin, gönder tarafında beyaz şerit, altın sekiz köşeli pusula yıldızı
+function paintMemFlag(g, w, h, mirror = false) {
+  g.save();
+  if (mirror) { g.translate(w, 0); g.scale(-1, 1); }
+  g.scale(w / 300, h / 200);
+  g.fillStyle = '#1d4f91'; g.fillRect(0, 0, 300, 200);
+  g.fillStyle = '#f4f1e6'; g.fillRect(0, 0, 70, 200);
+  g.fillStyle = '#2f9e8f'; g.fillRect(70, 0, 10, 200);
+  memdStar(g, 190, 100, 62, 26, 8, '#f2c14e');
+  g.fillStyle = '#1d4f91'; g.beginPath(); g.arc(190, 100, 14, 0, MEMD_TAU); g.fill();
+  g.restore();
+}
+
+function memdStar(g, x, y, ro, ri, n, color) {
+  g.fillStyle = color;
+  g.beginPath();
+  for (let i = 0; i < n * 2; i++) {
+    const r = i % 2 ? ri : ro;
+    const a = (i / (n * 2)) * MEMD_TAU - Math.PI / 2;
+    g[i ? 'lineTo' : 'moveTo'](x + Math.cos(a) * r, y + Math.sin(a) * r);
+  }
+  g.closePath(); g.fill();
+}
+
+// Bronz dolgu: üstten ışık alan sıcak metal
+function memdBronze(g, x, y, w, h) {
+  const gr = g.createLinearGradient(x, y, x + w, y + h);
+  gr.addColorStop(0, '#e2b06a'); gr.addColorStop(0.35, '#b07a3c'); gr.addColorStop(0.7, '#7a4f24'); gr.addColorStop(1, '#4e3116');
+  return gr;
+}
+
+// Defne dalı kabartması: eğri sap boyunca karşılıklı yapraklar
+function memdLaurel(g, x, y, len, ang, size, color) {
+  g.save();
+  g.translate(x, y); g.rotate(ang);
+  g.strokeStyle = color; g.lineWidth = Math.max(1, size * 0.18);
+  g.beginPath(); g.moveTo(0, 0); g.quadraticCurveTo(len * 0.5, -len * 0.08, len, 0); g.stroke();
+  g.fillStyle = color;
+  const n = Math.max(3, Math.round(len / (size * 1.25)));
+  for (let i = 1; i <= n; i++) {
+    const t = i / (n + 0.5);
+    const px = len * t; const py = -len * 0.08 * 4 * t * (1 - t);
+    for (const s of [-1, 1]) {
+      g.save(); g.translate(px, py); g.rotate(s * 0.75 - 0.25);
+      g.beginPath(); g.ellipse(size * 0.55, 0, size * 0.62, size * 0.26, 0, 0, MEMD_TAU); g.fill();
+      g.restore();
+    }
+  }
+  g.restore();
+}
+
+// Çerçeve içi kurgusal heykel ve kabartmalar. f: çerçeve iç alanı {x, y, w, h}, i: 0 orta (heykel), 1-2 yan, 3 alt
+function paintMemStatue(g, f, i, detail) {
+  g.save();
+  g.beginPath(); g.rect(f.x, f.y, f.w, f.h); g.clip();
+  // Koyu taş niş, ortası hafif aydınlık
+  const bg = g.createRadialGradient(f.x + f.w / 2, f.y + f.h * 0.4, 4, f.x + f.w / 2, f.y + f.h * 0.5, Math.max(f.w, f.h) * 0.75);
+  bg.addColorStop(0, '#4a4651'); bg.addColorStop(1, '#1c1b20');
+  g.fillStyle = bg; g.fillRect(f.x, f.y, f.w, f.h);
+  const cx = f.x + f.w / 2;
+  if (i === 0) {
+    // Meşale taşıyan kurgusal figür: yüz ayrıntısı yok, sade biçimler
+    const u = Math.min(f.w, f.h) / 100;
+    const base = f.y + f.h - 6 * u;
+    // Kaide
+    g.fillStyle = '#9b927f'; g.fillRect(cx - 26 * u, base - 12 * u, 52 * u, 12 * u);
+    g.fillStyle = '#c9bfa9'; g.fillRect(cx - 26 * u, base - 12 * u, 52 * u, 2.4 * u);
+    g.fillStyle = '#7c7464'; g.fillRect(cx - 30 * u, base - 3 * u, 60 * u, 3 * u);
+    const top = base - 12 * u;
+    g.fillStyle = memdBronze(g, cx - 20 * u, top - 70 * u, 40 * u, 70 * u);
+    // Uzun pelerin / gövde
+    g.beginPath();
+    g.moveTo(cx - 15 * u, top); g.lineTo(cx - 9 * u, top - 46 * u); g.lineTo(cx + 9 * u, top - 46 * u); g.lineTo(cx + 15 * u, top);
+    g.closePath(); g.fill();
+    // Omuzlar ve baş (yüz yok)
+    g.beginPath(); g.ellipse(cx, top - 47 * u, 11 * u, 4.5 * u, 0, 0, MEMD_TAU); g.fill();
+    g.beginPath(); g.arc(cx, top - 56 * u, 6.2 * u, 0, MEMD_TAU); g.fill();
+    // Yukarı kalkan kol ve meşale
+    g.lineCap = 'round'; g.strokeStyle = memdBronze(g, cx, top - 80 * u, 16 * u, 34 * u); g.lineWidth = 4.6 * u;
+    g.beginPath(); g.moveTo(cx + 9 * u, top - 46 * u); g.lineTo(cx + 15 * u, top - 64 * u); g.lineTo(cx + 16 * u, top - 74 * u); g.stroke();
+    g.fillStyle = '#6b4520'; g.fillRect(cx + 13.6 * u, top - 84 * u, 5 * u, 11 * u);
+    const fl = g.createRadialGradient(cx + 16 * u, top - 88 * u, 0.5 * u, cx + 16 * u, top - 88 * u, 9 * u);
+    fl.addColorStop(0, '#fff6c8'); fl.addColorStop(0.45, '#ffb340'); fl.addColorStop(1, 'rgba(255,90,20,0)');
+    g.fillStyle = fl; g.beginPath(); g.ellipse(cx + 16 * u, top - 89 * u, 6 * u, 9.5 * u, 0, 0, MEMD_TAU); g.fill();
+    // Öteki kolda kitap
+    g.strokeStyle = memdBronze(g, cx - 20 * u, top - 46 * u, 12 * u, 20 * u);
+    g.beginPath(); g.moveTo(cx - 9 * u, top - 45 * u); g.lineTo(cx - 14 * u, top - 32 * u); g.stroke();
+    g.fillStyle = '#c99a55'; g.fillRect(cx - 19 * u, top - 34 * u, 10 * u, 7 * u);
+    g.fillStyle = '#6b4520'; g.fillRect(cx - 14.4 * u, top - 34 * u, 0.9 * u, 7 * u);
+    // Bronz üzerinde parlak çizgi
+    if (detail) {
+      g.strokeStyle = 'rgba(255,236,190,.45)'; g.lineWidth = 1.2 * u;
+      g.beginPath(); g.moveTo(cx - 7 * u, top - 44 * u); g.lineTo(cx - 12 * u, top - 2 * u); g.stroke();
+    }
+    // Defne dalları kaidenin iki yanında
+    memdLaurel(g, cx - 24 * u, base - 16 * u, 22 * u, -2.5, 4.2 * u, '#c79a52');
+    memdLaurel(g, cx + 24 * u, base - 16 * u, 22 * u, -0.64, 4.2 * u, '#c79a52');
+  } else if (i === 1 || i === 2) {
+    // Yan kabartmalar: dikey defne dalı ve küçük yıldız
+    const s = Math.min(f.w, f.h / 2) / 30;
+    memdLaurel(g, cx + (i === 1 ? -6 : 6) * s, f.y + f.h - 8 * s, f.h * 0.8, -Math.PI / 2 + (i === 1 ? 0.08 : -0.08), 4 * s, '#c79a52');
+    memdStar(g, cx, f.y + 10 * s, 6 * s, 2.6 * s, 8, '#e2b06a');
+  } else {
+    // Alt kabartma: halka içinde pusula yıldızı
+    const r = Math.min(f.w, f.h) * 0.36;
+    const cy = f.y + f.h / 2;
+    g.strokeStyle = '#c79a52'; g.lineWidth = Math.max(1.5, r * 0.08);
+    g.beginPath(); g.arc(cx, cy, r, 0, MEMD_TAU); g.stroke();
+    memdStar(g, cx, cy, r * 0.82, r * 0.3, 8, '#d8a85e');
+    g.fillStyle = '#4e3116'; g.beginPath(); g.arc(cx, cy, r * 0.16, 0, MEMD_TAU); g.fill();
+  }
+  g.restore();
+}
+
+// Levha: yazı yerine defne çelengi içinde pusula yıldızı. p: levha {x, y, w, h}
+function paintMemEmblem(g, p) {
+  const cx = p.x + p.w / 2; const cy = p.y + p.h / 2;
+  const r = p.h * 0.36;
+  memdLaurel(g, cx - r * 0.25, cy + r * 0.95, r * 1.9, -2.2, r * 0.22, '#8a6a2e');
+  memdLaurel(g, cx + r * 0.25, cy + r * 0.95, r * 1.9, -0.94, r * 0.22, '#8a6a2e');
+  memdStar(g, cx, cy, r * 0.62, r * 0.24, 8, '#b8892e');
+  g.fillStyle = '#f2ead8'; g.beginPath(); g.arc(cx, cy, r * 0.12, 0, MEMD_TAU); g.fill();
+  g.fillStyle = '#b8892e';
+  g.fillRect(p.x + p.w * 0.12, cy - 1, p.w * 0.16, 2);
+  g.fillRect(p.x + p.w * 0.72, cy - 1, p.w * 0.16, 2);
+}
+
 // --- memorial.js ---
-// Cumhuriyet Meydanı: Atatürk anıtı. Saygılı, sade ve görkemli bir anıt; şaka ya da komik efekt yok.
+// ANIT: şehir meydanındaki korunan anıt. Saygılı, sade ve görkemli; şaka ya da komik efekt yok.
 // Anıt önbellekli tuvallere bir kez çizilir: uzakta sade (lo), yakında ayrıntılı (hi). Her karede yalnızca
 // hazır görüntü kopyalanır, üstüne dalgalanan bayraklar eklenir. Gece spot ışıklarıyla aydınlanır.
+// İçerik (fotoğraflar, levha metni, bayrak) sürüme göre ./memorial-data.js dosyasından gelir:
+//   Play Store: kurgusal heykel ve kabartmalar, yazısız levha, kurgusal şehir bayrağı (js/memorial-data.js)
+//   arkadaş   : names/anit-gercek.js (derlemede memorial-data.js yerine konur)
 // Fotoğraflar kırpılmaz ve değiştirilmez: en-boy oranı korunarak ölçeklenir ve çerçevelenir.
-// Gençliğe Hitabe, "Ne mutlu Türküm diyene!" ve imza çevrilmez; her dilde orijinal Türkçe kalır.
 // Not: js/app.file.js tüm modülleri tek kapsamda birleştirir; bu yüzden buradaki adlar MEM ön ekiyle benzersizdir.
+
+// Eski ad: anıtın bayrağı (sürüme göre)
+const paintTrFlag = paintMemFlag;
 
 const MEMC = CONFIG.memorial;
 const MEM_TILE = CONFIG.world.tile;
 const MEM_TAU = Math.PI * 2;
-// Fotoğraflar: gorseller/ataturk/ (kaynak: kullanıcının verdiği dört fotoğraf, kırpılmadan)
-const MEM_IMAGES = [1, 2, 3, 4].map((n) => `gorseller/ataturk/ataturk-${n}.jpeg`);
-
-const HITABE_TITLE = 'Gençliğe Hitabe';
-const HITABE_YEAR = '1927';
-const HITABE = [
-  'Ey Türk gençliği! Birinci vazifen, Türk istiklalini, Türk cumhuriyetini, ilelebet muhafaza ve müdafaa etmektir.',
-  'Mevcudiyetinin ve istikbalinin yegâne temeli budur. Bu temel, senin en kıymetli hazinendir. İstikbalde dahi, seni bu hazineden mahrum etmek isteyecek dahilî ve haricî bedhahların olacaktır. Bir gün, istiklal ve cumhuriyeti müdafaa mecburiyetine düşersen, vazifeye atılmak için içinde bulunacağın vaziyetin imkân ve şeraitini düşünmeyeceksin! Bu imkân ve şerait, çok namüsait bir mahiyette tezahür edebilir. İstiklal ve cumhuriyetine kastedecek düşmanlar, bütün dünyada emsali görülmemiş bir galibiyetin mümessili olabilirler. Cebren ve hile ile aziz vatanın bütün kaleleri zaptedilmiş, bütün tersanelerine girilmiş, bütün orduları dağıtılmış ve memleketin her köşesi bilfiil işgal edilmiş olabilir. Bütün bu şeraitten daha elîm ve daha vahim olmak üzere, memleketin dahilinde iktidara sahip olanlar gaflet ve dalâlet ve hattâ hıyanet içinde bulunabilirler. Hattâ bu iktidar sahipleri şahsî menfaatlerini, müstevlilerin siyasî emelleriyle tevhit edebilirler. Millet, fakr u zaruret içinde harap ve bîtap düşmüş olabilir.',
-  'Ey Türk istikbalinin evlâdı! İşte, bu ahval ve şerait içinde dahi vazifen, Türk istiklal ve cumhuriyetini kurtarmaktır! Muhtaç olduğun kudret, damarlarındaki asil kanda mevcuttur!',
-].join('\n');
-const MEM_MOTTO = 'Ne mutlu Türküm diyene!';
-const MEM_SIGNATURE = 'Gazi Mustafa Kemal Atatürk';
 
 const MEM_SERIF = "'Playfair Display', Georgia, 'Times New Roman', serif";
 
@@ -11803,17 +11999,17 @@ const MEM_SX = MEM_W / 680;
 const MEM_SY = MEM_H / 760;
 const memBox = (x, y, w, h, border) => ({ x: x * MEM_SX, y: y * MEM_SY, w: w * MEM_SX, h: h * MEM_SY, border });
 
-// Yerleşim (anıt içi yerel koordinat). Ortada en büyük ataturk-1; solunda 2, sağında 3, altında 4; üstünde levha
+// Yerleşim (anıt içi yerel koordinat). Ortada en büyük çerçeve; solunda 2, sağında 3, altında 4; üstünde levha
 const MEM_LAYOUT = {
   rail: 14 * MEM_SY,
   stele: memBox(80, 22, 520, 718),
   plaque: memBox(92, 34, 496, 162),
   flag: { x: 340 * MEM_SX - 38 * MEM_SX, y: 206 * MEM_SY, w: 76 * MEM_SX, h: 50 * MEM_SY },
   slots: [
-    memBox(222, 258, 236, 236, 12), // ataturk-1: orta, en büyük
-    memBox(92, 262, 120, 228, 8), // ataturk-2: sol
-    memBox(468, 262, 120, 228, 8), // ataturk-3: sağ
-    memBox(262, 502, 156, 168, 8), // ataturk-4: alt
+    memBox(222, 258, 236, 236, 12), // 1: orta, en büyük
+    memBox(92, 262, 120, 228, 8), // 2: sol
+    memBox(468, 262, 120, 228, 8), // 3: sağ
+    memBox(262, 502, 156, 168, 8), // 4: alt
   ],
   motto: { x: 340 * MEM_SX, y: 694 * MEM_SY, size: 22 * MEM_SY },
   signature: { x: 340 * MEM_SX, y: 722 * MEM_SY, size: 16 * MEM_SY },
@@ -11844,25 +12040,6 @@ function memCanvas(w, h) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
   return c;
-}
-
-// Türk bayrağı: 3:2, beyaz ay ve yıldız (resmî orana göre, 1200 x 800 tasarım alanında)
-function paintTrFlag(g, w, h, mirror = false) {
-  g.save();
-  if (mirror) { g.translate(w, 0); g.scale(-1, 1); }
-  g.scale(w / 1200, h / 800);
-  g.fillStyle = '#e30a17';
-  g.fillRect(0, 0, 1200, 800);
-  g.fillStyle = '#fff';
-  g.beginPath(); g.arc(425, 400, 200, 0, MEM_TAU); g.fill();
-  g.fillStyle = '#e30a17';
-  g.beginPath(); g.arc(475, 400, 160, 0, MEM_TAU); g.fill();
-  g.fillStyle = '#fff';
-  g.beginPath();
-  const pts = [[583.334, 400], [764.235, 458.779], [652.431, 304.894], [652.431, 495.106], [764.235, 341.221]];
-  pts.forEach(([x, y], i) => g[i ? 'lineTo' : 'moveTo'](x, y));
-  g.closePath(); g.fill();
-  g.restore();
 }
 
 function memWrap(g, text, maxW) {
@@ -11905,13 +12082,13 @@ function memGoldFrame(g, f, b, big) {
   g.restore();
 }
 
-// Ay yıldızlı küçük madalyon
+// Bayraklı küçük madalyon
 function memMedallion(g, x, y, r) {
   g.save();
   g.fillStyle = '#b8892e'; g.beginPath(); g.arc(x, y, r + 2.5, 0, MEM_TAU); g.fill();
   g.beginPath(); g.arc(x, y, r, 0, MEM_TAU); g.clip();
   g.translate(x - r * 1.5, y - r);
-  paintTrFlag(g, r * 3, r * 2);
+  paintMemFlag(g, r * 3, r * 2);
   g.restore();
 }
 
@@ -11986,21 +12163,22 @@ function memPaint(g, part, imgs, detail, frames) {
       }
     }
     g.strokeStyle = '#a58a4a'; g.lineWidth = 2; g.strokeRect(p.x + 5, p.y + 5, p.w - 10, p.h - 10);
+    if (!MEM_TITLE) { if (paintMemEmblem) paintMemEmblem(g, p); return; }
     g.textAlign = 'center'; g.textBaseline = 'middle';
     const cx = p.x + p.w / 2;
     g.fillStyle = 'rgba(255,255,255,.7)';
     g.font = `700 ${34 * MEM_SY}px ${MEM_SERIF}`;
-    g.fillText(HITABE_TITLE, cx + 1, p.y + 33 * MEM_SY + 1);
+    g.fillText(MEM_TITLE, cx + 1, p.y + 33 * MEM_SY + 1);
     g.fillStyle = '#2b2620';
-    g.fillText(HITABE_TITLE, cx, p.y + 33 * MEM_SY);
+    g.fillText(MEM_TITLE, cx, p.y + 33 * MEM_SY);
     g.font = `400 ${18 * MEM_SY}px ${MEM_SERIF}`;
     g.fillStyle = '#7a5b1e';
-    g.fillText(HITABE_YEAR, cx, p.y + 62 * MEM_SY);
+    g.fillText(MEM_YEAR, cx, p.y + 62 * MEM_SY);
     g.fillStyle = '#b8892e'; g.fillRect(cx - 60, p.y + 75 * MEM_SY, 120, 1.6);
     // Metnin başı: büyük ve net. Tamamı yaklaşınca okuma kartında kayarak gösterilir
     g.font = `400 ${15 * MEM_SY}px ${MEM_SERIF}`;
     g.fillStyle = '#2f2a24';
-    const lines = memWrap(g, HITABE, p.w - 44).slice(0, 4);
+    const lines = memWrap(g, MEM_TEXT, p.w - 44).slice(0, 4);
     lines.forEach((t, i) => g.fillText(i === lines.length - 1 ? `${t} …` : t, cx, p.y + (92 + i * 19) * MEM_SY));
     // Son satır hafifçe söner
     const fade = g.createLinearGradient(0, p.y + p.h - 32, 0, p.y + p.h - 8);
@@ -12018,6 +12196,9 @@ function memPaint(g, part, imgs, detail, frames) {
       g.imageSmoothingEnabled = true;
       if ('imageSmoothingQuality' in g) g.imageSmoothingQuality = 'high';
       g.drawImage(it.img, f.x, f.y, f.w, f.h);
+    } else if (paintMemStatue) {
+      // Kurgusal sürüm: fotoğraf yerine kodla çizilen heykel ve kabartmalar
+      paintMemStatue(g, f, i, detail);
     } else {
       // Fotoğraf yoksa yer tutucu: boş, sade koyu çerçeve
       g.fillStyle = '#2a2724'; g.fillRect(f.x, f.y, f.w, f.h);
@@ -12034,6 +12215,7 @@ function memPaint(g, part, imgs, detail, frames) {
     memMedallion(g, (L.stele.x + s4.fx) / 2 + 10, s4.fy + s4.fh / 2, 15 * MEM_SY);
     memMedallion(g, (L.stele.x + L.stele.w + s4.fx + s4.fw) / 2 - 10, s4.fy + s4.fh / 2, 15 * MEM_SY);
     g.textAlign = 'center'; g.textBaseline = 'middle';
+    if (!MEM_MOTTO && !MEM_SIGNATURE) return;
     g.font = `700 ${L.motto.size}px ${MEM_SERIF}`;
     g.fillStyle = '#e8c76c';
     g.fillText(MEM_MOTTO, L.motto.x, L.motto.y);
@@ -12088,12 +12270,12 @@ class MemorialArt {
     const fontsDone = () => { this.fonts = true; };
     try {
       const f = document.fonts;
-      Promise.all([f.load(`700 34px 'Playfair Display'`, 'Gençliğe Hitabe âîû'), f.load(`400 16px 'Playfair Display'`, 'ğüşıöçİâîû')]).then(fontsDone, fontsDone);
+      Promise.all([f.load(`700 34px 'Playfair Display'`, 'Anıt ğüşıöçİâîû'), f.load(`400 16px 'Playfair Display'`, 'ğüşıöçİâîû')]).then(fontsDone, fontsDone);
       setTimeout(fontsDone, 4000);
     } catch { fontsDone(); }
   }
 
-  get ready() { return this.loaded >= 4 && this.fonts; }
+  get ready() { return this.loaded >= MEM_IMAGES.length && this.fonts; }
 
   computeFrames() {
     this.frames = MEM_LAYOUT.slots.map((slot, i) => {
@@ -12105,8 +12287,8 @@ class MemorialArt {
 
   makeFlags() {
     const w = 120; const h = 80;
-    this.flag = memCanvas(w, h); paintTrFlag(this.flag.getContext('2d'), w, h);
-    this.flagM = memCanvas(w, h); paintTrFlag(this.flagM.getContext('2d'), w, h, true);
+    this.flag = memCanvas(w, h); paintMemFlag(this.flag.getContext('2d'), w, h);
+    this.flagM = memCanvas(w, h); paintMemFlag(this.flagM.getContext('2d'), w, h, true);
   }
 
   build(k, detail) {
@@ -12221,8 +12403,9 @@ class MemorialArt {
       flag: { x: b.x + L.flag.x, y: b.y + L.flag.y, w: L.flag.w, h: L.flag.h },
       motto: { x: b.x + L.motto.x, y: b.y + L.motto.y, text: MEM_MOTTO },
       signature: { x: b.x + L.signature.x, y: b.y + L.signature.y, text: MEM_SIGNATURE },
-      title: HITABE_TITLE, year: HITABE_YEAR,
-      images: this.imgs.map((it) => (it ? (it.ok ? 'ok' : 'missing') : 'loading')),
+      title: MEM_TITLE, year: MEM_YEAR,
+      images: this.imgs.slice(0, MEM_IMAGES.length).map((it) => (it ? (it.ok ? 'ok' : 'missing') : 'loading')),
+      real: MEM_REAL,
       hi: !!this.hi, lo: !!this.lo,
     };
   }
@@ -12240,7 +12423,7 @@ function bakeMemorialPad(g, x, y, w, h) {
   }
 }
 
-// Okuma kartı: metnin tamamı yavaşça kayar. Oyunu engellemez, dokununca kapanır.
+// Okuma kartı (yalnız levha metni olan sürümde): metnin tamamı yavaşça kayar. Oyunu engellemez, dokununca kapanır.
 // el: #memorial-card. Metin DOM'a bir kez yazılır; açıkken yalnızca kaydırma konumu değişir
 class MemorialCard {
   constructor(el, onDismiss) {
@@ -12250,15 +12433,16 @@ class MemorialCard {
     this.pos = 0;
     if (!el) return;
     el.textContent = '';
+    if (!MEM_TEXT) return; // Kurgusal sürüm: okunacak metin yok, kart açılmaz
     const head = document.createElement('header');
-    const h = document.createElement('h3'); h.textContent = HITABE_TITLE;
-    const y = document.createElement('span'); y.textContent = HITABE_YEAR;
+    const h = document.createElement('h3'); h.textContent = MEM_TITLE;
+    const y = document.createElement('span'); y.textContent = MEM_YEAR;
     head.append(h, y);
     this.body = document.createElement('div');
     this.body.className = 'mc-body';
     this.inner = document.createElement('div');
     this.inner.className = 'mc-text';
-    for (const para of HITABE.split('\n')) {
+    for (const para of MEM_TEXT.split('\n')) {
       const p = document.createElement('p'); p.textContent = para; this.inner.appendChild(p);
     }
     const foot = document.createElement('p');
@@ -12272,13 +12456,13 @@ class MemorialCard {
     el.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
   }
 
-  // Karttaki Hitabe metni (test: tam metin karşılaştırması)
+  // Karttaki levha metni (test: tam metin karşılaştırması)
   text() {
     return this.inner ? [...this.inner.querySelectorAll('p:not(.mc-sign)')].map((p) => p.textContent).join('\n') : '';
   }
 
   show(on) {
-    if (!this.el || on === this.open) return;
+    if (!this.el || !this.inner || on === this.open) return;
     this.open = on;
     this.el.hidden = !on;
     if (on) { this.t = 0; this.pos = 0; this.body.scrollTop = 0; }
@@ -12298,10 +12482,14 @@ class MemorialCard {
 }
 
 // --- stadium.js ---
-// İKİ STADYUM: kodla çizilir, gerçek kulüp amblemi ya da logosu yoktur. Adlar isim tablosundan (NAMES.stadyum).
-// Yozgat: orta boy, tek katlı tamamen çatılı tribünler, kırmızı-siyah koltuklar, köşelerde 4 ışık direği, camlı localar.
-// Konya: çok büyük, "yassı futbol topu" formu, beyaz-yeşil üçgen cephe ve zar çatı; gece üçgen kenarları ışıklanır.
+// İKİ STADYUM: kodla çizilir, gerçek kulüp amblemi ya da logosu yoktur. Adlar ve renkler isim tablosundan
+// (NAMES.stadyum, NAMES.stadRenk): Play Store sürümünde hiçbir kulübün renk düzeni kullanılmaz.
+// Küçük: orta boy, tek katlı tamamen çatılı tribünler, köşelerde 4 ışık direği, camlı localar.
+// Büyük: çok büyük, "yassı futbol topu" formu, üçgen cephe ve zar çatı; gece üçgen kenarları ışıklanır.
 // Önbellekli çizim: uzakta küçük (lo), yakında ayrıntılı (hi, karede bir parça üretilir). Bayrak ve taraftar canlıdır.
+
+const SM_COL = NAMES.stadRenk.kucuk;
+const BG_COL = NAMES.stadRenk.buyuk;
 
 const STC = CONFIG.stadiums;
 const STD_TAU = Math.PI * 2;
@@ -12371,10 +12559,10 @@ function stdSeats(g, ox, oy, ow, oh, ix, iy, iw, ih, color, line, rows) {
   g.restore();
 }
 
-// --- YOZGAT ---
-const YZ_PARTS = ['base', 'bowl', 'roof', 'details'];
-function paintYozgat(g, w, h, part, detail) {
-  const red = '#c8102e'; const black = '#141418';
+// --- KÜÇÜK STADYUM ---
+const SM_PARTS = ['base', 'bowl', 'roof', 'details'];
+function paintSmall(g, w, h, part, detail) {
+  const red = SM_COL.seat; const trim = SM_COL.trim; const black = '#141418';
   const rim = Math.min(w, h) * 0.19; // Çatı halkası
   const ix = rim; const iy = rim * 0.92; const iw = w - rim * 2; const ih = h - rim * 1.84;
   if (part === 'base') {
@@ -12410,8 +12598,8 @@ function paintYozgat(g, w, h, part, detail) {
       g.beginPath(); g.moveTo(0, y); g.lineTo(ix - 4, iy - 12 + (i / 10) * (ih + 24)); g.moveTo(w, y); g.lineTo(ix + iw + 4, iy - 12 + (i / 10) * (ih + 24)); g.stroke();
     }
     g.restore();
-    g.strokeStyle = red; g.lineWidth = 4; stdRound(g, 2, 2, w - 4, h - 4, 32); g.stroke();
-    g.strokeStyle = red; g.lineWidth = 2.5; g.strokeRect(ix - 4, iy - 12, iw + 8, ih + 24);
+    g.strokeStyle = trim; g.lineWidth = 4; stdRound(g, 2, 2, w - 4, h - 4, 32); g.stroke();
+    g.strokeStyle = trim; g.lineWidth = 2.5; g.strokeRect(ix - 4, iy - 12, iw + 8, ih + 24);
   } else {
     // Ana tribün (batı) camlı VIP locaları
     const gx = ix - rim * 0.72; const gy = iy + ih * 0.18; const gh = ih * 0.64;
@@ -12425,8 +12613,8 @@ function paintYozgat(g, w, h, part, detail) {
     // Giriş kapıları (güney cephe) ve tabela
     g.fillStyle = '#0c0d10';
     for (const u of [0.22, 0.5, 0.78]) g.fillRect(w * u - 16, h - 9, 32, 9);
-    g.fillStyle = red; g.fillRect(w * 0.2, h - rim * 0.62, w * 0.6, rim * 0.34);
-    stdText(g, NAMES.stadyum.yozgat, w / 2, h - rim * 0.45, rim * 0.24, '#ffffff', w * 0.56);
+    g.fillStyle = trim; g.fillRect(w * 0.2, h - rim * 0.62, w * 0.6, rim * 0.34);
+    stdText(g, NAMES.stadyum.kucuk, w / 2, h - rim * 0.45, rim * 0.24, '#ffffff', w * 0.56);
     // Köşelerde 4 uzun ışık direği: gölgesi çapraz düşer
     for (const [px, py] of [[16, 16], [w - 16, 16], [16, h - 16], [w - 16, h - 16]]) {
       g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 4; g.beginPath(); g.moveTo(px, py); g.lineTo(px + 34, py + 46); g.stroke();
@@ -12438,9 +12626,9 @@ function paintYozgat(g, w, h, part, detail) {
   }
 }
 
-// --- KONYA ---
-const KN_PARTS = ['base', 'bowl', 'roof', 'facade', 'details'];
-function knGeom(w, h) {
+// --- BÜYÜK STADYUM ---
+const BG_PARTS = ['base', 'bowl', 'roof', 'facade', 'details'];
+function bgGeom(w, h) {
   const c = Math.min(w, h) * 0.2;
   const outer = stdOcta(0, 0, w, h, c);
   const ex = w * 0.5; const ey = h * 0.5;
@@ -12466,15 +12654,15 @@ function knGeom(w, h) {
   return { outer, ex, ey, ia, ib, ring, N };
 }
 
-function paintKonya(g, w, h, part, detail) {
-  const G = knGeom(w, h);
-  const green = '#16834a';
+function paintBig(g, w, h, part, detail) {
+  const G = bgGeom(w, h);
+  const green = BG_COL.main;
   if (part === 'base') {
     g.fillStyle = 'rgba(0,0,0,.25)'; g.save(); g.translate(8, 12); stdPoly(g, G.outer); g.fill(); g.restore();
     g.fillStyle = '#e9eef0'; stdPoly(g, G.outer); g.fill();
     stdPitch(g, G.ex - G.ia * 0.74, G.ey - G.ib * 0.6, G.ia * 1.48, G.ib * 1.2, '#3a9a46');
   } else if (part === 'bowl') {
-    // Yeşil-beyaz koltuk halkası, iç açıklığın kenarında
+    // İki renkli koltuk halkası, iç açıklığın kenarında
     g.save();
     g.beginPath(); g.ellipse(G.ex, G.ey, G.ia * 1.02, G.ib * 1.02, 0, 0, STD_TAU);
     g.ellipse(G.ex, G.ey, G.ia * 0.78, G.ib * 0.66, 0, 0, STD_TAU); g.clip('evenodd');
@@ -12493,24 +12681,24 @@ function paintKonya(g, w, h, part, detail) {
       const shadeA = 0.92 + 0.08 * Math.sin(i * 1.7);
       g.fillStyle = `rgba(${Math.round(244 * shadeA)},${Math.round(248 * shadeA)},${Math.round(246 * shadeA)},1)`;
       stdPoly(g, [[a.ox, a.oy], [b.ox, b.oy], [a.ix, a.iy]]); g.fill();
-      g.fillStyle = i % 3 === 0 ? 'rgba(170,230,190,.62)' : 'rgba(226,236,232,.95)';
+      g.fillStyle = i % 3 === 0 ? BG_COL.glass : 'rgba(226,236,232,.95)';
       stdPoly(g, [[b.ox, b.oy], [b.ix, b.iy], [a.ix, a.iy]]); g.fill();
     }
-    g.strokeStyle = 'rgba(80,110,96,.45)'; g.lineWidth = 1.1;
+    g.strokeStyle = BG_COL.edge; g.lineWidth = 1.1;
     for (let i = 0; i < G.N; i++) {
       const a = G.ring[i]; const b = G.ring[(i + 1) % G.N];
       g.beginPath(); g.moveTo(a.ox, a.oy); g.lineTo(a.ix, a.iy); g.lineTo(b.ox, b.oy); g.moveTo(a.ix, a.iy); g.lineTo(b.ix, b.iy); g.stroke();
     }
     g.strokeStyle = green; g.lineWidth = 3; stdPoly(g, G.outer); g.stroke();
   } else if (part === 'facade') {
-    // Cephe üçgen paneller (güney ve kuzey kenar bantları), bazıları yarı saydam yeşil
+    // Cephe üçgen paneller (güney ve kuzey kenar bantları), bazıları yarı saydam renkli
     const band = 22;
     for (const side of [0, 1]) {
       const y0 = side ? h - band : 0;
       const n = Math.floor(w / 26);
       for (let i = 0; i < n; i++) {
         const x = (i / n) * w;
-        g.fillStyle = (i + side) % 4 === 0 ? 'rgba(120,210,150,.55)' : (i % 2 ? '#f6faf8' : '#e1ebe6');
+        g.fillStyle = (i + side) % 4 === 0 ? BG_COL.facade : (i % 2 ? '#f6faf8' : '#e1ebe6');
         stdPoly(g, side ? [[x, h], [x + w / n, h], [x + w / (2 * n), y0]] : [[x, 0], [x + w / n, 0], [x + w / (2 * n), band]]);
         g.fill();
       }
@@ -12532,15 +12720,15 @@ function paintKonya(g, w, h, part, detail) {
       for (let k = 0; k < 6; k++) { g.fillStyle = k % 2 ? '#d9dfe2' : '#c3cacf'; g.fillRect(w * 0.38, y + k * 3.6, w * 0.24, 3.6); }
     }
     g.fillStyle = green; g.fillRect(w * 0.3, h - 82, w * 0.4, 26);
-    stdText(g, NAMES.stadyum.konya, w / 2, h - 69, 17, '#ffffff', w * 0.38);
+    stdText(g, NAMES.stadyum.buyuk, w / 2, h - 69, 17, '#ffffff', w * 0.38);
   }
 }
 
-// Konya gece: panellerin değil üçgenlerin kenar ve köşe noktalarının ışığı (beyaz/yeşil çizgi). Önceden çizilir
-function paintKonyaNight(g, w, h) {
-  const G = knGeom(w, h);
+// Büyük stadyum gece: panellerin değil üçgenlerin kenar ve köşe noktalarının ışığı. Önceden çizilir
+function paintBigNight(g, w, h) {
+  const G = bgGeom(w, h);
   g.lineCap = 'round';
-  for (const [lw, col] of [[6, 'rgba(60,255,150,.22)'], [2.2, 'rgba(225,255,240,.95)']]) {
+  for (const [lw, col] of [[6, BG_COL.glow], [2.2, 'rgba(225,255,240,.95)']]) {
     g.strokeStyle = col; g.lineWidth = lw;
     for (let i = 0; i < G.N; i++) {
       const a = G.ring[i]; const b = G.ring[(i + 1) % G.N];
@@ -12550,15 +12738,15 @@ function paintKonyaNight(g, w, h) {
   }
   for (let i = 0; i < G.N; i++) {
     const a = G.ring[i];
-    for (const [x, y, c] of [[a.ox, a.oy, '#ffffff'], [a.ix, a.iy, '#5dff9e']]) {
+    for (const [x, y, c] of [[a.ox, a.oy, '#ffffff'], [a.ix, a.iy, BG_COL.dot]]) {
       g.fillStyle = c; g.beginPath(); g.arc(x, y, 3.4, 0, STD_TAU); g.fill();
     }
   }
 }
 
 const STD_KINDS = {
-  yozgat: { parts: YZ_PARTS, paint: paintYozgat },
-  konya: { parts: KN_PARTS, paint: paintKonya },
+  kucuk: { parts: SM_PARTS, paint: paintSmall },
+  buyuk: { parts: BG_PARTS, paint: paintBig },
 };
 
 // Bir stadyumun önbellekli görüntüsü
@@ -12593,27 +12781,28 @@ class StadiumArt {
       if (j.i >= this.def.parts.length) { this.hi = j.c; this.hiJob = null; }
       return;
     }
-    if (this.kind === 'konya' && !this.night && d < A.hiNear) {
+    if (this.kind === 'buyuk' && !this.night && d < A.hiNear) {
       const j = this.build(A.hiScale * 0.5, true);
-      paintKonyaNight(j.g, this.w, this.h);
+      paintBigNight(j.g, this.w, this.h);
       this.night = j.c;
     }
     if (this.hi && d > A.hiFree) { this.hi.width = 1; this.hi = null; if (this.night) { this.night.width = 1; this.night = null; } }
   }
 
-  // Bayrak: Yozgat'ta Türk bayrakları, Konya'da amblemsiz yeşil bayraklar
+  // Bayrak: amblemsiz, renkler isim tablosunda ('anit': anıtın bayrağı)
   flagImg() {
     if (this.flag) return this.flag;
     const c = stdCanvas(48, 32);
     const g = c.getContext('2d');
-    if (this.kind === 'yozgat') paintTrFlag(g, 48, 32);
-    else { g.fillStyle = '#16834a'; g.fillRect(0, 0, 48, 32); g.fillStyle = '#ffffff'; g.fillRect(0, 24, 48, 3); }
+    const fl = (this.kind === 'kucuk' ? SM_COL : BG_COL).flag;
+    if (fl === 'anit') paintMemFlag(g, 48, 32);
+    else { g.fillStyle = fl[0]; g.fillRect(0, 0, 48, 32); g.fillStyle = fl[1]; g.fillRect(0, 24, 48, 3); }
     this.flag = c;
     return c;
   }
 
   poles(b) {
-    if (this.kind === 'yozgat') return [0.3, 0.42, 0.58, 0.7].map((u) => ({ x: b.x + b.w * u, y: b.y + b.h + 34 }));
+    if (this.kind === 'kucuk') return [0.3, 0.42, 0.58, 0.7].map((u) => ({ x: b.x + b.w * u, y: b.y + b.h + 34 }));
     return [0.2, 0.3, 0.7, 0.8].map((u) => ({ x: b.x + b.w * u, y: b.y + b.h + 30 }));
   }
 
@@ -12635,8 +12824,8 @@ class StadiumArt {
     }
     // Kapı önünde küçük taraftar siluetleri: yalnız yakında
     if (near && px > 0.25) {
-      const gates = this.kind === 'yozgat' ? [0.22, 0.5, 0.78] : [0.42, 0.5, 0.58];
-      ctx.fillStyle = this.kind === 'yozgat' ? '#2a0b10' : '#0f3a24';
+      const gates = this.kind === 'kucuk' ? [0.22, 0.5, 0.78] : [0.42, 0.5, 0.58];
+      ctx.fillStyle = this.kind === 'kucuk' ? SM_COL.fan : BG_COL.fan;
       for (const [gi, u] of gates.entries()) {
         for (let k = 0; k < 6; k++) {
           const x = b.x + b.w * u - 22 + k * 8 + Math.sin(k * 3.1 + gi) * 3;
@@ -12651,7 +12840,7 @@ class StadiumArt {
   drawNight(ctx, b, now, night, lamp) {
     if (night < 0.05) return;
     ctx.globalCompositeOperation = 'lighter';
-    if (this.kind === 'yozgat') {
+    if (this.kind === 'kucuk') {
       // Dört ışık direği parlar, saha aydınlanır
       ctx.globalAlpha = night * 0.95;
       for (const [x, y] of [[16, 16], [b.w - 16, 16], [16, b.h - 16], [b.w - 16, b.h - 16]]) ctx.drawImage(lamp, b.x + x - 110, b.y + y - 110, 220, 220);
@@ -12671,7 +12860,7 @@ class Stadiums {
   constructor() { this.arts = new Map(); this.visible = []; }
 
   art(z) {
-    const kind = z.w > 600 ? 'konya' : 'yozgat';
+    const kind = z.w > 600 ? 'buyuk' : 'kucuk';
     let a = this.arts.get(kind);
     if (!a) { a = new StadiumArt(kind, z.w, z.h); this.arts.set(kind, a); }
     return a;
@@ -14043,8 +14232,8 @@ class Renderer {
       g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, gx + 3, y + 1);
     };
     const h = (Math.imul(c.cx, 73856093) >>> 0) % 4;
-    pan(top + side * 0.5, ['← EDİRNE O-3', '← SARAY O-3', '← GEBZE O-4', '← ÇORLU O-3'][h]);
-    pan(bot - side * 0.5, ['ANKARA O-4 →', 'İZMİT O-4 →', 'BOLU O-4 →', 'BURSA O-5 →'][h]);
+    pan(top + side * 0.5, NAMES.yol.sol[h]);
+    pan(bot - side * 0.5, NAMES.yol.sag[h]);
     // Hız tabelası
     for (const [y, t] of [[top + 2, '120'], [bot - 2, '120']]) {
       g.fillStyle = '#fff'; g.beginPath(); g.arc(c.x + CHUNK * 0.3, y, 11, 0, 7); g.fill();
@@ -14082,7 +14271,7 @@ class Renderer {
       g.strokeStyle = '#fff'; g.lineWidth = 1; g.strokeRect(-w / 2 + 1, -6, w - 2, 12);
       g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 0, 0.5);
     };
-    const DIR = ['← KADIKÖY', 'BEŞİKTAŞ →', '↑ TAKSİM', 'ÜSKÜDAR →', '← ŞİŞLİ', 'SARIYER →', '↑ BOĞAZ KÖPRÜSÜ', '← FATİH', 'BAKIRKÖY →'];
+    const DIR = NAMES.yol.yon;
     const h = (Math.imul(c.cx, 73856093) ^ Math.imul(c.cy, 19349663)) >>> 0;
     const list = [round('#fff', '#d0121b', String(30 + (h % 4) * 10)), tri('!'), tri('⚠'), round('#fff', '#d0121b', '50'), stop];
     const E = ART_W - 6;
@@ -17930,10 +18119,10 @@ class UI {
     return (Array.isArray(names) && names[i]) || (car.paints[i] || car.paints[0]).name;
   }
 
-  // Açılış: koyu zeminde geliştirici yazısı, yumuşak belirip kaybolur (0,8 sn). Oyun arkada yüklenir
+  // Açılış: koyu zeminde geliştirici yazısı (Play Store sürümünde yalnız oyunun adı), yumuşak belirip kaybolur (0,8 sn)
   splash(done) {
     const el = $('splash');
-    $('splash-text').textContent = tx('splash', { name: DEVELOPER });
+    $('splash-text').textContent = NAMES.yapimci ? tx('splash', { name: NAMES.yapimci }) : NAMES.oyun;
     el.hidden = false;
     el.classList.add('play');
     setTimeout(() => {
@@ -18829,7 +19018,7 @@ const ui = new UI(storage, {
 });
 // iPhone/iPad: ana ekrana ekle rehberi (yalnız iOS Safari/Chrome, ana ekrandan açılmamışsa)
 initA2hs(() => audio.unlock());
-// Gençliğe Hitabe okuma kartı: anıta yaklaşınca açılır, uzaklaşınca ya da dokununca kapanır
+// Anıt okuma kartı (levha metni olan sürümde): anıta yaklaşınca açılır, uzaklaşınca ya da dokununca kapanır
 const memorialCard = new MemorialCard(document.getElementById('memorial-card'), () => game.dismissMemorialCard());
 // Gizli geçit: bodrum sahnesi ve karşılama yazısı. Arkadaş sürümünde ev sahibinin adı, Play sürümünde genel yazı
 const secretScene = new SecretScene(document.getElementById('secret'), document.getElementById('secret-msg'));

@@ -1,4 +1,4 @@
-// v20 Cumhuriyet Meydanı anıtı tarayıcı testi: düzen, gündüz/gece, okuma kartı (tam metin), sınırı geçince
+// Anıt tarayıcı testi (arkadaş: fotoğraflı gerçek anıt; Play Store: kurgusal heykel, metinsiz, kart açılmaz): düzen, gündüz/gece, okuma kartı (tam metin), sınırı geçince
 // patlama + oyun sonu + 30 para cezası (0'ın altına inmez), hile açıkken giremez, polis/trafik/yaya girmez,
 // mermi alana zarar vermez, 6 dilde uyarılar, konsol hatası yok. Ekran görüntüleri: e2e-out/v20/<sürüm>/
 // node tools/memorial-test.mjs <port> [play|arkadas]
@@ -9,7 +9,9 @@ const port = Number(process.argv[2] || 8080);
 const flavor = process.argv[3] || 'play';
 const OUT = `e2e-out/v20/${flavor}`;
 fs.mkdirSync(OUT, { recursive: true });
-const REF = fs.readFileSync('tests/fixtures/hitabe.txt', 'utf8').replace(/\r\n/g, '\n');
+// Gerçek anıt (fotoğraflar, Gençliğe Hitabe) yalnız arkadaş sürümünde. Play Store sürümünde kurgusal heykel, metin yok
+const REAL = flavor === 'arkadas';
+const REF = REAL ? fs.readFileSync('tests/fixtures/hitabe.txt', 'utf8').replace(/\r\n/g, '\n') : '';
 const LANGS = ['tr', 'en', 'ja', 'zh', 'es', 'de'];
 const I18N = {};
 for (const l of LANGS) I18N[l] = (await import(`../js/i18n/${l}.js`)).default.memorial;
@@ -29,6 +31,7 @@ async function open({ lang = 'tr', god = false, coins = 0, car = 'atmaca', t = 0
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errs.push(`${lang}: ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error') errs.push(`${lang}: ${m.text()}`); });
+  page.on('request', (r) => { if (!REAL && /gorseller\/ataturk/i.test(r.url())) errs.push(`Play sürümü gerçek fotoğraf istedi: ${r.url()}`); });
   await page.goto(`http://localhost:${port}/?t=${t}${god ? '&god=1' : ''}`);
   await page.waitForFunction(() => window.__drift && !document.getElementById('menu').hidden, null, { timeout: 30000 });
   await page.evaluate(() => __drift.play());
@@ -54,7 +57,8 @@ const cardOpen = (page) => page.evaluate(() => !document.getElementById('memoria
   await page.waitForTimeout(900);
   const L = await page.evaluate(() => __drift.renderer.memorial.layoutAt(__drift.game.world.memorialBox()));
   const [c, l, r, d] = L.frames;
-  ok(L.images.every((s) => s === 'ok'), 'dört fotoğraf yüklendi', L.images);
+  if (REAL) ok(L.images.length === 4 && L.images.every((s) => s === 'ok'), 'dört fotoğraf yüklendi', L.images);
+  else ok(L.real === false && L.images.length === 0, 'Play: fotoğraf yok, kurgusal heykel', JSON.stringify(L.images));
   const area = (f) => f.w * f.h;
   ok(area(c) > area(l) && area(c) > area(r) && area(c) > area(d), 'ortada en büyük: ataturk-1');
   ok(l.x + l.w <= c.x && Math.abs((l.y + l.h / 2) - (c.y + c.h / 2)) < c.h / 2, 'solda ataturk-2');
@@ -62,8 +66,12 @@ const cardOpen = (page) => page.evaluate(() => !document.getElementById('memoria
   ok(d.y >= c.y + c.h && Math.abs((d.x + d.w / 2) - (c.x + c.w / 2)) < 2, 'altta ataturk-4');
   ok(L.plaque.y + L.plaque.h <= c.y && L.plaque.w > c.w * 1.8, 'üstte uzun levha');
   ok(L.flag.y + L.flag.h <= c.y && L.flag.y >= L.plaque.y + L.plaque.h, 'portrenin üstünde bayrak');
-  ok(L.title === 'Gençliğe Hitabe' && L.year === '1927', 'levha başlığı ve 1927', `${L.title} ${L.year}`);
-  ok(L.motto.text === 'Ne mutlu Türküm diyene!' && L.signature.text === 'Gazi Mustafa Kemal Atatürk' && L.motto.y > d.y + d.h, 'alt satırlar');
+  if (REAL) {
+    ok(L.title === 'Gençliğe Hitabe' && L.year === '1927', 'levha başlığı ve 1927', `${L.title} ${L.year}`);
+    ok(L.motto.text === 'Ne mutlu Türküm diyene!' && L.signature.text === 'Gazi Mustafa Kemal Atatürk' && L.motto.y > d.y + d.h, 'alt satırlar');
+  } else {
+    ok(L.title === '' && L.year === '' && L.motto.text === '' && L.signature.text === '', 'Play: levhada ve altta gerçek kişi adı ya da metin yok', JSON.stringify([L.title, L.motto.text, L.signature.text]));
+  }
   // Ekranda fotoğraf çizildi mi: çerçeve içinde renk çeşitliliği (yer tutucu düz renktir)
   const variety = await page.evaluate((frames) => {
     const R = __drift.renderer; const cv = document.getElementById('game'); const g = cv.getContext('2d');
@@ -75,7 +83,7 @@ const cardOpen = (page) => page.evaluate(() => !document.getElementById('memoria
       return Math.round(Math.sqrt(s2 / n - (s / n) ** 2)); // Parlaklık sapması: düz yer tutucuda ~0
     });
   }, L.frames);
-  ok(variety.every((v) => v > 12), 'dört çerçevede fotoğraf görünüyor (parlaklık sapması)', variety);
+  ok(variety.every((v) => v > 12), REAL ? 'dört çerçevede fotoğraf görünüyor (parlaklık sapması)' : 'dört çerçevede heykel ve kabartma çizili (parlaklık sapması)', variety);
   ok(await page.evaluate(() => document.fonts.check("700 20px 'Playfair Display'", 'Gençliğe âîû')), 'Türkçe karakterli serif yazı tipi yüklü');
   await page.screenshot({ path: `${OUT}/1-gunduz-genel.png` });
   await holdAt(page, 60, 740);
@@ -96,8 +104,19 @@ const cardOpen = (page) => page.evaluate(() => !document.getElementById('memoria
   await ctx.close();
 }
 
-// --- 2) Okuma kartı ---
-{
+// --- 2) Okuma kartı (Play: metin yok, kart hiç açılmaz) ---
+if (!REAL) {
+  const { ctx, page } = await open({ god: true });
+  const MC = await page.evaluate(() => __drift.cfg.memorial);
+  await holdAt(page, MC.readDist - 60);
+  await page.waitForTimeout(600);
+  ok(!(await cardOpen(page)), 'Play: anıta yaklaşınca okuma kartı açılmıyor');
+  const t = await page.evaluate(() => ({ text: document.getElementById('memorial-card').textContent, state: __drift.game.state }));
+  ok(t.text === '' && t.state === 'play', 'Play: kart boş, oyun sürüyor', JSON.stringify(t));
+  await page.screenshot({ path: `${OUT}/4-play-yakin.png` });
+  await release(page);
+  await ctx.close();
+} else {
   const { ctx, page } = await open({ god: true });
   const MC = await page.evaluate(() => __drift.cfg.memorial);
   await holdAt(page, 1600);
@@ -198,9 +217,9 @@ for (const lang of LANGS) {
   ok(over.mem === coins - cut && over.saved === coins - cut, `${lang}: para ${coins} -> ${coins - cut}, kalıcı kayıt`, `${over.mem}/${over.saved}`);
   ok(over.result.coins === 0 && over.result.penalty === 30, `${lang}: koşu kazancı yok, ceza 30`);
   if (lang === 'tr' || lang === 'de') await page.screenshot({ path: `${OUT}/7-oyun-bitti-${lang}.png` });
-  // Hitabe kartı her dilde Türkçe kalır
+  // Hitabe kartı her dilde Türkçe kalır (Play: kart metni yok)
   const cardText = await page.evaluate(() => __drift.memorialCard.text());
-  ok(cardText === REF, `${lang}: Hitabe çevrilmedi`);
+  ok(cardText === REF, REAL ? `${lang}: Hitabe çevrilmedi` : `${lang}: kart metni yok`);
   await release(page);
   await ctx.close();
 }
@@ -277,7 +296,7 @@ for (const [w, h] of [[360, 740], [844, 390]]) {
       return { m: m.left >= 0 && m.right <= innerWidth, t: t.scrollWidth <= innerWidth };
     }, T);
     ok(fit.m && fit.t, `${lang} ${w}x${h}: yazılar sığıyor`, JSON.stringify(fit));
-    if (w > h && lang === 'tr') {
+    if (REAL && w > h && lang === 'tr') {
       await holdAt(page, 300); await page.waitForTimeout(600);
       const r = await page.evaluate(() => { const e = document.getElementById('memorial-card'); const b = e.getBoundingClientRect(); return { open: !e.hidden, b: b.bottom, h: innerHeight, l: b.left, r: b.right, w: innerWidth }; });
       ok(r.open && r.b < r.h * 0.75 && r.l >= 0 && r.r <= r.w, 'yatay ekranda kart sığıyor', JSON.stringify(r));
