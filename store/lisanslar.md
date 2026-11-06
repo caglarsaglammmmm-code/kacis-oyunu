@@ -7,7 +7,7 @@ Kontrol: `node tools/play-clean.mjs --media` paketteki tüm medya dosyalarını 
 
 | Dosya | Kaynak | Lisans |
 |---|---|---|
-| gorseller/drift-lab-cover.png (DRIFT LAB kapak görseli), gorseller/start-button.png (sarı-siyah START düğmesi) | Kullanıcının verdiği iki kaynak görsel (Masaüstü\ai oyun görsel klasörü, 2 Kasım 2026). Hangi araçla üretildiği ve kullanım koşulları **kullanıcı tarafından teyit edilmeli** | Kullanıcıya göre proje sahibine ait (teyit bekliyor) |
+| gorseller/drift-lab-cover.png (DRIFT LAB kapak görseli), gorseller/start-button.png (sarı-siyah START düğmesi) | Kullanıcı Google Gemini ile üretti (Masaüstü, "ai oyun görsel" klasörü, 2 Kasım 2026); kullanıcı oyunda kullanımını onayladı | Kullanıcıya ait (Gemini ile üretilmiş) |
 | assets/ui/*.png (BAŞLA düğmesi, kapak, çerçeve, garaj arka planı, plaka, uyarı şeridi) | Yukarıdaki iki kaynak görselden `tools/make-pixel-assets.mjs` ve `tools/make-start-button.mjs` ile türetildi | Kaynak görsellere bağlı |
 | icons/*.png, gorseller/play-store/icon-512.png ve feature-1024x500.png | Kapak görselinden `tools/make-pixel-assets.mjs`, `tools/apple-icon.mjs` ile türetildi | Kaynak görsellere bağlı |
 | assets/cars.webp (araç sprite sayfası) | Projede kodla üretildi: `tools/bake-cars.mjs` (`js/cars.js`, `js/pixelcars.js` çizimleri) | Proje sahibine ait |
@@ -48,4 +48,4 @@ Ses dosyası yoktur. Motor, egzoz, siren, patlama ve arayüz sesleri oyun içind
 
 ## Lisansı belirsiz kalan
 
-- Kapak ve START düğmesi kaynak görselleri (yukarıda): kullanıcının verdiği yapay zekâ görselleri; üretildikleri aracın ticari kullanım koşulları teyit edilmeli. Kapaktaki pembe araba logosuz ve adsızdır, ama 1990lar Japon drift coupe tarzındadır; gerçek bir modele benzerlik riski düşük olsa da tamamen sıfır değildir.
+Yok. Kapak ve START görselleri Google Gemini ile kullanıcı tarafından üretildi ve kullanıcı oyunda kullanılmasını onayladı (6 Kasım 2026). Görsellerde marka adı ve logo yoktur. Kapaktaki pembe araba 1990lar Japon drift coupe tarzındadır; kullanıcı görselin olduğu gibi kalmasını istedi.

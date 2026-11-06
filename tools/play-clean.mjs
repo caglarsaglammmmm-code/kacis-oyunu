@@ -51,8 +51,9 @@ const MEDIA = /\.(png|jpe?g|webp|gif|mp3|ogg|wav|m4a|woff2?|ttf|otf)$/i;
 // Yapımcı adı yalnız ana menünün altındaki yapımcı satırında (i18n menu.maker) bulunabilir (kullanıcı isteği)
 // Kural: adın hemen önünde, aynı tırnak içinde "maker:" anahtarı olmalı (ör. maker: 'Made by …' ya da maker:"制作：…")
 const MAKER_OK = (t, i) => /maker\s*:\s*['"`][^'"`\n]{0,30}$/.test(t.slice(Math.max(0, i - 60), i));
-// GitHub hesap adı: Android paketinde hiç olmamalı (web sürümü zaten bu hesabın Pages adresinde barınır)
-const ACCOUNT = /caglarsaglam/g;
+// GitHub hesap adı: Android paketinde olmamalı (web sürümü zaten bu hesabın Pages adresinde barınır).
+// Tek istisna, kullanıcının verdiği gizlilik iletişim e-postası (privacy.html)
+const ACCOUNT = /caglarsaglam(?!mmmm@gmail\.com)/g;
 
 function scanText(text, pkg) {
   const out = [];
