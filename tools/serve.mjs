@@ -28,7 +28,8 @@ http.createServer(async (req, res) => {
     return;
   }
   // Anıt içeriği sürüme göre: arkadaş sürümünde gerçek (names/anit-gercek.js)
-  const real = flavor === 'arkadas' && pathname === '/js/memorial-data.js' ? '/names/anit-gercek.js' : pathname;
+  const ARK = { '/js/memorial-data.js': '/names/anit-gercek.js', '/js/secret-look.js': '/names/gizli-bina.js' };
+  const real = flavor === 'arkadas' && ARK[pathname] ? ARK[pathname] : pathname;
   const file = path.normalize(path.join(root, real === '/' ? 'index.html' : real));
   if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
     res.writeHead(404).end('Bulunamadı');

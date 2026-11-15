@@ -34,7 +34,7 @@ test('direksiyon: ±135° sınırlı, açıyla orantılı, basıldığı yerden 
   for (let k = 0; k < 30; k++) steps.push(() => {});
   track(i, steps);
   assert.ok(Math.abs(i.wheelS - Math.PI / 2) < 0.03, `90° ${i.wheelS}`);
-  assert.ok(Math.abs(i.steer - (Math.PI / 2) / WHEEL_MAX) < 0.03, 'orantılı');
+  assert.ok(Math.abs(i.axis - (Math.PI / 2) / WHEEL_MAX) < 0.03, 'ham değer orantılı');
   for (let d = 0; d <= 200; d += 5) i.move(1, ...at(d));
   assert.equal(i.wheelA, WHEEL_MAX, 'tam kilitten öteye gitmez');
   // Kilitteyken geri çevirince hemen tepki verir
@@ -136,7 +136,7 @@ test('joystick: basılan nokta merkez; kenarda basınca ani dönüş yok; ölü 
   assert.equal(i.steer, 0, 'kenarda basınca ilk hareket dönüş yapmaz (eskiden tam sola atlardı)');
   const steps = [];
   for (let x = 9; x <= 6 + STICK_R + 40; x += 4) steps.push(() => i.move(1, x, 400));
-  for (let n = 0; n < 30; n++) steps.push(() => {});
+  for (let n = 0; n < 60; n++) steps.push(() => {});
   report.stickSweep = +track(i, steps).toFixed(3);
   assert.ok(i.steer > 0.97, 'tam sağ');
   assert.ok(report.stickSweep < 0.15, `süpürme ${report.stickSweep}`);

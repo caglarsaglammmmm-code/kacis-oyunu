@@ -217,9 +217,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '24.0.0',
+  version: '24.1.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -565,26 +565,35 @@ const CONFIG = {
     lead: 0.45,
   },
 
+  // Puan miktarları odul bloğunda. Burada yalnız kombo çarpanı (dojlama ve makas puanını çarpar)
   score: {
-    perSecond: 10,
-    kill: 100,
-    prop: 10,
-    driftPerSecond: 30,
-    nearMiss: 50,
     comboTime: 3.5,
     comboMax: 5,
     comboDriftStep: 0.15, // Drift saniyesi başına çarpan artışı
     comboNearStep: 0.5,
     comboKillStep: 0.25,
-    nearMissDist: 66,
-    nearMissSpeed: 130,
-    coinPerSeconds: 8, // Bitişte her bu kadar saniye için 1 coin
-    coinPerNearMisses: 2, // Her bu kadar yakın kaçış için 1 coin
-    coinPerKill: 2,
-    earnMul: 1.3, // Koşu sonu kazancı (toplanan, süre, devrilen polis, yakın kaçış) bu kadar artar; fiyatlar aynı
   },
 
   coin: { magnet: 56, dropChance: 0.3 },
+
+  // === PARA VE PUAN: YALNIZ İKİ YOLDAN ===
+  // a) Polisi dojlamak: polis arabasına çok yaklaşıp değmeden kurtulmak (kıl payı kaçış)
+  // b) Makas: trafikteki bir arabanın yanından çok yakın ama değmeden geçmek
+  // Başka hiçbir şey (süre, drift, duvar, bariyer, nesne kırma, polis devirme, yerdeki paralar) para ya da puan vermez.
+  // Yakınlık penceresi boyunca oyuncu herhangi bir şeye (duvar, bariyer, nesne, araç) değerse o geçiş ödülsüz kalır.
+  //   polisEsik / makasEsik: iki araç arası boşluk eşiği (px, araba ~24 px eninde). Büyük = daha kolay ödül
+  //   polisPara / makasPara: [en az, en çok] para.  polisPuan / makasPuan: puan (o anki kombo çarpanıyla)
+  //   polisBekleme / makasBekleme: aynı arabadan bir sonraki ödül için en az süre (sn): yerinde dönerek kasılmaz
+  //   makasAracBasi: bir trafik arabasından en çok kaç ödül alınır (araba yeniden doğunca sıfırlanır)
+  //   makasHiz: makas için oyuncunun en düşük hızı; makasBagilHiz: iki aracın bağıl hızı (duran arabaya makas olmaz)
+  //   genelAra: iki ödül arası en az süre (sn), enUzunYakinlik: yanında bundan uzun kalınırsa geçiş sayılmaz (sn),
+  //   enAzYol: yakınlık penceresinde en az yol (px), cikis: pencereden çıkış eşiği (giriş eşiğinin katı)
+  odul: {
+    polisEsik: 36, polisPara: [5, 10], polisPuan: 150, polisBekleme: 3,
+    makasEsik: 26, makasPara: [2, 4], makasPuan: 75, makasBekleme: 8, makasAracBasi: 2, makasHiz: 200, makasBagilHiz: 140,
+    genelAra: 0.5, enUzunYakinlik: 1.6, enAzYol: 70, cikis: 1.35,
+    yerdekiParalar: false, // true yapılırsa yolda toplanan paralar geri gelir (kural dışı kazanç)
+  },
 
   // HAVA DURUMU: her koşu başında seçilir (ayar: random ya da sabit). grip: lastik tutuşu çarpanı (oyuncu),
   // copShare: polisler etkinin bu kadarını hisseder (adil kalsın), fade: geçiş süresi (sn),
@@ -753,7 +762,8 @@ const CONFIG = {
   // cooldown: aynı polisten tekrar ödül için bekleme (sn), globalGap: iki ödül arası en kısa süre,
   // maxClose: bundan uzun yakında kalmak sıkışmadır (ödül yok), minTravel: yakında geçerken alınan en kısa yol,
   // comboEvery / comboBonus / comboWindow: art arda kaçışlarda her N'de bir küçük ek
-  escape: { distMul: 1.5, exitMul: 1.35, minSpeed: 220, min: 5, max: 10, cooldown: 3, globalGap: 0.5, maxClose: 1.6, minTravel: 70, comboEvery: 3, comboBonus: 2, comboWindow: 8 },
+  // Eşik, ödül ve bekleme süreleri odul bloğunda (polis*). Burada: en düşük hız ve art arda kaçış kombosu
+  escape: { minSpeed: 220, comboEvery: 3, comboBonus: 2, comboWindow: 8 },
 
   // Sokak insanları. density: zemin başına doğma olasılığı (GROUND sırasıyla)
   // voice: bağırma sesi, road: yolda gider, dodge: asla çarpılmaz, safe: araç değmez ve kenara kaçar, fx: özel dağılma
@@ -963,7 +973,7 @@ const TR = {
     rev: 'GERİ',
   },
   alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!', meteors: 'METEOR YAĞMURU!' },
-  escape: { toast: '+{n} KIL PAYI!', combo: 'KOMBO +{n}' },
+  escape: { toast: '+{n} KIL PAYI!', makas: '+{n} MAKAS!', combo: 'KOMBO +{n}' },
   code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.' },
   custom: {
     title: 'Özelleştir', paint: 'Boya', rim: 'Jant', led: 'Alt LED', exhaust: 'Egzoz', listen: 'Dinle', buy: 'Satın al · {cost}', confirm: 'Onayla · {cost}', poor: 'Yetersiz para', bought: 'Satın alındı!', use: 'Zaten açık', ownFirst: 'Özelleştirmek için önce arabayı al.',
@@ -1067,7 +1077,7 @@ const EN = {
     rev: 'REV',
   },
   alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!', meteors: 'METEOR SHOWER!' },
-  escape: { toast: '+{n} CLOSE CALL!', combo: 'COMBO +{n}' },
+  escape: { toast: '+{n} CLOSE CALL!', makas: '+{n} NEAR MISS!', combo: 'COMBO +{n}' },
   code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.' },
   custom: {
     title: 'Customize', paint: 'Paint', rim: 'Rims', led: 'Underglow', exhaust: 'Exhaust', listen: 'Listen', buy: 'Buy · {cost}', confirm: 'Confirm · {cost}', poor: 'Not enough coins', bought: 'Purchased!', use: 'Already unlocked', ownFirst: 'Buy the car first to customize it.',
@@ -1171,7 +1181,7 @@ const JA = {
     rev: 'バック',
   },
   alert: { swat: 'SWAT出動！', heavy: '重装増援！', tanks: '戦車だ！', aliens: 'エイリアン襲来！', meteors: '隕石の雨！' },
-  escape: { toast: '+{n} ギリギリ回避！', combo: 'コンボ +{n}' },
+  escape: { toast: '+{n} ギリギリ回避！', makas: '+{n} ニアミス！', combo: 'コンボ +{n}' },
   code: { title: 'コード入力', apply: '適用', ok: 'コード承認！{car}がガレージに追加されたよ。', owned: 'この車はもう持っているよ。', invalid: '無効なコードです。', empty: 'まずコードを入力してね。' },
   custom: {
     title: 'カスタマイズ', paint: '塗装', rim: 'ホイール', led: 'アンダーネオン', exhaust: 'マフラー', listen: '試聴', buy: '購入 · {cost}', confirm: '確認 · {cost}', poor: 'コインが足りません', bought: '購入しました！', use: '解放済み', ownFirst: 'カスタマイズするには先に車を買おう。',
@@ -1275,7 +1285,7 @@ const ZH = {
     rev: '倒车',
   },
   alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！', meteors: '流星雨来袭！' },
-  escape: { toast: '+{n} 惊险脱身！', combo: '连击 +{n}' },
+  escape: { toast: '+{n} 惊险脱身！', makas: '+{n} 擦肩而过！', combo: '连击 +{n}' },
   code: { title: '输入代码', apply: '确定', ok: '代码已接受！{car} 已加入你的车库。', owned: '这辆车你已经有了。', invalid: '无效代码。', empty: '请先输入代码。' },
   custom: {
     title: '改装', paint: '涂装', rim: '轮毂', led: '底盘灯', exhaust: '排气', listen: '试听', buy: '购买 · {cost}', confirm: '确认 · {cost}', poor: '金币不足', bought: '购买成功！', use: '已解锁', ownFirst: '先购买这辆车才能改装。',
@@ -1379,7 +1389,7 @@ const ES = {
     rev: 'ATRÁS',
   },
   alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!', meteors: '¡LLUVIA DE METEORITOS!' },
-  escape: { toast: '+{n} ¡POR LOS PELOS!', combo: 'COMBO +{n}' },
+  escape: { toast: '+{n} ¡POR LOS PELOS!', makas: '+{n} ¡RASANTE!', combo: 'COMBO +{n}' },
   code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.' },
   custom: {
     title: 'Personalizar', paint: 'Pintura', rim: 'Llantas', led: 'Luz inferior', exhaust: 'Escape', listen: 'Escuchar', buy: 'Comprar · {cost}', confirm: 'Confirmar · {cost}', poor: 'Monedas insuficientes', bought: '¡Comprado!', use: 'Ya desbloqueado', ownFirst: 'Compra el coche para personalizarlo.',
@@ -1483,7 +1493,7 @@ const DE = {
     rev: 'RÜCK',
   },
   alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!', meteors: 'METEORITENHAGEL!' },
-  escape: { toast: '+{n} HAARSCHARF!', combo: 'COMBO +{n}' },
+  escape: { toast: '+{n} HAARSCHARF!', makas: '+{n} KNAPP VORBEI!', combo: 'COMBO +{n}' },
   code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.' },
   custom: {
     title: 'Anpassen', paint: 'Lack', rim: 'Felgen', led: 'Unterboden', exhaust: 'Auspuff', listen: 'Anhören', buy: 'Kaufen · {cost}', confirm: 'Bestätigen · {cost}', poor: 'Nicht genug Münzen', bought: 'Gekauft!', use: 'Schon freigeschaltet', ownFirst: 'Kaufe zuerst das Auto, um es anzupassen.',
@@ -1660,7 +1670,8 @@ function stepCar(c, steerIn, throttle, spec, surf, dt) {
   const dir = vF >= 0 ? 1 : -1;
   // Duvara dayalı duran araç da burnunu yavaşça çevirebilir: direksiyon kırılıysa kilitlenmez
   const speedFactor = Math.max(throttle !== 0 ? P.pivot : 0, Math.min(1, speed / P.lowTurnSpeed)) * (1 - 0.1 * Math.min(1, speed / spec.maxSpeed));
-  const yawTarget = c.steer * spec.turnRate * (1 + P.agileTurn * agile) * speedFactor * dir;
+  // yawMul: yalnız oyuncuda, direksiyon/joystick modunda dönüşü yumuşatır (js/input.js DONUS_HIZI)
+  const yawTarget = c.steer * spec.turnRate * (c.yawMul || 1) * (1 + P.agileTurn * agile) * speedFactor * dir;
   c.w += (yawTarget - c.w) * (1 - Math.exp(-(P.yawResponse + P.agileYaw * agile) * dt));
 
   // 4) Bırakınca burun gidiş yönüne döner
@@ -1762,6 +1773,11 @@ function wrapAngle(a) {
   while (a < -Math.PI) a += Math.PI * 2;
   return a;
 }
+
+// --- secret-look.js ---
+// Gizli geçidin ek görünüşü. Bu sürümde yoktur: geçit neredeyse görünmeyen eski rampadır (render.js bakeRamp).
+// Arkadaş derlemesi bu dosyanın yerine kendi görünüşünü koyar (tools/flavor.mjs). Mantık, yer ve ödül her iki sürümde aynıdır.
+const SECRET_LOOK = null;
 
 // --- world.js ---
 // Sonsuz şehir. Her chunk yalnızca kendi koordinatından ve tohumdan üretilir.
@@ -2249,7 +2265,7 @@ class World {
     // Kayıt yeniden kullanılır: önceki binanın tabela görüntüsü kalmasın (render.js rectSign önbelleği)
     r.signImg = null;
     r.landmark = ''; r.signArt = ''; r.roofSignH = 0; r.noRoofSign = false; r.variant = '';
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false; r.memorial = false; r.stadium = "";
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false; r.memorial = false; r.stadium = ""; r.secretLook = false;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -3113,6 +3129,20 @@ class World {
     }
     // Zemin çevresiyle aynı toprak: tek ipucu rampanın çok hafif gölgesi (render.js bakeRamp)
     this.addPad(c, 'gecit', rx0, ry0, rx1 - rx0, ry1 - ry0);
+    // Arkadaş sürümü: rampanın kuzeyinde bina, rampa onun girişidir (js/secret-look.js). Yer ve tetik aynı.
+    // Zar durumu korunur: şehrin geri kalanı iki sürümde birebir aynı üretilir
+    if (SECRET_LOOK) {
+      const st = rngState;
+      const [bx0, by0, bx1, by1] = SECRET_LOOK.bina;
+      const r = this.addRect(c, 'building', bx0, by0, bx1, by1, 0, B.FACTORY, '#e0b23a');
+      r.secretLook = true; r.sacred = true; r.noRoofSign = true;
+      rngState = st;
+      for (let i = 0; i < c.propCount; i++) {
+        const p = c.props[i];
+        const tx = (p.x - c.x) / TILE; const ty = (p.y - c.y) / TILE;
+        if (tx > bx0 - 1 && tx < bx1 + 1 && ty > by0 - 1 && ty < by1 + 1) p.alive = false;
+      }
+    }
   }
 
   fillPark(c) {
@@ -3424,7 +3454,8 @@ class World {
       const vertical = chance(0.5);
       const s = rint(7, 18);
       const lane = chance(0.5) ? 30 : 90;
-      for (let i = 0; i < 5; i++) {
+      // Yerdeki paralar kural dışı kazançtır (odul.yerdekiParalar); zar yine atılır, şehir aynı üretilir
+      for (let i = 0; i < 5 && CONFIG.odul.yerdekiParalar; i++) {
         const along = (s + i * 0.9) * TILE;
         this.addProp(c, PROP.COIN, c.x + (vertical ? lane : along), c.y + (vertical ? along : lane));
       }
@@ -3443,7 +3474,7 @@ class World {
     const solid = (x, y) => x >= 0 && y >= 0 && x < CT && y < CT && c.rectAt[y * CT + x] !== 0;
     for (let i = 0; i < c.rectCount; i++) {
       const r = c.rects[i];
-      if (r.kind !== 'building') continue;
+      if (r.kind !== 'building' || r.secretLook) continue; // Gizli geçit binası tam karo: kapısı rampaya dayanır
       const x0 = Math.floor((r.x - c.x) / TILE);
       const y0 = Math.floor((r.y - c.y) / TILE);
       const x1 = Math.ceil((r.x + r.w - c.x) / TILE);
@@ -4177,6 +4208,7 @@ class Crowd {
     h.cruise = a + (b - a) * ((HWC.lanes - lane) / HWC.lanes) * (0.8 + Math.random() * 0.2);
     h.speed = h.cruise; h.hitT = 0; h.hornT = 0;
     h.vx = dir * h.speed; h.vy = 0;
+    h.escIn = false; h.escAt = -99; h.passN = 0; // Makas sayacı: yeni araç yeniden ödül verebilir
   }
 
   updateHighway(dt, g) {
@@ -4606,6 +4638,7 @@ class Crowd {
     n.spec = spec;
     n.state = 'drive';
     n.sinkT = 0; n.pushT = 0;
+    n.escIn = false; n.escAt = -99; n.passN = 0; // Makas sayacı: yeni araç yeniden ödül verebilir
     n.dir = dir;
     n.line = line;
     n.color = Math.floor(Math.random() * spec.colors.length);
@@ -5141,6 +5174,7 @@ const D = CONFIG.difficulty;
 const DMG = CONFIG.damage;
 const AI = CONFIG.policeAI;
 const SC = CONFIG.score;
+const OD = CONFIG.odul; // Para ve puan yalnız polisi dojlamak ve makastan (config.js odul)
 const BAR = CONFIG.barricade;
 const TK = CONFIG.tank;
 const PW = CONFIG.powers;
@@ -5335,6 +5369,8 @@ class Game {
     this.escCoins = 0;
     this.escCombo = 0;
     this.escLastT = -99;
+    this.bumpT = -99; // Oyuncunun en son bir şeye (duvar, bariyer, nesne, araç) değdiği an: o geçiş ödülsüz
+    this.passes = 0; // Makas (trafik yakın geçiş) sayısı
     this.cheat = false; // Kaydedilmez, her koşu kapalı başlar
     this.penalty = 0; // Anıta saygısızlık cezası (para)
     this.mem = { warned: false, reading: false, dismissed: false, dist: Infinity };
@@ -5551,6 +5587,7 @@ class Game {
     this.meteors.update(this, dt);
     if (this.state !== 'play') return;
     this.crowd.update(dt);
+    this.checkTraffic();
     this.director(dt);
     this.updatePowers(dt);
     this.updateShots(dt);
@@ -5912,11 +5949,9 @@ class Game {
   finish() {
     this.state = 'over';
     if (this.giantT > 0) this.setGiant(false);
-    // Hile kullanılan koşu kazandırmaz, rekor saymaz
-    // Kıl payı paraları ayrıca eklenir; geri kalan kazanç earnMul ile yumuşatılır
-    const base = this.coins - this.escCoins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
+    // Hile kullanılan koşu kazandırmaz, rekor saymaz. Kazanç yalnız polisi dojlama ve makas paralarıdır (odul)
     const memorial = this.cause === 'memorial';
-    const earned = this.cheatUsed || memorial ? 0 : Math.round(base * SC.earnMul) + this.escCoins;
+    const earned = this.cheatUsed || memorial ? 0 : this.coins;
     this.result = {
       score: Math.floor(this.score),
       time: this.time,
@@ -5961,6 +5996,7 @@ class Game {
       }
       b.x += hit.nx * hit.depth;
       b.y += hit.ny * hit.depth;
+      if (isPlayer) this.bumpT = this.runTime; // Duvar ve bariyer teması: süren geçiş ödül vermez
       let impact = bounceOff(b, hit.nx, hit.ny);
       if (b.graze) impact *= DMG.grazeScale; // Sürtme sayılır: hasar ve sarsıntı çok az
       if (impact > best) best = impact;
@@ -6036,7 +6072,7 @@ class Game {
             continue;
           }
           if (pr.kind === PROP.COIN) {
-            if (!isPlayer) continue;
+            if (!isPlayer || !OD.yerdekiParalar) continue;
             const m = CONFIG.coin.magnet;
             if (dx * dx + dy * dy < m * m) {
               pr.alive = false;
@@ -6051,6 +6087,7 @@ class Game {
           const rr = info.r + R;
           const d2 = dx * dx + dy * dy;
           if (d2 >= rr * rr) continue;
+          if (isPlayer) this.bumpT = this.runTime; // Nesneye değdi: süren geçiş ödül vermez
           const speed = Math.hypot(b.vx, b.vy);
           if (!info.safe && (speed >= info.brk || b.crusher || b.breaker || (isPlayer && this.giantT > 0))) {
             this.breakProp(b, pr, info, isPlayer);
@@ -6077,15 +6114,14 @@ class Game {
     if (pr.kind === PROP.PARKED) this.fx.sparks(pr.x, pr.y, 10);
     if (!isPlayer) return;
     this.broken++;
-    this.addHeat(PU.heat.prop);
-    this.addScore(SC.prop, pr.x, pr.y);
+    this.addHeat(PU.heat.prop); // Nesne kırmak para ve puan vermez (odul)
     if (info.dmg > 0) this.hurt(info.dmg / this.carSpec.durability);
     this.emit('break', info.drag);
     if (info.snd) {
       this.emit(info.snd);
       if (pr.kind === PROP.SIMITCART) this.fx.burst(FX.SIMIT, pr.x, pr.y, 10, 210, 1.2, 7);
     }
-    if (info.coin && Math.random() < CONFIG.coin.dropChance) {
+    if (OD.yerdekiParalar && info.coin && Math.random() < CONFIG.coin.dropChance) {
       this.world.dropCoin(pr.x + (Math.random() - 0.5) * 30, pr.y + (Math.random() - 0.5) * 30);
     }
   }
@@ -6116,6 +6152,7 @@ class Game {
       }
     }
     if (bestD <= 0) return 0;
+    if (a === this.player || b === this.player) this.bumpT = this.runTime; // Araç teması: süren geçiş ödül vermez
     const ma = a.staticBody ? 1e6 : a.mass;
     const mb = b.staticBody ? 1e6 : b.mass;
     const ia = 1 / ma;
@@ -6209,8 +6246,8 @@ class Game {
     this.fx.debris(c.x, c.y, '#f4f4f4', 6, 240);
     this.kills++;
     this.addHeat(PU.heat.kill);
-    this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.alien ? 4 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
-    if (Math.random() < 0.6) this.world.dropCoin(c.x, c.y);
+    if (byPlayer) this.bumpCombo(SC.comboKillStep); // Devirmek puan ve para vermez (odul), yalnız kombo
+    if (OD.yerdekiParalar && Math.random() < 0.6) this.world.dropCoin(c.x, c.y);
     const near = Math.hypot(c.x - this.player.x, c.y - this.player.y) < 500;
     this.emit('copdown', near ? 1 : 0.4);
     if (near) this.cam.shake = Math.min(12, this.cam.shake + 5);
@@ -6312,19 +6349,7 @@ class Game {
           if (rv > 1) this.copContact(c, rv, i);
           if (i >= this.cops.length || this.cops[i] !== c) continue;
         }
-        // Yakın kaçış
-        if (this.ghostT <= 0 && !this.cheat && c.nearCd <= 0 && c.hitCd <= 0 && dist < SC.nearMissDist + c.wid * 0.5 && c.state === 'chase') {
-          const rvx = p.vx - c.vx;
-          const rvy = p.vy - c.vy;
-          const rel = Math.hypot(rvx, rvy);
-          if (rel > SC.nearMissSpeed && dist > (c.wid + p.wid) * 0.55 && rvx * -dx + rvy * -dy > 0) {
-            c.nearCd = 2.5;
-            this.nearMisses++;
-            this.addHeat(PU.heat.nearMiss);
-            this.addScore(SC.nearMiss, p.x, p.y - 30, SC.comboNearStep, '#7af6ff');
-            this.emit('nearmiss');
-          }
-        }
+        // Polisi dojlamak: puan ve para checkEscape içinde, tek yerden
         this.checkEscape(c, dist);
         if (dist < nearest) {
           nearest = dist;
@@ -6385,38 +6410,95 @@ class Game {
     this.emit('gunhit', dead ? 1 : 0.3);
   }
 
-  // Kıl payı kaçış: polis yakın bölgeye girer, değmeden çıkarsa ödül. Ödül çıkış anında verilir
-  checkEscape(c, dist) {
+  // Yakınlık penceresi: araç (polis ya da trafik) eşiğe girer, değmeden ve hiçbir şeye çarpmadan çıkarsa ödül.
+  // Ödül çıkış anında verilir. Eşik: iki araç arası boşluk (esik px) + iki aracın ortalama yarı boyu
+  passZone(o, esik) {
     const p = this.player;
-    const zone = p.wid * ESC.distMul + (p.len + p.wid + c.len + c.wid) / 4;
-    if (!c.escIn) {
-      if (dist < zone && this.escapeEligible(c)) {
-        c.escIn = true; c.escHit = false; c.escEnterT = this.runTime; c.escX = p.x; c.escY = p.y;
+    return esik + (p.len + p.wid + o.len + o.wid) / 4;
+  }
+
+  // Pencere adımı. true: pencereden temiz çıkıldı (araç başı bekleme çağıran tarafta)
+  passStep(o, dist, zone, eligible) {
+    const p = this.player;
+    if (!o.escIn) {
+      if (dist < zone && eligible) {
+        o.escIn = true; o.escHit = false; o.escEnterT = this.runTime; o.escX = p.x; o.escY = p.y;
       }
-      return 0;
+      return false;
     }
-    if (dist < zone * ESC.exitMul) {
-      if (this.runTime - c.escEnterT > ESC.maxClose) c.escHit = true; // Yanında uzun kaldı: sıkışma ya da dönüp durma
-      return 0;
+    if (dist < zone * OD.cikis) {
+      if (this.runTime - o.escEnterT > OD.enUzunYakinlik) o.escHit = true; // Yanında uzun kaldı: sıkışma ya da dönüp durma
+      return false;
     }
-    c.escIn = false;
-    // Girişten hemen önceki temas da sayılır: çarpışma aynı karede bölgeye girişten önce işlenir
-    if (c.escHit || c.escHitAt >= c.escEnterT - 0.1 || !this.escapeEligible(c)) return 0;
-    if (this.runTime - c.escAt < ESC.cooldown || this.runTime - this.escLastT < ESC.globalGap) return 0;
-    if (Math.hypot(p.x - c.escX, p.y - c.escY) < ESC.minTravel) return 0;
+    o.escIn = false;
+    // Girişten hemen önceki temas da sayılır: çarpışma aynı karede bölgeye girişten önce işlenir.
+    // Pencere boyunca duvara, bariyere, nesneye ya da herhangi bir araca değmek geçişi bozar
+    if (o.escHit || (o.escHitAt ?? -99) >= o.escEnterT - 0.1 || this.bumpT >= o.escEnterT - 0.1 || !eligible) return false;
+    if (this.runTime - this.escLastT < OD.genelAra) return false;
+    return Math.hypot(p.x - o.escX, p.y - o.escY) >= OD.enAzYol;
+  }
+
+  // Polisi dojlamak: polis yakın bölgeye girer, değmeden çıkarsa para ve puan
+  checkEscape(c, dist) {
+    if (!this.passStep(c, dist, this.passZone(c, OD.polisEsik), this.escapeEligible(c))) return 0;
+    if (this.runTime - (c.escAt ?? -99) < OD.polisBekleme) return 0;
     return this.rewardEscape(c);
+  }
+
+  // Makas: trafikteki (şehir ve otoban) araçların yanından değmeden çok yakın geçmek
+  checkTraffic() {
+    if (this.state !== 'play') return;
+    const p = this.player;
+    const reach = this.passZone(p, OD.makasEsik) * OD.cikis + 60;
+    const look = (o) => {
+      if (!o.alive || o.sinkT > 0) return;
+      const dx = o.x - p.x; const dy = o.y - p.y;
+      if (!o.escIn && (dx > reach || dx < -reach || dy > reach || dy < -reach)) return;
+      const dist = Math.hypot(dx, dy);
+      const rel = Math.hypot(p.vx - (o.vx || 0), p.vy - (o.vy || 0));
+      const ok = this.passEligible(OD.makasHiz) && rel >= OD.makasBagilHiz && (o.state === undefined || o.state === 'drive');
+      if (!this.passStep(o, dist, this.passZone(o, OD.makasEsik), ok)) return;
+      if (this.runTime - (o.escAt ?? -99) < OD.makasBekleme || (o.passN || 0) >= OD.makasAracBasi) return;
+      this.rewardPass(o);
+    };
+    for (const n of this.crowd.npcs) look(n);
+    for (const h of this.crowd.hw) look(h);
+  }
+
+  rewardPass(o) {
+    const [lo, hi] = OD.makasPara;
+    const amount = lo + Math.floor(Math.random() * (hi - lo + 1));
+    this.coins += amount;
+    this.escCoins += amount;
+    this.passes++;
+    this.nearMisses++;
+    this.escLastT = this.runTime;
+    o.escAt = this.runTime;
+    o.passN = (o.passN || 0) + 1;
+    this.addHeat(PU.heat.nearMiss);
+    this.addScore(OD.makasPuan, this.player.x, this.player.y - 30, SC.comboNearStep, '#7af6ff');
+    this.emit('nearmiss');
+    this.emit('escape', { amount, bonus: 0, kind: 'makas' });
+    return amount;
+  }
+
+  // Oyuncu oyunda, hızla ileri gidiyor; hile ve görünmezlikte yok
+  passEligible(minSpeed) {
+    const p = this.player;
+    if (this.state !== 'play' || this.cheat || this.ghostT > 0) return false;
+    return p.speed >= minSpeed && p.forward > 0 && this.autoRevT <= 0;
   }
 
   // Yalnız polis gerçekten kovalarken, oyuncu hızla ileri giderken; hile ve görünmezlikte yok
   escapeEligible(c) {
-    const p = this.player;
-    if (this.state !== 'play' || this.cheat || this.ghostT > 0 || c.warpT > 0) return false;
+    if (c.warpT > 0) return false;
     if (c.state !== 'chase' && c.state !== 'block' && c.state !== 'barricade') return false;
-    return p.speed >= ESC.minSpeed && p.forward > 0 && this.autoRevT <= 0;
+    return this.passEligible(ESC.minSpeed);
   }
 
   rewardEscape(c) {
-    const amount = ESC.min + Math.floor(Math.random() * (ESC.max - ESC.min + 1));
+    const [lo, hi] = OD.polisPara;
+    const amount = lo + Math.floor(Math.random() * (hi - lo + 1));
     this.escCombo = this.runTime - this.escLastT <= ESC.comboWindow ? this.escCombo + 1 : 1;
     const bonus = this.escCombo % ESC.comboEvery === 0 ? ESC.comboBonus : 0;
     const total = amount + bonus;
@@ -6425,7 +6507,10 @@ class Game {
     this.escapes++;
     this.escLastT = this.runTime;
     c.escAt = this.runTime;
-    this.emit('escape', { amount, bonus });
+    this.nearMisses++;
+    this.addHeat(PU.heat.nearMiss);
+    this.addScore(OD.polisPuan, this.player.x, this.player.y - 30, SC.comboNearStep, '#7af6ff');
+    this.emit('escape', { amount, bonus, kind: 'polis' });
     return total;
   }
 
@@ -6818,7 +6903,7 @@ class Game {
     // Oyuncunun ittiği polis suya düşerse devirmiş sayılır
     if (b.pushedBy && b.pushT > 0 && this.cops.includes(b)) {
       this.kills++;
-      this.addScore(SC.kill, b.x, b.y, SC.comboKillStep);
+      this.bumpCombo(SC.comboKillStep);
     }
   }
 
@@ -7149,12 +7234,11 @@ class Game {
     this.comboT = SC.comboTime;
   }
 
+  // Süre ve drift puan vermez (odul): drift yalnız kombo çarpanını büyütür
   updateScore(dt) {
-    this.score += SC.perSecond * dt;
     const p = this.player;
     if (p.drifting) {
       this.driftTime += dt;
-      this.score += SC.driftPerSecond * this.combo * dt;
       this.bumpCombo(SC.comboDriftStep * dt);
     }
     if (this.comboT > 0) {
@@ -10146,6 +10230,7 @@ function factory(g, r) {
 }
 
 function paintBuilding2(g, r) {
+  if (r.secretLook && SECRET_LOOK) return SECRET_LOOK.paint(g, r); // Yalnız arkadaş sürümü: gizli geçidin binası
   const S = BUILD;
   switch (r.style) {
     case S.APARTMENT: apartment2(g, r); break;
@@ -14315,6 +14400,7 @@ class Renderer {
   // Açık alanlar: spor sahaları, avlu, otopark, ambulans alanı, okul bahçesi
   // Gizli geçit rampası: neredeyse görünmez. Hafif koyu zemin, soluk eğim çizgileri, köşede karanlık bir boşluk
   bakeRamp(g, x, y, w, h) {
+    if (SECRET_LOOK) { SECRET_LOOK.paintEntrance(g, x, y, w, h); return; } // Arkadaş sürümü: binanın girişi
     const grd = g.createLinearGradient(x, y, x + w, y + h);
     grd.addColorStop(0, 'rgba(0,0,0,0)'); grd.addColorStop(0.55, 'rgba(20,16,12,.10)'); grd.addColorStop(1, 'rgba(8,6,5,.26)');
     g.fillStyle = grd; g.fillRect(x, y, w, h);
@@ -14658,6 +14744,7 @@ class Renderer {
     this.drawMeteorSky(game, now);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawNight(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now);
+    if (SECRET_LOOK) this.drawSecretSign(game, now, vx0, vx1, vy0, vy1);
     this.drawPhasing(game);
     this.drawSirens(game, now, vx0, vx1, vy0, vy1);
     this.drawWaves(game);
@@ -14667,6 +14754,18 @@ class Renderer {
     this.drawWeather(game, now);
     this.drawSpeedLines(game, now);
     this.drawOverlay(game, now);
+  }
+
+  // Arkadaş sürümü: gizli geçit binasının tabelası, gece de aydınlık (js/secret-look.js)
+  drawSecretSign(game, now, vx0, vx1, vy0, vy1) {
+    const z = game.world.zone('secret');
+    if (!z) return;
+    const R = CONFIG.secret.ramp; const B = SECRET_LOOK.bina;
+    const ox = z.x - R[0] * TILE; const oy = z.y - R[1] * TILE;
+    const box = { x: ox + B[0] * TILE, y: oy + B[1] * TILE, w: (B[2] - B[0]) * TILE, h: (B[3] - B[1]) * TILE };
+    const m = 140;
+    if (box.x - m > vx1 || box.x + box.w + m < vx0 || box.y - m > vy1 || box.y + box.h + m < vy0) return;
+    SECRET_LOOK.drawSign(this.ctx, box, now, game.daylight.k);
   }
 
   // Görünecek parçaları karede en çok birer birer hazırlar: geçişte ekran donmaz
@@ -15916,6 +16015,24 @@ class CheatCode {
 // stick: sol yarıda basılan yerde beliren görünmez joystick.
 // DOM'a dokunmaz: görünüm controls.js'tedir, burası birim testle sınanır.
 
+// === DİREKSİYON VE JOYSTICK YUMUŞAKLIĞI (yalnız bu iki mod; bölge dokunuşu ve klavye eskisi gibi) ===
+// DONUS_HIZI: aracın direksiyon/joystick ile dönüş hızı çarpanı. 1 = eski keskinlik.
+//   Büyütürsen daha SERT (çabuk döner), küçültürsen daha YUMUŞAK.
+const DONUS_HIZI = 0.78;
+// HIZDA_ACI_AZALMA: tepe hızda direksiyon açısı bu oranda kısılır (0 = kısılmaz, 0.35 = %35 az).
+//   Büyütürsen yüksek hızda daha YUMUŞAK, küçültürsen daha SERT. 0.4 üstüne çıkma: tam kırınca viraj freni çalışmaz.
+const HIZDA_ACI_AZALMA = 0.35;
+// AZALMA_BASLANGICI: hız / tepe hız oranı bunun altındayken açı kısılmaz (dar sokak dönüşleri etkilenmez).
+const AZALMA_BASLANGICI = 0.3;
+// GIRDI_YUMUSATMA: direksiyonu kırarken girdinin araca geçiş hızı (1/sn).
+//   Büyütürsen daha SERT ve anlık, küçültürsen daha YUMUŞAK ve gecikmeli.
+const GIRDI_YUMUSATMA = 7;
+// BIRAKINCA_YUMUSATMA: bırakınca ya da geri çevirince ortaya dönüş hızı (1/sn). Büyük = çabuk toparlar.
+const BIRAKINCA_YUMUSATMA = 11;
+// GIRDI_EGRISI: 1 = doğrusal. Büyütürsen küçük parmak hareketleri daha az döndürür (merkezde daha YUMUŞAK),
+//   tam kırınca yine tam döner. 1'e indirirsen daha SERT.
+const GIRDI_EGRISI = 1.5;
+
 const CONTROLS = ['zones', 'wheel', 'stick'];
 const WH = CONFIG.input.wheel;
 const SK = CONFIG.input.stick;
@@ -15948,7 +16065,9 @@ class Input {
     this.stickId = null;
     // x, y: halkanın görünen yeri (ekrana sığar). ox, oy: değerin merkezi (parmağın bastığı nokta)
     this.stick = { on: false, x: 0, y: 0, ox: 0, oy: 0, dx: 0, dy: 0 };
-    this.axis = 0; // Yumuşatılmış analog direksiyon
+    this.axis = 0; // Yumuşatılmış analog direksiyon (ham: parmağın değeri)
+    this.out = 0; // Araca giden analog değer: eğri, hızda kısma ve ek yumuşatma uygulanmış
+    this.speedK = 0; // Hız / tepe hız: main.js her adımda yazar
     this.revHeld = false;
     this.bounds = { l: 0, t: 0, r: 1, b: 1 }; // Joystick halkası bunun dışına taşmaz
     this.code = new CheatCode();
@@ -15984,7 +16103,24 @@ class Input {
       this.axis += (target - this.axis) * (1 - Math.exp(-SK.smooth * dt));
       if (Math.abs(this.axis) < 0.005) this.axis = 0;
     }
+    if (this.mode !== 'zones') this.shape(dt);
     this.watchCode(dt);
+  }
+
+  // Analog girdiyi araca yumuşak verir: eğri, hız arttıkça kısılan açı, kırarken yavaş / bırakınca daha çabuk geçiş
+  shape(dt) {
+    const a = this.axis;
+    const k = Math.max(0, Math.min(1, (this.speedK - AZALMA_BASLANGICI) / (1 - AZALMA_BASLANGICI)));
+    const target = Math.sign(a) * Math.abs(a) ** GIRDI_EGRISI * (1 - HIZDA_ACI_AZALMA * k);
+    const out = this.out;
+    const rate = Math.abs(target) > Math.abs(out) && target * out >= 0 ? GIRDI_YUMUSATMA : BIRAKINCA_YUMUSATMA;
+    this.out = out + (target - out) * (1 - Math.exp(-rate * dt));
+    if (target === 0 && Math.abs(this.out) < 0.004) this.out = 0;
+  }
+
+  // Aracın dönüş hızı çarpanı: yalnız direksiyon ve joystick modunda kısılır
+  get yawMul() {
+    return this.mode === 'zones' || this.keyL || this.keyR ? 1 : DONUS_HIZI;
   }
 
   // Direksiyon ve joystick: eşiği aşan kısa hareket bir basıştır, sonraki için merkeze dönmek gerekir.
@@ -16025,7 +16161,7 @@ class Input {
   get steer() {
     const l = this.left;
     const r = this.right;
-    if (!l && !r) return this.axis;
+    if (!l && !r) return this.mode === 'zones' ? this.axis : this.out;
     if (l && r) return this.reverse ? 0 : this.last === 'R' ? 1 : -1;
     return r ? 1 : -1;
   }
@@ -16050,6 +16186,7 @@ class Input {
     this.wheelA = 0;
     this.wheelS = 0;
     this.axis = 0;
+    this.out = 0;
     this.revHeld = false;
     this.code.reset();
     this.heldT = 0;
@@ -18217,14 +18354,14 @@ class UI {
   }
 
   // Kıl payı bildirimi: üst üste binmez, art arda gelenler tek bildirimde toplanır
-  escapeToast({ amount, bonus }) {
+  escapeToast({ amount, bonus, kind = 'polis' }) {
     const el = $('escape-msg');
     const now = performance.now();
     const merge = now - (this.escAt || -1e9) < 1100;
     this.escTotal = (merge ? this.escTotal : 0) + amount + bonus;
     this.escBonus = (merge ? this.escBonus : 0) + bonus;
     this.escAt = now;
-    el.firstElementChild.textContent = tx('escape.toast', { n: this.escTotal });
+    el.firstElementChild.textContent = tx(kind === 'makas' ? 'escape.makas' : 'escape.toast', { n: this.escTotal });
     el.lastElementChild.textContent = this.escBonus ? tx('escape.combo', { n: this.escBonus }) : '';
     el.classList.remove('run');
     void el.offsetWidth;
@@ -19116,7 +19253,9 @@ function frame(now) {
     accumulator += elapsed;
     // Menü kendi sahnesini çizer: arkada oyun dönmez, pil harcanmaz
     while (game.state !== 'attract' && !warming && accumulator >= STEP && steps < 5) {
+      input.speedK = game.state === 'play' ? game.player.speed / Math.max(1, game.carSpec.maxSpeed) : 0;
       input.tick(STEP);
+      game.player.yawMul = input.yawMul;
       game.tick(STEP, input.steer, input.reverse);
       accumulator -= STEP;
       steps++;

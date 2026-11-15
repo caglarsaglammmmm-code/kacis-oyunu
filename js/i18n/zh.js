@@ -67,7 +67,7 @@ export default {
     rev: '倒车',
   },
   alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！', meteors: '流星雨来袭！' },
-  escape: { toast: '+{n} 惊险脱身！', combo: '连击 +{n}' },
+  escape: { toast: '+{n} 惊险脱身！', makas: '+{n} 擦肩而过！', combo: '连击 +{n}' },
   code: { title: '输入代码', apply: '确定', ok: '代码已接受！{car} 已加入你的车库。', owned: '这辆车你已经有了。', invalid: '无效代码。', empty: '请先输入代码。' },
   custom: {
     title: '改装', paint: '涂装', rim: '轮毂', led: '底盘灯', exhaust: '排气', listen: '试听', buy: '购买 · {cost}', confirm: '确认 · {cost}', poor: '金币不足', bought: '购买成功！', use: '已解锁', ownFirst: '先购买这辆车才能改装。',

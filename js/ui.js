@@ -316,14 +316,14 @@ export class UI {
   }
 
   // Kıl payı bildirimi: üst üste binmez, art arda gelenler tek bildirimde toplanır
-  escapeToast({ amount, bonus }) {
+  escapeToast({ amount, bonus, kind = 'polis' }) {
     const el = $('escape-msg');
     const now = performance.now();
     const merge = now - (this.escAt || -1e9) < 1100;
     this.escTotal = (merge ? this.escTotal : 0) + amount + bonus;
     this.escBonus = (merge ? this.escBonus : 0) + bonus;
     this.escAt = now;
-    el.firstElementChild.textContent = tx('escape.toast', { n: this.escTotal });
+    el.firstElementChild.textContent = tx(kind === 'makas' ? 'escape.makas' : 'escape.toast', { n: this.escTotal });
     el.lastElementChild.textContent = this.escBonus ? tx('escape.combo', { n: this.escBonus }) : '';
     el.classList.remove('run');
     void el.offsetWidth;

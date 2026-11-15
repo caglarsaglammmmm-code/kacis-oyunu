@@ -67,7 +67,7 @@ export default {
     rev: 'REV',
   },
   alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!', meteors: 'METEOR SHOWER!' },
-  escape: { toast: '+{n} CLOSE CALL!', combo: 'COMBO +{n}' },
+  escape: { toast: '+{n} CLOSE CALL!', makas: '+{n} NEAR MISS!', combo: 'COMBO +{n}' },
   code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.' },
   custom: {
     title: 'Customize', paint: 'Paint', rim: 'Rims', led: 'Underglow', exhaust: 'Exhaust', listen: 'Listen', buy: 'Buy · {cost}', confirm: 'Confirm · {cost}', poor: 'Not enough coins', bought: 'Purchased!', use: 'Already unlocked', ownFirst: 'Buy the car first to customize it.',

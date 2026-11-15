@@ -52,6 +52,8 @@ export async function buildWeb(flavor, out, { pages = false } = {}) {
   fs.writeFileSync(path.join(out, 'js', 'names.js'), await namesSource(flavor));
   // Anıt içeriği: arkadaş sürümünde gerçek (names/anit-gercek.js), Play Store sürümünde kurgusal (js/memorial-data.js)
   if (flavor === 'arkadas') fs.copyFileSync(path.join(root, 'names', 'anit-gercek.js'), path.join(out, 'js', 'memorial-data.js'));
+  // Gizli geçidin binası ve tabelası yalnız arkadaş sürümünde (names/gizli-bina.js); Play'de js/secret-look.js boştur
+  if (flavor === 'arkadas') fs.copyFileSync(path.join(root, 'names', 'gizli-bina.js'), path.join(out, 'js', 'secret-look.js'));
   let html = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
   if (flavor !== 'play') {
     html = html.replace(/href="https:\/\/github\.com\/[^"]*\.apk"/, `href="${info.apkUrl}"`);

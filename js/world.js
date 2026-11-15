@@ -4,6 +4,7 @@
 import { CONFIG, GROUND, BUILD } from './config.js';
 import { NAMES } from './names.js';
 import { circleRect, roundCorner } from './physics.js';
+import { SECRET_LOOK } from './secret-look.js';
 
 const W = CONFIG.world;
 export const TILE = W.tile;
@@ -486,7 +487,7 @@ export class World {
     // Kayıt yeniden kullanılır: önceki binanın tabela görüntüsü kalmasın (render.js rectSign önbelleği)
     r.signImg = null;
     r.landmark = ''; r.signArt = ''; r.roofSignH = 0; r.noRoofSign = false; r.variant = '';
-    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false; r.memorial = false; r.stadium = "";
+    r.sign = ''; r.signColor = ''; r.brand = ''; r.neon = false; r.deep = false; r.signSize = 1; r.block = 0; r.tall = 0; r.fire = false; r.corners = 0; r.radius = 0; r.sacred = false; r.memorial = false; r.stadium = ""; r.secretLook = false;
     r.x = c.x + tx0 * TILE + inset;
     r.y = c.y + ty0 * TILE + inset;
     r.w = (tx1 - tx0) * TILE - inset * 2;
@@ -1350,6 +1351,20 @@ export class World {
     }
     // Zemin çevresiyle aynı toprak: tek ipucu rampanın çok hafif gölgesi (render.js bakeRamp)
     this.addPad(c, 'gecit', rx0, ry0, rx1 - rx0, ry1 - ry0);
+    // Arkadaş sürümü: rampanın kuzeyinde bina, rampa onun girişidir (js/secret-look.js). Yer ve tetik aynı.
+    // Zar durumu korunur: şehrin geri kalanı iki sürümde birebir aynı üretilir
+    if (SECRET_LOOK) {
+      const st = rngState;
+      const [bx0, by0, bx1, by1] = SECRET_LOOK.bina;
+      const r = this.addRect(c, 'building', bx0, by0, bx1, by1, 0, B.FACTORY, '#e0b23a');
+      r.secretLook = true; r.sacred = true; r.noRoofSign = true;
+      rngState = st;
+      for (let i = 0; i < c.propCount; i++) {
+        const p = c.props[i];
+        const tx = (p.x - c.x) / TILE; const ty = (p.y - c.y) / TILE;
+        if (tx > bx0 - 1 && tx < bx1 + 1 && ty > by0 - 1 && ty < by1 + 1) p.alive = false;
+      }
+    }
   }
 
   fillPark(c) {
@@ -1661,7 +1676,8 @@ export class World {
       const vertical = chance(0.5);
       const s = rint(7, 18);
       const lane = chance(0.5) ? 30 : 90;
-      for (let i = 0; i < 5; i++) {
+      // Yerdeki paralar kural dışı kazançtır (odul.yerdekiParalar); zar yine atılır, şehir aynı üretilir
+      for (let i = 0; i < 5 && CONFIG.odul.yerdekiParalar; i++) {
         const along = (s + i * 0.9) * TILE;
         this.addProp(c, PROP.COIN, c.x + (vertical ? lane : along), c.y + (vertical ? along : lane));
       }
@@ -1680,7 +1696,7 @@ export class World {
     const solid = (x, y) => x >= 0 && y >= 0 && x < CT && y < CT && c.rectAt[y * CT + x] !== 0;
     for (let i = 0; i < c.rectCount; i++) {
       const r = c.rects[i];
-      if (r.kind !== 'building') continue;
+      if (r.kind !== 'building' || r.secretLook) continue; // Gizli geçit binası tam karo: kapısı rampaya dayanır
       const x0 = Math.floor((r.x - c.x) / TILE);
       const y0 = Math.floor((r.y - c.y) / TILE);
       const x1 = Math.ceil((r.x + r.w - c.x) / TILE);

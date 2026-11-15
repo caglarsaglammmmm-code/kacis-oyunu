@@ -5,6 +5,7 @@ import { Game } from '../js/game.js';
 
 const dt = 1 / 60;
 const E = CONFIG.escape;
+const OD = CONFIG.odul;
 const car = CONFIG.cars[0];
 
 function setup() {
@@ -39,7 +40,7 @@ test('yakın ve hızlı geçiş ödül verir; ödül 5-10, para hemen eklenir', 
   const c = cop(g);
   const before = g.coins;
   const got = pass(g, c);
-  assert.ok(got >= E.min && got <= E.max + E.comboBonus, `ödül ${got}`);
+  assert.ok(got >= OD.polisPara[0] && got <= OD.polisPara[1] + E.comboBonus, `ödül ${got}`);
   assert.equal(events.length, 1);
   assert.ok(events[0].amount >= 5 && events[0].amount <= 10);
   assert.equal(g.coins - before, got);
@@ -87,7 +88,7 @@ test('polisin yanında uzun kalmak (sıkışma, dönüp durma) ödül vermez', (
   const c = cop(g);
   const p = g.player;
   c.x = p.x + 10; c.y = p.y + 40;
-  for (let t = 0; t < E.maxClose + 0.5; t += dt) {
+  for (let t = 0; t < OD.enUzunYakinlik + 0.5; t += dt) {
     p.speed = 300; p.forward = 300; g.runTime += dt;
     g.checkEscape(c, Math.hypot(c.x - p.x, c.y - p.y));
   }
@@ -103,7 +104,7 @@ test('aynı polisten 3 saniye içinde ikinci ödül yok, sonra yine var', () => 
   assert.equal(events.length, 1);
   pass(g, c, { seconds: 1.2 }); // 3 sn dolmadı
   assert.equal(events.length, 1, 'bekleme süresinde');
-  g.runTime += E.cooldown;
+  g.runTime += OD.polisBekleme;
   pass(g, c);
   assert.equal(events.length, 2, 'süre dolunca');
 });
@@ -144,14 +145,20 @@ test('ödül her zaman 5-10; kombo her 3 kaçışta +2, toplam makul', () => {
   assert.ok(total / events.length < 9.2, `ortalama ${total / events.length}`);
 });
 
-test('koşu sonu kazancı yaklaşık %30 artar, kıl payı paraları ayrıca eklenir', () => {
+test('koşu sonu kazancı yalnız dojlama ve makas paralarıdır: süre, devirme ve yakın kaçış sayısı para vermez', () => {
   const { g } = setup();
-  g.runTime = 80; g.kills = 4; g.nearMisses = 6; g.coins = 10;
-  const base = 10 + Math.floor(80 / CONFIG.score.coinPerSeconds) + 4 * CONFIG.score.coinPerKill + Math.floor(6 / CONFIG.score.coinPerNearMisses);
+  g.runTime = 80; g.kills = 4; g.nearMisses = 6;
   const c = cop(g);
   const esc = pass(g, c);
+  assert.ok(esc > 0);
   g.state = 'dying';
   g.finish();
-  assert.equal(g.result.coins, Math.round(base * 1.3) + esc);
-  assert.ok(CONFIG.score.earnMul >= 1.25 && CONFIG.score.earnMul <= 1.4);
+  assert.equal(g.result.coins, esc);
+});
+
+test('dojlama puan da verir', () => {
+  const { g } = setup();
+  const s = g.score;
+  pass(g, cop(g));
+  assert.ok(g.score >= s + OD.polisPuan, `puan ${g.score - s}`);
 });

@@ -67,7 +67,7 @@ export default {
     rev: 'バック',
   },
   alert: { swat: 'SWAT出動！', heavy: '重装増援！', tanks: '戦車だ！', aliens: 'エイリアン襲来！', meteors: '隕石の雨！' },
-  escape: { toast: '+{n} ギリギリ回避！', combo: 'コンボ +{n}' },
+  escape: { toast: '+{n} ギリギリ回避！', makas: '+{n} ニアミス！', combo: 'コンボ +{n}' },
   code: { title: 'コード入力', apply: '適用', ok: 'コード承認！{car}がガレージに追加されたよ。', owned: 'この車はもう持っているよ。', invalid: '無効なコードです。', empty: 'まずコードを入力してね。' },
   custom: {
     title: 'カスタマイズ', paint: '塗装', rim: 'ホイール', led: 'アンダーネオン', exhaust: 'マフラー', listen: '試聴', buy: '購入 · {cost}', confirm: '確認 · {cost}', poor: 'コインが足りません', bought: '購入しました！', use: '解放済み', ownFirst: 'カスタマイズするには先に車を買おう。',

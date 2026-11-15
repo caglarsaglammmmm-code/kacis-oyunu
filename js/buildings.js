@@ -4,6 +4,7 @@ import { BUILD, CONFIG } from './config.js';
 import { rr, shade } from './art.js';
 import { NAMES } from './names.js';
 import { paintLandmark } from './landmarks.js';
+import { SECRET_LOOK } from './secret-look.js';
 
 function hsl(h, s, l) { return `hsl(${h % 360},${s}%,${l}%)`; }
 
@@ -670,6 +671,7 @@ function factory(g, r) {
 }
 
 export function paintBuilding2(g, r) {
+  if (r.secretLook && SECRET_LOOK) return SECRET_LOOK.paint(g, r); // Yalnız arkadaş sürümü: gizli geçidin binası
   const S = BUILD;
   switch (r.style) {
     case S.APARTMENT: apartment2(g, r); break;

@@ -67,7 +67,7 @@ export default {
     rev: 'RÜCK',
   },
   alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!', meteors: 'METEORITENHAGEL!' },
-  escape: { toast: '+{n} HAARSCHARF!', combo: 'COMBO +{n}' },
+  escape: { toast: '+{n} HAARSCHARF!', makas: '+{n} KNAPP VORBEI!', combo: 'COMBO +{n}' },
   code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.' },
   custom: {
     title: 'Anpassen', paint: 'Lack', rim: 'Felgen', led: 'Unterboden', exhaust: 'Auspuff', listen: 'Anhören', buy: 'Kaufen · {cost}', confirm: 'Bestätigen · {cost}', poor: 'Nicht genug Münzen', bought: 'Gekauft!', use: 'Schon freigeschaltet', ownFirst: 'Kaufe zuerst das Auto, um es anzupassen.',

@@ -243,7 +243,8 @@ test('kontrol: üç mod sola/sağa çalışır, bırakınca düzelir, dış doku
   for (const [x, y] of [[335, 665], [350, 700]]) w.move(1, x, y); // Saat yönünde 90 derece
   run(w, 40); // Değer yumuşatılır
   assert.ok(Math.abs(w.wheelA - Math.PI / 2) < 0.02);
-  assert.ok(Math.abs(w.steer - (Math.PI / 2) / WHEEL_MAX) < 0.02, 'açı ile orantılı');
+  assert.ok(Math.abs(w.axis - (Math.PI / 2) / WHEEL_MAX) < 0.02, 'ham değer açı ile orantılı');
+  assert.ok(w.steer > 0 && w.steer < w.axis, 'araca giden değer eğriyle yumuşatılır');
   for (const [x, y] of [[335, 735], [300, 750], [265, 735], [250, 700], [265, 665], [300, 650], [335, 665], [350, 700]]) w.move(1, x, y);
   assert.equal(w.wheelA, WHEEL_MAX, 'tam kilitten öteye gitmez');
   w.up(2);

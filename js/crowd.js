@@ -153,6 +153,7 @@ export class Crowd {
     h.cruise = a + (b - a) * ((HWC.lanes - lane) / HWC.lanes) * (0.8 + Math.random() * 0.2);
     h.speed = h.cruise; h.hitT = 0; h.hornT = 0;
     h.vx = dir * h.speed; h.vy = 0;
+    h.escIn = false; h.escAt = -99; h.passN = 0; // Makas sayacı: yeni araç yeniden ödül verebilir
   }
 
   updateHighway(dt, g) {
@@ -582,6 +583,7 @@ export class Crowd {
     n.spec = spec;
     n.state = 'drive';
     n.sinkT = 0; n.pushT = 0;
+    n.escIn = false; n.escAt = -99; n.passN = 0; // Makas sayacı: yeni araç yeniden ödül verebilir
     n.dir = dir;
     n.line = line;
     n.color = Math.floor(Math.random() * spec.colors.length);

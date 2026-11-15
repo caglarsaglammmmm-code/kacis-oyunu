@@ -16,7 +16,7 @@ import { buildWeb } from './flavor.mjs';
 // bereket, Anadolu, Marmara gibi bölge adları, "Türk") listede yoktur: bunlar tek bir kuruluşun adı değildir.
 export const YASAKLI = [
   // Kişiler ve anıt
-  'atatürk', 'ataturk', 'mustafa kemal', 'gazi mustafa', 'gençliğe hitabe', 'hitabe', 'ne mutlu türküm', 'ey türk gençliği', 'ömer yıldız', 'şerife akkanat', 'akkanat',
+  'atatürk', 'ataturk', 'mustafa kemal', 'gazi mustafa', 'gençliğe hitabe', 'hitabe', 'ne mutlu türküm', 'ey türk gençliği', 'ömer yıldız', 'ömer', 'şerife akkanat', 'akkanat',
   // Okul ve kurumlar
   'sistem koleji', 'ted konya', 'ted koleji', 'gündoğdu', 'selçuklu', 'selçuk arena', 'büyükşehir', 'belediyesi',
   // Kulüp ve stadyumlar
@@ -55,8 +55,13 @@ const MAKER_OK = (t, i) => /maker\s*:\s*['"`][^'"`\n]{0,30}$/.test(t.slice(Math.
 // Tek istisna, kullanıcının verdiği gizlilik iletişim e-postası (privacy.html)
 const ACCOUNT = /caglarsaglam(?!mmmm@gmail\.com)/g;
 
+// Arkadaş sürümündeki gizli bina tabelasının yazısı: büyük harfle, tam bu biçimde aranır. Küçük harfli genel kelime
+// ("Beş Kollu Yıldız" jant adı, yildiz kimliği) tabela yazısı değildir
+const EXACT = /(?<![\p{L}\p{N}_])YILDIZ(?![\p{L}\p{N}_])/gu;
+
 function scanText(text, pkg) {
   const out = [];
+  for (const m of text.matchAll(EXACT)) out.push(`tabela yazısı ${m[0]}`);
   for (const t of [fold(low(text)), fold(text.toLowerCase())]) {
     for (const m of t.matchAll(RE)) if (!(/sağlam|saglam/.test(m[0]) && MAKER_OK(t, m.index))) out.push(m[0]);
     if (pkg) for (const m of t.matchAll(ACCOUNT)) out.push('GitHub hesap adı');

@@ -14,6 +14,7 @@ const D = CONFIG.difficulty;
 const DMG = CONFIG.damage;
 const AI = CONFIG.policeAI;
 const SC = CONFIG.score;
+const OD = CONFIG.odul; // Para ve puan yalnız polisi dojlamak ve makastan (config.js odul)
 const BAR = CONFIG.barricade;
 const TK = CONFIG.tank;
 const PW = CONFIG.powers;
@@ -208,6 +209,8 @@ export class Game {
     this.escCoins = 0;
     this.escCombo = 0;
     this.escLastT = -99;
+    this.bumpT = -99; // Oyuncunun en son bir şeye (duvar, bariyer, nesne, araç) değdiği an: o geçiş ödülsüz
+    this.passes = 0; // Makas (trafik yakın geçiş) sayısı
     this.cheat = false; // Kaydedilmez, her koşu kapalı başlar
     this.penalty = 0; // Anıta saygısızlık cezası (para)
     this.mem = { warned: false, reading: false, dismissed: false, dist: Infinity };
@@ -424,6 +427,7 @@ export class Game {
     this.meteors.update(this, dt);
     if (this.state !== 'play') return;
     this.crowd.update(dt);
+    this.checkTraffic();
     this.director(dt);
     this.updatePowers(dt);
     this.updateShots(dt);
@@ -785,11 +789,9 @@ export class Game {
   finish() {
     this.state = 'over';
     if (this.giantT > 0) this.setGiant(false);
-    // Hile kullanılan koşu kazandırmaz, rekor saymaz
-    // Kıl payı paraları ayrıca eklenir; geri kalan kazanç earnMul ile yumuşatılır
-    const base = this.coins - this.escCoins + Math.floor(this.runTime / SC.coinPerSeconds) + this.kills * SC.coinPerKill + Math.floor(this.nearMisses / SC.coinPerNearMisses);
+    // Hile kullanılan koşu kazandırmaz, rekor saymaz. Kazanç yalnız polisi dojlama ve makas paralarıdır (odul)
     const memorial = this.cause === 'memorial';
-    const earned = this.cheatUsed || memorial ? 0 : Math.round(base * SC.earnMul) + this.escCoins;
+    const earned = this.cheatUsed || memorial ? 0 : this.coins;
     this.result = {
       score: Math.floor(this.score),
       time: this.time,
@@ -834,6 +836,7 @@ export class Game {
       }
       b.x += hit.nx * hit.depth;
       b.y += hit.ny * hit.depth;
+      if (isPlayer) this.bumpT = this.runTime; // Duvar ve bariyer teması: süren geçiş ödül vermez
       let impact = bounceOff(b, hit.nx, hit.ny);
       if (b.graze) impact *= DMG.grazeScale; // Sürtme sayılır: hasar ve sarsıntı çok az
       if (impact > best) best = impact;
@@ -909,7 +912,7 @@ export class Game {
             continue;
           }
           if (pr.kind === PROP.COIN) {
-            if (!isPlayer) continue;
+            if (!isPlayer || !OD.yerdekiParalar) continue;
             const m = CONFIG.coin.magnet;
             if (dx * dx + dy * dy < m * m) {
               pr.alive = false;
@@ -924,6 +927,7 @@ export class Game {
           const rr = info.r + R;
           const d2 = dx * dx + dy * dy;
           if (d2 >= rr * rr) continue;
+          if (isPlayer) this.bumpT = this.runTime; // Nesneye değdi: süren geçiş ödül vermez
           const speed = Math.hypot(b.vx, b.vy);
           if (!info.safe && (speed >= info.brk || b.crusher || b.breaker || (isPlayer && this.giantT > 0))) {
             this.breakProp(b, pr, info, isPlayer);
@@ -950,15 +954,14 @@ export class Game {
     if (pr.kind === PROP.PARKED) this.fx.sparks(pr.x, pr.y, 10);
     if (!isPlayer) return;
     this.broken++;
-    this.addHeat(PU.heat.prop);
-    this.addScore(SC.prop, pr.x, pr.y);
+    this.addHeat(PU.heat.prop); // Nesne kırmak para ve puan vermez (odul)
     if (info.dmg > 0) this.hurt(info.dmg / this.carSpec.durability);
     this.emit('break', info.drag);
     if (info.snd) {
       this.emit(info.snd);
       if (pr.kind === PROP.SIMITCART) this.fx.burst(FX.SIMIT, pr.x, pr.y, 10, 210, 1.2, 7);
     }
-    if (info.coin && Math.random() < CONFIG.coin.dropChance) {
+    if (OD.yerdekiParalar && info.coin && Math.random() < CONFIG.coin.dropChance) {
       this.world.dropCoin(pr.x + (Math.random() - 0.5) * 30, pr.y + (Math.random() - 0.5) * 30);
     }
   }
@@ -989,6 +992,7 @@ export class Game {
       }
     }
     if (bestD <= 0) return 0;
+    if (a === this.player || b === this.player) this.bumpT = this.runTime; // Araç teması: süren geçiş ödül vermez
     const ma = a.staticBody ? 1e6 : a.mass;
     const mb = b.staticBody ? 1e6 : b.mass;
     const ia = 1 / ma;
@@ -1082,8 +1086,8 @@ export class Game {
     this.fx.debris(c.x, c.y, '#f4f4f4', 6, 240);
     this.kills++;
     this.addHeat(PU.heat.kill);
-    this.addScore(SC.kill * (c.type === 'tank' ? 8 : c.alien ? 4 : c.type === 'swat' ? 2 : 1), c.x, c.y, byPlayer ? SC.comboKillStep : 0);
-    if (Math.random() < 0.6) this.world.dropCoin(c.x, c.y);
+    if (byPlayer) this.bumpCombo(SC.comboKillStep); // Devirmek puan ve para vermez (odul), yalnız kombo
+    if (OD.yerdekiParalar && Math.random() < 0.6) this.world.dropCoin(c.x, c.y);
     const near = Math.hypot(c.x - this.player.x, c.y - this.player.y) < 500;
     this.emit('copdown', near ? 1 : 0.4);
     if (near) this.cam.shake = Math.min(12, this.cam.shake + 5);
@@ -1185,19 +1189,7 @@ export class Game {
           if (rv > 1) this.copContact(c, rv, i);
           if (i >= this.cops.length || this.cops[i] !== c) continue;
         }
-        // Yakın kaçış
-        if (this.ghostT <= 0 && !this.cheat && c.nearCd <= 0 && c.hitCd <= 0 && dist < SC.nearMissDist + c.wid * 0.5 && c.state === 'chase') {
-          const rvx = p.vx - c.vx;
-          const rvy = p.vy - c.vy;
-          const rel = Math.hypot(rvx, rvy);
-          if (rel > SC.nearMissSpeed && dist > (c.wid + p.wid) * 0.55 && rvx * -dx + rvy * -dy > 0) {
-            c.nearCd = 2.5;
-            this.nearMisses++;
-            this.addHeat(PU.heat.nearMiss);
-            this.addScore(SC.nearMiss, p.x, p.y - 30, SC.comboNearStep, '#7af6ff');
-            this.emit('nearmiss');
-          }
-        }
+        // Polisi dojlamak: puan ve para checkEscape içinde, tek yerden
         this.checkEscape(c, dist);
         if (dist < nearest) {
           nearest = dist;
@@ -1258,38 +1250,95 @@ export class Game {
     this.emit('gunhit', dead ? 1 : 0.3);
   }
 
-  // Kıl payı kaçış: polis yakın bölgeye girer, değmeden çıkarsa ödül. Ödül çıkış anında verilir
-  checkEscape(c, dist) {
+  // Yakınlık penceresi: araç (polis ya da trafik) eşiğe girer, değmeden ve hiçbir şeye çarpmadan çıkarsa ödül.
+  // Ödül çıkış anında verilir. Eşik: iki araç arası boşluk (esik px) + iki aracın ortalama yarı boyu
+  passZone(o, esik) {
     const p = this.player;
-    const zone = p.wid * ESC.distMul + (p.len + p.wid + c.len + c.wid) / 4;
-    if (!c.escIn) {
-      if (dist < zone && this.escapeEligible(c)) {
-        c.escIn = true; c.escHit = false; c.escEnterT = this.runTime; c.escX = p.x; c.escY = p.y;
+    return esik + (p.len + p.wid + o.len + o.wid) / 4;
+  }
+
+  // Pencere adımı. true: pencereden temiz çıkıldı (araç başı bekleme çağıran tarafta)
+  passStep(o, dist, zone, eligible) {
+    const p = this.player;
+    if (!o.escIn) {
+      if (dist < zone && eligible) {
+        o.escIn = true; o.escHit = false; o.escEnterT = this.runTime; o.escX = p.x; o.escY = p.y;
       }
-      return 0;
+      return false;
     }
-    if (dist < zone * ESC.exitMul) {
-      if (this.runTime - c.escEnterT > ESC.maxClose) c.escHit = true; // Yanında uzun kaldı: sıkışma ya da dönüp durma
-      return 0;
+    if (dist < zone * OD.cikis) {
+      if (this.runTime - o.escEnterT > OD.enUzunYakinlik) o.escHit = true; // Yanında uzun kaldı: sıkışma ya da dönüp durma
+      return false;
     }
-    c.escIn = false;
-    // Girişten hemen önceki temas da sayılır: çarpışma aynı karede bölgeye girişten önce işlenir
-    if (c.escHit || c.escHitAt >= c.escEnterT - 0.1 || !this.escapeEligible(c)) return 0;
-    if (this.runTime - c.escAt < ESC.cooldown || this.runTime - this.escLastT < ESC.globalGap) return 0;
-    if (Math.hypot(p.x - c.escX, p.y - c.escY) < ESC.minTravel) return 0;
+    o.escIn = false;
+    // Girişten hemen önceki temas da sayılır: çarpışma aynı karede bölgeye girişten önce işlenir.
+    // Pencere boyunca duvara, bariyere, nesneye ya da herhangi bir araca değmek geçişi bozar
+    if (o.escHit || (o.escHitAt ?? -99) >= o.escEnterT - 0.1 || this.bumpT >= o.escEnterT - 0.1 || !eligible) return false;
+    if (this.runTime - this.escLastT < OD.genelAra) return false;
+    return Math.hypot(p.x - o.escX, p.y - o.escY) >= OD.enAzYol;
+  }
+
+  // Polisi dojlamak: polis yakın bölgeye girer, değmeden çıkarsa para ve puan
+  checkEscape(c, dist) {
+    if (!this.passStep(c, dist, this.passZone(c, OD.polisEsik), this.escapeEligible(c))) return 0;
+    if (this.runTime - (c.escAt ?? -99) < OD.polisBekleme) return 0;
     return this.rewardEscape(c);
+  }
+
+  // Makas: trafikteki (şehir ve otoban) araçların yanından değmeden çok yakın geçmek
+  checkTraffic() {
+    if (this.state !== 'play') return;
+    const p = this.player;
+    const reach = this.passZone(p, OD.makasEsik) * OD.cikis + 60;
+    const look = (o) => {
+      if (!o.alive || o.sinkT > 0) return;
+      const dx = o.x - p.x; const dy = o.y - p.y;
+      if (!o.escIn && (dx > reach || dx < -reach || dy > reach || dy < -reach)) return;
+      const dist = Math.hypot(dx, dy);
+      const rel = Math.hypot(p.vx - (o.vx || 0), p.vy - (o.vy || 0));
+      const ok = this.passEligible(OD.makasHiz) && rel >= OD.makasBagilHiz && (o.state === undefined || o.state === 'drive');
+      if (!this.passStep(o, dist, this.passZone(o, OD.makasEsik), ok)) return;
+      if (this.runTime - (o.escAt ?? -99) < OD.makasBekleme || (o.passN || 0) >= OD.makasAracBasi) return;
+      this.rewardPass(o);
+    };
+    for (const n of this.crowd.npcs) look(n);
+    for (const h of this.crowd.hw) look(h);
+  }
+
+  rewardPass(o) {
+    const [lo, hi] = OD.makasPara;
+    const amount = lo + Math.floor(Math.random() * (hi - lo + 1));
+    this.coins += amount;
+    this.escCoins += amount;
+    this.passes++;
+    this.nearMisses++;
+    this.escLastT = this.runTime;
+    o.escAt = this.runTime;
+    o.passN = (o.passN || 0) + 1;
+    this.addHeat(PU.heat.nearMiss);
+    this.addScore(OD.makasPuan, this.player.x, this.player.y - 30, SC.comboNearStep, '#7af6ff');
+    this.emit('nearmiss');
+    this.emit('escape', { amount, bonus: 0, kind: 'makas' });
+    return amount;
+  }
+
+  // Oyuncu oyunda, hızla ileri gidiyor; hile ve görünmezlikte yok
+  passEligible(minSpeed) {
+    const p = this.player;
+    if (this.state !== 'play' || this.cheat || this.ghostT > 0) return false;
+    return p.speed >= minSpeed && p.forward > 0 && this.autoRevT <= 0;
   }
 
   // Yalnız polis gerçekten kovalarken, oyuncu hızla ileri giderken; hile ve görünmezlikte yok
   escapeEligible(c) {
-    const p = this.player;
-    if (this.state !== 'play' || this.cheat || this.ghostT > 0 || c.warpT > 0) return false;
+    if (c.warpT > 0) return false;
     if (c.state !== 'chase' && c.state !== 'block' && c.state !== 'barricade') return false;
-    return p.speed >= ESC.minSpeed && p.forward > 0 && this.autoRevT <= 0;
+    return this.passEligible(ESC.minSpeed);
   }
 
   rewardEscape(c) {
-    const amount = ESC.min + Math.floor(Math.random() * (ESC.max - ESC.min + 1));
+    const [lo, hi] = OD.polisPara;
+    const amount = lo + Math.floor(Math.random() * (hi - lo + 1));
     this.escCombo = this.runTime - this.escLastT <= ESC.comboWindow ? this.escCombo + 1 : 1;
     const bonus = this.escCombo % ESC.comboEvery === 0 ? ESC.comboBonus : 0;
     const total = amount + bonus;
@@ -1298,7 +1347,10 @@ export class Game {
     this.escapes++;
     this.escLastT = this.runTime;
     c.escAt = this.runTime;
-    this.emit('escape', { amount, bonus });
+    this.nearMisses++;
+    this.addHeat(PU.heat.nearMiss);
+    this.addScore(OD.polisPuan, this.player.x, this.player.y - 30, SC.comboNearStep, '#7af6ff');
+    this.emit('escape', { amount, bonus, kind: 'polis' });
     return total;
   }
 
@@ -1691,7 +1743,7 @@ export class Game {
     // Oyuncunun ittiği polis suya düşerse devirmiş sayılır
     if (b.pushedBy && b.pushT > 0 && this.cops.includes(b)) {
       this.kills++;
-      this.addScore(SC.kill, b.x, b.y, SC.comboKillStep);
+      this.bumpCombo(SC.comboKillStep);
     }
   }
 
@@ -2022,12 +2074,11 @@ export class Game {
     this.comboT = SC.comboTime;
   }
 
+  // Süre ve drift puan vermez (odul): drift yalnız kombo çarpanını büyütür
   updateScore(dt) {
-    this.score += SC.perSecond * dt;
     const p = this.player;
     if (p.drifting) {
       this.driftTime += dt;
-      this.score += SC.driftPerSecond * this.combo * dt;
       this.bumpCombo(SC.comboDriftStep * dt);
     }
     if (this.comboT > 0) {

@@ -143,11 +143,11 @@ test('binaya tam gaz çarpma hasar verir ama öldürmez', () => {
   assert.equal(g.state, 'play');
 });
 
-test('skor süre, kırılan nesne ve drift ile artar; combo sınırlı', () => {
+test('skor süreyle artmaz; combo sınırlı', () => {
   const g = game();
   for (let i = 0; i < 120; i++) g.tick(dt, 0, false);
   const s = g.score;
-  assert.ok(s > 15);
+  assert.equal(s, 0, 'süre puan vermez');
   g.bumpCombo(99);
   assert.equal(g.combo, CONFIG.score.comboMax);
   g.addScore(10);
@@ -164,11 +164,12 @@ test('uyarı olayı eşik geçilince bir kez gelir', () => {
   assert.deepEqual(alerts, [1]);
 });
 
-test('coin toplanır', () => {
+test('yerdeki para kural dışıdır: toplanmaz (odul.yerdekiParalar kapalı)', () => {
   const g = game();
+  assert.equal(CONFIG.odul.yerdekiParalar, false);
   g.world.dropCoin(g.player.x + 40, g.player.y);
   g.tick(dt, 0, false);
-  assert.equal(g.coins, 1);
+  assert.equal(g.coins, 0);
 });
 
 test('kırılabilir nesne hızlı temasta kırılır, sayaç artar', () => {

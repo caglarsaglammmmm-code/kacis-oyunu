@@ -64,7 +64,8 @@ export function stepCar(c, steerIn, throttle, spec, surf, dt) {
   const dir = vF >= 0 ? 1 : -1;
   // Duvara dayalı duran araç da burnunu yavaşça çevirebilir: direksiyon kırılıysa kilitlenmez
   const speedFactor = Math.max(throttle !== 0 ? P.pivot : 0, Math.min(1, speed / P.lowTurnSpeed)) * (1 - 0.1 * Math.min(1, speed / spec.maxSpeed));
-  const yawTarget = c.steer * spec.turnRate * (1 + P.agileTurn * agile) * speedFactor * dir;
+  // yawMul: yalnız oyuncuda, direksiyon/joystick modunda dönüşü yumuşatır (js/input.js DONUS_HIZI)
+  const yawTarget = c.steer * spec.turnRate * (c.yawMul || 1) * (1 + P.agileTurn * agile) * speedFactor * dir;
   c.w += (yawTarget - c.w) * (1 - Math.exp(-(P.yawResponse + P.agileYaw * agile) * dt));
 
   // 4) Bırakınca burun gidiş yönüne döner

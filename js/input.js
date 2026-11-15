@@ -6,6 +6,24 @@
 import { CONFIG } from './config.js';
 import { CheatCode } from './cheat.js';
 
+// === DİREKSİYON VE JOYSTICK YUMUŞAKLIĞI (yalnız bu iki mod; bölge dokunuşu ve klavye eskisi gibi) ===
+// DONUS_HIZI: aracın direksiyon/joystick ile dönüş hızı çarpanı. 1 = eski keskinlik.
+//   Büyütürsen daha SERT (çabuk döner), küçültürsen daha YUMUŞAK.
+export const DONUS_HIZI = 0.78;
+// HIZDA_ACI_AZALMA: tepe hızda direksiyon açısı bu oranda kısılır (0 = kısılmaz, 0.35 = %35 az).
+//   Büyütürsen yüksek hızda daha YUMUŞAK, küçültürsen daha SERT. 0.4 üstüne çıkma: tam kırınca viraj freni çalışmaz.
+export const HIZDA_ACI_AZALMA = 0.35;
+// AZALMA_BASLANGICI: hız / tepe hız oranı bunun altındayken açı kısılmaz (dar sokak dönüşleri etkilenmez).
+export const AZALMA_BASLANGICI = 0.3;
+// GIRDI_YUMUSATMA: direksiyonu kırarken girdinin araca geçiş hızı (1/sn).
+//   Büyütürsen daha SERT ve anlık, küçültürsen daha YUMUŞAK ve gecikmeli.
+export const GIRDI_YUMUSATMA = 7;
+// BIRAKINCA_YUMUSATMA: bırakınca ya da geri çevirince ortaya dönüş hızı (1/sn). Büyük = çabuk toparlar.
+export const BIRAKINCA_YUMUSATMA = 11;
+// GIRDI_EGRISI: 1 = doğrusal. Büyütürsen küçük parmak hareketleri daha az döndürür (merkezde daha YUMUŞAK),
+//   tam kırınca yine tam döner. 1'e indirirsen daha SERT.
+export const GIRDI_EGRISI = 1.5;
+
 export const CONTROLS = ['zones', 'wheel', 'stick'];
 const WH = CONFIG.input.wheel;
 const SK = CONFIG.input.stick;
@@ -38,7 +56,9 @@ export class Input {
     this.stickId = null;
     // x, y: halkanın görünen yeri (ekrana sığar). ox, oy: değerin merkezi (parmağın bastığı nokta)
     this.stick = { on: false, x: 0, y: 0, ox: 0, oy: 0, dx: 0, dy: 0 };
-    this.axis = 0; // Yumuşatılmış analog direksiyon
+    this.axis = 0; // Yumuşatılmış analog direksiyon (ham: parmağın değeri)
+    this.out = 0; // Araca giden analog değer: eğri, hızda kısma ve ek yumuşatma uygulanmış
+    this.speedK = 0; // Hız / tepe hız: main.js her adımda yazar
     this.revHeld = false;
     this.bounds = { l: 0, t: 0, r: 1, b: 1 }; // Joystick halkası bunun dışına taşmaz
     this.code = new CheatCode();
@@ -74,7 +94,24 @@ export class Input {
       this.axis += (target - this.axis) * (1 - Math.exp(-SK.smooth * dt));
       if (Math.abs(this.axis) < 0.005) this.axis = 0;
     }
+    if (this.mode !== 'zones') this.shape(dt);
     this.watchCode(dt);
+  }
+
+  // Analog girdiyi araca yumuşak verir: eğri, hız arttıkça kısılan açı, kırarken yavaş / bırakınca daha çabuk geçiş
+  shape(dt) {
+    const a = this.axis;
+    const k = Math.max(0, Math.min(1, (this.speedK - AZALMA_BASLANGICI) / (1 - AZALMA_BASLANGICI)));
+    const target = Math.sign(a) * Math.abs(a) ** GIRDI_EGRISI * (1 - HIZDA_ACI_AZALMA * k);
+    const out = this.out;
+    const rate = Math.abs(target) > Math.abs(out) && target * out >= 0 ? GIRDI_YUMUSATMA : BIRAKINCA_YUMUSATMA;
+    this.out = out + (target - out) * (1 - Math.exp(-rate * dt));
+    if (target === 0 && Math.abs(this.out) < 0.004) this.out = 0;
+  }
+
+  // Aracın dönüş hızı çarpanı: yalnız direksiyon ve joystick modunda kısılır
+  get yawMul() {
+    return this.mode === 'zones' || this.keyL || this.keyR ? 1 : DONUS_HIZI;
   }
 
   // Direksiyon ve joystick: eşiği aşan kısa hareket bir basıştır, sonraki için merkeze dönmek gerekir.
@@ -115,7 +152,7 @@ export class Input {
   get steer() {
     const l = this.left;
     const r = this.right;
-    if (!l && !r) return this.axis;
+    if (!l && !r) return this.mode === 'zones' ? this.axis : this.out;
     if (l && r) return this.reverse ? 0 : this.last === 'R' ? 1 : -1;
     return r ? 1 : -1;
   }
@@ -140,6 +177,7 @@ export class Input {
     this.wheelA = 0;
     this.wheelS = 0;
     this.axis = 0;
+    this.out = 0;
     this.revHeld = false;
     this.code.reset();
     this.heldT = 0;

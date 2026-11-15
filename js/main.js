@@ -375,7 +375,9 @@ function frame(now) {
     accumulator += elapsed;
     // Menü kendi sahnesini çizer: arkada oyun dönmez, pil harcanmaz
     while (game.state !== 'attract' && !warming && accumulator >= STEP && steps < 5) {
+      input.speedK = game.state === 'play' ? game.player.speed / Math.max(1, game.carSpec.maxSpeed) : 0;
       input.tick(STEP);
+      game.player.yawMul = input.yawMul;
       game.tick(STEP, input.steer, input.reverse);
       accumulator -= STEP;
       steps++;

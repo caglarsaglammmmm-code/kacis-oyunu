@@ -67,7 +67,7 @@ export default {
     rev: 'ATRÁS',
   },
   alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!', meteors: '¡LLUVIA DE METEORITOS!' },
-  escape: { toast: '+{n} ¡POR LOS PELOS!', combo: 'COMBO +{n}' },
+  escape: { toast: '+{n} ¡POR LOS PELOS!', makas: '+{n} ¡RASANTE!', combo: 'COMBO +{n}' },
   code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.' },
   custom: {
     title: 'Personalizar', paint: 'Pintura', rim: 'Llantas', led: 'Luz inferior', exhaust: 'Escape', listen: 'Escuchar', buy: 'Comprar · {cost}', confirm: 'Confirmar · {cost}', poor: 'Monedas insuficientes', bought: '¡Comprado!', use: 'Ya desbloqueado', ownFirst: 'Compra el coche para personalizarlo.',

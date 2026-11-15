@@ -96,7 +96,8 @@ test('tüm çeşitler üretilir: bina, duvar, su, ağaç, çit, park araba, bari
     }
   }
   for (const r of ['building', 'wall', 'water']) assert.ok(rects.has(r), r);
-  for (const p of ['TREE', 'FENCE', 'CRATE', 'BARREL', 'CONE', 'BARRIER', 'PARKED', 'COIN']) assert.ok(props.has(PROP[p]), p);
+  for (const p of ['TREE', 'FENCE', 'CRATE', 'BARREL', 'CONE', 'BARRIER', 'PARKED']) assert.ok(props.has(PROP[p]), p);
+  assert.ok(!props.has(PROP.COIN), 'yerde para yok (odul.yerdekiParalar)');
   assert.ok(templates.size >= 11, [...templates].join());
   for (const b of ['city', 'beach', 'forest', 'desert', 'rural']) assert.ok(biomes.has(b), b);
   assert.ok(rects.has('sea'));

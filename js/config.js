@@ -17,9 +17,9 @@ export const BUILD = {
 
 export const CONFIG = {
   name: NAMES.oyun,
-  version: '24.0.0',
+  version: '24.1.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.0.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -365,26 +365,35 @@ export const CONFIG = {
     lead: 0.45,
   },
 
+  // Puan miktarları odul bloğunda. Burada yalnız kombo çarpanı (dojlama ve makas puanını çarpar)
   score: {
-    perSecond: 10,
-    kill: 100,
-    prop: 10,
-    driftPerSecond: 30,
-    nearMiss: 50,
     comboTime: 3.5,
     comboMax: 5,
     comboDriftStep: 0.15, // Drift saniyesi başına çarpan artışı
     comboNearStep: 0.5,
     comboKillStep: 0.25,
-    nearMissDist: 66,
-    nearMissSpeed: 130,
-    coinPerSeconds: 8, // Bitişte her bu kadar saniye için 1 coin
-    coinPerNearMisses: 2, // Her bu kadar yakın kaçış için 1 coin
-    coinPerKill: 2,
-    earnMul: 1.3, // Koşu sonu kazancı (toplanan, süre, devrilen polis, yakın kaçış) bu kadar artar; fiyatlar aynı
   },
 
   coin: { magnet: 56, dropChance: 0.3 },
+
+  // === PARA VE PUAN: YALNIZ İKİ YOLDAN ===
+  // a) Polisi dojlamak: polis arabasına çok yaklaşıp değmeden kurtulmak (kıl payı kaçış)
+  // b) Makas: trafikteki bir arabanın yanından çok yakın ama değmeden geçmek
+  // Başka hiçbir şey (süre, drift, duvar, bariyer, nesne kırma, polis devirme, yerdeki paralar) para ya da puan vermez.
+  // Yakınlık penceresi boyunca oyuncu herhangi bir şeye (duvar, bariyer, nesne, araç) değerse o geçiş ödülsüz kalır.
+  //   polisEsik / makasEsik: iki araç arası boşluk eşiği (px, araba ~24 px eninde). Büyük = daha kolay ödül
+  //   polisPara / makasPara: [en az, en çok] para.  polisPuan / makasPuan: puan (o anki kombo çarpanıyla)
+  //   polisBekleme / makasBekleme: aynı arabadan bir sonraki ödül için en az süre (sn): yerinde dönerek kasılmaz
+  //   makasAracBasi: bir trafik arabasından en çok kaç ödül alınır (araba yeniden doğunca sıfırlanır)
+  //   makasHiz: makas için oyuncunun en düşük hızı; makasBagilHiz: iki aracın bağıl hızı (duran arabaya makas olmaz)
+  //   genelAra: iki ödül arası en az süre (sn), enUzunYakinlik: yanında bundan uzun kalınırsa geçiş sayılmaz (sn),
+  //   enAzYol: yakınlık penceresinde en az yol (px), cikis: pencereden çıkış eşiği (giriş eşiğinin katı)
+  odul: {
+    polisEsik: 36, polisPara: [5, 10], polisPuan: 150, polisBekleme: 3,
+    makasEsik: 26, makasPara: [2, 4], makasPuan: 75, makasBekleme: 8, makasAracBasi: 2, makasHiz: 200, makasBagilHiz: 140,
+    genelAra: 0.5, enUzunYakinlik: 1.6, enAzYol: 70, cikis: 1.35,
+    yerdekiParalar: false, // true yapılırsa yolda toplanan paralar geri gelir (kural dışı kazanç)
+  },
 
   // HAVA DURUMU: her koşu başında seçilir (ayar: random ya da sabit). grip: lastik tutuşu çarpanı (oyuncu),
   // copShare: polisler etkinin bu kadarını hisseder (adil kalsın), fade: geçiş süresi (sn),
@@ -553,7 +562,8 @@ export const CONFIG = {
   // cooldown: aynı polisten tekrar ödül için bekleme (sn), globalGap: iki ödül arası en kısa süre,
   // maxClose: bundan uzun yakında kalmak sıkışmadır (ödül yok), minTravel: yakında geçerken alınan en kısa yol,
   // comboEvery / comboBonus / comboWindow: art arda kaçışlarda her N'de bir küçük ek
-  escape: { distMul: 1.5, exitMul: 1.35, minSpeed: 220, min: 5, max: 10, cooldown: 3, globalGap: 0.5, maxClose: 1.6, minTravel: 70, comboEvery: 3, comboBonus: 2, comboWindow: 8 },
+  // Eşik, ödül ve bekleme süreleri odul bloğunda (polis*). Burada: en düşük hız ve art arda kaçış kombosu
+  escape: { minSpeed: 220, comboEvery: 3, comboBonus: 2, comboWindow: 8 },
 
   // Sokak insanları. density: zemin başına doğma olasılığı (GROUND sırasıyla)
   // voice: bağırma sesi, road: yolda gider, dodge: asla çarpılmaz, safe: araç değmez ve kenara kaçar, fx: özel dağılma

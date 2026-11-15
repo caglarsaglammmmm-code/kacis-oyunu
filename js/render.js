@@ -12,6 +12,7 @@ import { FX } from './effects.js';
 import { MemorialArt, bakeMemorialPad } from './memorial.js';
 import { Stadiums } from './stadium.js';
 import { NAMES } from './names.js';
+import { SECRET_LOOK } from './secret-look.js';
 import { snowLevel, snowFlat, paintRoofSnow, paintClutterSnow, paintSignSnow, paintIcicles, icicleTips, RoofCache, paintTreeSnow, paintCarSnow } from './snow.js';
 import { signKind, paintDoner, paintPromo, paintDancer, paintBalcony, paintWashing, paintMoon, paintStars, rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintAlien, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
 
@@ -1226,6 +1227,7 @@ export class Renderer {
   // Açık alanlar: spor sahaları, avlu, otopark, ambulans alanı, okul bahçesi
   // Gizli geçit rampası: neredeyse görünmez. Hafif koyu zemin, soluk eğim çizgileri, köşede karanlık bir boşluk
   bakeRamp(g, x, y, w, h) {
+    if (SECRET_LOOK) { SECRET_LOOK.paintEntrance(g, x, y, w, h); return; } // Arkadaş sürümü: binanın girişi
     const grd = g.createLinearGradient(x, y, x + w, y + h);
     grd.addColorStop(0, 'rgba(0,0,0,0)'); grd.addColorStop(0.55, 'rgba(20,16,12,.10)'); grd.addColorStop(1, 'rgba(8,6,5,.26)');
     g.fillStyle = grd; g.fillRect(x, y, w, h);
@@ -1569,6 +1571,7 @@ export class Renderer {
     this.drawMeteorSky(game, now);
     this.drawParticles(game, vx0, vx1, vy0, vy1);
     this.drawNight(game, c0x, c1x, c0y, c1y, vx0, vx1, vy0, vy1, now);
+    if (SECRET_LOOK) this.drawSecretSign(game, now, vx0, vx1, vy0, vy1);
     this.drawPhasing(game);
     this.drawSirens(game, now, vx0, vx1, vy0, vy1);
     this.drawWaves(game);
@@ -1578,6 +1581,18 @@ export class Renderer {
     this.drawWeather(game, now);
     this.drawSpeedLines(game, now);
     this.drawOverlay(game, now);
+  }
+
+  // Arkadaş sürümü: gizli geçit binasının tabelası, gece de aydınlık (js/secret-look.js)
+  drawSecretSign(game, now, vx0, vx1, vy0, vy1) {
+    const z = game.world.zone('secret');
+    if (!z) return;
+    const R = CONFIG.secret.ramp; const B = SECRET_LOOK.bina;
+    const ox = z.x - R[0] * TILE; const oy = z.y - R[1] * TILE;
+    const box = { x: ox + B[0] * TILE, y: oy + B[1] * TILE, w: (B[2] - B[0]) * TILE, h: (B[3] - B[1]) * TILE };
+    const m = 140;
+    if (box.x - m > vx1 || box.x + box.w + m < vx0 || box.y - m > vy1 || box.y + box.h + m < vy0) return;
+    SECRET_LOOK.drawSign(this.ctx, box, now, game.daylight.k);
   }
 
   // Görünecek parçaları karede en çok birer birer hazırlar: geçişte ekran donmaz

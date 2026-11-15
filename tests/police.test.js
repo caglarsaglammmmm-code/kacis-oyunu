@@ -118,7 +118,7 @@ test('çok uzaktaki polis ekran dışında silinir', () => {
   assert.equal(g.cops.length, 0);
 });
 
-test('duvara hızlı çarpan polis hasar alır, yeterince çarpınca patlar ve skor kazandırır', () => {
+test('duvara hızlı çarpan polis hasar alır, yeterince çarpınca patlar; devirmek puan vermez', () => {
   const g = game(10);
   let rect;
   for (let cx = 1; !rect; cx++) {
@@ -144,7 +144,7 @@ test('duvara hızlı çarpan polis hasar alır, yeterince çarpınca patlar ve s
   c.hp = -1;
   g.updateCops(dt);
   assert.equal(g.kills, 1);
-  assert.ok(g.score > score);
+  assert.equal(g.score, score, 'puan yalnız dojlama ve makastan');
 });
 
 test('oyuncu polisi devirebilir; SWAT daha dayanıklı', () => {

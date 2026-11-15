@@ -67,7 +67,7 @@ export default {
     rev: 'GERİ',
   },
   alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!', meteors: 'METEOR YAĞMURU!' },
-  escape: { toast: '+{n} KIL PAYI!', combo: 'KOMBO +{n}' },
+  escape: { toast: '+{n} KIL PAYI!', makas: '+{n} MAKAS!', combo: 'KOMBO +{n}' },
   code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.' },
   custom: {
     title: 'Özelleştir', paint: 'Boya', rim: 'Jant', led: 'Alt LED', exhaust: 'Egzoz', listen: 'Dinle', buy: 'Satın al · {cost}', confirm: 'Onayla · {cost}', poor: 'Yetersiz para', bought: 'Satın alındı!', use: 'Zaten açık', ownFirst: 'Özelleştirmek için önce arabayı al.',
