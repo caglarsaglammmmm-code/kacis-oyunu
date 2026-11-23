@@ -8,7 +8,8 @@
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
 
-const PORT = Number(process.argv[2] || 8080);
+// İlk bağımsız değişken port ya da tam adres (canlı yayın: https://.../drift-lab/)
+const BASE = /^https?:/.test(process.argv[2] || '') ? process.argv[2].replace(/\/?$/, '/') : `http://localhost:${Number(process.argv[2] || 8080)}/`;
 const R = Number(process.argv[3] || 7);
 const OUT = 'e2e-out/v24c';
 fs.mkdirSync(OUT, { recursive: true });
@@ -33,7 +34,7 @@ for (const lang of ['tr', 'en', 'de', 'ja']) {
   const page = await ctx.newPage();
   page.on('pageerror', (e) => errs.push(`${lang} pageerror ${e.message}`));
   page.on('console', (m) => { if (m.type() === 'error') errs.push(`${lang} ${m.text()}`); });
-  await page.goto(`http://localhost:${PORT}/?god=1&t=0`);
+  await page.goto(`${BASE}?god=1&t=0&v=${Date.now()}`);
   await page.waitForFunction(() => window.__drift && !document.getElementById('menu').hidden, null, { timeout: 30000 });
   await page.evaluate((c) => { const k = __drift; k.storage.data.settings.lang = c; k.storage.save(); k.applySettings(); }, lang);
   await page.evaluate(() => __drift.play());
