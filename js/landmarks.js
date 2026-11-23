@@ -3,6 +3,7 @@
 // gece pencere dokuları ilk görüldüğünde bir kez üretilir, sonra yalnızca kopyalanır.
 import { BUILD } from './config.js';
 import { rr, shade } from './art.js';
+import { tabelaText } from './tabela.js';
 
 const S = BUILD;
 const TAU = Math.PI * 2;
@@ -77,7 +78,7 @@ function servis(g, r) {
   for (let k = -L / 2 + 22; k < L / 2 - 12; k += 14) { g.fillRect(-W / 2, k, 3, 9); g.fillRect(W / 2 - 3, k, 3, 9); }
   g.fillStyle = '#f4f6f8'; g.fillRect(-W / 2 + 6, -L / 2 + 30, W - 12, 3);
   g.save(); g.rotate(Math.PI / 2);
-  text(g, 'OKUL TAŞITI', 0, 0, Math.min(9, W * 0.32), '#1b1d22');
+  text(g, tabelaText('OKUL TAŞITI'), 0, 0, Math.min(9, W * 0.32), '#1b1d22');
   g.restore();
   g.fillStyle = '#e8352e'; g.fillRect(-W / 2 + 4, L / 2 - 4, 6, 3); g.fillRect(W / 2 - 10, L / 2 - 4, 6, 3);
   g.restore();
@@ -284,7 +285,7 @@ export function paintPad(g, p, x, y, w, h) {
         g.fillStyle = '#ffd23f'; if (vertical) g.fillRect(px, py, 3, ph); else g.fillRect(px, py, pw, 3);
         g.fillStyle = '#2b6fd6'; if (vertical) g.fillRect(px + 6, py + ph * 0.3, 9, ph * 0.4); else g.fillRect(px + pw * 0.3, py + 6, pw * 0.4, 9);
         g.fillStyle = '#1b2a4a'; rr(g, px + (vertical ? 18 : pw * 0.05), py + (vertical ? 4 : 18), vertical ? 70 : 70, 14, 3); g.fill();
-        text(g, p.text, px + (vertical ? 53 : pw * 0.05 + 35), py + (vertical ? 11 : 25), 8, '#ffffff', 800);
+        text(g, tabelaText(p.text), px + (vertical ? 53 : pw * 0.05 + 35), py + (vertical ? 11 : 25), 8, '#ffffff', 800);
       }
       return true;
     }
@@ -306,7 +307,7 @@ export function paintPad(g, p, x, y, w, h) {
       g.fillStyle = '#8a5a3a'; g.fillRect(cx - R * 0.32, cy - 12, R * 0.64, 14);
       return true;
     }
-    case 'yildiz': {
+    case 'starPad': {
       // Meydan taşı: büyük Selçuklu yıldızı, çevresinde küçükleri
       g.fillStyle = '#d9d2c4'; g.fillRect(x, y, w, h);
       g.lineWidth = 1.5;
@@ -348,13 +349,13 @@ export function paintPad(g, p, x, y, w, h) {
 // Kolej tabelası: siyah zemin, turuncu çerçeve, beyaz ve turuncu harfler
 export function landmarkSign(r) {
   if (r.signArt !== 'kolej') return null;
-  const words = r.sign.split(' ');
+  const words = tabelaText(r.sign).split(' ');
   const last = words.pop();
-  const first = words.join(' ');
+  const head = words.length ? `${words.join(' ')} ` : ''; // Tek kelimelik ad (KOLEJ, COLLEGE) yalnız turuncu yazılır
   const H = 96;
   const c0 = mk(8, 8).getContext('2d');
   c0.font = `400 ${H * 0.62}px Bungee, Nunito, sans-serif`;
-  const w1 = c0.measureText(`${first} `).width;
+  const w1 = c0.measureText(head).width;
   const w2 = c0.measureText(last).width;
   const W = Math.ceil(w1 + w2 + H * 0.8);
   const c = mk(W, H);
@@ -365,7 +366,7 @@ export function landmarkSign(r) {
   g.textBaseline = 'middle';
   g.textAlign = 'left';
   const x0 = H * 0.4;
-  g.fillStyle = '#ffffff'; g.fillText(`${first} `, x0, H * 0.54);
+  g.fillStyle = '#ffffff'; if (head) g.fillText(head, x0, H * 0.54);
   g.fillStyle = '#ff7a00'; g.fillText(last, x0 + w1, H * 0.54);
   return c;
 }
@@ -435,6 +436,51 @@ function roofKolej(w, h) {
   return c;
 }
 
+// Siyah-beyaz site bloğu: beyaz katlar, siyah kat bantları ve dikey siyah şeritler, geniş cam pencereler
+function wallMono(len, lit) {
+  const c = mk(len, H0);
+  const g = c.getContext('2d');
+  const floors = 12;
+  const fh = (H0 - 14) / floors;
+  if (!lit) {
+    g.fillStyle = '#f4f4f1'; g.fillRect(0, 0, len, H0);
+    g.fillStyle = '#111214'; g.fillRect(0, 0, len, 10);
+  }
+  for (let f = 0; f < floors; f++) {
+    const y = 12 + f * fh;
+    if (!lit) { g.fillStyle = '#111214'; g.fillRect(0, y + fh - 3, len, 3); }
+    for (let px = 5, col = 0; px < len - 8; px += 15, col++) {
+      if (!lit) {
+        g.fillStyle = col % 3 === 1 ? '#111214' : '#2a2d33';
+        g.fillRect(px, y + 2, 10, fh - 6);
+        g.fillStyle = 'rgba(200,210,220,.28)'; g.fillRect(px, y + 2, 3, fh - 6);
+      } else {
+        const on = ((f * 97 + col * 53 + len) % 10) < 6;
+        if (!on) continue;
+        g.fillStyle = (f + col) % 4 === 0 ? '#d6ecff' : '#fff0c4';
+        g.fillRect(px, y + 2, 10, fh - 6);
+      }
+    }
+  }
+  if (!lit) { g.fillStyle = '#111214'; for (const px of [0, len / 2 - 3, len - 6]) g.fillRect(px, 0, 6, H0); }
+  return c;
+}
+
+function roofMono(w, h) {
+  const c = mk(w, h);
+  const g = c.getContext('2d');
+  g.fillStyle = '#111214'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#f4f4f1'; g.fillRect(6, 6, w - 12, h - 12);
+  // Satranç tahtası çatı terası ve siyah teknik kat
+  const s = Math.max(8, Math.round(w / 10));
+  for (let py = 12; py < h * 0.55; py += s) for (let px = 12; px < w - 12; px += s) {
+    if (((px / s) | 0) % 2 === ((py / s) | 0) % 2) { g.fillStyle = '#1d1f23'; g.fillRect(px, py, Math.min(s, w - 12 - px), Math.min(s, h * 0.55 - py)); }
+  }
+  g.fillStyle = '#111214'; g.fillRect(w * 0.3, h * 0.62, w * 0.4, h * 0.26);
+  g.fillStyle = '#f4f4f1'; for (let px = w * 0.33; px < w * 0.67; px += 10) g.fillRect(px, h * 0.66, 5, h * 0.18);
+  return c;
+}
+
 function wallKule(len, lit) {
   const c = mk(len, H0);
   const g = c.getContext('2d');
@@ -471,7 +517,7 @@ function roofKule(w, h) {
 }
 
 const ART_CACHE = new Map();
-// r.landmark: 'kolej' | 'kule'. Doku boyu binanın kendi oranına göre, bir kez üretilir
+// r.landmark: 'kolej' | 'kule' | 'monokrom'. Doku boyu binanın kendi oranına göre, bir kez üretilir
 export function tallArt(r) {
   const key = `${r.landmark}:${Math.round(r.w)}x${Math.round(r.h)}`;
   let a = ART_CACHE.get(key);
@@ -489,6 +535,12 @@ export function tallArt(r) {
       n: wallKolej(lenN, false, true), e: rot(wallKolej(lenE, false, false)),
       litN: wallKolej(lenN, true, true), litE: rot(wallKolej(lenE, true, false)),
       roof: roofKolej(Math.round(r.w * 0.6), Math.round(r.h * 0.6)),
+    };
+  } else if (r.landmark === 'monokrom') {
+    a = {
+      n: wallMono(lenN, false), e: rot(wallMono(lenE, false)),
+      litN: wallMono(lenN, true), litE: rot(wallMono(lenE, true)),
+      roof: roofMono(Math.round(r.w * 0.6), Math.round(r.h * 0.6)),
     };
   } else if (r.landmark === 'kule') {
     a = {

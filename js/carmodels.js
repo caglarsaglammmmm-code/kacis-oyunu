@@ -190,7 +190,7 @@ export const CAR_MODELS = {
   },
   kartal: {
     name: 'Kartal 67', L: 4.78, W: 1.86, H: 1.36, wb: 2.78, fo: 0.92, r: 0.34, sill: 0.18, crown: 0.02, tumble: 0.86, bowF: 0.04, bowR: 0.02, rim: 'star',
-    features: ['Uzun kaputlu klasik güç arabası', 'Geniş ızgara, çift yuvarlak far', 'Kaputtan bagaja çift yarış şeridi', 'Krom tampon, kalın arka çamurluk', 'Yıldız jant'],
+    features: ['Uzun kaputlu klasik güç arabası', 'Geniş ızgara, çift yuvarlak far', 'Kaputtan bagaja çift yarış şeridi', 'Krom tampon, kalın arka çamurluk', 'Beş kollu jant'],
     plan: [[0, 0.94], [0.03, 0.99], [0.5, 1], [0.97, 0.99], [1, 0.95]],
     deck: [[0, 0.7], [0.02, 0.78], [0.42, 0.86], [0.46, 0.88], [0.86, 0.9], [0.98, 0.86], [1, 0.76]],
     roof: [[0.45, 0.86], [0.55, 1.32], [0.73, 1.36], [0.85, 0.92], [0.87, 0.9]],

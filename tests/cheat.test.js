@@ -59,7 +59,7 @@ test('sıra doğru girilince tamamlanır, süre aşımı ve yanlış yön başa 
   const c = new CheatCode();
   let t = 0;
   const all = (gap) => { let done = false; for (const d of SEQ) { t += gap; done = c.press(d, t); } return done; };
-  assert.equal(SEQ.join(''), 'LLRRLRLRLLRR');
+  assert.equal(SEQ.join(''), 'LLRRLRLRLLRRLLLR');
   assert.equal(all(0.5), true);
   assert.equal(all(2.0), false, 'süre aşımı');
   c.reset();
@@ -77,15 +77,18 @@ for (const [mode, tap] of [['zones', tapZones], ['wheel', tapWheel], ['stick', t
     const n = countOf(i);
     for (const d of SEQ) tap(i, d);
     assert.equal(n(), 1, 'doğru kod');
-    for (const d of 'LRLRLRLRLRLR') tap(i, d);
+    for (const d of 'LRLRLRLRLRLRLRLR') tap(i, d);
     assert.equal(n(), 1, 'yanlış kod');
     wait(i, 2.1);
     for (const d of 'LLRRLRLR') tap(i, d);
     wait(i, 2.1);
     assert.equal(n(), 1, 'eski 8 basışlık kod açmaz');
-    for (const d of 'LLRRLRLRL') tap(i, d);
+    for (const d of 'LLRRLRLRLLRR') tap(i, d);
+    wait(i, 2.1);
+    assert.equal(n(), 1, 'eski 12 basışlık kod açmaz');
+    for (const d of 'LLRRLRLRLLRRL') tap(i, d);
     tap(i, 'R'); // Araya yanlış basış
-    for (const d of 'LRR') tap(i, d);
+    for (const d of 'LLR') tap(i, d);
     assert.equal(n(), 1, 'araya yanlış basış girince açmaz');
     wait(i, 2.1);
     wait(i, 2);
@@ -303,13 +306,30 @@ for (const [mode, tap] of [['zones', tapZones], ['wheel', tapWheel], ['stick', t
   });
 }
 
-test('12 basışlık kod: eski 8 basışlık kod açmaz, tam kod açar ve ikinci kez kapatır', () => {
-  assert.equal(SEQ.length, 12);
+test('16 basışlık kod: eski 8 ve 12 basışlık kod açmaz, tam kod açar ve ikinci kez kapatır', () => {
+  assert.equal(SEQ.length, 16);
   const c = new CheatCode();
   let t = 0;
   for (const d of 'LLRRLRLR') { t += 0.3; assert.equal(c.press(d, t), false); }
   t += 2.0;
   assert.equal(c.press('L', t), false, 'eski kodun ardı süre aşımı');
+  c.reset();
+  for (const d of 'LLRRLRLRLLRR') { t += 0.3; assert.equal(c.press(d, t), false, 'eski 12 basışlık kod'); }
+  t += 2.0;
+  c.reset();
+  // Her konumda yanlış yön sırayı sıfırlar: sonra kalan doğru basışlar kodu tamamlamaz
+  for (let k = 0; k < SEQ.length; k++) {
+    c.reset();
+    for (const d of SEQ.slice(0, k)) { t += 0.3; c.press(d, t); }
+    t += 0.3; c.press(SEQ[k] === 'L' ? 'R' : 'L', t);
+    let done = false;
+    for (const d of SEQ.slice(k + 1)) { t += 0.3; done = c.press(d, t) || done; }
+    assert.equal(done, false, `yanlış basış ${k + 1}. adımda`);
+  }
+  c.reset();
+  let ok = false;
+  for (const d of SEQ) { t += 0.3; ok = c.press(d, t); }
+  assert.equal(ok, true, 'yeni kod açar');
   const g = play();
   const i = makeInput('zones');
   i.onCode = () => g.toggleCheat();

@@ -5,6 +5,7 @@
 // Önbellekli çizim: uzakta küçük (lo), yakında ayrıntılı (hi, karede bir parça üretilir). Bayrak ve taraftar canlıdır.
 import { CONFIG } from './config.js';
 import { NAMES } from './names.js';
+import { tabelaText, tabelaEnglish } from './tabela.js';
 import { paintMemFlag } from './memorial-data.js';
 
 const SM_COL = NAMES.stadRenk.kucuk;
@@ -133,7 +134,7 @@ function paintSmall(g, w, h, part, detail) {
     g.fillStyle = '#0c0d10';
     for (const u of [0.22, 0.5, 0.78]) g.fillRect(w * u - 16, h - 9, 32, 9);
     g.fillStyle = trim; g.fillRect(w * 0.2, h - rim * 0.62, w * 0.6, rim * 0.34);
-    stdText(g, NAMES.stadyum.kucuk, w / 2, h - rim * 0.45, rim * 0.24, '#ffffff', w * 0.56);
+    stdText(g, tabelaText(NAMES.stadyum.kucuk), w / 2, h - rim * 0.45, rim * 0.24, '#ffffff', w * 0.56);
     // Köşelerde 4 uzun ışık direği: gölgesi çapraz düşer
     for (const [px, py] of [[16, 16], [w - 16, 16], [16, h - 16], [w - 16, h - 16]]) {
       g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 4; g.beginPath(); g.moveTo(px, py); g.lineTo(px + 34, py + 46); g.stroke();
@@ -239,7 +240,7 @@ function paintBig(g, w, h, part, detail) {
       for (let k = 0; k < 6; k++) { g.fillStyle = k % 2 ? '#d9dfe2' : '#c3cacf'; g.fillRect(w * 0.38, y + k * 3.6, w * 0.24, 3.6); }
     }
     g.fillStyle = green; g.fillRect(w * 0.3, h - 82, w * 0.4, 26);
-    stdText(g, NAMES.stadyum.buyuk, w / 2, h - 69, 17, '#ffffff', w * 0.38);
+    stdText(g, tabelaText(NAMES.stadyum.buyuk), w / 2, h - 69, 17, '#ffffff', w * 0.38);
   }
 }
 
@@ -380,8 +381,9 @@ export class Stadiums {
 
   art(z) {
     const kind = z.w > 600 ? 'buyuk' : 'kucuk';
-    let a = this.arts.get(kind);
-    if (!a) { a = new StadiumArt(kind, z.w, z.h); this.arts.set(kind, a); }
+    const key = `${kind}:${tabelaEnglish() ? 'en' : 'tr'}`; // Tabela dile göre: dil değişince yeni çizim
+    let a = this.arts.get(key);
+    if (!a) { a = new StadiumArt(kind, z.w, z.h); this.arts.set(key, a); }
     return a;
   }
 

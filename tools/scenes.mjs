@@ -49,7 +49,7 @@ await scene('kalabalik', 844, 390, '?t=60&god=1', () => {
   for (const o of g.crowd.npcs) if (o.alive) { o.kind = kinds[n % 4]; o.color = 0; o.spec = globalThis.__drift.cfg.npc.types[o.kind]; o.len = o.spec.len; o.wid = o.spec.wid; o.x = p.x - 280 + n * 150; o.y = p.y + 170; o.vx = 0; o.vy = 0; o.a = 0; o.drive.maxSpeed = 1; n++; }
 }, 280);
 await scene('kolej', 844, 390, '?god=1', () => {
-  const g = globalThis.__drift.game; const s = g.world.sistemChunk(); const c = g.world.chunk(s.cx, s.cy); const p = g.player;
+  const g = globalThis.__drift.game; const s = g.world.kolejChunk(); const c = g.world.chunk(s.cx, s.cy); const p = g.player;
   p.x = c.x + 580; p.y = c.y + 900; p.a = 0; p.vx = 0; p.vy = 0; g.cam.x = p.x; g.cam.y = p.y - 280;
   for (const k of g.cops) k.x += 1e5;
 }, 700);

@@ -15,7 +15,7 @@ Mobil öncelikli, Türkiye sokaklarını andıran bir şehirde geçen kuşbakı�
 - **Garaj:** Atmaca ile başlarsın; coinlerle motosiklet, Granit SUV, Elektra X1, Şimşek, Çınar A, Efe 131, Marmara S, Liva ve Bozkır 4x4 açılır.
 - **Polisler:** normal, hızlı, motosiklet, SWAT, gelişmiş, tank; 225. saniyeden sonra uzaylılar.
 - **Gece-gündüz:** sokak lambaları, pencereler, tabelalar ve araç farları gece yanar.
-- **Şehir:** tabelalı dükkânlar, marketler, çay ocakları, müzikli kafeler, çay bahçeleri, spor salonları, kapalı pazar, kediler, trafik ışıkları, dolmuş, taksi ve şehir otobüsü. Haritada tek bir turuncu Mandalina Koleji vardır.
+- **Şehir:** tabelalı dükkânlar, marketler, çay ocakları, müzikli kafeler, çay bahçeleri, spor salonları, kapalı pazar, kediler, trafik ışıkları, dolmuş, taksi ve şehir otobüsü. Haritada tek bir büyük turuncu-siyah-beyaz Kolej ve siyah-beyaz 6 yüksek bloklu bir site (Monokrom Sitesi) vardır.
 
 ## İçerik kuralları
 
@@ -92,4 +92,4 @@ Adlar `names/tablo.mjs` içinde, her yer için `gercek` ve `uydurma` sütunuyla 
 - Android: `npm run android:build` (iki sürüm; tek sürüm için `npm run android:build -- play`)
 - Play paketinde gerçek ad kalmadığının kanıtı: `node tools/play-clean.mjs --kontrol`
 
-Diller: `js/i18n/` (tr, en, ja, zh, es, de). Mağaza metinleri: `gorseller/play-store/metinler/`.
+Diller: `js/i18n/` (tr, en, ja, zh, es, de). Haritadaki tabelalar Türkçede Türkçe, diğer bütün dillerde İngilizce yazar: genel adlar `js/tabela.js`, sürüme göre değişen adlar `names/tablo.mjs` içindeki `ingilizce` tablosunda. Tabela listesi: `node tools/sign-list.mjs`. Mağaza metinleri: `gorseller/play-store/metinler/`.

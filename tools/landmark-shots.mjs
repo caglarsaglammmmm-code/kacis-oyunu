@@ -37,7 +37,7 @@ for (const id of Object.keys(WANT)) {
   for (const night of [false, true]) {
     const info = await page.evaluate(async ({ id, night }) => {
       const k = __drift; const g = k.game; const w = g.world;
-      const m = id === 'kolej' ? w.sistemChunk() : w.landmarkList().find((o) => o.id === id);
+      const m = id === 'kolej' ? w.kolejChunk() : w.landmarkList().find((o) => o.id === id);
       if (!m) return { missing: true };
       const C = 40 * 32;
       const cx = m.cx * C + C / 2 + 60; const cy = m.cy * C + C / 2 + (id === 'kolej' ? 330 : id === 'kule' ? 120 : 0);

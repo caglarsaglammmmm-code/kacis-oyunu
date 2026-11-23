@@ -10,8 +10,7 @@ const NAMES = {
  "yapimci": "",
  "indir": "",
  "kolej": {
-  "ad": "MANDALİNA KOLEJİ",
-  "ust": "MANDALİNA"
+  "ad": "KOLEJ"
  },
  "okullar": {
   "fen": "Fen Bilimleri Okulu",
@@ -111,8 +110,8 @@ const NAMES = {
    "renk": "#1f9e9e"
   },
   {
-   "id": "yildiz",
-   "ad": "Yıldız Mağazaları",
+   "id": "papatya",
+   "ad": "Papatya Mağazaları",
    "renk": "#c23b6b"
   },
   {
@@ -138,7 +137,7 @@ const NAMES = {
  ],
  "bankalar": [
   {
-   "ad": "Yıldız Bankası",
+   "ad": "Ufuk Bankası",
    "renk": "#3b3f8f"
   },
   {
@@ -160,7 +159,8 @@ const NAMES = {
  ],
  "siteler": {
   "buyuk1": "Yeşilvadi Sitesi",
-  "buyuk2": "Mavi Orman Sitesi"
+  "buyuk2": "Mavi Orman Sitesi",
+  "monokrom": "Monokrom Sitesi"
  },
  "tekil": {
   "ishani": "Merkez Çarşı İş Hanı",
@@ -195,6 +195,69 @@ const NAMES = {
    ]
   }
  },
+ "ingilizce": {
+  "KOLEJ": "COLLEGE",
+  "Monokrom Sitesi": "Monochrome Residence",
+  "Fen Bilimleri Okulu": "Science School",
+  "Bozkır Koleji": "Steppe College",
+  "Gün Işığı Koleji": "Sunlight College",
+  "Çınar İlkokulu": "Plane Tree Primary School",
+  "Bozkır Kulesi": "Steppe Tower",
+  "Şehir Müzesi": "City Museum",
+  "Tepe Camii": "Hill Mosque",
+  "Yeşil Tepe": "Green Hill",
+  "Kongre Merkezi": "Congress Center",
+  "Şehir Parkı": "City Park",
+  "Çınar Meydanı": "Plane Tree Square",
+  "Eski Çarşı": "Old Bazaar",
+  "Bağlar Bahçesi": "Vineyard Garden",
+  "Taş Fırın": "Stone Oven",
+  "Tepe": "Hill",
+  "Çınar": "Plane Tree",
+  "Müze": "Museum",
+  "Kebap Sarayı": "Kebab Palace",
+  "Kayık Pide": "Boat Pide",
+  "Fırın Lahmacun": "Oven Lahmacun",
+  "Ocakbaşı Kebapçısı": "Grill Kebab House",
+  "Tereyağlı Kebapçı": "Butter Kebab House",
+  "Öz Ocakbaşı": "Pure Grill",
+  "Pazarcık Market": "Bazaar Market",
+  "Ucuzlar": "Bargains",
+  "Sepet Market": "Basket Market",
+  "Papatya Mağazaları": "Daisy Stores",
+  "Dörtyol Market": "Crossroads Market",
+  "Teknoloji Durağı": "Tech Stop",
+  "Yapı Dünyası": "Building World",
+  "Ufuk Bankası": "Horizon Bank",
+  "Kumbara Tasarruf": "Piggy Bank Savings",
+  "Bereket Bankası": "Bounty Bank",
+  "Güven Kredi": "Trust Credit",
+  "Liman Yatırım": "Harbor Investment",
+  "Yeşilvadi Sitesi": "Green Valley Residence",
+  "Mavi Orman Sitesi": "Blue Forest Residence",
+  "Merkez Çarşı İş Hanı": "Central Bazaar Business Center",
+  "Sahil Palas Oteli": "Coast Palace Hotel",
+  "Nane Döner": "Mint Doner",
+  "ÇINARLI ŞEHİR STADYUMU": "ÇINARLI CITY STADIUM",
+  "MAVİ RÜZGAR ARENA": "BLUE WIND ARENA",
+  "← LİMAN O-1": "← PORT O-1",
+  "← SAHİL O-1": "← COAST O-1",
+  "← OVA O-2": "← PLAIN O-2",
+  "← KÖPRÜ O-1": "← BRIDGE O-1",
+  "MERKEZ O-2 →": "CENTER O-2 →",
+  "DAĞ O-2 →": "MOUNTAIN O-2 →",
+  "GÖL O-2 →": "LAKE O-2 →",
+  "VADİ O-3 →": "VALLEY O-3 →",
+  "← ÇARŞI": "← BAZAAR",
+  "LİMAN →": "PORT →",
+  "↑ MERKEZ": "↑ CENTER",
+  "SAHİL →": "COAST →",
+  "← ÇINARLI": "← ÇINARLI",
+  "TEPEBAŞI →": "HILLTOP →",
+  "↑ KÖPRÜ": "↑ BRIDGE",
+  "← ESKİ ŞEHİR": "← OLD TOWN",
+  "YENİ MAHALLE →": "NEW QUARTER →"
+ },
  "misafir": ""
 };
 
@@ -219,7 +282,7 @@ const CONFIG = {
   name: NAMES.oyun,
   version: '24.1.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.0-2/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -265,7 +328,7 @@ const CONFIG = {
       harabe: { alleys: [4, 3], maxB: 5, wide: 0.5, detached: 0.4, stub: 0.4 },
       sanayi: { alleys: [3, 2], maxB: 8, wide: 0.8, detached: 0.3, stub: 0.2 },
     },
-    sistemRing: [4, 9], // Kolej: başlangıçtan bu kadar chunk uzakta
+    kolejRing: [4, 9], // Kolej: başlangıçtan bu kadar chunk uzakta
     // Tek seferlik özel yerler: her biri kendi chunk'ında, başlangıçtan ring kadar uzakta, birbirinden ayrı.
     // Adlar isim tablosundadır (names/tablo.mjs)
     landmarks: [
@@ -279,7 +342,7 @@ const CONFIG = {
       { id: 'gecit', ring: [11, 14] }, // Ücra köşedeki terk edilmiş depo alanı (CONFIG.secret)
     ],
     // Yüksek özel yapıların yükseklik payı (sıradan binalar en çok tall.height[1])
-    landmarkHeight: { kolej: 0.46, kule: 0.95 },
+    landmarkHeight: { kolej: 0.58, kule: 0.95, monokrom: 0.82 },
     // Bina yüksekliği: share yüksek bina oranı, height kameraya uzanma payı
     // ruin ve work: sıradan mahallede harabe ve inşaat, fire: yangın olasılığı
     tall: { share: 0.62, height: [0.16, 0.42], maxPerChunk: 16 },
@@ -295,6 +358,8 @@ const CONFIG = {
     bigSites: [
       { name: NAMES.siteler.buyuk1, color: '#7fa86b', ring: [5, 11], layout: 0 },
       { name: NAMES.siteler.buyuk2, color: '#c98a5a', ring: [8, 15], layout: 1 },
+      // Siyah-beyaz site: tek chunk, 6 yüksek blok (layout 2, world.js fillSite). Ad sürüme göre (isim tablosu)
+      { name: NAMES.siteler.monokrom, color: '#f2f2ef', ring: [4, 9], layout: 2, span: 1 },
     ],
   },
 
@@ -473,7 +538,7 @@ const CONFIG = {
   // baştan başlatır (1,9 sn geçerli, 2,0 sn geçersiz). maxHold: bunu aşan basılı tutma normal sürüş sayılır
   // ve sırayı bozar. wheelOn, stickOn: eksen eşiği, axisBack: yeniden saymak için merkeze dönüş eşiği
   cheat: {
-    sequence: ['L', 'L', 'R', 'R', 'L', 'R', 'L', 'R', 'L', 'L', 'R', 'R'], // 12 basış; eski 8'li kod açmaz
+    sequence: ['L', 'L', 'R', 'R', 'L', 'R', 'L', 'R', 'L', 'L', 'R', 'R', 'L', 'L', 'L', 'R'], // 16 basış; eski 12'li ve 8'li kod açmaz
     gap: 2,
     maxHold: 0.45, // Kod girişi kısa dokunuşlarla yapılır; sürüşteki basılı tutmalar sırayı bozar
     wheelOn: 0.45,
@@ -644,7 +709,7 @@ const CONFIG = {
       { id: 'krom', color: '#dfe6ee', finish: 'metal', price: 250 }, { id: 'lav', color: '#ff3b1f', finish: 'pearl', price: 200 },
     ],
     rims: [
-      { id: 'std', price: 0 }, { id: 'yildiz', price: 60 }, { id: 'cok', price: 90 }, { id: 'spor', price: 120 },
+      { id: 'std', price: 0 }, { id: 'bes', price: 60 }, { id: 'cok', price: 90 }, { id: 'spor', price: 120 },
       { id: 'derin', price: 150 }, { id: 'turbin', price: 180 }, { id: 'karbon', price: 200 }, { id: 'altin', price: 250 },
     ],
     // fx: static sabit, breathe nefes alır, rainbow gökkuşağı
@@ -858,7 +923,7 @@ const CONFIG = {
     cafes: ['Melodi Kafe', 'Akustik Kafe', 'Sahne Kafe', 'Çınaraltı Çay Bahçesi', 'Bahçe Çay Evi', 'Çay Bahçesi', 'Demir Spor Salonu', 'Kondisyon Spor Salonu'],
     cafeColors: ['#c9773b', '#3f8f6b', '#8a5fb0', '#d1a03c'],
     neon: ['#ff2a6d', '#21d4fd', '#b967ff', '#05ffa1', '#fffb96'],
-    markets: ['Ucuzluk Market', 'Bereket Gross', 'Komşu Market', 'Anadolu Gross', 'Yıldız Gross', 'Hesaplı Market', 'Doyuran Gross', 'Tasarruf Market'],
+    markets: ['Ucuzluk Market', 'Bereket Gross', 'Komşu Market', 'Anadolu Gross', 'Kervan Gross', 'Hesaplı Market', 'Doyuran Gross', 'Tasarruf Market'],
     colors: ['#c8261e', '#1d6fb8', '#178a4d', '#d97706', '#6d28a8', '#0f766e', '#be185d', '#1f2937'],
   },
 
@@ -895,7 +960,7 @@ const CONFIG = {
   CONFIG.npc.panicSpeed = Math.round(CONFIG.npc.panicSpeed * S.player);
 }
 
-// Yıldız seviyesi: başlangıçta 1, her eşikte artar
+// Aranma seviyesi: başlangıçta 1, her eşikte artar
 const MAX_STARS = 4;
 
 // Araç bul: satılık arabalar ve gizli motosiklet
@@ -978,7 +1043,7 @@ const TR = {
   custom: {
     title: 'Özelleştir', paint: 'Boya', rim: 'Jant', led: 'Alt LED', exhaust: 'Egzoz', listen: 'Dinle', buy: 'Satın al · {cost}', confirm: 'Onayla · {cost}', poor: 'Yetersiz para', bought: 'Satın alındı!', use: 'Zaten açık', ownFirst: 'Özelleştirmek için önce arabayı al.',
     paints: { gece: 'Gece Siyahı', gumus: 'Parlak Gümüş', kiraz: 'Kiraz Kırmızı', okyanus: 'Okyanus Mavisi', zumrut: 'Zümrüt Yeşili', limon: 'Limon Sarısı', mandalina: 'Mandalina', lavanta: 'Mat Lavanta', pembe: 'Şeker Pembe', haki: 'Mat Haki', fume: 'Mat Füme', bakir: 'Bakır', lacivert: 'Lacivert Metalik', neonyesil: 'Neon Yeşil', neonpembe: 'Neon Pembe', mor: 'Elektrik Moru', inci: 'İnci Beyazı', altin: 'Altın', krom: 'Ayna Krom', lav: 'Lav Kırmızısı' },
-    rims: { std: 'Standart', yildiz: 'Beş Kollu Yıldız', cok: 'Çok Kollu', spor: 'Spor', derin: 'Derin Çanak', turbin: 'Türbin', karbon: 'Karbon', altin: 'Altın' },
+    rims: { std: 'Standart', bes: 'Beş Kollu', cok: 'Çok Kollu', spor: 'Spor', derin: 'Derin Çanak', turbin: 'Türbin', karbon: 'Karbon', altin: 'Altın' },
     leds: { yok: 'Kapalı', mavi: 'Neon Mavi', pembe: 'Neon Pembe', mor: 'Mor', yesil: 'Yeşil', beyaz: 'Beyaz', kirmizi: 'Kırmızı Nefes', buz: 'Buz Nefesi', altin: 'Altın Nefes', gokkusagi: 'Gökkuşağı' },
     exhausts: { std: 'Standart', v8: 'Gür V8', patlamali: 'Patlamalı', turbo: 'Turbo', spor: 'Spor Tiz', derin: 'Derin Bas' },
     exhaustInfo: { std: 'Fabrika çıkışı, dengeli ses', v8: 'Kalın, gürleyen sekiz silindir', patlamali: 'Gaz bırakınca sık sık pat pat pop', turbo: 'Tiz ıslık ve boşalma sesi', spor: 'Yüksek devirde keskin, tiz çığlık', derin: 'Yeri titreten derin bas' },
@@ -1082,7 +1147,7 @@ const EN = {
   custom: {
     title: 'Customize', paint: 'Paint', rim: 'Rims', led: 'Underglow', exhaust: 'Exhaust', listen: 'Listen', buy: 'Buy · {cost}', confirm: 'Confirm · {cost}', poor: 'Not enough coins', bought: 'Purchased!', use: 'Already unlocked', ownFirst: 'Buy the car first to customize it.',
     paints: { gece: 'Midnight Black', gumus: 'Bright Silver', kiraz: 'Cherry Red', okyanus: 'Ocean Blue', zumrut: 'Emerald Green', limon: 'Lemon Yellow', mandalina: 'Tangerine', lavanta: 'Matte Lavender', pembe: 'Candy Pink', haki: 'Matte Khaki', fume: 'Matte Smoke Gray', bakir: 'Copper', lacivert: 'Navy Metallic', neonyesil: 'Neon Green', neonpembe: 'Neon Pink', mor: 'Electric Purple', inci: 'Pearl White', altin: 'Gold', krom: 'Mirror Chrome', lav: 'Lava Red' },
-    rims: { std: 'Standard', yildiz: 'Five-Spoke Star', cok: 'Multi-Spoke', spor: 'Sport', derin: 'Deep Dish', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
+    rims: { std: 'Standard', bes: 'Five-Spoke Star', cok: 'Multi-Spoke', spor: 'Sport', derin: 'Deep Dish', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
     leds: { yok: 'Off', mavi: 'Neon Blue', pembe: 'Neon Pink', mor: 'Purple', yesil: 'Green', beyaz: 'White', kirmizi: 'Red Pulse', buz: 'Ice Pulse', altin: 'Gold Pulse', gokkusagi: 'Rainbow' },
     exhausts: { std: 'Stock', v8: 'Rumbling V8', patlamali: 'Popper', turbo: 'Turbo', spor: 'Sport Scream', derin: 'Deep Bass' },
     exhaustInfo: { std: 'Factory fitted, balanced sound', v8: 'Thick, roaring eight cylinders', patlamali: 'Pops and bangs whenever you lift off', turbo: 'High whistle and blow-off', spor: 'Sharp, high-revving scream', derin: 'Ground-shaking deep bass' },
@@ -1186,7 +1251,7 @@ const JA = {
   custom: {
     title: 'カスタマイズ', paint: '塗装', rim: 'ホイール', led: 'アンダーネオン', exhaust: 'マフラー', listen: '試聴', buy: '購入 · {cost}', confirm: '確認 · {cost}', poor: 'コインが足りません', bought: '購入しました！', use: '解放済み', ownFirst: 'カスタマイズするには先に車を買おう。',
     paints: { gece: 'ミッドナイトブラック', gumus: 'ブライトシルバー', kiraz: 'チェリーレッド', okyanus: 'オーシャンブルー', zumrut: 'エメラルドグリーン', limon: 'レモンイエロー', mandalina: 'タンジェリン', lavanta: 'マット・ラベンダー', pembe: 'キャンディピンク', haki: 'マット・カーキ', fume: 'マット・スモークグレー', bakir: 'カッパー', lacivert: 'ネイビーメタリック', neonyesil: 'ネオングリーン', neonpembe: 'ネオンピンク', mor: 'エレクトリックパープル', inci: 'パールホワイト', altin: 'ゴールド', krom: 'ミラークローム', lav: 'ラヴァレッド' },
-    rims: { std: 'スタンダード', yildiz: '5本スポーク', cok: 'マルチスポーク', spor: 'スポーツ', derin: 'ディープリム', turbin: 'タービン', karbon: 'カーボン', altin: 'ゴールド' },
+    rims: { std: 'スタンダード', bes: '5本スポーク', cok: 'マルチスポーク', spor: 'スポーツ', derin: 'ディープリム', turbin: 'タービン', karbon: 'カーボン', altin: 'ゴールド' },
     leds: { yok: 'なし', mavi: 'ネオンブルー', pembe: 'ネオンピンク', mor: 'パープル', yesil: 'グリーン', beyaz: 'ホワイト', kirmizi: 'レッドパルス', buz: 'アイスパルス', altin: 'ゴールドパルス', gokkusagi: 'レインボー' },
     exhausts: { std: 'ノーマル', v8: '轟音V8', patlamali: 'アフターファイア', turbo: 'ターボ', spor: 'スポーツ高音', derin: '重低音' },
     exhaustInfo: { std: 'メーカー純正のバランスの良い音', v8: '太く轟く8気筒サウンド', patlamali: 'アクセルを戻すとパンパン鳴る', turbo: '甲高いタービン音とブローオフ', spor: '高回転で鋭く響く高音', derin: '地面を揺らす重低音' },
@@ -1290,7 +1355,7 @@ const ZH = {
   custom: {
     title: '改装', paint: '涂装', rim: '轮毂', led: '底盘灯', exhaust: '排气', listen: '试听', buy: '购买 · {cost}', confirm: '确认 · {cost}', poor: '金币不足', bought: '购买成功！', use: '已解锁', ownFirst: '先购买这辆车才能改装。',
     paints: { gece: '午夜黑', gumus: '亮银', kiraz: '樱桃红', okyanus: '海洋蓝', zumrut: '祖母绿', limon: '柠檬黄', mandalina: '橘橙', lavanta: '哑光薰衣草', pembe: '糖果粉', haki: '哑光卡其', fume: '哑光烟灰', bakir: '古铜', lacivert: '藏青金属', neonyesil: '霓虹绿', neonpembe: '霓虹粉', mor: '电光紫', inci: '珍珠白', altin: '金色', krom: '镜面铬', lav: '熔岩红' },
-    rims: { std: '标准', yildiz: '五辐星形', cok: '多辐', spor: '运动', derin: '深唇', turbin: '涡轮', karbon: '碳纤维', altin: '金色' },
+    rims: { std: '标准', bes: '五辐星形', cok: '多辐', spor: '运动', derin: '深唇', turbin: '涡轮', karbon: '碳纤维', altin: '金色' },
     leds: { yok: '关闭', mavi: '霓虹蓝', pembe: '霓虹粉', mor: '紫色', yesil: '绿色', beyaz: '白色', kirmizi: '红色呼吸', buz: '冰蓝呼吸', altin: '金色呼吸', gokkusagi: '彩虹' },
     exhausts: { std: '原厂', v8: '轰鸣V8', patlamali: '回火爆鸣', turbo: '涡轮', spor: '运动高音', derin: '深沉低音' },
     exhaustInfo: { std: '原厂配置，声音均衡', v8: '浑厚轰鸣的八缸声浪', patlamali: '松油门时噼啪回火', turbo: '尖锐的涡轮啸叫与泄压声', spor: '高转速下尖锐的嘶吼', derin: '震撼地面的深沉低音' },
@@ -1394,7 +1459,7 @@ const ES = {
   custom: {
     title: 'Personalizar', paint: 'Pintura', rim: 'Llantas', led: 'Luz inferior', exhaust: 'Escape', listen: 'Escuchar', buy: 'Comprar · {cost}', confirm: 'Confirmar · {cost}', poor: 'Monedas insuficientes', bought: '¡Comprado!', use: 'Ya desbloqueado', ownFirst: 'Compra el coche para personalizarlo.',
     paints: { gece: 'Negro medianoche', gumus: 'Plata brillante', kiraz: 'Rojo cereza', okyanus: 'Azul océano', zumrut: 'Verde esmeralda', limon: 'Amarillo limón', mandalina: 'Mandarina', lavanta: 'Lavanda mate', pembe: 'Rosa chicle', haki: 'Caqui mate', fume: 'Gris humo mate', bakir: 'Cobre', lacivert: 'Azul marino metalizado', neonyesil: 'Verde neón', neonpembe: 'Rosa neón', mor: 'Morado eléctrico', inci: 'Blanco perla', altin: 'Oro', krom: 'Cromo espejo', lav: 'Rojo lava' },
-    rims: { std: 'Estándar', yildiz: 'Estrella de 5 radios', cok: 'Multirradio', spor: 'Deportiva', derin: 'Plato hondo', turbin: 'Turbina', karbon: 'Carbono', altin: 'Oro' },
+    rims: { std: 'Estándar', bes: 'Estrella de 5 radios', cok: 'Multirradio', spor: 'Deportiva', derin: 'Plato hondo', turbin: 'Turbina', karbon: 'Carbono', altin: 'Oro' },
     leds: { yok: 'Apagado', mavi: 'Azul neón', pembe: 'Rosa neón', mor: 'Morado', yesil: 'Verde', beyaz: 'Blanco', kirmizi: 'Rojo pulsante', buz: 'Hielo pulsante', altin: 'Oro pulsante', gokkusagi: 'Arcoíris' },
     exhausts: { std: 'Estándar', v8: 'V8 Rugiente', patlamali: 'Petardeo', turbo: 'Turbo', spor: 'Deportivo agudo', derin: 'Bajo profundo' },
     exhaustInfo: { std: 'De fábrica, sonido equilibrado', v8: 'Ocho cilindros gruesos y rugientes', patlamali: 'Petardea al soltar el acelerador', turbo: 'Silbido agudo y soplido de válvula', spor: 'Grito agudo a altas revoluciones', derin: 'Bajo profundo que hace temblar el suelo' },
@@ -1498,7 +1563,7 @@ const DE = {
   custom: {
     title: 'Anpassen', paint: 'Lack', rim: 'Felgen', led: 'Unterboden', exhaust: 'Auspuff', listen: 'Anhören', buy: 'Kaufen · {cost}', confirm: 'Bestätigen · {cost}', poor: 'Nicht genug Münzen', bought: 'Gekauft!', use: 'Schon freigeschaltet', ownFirst: 'Kaufe zuerst das Auto, um es anzupassen.',
     paints: { gece: 'Mitternachtsschwarz', gumus: 'Hellsilber', kiraz: 'Kirschrot', okyanus: 'Ozeanblau', zumrut: 'Smaragdgrün', limon: 'Zitronengelb', mandalina: 'Mandarine', lavanta: 'Mattes Lavendel', pembe: 'Bonbonrosa', haki: 'Mattes Khaki', fume: 'Mattes Rauchgrau', bakir: 'Kupfer', lacivert: 'Marineblau Metallic', neonyesil: 'Neongrün', neonpembe: 'Neonpink', mor: 'Elektrolila', inci: 'Perlweiß', altin: 'Gold', krom: 'Spiegelchrom', lav: 'Lavarot' },
-    rims: { std: 'Standard', yildiz: 'Fünfspeichen-Stern', cok: 'Vielspeichen', spor: 'Sport', derin: 'Tiefbett', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
+    rims: { std: 'Standard', bes: 'Fünfspeichen-Stern', cok: 'Vielspeichen', spor: 'Sport', derin: 'Tiefbett', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
     leds: { yok: 'Aus', mavi: 'Neonblau', pembe: 'Neonpink', mor: 'Lila', yesil: 'Grün', beyaz: 'Weiß', kirmizi: 'Rot pulsierend', buz: 'Eis pulsierend', altin: 'Gold pulsierend', gokkusagi: 'Regenbogen' },
     exhausts: { std: 'Serie', v8: 'Grollender V8', patlamali: 'Fehlzündung', turbo: 'Turbo', spor: 'Sport hell', derin: 'Tiefer Bass' },
     exhaustInfo: { std: 'Ab Werk, ausgewogener Klang', v8: 'Dicker, grollender Achtzylinder', patlamali: 'Knallt beim Gaswegnehmen', turbo: 'Hohes Pfeifen und Abblasen', spor: 'Scharfer, hochdrehender Schrei', derin: 'Bodenerschütternder tiefer Bass' },
@@ -1603,6 +1668,74 @@ function langKeys(code) {
   walk(LANG_PACKS[code], '');
   return out;
 }
+
+// --- tabela.js ---
+// Haritadaki tabelaların dili: oyun dili Türkçe ise Türkçe, Türkçe dışındaki BÜTÜN dillerde İngilizce.
+// Dünya (world.js) tabelaya hep Türkçe yazıyı koyar; çizim anında tabelaText() çevirir (render.js, buildings.js,
+// landmarks.js, stadium.js). Dil değişince çizilmiş zemin ve tabela görüntüleri yeniden üretilir (render.js draw).
+// Sürüme göre değişen adların İngilizcesi isim tablosundadır (names/tablo.mjs ingilizce -> NAMES.ingilizce);
+// burada iki sürümde ortak genel adlar durur. Tabloda olmayan yazı olduğu gibi kalır (testler eksik bırakmaz).
+// Bağımlılığı yalnız dil durumu ve isim tablosudur; birim testle sınanır.
+
+const TABELA_EN = {
+  // Dükkânlar
+  Bakkal: 'Grocery', 'Kardeşler Bakkal': 'Brothers Grocery', 'Köşe Bakkal': 'Corner Grocery',
+  Büfe: 'Kiosk', 'Büfe 7/24': 'Kiosk 24/7', 'Köşe Büfe': 'Corner Kiosk', 'Köşe Bayii': 'Corner Newsstand',
+  Berber: 'Barber', 'Erkek Berberi': "Men's Barber", Kuaför: 'Hairdresser', 'Bayan Kuaförü': "Ladies' Hairdresser",
+  Eczane: 'Pharmacy', 'Nöbetçi Eczane': 'On-Duty Pharmacy',
+  Fırın: 'Bakery', 'Ekmek Fırını': 'Bread Bakery', 'Etli Ekmek Fırını': 'Flatbread Bakery', 'Etliekmek Salonu': 'Flatbread House',
+  'Fırın Kebabı': 'Oven Kebab', 'Bamya Çorbası': 'Okra Soup',
+  Dönerci: 'Doner Shop', 'Usta Döner': 'Master Doner', 'Usta Dönerci': 'Master Doner Shop', 'Soslu Döner': 'Saucy Doner',
+  Kebapçı: 'Kebab House', Pideci: 'Pide House', 'Hacı Usta Pide': "Master's Pide", Lahmacun: 'Lahmacun',
+  Ciğerci: 'Liver Kebab', Çiğköfte: 'Raw Meatballs', Börekçi: 'Pastry Shop', Tatlıcı: 'Dessert Shop', 'Tost Evi': 'Toast House',
+  Lokanta: 'Restaurant', Kahveci: 'Coffee House', 'Çay Ocağı': 'Tea Stall', 'Mahalle Çay Ocağı': 'Neighborhood Tea Stall',
+  Kasap: 'Butcher', Manav: 'Greengrocer', Züccaciye: 'Crockery Store', Kırtasiye: 'Stationery', Emlakçı: 'Real Estate',
+  Terzi: 'Tailor', Tuhafiye: 'Haberdashery', Tamirci: 'Repair Shop', 'Oto Yıkama': 'Car Wash', Telefoncu: 'Phone Shop',
+  'Bit Bilgisayar': 'Bit Computers', 'Piksel Oyun Salonu': 'Pixel Arcade',
+  // Kafe, çay bahçesi, spor salonu
+  'Çınar Kafe': 'Plane Tree Cafe', 'Melodi Kafe': 'Melody Cafe', 'Akustik Kafe': 'Acoustic Cafe', 'Sahne Kafe': 'Stage Cafe',
+  'Çınaraltı Çay Bahçesi': 'Plane Tree Tea Garden', 'Bahçe Çay Evi': 'Garden Tea House', 'Çay Bahçesi': 'Tea Garden',
+  'Demir Spor Salonu': 'Iron Gym', 'Kondisyon Spor Salonu': 'Fitness Gym',
+  // Marketler
+  'Ucuzluk Market': 'Bargain Market', 'Bereket Gross': 'Bounty Wholesale', 'Komşu Market': 'Neighbor Market',
+  'Anadolu Gross': 'Anatolia Wholesale', 'Kervan Gross': 'Caravan Wholesale', 'Hesaplı Market': 'Thrifty Market',
+  'Doyuran Gross': 'Hearty Wholesale', 'Tasarruf Market': 'Savings Market',
+  // Plaza, iş merkezi, otel
+  'Merkez İş Merkezi': 'Central Business Center', 'Kristal Plaza': 'Crystal Plaza', 'Boğaz Tower': 'Strait Tower',
+  'Anadolu Plaza': 'Anatolia Plaza', 'Sultan Rezidans': 'Sultan Residence', 'Lale Rezidans': 'Tulip Residence',
+  'Marmara Residence': 'Marmara Residence', 'Mavi Kule': 'Blue Tower', 'Atlas Tower': 'Atlas Tower',
+  'Grand Otel': 'Grand Hotel', 'Otel Boğaz': 'Hotel Strait', 'Park Hotel': 'Park Hotel', 'Otel Saray': 'Hotel Palace', 'Mavi Otel': 'Blue Hotel',
+  // Siteler
+  'Yeşil Tepe Sitesi': 'Green Hill Residence', 'Boğaz Evleri': 'Strait Homes', 'Mavi Konak Sitesi': 'Blue Mansion Residence',
+  'Çamlık Sitesi': 'Pine Grove Residence', 'Güneş Sitesi': 'Sun Residence', 'Lale Evleri': 'Tulip Homes',
+  'Marmara Konutları': 'Marmara Homes', 'Park Evleri': 'Park Homes',
+  // Kamu yapıları
+  'Şehir Hastanesi': 'City Hospital',
+  // Bina üstüne çizilen küçük yazılar
+  'OKUL TAŞITI': 'SCHOOL BUS', 'İŞ HANI': 'BUSINESS CENTER', ACİL: 'EMERGENCY', AMBULANS: 'AMBULANCE', DUR: 'STOP',
+  // Dükkân önü afişleri
+  '%30 İNDİRİM': '30% OFF', 'BUGÜNE ÖZEL': 'TODAY ONLY', '%50 İNDİRİM': '50% OFF', '2 AL 1 ÖDE': 'BUY 2 PAY 1',
+  KAMPANYA: 'SPECIAL DEAL', 'FIRSAT!': 'BARGAIN!', 'YENİ AÇILDI': 'NEW OPENING', 'SON GÜN': 'LAST DAY',
+};
+
+// Türkçe dışında İngilizce mi yazılacak
+const tabelaEnglish = () => getLang() !== 'tr';
+
+// Tabelanın o anki dildeki yazısı
+function tabelaText(tr) {
+  if (!tr || !tabelaEnglish()) return tr;
+  const en = (NAMES.ingilizce && NAMES.ingilizce[tr]) || TABELA_EN[tr];
+  return en === undefined ? tr : en;
+}
+
+// Dilden bağımsız İngilizce karşılık (önceden çizilen İngilizce afişler için)
+tabelaText.en = (tr) => {
+  const en = (NAMES.ingilizce && NAMES.ingilizce[tr]) || TABELA_EN[tr];
+  return en === undefined ? tr : en;
+};
+
+// Türkçe tabela yazısının İngilizce karşılığı var mı (test ve araçlar için)
+const tabelaKnown = (tr) => Boolean((NAMES.ingilizce && NAMES.ingilizce[tr]) || TABELA_EN[tr]);
 
 // --- physics.js ---
 // Araba fiziği: ileri hız, yanal kayma ve açısal hız ayrı ayrı hesaplanır.
@@ -2191,7 +2324,7 @@ class World {
     }
 
     // Tek seferlik yerler önce hesaplanır: ilk çağrı rastgele diziyi bozmasın
-    const sis = this.sistemChunk();
+    const sis = this.kolejChunk();
     const mark = this.landmarkAt(cx, cy);
     const big = this.bigSiteAt(cx, cy);
     this.biomeAt(cx, cy, biomeOut);
@@ -2230,7 +2363,7 @@ class World {
     else if (t === 'donel') this.fillRoundabout(c);
     else if (t === 'viraj') this.fillCurvy(c);
     else if (t === 'pazar') this.fillPazar(c);
-    else if (t === 'kolej') this.fillSistem(c);
+    else if (t === 'kolej') this.fillKolej(c);
     else if (LANDMARKS.has(t)) this.fillLandmark(c, t);
     else if (t === 'sea') this.fillSea(c);
     else if (t === 'beach') this.fillBeach(c);
@@ -2692,6 +2825,7 @@ class World {
     this.setGround(c, ART, ART, ART + 1, CT, GROUND.WALK);
     this.setGround(c, CT - 1, ART, CT, CT, GROUND.WALK);
     c.siteName = name;
+    if (layout === 2) { this.fillMonoSite(c, name, color, withSign); return; }
     // Ortada havuz: içine düşülmez, kenarı duvar gibidir
     const mid = (CT + ART) >> 1;
     this.setGround(c, mid - 3, mid - 3, mid + 3, mid + 3, GROUND.PLAZA);
@@ -2717,7 +2851,30 @@ class World {
     for (let k = 7; k < CT - 2; k += 2) this.addProp(c, PROP.PARKED, c.x + (k + 0.5) * TILE, c.y + (ART + 1.6) * TILE, Math.PI / 2);
   }
 
-  // Tek seferlik büyük siteler. Bir site 2x2 chunk kaplar
+  // Siyah-beyaz site: iki sıra halinde 6 uzun blok (her biri 6x6 karo), ortada havuz, girişte otopark.
+  // Blokların tamamı chunk'ın iç alanında: ana yollara ve sokaklara taşmaz (place yol karosuna bina koymaz)
+  fillMonoSite(c, name, color, withSign) {
+    const mid = (CT + ART) >> 1;
+    this.setGround(c, mid - 4, mid - 3, mid + 4, mid + 3, GROUND.PLAZA);
+    this.addRect(c, 'water', mid - 3, mid - 2, mid + 3, mid + 2, 6, 0, '#57c1f0');
+    let blockNo = 0;
+    for (const y of [7, 21]) {
+      for (const x of [5, 13, 21]) {
+        const r = this.place(c, 'building', x, y, 6, 6, BUILD.SITE_BLOCK, color);
+        if (!r) continue;
+        r.landmark = 'monokrom';
+        r.block = blockNo++;
+        if (withSign && !r.block) { r.sign = name; r.signColor = '#111214'; r.signSize = 2; }
+      }
+    }
+    this.addPad(c, 'parking', ART + 1, ART + 1, CT - ART - 2, 2);
+    this.scatter(c, PROP.TREE, 26, [GROUND.GRASS]);
+    this.scatter(c, PROP.BENCH, 10, [GROUND.GRASS]);
+    this.scatter(c, PROP.BUSH, 14, [GROUND.GRASS]);
+    for (let k = 7; k < CT - 2; k += 2) this.addProp(c, PROP.PARKED, c.x + (k + 0.5) * TILE, c.y + (ART + 1.6) * TILE, Math.PI / 2);
+  }
+
+  // Tek seferlik büyük siteler. Bir site 2x2 chunk kaplar (span: 1 olan tek chunk)
   bigSiteAt(cx, cy) {
     if (!this.sites) {
       this.sites = [];
@@ -2734,14 +2891,14 @@ class World {
           const sis = this.kolej;
           const clash = this.sites.some((o) => Math.abs(o.cx - ax) < 3 && Math.abs(o.cy - ay) < 3) || (Math.abs(sis.cx - ax) < 3 && Math.abs(sis.cy - ay) < 3)
             || this.landmarkList().some((o) => o.cx - ax >= -1 && o.cx - ax <= 2 && o.cy - ay >= -1 && o.cy - ay <= 2);
-          if (out.biome === 'city' && !clash && !isHighwayRow(ay) && !isHighwayRow(ay + 1) && Math.max(Math.abs(ax), Math.abs(ay)) > 3) {
+          if (out.biome === 'city' && !clash && !isHighwayRow(ay) && !isHighwayRow(ay + (s.span || 2) - 1) && Math.max(Math.abs(ax), Math.abs(ay)) > 3) {
             this.sites.push({ ...s, cx: ax, cy: ay });
             break;
           }
         }
       });
     }
-    for (const s of this.sites) if (cx - s.cx >= 0 && cx - s.cx <= 1 && cy - s.cy >= 0 && cy - s.cy <= 1) return s;
+    for (const s of this.sites) { const n = s.span || 2; if (cx - s.cx >= 0 && cx - s.cx < n && cy - s.cy >= 0 && cy - s.cy < n) return s; }
     return null;
   }
 
@@ -2823,9 +2980,9 @@ class World {
   }
 
   // Haritanın tek Kolej Koleji chunk'ı: tohuma bağlı, başlangıca yakın bir şehir bölgesinde
-  sistemChunk() {
+  kolejChunk() {
     if (this.kolej) return this.kolej;
-    const [a, b] = W.sistemRing;
+    const [a, b] = W.kolejRing;
     const out = { biome: '', sea: false };
     let found = null;
     for (let i = 0; i < 400 && !found; i++) {
@@ -2842,14 +2999,15 @@ class World {
   }
 
   // Kolej kampüsü: haritanın en geniş ve en yüksek binası, bahçe, çit, servisler, spor sahaları
-  fillSistem(c) {
+  fillKolej(c) {
     this.setGround(c, ART, ART, CT, CT, GROUND.GRASS);
-    const r = this.addRect(c, 'building', 6, 6, 28, 15, 3, BUILD.KOLEJ, '#ff7a00');
+    // Haritanın en büyük binası (25x12 karo): kongre merkezinden ve stadyumlardan büyük
+    const r = this.addRect(c, 'building', 5, 4, 30, 16, 3, BUILD.KOLEJ, '#ff7a00');
     r.landmark = 'kolej'; r.sign = NAMES.kolej.ad; r.signColor = '#ff7a00'; r.signArt = 'kolej'; r.signSize = 3; r.roofSignH = 120;
-    this.setGround(c, 6, 15, 28, 18, GROUND.PLAZA); // Ön avlu
+    this.setGround(c, 5, 16, 30, 18, GROUND.PLAZA); // Ön avlu
     this.setGround(c, 15, 18, 20, CT, GROUND.PLAZA); // Kapıya giden yol
     this.setGround(c, ART, 18, 15, 20, GROUND.PLAZA);
-    this.addPad(c, 'stairs', 14, 15, 6, 1);
+    this.addPad(c, 'stairs', 14, 16, 6, 1);
     this.addPad(c, 'flag', 20, 16, 2, 2);
     this.setGround(c, 5, 21, 13, 26, GROUND.PLAZA);
     this.addPad(c, 'basket', 5, 21, 8, 5);
@@ -2896,7 +3054,7 @@ class World {
   landmarkList() {
     if (this.marks) return this.marks;
     this.marks = [];
-    const sis = this.sistemChunk();
+    const sis = this.kolejChunk();
     const out = { biome: '', sea: false };
     W.landmarks.forEach((m, n) => {
       const [a, b] = m.ring;
@@ -2947,7 +3105,7 @@ class World {
       this.setGround(c, 21, 18, 29, 28, GROUND.GRASS);
       this.addPad(c, 'gul', 21, 18, 8, 10);
       this.addRect(c, 'water', 16, 20, 19, 23, 10, 2, '#3aa7e8'); // Şadırvan
-      this.addPad(c, 'yildiz', 14, 24, 7, 6);
+      this.addPad(c, 'starPad', 14, 24, 7, 6);
       this.scatter(c, PROP.TREE, 14, [GROUND.GRASS]);
       for (let k = 7; k < 28; k += 4) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 17.3 * TILE);
       this.tram(c, D[2]);
@@ -2967,7 +3125,7 @@ class World {
       this.tram(c, D[0]);
     } else if (id === 'meydan') {
       this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
-      this.addPad(c, 'yildiz', 9, 9, 17, 17);
+      this.addPad(c, 'starPad', 9, 9, 17, 17);
       this.sign(this.addRect(c, 'building', 15, 15, 20, 20, 2, B.ANIT, '#b9ad98'), K.meydan, '#a8323a', 1);
       for (const [x, y] of [[6, 6], [27, 6], [6, 27], [27, 27]]) this.addRect(c, 'water', x, y, x + 2, y + 2, 10, 2, '#3aa7e8');
       // Güney kenarında fırınlar
@@ -2988,8 +3146,8 @@ class World {
       this.setGround(c, ART, ART, CT, CT, GROUND.PLAZA);
       this.sign(this.addRect(c, 'building', 5, 6, 30, 17, 3, B.KONGRE, '#1c7a8c'), K.kongre, '#1c4f6a', 2);
       this.addRect(c, 'water', 14, 20, 21, 24, 8, 2, '#3aa7e8');
-      this.addPad(c, 'yildiz', 6, 19, 7, 7);
-      this.addPad(c, 'yildiz', 22, 19, 7, 7);
+      this.addPad(c, 'starPad', 6, 19, 7, 7);
+      this.addPad(c, 'starPad', 22, 19, 7, 7);
       this.addPad(c, 'parking', 5, 27, 26, 4);
       for (let k = 7; k < 29; k += 3) this.addProp(c, PROP.BENCH, c.x + (k + 0.5) * TILE, c.y + 25.5 * TILE);
       this.tram(c, D[4]);
@@ -8139,10 +8297,11 @@ function signKind(text) {
   return 'box';
 }
 
-function signCanvas(text, color, seed = 0) {
-  const list = SIGN_STYLES[signKind(text)];
+// kindOf: biçimi seçen yazı (Türkçe asıl ad). Gösterilen yazı dile göre İngilizce olabilir, biçim aynı kalır
+function signCanvas(text, color, seed = 0, kindOf = text) {
+  const list = SIGN_STYLES[signKind(kindOf)];
   const v = seed % list.length;
-  const key = text + color + v;
+  const key = text + color + v + list.length;
   let c = signCache.get(key);
   if (c) return c;
   if (signCache.size > 400) signCache.clear();
@@ -8582,7 +8741,7 @@ function servis(g, r) {
   for (let k = -L / 2 + 22; k < L / 2 - 12; k += 14) { g.fillRect(-W / 2, k, 3, 9); g.fillRect(W / 2 - 3, k, 3, 9); }
   g.fillStyle = '#f4f6f8'; g.fillRect(-W / 2 + 6, -L / 2 + 30, W - 12, 3);
   g.save(); g.rotate(Math.PI / 2);
-  text(g, 'OKUL TAŞITI', 0, 0, Math.min(9, W * 0.32), '#1b1d22');
+  text(g, tabelaText('OKUL TAŞITI'), 0, 0, Math.min(9, W * 0.32), '#1b1d22');
   g.restore();
   g.fillStyle = '#e8352e'; g.fillRect(-W / 2 + 4, L / 2 - 4, 6, 3); g.fillRect(W / 2 - 10, L / 2 - 4, 6, 3);
   g.restore();
@@ -8789,7 +8948,7 @@ function paintPad(g, p, x, y, w, h) {
         g.fillStyle = '#ffd23f'; if (vertical) g.fillRect(px, py, 3, ph); else g.fillRect(px, py, pw, 3);
         g.fillStyle = '#2b6fd6'; if (vertical) g.fillRect(px + 6, py + ph * 0.3, 9, ph * 0.4); else g.fillRect(px + pw * 0.3, py + 6, pw * 0.4, 9);
         g.fillStyle = '#1b2a4a'; rr(g, px + (vertical ? 18 : pw * 0.05), py + (vertical ? 4 : 18), vertical ? 70 : 70, 14, 3); g.fill();
-        text(g, p.text, px + (vertical ? 53 : pw * 0.05 + 35), py + (vertical ? 11 : 25), 8, '#ffffff', 800);
+        text(g, tabelaText(p.text), px + (vertical ? 53 : pw * 0.05 + 35), py + (vertical ? 11 : 25), 8, '#ffffff', 800);
       }
       return true;
     }
@@ -8811,7 +8970,7 @@ function paintPad(g, p, x, y, w, h) {
       g.fillStyle = '#8a5a3a'; g.fillRect(cx - R * 0.32, cy - 12, R * 0.64, 14);
       return true;
     }
-    case 'yildiz': {
+    case 'starPad': {
       // Meydan taşı: büyük Selçuklu yıldızı, çevresinde küçükleri
       g.fillStyle = '#d9d2c4'; g.fillRect(x, y, w, h);
       g.lineWidth = 1.5;
@@ -8853,13 +9012,13 @@ function paintPad(g, p, x, y, w, h) {
 // Kolej tabelası: siyah zemin, turuncu çerçeve, beyaz ve turuncu harfler
 function landmarkSign(r) {
   if (r.signArt !== 'kolej') return null;
-  const words = r.sign.split(' ');
+  const words = tabelaText(r.sign).split(' ');
   const last = words.pop();
-  const first = words.join(' ');
+  const head = words.length ? `${words.join(' ')} ` : ''; // Tek kelimelik ad (KOLEJ, COLLEGE) yalnız turuncu yazılır
   const H = 96;
   const c0 = mk(8, 8).getContext('2d');
   c0.font = `400 ${H * 0.62}px Bungee, Nunito, sans-serif`;
-  const w1 = c0.measureText(`${first} `).width;
+  const w1 = c0.measureText(head).width;
   const w2 = c0.measureText(last).width;
   const W = Math.ceil(w1 + w2 + H * 0.8);
   const c = mk(W, H);
@@ -8870,7 +9029,7 @@ function landmarkSign(r) {
   g.textBaseline = 'middle';
   g.textAlign = 'left';
   const x0 = H * 0.4;
-  g.fillStyle = '#ffffff'; g.fillText(`${first} `, x0, H * 0.54);
+  g.fillStyle = '#ffffff'; if (head) g.fillText(head, x0, H * 0.54);
   g.fillStyle = '#ff7a00'; g.fillText(last, x0 + w1, H * 0.54);
   return c;
 }
@@ -8940,6 +9099,51 @@ function roofKolej(w, h) {
   return c;
 }
 
+// Siyah-beyaz site bloğu: beyaz katlar, siyah kat bantları ve dikey siyah şeritler, geniş cam pencereler
+function wallMono(len, lit) {
+  const c = mk(len, H0);
+  const g = c.getContext('2d');
+  const floors = 12;
+  const fh = (H0 - 14) / floors;
+  if (!lit) {
+    g.fillStyle = '#f4f4f1'; g.fillRect(0, 0, len, H0);
+    g.fillStyle = '#111214'; g.fillRect(0, 0, len, 10);
+  }
+  for (let f = 0; f < floors; f++) {
+    const y = 12 + f * fh;
+    if (!lit) { g.fillStyle = '#111214'; g.fillRect(0, y + fh - 3, len, 3); }
+    for (let px = 5, col = 0; px < len - 8; px += 15, col++) {
+      if (!lit) {
+        g.fillStyle = col % 3 === 1 ? '#111214' : '#2a2d33';
+        g.fillRect(px, y + 2, 10, fh - 6);
+        g.fillStyle = 'rgba(200,210,220,.28)'; g.fillRect(px, y + 2, 3, fh - 6);
+      } else {
+        const on = ((f * 97 + col * 53 + len) % 10) < 6;
+        if (!on) continue;
+        g.fillStyle = (f + col) % 4 === 0 ? '#d6ecff' : '#fff0c4';
+        g.fillRect(px, y + 2, 10, fh - 6);
+      }
+    }
+  }
+  if (!lit) { g.fillStyle = '#111214'; for (const px of [0, len / 2 - 3, len - 6]) g.fillRect(px, 0, 6, H0); }
+  return c;
+}
+
+function roofMono(w, h) {
+  const c = mk(w, h);
+  const g = c.getContext('2d');
+  g.fillStyle = '#111214'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#f4f4f1'; g.fillRect(6, 6, w - 12, h - 12);
+  // Satranç tahtası çatı terası ve siyah teknik kat
+  const s = Math.max(8, Math.round(w / 10));
+  for (let py = 12; py < h * 0.55; py += s) for (let px = 12; px < w - 12; px += s) {
+    if (((px / s) | 0) % 2 === ((py / s) | 0) % 2) { g.fillStyle = '#1d1f23'; g.fillRect(px, py, Math.min(s, w - 12 - px), Math.min(s, h * 0.55 - py)); }
+  }
+  g.fillStyle = '#111214'; g.fillRect(w * 0.3, h * 0.62, w * 0.4, h * 0.26);
+  g.fillStyle = '#f4f4f1'; for (let px = w * 0.33; px < w * 0.67; px += 10) g.fillRect(px, h * 0.66, 5, h * 0.18);
+  return c;
+}
+
 function wallKule(len, lit) {
   const c = mk(len, H0);
   const g = c.getContext('2d');
@@ -8976,7 +9180,7 @@ function roofKule(w, h) {
 }
 
 const ART_CACHE = new Map();
-// r.landmark: 'kolej' | 'kule'. Doku boyu binanın kendi oranına göre, bir kez üretilir
+// r.landmark: 'kolej' | 'kule' | 'monokrom'. Doku boyu binanın kendi oranına göre, bir kez üretilir
 function tallArt(r) {
   const key = `${r.landmark}:${Math.round(r.w)}x${Math.round(r.h)}`;
   let a = ART_CACHE.get(key);
@@ -8994,6 +9198,12 @@ function tallArt(r) {
       n: wallKolej(lenN, false, true), e: rot(wallKolej(lenE, false, false)),
       litN: wallKolej(lenN, true, true), litE: rot(wallKolej(lenE, true, false)),
       roof: roofKolej(Math.round(r.w * 0.6), Math.round(r.h * 0.6)),
+    };
+  } else if (r.landmark === 'monokrom') {
+    a = {
+      n: wallMono(lenN, false), e: rot(wallMono(lenE, false)),
+      litN: wallMono(lenN, true), litE: rot(wallMono(lenE, true)),
+      roof: roofMono(Math.round(r.w * 0.6), Math.round(r.h * 0.6)),
     };
   } else if (r.landmark === 'kule') {
     a = {
@@ -9703,7 +9913,7 @@ function ishani(g, r) {
   g.fillStyle = '#b0b4b8'; g.fillRect(x, y, w, h - wall);
   g.fillStyle = '#cfd3d7'; g.fillRect(x + 8, y + 8, w - 16, h - wall - 16);
   g.fillStyle = '#8fa8b8'; g.fillRect(x + 18, y + 18, Math.max(6, w - 36), Math.max(6, h - wall - 36)); // Avlu camı
-  label(g, 'İŞ HANI', x + w / 2, y + 12 + (s % 3), 9, '#2b3036');
+  label(g, tabelaText('İŞ HANI'), x + w / 2, y + 12 + (s % 3), 9, '#2b3036');
 }
 
 function office(g, r) {
@@ -9811,7 +10021,7 @@ const CHAINS = {
   // İndirim marketi: büyük yıldız çatı yaması
   ucuzlar: (g, r) => { box(g, r, '#7b3fa0', '#ffd23f'); g.fillStyle = '#ffd23f'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -1.57 + i * 0.628; const q = i % 2 ? 9 : 20; g[i ? 'lineTo' : 'moveTo'](r.x + r.w * 0.78 + Math.cos(a) * q, r.y + 24 + Math.sin(a) * q); } g.closePath(); g.fill(); },
   sepet: (g, r) => { box(g, r, '#1f9e9e', '#e9f6f4'); g.strokeStyle = '#e9f6f4'; g.lineWidth = 3; g.strokeRect(r.x + r.w * 0.7, r.y + 16, 26, 14); g.beginPath(); g.arc(r.x + r.w * 0.7 + 13, r.y + 16, 11, 3.14, 0); g.stroke(); },
-  yildiz: (g, r) => { box(g, r, '#c23b6b', '#fff0d8'); g.fillStyle = '#fff0d8'; for (const k of [0.2, 0.5, 0.8]) { g.beginPath(); g.arc(r.x + r.w * k, r.y + 18, 5, 0, 7); g.fill(); } },
+  papatya: (g, r) => { box(g, r, '#c23b6b', '#fff0d8'); g.fillStyle = '#fff0d8'; for (const k of [0.2, 0.5, 0.8]) { g.beginPath(); g.arc(r.x + r.w * k, r.y + 18, 5, 0, 7); g.fill(); } },
   dortyol: (g, r) => { box(g, r, '#6a7f2a', '#f7f3e3'); g.fillStyle = '#f7f3e3'; g.fillRect(r.x + r.w * 0.5 - 2, r.y + 8, 4, r.h - 34); g.fillRect(r.x + 8, r.y + (r.h - 26) * 0.5, r.w - 16, 4); },
   teknoloji: (g, r) => {
     box(g, r, '#2b3a67', '#b7f34a');
@@ -9858,13 +10068,14 @@ function kolej(g, r) {
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.fillStyle = '#17181b';
-  const [top, ...rest] = NAMES.kolej.ad.split(' ');
+  // Ad tek kelimeyse (Play: KOLEJ / COLLEGE) tek satır, iki kelimeyse iki satır
+  const name = tabelaText(NAMES.kolej.ad);
+  const [top, ...rest] = name.split(' ');
   const bottom = rest.join(' ');
-  g.fillText(top, cx + 4, cy - size * 0.55 + 4);
-  g.fillText(bottom, cx + 4, cy + size * 0.55 + 4);
+  const lines = bottom ? [[top, cy - size * 0.55], [bottom, cy + size * 0.55]] : [[top, cy]];
+  for (const [t, ty] of lines) g.fillText(t, cx + 4, ty + 4);
   g.fillStyle = '#ffffff';
-  g.fillText(top, cx, cy - size * 0.55);
-  g.fillText(bottom, cx, cy + size * 0.55);
+  for (const [t, ty] of lines) g.fillText(t, cx, ty);
   // Cephe: beyaz sütunlar, siyah camlar, turuncu giriş
   for (let px = x + 10; px < x + w - 12; px += 24) {
     g.fillStyle = '#ffffff'; g.fillRect(px, y + h - 38, 6, 38);
@@ -9872,7 +10083,7 @@ function kolej(g, r) {
     g.fillStyle = '#ff9a3c'; g.fillRect(px + 6, y + h - 20, 16, 12);
   }
   g.fillStyle = '#ff7a00'; g.fillRect(x + w / 2 - 58, y + h - 40, 116, 40);
-  label(g, NAMES.kolej.ad, x + w / 2, y + h - 22, 8.5, '#ffffff', 900);
+  label(g, name, x + w / 2, y + h - 22, 8.5, '#ffffff', 900);
 }
 
 
@@ -10011,7 +10222,7 @@ function hospital2(g, r) {
   label(g, 'H', hx, cy + 1, q * 1.7, '#fff');
   // Acil girişi
   g.fillStyle = '#d0121b'; g.fillRect(x + w * 0.4, y + h - 13, w * 0.2, 13);
-  label(g, 'ACİL', x + w * 0.5, y + h - 6.5, 9, '#fff', 900);
+  label(g, tabelaText('ACİL'), x + w * 0.5, y + h - 6.5, 9, '#fff', 900);
 }
 
 function school2(g, r) {
@@ -10229,8 +10440,20 @@ function factory(g, r) {
   g.strokeStyle = '#5f6972'; g.lineWidth = 4; g.beginPath(); g.moveTo(x + 8, y + rh * 0.76); g.lineTo(x + w - 8, y + rh * 0.76); g.stroke();
 }
 
+// Siyah-beyaz site bloğu (zemin izi): beyaz gövde, siyah çerçeve ve kat bantları, ortada blok harfi
+function monoBlock(g, r) {
+  const { x, y, w, h } = r;
+  g.fillStyle = '#111214'; rr(g, x, y, w, h, 4); g.fill();
+  g.fillStyle = '#f4f4f1'; g.fillRect(x + 6, y + 6, w - 12, h - 12);
+  g.fillStyle = '#111214';
+  for (let py = y + 18; py < y + h - 10; py += 22) g.fillRect(x + 6, py, w - 12, 6);
+  g.fillStyle = '#111214'; g.beginPath(); g.arc(x + w / 2, y + h / 2, 13, 0, 7); g.fill();
+  label(g, String.fromCharCode(65 + (r.block || 0)), x + w / 2, y + h / 2 + 1, 15, '#fff');
+}
+
 function paintBuilding2(g, r) {
   if (r.secretLook && SECRET_LOOK) return SECRET_LOOK.paint(g, r); // Yalnız arkadaş sürümü: gizli geçidin binası
+  if (r.landmark === 'monokrom') { monoBlock(g, r); return true; }
   const S = BUILD;
   switch (r.style) {
     case S.APARTMENT: apartment2(g, r); break;
@@ -10557,7 +10780,7 @@ const CAR_MODELS = {
   },
   kartal: {
     name: 'Kartal 67', L: 4.78, W: 1.86, H: 1.36, wb: 2.78, fo: 0.92, r: 0.34, sill: 0.18, crown: 0.02, tumble: 0.86, bowF: 0.04, bowR: 0.02, rim: 'star',
-    features: ['Uzun kaputlu klasik güç arabası', 'Geniş ızgara, çift yuvarlak far', 'Kaputtan bagaja çift yarış şeridi', 'Krom tampon, kalın arka çamurluk', 'Yıldız jant'],
+    features: ['Uzun kaputlu klasik güç arabası', 'Geniş ızgara, çift yuvarlak far', 'Kaputtan bagaja çift yarış şeridi', 'Krom tampon, kalın arka çamurluk', 'Beş kollu jant'],
     plan: [[0, 0.94], [0.03, 0.99], [0.5, 1], [0.97, 0.99], [1, 0.95]],
     deck: [[0, 0.7], [0.02, 0.78], [0.42, 0.86], [0.46, 0.88], [0.86, 0.9], [0.98, 0.86], [1, 0.76]],
     roof: [[0.45, 0.86], [0.55, 1.32], [0.73, 1.36], [0.85, 0.92], [0.87, 0.9]],
@@ -12699,7 +12922,7 @@ function paintSmall(g, w, h, part, detail) {
     g.fillStyle = '#0c0d10';
     for (const u of [0.22, 0.5, 0.78]) g.fillRect(w * u - 16, h - 9, 32, 9);
     g.fillStyle = trim; g.fillRect(w * 0.2, h - rim * 0.62, w * 0.6, rim * 0.34);
-    stdText(g, NAMES.stadyum.kucuk, w / 2, h - rim * 0.45, rim * 0.24, '#ffffff', w * 0.56);
+    stdText(g, tabelaText(NAMES.stadyum.kucuk), w / 2, h - rim * 0.45, rim * 0.24, '#ffffff', w * 0.56);
     // Köşelerde 4 uzun ışık direği: gölgesi çapraz düşer
     for (const [px, py] of [[16, 16], [w - 16, 16], [16, h - 16], [w - 16, h - 16]]) {
       g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 4; g.beginPath(); g.moveTo(px, py); g.lineTo(px + 34, py + 46); g.stroke();
@@ -12805,7 +13028,7 @@ function paintBig(g, w, h, part, detail) {
       for (let k = 0; k < 6; k++) { g.fillStyle = k % 2 ? '#d9dfe2' : '#c3cacf'; g.fillRect(w * 0.38, y + k * 3.6, w * 0.24, 3.6); }
     }
     g.fillStyle = green; g.fillRect(w * 0.3, h - 82, w * 0.4, 26);
-    stdText(g, NAMES.stadyum.buyuk, w / 2, h - 69, 17, '#ffffff', w * 0.38);
+    stdText(g, tabelaText(NAMES.stadyum.buyuk), w / 2, h - 69, 17, '#ffffff', w * 0.38);
   }
 }
 
@@ -12946,8 +13169,9 @@ class Stadiums {
 
   art(z) {
     const kind = z.w > 600 ? 'buyuk' : 'kucuk';
-    let a = this.arts.get(kind);
-    if (!a) { a = new StadiumArt(kind, z.w, z.h); this.arts.set(kind, a); }
+    const key = `${kind}:${tabelaEnglish() ? 'en' : 'tr'}`; // Tabela dile göre: dil değişince yeni çizim
+    let a = this.arts.get(key);
+    if (!a) { a = new StadiumArt(kind, z.w, z.h); this.arts.set(key, a); }
     return a;
   }
 
@@ -13256,8 +13480,9 @@ function reticleSprite() {
   return c;
 }
 
+// Tabela yazısı dile göre (js/tabela.js): Türkçe ya da İngilizce. Biçim (kurumsal, market, ahşap...) Türkçe yazıdan seçilir
 function rectSign(r) {
-  return r.signImg || (r.signImg = landmarkSign(r) || signCanvas(r.sign, r.signColor, r.seed));
+  return r.signImg || (r.signImg = landmarkSign(r) || signCanvas(tabelaText(r.sign), r.signColor, r.seed, r.sign));
 }
 
 // Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
@@ -13823,6 +14048,7 @@ class Renderer {
     // Dükkân önü: döner şişi, afişler, üç renk şişme balon
     s.doner = [0, 1, 2, 3].map((f) => sprite(18, 24, (g) => paintDoner(g, f)));
     s.promos = CONFIG.signs.promos.map((t, i) => sprite(44, 26, (g) => paintPromo(g, t, i)));
+    s.promosEn = CONFIG.signs.promos.map((t, i) => sprite(44, 26, (g) => paintPromo(g, tabelaText.en(t), i)));
     s.dancers = ['#e8352e', '#ffd23f', '#21a9e0'].map((c) => [0, 1, 2, 3, 4, 5].map((f) => sprite(46, 78, (g) => paintDancer(g, c, f))));
     // Balkon: çay içen, el sallayan, çiçek sulayan, çamaşır asan ve sallanan çamaşır
     s.balcony = ['tea', 'wave', 'water', 'hang'].map((a) => [0, 1].map((f) => sprite(20, 24, (g) => paintBalcony(g, a, f, SHIRT[(a.length * 3 + f * 0) % SHIRT.length]))));
@@ -14317,8 +14543,8 @@ class Renderer {
       g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, gx + 3, y + 1);
     };
     const h = (Math.imul(c.cx, 73856093) >>> 0) % 4;
-    pan(top + side * 0.5, NAMES.yol.sol[h]);
-    pan(bot - side * 0.5, NAMES.yol.sag[h]);
+    pan(top + side * 0.5, tabelaText(NAMES.yol.sol[h]));
+    pan(bot - side * 0.5, tabelaText(NAMES.yol.sag[h]));
     // Hız tabelası
     for (const [y, t] of [[top + 2, '120'], [bot - 2, '120']]) {
       g.fillStyle = '#fff'; g.beginPath(); g.arc(c.x + CHUNK * 0.3, y, 11, 0, 7); g.fill();
@@ -14347,7 +14573,7 @@ class Renderer {
       g.fillStyle = '#d0121b'; g.beginPath();
       for (let i = 0; i < 8; i++) { const a = 0.39 + (i / 8) * 6.283; g.lineTo(Math.cos(a) * 9.5, Math.sin(a) * 9.5); }
       g.closePath(); g.fill();
-      g.fillStyle = '#fff'; g.font = '900 7px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('DUR', 0, 0.5);
+      g.fillStyle = '#fff'; g.font = '900 7px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(tabelaText('DUR'), 0, 0.5);
     };
     const panel = (t) => () => {
       g.font = '800 9px Nunito, sans-serif';
@@ -14356,7 +14582,7 @@ class Renderer {
       g.strokeStyle = '#fff'; g.lineWidth = 1; g.strokeRect(-w / 2 + 1, -6, w - 2, 12);
       g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 0, 0.5);
     };
-    const DIR = NAMES.yol.yon;
+    const DIR = NAMES.yol.yon.map(tabelaText);
     const h = (Math.imul(c.cx, 73856093) ^ Math.imul(c.cy, 19349663)) >>> 0;
     const list = [round('#fff', '#d0121b', String(30 + (h % 4) * 10)), tri('!'), tri('⚠'), round('#fff', '#d0121b', '50'), stop];
     const E = ART_W - 6;
@@ -14465,7 +14691,7 @@ class Renderer {
         g.strokeStyle = '#fff'; g.lineWidth = 2;
         for (let k = 0; k < 7; k++) { g.beginPath(); g.moveTo(x + 14 + k * 34, y + 4); g.lineTo(x + 14 + k * 34, y + 40); g.stroke(); }
         g.fillStyle = '#d0121b'; g.fillRect(x + w * 0.4, y, w * 0.2, h);
-        g.fillStyle = '#fff'; g.font = '900 13px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('AMBULANS', x + w * 0.5, y + h / 2);
+        g.fillStyle = '#fff'; g.font = '900 13px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(tabelaText('AMBULANS'), x + w * 0.5, y + h / 2);
         const am = this.sprites.parked && this.sprites.ambulance;
         if (am) g.drawImage(am, x + 22, y + 8, 54, 24);
       } else if (p.kind === 'parking') {
@@ -14668,6 +14894,17 @@ class Renderer {
       const snowy = (w) => w === 'snow' || w === 'ice';
       if (snowy(this.weather) || snowy(game.weather)) for (const c of game.world.chunks.values()) c.dirty = true;
       this.weather = game.weather;
+    }
+    // Dil değişince tabelalar o dilde yeniden çizilir: zemine işlenmiş yazılar ve tabela görüntüleri
+    const signLang = tabelaEnglish() ? 'en' : 'tr';
+    if (this.signLang !== signLang) {
+      if (this.signLang) {
+        for (const c of game.world.chunks.values()) {
+          c.dirty = true;
+          for (let i = 0; i < c.rectCount; i++) c.rects[i].signImg = null;
+        }
+      }
+      this.signLang = signLang;
     }
     const { ctx, dpr, w, h } = this;
     const cam = game.cam;
@@ -14939,7 +15176,7 @@ class Renderer {
           }
           if (pr.kind === PROP.PROMO) {
             ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
-            ctx.drawImage(sp.promos[pr.v || 0], pr.x - 22, pr.y - 20, 44, 26);
+            ctx.drawImage((this.signLang === 'en' ? sp.promosEn : sp.promos)[pr.v || 0], pr.x - 22, pr.y - 20, 44, 26);
             continue;
           }
           if (pr.kind === PROP.DANCER) {
@@ -16412,6 +16649,10 @@ class ControlView {
 
 const KEY = 'drift-lab-v1';
 
+// v24.2: beş kollu jantın kimliği 'bes' oldu. Eski kayıttaki bilinmeyen jant kimliği o janttır (başka jant
+// kimliği hiç değişmedi); satın alınmış jant kaybolmasın diye 'bes' sayılır
+const rimId = (id) => (typeof id !== 'string' || itemOf('rim', id) ? id : 'bes');
+
 function defaultSave() {
   return {
     bestScore: 0,
@@ -16469,7 +16710,7 @@ function sanitize(data) {
   }
   if (data.unlocked && typeof data.unlocked === 'object') {
     for (const [kind, key] of [['paint', 'paints'], ['rim', 'rims'], ['led', 'leds'], ['exhaust', 'exhausts']]) {
-      const list = Array.isArray(data.unlocked[key]) ? data.unlocked[key] : [];
+      const list = Array.isArray(data.unlocked[key]) ? data.unlocked[key].map((id) => (kind === 'rim' ? rimId(id) : id)) : [];
       d.unlocked[key] = [...new Set(list.filter((id) => itemOf(kind, id)))];
     }
   }
@@ -16485,7 +16726,8 @@ function sanitize(data) {
       const v = data.custom[c.id];
       if (!v || typeof v !== 'object') continue;
       const ok = (kind, key, id) => itemOf(kind, id) && (itemOf(kind, id).price === 0 || d.unlocked[key].includes(id));
-      d.custom[c.id] = { rim: ok('rim', 'rims', v.rim) ? v.rim : 'std', led: ok('led', 'leds', v.led) ? v.led : 'yok', exhaust: ok('exhaust', 'exhausts', v.exhaust) ? v.exhaust : 'std' };
+      const rim = rimId(v.rim);
+      d.custom[c.id] = { rim: ok('rim', 'rims', rim) ? rim : 'std', led: ok('led', 'leds', v.led) ? v.led : 'yok', exhaust: ok('exhaust', 'exhausts', v.exhaust) ? v.exhaust : 'std' };
     }
   }
   return d;
@@ -17528,7 +17770,7 @@ function pxInside(poly, x, y) {
 // Jant tasarımları: halka, yüz, kol rengi ve sayısı; curve türbin eğriliği, dish derin çanak
 const RIM_LOOK = {
   std: { ring: '#a8b4c8', face: '#39415a', spoke: '#e6eef8', n: 4 },
-  yildiz: { ring: '#cfd6de', face: '#2a3040', spoke: '#f4f8ff', n: 5 },
+  bes: { ring: '#cfd6de', face: '#2a3040', spoke: '#f4f8ff', n: 5 },
   cok: { ring: '#b8c2cf', face: '#323a4c', spoke: '#dfe7f1', n: 10 },
   spor: { ring: '#e8eef6', face: '#1d222c', spoke: '#ff3a2a', n: 6 },
   derin: { ring: '#f2f6fa', face: '#5a6478', spoke: '#c8d2de', n: 8, dish: 2 },

@@ -1,5 +1,5 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'drift-lab-v24.1.0';
+const CACHE = 'drift-lab-v24.1.0-2'; // 24.1.0 ikinci web yayını (tabela dili, kolej, siteler)
 const ASSETS = [
   './',
   'index.html',
@@ -7,6 +7,7 @@ const ASSETS = [
   'manifest.json',
   'css/style.css',
   'js/names.js',
+  'js/tabela.js',
   'js/config.js',
   'js/custom.js',
   'js/a2hs.js',

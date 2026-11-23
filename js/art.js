@@ -851,10 +851,11 @@ export function signKind(text) {
   return 'box';
 }
 
-export function signCanvas(text, color, seed = 0) {
-  const list = SIGN_STYLES[signKind(text)];
+// kindOf: biçimi seçen yazı (Türkçe asıl ad). Gösterilen yazı dile göre İngilizce olabilir, biçim aynı kalır
+export function signCanvas(text, color, seed = 0, kindOf = text) {
+  const list = SIGN_STYLES[signKind(kindOf)];
   const v = seed % list.length;
-  const key = text + color + v;
+  const key = text + color + v + list.length;
   let c = signCache.get(key);
   if (c) return c;
   if (signCache.size > 400) signCache.clear();

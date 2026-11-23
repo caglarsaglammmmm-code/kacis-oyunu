@@ -56,12 +56,17 @@ const MAKER_OK = (t, i) => /maker\s*:\s*['"`][^'"`\n]{0,30}$/.test(t.slice(Math.
 const ACCOUNT = /caglarsaglam(?!mmmm@gmail\.com)/g;
 
 // Arkadaş sürümündeki gizli bina tabelasının yazısı: büyük harfle, tam bu biçimde aranır. Küçük harfli genel kelime
-// ("Beş Kollu Yıldız" jant adı, yildiz kimliği) tabela yazısı değildir
+// (eski jant adı ve kimliği; v24.1.0-2 ile kaldırıldı) tabela yazısı değildir
 const EXACT = /(?<![\p{L}\p{N}_])YILDIZ(?![\p{L}\p{N}_])/gu;
+
+// Kullanıcı isteği: Play paketinde bu kelimeler HİÇBİR biçimde (kimlik, yorum, kelime içi dahil) geçmez.
+// Büyük/küçük harf ve Türkçe ı/i, ö/o farkı gözetmeden, kelime içinde de aranır ("sistemi", "yildizli" gibi)
+const STRICT = /(y[ıi]ld[ıi]z|sistem|anthropic|ömer|(?<![\p{L}])omer(?![\p{L}]))/giu;
 
 function scanText(text, pkg) {
   const out = [];
   for (const m of text.matchAll(EXACT)) out.push(`tabela yazısı ${m[0]}`);
+  for (const m of fold(low(text)).matchAll(STRICT)) out.push(`yasak kelime ${m[0]}`);
   for (const t of [fold(low(text)), fold(text.toLowerCase())]) {
     for (const m of t.matchAll(RE)) if (!(/sağlam|saglam/.test(m[0]) && MAKER_OK(t, m.index))) out.push(m[0]);
     if (pkg) for (const m of t.matchAll(ACCOUNT)) out.push('GitHub hesap adı');

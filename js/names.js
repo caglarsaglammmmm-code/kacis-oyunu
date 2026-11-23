@@ -6,8 +6,7 @@ export const NAMES = {
  "yapimci": "",
  "indir": "",
  "kolej": {
-  "ad": "MANDALİNA KOLEJİ",
-  "ust": "MANDALİNA"
+  "ad": "KOLEJ"
  },
  "okullar": {
   "fen": "Fen Bilimleri Okulu",
@@ -107,8 +106,8 @@ export const NAMES = {
    "renk": "#1f9e9e"
   },
   {
-   "id": "yildiz",
-   "ad": "Yıldız Mağazaları",
+   "id": "papatya",
+   "ad": "Papatya Mağazaları",
    "renk": "#c23b6b"
   },
   {
@@ -134,7 +133,7 @@ export const NAMES = {
  ],
  "bankalar": [
   {
-   "ad": "Yıldız Bankası",
+   "ad": "Ufuk Bankası",
    "renk": "#3b3f8f"
   },
   {
@@ -156,7 +155,8 @@ export const NAMES = {
  ],
  "siteler": {
   "buyuk1": "Yeşilvadi Sitesi",
-  "buyuk2": "Mavi Orman Sitesi"
+  "buyuk2": "Mavi Orman Sitesi",
+  "monokrom": "Monokrom Sitesi"
  },
  "tekil": {
   "ishani": "Merkez Çarşı İş Hanı",
@@ -190,6 +190,69 @@ export const NAMES = {
     "#ffffff"
    ]
   }
+ },
+ "ingilizce": {
+  "KOLEJ": "COLLEGE",
+  "Monokrom Sitesi": "Monochrome Residence",
+  "Fen Bilimleri Okulu": "Science School",
+  "Bozkır Koleji": "Steppe College",
+  "Gün Işığı Koleji": "Sunlight College",
+  "Çınar İlkokulu": "Plane Tree Primary School",
+  "Bozkır Kulesi": "Steppe Tower",
+  "Şehir Müzesi": "City Museum",
+  "Tepe Camii": "Hill Mosque",
+  "Yeşil Tepe": "Green Hill",
+  "Kongre Merkezi": "Congress Center",
+  "Şehir Parkı": "City Park",
+  "Çınar Meydanı": "Plane Tree Square",
+  "Eski Çarşı": "Old Bazaar",
+  "Bağlar Bahçesi": "Vineyard Garden",
+  "Taş Fırın": "Stone Oven",
+  "Tepe": "Hill",
+  "Çınar": "Plane Tree",
+  "Müze": "Museum",
+  "Kebap Sarayı": "Kebab Palace",
+  "Kayık Pide": "Boat Pide",
+  "Fırın Lahmacun": "Oven Lahmacun",
+  "Ocakbaşı Kebapçısı": "Grill Kebab House",
+  "Tereyağlı Kebapçı": "Butter Kebab House",
+  "Öz Ocakbaşı": "Pure Grill",
+  "Pazarcık Market": "Bazaar Market",
+  "Ucuzlar": "Bargains",
+  "Sepet Market": "Basket Market",
+  "Papatya Mağazaları": "Daisy Stores",
+  "Dörtyol Market": "Crossroads Market",
+  "Teknoloji Durağı": "Tech Stop",
+  "Yapı Dünyası": "Building World",
+  "Ufuk Bankası": "Horizon Bank",
+  "Kumbara Tasarruf": "Piggy Bank Savings",
+  "Bereket Bankası": "Bounty Bank",
+  "Güven Kredi": "Trust Credit",
+  "Liman Yatırım": "Harbor Investment",
+  "Yeşilvadi Sitesi": "Green Valley Residence",
+  "Mavi Orman Sitesi": "Blue Forest Residence",
+  "Merkez Çarşı İş Hanı": "Central Bazaar Business Center",
+  "Sahil Palas Oteli": "Coast Palace Hotel",
+  "Nane Döner": "Mint Doner",
+  "ÇINARLI ŞEHİR STADYUMU": "ÇINARLI CITY STADIUM",
+  "MAVİ RÜZGAR ARENA": "BLUE WIND ARENA",
+  "← LİMAN O-1": "← PORT O-1",
+  "← SAHİL O-1": "← COAST O-1",
+  "← OVA O-2": "← PLAIN O-2",
+  "← KÖPRÜ O-1": "← BRIDGE O-1",
+  "MERKEZ O-2 →": "CENTER O-2 →",
+  "DAĞ O-2 →": "MOUNTAIN O-2 →",
+  "GÖL O-2 →": "LAKE O-2 →",
+  "VADİ O-3 →": "VALLEY O-3 →",
+  "← ÇARŞI": "← BAZAAR",
+  "LİMAN →": "PORT →",
+  "↑ MERKEZ": "↑ CENTER",
+  "SAHİL →": "COAST →",
+  "← ÇINARLI": "← ÇINARLI",
+  "TEPEBAŞI →": "HILLTOP →",
+  "↑ KÖPRÜ": "↑ BRIDGE",
+  "← ESKİ ŞEHİR": "← OLD TOWN",
+  "YENİ MAHALLE →": "NEW QUARTER →"
  },
  "misafir": ""
 };

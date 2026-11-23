@@ -19,7 +19,7 @@ export const CONFIG = {
   name: NAMES.oyun,
   version: '24.1.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.0-2/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -65,7 +65,7 @@ export const CONFIG = {
       harabe: { alleys: [4, 3], maxB: 5, wide: 0.5, detached: 0.4, stub: 0.4 },
       sanayi: { alleys: [3, 2], maxB: 8, wide: 0.8, detached: 0.3, stub: 0.2 },
     },
-    sistemRing: [4, 9], // Kolej: başlangıçtan bu kadar chunk uzakta
+    kolejRing: [4, 9], // Kolej: başlangıçtan bu kadar chunk uzakta
     // Tek seferlik özel yerler: her biri kendi chunk'ında, başlangıçtan ring kadar uzakta, birbirinden ayrı.
     // Adlar isim tablosundadır (names/tablo.mjs)
     landmarks: [
@@ -79,7 +79,7 @@ export const CONFIG = {
       { id: 'gecit', ring: [11, 14] }, // Ücra köşedeki terk edilmiş depo alanı (CONFIG.secret)
     ],
     // Yüksek özel yapıların yükseklik payı (sıradan binalar en çok tall.height[1])
-    landmarkHeight: { kolej: 0.46, kule: 0.95 },
+    landmarkHeight: { kolej: 0.58, kule: 0.95, monokrom: 0.82 },
     // Bina yüksekliği: share yüksek bina oranı, height kameraya uzanma payı
     // ruin ve work: sıradan mahallede harabe ve inşaat, fire: yangın olasılığı
     tall: { share: 0.62, height: [0.16, 0.42], maxPerChunk: 16 },
@@ -95,6 +95,8 @@ export const CONFIG = {
     bigSites: [
       { name: NAMES.siteler.buyuk1, color: '#7fa86b', ring: [5, 11], layout: 0 },
       { name: NAMES.siteler.buyuk2, color: '#c98a5a', ring: [8, 15], layout: 1 },
+      // Siyah-beyaz site: tek chunk, 6 yüksek blok (layout 2, world.js fillSite). Ad sürüme göre (isim tablosu)
+      { name: NAMES.siteler.monokrom, color: '#f2f2ef', ring: [4, 9], layout: 2, span: 1 },
     ],
   },
 
@@ -273,7 +275,7 @@ export const CONFIG = {
   // baştan başlatır (1,9 sn geçerli, 2,0 sn geçersiz). maxHold: bunu aşan basılı tutma normal sürüş sayılır
   // ve sırayı bozar. wheelOn, stickOn: eksen eşiği, axisBack: yeniden saymak için merkeze dönüş eşiği
   cheat: {
-    sequence: ['L', 'L', 'R', 'R', 'L', 'R', 'L', 'R', 'L', 'L', 'R', 'R'], // 12 basış; eski 8'li kod açmaz
+    sequence: ['L', 'L', 'R', 'R', 'L', 'R', 'L', 'R', 'L', 'L', 'R', 'R', 'L', 'L', 'L', 'R'], // 16 basış; eski 12'li ve 8'li kod açmaz
     gap: 2,
     maxHold: 0.45, // Kod girişi kısa dokunuşlarla yapılır; sürüşteki basılı tutmalar sırayı bozar
     wheelOn: 0.45,
@@ -444,7 +446,7 @@ export const CONFIG = {
       { id: 'krom', color: '#dfe6ee', finish: 'metal', price: 250 }, { id: 'lav', color: '#ff3b1f', finish: 'pearl', price: 200 },
     ],
     rims: [
-      { id: 'std', price: 0 }, { id: 'yildiz', price: 60 }, { id: 'cok', price: 90 }, { id: 'spor', price: 120 },
+      { id: 'std', price: 0 }, { id: 'bes', price: 60 }, { id: 'cok', price: 90 }, { id: 'spor', price: 120 },
       { id: 'derin', price: 150 }, { id: 'turbin', price: 180 }, { id: 'karbon', price: 200 }, { id: 'altin', price: 250 },
     ],
     // fx: static sabit, breathe nefes alır, rainbow gökkuşağı
@@ -658,7 +660,7 @@ export const CONFIG = {
     cafes: ['Melodi Kafe', 'Akustik Kafe', 'Sahne Kafe', 'Çınaraltı Çay Bahçesi', 'Bahçe Çay Evi', 'Çay Bahçesi', 'Demir Spor Salonu', 'Kondisyon Spor Salonu'],
     cafeColors: ['#c9773b', '#3f8f6b', '#8a5fb0', '#d1a03c'],
     neon: ['#ff2a6d', '#21d4fd', '#b967ff', '#05ffa1', '#fffb96'],
-    markets: ['Ucuzluk Market', 'Bereket Gross', 'Komşu Market', 'Anadolu Gross', 'Yıldız Gross', 'Hesaplı Market', 'Doyuran Gross', 'Tasarruf Market'],
+    markets: ['Ucuzluk Market', 'Bereket Gross', 'Komşu Market', 'Anadolu Gross', 'Kervan Gross', 'Hesaplı Market', 'Doyuran Gross', 'Tasarruf Market'],
     colors: ['#c8261e', '#1d6fb8', '#178a4d', '#d97706', '#6d28a8', '#0f766e', '#be185d', '#1f2937'],
   },
 
@@ -695,7 +697,7 @@ export const CONFIG = {
   CONFIG.npc.panicSpeed = Math.round(CONFIG.npc.panicSpeed * S.player);
 }
 
-// Yıldız seviyesi: başlangıçta 1, her eşikte artar
+// Aranma seviyesi: başlangıçta 1, her eşikte artar
 export const MAX_STARS = 4;
 
 // Araç bul: satılık arabalar ve gizli motosiklet

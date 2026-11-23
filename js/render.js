@@ -13,6 +13,7 @@ import { MemorialArt, bakeMemorialPad } from './memorial.js';
 import { Stadiums } from './stadium.js';
 import { NAMES } from './names.js';
 import { SECRET_LOOK } from './secret-look.js';
+import { tabelaText, tabelaEnglish } from './tabela.js';
 import { snowLevel, snowFlat, paintRoofSnow, paintClutterSnow, paintSignSnow, paintIcicles, icicleTips, RoofCache, paintTreeSnow, paintCarSnow } from './snow.js';
 import { signKind, paintDoner, paintPromo, paintDancer, paintBalcony, paintWashing, paintMoon, paintStars, rr, shade, paintLux, paintCar, paintPolice, paintPoliceFast, paintMoto, paintSwat, paintTankHull, paintTurret, paintNpc, paintPed, paintPedKind, paintAlien, signCanvas, roofClutter, paintLight, paintSimit, paintPower, paintSpecial, TALL_STYLES, POWER_LOOK } from './art.js';
 
@@ -83,8 +84,9 @@ function reticleSprite() {
   return c;
 }
 
+// Tabela yazısı dile göre (js/tabela.js): Türkçe ya da İngilizce. Biçim (kurumsal, market, ahşap...) Türkçe yazıdan seçilir
 function rectSign(r) {
-  return r.signImg || (r.signImg = landmarkSign(r) || signCanvas(r.sign, r.signColor, r.seed));
+  return r.signImg || (r.signImg = landmarkSign(r) || signCanvas(tabelaText(r.sign), r.signColor, r.seed, r.sign));
 }
 
 // Tabela boyutu: 0 minicik, 1 normal, 2 büyük, 3 dev çatı yazısı
@@ -650,6 +652,7 @@ export class Renderer {
     // Dükkân önü: döner şişi, afişler, üç renk şişme balon
     s.doner = [0, 1, 2, 3].map((f) => sprite(18, 24, (g) => paintDoner(g, f)));
     s.promos = CONFIG.signs.promos.map((t, i) => sprite(44, 26, (g) => paintPromo(g, t, i)));
+    s.promosEn = CONFIG.signs.promos.map((t, i) => sprite(44, 26, (g) => paintPromo(g, tabelaText.en(t), i)));
     s.dancers = ['#e8352e', '#ffd23f', '#21a9e0'].map((c) => [0, 1, 2, 3, 4, 5].map((f) => sprite(46, 78, (g) => paintDancer(g, c, f))));
     // Balkon: çay içen, el sallayan, çiçek sulayan, çamaşır asan ve sallanan çamaşır
     s.balcony = ['tea', 'wave', 'water', 'hang'].map((a) => [0, 1].map((f) => sprite(20, 24, (g) => paintBalcony(g, a, f, SHIRT[(a.length * 3 + f * 0) % SHIRT.length]))));
@@ -1144,8 +1147,8 @@ export class Renderer {
       g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, gx + 3, y + 1);
     };
     const h = (Math.imul(c.cx, 73856093) >>> 0) % 4;
-    pan(top + side * 0.5, NAMES.yol.sol[h]);
-    pan(bot - side * 0.5, NAMES.yol.sag[h]);
+    pan(top + side * 0.5, tabelaText(NAMES.yol.sol[h]));
+    pan(bot - side * 0.5, tabelaText(NAMES.yol.sag[h]));
     // Hız tabelası
     for (const [y, t] of [[top + 2, '120'], [bot - 2, '120']]) {
       g.fillStyle = '#fff'; g.beginPath(); g.arc(c.x + CHUNK * 0.3, y, 11, 0, 7); g.fill();
@@ -1174,7 +1177,7 @@ export class Renderer {
       g.fillStyle = '#d0121b'; g.beginPath();
       for (let i = 0; i < 8; i++) { const a = 0.39 + (i / 8) * 6.283; g.lineTo(Math.cos(a) * 9.5, Math.sin(a) * 9.5); }
       g.closePath(); g.fill();
-      g.fillStyle = '#fff'; g.font = '900 7px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('DUR', 0, 0.5);
+      g.fillStyle = '#fff'; g.font = '900 7px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(tabelaText('DUR'), 0, 0.5);
     };
     const panel = (t) => () => {
       g.font = '800 9px Nunito, sans-serif';
@@ -1183,7 +1186,7 @@ export class Renderer {
       g.strokeStyle = '#fff'; g.lineWidth = 1; g.strokeRect(-w / 2 + 1, -6, w - 2, 12);
       g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 0, 0.5);
     };
-    const DIR = NAMES.yol.yon;
+    const DIR = NAMES.yol.yon.map(tabelaText);
     const h = (Math.imul(c.cx, 73856093) ^ Math.imul(c.cy, 19349663)) >>> 0;
     const list = [round('#fff', '#d0121b', String(30 + (h % 4) * 10)), tri('!'), tri('⚠'), round('#fff', '#d0121b', '50'), stop];
     const E = ART_W - 6;
@@ -1292,7 +1295,7 @@ export class Renderer {
         g.strokeStyle = '#fff'; g.lineWidth = 2;
         for (let k = 0; k < 7; k++) { g.beginPath(); g.moveTo(x + 14 + k * 34, y + 4); g.lineTo(x + 14 + k * 34, y + 40); g.stroke(); }
         g.fillStyle = '#d0121b'; g.fillRect(x + w * 0.4, y, w * 0.2, h);
-        g.fillStyle = '#fff'; g.font = '900 13px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('AMBULANS', x + w * 0.5, y + h / 2);
+        g.fillStyle = '#fff'; g.font = '900 13px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(tabelaText('AMBULANS'), x + w * 0.5, y + h / 2);
         const am = this.sprites.parked && this.sprites.ambulance;
         if (am) g.drawImage(am, x + 22, y + 8, 54, 24);
       } else if (p.kind === 'parking') {
@@ -1495,6 +1498,17 @@ export class Renderer {
       const snowy = (w) => w === 'snow' || w === 'ice';
       if (snowy(this.weather) || snowy(game.weather)) for (const c of game.world.chunks.values()) c.dirty = true;
       this.weather = game.weather;
+    }
+    // Dil değişince tabelalar o dilde yeniden çizilir: zemine işlenmiş yazılar ve tabela görüntüleri
+    const signLang = tabelaEnglish() ? 'en' : 'tr';
+    if (this.signLang !== signLang) {
+      if (this.signLang) {
+        for (const c of game.world.chunks.values()) {
+          c.dirty = true;
+          for (let i = 0; i < c.rectCount; i++) c.rects[i].signImg = null;
+        }
+      }
+      this.signLang = signLang;
     }
     const { ctx, dpr, w, h } = this;
     const cam = game.cam;
@@ -1766,7 +1780,7 @@ export class Renderer {
           }
           if (pr.kind === PROP.PROMO) {
             ctx.setTransform(this.s, 0, 0, this.s, this.ox, this.oy);
-            ctx.drawImage(sp.promos[pr.v || 0], pr.x - 22, pr.y - 20, 44, 26);
+            ctx.drawImage((this.signLang === 'en' ? sp.promosEn : sp.promos)[pr.v || 0], pr.x - 22, pr.y - 20, 44, 26);
             continue;
           }
           if (pr.kind === PROP.DANCER) {

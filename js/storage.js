@@ -4,6 +4,10 @@ import { itemOf } from './custom.js';
 
 const KEY = 'drift-lab-v1';
 
+// v24.2: beş kollu jantın kimliği 'bes' oldu. Eski kayıttaki bilinmeyen jant kimliği o janttır (başka jant
+// kimliği hiç değişmedi); satın alınmış jant kaybolmasın diye 'bes' sayılır
+const rimId = (id) => (typeof id !== 'string' || itemOf('rim', id) ? id : 'bes');
+
 export function defaultSave() {
   return {
     bestScore: 0,
@@ -61,7 +65,7 @@ export function sanitize(data) {
   }
   if (data.unlocked && typeof data.unlocked === 'object') {
     for (const [kind, key] of [['paint', 'paints'], ['rim', 'rims'], ['led', 'leds'], ['exhaust', 'exhausts']]) {
-      const list = Array.isArray(data.unlocked[key]) ? data.unlocked[key] : [];
+      const list = Array.isArray(data.unlocked[key]) ? data.unlocked[key].map((id) => (kind === 'rim' ? rimId(id) : id)) : [];
       d.unlocked[key] = [...new Set(list.filter((id) => itemOf(kind, id)))];
     }
   }
@@ -77,7 +81,8 @@ export function sanitize(data) {
       const v = data.custom[c.id];
       if (!v || typeof v !== 'object') continue;
       const ok = (kind, key, id) => itemOf(kind, id) && (itemOf(kind, id).price === 0 || d.unlocked[key].includes(id));
-      d.custom[c.id] = { rim: ok('rim', 'rims', v.rim) ? v.rim : 'std', led: ok('led', 'leds', v.led) ? v.led : 'yok', exhaust: ok('exhaust', 'exhausts', v.exhaust) ? v.exhaust : 'std' };
+      const rim = rimId(v.rim);
+      d.custom[c.id] = { rim: ok('rim', 'rims', rim) ? rim : 'std', led: ok('led', 'leds', v.led) ? v.led : 'yok', exhaust: ok('exhaust', 'exhausts', v.exhaust) ? v.exhaust : 'std' };
     }
   }
   return d;

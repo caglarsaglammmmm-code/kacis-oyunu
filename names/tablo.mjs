@@ -18,10 +18,9 @@ export const TABLO = {
   // Menüdeki APK düğmesi: arkadaş sürümü hep son APK'ya gider, Play sürümünde boş (config kendi adresini kullanır)
   indir: { gercek: 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/latest/download/DriftLab-Arkadas.apk', uydurma: '' },
 
-  // Haritanın en büyük binası
+  // Haritanın en büyük binası: turuncu, siyah, beyaz kolej. Play Store sürümünde genel ad
   kolej: {
-    ad: { gercek: 'SİSTEM KOLEJİ', uydurma: 'MANDALİNA KOLEJİ' },
-    ust: { gercek: 'SİSTEM', uydurma: 'MANDALİNA' },
+    ad: { gercek: 'SİSTEM KOLEJİ', uydurma: 'KOLEJ' },
   },
 
   // Özel ve devlet okulları
@@ -93,7 +92,7 @@ export const TABLO = {
     { id: 'pazarcik', ad: { gercek: 'Migros', uydurma: 'Pazarcık Market' }, renk: { gercek: '#ff7a00', uydurma: '#3f8f5b' } },
     { id: 'ucuzlar', ad: { gercek: 'BİM', uydurma: 'Ucuzlar' }, renk: { gercek: '#d0121b', uydurma: '#7b3fa0' } },
     { id: 'sepet', ad: { gercek: 'ŞOK', uydurma: 'Sepet Market' }, renk: { gercek: '#e6a800', uydurma: '#1f9e9e' } },
-    { id: 'yildiz', ad: { gercek: 'A101', uydurma: 'Yıldız Mağazaları' }, renk: { gercek: '#0088b0', uydurma: '#c23b6b' } },
+    { id: 'papatya', ad: { gercek: 'A101', uydurma: 'Papatya Mağazaları' }, renk: { gercek: '#0088b0', uydurma: '#c23b6b' } },
     { id: 'dortyol', ad: { gercek: 'CarrefourSA', uydurma: 'Dörtyol Market' }, renk: { gercek: '#0a4ea2', uydurma: '#6a7f2a' } },
     { id: 'teknoloji', ad: { gercek: 'İtopya', uydurma: 'Teknoloji Durağı' }, renk: { gercek: '#ff2a6d', uydurma: '#2b3a67' } },
     { id: 'yapi', ad: { gercek: 'Koçtaş', uydurma: 'Yapı Dünyası' }, renk: { gercek: '#f59300', uydurma: '#8a5a2b' } },
@@ -101,7 +100,7 @@ export const TABLO = {
   ],
 
   bankalar: [
-    { ad: { gercek: 'Akbank', uydurma: 'Yıldız Bankası' }, renk: { gercek: '#d0121b', uydurma: '#3b3f8f' } },
+    { ad: { gercek: 'Akbank', uydurma: 'Ufuk Bankası' }, renk: { gercek: '#d0121b', uydurma: '#3b3f8f' } },
     { ad: { gercek: 'İş Bankası', uydurma: 'Kumbara Tasarruf' }, renk: { gercek: '#0a4ea2', uydurma: '#8a6d1f' } },
     { ad: { gercek: 'Ziraat Bankası', uydurma: 'Bereket Bankası' }, renk: { gercek: '#c8102e', uydurma: '#6b8e23' } },
     { ad: { gercek: 'Garanti BBVA', uydurma: 'Güven Kredi' }, renk: { gercek: '#0f7a45', uydurma: '#5b2a86' } },
@@ -111,6 +110,8 @@ export const TABLO = {
   siteler: {
     buyuk1: { gercek: 'Natura Park Sitesi', uydurma: 'Yeşilvadi Sitesi' },
     buyuk2: { gercek: 'Doğa Şehir Sitesi', uydurma: 'Mavi Orman Sitesi' },
+    // Siyah-beyaz yüksek bloklu site (iki sürümde aynı görünüm, yalnız ad farklı)
+    monokrom: { gercek: 'Anthropic Sitesi', uydurma: 'Monokrom Sitesi' },
   },
 
   // Tek tük dükkân ve yapı adları
@@ -138,6 +139,55 @@ export const TABLO = {
     },
   },
 
+  // Tabelaların İngilizce karşılığı (Türkçe dışındaki bütün dillerde tabelalar İngilizce yazar, js/tabela.js).
+  // Burada yalnız sürüme göre değişen adlar durur; iki sürümde ortak genel adlar js/tabela.js içindedir.
+  // Anahtar: haritadaki Türkçe yazı (tam olarak), değer: İngilizce yazı
+  ingilizce: {
+    gercek: {
+      'SİSTEM KOLEJİ': 'SYSTEM COLLEGE',
+      'Anthropic Sitesi': 'Anthropic Residence',
+      'Şerife Akkanat Ortaokulu': 'Şerife Akkanat Middle School', 'TED Konya Koleji': 'TED Konya College', 'Gündoğdu Koleji': 'Gündoğdu College',
+      'Cumhuriyet İlkokulu': 'Cumhuriyet Primary School', 'Selçuklu Kulesi': 'Selçuklu Tower',
+      'Mevlana Müzesi': 'Mevlana Museum', 'Alaaddin Camii': 'Alaaddin Mosque', 'Alaaddin Tepesi': 'Alaaddin Hill',
+      'Selçuklu Kongre Merkezi': 'Selçuklu Congress Center', 'Kültürpark': 'Kültürpark', 'Zafer Meydanı': 'Zafer Square',
+      'Bedesten Çarşısı': 'Bedesten Bazaar', 'Meram Bağları': 'Meram Vineyards', 'Konya Fırını': 'Konya Bakery',
+      'İskender Sarayı': 'İskender Palace', 'Karadeniz Pide': 'Black Sea Pide', 'Urfa Lahmacun': 'Urfa Lahmacun',
+      'Adana Kebapçısı': 'Adana Kebab House', 'İskenderci': 'İskender House', 'Öz Urfa Kebap': 'Öz Urfa Kebab',
+      'Migros': 'Migros', 'BİM': 'BİM', 'ŞOK': 'ŞOK', 'A101': 'A101', 'CarrefourSA': 'CarrefourSA', 'İtopya': 'İtopya', 'Koçtaş': 'Koçtaş',
+      'Akbank': 'Akbank', 'İş Bankası': 'İşbank', 'Ziraat Bankası': 'Ziraat Bank', 'Garanti BBVA': 'Garanti BBVA', 'Yapı Kredi': 'Yapı Kredi',
+      'Natura Park Sitesi': 'Natura Park Residence', 'Doğa Şehir Sitesi': 'Doğa Şehir Residence',
+      'Grand Bazaar İş Hanı': 'Grand Bazaar Business Center', 'Pera Palas Oteli': 'Pera Palace Hotel', 'Maydanoz Döner': 'Maydanoz Döner',
+      'YOZGAT ŞEHİR STADYUMU': 'YOZGAT CITY STADIUM', 'KONYA BÜYÜKŞEHİR STADYUMU': 'KONYA METROPOLITAN STADIUM',
+      '← EDİRNE O-3': '← EDİRNE O-3', '← SARAY O-3': '← SARAY O-3', '← GEBZE O-4': '← GEBZE O-4', '← ÇORLU O-3': '← ÇORLU O-3',
+      'ANKARA O-4 →': 'ANKARA O-4 →', 'İZMİT O-4 →': 'İZMİT O-4 →', 'BOLU O-4 →': 'BOLU O-4 →', 'BURSA O-5 →': 'BURSA O-5 →',
+      '← KADIKÖY': '← KADIKÖY', 'BEŞİKTAŞ →': 'BEŞİKTAŞ →', '↑ TAKSİM': '↑ TAKSİM', 'ÜSKÜDAR →': 'ÜSKÜDAR →', '← ŞİŞLİ': '← ŞİŞLİ',
+      'Alaaddin': 'Alaaddin', 'Zafer': 'Zafer', 'Mevlana': 'Mevlana', 'Kongre Merkezi': 'Congress Center',
+      'SARIYER →': 'SARIYER →', '↑ BOĞAZ KÖPRÜSÜ': '↑ BOSPHORUS BRIDGE', '← FATİH': '← FATİH', 'BAKIRKÖY →': 'BAKIRKÖY →',
+    },
+    uydurma: {
+      KOLEJ: 'COLLEGE',
+      'Monokrom Sitesi': 'Monochrome Residence',
+      'Fen Bilimleri Okulu': 'Science School', 'Bozkır Koleji': 'Steppe College', 'Gün Işığı Koleji': 'Sunlight College',
+      'Çınar İlkokulu': 'Plane Tree Primary School', 'Bozkır Kulesi': 'Steppe Tower',
+      'Şehir Müzesi': 'City Museum', 'Tepe Camii': 'Hill Mosque', 'Yeşil Tepe': 'Green Hill', 'Kongre Merkezi': 'Congress Center',
+      'Şehir Parkı': 'City Park', 'Çınar Meydanı': 'Plane Tree Square', 'Eski Çarşı': 'Old Bazaar', 'Bağlar Bahçesi': 'Vineyard Garden',
+      'Taş Fırın': 'Stone Oven', 'Tepe': 'Hill', 'Çınar': 'Plane Tree', 'Müze': 'Museum',
+      'Kebap Sarayı': 'Kebab Palace', 'Kayık Pide': 'Boat Pide', 'Fırın Lahmacun': 'Oven Lahmacun', 'Ocakbaşı Kebapçısı': 'Grill Kebab House',
+      'Tereyağlı Kebapçı': 'Butter Kebab House', 'Öz Ocakbaşı': 'Pure Grill',
+      'Pazarcık Market': 'Bazaar Market', 'Ucuzlar': 'Bargains', 'Sepet Market': 'Basket Market', 'Papatya Mağazaları': 'Daisy Stores',
+      'Dörtyol Market': 'Crossroads Market', 'Teknoloji Durağı': 'Tech Stop', 'Yapı Dünyası': 'Building World',
+      'Ufuk Bankası': 'Horizon Bank', 'Kumbara Tasarruf': 'Piggy Bank Savings', 'Bereket Bankası': 'Bounty Bank', 'Güven Kredi': 'Trust Credit',
+      'Liman Yatırım': 'Harbor Investment',
+      'Yeşilvadi Sitesi': 'Green Valley Residence', 'Mavi Orman Sitesi': 'Blue Forest Residence',
+      'Merkez Çarşı İş Hanı': 'Central Bazaar Business Center', 'Sahil Palas Oteli': 'Coast Palace Hotel', 'Nane Döner': 'Mint Doner',
+      'ÇINARLI ŞEHİR STADYUMU': 'ÇINARLI CITY STADIUM', 'MAVİ RÜZGAR ARENA': 'BLUE WIND ARENA',
+      '← LİMAN O-1': '← PORT O-1', '← SAHİL O-1': '← COAST O-1', '← OVA O-2': '← PLAIN O-2', '← KÖPRÜ O-1': '← BRIDGE O-1',
+      'MERKEZ O-2 →': 'CENTER O-2 →', 'DAĞ O-2 →': 'MOUNTAIN O-2 →', 'GÖL O-2 →': 'LAKE O-2 →', 'VADİ O-3 →': 'VALLEY O-3 →',
+      '← ÇARŞI': '← BAZAAR', 'LİMAN →': 'PORT →', '↑ MERKEZ': '↑ CENTER', 'SAHİL →': 'COAST →', '← ÇINARLI': '← ÇINARLI',
+      'TEPEBAŞI →': 'HILLTOP →', '↑ KÖPRÜ': '↑ BRIDGE', '← ESKİ ŞEHİR': '← OLD TOWN', 'YENİ MAHALLE →': 'NEW QUARTER →',
+    },
+  },
+
   // Gizli geçidin ev sahibi: arkadaş sürümünde gerçek kişi, Play Store sürümünde boş (genel karşılama yazısı çıkar)
   misafir: { gercek: 'Ömer Yıldız', uydurma: '' },
 };
@@ -156,5 +206,9 @@ export function gercekAdlar() {
     for (const k of Object.keys(v)) walk(v[k]);
   };
   walk(TABLO);
+  // İngilizce tabela tablosu: gerçek sütundaki Türkçe ve İngilizce adlar, uydurma sütunda yoksa
+  const { gercek, uydurma } = TABLO.ingilizce;
+  const fake = new Set([...Object.keys(uydurma), ...Object.values(uydurma)]);
+  for (const s of [...Object.keys(gercek), ...Object.values(gercek)]) if (!fake.has(s)) out.add(s);
   return [...out];
 }

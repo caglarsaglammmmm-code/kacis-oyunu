@@ -18,7 +18,7 @@ for (const [name, night] of [['kolej-gunduz', false], ['kolej-gece', true], ['ku
   await page.waitForFunction(() => __drift.game.state === 'play');
   await page.evaluate(({ name, night }) => {
     const k = __drift; const g = k.game; const w = g.world;
-    const m = name.startsWith('kule') && w.landmarkList ? w.landmarkList().find((o) => o.id === 'kule') : w.sistemChunk();
+    const m = name.startsWith('kule') && w.landmarkList ? w.landmarkList().find((o) => o.id === 'kule') : w.kolejChunk();
     const C = 40 * 32;
     const p = g.player;
     // Yapının güneyindeki ana yoldan doğuya doğru geçer

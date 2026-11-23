@@ -55,7 +55,7 @@ function pxInside(poly, x, y) {
 // Jant tasarımları: halka, yüz, kol rengi ve sayısı; curve türbin eğriliği, dish derin çanak
 const RIM_LOOK = {
   std: { ring: '#a8b4c8', face: '#39415a', spoke: '#e6eef8', n: 4 },
-  yildiz: { ring: '#cfd6de', face: '#2a3040', spoke: '#f4f8ff', n: 5 },
+  bes: { ring: '#cfd6de', face: '#2a3040', spoke: '#f4f8ff', n: 5 },
   cok: { ring: '#b8c2cf', face: '#323a4c', spoke: '#dfe7f1', n: 10 },
   spor: { ring: '#e8eef6', face: '#1d222c', spoke: '#ff3a2a', n: 6 },
   derin: { ring: '#f2f6fa', face: '#5a6478', spoke: '#c8d2de', n: 8, dish: 2 },

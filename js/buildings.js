@@ -5,6 +5,7 @@ import { rr, shade } from './art.js';
 import { NAMES } from './names.js';
 import { paintLandmark } from './landmarks.js';
 import { SECRET_LOOK } from './secret-look.js';
+import { tabelaText } from './tabela.js';
 
 function hsl(h, s, l) { return `hsl(${h % 360},${s}%,${l}%)`; }
 
@@ -144,7 +145,7 @@ function ishani(g, r) {
   g.fillStyle = '#b0b4b8'; g.fillRect(x, y, w, h - wall);
   g.fillStyle = '#cfd3d7'; g.fillRect(x + 8, y + 8, w - 16, h - wall - 16);
   g.fillStyle = '#8fa8b8'; g.fillRect(x + 18, y + 18, Math.max(6, w - 36), Math.max(6, h - wall - 36)); // Avlu camı
-  label(g, 'İŞ HANI', x + w / 2, y + 12 + (s % 3), 9, '#2b3036');
+  label(g, tabelaText('İŞ HANI'), x + w / 2, y + 12 + (s % 3), 9, '#2b3036');
 }
 
 function office(g, r) {
@@ -252,7 +253,7 @@ const CHAINS = {
   // İndirim marketi: büyük yıldız çatı yaması
   ucuzlar: (g, r) => { box(g, r, '#7b3fa0', '#ffd23f'); g.fillStyle = '#ffd23f'; g.beginPath(); for (let i = 0; i < 10; i++) { const a = -1.57 + i * 0.628; const q = i % 2 ? 9 : 20; g[i ? 'lineTo' : 'moveTo'](r.x + r.w * 0.78 + Math.cos(a) * q, r.y + 24 + Math.sin(a) * q); } g.closePath(); g.fill(); },
   sepet: (g, r) => { box(g, r, '#1f9e9e', '#e9f6f4'); g.strokeStyle = '#e9f6f4'; g.lineWidth = 3; g.strokeRect(r.x + r.w * 0.7, r.y + 16, 26, 14); g.beginPath(); g.arc(r.x + r.w * 0.7 + 13, r.y + 16, 11, 3.14, 0); g.stroke(); },
-  yildiz: (g, r) => { box(g, r, '#c23b6b', '#fff0d8'); g.fillStyle = '#fff0d8'; for (const k of [0.2, 0.5, 0.8]) { g.beginPath(); g.arc(r.x + r.w * k, r.y + 18, 5, 0, 7); g.fill(); } },
+  papatya: (g, r) => { box(g, r, '#c23b6b', '#fff0d8'); g.fillStyle = '#fff0d8'; for (const k of [0.2, 0.5, 0.8]) { g.beginPath(); g.arc(r.x + r.w * k, r.y + 18, 5, 0, 7); g.fill(); } },
   dortyol: (g, r) => { box(g, r, '#6a7f2a', '#f7f3e3'); g.fillStyle = '#f7f3e3'; g.fillRect(r.x + r.w * 0.5 - 2, r.y + 8, 4, r.h - 34); g.fillRect(r.x + 8, r.y + (r.h - 26) * 0.5, r.w - 16, 4); },
   teknoloji: (g, r) => {
     box(g, r, '#2b3a67', '#b7f34a');
@@ -299,13 +300,14 @@ function kolej(g, r) {
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.fillStyle = '#17181b';
-  const [top, ...rest] = NAMES.kolej.ad.split(' ');
+  // Ad tek kelimeyse (Play: KOLEJ / COLLEGE) tek satır, iki kelimeyse iki satır
+  const name = tabelaText(NAMES.kolej.ad);
+  const [top, ...rest] = name.split(' ');
   const bottom = rest.join(' ');
-  g.fillText(top, cx + 4, cy - size * 0.55 + 4);
-  g.fillText(bottom, cx + 4, cy + size * 0.55 + 4);
+  const lines = bottom ? [[top, cy - size * 0.55], [bottom, cy + size * 0.55]] : [[top, cy]];
+  for (const [t, ty] of lines) g.fillText(t, cx + 4, ty + 4);
   g.fillStyle = '#ffffff';
-  g.fillText(top, cx, cy - size * 0.55);
-  g.fillText(bottom, cx, cy + size * 0.55);
+  for (const [t, ty] of lines) g.fillText(t, cx, ty);
   // Cephe: beyaz sütunlar, siyah camlar, turuncu giriş
   for (let px = x + 10; px < x + w - 12; px += 24) {
     g.fillStyle = '#ffffff'; g.fillRect(px, y + h - 38, 6, 38);
@@ -313,7 +315,7 @@ function kolej(g, r) {
     g.fillStyle = '#ff9a3c'; g.fillRect(px + 6, y + h - 20, 16, 12);
   }
   g.fillStyle = '#ff7a00'; g.fillRect(x + w / 2 - 58, y + h - 40, 116, 40);
-  label(g, NAMES.kolej.ad, x + w / 2, y + h - 22, 8.5, '#ffffff', 900);
+  label(g, name, x + w / 2, y + h - 22, 8.5, '#ffffff', 900);
 }
 
 
@@ -452,7 +454,7 @@ function hospital2(g, r) {
   label(g, 'H', hx, cy + 1, q * 1.7, '#fff');
   // Acil girişi
   g.fillStyle = '#d0121b'; g.fillRect(x + w * 0.4, y + h - 13, w * 0.2, 13);
-  label(g, 'ACİL', x + w * 0.5, y + h - 6.5, 9, '#fff', 900);
+  label(g, tabelaText('ACİL'), x + w * 0.5, y + h - 6.5, 9, '#fff', 900);
 }
 
 function school2(g, r) {
@@ -670,8 +672,20 @@ function factory(g, r) {
   g.strokeStyle = '#5f6972'; g.lineWidth = 4; g.beginPath(); g.moveTo(x + 8, y + rh * 0.76); g.lineTo(x + w - 8, y + rh * 0.76); g.stroke();
 }
 
+// Siyah-beyaz site bloğu (zemin izi): beyaz gövde, siyah çerçeve ve kat bantları, ortada blok harfi
+function monoBlock(g, r) {
+  const { x, y, w, h } = r;
+  g.fillStyle = '#111214'; rr(g, x, y, w, h, 4); g.fill();
+  g.fillStyle = '#f4f4f1'; g.fillRect(x + 6, y + 6, w - 12, h - 12);
+  g.fillStyle = '#111214';
+  for (let py = y + 18; py < y + h - 10; py += 22) g.fillRect(x + 6, py, w - 12, 6);
+  g.fillStyle = '#111214'; g.beginPath(); g.arc(x + w / 2, y + h / 2, 13, 0, 7); g.fill();
+  label(g, String.fromCharCode(65 + (r.block || 0)), x + w / 2, y + h / 2 + 1, 15, '#fff');
+}
+
 export function paintBuilding2(g, r) {
   if (r.secretLook && SECRET_LOOK) return SECRET_LOOK.paint(g, r); // Yalnız arkadaş sürümü: gizli geçidin binası
+  if (r.landmark === 'monokrom') { monoBlock(g, r); return true; }
   const S = BUILD;
   switch (r.style) {
     case S.APARTMENT: apartment2(g, r); break;
