@@ -34,8 +34,8 @@ test('haritadaki her tabelanın İngilizcesi var; Türkçede Türkçe, diğer b�
     assert.equal(tabelaText(NAMES.kolej.ad), 'KOLEJ');
     for (const code of Object.keys(LANG_PACKS).filter((c) => c !== 'tr')) {
       setLang(code);
-      assert.equal(tabelaText('Züccaciye'), 'Crockery Store', code);
-      assert.equal(tabelaText(NAMES.ilkokul), 'Plane Tree Primary School', code);
+      assert.equal(tabelaText('Züccaciye'), 'Housewares Store', code);
+      assert.equal(tabelaText(NAMES.ilkokul), 'Plane Tree Elementary School', code);
       assert.equal(tabelaText(NAMES.kolej.ad), 'COLLEGE', code);
       assert.equal(tabelaText(NAMES.siteler.monokrom), 'Monochrome Residence', code);
       assert.equal(tabelaText('Şehir Hastanesi'), 'City Hospital', code);

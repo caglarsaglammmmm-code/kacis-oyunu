@@ -1,6 +1,7 @@
 // Koddan üretilen çizimler: lüks araba, polis çeşitleri, sivil araçlar, yayalar, güçler, binalar.
 // Tüm araçlar burun +x yönünde çizilir.
 import { BUILD } from './config.js';
+import { tabelaText, tabelaEnglish } from './tabela.js';
 import { paintTr } from './cars.js';
 import { NAMES } from './names.js';
 
@@ -318,7 +319,7 @@ export function paintNpc(g, kind, spec, color, finish) {
       g.font = 'bold 4px sans-serif';
       g.textAlign = 'center';
       g.textBaseline = 'middle';
-      g.save(); g.rotate(1.57); g.fillText('TAKSİ', 0, 1); g.restore();
+      g.save(); g.rotate(1.57); g.fillText(tabelaText('TAKSİ'), 0, 1); g.restore();
     }
   } else if (kind === 'minibus') {
     g.fillStyle = '#121216';
@@ -336,7 +337,7 @@ export function paintNpc(g, kind, spec, color, finish) {
     g.font = 'bold 6.5px sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    g.fillText('DOLMUŞ', -6, 0.5);
+    g.fillText(tabelaText('DOLMUŞ'), -6, 0.5);
     g.fillStyle = '#fff7c2';
     g.fillRect(L - 2, -H + 3, 2, 4); g.fillRect(L - 2, H - 7, 2, 4);
   } else if (kind === 'bus') {
@@ -354,7 +355,7 @@ export function paintNpc(g, kind, spec, color, finish) {
     g.font = 'bold 8px sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    g.fillText('BELEDİYE', -6, 0.6);
+    g.fillText(tabelaText('BELEDİYE'), -6, 0.6);
     g.fillStyle = '#fff7c2';
     g.fillRect(L - 2, -H + 3, 2, 4); g.fillRect(L - 2, H - 7, 2, 4);
   } else {
@@ -855,12 +856,13 @@ export function signKind(text) {
 export function signCanvas(text, color, seed = 0, kindOf = text) {
   const list = SIGN_STYLES[signKind(kindOf)];
   const v = seed % list.length;
-  const key = text + color + v + list.length;
+  const key = text + color + v + list.length + (tabelaEnglish() ? 'en' : 'tr');
   let c = signCache.get(key);
   if (c) return c;
   if (signCache.size > 400) signCache.clear();
   const [font, kind] = list[v];
-  const shown = kind === 'vivid' || font.includes('Bungee') ? text.toLocaleUpperCase('tr') : text;
+  // Büyük harf dile göre: Türkçede i → İ, İngilizcede i → I ("HAIR", "HAİR" değil)
+  const shown = kind === 'vivid' || font.includes('Bungee') ? (tabelaEnglish() ? text.toUpperCase() : text.toLocaleUpperCase('tr')) : text;
   c = document.createElement('canvas');
   const g0 = c.getContext('2d');
   g0.font = font;

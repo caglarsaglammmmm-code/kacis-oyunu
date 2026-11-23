@@ -81,7 +81,7 @@ for (const flavor of ['play', 'arkadas']) {
     });
     const en = lang !== 'tr';
     ok(t.lang === (en ? 'en' : 'tr'), `${flavor}-${lang}: çizici tabela dili`, t.lang);
-    ok(t.z === (en ? 'Crockery Store' : 'Züccaciye'), `${flavor}-${lang}: Züccaciye`, t.z);
+    ok(t.z === (en ? 'Housewares Store' : 'Züccaciye'), `${flavor}-${lang}: Züccaciye`, t.z);
     const want = flavor === 'play' ? (en ? 'COLLEGE' : 'KOLEJ') : (en ? 'SYSTEM COLLEGE' : 'SİSTEM KOLEJİ');
     ok(t.kolej === want, `${flavor}-${lang}: kolej tabelası`, t.kolej);
   }

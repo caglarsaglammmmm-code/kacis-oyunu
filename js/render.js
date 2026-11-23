@@ -3,7 +3,7 @@ import { CONFIG, GROUND, BUILD } from './config.js';
 import { CHUNK, CT, TILE, PROP, isPower, powerName } from './world.js';
 import { PED_FLY, lightState } from './crowd.js';
 import { paintTr } from './cars.js';
-import { sheetSprite } from './sheet.js';
+import { sheetSprite, atlasReady } from './sheet.js';
 import { CUSTOM, paintOf, ledOf, refPaintIndex } from './custom.js';
 import { rimIcon } from './pixelcars.js';
 import { paintPad, tallArt, landmarkSign } from './landmarks.js';
@@ -1507,6 +1507,7 @@ export class Renderer {
           c.dirty = true;
           for (let i = 0; i < c.rectCount; i++) c.rects[i].signImg = null;
         }
+        if (atlasReady()) this.useAtlas(); // Araç üstü yazılar (TAXI, POLICE, FREIGHT...)
       }
       this.signLang = signLang;
     }

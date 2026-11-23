@@ -2,7 +2,9 @@
 <html lang="tr"><head><meta charset="utf-8"><title>bake</title></head><body>
 <script src="/vendor/three.min.js"></script>
 <script type="module">
-import { buildCar, makeEnv } from '/js/car3d.js';
+import { buildCar, makeEnv, setCarTextEnglish } from '/js/car3d.js';
+// ?lang=en: araç üstü yazılar İngilizce (assets/cars-en.webp). Hücre düzeni Türkçe atlasla aynıdır
+setCarTextEnglish(new URLSearchParams(location.search).get('lang') === 'en');
 import { CONFIG } from '/js/config.js';
 import { spriteList, FRAME_L, FRAME_W, FATTEN } from '/js/sheet.js';
 const T = globalThis.THREE;

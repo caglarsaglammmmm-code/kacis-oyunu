@@ -1,5 +1,5 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'drift-lab-v24.1.0-2'; // 24.1.0 ikinci web yayını (tabela dili, kolej, siteler)
+const CACHE = 'drift-lab-v24.1.0-3'; // 24.1.0 üçüncü web yayını (bütün dünya yazıları dile göre)
 const ASSETS = [
   './',
   'index.html',
@@ -46,6 +46,7 @@ const ASSETS = [
   'js/car3d.js',
   'js/menu3d.js',
   'assets/cars.webp',
+  'assets/cars-en.webp',
   'js/cars.js',
   'js/landmarks.js',
   'js/buildings.js',
@@ -66,7 +67,6 @@ const ASSETS = [
   'icons/icon-maskable-512.png',
   'icons/favicon-32.png',
   'assets/ui/cover.png',
-  'assets/ui/btn-basla.png',
   'assets/ui/frame.png',
   'assets/ui/garage-bg.png',
   'assets/ui/hazard.png',

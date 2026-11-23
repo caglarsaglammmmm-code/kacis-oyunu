@@ -201,62 +201,62 @@ const NAMES = {
   "Fen Bilimleri Okulu": "Science School",
   "Bozkır Koleji": "Steppe College",
   "Gün Işığı Koleji": "Sunlight College",
-  "Çınar İlkokulu": "Plane Tree Primary School",
+  "Çınar İlkokulu": "Plane Tree Elementary School",
   "Bozkır Kulesi": "Steppe Tower",
   "Şehir Müzesi": "City Museum",
-  "Tepe Camii": "Hill Mosque",
+  "Tepe Camii": "Hilltop Mosque",
   "Yeşil Tepe": "Green Hill",
-  "Kongre Merkezi": "Congress Center",
+  "Kongre Merkezi": "Convention Center",
   "Şehir Parkı": "City Park",
   "Çınar Meydanı": "Plane Tree Square",
   "Eski Çarşı": "Old Bazaar",
-  "Bağlar Bahçesi": "Vineyard Garden",
-  "Taş Fırın": "Stone Oven",
+  "Bağlar Bahçesi": "Vineyard Gardens",
+  "Taş Fırın": "Stone Oven Bakery",
   "Tepe": "Hill",
   "Çınar": "Plane Tree",
   "Müze": "Museum",
   "Kebap Sarayı": "Kebab Palace",
-  "Kayık Pide": "Boat Pide",
-  "Fırın Lahmacun": "Oven Lahmacun",
-  "Ocakbaşı Kebapçısı": "Grill Kebab House",
-  "Tereyağlı Kebapçı": "Butter Kebab House",
-  "Öz Ocakbaşı": "Pure Grill",
+  "Kayık Pide": "Boat-Shaped Pide",
+  "Fırın Lahmacun": "Stone Oven Turkish Pizza",
+  "Ocakbaşı Kebapçısı": "Charcoal Grill House",
+  "Tereyağlı Kebapçı": "Butter Kebab Shop",
+  "Öz Ocakbaşı": "Classic Grill House",
   "Pazarcık Market": "Bazaar Market",
-  "Ucuzlar": "Bargains",
+  "Ucuzlar": "Bargain Mart",
   "Sepet Market": "Basket Market",
   "Papatya Mağazaları": "Daisy Stores",
   "Dörtyol Market": "Crossroads Market",
   "Teknoloji Durağı": "Tech Stop",
-  "Yapı Dünyası": "Building World",
+  "Yapı Dünyası": "Home Improvement World",
   "Ufuk Bankası": "Horizon Bank",
   "Kumbara Tasarruf": "Piggy Bank Savings",
   "Bereket Bankası": "Bounty Bank",
   "Güven Kredi": "Trust Credit",
-  "Liman Yatırım": "Harbor Investment",
-  "Yeşilvadi Sitesi": "Green Valley Residence",
-  "Mavi Orman Sitesi": "Blue Forest Residence",
-  "Merkez Çarşı İş Hanı": "Central Bazaar Business Center",
-  "Sahil Palas Oteli": "Coast Palace Hotel",
-  "Nane Döner": "Mint Doner",
-  "ÇINARLI ŞEHİR STADYUMU": "ÇINARLI CITY STADIUM",
+  "Liman Yatırım": "Harbor Investments",
+  "Yeşilvadi Sitesi": "Green Valley Residences",
+  "Mavi Orman Sitesi": "Blue Forest Residences",
+  "Merkez Çarşı İş Hanı": "Central Bazaar Office Building",
+  "Sahil Palas Oteli": "Seaside Palace Hotel",
+  "Nane Döner": "Mint Doner Kebab",
+  "ÇINARLI ŞEHİR STADYUMU": "PLANE TREE CITY STADIUM",
   "MAVİ RÜZGAR ARENA": "BLUE WIND ARENA",
   "← LİMAN O-1": "← PORT O-1",
-  "← SAHİL O-1": "← COAST O-1",
-  "← OVA O-2": "← PLAIN O-2",
+  "← SAHİL O-1": "← SEASIDE O-1",
+  "← OVA O-2": "← VALLEY O-2",
   "← KÖPRÜ O-1": "← BRIDGE O-1",
-  "MERKEZ O-2 →": "CENTER O-2 →",
+  "MERKEZ O-2 →": "DOWNTOWN O-2 →",
   "DAĞ O-2 →": "MOUNTAIN O-2 →",
   "GÖL O-2 →": "LAKE O-2 →",
   "VADİ O-3 →": "VALLEY O-3 →",
   "← ÇARŞI": "← BAZAAR",
   "LİMAN →": "PORT →",
-  "↑ MERKEZ": "↑ CENTER",
-  "SAHİL →": "COAST →",
-  "← ÇINARLI": "← ÇINARLI",
+  "↑ MERKEZ": "↑ DOWNTOWN",
+  "SAHİL →": "SEASIDE →",
+  "← ÇINARLI": "← PLANE TREE",
   "TEPEBAŞI →": "HILLTOP →",
   "↑ KÖPRÜ": "↑ BRIDGE",
   "← ESKİ ŞEHİR": "← OLD TOWN",
-  "YENİ MAHALLE →": "NEW QUARTER →"
+  "YENİ MAHALLE →": "NEW TOWN →"
  },
  "misafir": ""
 };
@@ -282,7 +282,7 @@ const CONFIG = {
   name: NAMES.oyun,
   version: '24.1.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.0-2/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.0-3/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -1678,44 +1678,54 @@ function langKeys(code) {
 // Bağımlılığı yalnız dil durumu ve isim tablosudur; birim testle sınanır.
 
 const TABELA_EN = {
-  // Dükkânlar
-  Bakkal: 'Grocery', 'Kardeşler Bakkal': 'Brothers Grocery', 'Köşe Bakkal': 'Corner Grocery',
-  Büfe: 'Kiosk', 'Büfe 7/24': 'Kiosk 24/7', 'Köşe Büfe': 'Corner Kiosk', 'Köşe Bayii': 'Corner Newsstand',
-  Berber: 'Barber', 'Erkek Berberi': "Men's Barber", Kuaför: 'Hairdresser', 'Bayan Kuaförü': "Ladies' Hairdresser",
-  Eczane: 'Pharmacy', 'Nöbetçi Eczane': 'On-Duty Pharmacy',
-  Fırın: 'Bakery', 'Ekmek Fırını': 'Bread Bakery', 'Etli Ekmek Fırını': 'Flatbread Bakery', 'Etliekmek Salonu': 'Flatbread House',
-  'Fırın Kebabı': 'Oven Kebab', 'Bamya Çorbası': 'Okra Soup',
-  Dönerci: 'Doner Shop', 'Usta Döner': 'Master Doner', 'Usta Dönerci': 'Master Doner Shop', 'Soslu Döner': 'Saucy Doner',
-  Kebapçı: 'Kebab House', Pideci: 'Pide House', 'Hacı Usta Pide': "Master's Pide", Lahmacun: 'Lahmacun',
-  Ciğerci: 'Liver Kebab', Çiğköfte: 'Raw Meatballs', Börekçi: 'Pastry Shop', Tatlıcı: 'Dessert Shop', 'Tost Evi': 'Toast House',
-  Lokanta: 'Restaurant', Kahveci: 'Coffee House', 'Çay Ocağı': 'Tea Stall', 'Mahalle Çay Ocağı': 'Neighborhood Tea Stall',
-  Kasap: 'Butcher', Manav: 'Greengrocer', Züccaciye: 'Crockery Store', Kırtasiye: 'Stationery', Emlakçı: 'Real Estate',
-  Terzi: 'Tailor', Tuhafiye: 'Haberdashery', Tamirci: 'Repair Shop', 'Oto Yıkama': 'Car Wash', Telefoncu: 'Phone Shop',
+  // Dükkânlar: İngilizce konuşan birinin gerçekte kullandığı adlar (kelimesi kelimesine değil)
+  Bakkal: 'Grocery Store', 'Kardeşler Bakkal': 'Brothers Grocery', 'Köşe Bakkal': 'Corner Store',
+  Büfe: 'Snack Kiosk', 'Büfe 7/24': '24/7 Snack Kiosk', 'Köşe Büfe': 'Corner Kiosk', 'Köşe Bayii': 'Corner Newsstand',
+  Berber: 'Barbershop', 'Erkek Berberi': "Men's Barbershop", Kuaför: 'Hair Salon', 'Bayan Kuaförü': "Women's Hair Salon",
+  Eczane: 'Pharmacy', 'Nöbetçi Eczane': '24-Hour Pharmacy',
+  Fırın: 'Bakery', 'Ekmek Fırını': 'Bakery', 'Etli Ekmek Fırını': 'Flatbread Bakery', 'Etliekmek Salonu': 'Flatbread House',
+  'Fırın Kebabı': 'Oven-Roasted Kebab', 'Bamya Çorbası': 'Okra Soup House',
+  Dönerci: 'Doner Kebab Shop', 'Usta Döner': "Master's Doner", 'Usta Dönerci': "Master's Doner Kebab", 'Soslu Döner': 'Saucy Doner',
+  Kebapçı: 'Kebab Shop', Pideci: 'Pide Bakery', 'Hacı Usta Pide': "Master's Pide", Lahmacun: 'Turkish Pizza',
+  Ciğerci: 'Liver Kebab Shop', Çiğköfte: 'Kofte Wraps', Börekçi: 'Pastry Shop', Tatlıcı: 'Dessert Shop', 'Tost Evi': 'Sandwich Shop',
+  Lokanta: 'Diner', Kahveci: 'Coffee House', 'Çay Ocağı': 'Tea Stand', 'Mahalle Çay Ocağı': 'Neighborhood Tea Stand',
+  Kasap: 'Butcher Shop', Manav: 'Greengrocer', Züccaciye: 'Housewares Store', Kırtasiye: 'Stationery Store', Emlakçı: 'Real Estate Agency',
+  Terzi: 'Tailor', Tuhafiye: 'Sewing Supplies', Tamirci: 'Auto Repair', 'Oto Yıkama': 'Car Wash', Telefoncu: 'Phone Store',
   'Bit Bilgisayar': 'Bit Computers', 'Piksel Oyun Salonu': 'Pixel Arcade',
   // Kafe, çay bahçesi, spor salonu
   'Çınar Kafe': 'Plane Tree Cafe', 'Melodi Kafe': 'Melody Cafe', 'Akustik Kafe': 'Acoustic Cafe', 'Sahne Kafe': 'Stage Cafe',
   'Çınaraltı Çay Bahçesi': 'Plane Tree Tea Garden', 'Bahçe Çay Evi': 'Garden Tea House', 'Çay Bahçesi': 'Tea Garden',
-  'Demir Spor Salonu': 'Iron Gym', 'Kondisyon Spor Salonu': 'Fitness Gym',
+  'Demir Spor Salonu': 'Iron Gym', 'Kondisyon Spor Salonu': 'Fitness Center',
   // Marketler
-  'Ucuzluk Market': 'Bargain Market', 'Bereket Gross': 'Bounty Wholesale', 'Komşu Market': 'Neighbor Market',
+  'Ucuzluk Market': 'Bargain Market', 'Bereket Gross': 'Bounty Wholesale', 'Komşu Market': 'Neighborhood Market',
   'Anadolu Gross': 'Anatolia Wholesale', 'Kervan Gross': 'Caravan Wholesale', 'Hesaplı Market': 'Thrifty Market',
   'Doyuran Gross': 'Hearty Wholesale', 'Tasarruf Market': 'Savings Market',
   // Plaza, iş merkezi, otel
   'Merkez İş Merkezi': 'Central Business Center', 'Kristal Plaza': 'Crystal Plaza', 'Boğaz Tower': 'Strait Tower',
-  'Anadolu Plaza': 'Anatolia Plaza', 'Sultan Rezidans': 'Sultan Residence', 'Lale Rezidans': 'Tulip Residence',
-  'Marmara Residence': 'Marmara Residence', 'Mavi Kule': 'Blue Tower', 'Atlas Tower': 'Atlas Tower',
-  'Grand Otel': 'Grand Hotel', 'Otel Boğaz': 'Hotel Strait', 'Park Hotel': 'Park Hotel', 'Otel Saray': 'Hotel Palace', 'Mavi Otel': 'Blue Hotel',
+  'Anadolu Plaza': 'Anatolia Plaza', 'Sultan Rezidans': 'Sultan Residences', 'Lale Rezidans': 'Tulip Residences',
+  'Marmara Residence': 'Marmara Residences', 'Mavi Kule': 'Blue Tower', 'Atlas Tower': 'Atlas Tower',
+  'Grand Otel': 'Grand Hotel', 'Otel Boğaz': 'Strait Hotel', 'Park Hotel': 'Park Hotel', 'Otel Saray': 'Palace Hotel', 'Mavi Otel': 'Blue Hotel',
   // Siteler
-  'Yeşil Tepe Sitesi': 'Green Hill Residence', 'Boğaz Evleri': 'Strait Homes', 'Mavi Konak Sitesi': 'Blue Mansion Residence',
-  'Çamlık Sitesi': 'Pine Grove Residence', 'Güneş Sitesi': 'Sun Residence', 'Lale Evleri': 'Tulip Homes',
+  'Yeşil Tepe Sitesi': 'Green Hill Residences', 'Boğaz Evleri': 'Strait Homes', 'Mavi Konak Sitesi': 'Blue Mansion Residences',
+  'Çamlık Sitesi': 'Pine Grove Residences', 'Güneş Sitesi': 'Sunshine Residences', 'Lale Evleri': 'Tulip Homes',
   'Marmara Konutları': 'Marmara Homes', 'Park Evleri': 'Park Homes',
   // Kamu yapıları
   'Şehir Hastanesi': 'City Hospital',
-  // Bina üstüne çizilen küçük yazılar
-  'OKUL TAŞITI': 'SCHOOL BUS', 'İŞ HANI': 'BUSINESS CENTER', ACİL: 'EMERGENCY', AMBULANS: 'AMBULANCE', DUR: 'STOP',
+  // Bina, yol ve zemine çizilen küçük yazılar
+  'OKUL TAŞITI': 'SCHOOL BUS', 'İŞ HANI': 'OFFICE BUILDING', ACİL: 'EMERGENCY', AMBULANS: 'AMBULANCE', DUR: 'STOP',
   // Dükkân önü afişleri
-  '%30 İNDİRİM': '30% OFF', 'BUGÜNE ÖZEL': 'TODAY ONLY', '%50 İNDİRİM': '50% OFF', '2 AL 1 ÖDE': 'BUY 2 PAY 1',
-  KAMPANYA: 'SPECIAL DEAL', 'FIRSAT!': 'BARGAIN!', 'YENİ AÇILDI': 'NEW OPENING', 'SON GÜN': 'LAST DAY',
+  '%30 İNDİRİM': '30% OFF', 'BUGÜNE ÖZEL': 'TODAY ONLY', '%50 İNDİRİM': '50% OFF', '2 AL 1 ÖDE': 'BUY 2, GET 1 FREE',
+  KAMPANYA: 'SALE', 'FIRSAT!': 'GREAT DEAL!', 'YENİ AÇILDI': 'NOW OPEN', 'SON GÜN': 'LAST DAY',
+  // Araç üstü yazılar (araç atlası assets/cars-en.webp ve yedek çizimler)
+  TAKSİ: 'TAXI', DOLMUŞ: 'SHUTTLE', BELEDİYE: 'CITY BUS', NAKLİYAT: 'FREIGHT', POLİS: 'POLICE', 'ÖZEL HAREKAT': 'SWAT',
+  '12 MERKEZ': '12 DOWNTOWN', PİKAP: 'PICKUP',
+  // Yayaların çarpılınca bağırdığı sözler (dünyada yüzen yazı)
+  'SİMİTLERİM!': 'MY BAGELS!', 'SİMİİİT!': 'BAGELS!', 'TEPSİM!': 'MY TRAY!', 'ZİLİM BOZUK!': 'MY BELL IS BROKEN!', 'YOLDAN!': 'OUT OF THE WAY!',
+  'PAKET GİTTİ!': 'THERE GOES THE PACKAGE!', 'SİPARİŞ!': 'MY DELIVERY!', 'OHA!': 'WHOA!', 'ÇAYLAR!': 'THE TEA!', 'BARDAKLAR!': 'THE GLASSES!',
+  'TAZE DEMLEMİŞTİM!': 'I JUST BREWED THAT!', 'DÜKKÂNIM!': 'MY SHOP!', 'HOOP!': 'HEY!', 'YAVAŞ OĞLUM!': 'SLOW DOWN, KID!',
+  'NEFESİM!': "I'M OUT OF BREATH!", 'KOŞTUM YA!': 'I WAS JOGGING!', 'DUR ORADA!': 'STOP RIGHT THERE!', 'GİRİŞ YOK!': 'NO ENTRY!',
+  'TEZGÂHIM!': 'MY STALL!', 'MALLAR!': 'MY GOODS!', 'YANDIM!': "I'M DONE FOR!", 'NOLUYOR YA!': "WHAT'S GOING ON?!", 'AMAN!': 'OH DEAR!',
+  'İMDAT!': 'HELP!', 'EYVAH!': 'OH NO!', 'YAPMA!': "DON'T!", 'ABİ YA!': 'COME ON, MAN!', 'MİYAV!': 'MEOW!',
 };
 
 // Türkçe dışında İngilizce mi yazılacak
@@ -4566,7 +4576,7 @@ class Crowd {
       g.lastVoice = info.voice;
       g.emit('scream', Math.min(1, 500 / (Math.hypot(p.x - g.player.x, p.y - g.player.y) + 200)));
       const words = info.words || PD.words[info.voice];
-      if (Math.random() < 0.6) g.fx.float(p.x, p.y - 16, words[Math.floor(Math.random() * words.length)], '#ffffff');
+      if (Math.random() < 0.6) g.fx.float(p.x, p.y - 16, tabelaText(words[Math.floor(Math.random() * words.length)]), '#ffffff');
     }
     g.emit('thud');
   }
@@ -7764,7 +7774,7 @@ function paintNpc(g, kind, spec, color, finish) {
       g.font = 'bold 4px sans-serif';
       g.textAlign = 'center';
       g.textBaseline = 'middle';
-      g.save(); g.rotate(1.57); g.fillText('TAKSİ', 0, 1); g.restore();
+      g.save(); g.rotate(1.57); g.fillText(tabelaText('TAKSİ'), 0, 1); g.restore();
     }
   } else if (kind === 'minibus') {
     g.fillStyle = '#121216';
@@ -7782,7 +7792,7 @@ function paintNpc(g, kind, spec, color, finish) {
     g.font = 'bold 6.5px sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    g.fillText('DOLMUŞ', -6, 0.5);
+    g.fillText(tabelaText('DOLMUŞ'), -6, 0.5);
     g.fillStyle = '#fff7c2';
     g.fillRect(L - 2, -H + 3, 2, 4); g.fillRect(L - 2, H - 7, 2, 4);
   } else if (kind === 'bus') {
@@ -7800,7 +7810,7 @@ function paintNpc(g, kind, spec, color, finish) {
     g.font = 'bold 8px sans-serif';
     g.textAlign = 'center';
     g.textBaseline = 'middle';
-    g.fillText('BELEDİYE', -6, 0.6);
+    g.fillText(tabelaText('BELEDİYE'), -6, 0.6);
     g.fillStyle = '#fff7c2';
     g.fillRect(L - 2, -H + 3, 2, 4); g.fillRect(L - 2, H - 7, 2, 4);
   } else {
@@ -8301,12 +8311,13 @@ function signKind(text) {
 function signCanvas(text, color, seed = 0, kindOf = text) {
   const list = SIGN_STYLES[signKind(kindOf)];
   const v = seed % list.length;
-  const key = text + color + v + list.length;
+  const key = text + color + v + list.length + (tabelaEnglish() ? 'en' : 'tr');
   let c = signCache.get(key);
   if (c) return c;
   if (signCache.size > 400) signCache.clear();
   const [font, kind] = list[v];
-  const shown = kind === 'vivid' || font.includes('Bungee') ? text.toLocaleUpperCase('tr') : text;
+  // Büyük harf dile göre: Türkçede i → İ, İngilizcede i → I ("HAIR", "HAİR" değil)
+  const shown = kind === 'vivid' || font.includes('Bungee') ? (tabelaEnglish() ? text.toUpperCase() : text.toLocaleUpperCase('tr')) : text;
   c = document.createElement('canvas');
   const g0 = c.getContext('2d');
   g0.font = font;
@@ -10521,16 +10532,25 @@ const FRAME_W = 1.5;
 const FATTEN = 1.14; // Üstten görünümde dar kalmasın diye genişlik büyütülür
 const DRAW_LEN = 1.1; // Çizilen boy, çarpışma boyuna oranla
 
-const ATLAS = { img: null, ready: false };
+const ATLAS = { img: null, ready: false, en: null };
+
+// İki atlas aynı hücre düzenindedir: assets/cars.webp (Türkçe yazılar: TAKSİ, NAKLİYAT, POLİS...) ve
+// assets/cars-en.webp (aynı araçlar, İngilizce yazılar). Türkçe dışındaki bütün dillerde İngilizce atlas kullanılır
+function loadImage(src, ok, fail) {
+  const img = new Image();
+  const ready = () => ok(img);
+  // Görsel, ilk çizimde değil burada çözülür: oyun sırasında takılma yapmaz
+  img.onload = () => { if (img.decode) img.decode().then(ready, ready); else ready(); };
+  img.onerror = fail;
+  img.src = src;
+}
 
 function loadAtlas(done) {
   if (typeof Image === 'undefined') return;
-  const img = new Image();
-  const ready = () => { ATLAS.img = img; ATLAS.ready = true; if (done) done(); };
-  // Görsel, ilk çizimde değil burada çözülür: oyun sırasında takılma yapmaz
-  img.onload = () => { if (img.decode) img.decode().then(ready, ready); else ready(); };
-  img.onerror = () => { ATLAS.ready = false; if (done) done(); };
-  img.src = 'assets/cars.webp';
+  let left = 2;
+  const end = () => { if (--left === 0 && done) done(); };
+  loadImage('assets/cars.webp', (img) => { ATLAS.img = img; ATLAS.ready = true; end(); }, () => { ATLAS.ready = false; end(); });
+  loadImage('assets/cars-en.webp', (img) => { ATLAS.en = img; end(); }, end);
 }
 
 const atlasReady = () => ATLAS.ready;
@@ -10540,6 +10560,7 @@ function sheetSprite(key, len) {
   const cell = CAR_SHEET.cells[key];
   if (!ATLAS.ready || !cell) return null;
   const [x, y, w, h] = cell;
+  const src = (tabelaEnglish() && ATLAS.en) || ATLAS.img;
   const c = document.createElement('canvas');
   c.width = w;
   c.height = h;
@@ -10547,12 +10568,12 @@ function sheetSprite(key, len) {
   // Çift kontur: koyu dış hale açık yolda, ince açık hat koyu yolda aracı ayırır
   const q = w / 96;
   g.shadowColor = 'rgba(0,0,0,.95)'; g.shadowBlur = 3.6 * q;
-  g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
-  g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
+  g.drawImage(src, x, y, w, h, 0, 0, w, h);
+  g.drawImage(src, x, y, w, h, 0, 0, w, h);
   g.shadowColor = 'rgba(255,255,255,.9)'; g.shadowBlur = 1.2 * q;
-  g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
+  g.drawImage(src, x, y, w, h, 0, 0, w, h);
   g.shadowColor = 'transparent'; g.shadowBlur = 0;
-  g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
+  g.drawImage(src, x, y, w, h, 0, 0, w, h);
   c.wu = len * DRAW_LEN * FRAME_L;
   c.hu = (c.wu * h) / w;
   return c;
@@ -11034,6 +11055,12 @@ const BAKE_NPC = (types) => {
 // Araç tanımından gerçek üç boyutlu model üretir. Menü, garaj ve sprite üretim aracı aynı kodu kullanır.
 // x burun yönü değil: model önce (s, y, z) uzayında kurulur; dünya ekseni X uzunluk, Y yükseklik, Z yan.
 
+// Araç üstü yazıların dili. Oyun içi araç atlası iki dilde üretilir (assets/cars.webp Türkçe, assets/cars-en.webp
+// İngilizce: tools/bake-cars.mjs en). Garajdaki 3B araç ve model adı rozetleri (ATMACA gibi ürün adları) değişmez
+let CAR_EN = false;
+function setCarTextEnglish(on) { CAR_EN = !!on; }
+const carWord = (t) => (CAR_EN ? tabelaText.en(t) : t);
+
 function curve(pts, smooth = 2) {
   const N = 240;
   const t = new Float32Array(N + 1);
@@ -11087,7 +11114,7 @@ function fascia(THREE, W, Z, draw, px = 512) {
     polyLine(p, col, w) { g.strokeStyle = col; g.lineWidth = w * k; g.lineJoin = 'round'; g.beginPath(); p.forEach(([a, b], i) => (i ? g.lineTo(X(a), Y(b)) : g.moveTo(X(a), Y(b)))); g.closePath(); g.stroke(); },
     arcB(y, z, r, col) { for (const s of [-1, 1]) { g.strokeStyle = col; g.lineWidth = r * k * 0.3; g.lineCap = 'round'; g.beginPath(); g.arc(X(s * y), Y(z), r * k, s > 0 ? 0.5 : 3.14 - 2.6, s > 0 ? 3.14 + 0.1 + 0.9 : 3.14 - 0.5); g.stroke(); } },
     arcR(y, z, r, col) { d.arcB(y, z, r, col); },
-    text(t, h, z, col = '#23262b', y = 0) { g.fillStyle = col; g.font = `900 ${h * k * 0.8}px Nunito, Arial, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, X(y), Y(z)); },
+    text(t, h, z, col = '#23262b', y = 0) { g.fillStyle = col; g.font = `900 ${h * k * 0.8}px Nunito, Arial, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(carWord(t), X(y), Y(z)); },
     // Drift Lab rozeti: altıgen içinde deney şişesi çizgisi
     emblem(y, z, kind, r = 0.055) {
       const q = r * k;
@@ -11429,7 +11456,7 @@ function buildCar(THREE, id, paint) {
   if (m.wind) { const w = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.42, W * 0.86), new THREE.MeshStandardMaterial({ color: paint.accent || '#dfe3e7', roughness: 0.4 })); w.position.set(0.18 * L, roofF(0.12) + 0.26, 0); w.rotation.z = 0.2; group.add(w); }
   if (m.cargo) {
     const q = m.cargo;
-    const tarp = new THREE.MeshStandardMaterial({ map: tarpTexture(THREE, paint.accent || '#2a6db0', 'NAKLİYAT'), roughness: 0.7 });
+    const tarp = new THREE.MeshStandardMaterial({ map: tarpTexture(THREE, paint.accent || '#2a6db0', carWord('NAKLİYAT')), roughness: 0.7 });
     const x0 = q.s0 * L; const x1 = q.s1 * L;
     addBox(THREE, group, x1 - x0, q.z1 - q.z0, W * 0.98, (x0 + x1) / 2, (q.z0 + q.z1) / 2, 0, tarp);
     addBox(THREE, group, x1 - x0, 0.14, W, (x0 + x1) / 2, q.z0 - 0.04, 0, plastic);
@@ -11527,7 +11554,7 @@ function sideTexture(THREE, m, paint) {
   if (m.band) { g.fillStyle = m.band.c; g.fillRect(0, Y(m.band.z + m.band.h / 2), 1024, (m.band.h / m.H) * 256); }
   if (paint.band) { g.fillStyle = paint.band; g.fillRect(0, Y(0.8), 1024, (0.26 / m.H) * 256); }
   if (paint.lower) { g.fillStyle = paint.lower; g.fillRect(0, Y(0.62), 1024, 256 - Y(0.62)); }
-  if (paint.text) { g.fillStyle = paint.textColor || '#fff'; g.font = `900 ${(0.2 / m.H) * 256}px Nunito, Arial`; g.textAlign = 'center'; g.fillText(paint.text, X(0.55), Y(0.74)); }
+  if (paint.text) { g.fillStyle = paint.textColor || '#fff'; g.font = `900 ${(0.2 / m.H) * 256}px Nunito, Arial`; g.textAlign = 'center'; g.fillText(carWord(paint.text), X(0.55), Y(0.74)); }
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
@@ -11540,7 +11567,9 @@ function tarpTexture(THREE, col, text) {
   g.fillStyle = col; g.fillRect(0, 0, 512, 128);
   g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 3;
   for (let x = 32; x < 512; x += 42) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 128); g.stroke(); }
-  g.fillStyle = '#fff'; g.font = '900 44px Nunito, Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 256, 66);
+  g.fillStyle = '#fff'; g.font = '900 44px Nunito, Arial'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  // Üstten görünümde ayna gibi ters okunmasın: yazı iki eksende çevrilerek çizilir (yalnız İngilizce atlas yeniden üretildi)
+  if (CAR_EN) { g.save(); g.translate(512, 128); g.scale(-1, -1); g.fillText(text, 256, 62); g.restore(); } else g.fillText(text, 256, 66);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
@@ -14903,6 +14932,7 @@ class Renderer {
           c.dirty = true;
           for (let i = 0; i < c.rectCount; i++) c.rects[i].signImg = null;
         }
+        if (atlasReady()) this.useAtlas(); // Araç üstü yazılar (TAXI, POLICE, FREIGHT...)
       }
       this.signLang = signLang;
     }

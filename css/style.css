@@ -477,7 +477,7 @@ body:not(.has3d) .garage3d { background: linear-gradient(160deg, #15183a, #0a0c1
 .menu nav .row { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 0; }
 .menu-panel .sub { display: none; }
 
-.start { --size: 0; position: relative; width: 240px; height: 94px; margin: 0; padding: 0; border: 0; border-radius: 0; background: url(../assets/ui/btn-basla.png) center / 100% 100% no-repeat; image-rendering: pixelated; box-shadow: none; animation: none; transition: none; cursor: pointer; filter: none; touch-action: manipulation; }
+.start { --size: 0; position: relative; width: 240px; height: 94px; margin: 0; padding: 0; border: 0; border-radius: 0; background: url(../assets/ui/btn-start.png) center / 100% 100% no-repeat; image-rendering: pixelated; box-shadow: none; animation: none; transition: none; cursor: pointer; filter: none; touch-action: manipulation; }
 .start::after { content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 3px; background: #000; }
 .start i, .start span { display: none; }
 .start:active, .start.down { transform: translateY(3px); box-shadow: none; filter: brightness(.86); }

@@ -1,21 +1,31 @@
 // 3B modellerden üretilmiş araç atlası. Atlas yüklenemezse çizim kodlu yedek sprite'lar kullanılır.
 import { CAR_SHEET } from './carsheet.js';
+import { tabelaEnglish } from './tabela.js';
 
 export const FRAME_L = 1.08; // Kare, aracın boyundan bu kadar geniş
 export const FRAME_W = 1.5;
 export const FATTEN = 1.14; // Üstten görünümde dar kalmasın diye genişlik büyütülür
 export const DRAW_LEN = 1.1; // Çizilen boy, çarpışma boyuna oranla
 
-const ATLAS = { img: null, ready: false };
+const ATLAS = { img: null, ready: false, en: null };
+
+// İki atlas aynı hücre düzenindedir: assets/cars.webp (Türkçe yazılar: TAKSİ, NAKLİYAT, POLİS...) ve
+// assets/cars-en.webp (aynı araçlar, İngilizce yazılar). Türkçe dışındaki bütün dillerde İngilizce atlas kullanılır
+function loadImage(src, ok, fail) {
+  const img = new Image();
+  const ready = () => ok(img);
+  // Görsel, ilk çizimde değil burada çözülür: oyun sırasında takılma yapmaz
+  img.onload = () => { if (img.decode) img.decode().then(ready, ready); else ready(); };
+  img.onerror = fail;
+  img.src = src;
+}
 
 export function loadAtlas(done) {
   if (typeof Image === 'undefined') return;
-  const img = new Image();
-  const ready = () => { ATLAS.img = img; ATLAS.ready = true; if (done) done(); };
-  // Görsel, ilk çizimde değil burada çözülür: oyun sırasında takılma yapmaz
-  img.onload = () => { if (img.decode) img.decode().then(ready, ready); else ready(); };
-  img.onerror = () => { ATLAS.ready = false; if (done) done(); };
-  img.src = 'assets/cars.webp';
+  let left = 2;
+  const end = () => { if (--left === 0 && done) done(); };
+  loadImage('assets/cars.webp', (img) => { ATLAS.img = img; ATLAS.ready = true; end(); }, () => { ATLAS.ready = false; end(); });
+  loadImage('assets/cars-en.webp', (img) => { ATLAS.en = img; end(); }, end);
 }
 
 export const atlasReady = () => ATLAS.ready;
@@ -25,6 +35,7 @@ export function sheetSprite(key, len) {
   const cell = CAR_SHEET.cells[key];
   if (!ATLAS.ready || !cell) return null;
   const [x, y, w, h] = cell;
+  const src = (tabelaEnglish() && ATLAS.en) || ATLAS.img;
   const c = document.createElement('canvas');
   c.width = w;
   c.height = h;
@@ -32,12 +43,12 @@ export function sheetSprite(key, len) {
   // Çift kontur: koyu dış hale açık yolda, ince açık hat koyu yolda aracı ayırır
   const q = w / 96;
   g.shadowColor = 'rgba(0,0,0,.95)'; g.shadowBlur = 3.6 * q;
-  g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
-  g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
+  g.drawImage(src, x, y, w, h, 0, 0, w, h);
+  g.drawImage(src, x, y, w, h, 0, 0, w, h);
   g.shadowColor = 'rgba(255,255,255,.9)'; g.shadowBlur = 1.2 * q;
-  g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
+  g.drawImage(src, x, y, w, h, 0, 0, w, h);
   g.shadowColor = 'transparent'; g.shadowBlur = 0;
-  g.drawImage(ATLAS.img, x, y, w, h, 0, 0, w, h);
+  g.drawImage(src, x, y, w, h, 0, 0, w, h);
   c.wu = len * DRAW_LEN * FRAME_L;
   c.hu = (c.wu * h) / w;
   return c;

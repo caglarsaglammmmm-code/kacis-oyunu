@@ -1,6 +1,13 @@
 // Araç tanımından gerçek üç boyutlu model üretir. Menü, garaj ve sprite üretim aracı aynı kodu kullanır.
 // x burun yönü değil: model önce (s, y, z) uzayında kurulur; dünya ekseni X uzunluk, Y yükseklik, Z yan.
 import { CAR_MODELS } from './carmodels.js';
+import { tabelaText } from './tabela.js';
+
+// Araç üstü yazıların dili. Oyun içi araç atlası iki dilde üretilir (assets/cars.webp Türkçe, assets/cars-en.webp
+// İngilizce: tools/bake-cars.mjs en). Garajdaki 3B araç ve model adı rozetleri (ATMACA gibi ürün adları) değişmez
+let CAR_EN = false;
+export function setCarTextEnglish(on) { CAR_EN = !!on; }
+const carWord = (t) => (CAR_EN ? tabelaText.en(t) : t);
 
 function curve(pts, smooth = 2) {
   const N = 240;
@@ -55,7 +62,7 @@ function fascia(THREE, W, Z, draw, px = 512) {
     polyLine(p, col, w) { g.strokeStyle = col; g.lineWidth = w * k; g.lineJoin = 'round'; g.beginPath(); p.forEach(([a, b], i) => (i ? g.lineTo(X(a), Y(b)) : g.moveTo(X(a), Y(b)))); g.closePath(); g.stroke(); },
     arcB(y, z, r, col) { for (const s of [-1, 1]) { g.strokeStyle = col; g.lineWidth = r * k * 0.3; g.lineCap = 'round'; g.beginPath(); g.arc(X(s * y), Y(z), r * k, s > 0 ? 0.5 : 3.14 - 2.6, s > 0 ? 3.14 + 0.1 + 0.9 : 3.14 - 0.5); g.stroke(); } },
     arcR(y, z, r, col) { d.arcB(y, z, r, col); },
-    text(t, h, z, col = '#23262b', y = 0) { g.fillStyle = col; g.font = `900 ${h * k * 0.8}px Nunito, Arial, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, X(y), Y(z)); },
+    text(t, h, z, col = '#23262b', y = 0) { g.fillStyle = col; g.font = `900 ${h * k * 0.8}px Nunito, Arial, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(carWord(t), X(y), Y(z)); },
     // Drift Lab rozeti: altıgen içinde deney şişesi çizgisi
     emblem(y, z, kind, r = 0.055) {
       const q = r * k;
@@ -397,7 +404,7 @@ export function buildCar(THREE, id, paint) {
   if (m.wind) { const w = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.42, W * 0.86), new THREE.MeshStandardMaterial({ color: paint.accent || '#dfe3e7', roughness: 0.4 })); w.position.set(0.18 * L, roofF(0.12) + 0.26, 0); w.rotation.z = 0.2; group.add(w); }
   if (m.cargo) {
     const q = m.cargo;
-    const tarp = new THREE.MeshStandardMaterial({ map: tarpTexture(THREE, paint.accent || '#2a6db0', 'NAKLİYAT'), roughness: 0.7 });
+    const tarp = new THREE.MeshStandardMaterial({ map: tarpTexture(THREE, paint.accent || '#2a6db0', carWord('NAKLİYAT')), roughness: 0.7 });
     const x0 = q.s0 * L; const x1 = q.s1 * L;
     addBox(THREE, group, x1 - x0, q.z1 - q.z0, W * 0.98, (x0 + x1) / 2, (q.z0 + q.z1) / 2, 0, tarp);
     addBox(THREE, group, x1 - x0, 0.14, W, (x0 + x1) / 2, q.z0 - 0.04, 0, plastic);
@@ -495,7 +502,7 @@ function sideTexture(THREE, m, paint) {
   if (m.band) { g.fillStyle = m.band.c; g.fillRect(0, Y(m.band.z + m.band.h / 2), 1024, (m.band.h / m.H) * 256); }
   if (paint.band) { g.fillStyle = paint.band; g.fillRect(0, Y(0.8), 1024, (0.26 / m.H) * 256); }
   if (paint.lower) { g.fillStyle = paint.lower; g.fillRect(0, Y(0.62), 1024, 256 - Y(0.62)); }
-  if (paint.text) { g.fillStyle = paint.textColor || '#fff'; g.font = `900 ${(0.2 / m.H) * 256}px Nunito, Arial`; g.textAlign = 'center'; g.fillText(paint.text, X(0.55), Y(0.74)); }
+  if (paint.text) { g.fillStyle = paint.textColor || '#fff'; g.font = `900 ${(0.2 / m.H) * 256}px Nunito, Arial`; g.textAlign = 'center'; g.fillText(carWord(paint.text), X(0.55), Y(0.74)); }
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
@@ -508,7 +515,9 @@ function tarpTexture(THREE, col, text) {
   g.fillStyle = col; g.fillRect(0, 0, 512, 128);
   g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 3;
   for (let x = 32; x < 512; x += 42) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 128); g.stroke(); }
-  g.fillStyle = '#fff'; g.font = '900 44px Nunito, Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 256, 66);
+  g.fillStyle = '#fff'; g.font = '900 44px Nunito, Arial'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  // Üstten görünümde ayna gibi ters okunmasın: yazı iki eksende çevrilerek çizilir (yalnız İngilizce atlas yeniden üretildi)
+  if (CAR_EN) { g.save(); g.translate(512, 128); g.scale(-1, -1); g.fillText(text, 256, 62); g.restore(); } else g.fillText(text, 256, 66);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;

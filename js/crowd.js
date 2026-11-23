@@ -1,6 +1,7 @@
 // Yayalar, sokak insanları, kediler, sivil trafik ve trafik ışıkları.
 // Sabit havuz kullanır, sadece oyuncunun çevresinde yaşar.
 import { CONFIG, GROUND } from './config.js';
+import { tabelaText } from './tabela.js';
 import { makeBody, resetBody, stepCar, wrapAngle } from './physics.js';
 import { CHUNK, TILE, isHighwayRow, HIGHWAY } from './world.js';
 import { FX } from './effects.js';
@@ -353,7 +354,7 @@ export class Crowd {
       g.lastVoice = info.voice;
       g.emit('scream', Math.min(1, 500 / (Math.hypot(p.x - g.player.x, p.y - g.player.y) + 200)));
       const words = info.words || PD.words[info.voice];
-      if (Math.random() < 0.6) g.fx.float(p.x, p.y - 16, words[Math.floor(Math.random() * words.length)], '#ffffff');
+      if (Math.random() < 0.6) g.fx.float(p.x, p.y - 16, tabelaText(words[Math.floor(Math.random() * words.length)]), '#ffffff');
     }
     g.emit('thud');
   }
