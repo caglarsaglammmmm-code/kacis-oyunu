@@ -1,6 +1,6 @@
 {
   "name": "drift-lab",
-  "version": "24.1.0",
+  "version": "24.1.1",
   "private": true,
   "type": "module",
   "scripts": {

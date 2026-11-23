@@ -280,9 +280,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '24.1.0',
+  version: '24.1.1',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.0-3/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.1/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
