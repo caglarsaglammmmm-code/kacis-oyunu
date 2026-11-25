@@ -94,7 +94,7 @@ if (only.includes('meteor')) {
   await hold(page, r.x - 60, r.y + 260, -Math.PI / 2, false);
   await page.waitForTimeout(1400);
   await shot(page, 'meteor-halka');
-  await page.waitForFunction(() => __drift.game.meteors.list.some((m) => m.alive && m.t > __drift.cfg.meteor.warn + __drift.cfg.meteor.fall - 0.3), null, { timeout: 5000 });
+  await page.waitForFunction(() => __drift.game.meteors.list.some((m) => m.alive && m.t > m.warn + m.fall - 0.3), null, { timeout: 8000 });
   await shot(page, 'meteor-dusus');
   await page.waitForTimeout(380);
   await shot(page, 'meteor-carpma');
@@ -141,8 +141,9 @@ if (only.includes('secret')) {
   await ctx.close();
   // Bulmayan oyuncu: garajda iz yok
   const fresh = await open({ url: '?god=1&t=0' });
-  const g3 = await fresh.page.evaluate(() => { document.getElementById('btn-garage').click(); return { n: document.querySelectorAll('#garage-list .thumb').length, text: document.body.innerText.includes('Gölge') }; });
-  ok(g3.n === 14 && !g3.text, 'bulmayanda motosiklet yok', JSON.stringify(g3));
+  // Garajda satılık arabalar; yalnız kodla açılan araba (Kuzgun) ve gizli motosiklet görünmez
+  const g3 = await fresh.page.evaluate(() => { document.getElementById('btn-garage').click(); return { n: document.querySelectorAll('#garage-list .thumb').length, want: __drift.cfg.cars.filter((c) => !c.codeOnly).length, text: document.body.innerText.includes('Gölge') }; });
+  ok(g3.n === g3.want && !g3.text, 'bulmayanda motosiklet yok', JSON.stringify(g3));
   await fresh.ctx.close();
 }
 

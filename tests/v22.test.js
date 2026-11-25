@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CONFIG } from '../js/config.js';
 import { Game } from '../js/game.js';
-import { meteorAim } from '../js/meteor.js';
+import { meteorAim, meteorLead, meteorRate } from '../js/meteor.js';
 import { isDeep, CHUNK } from '../js/world.js';
 import { GROUND } from '../js/config.js';
 
@@ -29,19 +29,31 @@ test('meteor nişanı: oyuncunun gideceği noktaya, hıza orantılı (yavaşta y
     g.world.update(p.x, p.y);
     assert.ok(meteorAim(g, out), `${v}: nişan bulundu`);
     const d = Math.hypot(out.x - p.x, out.y - p.y);
-    rows.push({ v, d: Math.round(d), want: Math.round(v * (MET.warn + MET.fall)), road: g.world.groundAt(out.x, out.y) === GROUND.ROAD });
+    const T = MET.warn + meteorRate(g.time).fall;
+    rows.push({ v, d: Math.round(d), want: Math.round(meteorLead(v, T, g.carSpec, 1, g.surfP[g.world.groundAt(p.x, p.y)])), road: g.world.groundAt(out.x, out.y) === GROUND.ROAD });
     assert.ok(d >= MET.minR, 'tam üstünde değil');
     assert.ok(out.y > p.y && Math.abs(out.x - p.x) < 140, 'gidiş yönünde');
     assert.ok(g.world.groundAt(out.x, out.y) === GROUND.ROAD, 'yolda');
   }
   console.log('# hız -> nişan uzaklığı', JSON.stringify(rows));
   for (let i = 1; i < rows.length; i++) assert.ok(rows[i].d >= rows[i - 1].d, 'hızlı araçta daha ileride');
-  assert.ok(rows.at(-1).d > rows[0].d * 2, 'belirgin fark');
-  // Hızlıda tahmin süreye uyar (yol açık olduğu sürece)
-  assert.ok(Math.abs(rows[2].d - rows[2].want) < 120, `320 hızda ${rows[2].d} ~ ${rows[2].want}`);
+  assert.ok(rows.at(-1).d > rows[0].d + 150, 'belirgin fark');
+  // Kilit anında (kalan süre = düşüş süresi) fark daha da belirgin: hedef = konum + hız x düşüş süresi (+ hızlanma)
+  const lock = [];
+  for (const v of [80, 420]) {
+    p.x = 100; p.y = 300; p.a = Math.PI / 2; p.vx = 0; p.vy = v;
+    assert.ok(meteorAim(g, out, MET.fall, { minR: 0 }));
+    lock.push(Math.hypot(out.x - p.x, out.y - p.y));
+  }
+  assert.ok(lock[1] > lock[0] + 150, `kilitte 80: ${lock[0].toFixed(0)}, 420: ${lock[1].toFixed(0)}`);
+  // Seyir hızındaki araba için hedef = konum + hız x düşüş süresi (yavaş araba ayrıca hızlanır, o yüzden biraz daha ileri)
+  assert.ok(Math.abs(lock[1] - 420 * MET.fall) < 40, `420 x ${MET.fall} = ${420 * MET.fall}, nişan ${lock[1].toFixed(0)}`);
+  assert.ok(lock[0] > 80 * MET.fall, 'yavaş araba hızlanır: hız x süreden ileride, asla arkada değil');
+  // Tahmin, yol açık olduğu sürece arabanın o sürede alacağı yol kadar ileride (yola çekme payı içinde)
+  for (const r of rows) assert.ok(Math.abs(r.d - r.want) < MET.road + 40, `${r.v} hızda ${r.d} ~ ${r.want}`);
 });
 
-test('meteor: asıl meteor kilitlenir (takip etmez); uyarı en az 3 sn; nişan eskisinden küçük; çarpma 1-2 sn sarsar', () => {
+test('meteor: nişan uyarı boyunca arabanın gideceği yeri izler, düşüş başlarken kilitlenir; uyarı en az 3 sn; çarpma 1-2 sn sarsar', () => {
   assert.ok(MET.warn >= 3);
   assert.ok(MET.radius <= 120 * 0.6, `yarıçap ${MET.radius} (eskisi 120)`);
   assert.ok(MET.quake >= 1 && MET.quake <= 2);
@@ -50,12 +62,18 @@ test('meteor: asıl meteor kilitlenir (takip etmez); uyarı en az 3 sn; nişan e
   let m = null;
   for (let i = 0; i < 120 && !m; i++) { p.vx = 0; p.vy = 300; g.tick(dt, 0, false); m = g.meteors.list.find((k) => k.alive && k.main); }
   assert.ok(m, 'asıl meteor çıktı');
+  // Uyarıda: araba ilerledikçe nişan da önünde ilerler (izler)
+  const y0 = m.y;
+  for (let i = 0; i < 30 && !m.falling; i++) { p.vx = 0; p.vy = 300; g.tick(dt, 0, false); }
+  assert.ok(m.y > p.y, 'nişan arabanın önünde');
+  // Düşüş başlayınca kilitlenir: oyuncu sola kıvrılır, nişan yerinde kalır
+  while (!m.falling) { p.vx = 0; p.vy = 300; g.tick(dt, 0, false); }
+  assert.ok(m.y !== y0, 'uyarıda izledi');
   const at = { x: m.x, y: m.y };
-  // Oyuncu sola kıvrılır, nişan yerinde kalır
-  for (let i = 0; i < 60; i++) { p.vx = -300; p.vy = 0; g.tick(dt, -1, false); }
+  for (let i = 0; i < 30; i++) { p.vx = -300; p.vy = 0; g.tick(dt, -1, false); }
   assert.deepEqual({ x: m.x, y: m.y }, at, 'kilitli');
   // Çarpma: sarsıntı 1-2 sn sürer
-  m.t = MET.warn + MET.fall - dt / 2;
+  m.t = m.warn + m.fall - dt / 2;
   g.tick(dt, 0, false);
   assert.ok(g.quakeT > 1 && g.quakeT <= 2, `sarsıntı ${g.quakeT}`);
   let shaken = 0;
@@ -63,7 +81,7 @@ test('meteor: asıl meteor kilitlenir (takip etmez); uyarı en az 3 sn; nişan e
   assert.ok(shaken > 0.9 && shaken < 2.3, `sarsıntı süresi ${shaken.toFixed(2)} sn`);
 });
 
-test('meteor: fren yapan ya da dönen bot kaçar; sabit giden ölür (adalet)', () => {
+test('meteor: kilitten sonra fren yapan kaçar; hiç tepki vermeden düz giden ölür (adalet)', () => {
   const run = (mode) => {
     const g = game({ startTime: MET.at + 1, god: false });
     g.meteors.waveT = 999; // Yalnız bu meteor
@@ -76,8 +94,7 @@ test('meteor: fren yapan ya da dönen bot kaçar; sabit giden ölür (adalet)', 
     for (let t = 0; t < MET.warn + MET.fall + 0.3 && g.state === 'play'; t += dt) {
       g.cops.length = 0;
       g.damage = 0;
-      if (mode === 'sabit') { p.a = Math.PI / 2; p.vx = 0; p.vy = Math.hypot(m.x - p.x, m.y - p.y) / Math.max(0.05, MET.warn + MET.fall - t); }
-      g.tick(dt, 0, mode === 'fren');
+      g.tick(dt, 0, mode === 'fren' && m.falling); // Nişan kilitlenip meteor düşmeye başlayınca fren
     }
     return g.cause === 'meteor' ? 'öldü' : 'kaçtı';
   };

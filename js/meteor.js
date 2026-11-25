@@ -1,13 +1,15 @@
-// METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır: çarpma anında arabanın olacağı
-// nokta, oyuncunun konumu, hızı ve yönünden tahmin edilir (konum + hız x (uyarı + düşüş)), yol üzerinde tutulur ve
-// KİLİTLENİR: sonra takip etmez, oyuncu hız ya da yön değiştirerek kaçabilir. Diğerleri çevreye düşen meteorlardır.
-// Uyarı en az 3 sn; düşüş sonra başlar. İçindeki oyuncu ölür, dışındaki zarar görmez. Binalar yıkılır; polis, uzaylı,
+// METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır:
+//   1) Uyarı (warn sn): nişan her karede arabanın çarpma anında olacağı yeri izler. Tahmin = konum + hız x kalan süre,
+//      yol boyunca (köşede yolun döndüğü yere, direksiyon yönüne) ve hızla orantılı: hızlı arabada daha ileride.
+//   2) Düşüş (fall sn): meteor gökten düşmeye başlarken nişan KİLİTLENİR: hedef = konum + hız x düşüş süresi.
+//      Bundan sonra takip etmez; oyuncu düşüş süresi içinde hız ya da yön değiştirerek kaçar.
+// Zamanla dalgalar sıklaşır (every, minEvery) ve meteor hızlanır: düşüş süresi kısalır (fallCurve, minFall tabanı).
+// Diğerleri çevreye düşen meteorlardır. İçindeki oyuncu ölür, dışındaki zarar görmez. Binalar yıkılır; polis, uzaylı,
 // tank ve trafik etkilenir. Korunan alanlara (anıt, gizli geçit, stadyumlar) asla düşmez. Havuz kullanılır, sayı sınırlıdır.
 import { CONFIG, GROUND } from './config.js';
 import { FX } from './effects.js';
 
 const MET = CONFIG.meteor;
-const MET_TOTAL = MET.warn + MET.fall; // Nişandan çarpmaya
 
 // [saniye, değer] noktaları arası doğrusal
 function meteorCurve(curve, t) {
@@ -22,42 +24,85 @@ function meteorCurve(curve, t) {
   return curve[curve.length - 1][1];
 }
 
-// Dalga aralığı ve dalgadaki sayı: zamanla artar, uyarı süresi hiç değişmez
+// Dalga aralığı, dalgadaki sayı ve düşüş süresi: zamanla sıklaşır ve hızlanır, tabanların altına inmez.
+// Uyarı süresi (warn) hiç değişmez
 export function meteorRate(t) {
-  return { every: meteorCurve(MET.every, t), perWave: Math.round(meteorCurve(MET.perWave, t)) };
+  return {
+    every: Math.max(MET.minEvery, meteorCurve(MET.every, t)),
+    perWave: Math.round(meteorCurve(MET.perWave, t)),
+    fall: Math.max(MET.minFall, meteorCurve(MET.fallCurve, t)),
+  };
 }
 
-// Tahmini nişan: oyuncunun gidiş yönünde, hızla orantılı uzaklıkta, yol boyunca (binaya girmeden) ve yola çekilmiş.
-// out: x, y, lead (tahmin uzaklığı). Uygun yer yoksa false
-export function meteorAim(game, out) {
+// Meteorun uyarı ve düşüş süresi (elle konmuş eski kayıtlarda varsayılan)
+const mWarn = (m) => m.warn || MET.warn;
+const mFall = (m) => m.fall || MET.fall;
+export const meteorTotal = (m) => mWarn(m) + mFall(m);
+
+// t saniyede alınacak yol, oyun fiziğiyle aynı (js/physics.js): araba kendi gaz verir, hız
+// v' = ivme x gaz x (1 - v / son hız) - sürtünme x v. Yani yavaş araba hızlanır, son hızın üstündeki yavaşlar.
+// Gaz yoksa (fren, geri vites): konum + hız x süre. surf: oyuncunun zemini (son hız ve sürtünme)
+export function meteorLead(sp, t, spec, gas = 1, surf = null) {
+  if (!spec || gas <= 0 || !(spec.accel > 0) || t <= 0) return sp * Math.max(0, t);
+  const top = spec.maxSpeed * (surf ? surf.speed : 1);
+  const drag = CONFIG.physics.rollingDrag + (surf ? surf.drag : 0);
+  const a = spec.accel * Math.min(1, gas);
+  const k = a / top + drag;
+  const vEnd = a / k; // Bu zeminde ulaşılan hız
+  return vEnd * t - ((vEnd - sp) * (1 - Math.exp(-k * t))) / k;
+}
+
+// Köşede hangi yöne dönülür: direksiyon yönü açıksa o, değilse daha açık taraf. 0: ikisi de kapalı
+function meteorTurn(w, x, y, dx, dy, steer) {
+  const open = (sx, sy) => { let n = 0; for (let d = 20; d <= 120; d += 20) { if (w.blockedAt(x + sx * d, y + sy * d)) break; n++; } return n; };
+  const r = open(-dy, dx); // +90 derece: sağ (ekranda y aşağı)
+  const l = open(dy, -dx);
+  if (steer > 0.2 && r >= 3) return 1;
+  if (steer < -0.2 && l >= 3) return -1;
+  if (r < 3 && l < 3) return 0;
+  return r >= l ? 1 : -1;
+}
+
+// Tahmini nişan: arabanın t saniye sonra olacağı yer. Hızla orantılı uzaklık (meteorLead), gidiş yönünde, binaya
+// girmeden; yol bitiyorsa köşeyi döner (en çok MET.turns kez), sonunda yola çekilir (geriye değil).
+// out: x, y, lead (yol boyunca uzaklık). t verilmezse yeni meteorun çarpmasına kalan süre. Uygun yer yoksa false
+export function meteorAim(game, out, t = MET.warn + meteorRate(game.time).fall, { minR = MET.minR } = {}) {
   const p = game.player;
   const w = game.world;
   const sp = Math.hypot(p.vx, p.vy);
-  const dx = sp > 25 ? p.vx / sp : Math.cos(p.a);
-  const dy = sp > 25 ? p.vy / sp : Math.sin(p.a);
-  const lead = Math.min(MET.maxLead, sp * MET_TOTAL);
-  const want = Math.max(MET.minR, lead);
-  // Gidiş yönünde, binaya girmeden ne kadar ilerlenebilir: yol bitiyorsa nişan dönüş noktasına düşer
+  let dx = sp > 25 ? p.vx / sp : Math.cos(p.a);
+  let dy = sp > 25 ? p.vy / sp : Math.sin(p.a);
+  const surf = game.surfP ? (game.cheat ? CONFIG.surfaces[GROUND.ROAD] : game.surfP[w.groundAt(p.x, p.y)]) : null;
+  let left = Math.min(MET.maxLead, Math.max(0, meteorLead(sp, Math.max(0, t), game.carSpec, p.gas ?? 1, surf)));
+  let x = p.x; let y = p.y;
   let L = 0;
-  for (let d = 20; d <= want; d += 20) {
-    if (w.blockedAt(p.x + dx * d, p.y + dy * d)) break;
-    L = d;
+  let turns = 0;
+  while (left > 0.5) {
+    const s = Math.min(20, left);
+    const nx = x + dx * s; const ny = y + dy * s;
+    if (!w.blockedAt(nx, ny)) { x = nx; y = ny; left -= s; L += s; continue; }
+    // Yol bitti: araba orada durmaz, döner. Nişan da dönülen yolda kalan uzaklık kadar ileriye
+    const side = turns < MET.turns ? meteorTurn(w, x, y, dx, dy, game.lastSteer || 0) : 0;
+    if (!side) break;
+    [dx, dy] = side > 0 ? [-dy, dx] : [dy, -dx];
+    turns++;
   }
-  let x = p.x + dx * L; let y = p.y + dy * L;
-  // Yola çek: araba yoldan gidiyorsa nişan da yolda
+  // Yola çek: araba yoldan gidiyorsa nişan da yolda. Yalnız gidiş yönünde geriye düşmeyen noktalar
   if (w.groundAt(x, y) !== GROUND.ROAD) {
-    let best = null; let bd = 1e9;
+    let best = null;
     for (let r = 20; r <= MET.road && !best; r += 20) {
       for (let k = 0; k < 8; k++) {
         const a = (k / 8) * Math.PI * 2;
         const qx = x + Math.cos(a) * r; const qy = y + Math.sin(a) * r;
+        if ((qx - x) * dx + (qy - y) * dy < -r * 0.3) continue;
         if (w.groundAt(qx, qy) !== GROUND.ROAD || w.blockedAt(qx, qy)) continue;
-        if (r < bd) { bd = r; best = [qx, qy]; }
+        best = [qx, qy];
+        break;
       }
     }
     if (best) [x, y] = best;
   }
-  if (Math.hypot(x - p.x, y - p.y) < MET.minR) return false; // Tam üstünde (kaçılamaz) doğmaz
+  if (Math.hypot(x - p.x, y - p.y) < minR) return false; // Yeni nişan tam üstünde (kaçılamaz) doğmaz
   if (w.protectedAt(x, y, MET.radius)) return false;
   out.x = x; out.y = y; out.lead = L;
   return true;
@@ -68,7 +113,7 @@ const aimOut = { x: 0, y: 0, lead: 0 };
 export class MeteorStorm {
   constructor() {
     this.list = [];
-    for (let i = 0; i < MET.max; i++) this.list.push({ alive: false, x: 0, y: 0, t: 0, seed: 0, main: false, falling: false });
+    for (let i = 0; i < MET.max; i++) this.list.push({ alive: false, x: 0, y: 0, t: 0, warn: MET.warn, fall: MET.fall, seed: 0, main: false, falling: false });
     this.reset();
   }
 
@@ -111,19 +156,32 @@ export class MeteorStorm {
   spawn(game, main) {
     const m = this.list.find((k) => !k.alive);
     if (!m) return false;
+    const fall = meteorRate(game.time).fall;
     if (main) {
-      if (!meteorAim(game, aimOut) || this.clash(m, aimOut.x, aimOut.y)) return false;
+      if (!meteorAim(game, aimOut, MET.warn + fall) || this.clash(m, aimOut.x, aimOut.y)) return false;
       m.x = aimOut.x; m.y = aimOut.y;
       this.aimed++;
     } else if (!this.place(game, m)) return false;
     m.alive = true;
     m.main = main;
     m.t = 0;
+    m.warn = MET.warn;
+    m.fall = fall;
     m.falling = false;
     m.seed = Math.random();
     this.spawned++;
     game.emit('meteorwarn', main ? 1 : 0);
     return true;
+  }
+
+  // Asıl meteorun nişanı uyarı boyunca arabanın çarpma anındaki tahmini yerini izler; düşüş başlarken
+  // hedef = konum + hız x düşüş süresi noktasına kilitlenir. Korunan alana giden tahmin izlenmez
+  track(game, m, dt) {
+    const left = meteorTotal(m) - m.t;
+    if (!meteorAim(game, aimOut, left, { minR: 0 })) return;
+    const k = m.falling ? 1 : Math.min(1, dt * MET.follow);
+    m.x += (aimOut.x - m.x) * k;
+    m.y += (aimOut.y - m.y) * k;
   }
 
   update(game, dt) {
@@ -135,15 +193,22 @@ export class MeteorStorm {
     for (const m of this.list) {
       if (!m.alive) continue;
       m.t += dt;
-      if (!m.falling && m.t >= MET.warn) { m.falling = true; game.emit('meteorfall', m.main ? 1 : 0.5); }
+      if (m.main && !m.falling && game.state === 'play') {
+        // Düşüş başlarken son kez ve yumuşatmasız: hedef = konum + hız x kalan düşüş süresi, sonra kilitli
+        const lock = m.t >= mWarn(m);
+        if (lock) m.falling = true;
+        this.track(game, m, dt);
+        if (lock) game.emit('meteorfall', 1);
+      }
+      if (!m.falling && m.t >= mWarn(m)) { m.falling = true; game.emit('meteorfall', m.main ? 1 : 0.5); }
       // Düşerken alev ve duman kuyruğu (yalnız ekrandaysa, sınırlı)
       if (m.falling && trail && game.onScreen(m.x, m.y, 200)) {
-        const q = (m.t - MET.warn) / MET.fall;
+        const q = (m.t - mWarn(m)) / mFall(m);
         const h = (1 - q) * (game.cam.halfH * 0.7 + 80);
         game.fx.spawn(FX.FIRE, m.x + (1 - q) * 120, m.y - h, 0, -30, 0.3, 14);
         game.fx.spawn(FX.SMOKE, m.x + (1 - q) * 130, m.y - h - 10, 0, -50, 0.7, 16);
       }
-      if (m.t >= MET_TOTAL) this.impact(game, m);
+      if (m.t >= meteorTotal(m)) this.impact(game, m);
     }
     if (game.state !== 'play') return;
     this.waveT -= dt;

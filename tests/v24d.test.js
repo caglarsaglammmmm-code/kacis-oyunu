@@ -230,8 +230,8 @@ test('silah tablosu: 6 kademe, her biri öncekinden hızlı, güçlü ve çok da
     }
   }
   assert.ok(Math.abs(gunStats(gunSpec('g6')).damage - CONFIG.weapon.copHp / 1.5) < 1e-9, 'Silah 6 hasarı polis canının 1/1,5i');
-  const maxCar = Math.max(...CONFIG.cars.map((c) => c.cost));
-  assert.ok(CONFIG.guns[5].price > maxCar, 'Silah 6 oyundaki en pahalı şey');
+  const maxCar = Math.max(...CONFIG.cars.filter((c) => !c.codeOnly).map((c) => c.cost));
+  assert.ok(CONFIG.guns[5].price > maxCar, 'Silah 6 satılık her arabadan pahalı');
 });
 
 test('düşman canı = normal polis canı x vuruş / 15; kademeler 15, 20, 25 ... 45', () => {

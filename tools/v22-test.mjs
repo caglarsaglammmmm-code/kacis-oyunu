@@ -56,11 +56,14 @@ if (only.includes('meteor')) {
   await page.waitForTimeout(1200);
   const m0 = await page.evaluate(() => { const m = __drift.game.meteors.list.find((k) => k.alive); return { x: m.x, y: m.y, R: __drift.cfg.meteor.radius }; });
   await shot(page, 'meteor-nisan');
-  await page.waitForFunction(() => { const m = __drift.game.meteors.list.find((k) => k.alive); return m && m.t > __drift.cfg.meteor.warn + 0.35; }, null, { timeout: 6000 });
+  // v24.2: nişan uyarı boyunca arabanın gideceği yeri izler, düşüş başlayınca kilitlenir
+  await page.waitForFunction(() => { const m = __drift.game.meteors.list.find((k) => k.alive); return m && m.falling; }, null, { timeout: 6000 });
   const m1 = await page.evaluate(() => { const m = __drift.game.meteors.list.find((k) => k.alive); return { x: m.x, y: m.y }; });
-  ok(m1.x === m0.x && m1.y === m0.y, 'nişan kilitli (takip etmiyor)');
+  await page.waitForTimeout(400);
+  const m2 = await page.evaluate(() => { const m = __drift.game.meteors.list.find((k) => k.alive); return m ? { x: m.x, y: m.y } : null; });
+  ok(m2 && m2.x === m1.x && m2.y === m1.y, 'düşüşte nişan kilitli (takip etmiyor)', JSON.stringify({ m0, m1, m2 }));
   await shot(page, 'meteor-dusus');
-  await page.waitForFunction(() => __drift.game.meteors.impacts > 0, null, { timeout: 4000 });
+  await page.waitForFunction(() => __drift.game.meteors.impacts > 0, null, { timeout: 6000 });
   await page.waitForTimeout(60);
   await shot(page, 'meteor-carpma');
   const q = await page.evaluate(() => ({ quake: __drift.game.quakeT, shake: __drift.game.cam.shake, t: __drift.game.runTime }));

@@ -2535,12 +2535,15 @@ export class Renderer {
     const ctx = this.ctx;
     const M = CONFIG.meteor;
     const R = M.radius;
-    const T = M.warn + M.fall;
     for (const m of game.meteors.list) {
       if (!m.alive) continue;
+      // Her meteorun kendi süreleri: zamanla düşüş kısalır (meteor hızlanır)
+      const W = m.warn || M.warn; const F = m.fall || M.fall; const T = W + F;
       const k = Math.min(1, m.t / T);
       const left = T - m.t;
       const blink = left < M.blink ? Math.floor(now / 70) % 2 === 0 : Math.floor(now / 260) % 2 === 0;
+      // Asıl meteorun nişanı ekran dışındaysa (hızlı arabada uyarının başı): ekran kenarında o yöne bakan kırmızı ok
+      if (m.main && !game.onScreen(m.x, m.y, -R * 0.5)) { this.drawMeteorArrow(game, m, blink); continue; }
       // Yumuşak kırmızı-turuncu parlama (önceden çizilmiş ışık)
       ctx.globalCompositeOperation = 'lighter';
       ctx.globalAlpha = (0.18 + 0.22 * k) * (blink ? 1 : 0.7);
@@ -2565,8 +2568,8 @@ export class Renderer {
       ctx.beginPath(); ctx.arc(m.x, m.y, r1 * 0.7, 0, 6.283); ctx.stroke();
       ctx.fillStyle = blink ? '#ffffff' : '#ff5a36'; ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
       // Düşerken yerdeki gölge büyür
-      if (m.t > M.warn) {
-        const q = (m.t - M.warn) / M.fall;
+      if (m.t > W) {
+        const q = Math.min(1, (m.t - W) / F);
         ctx.globalAlpha = 0.2 + 0.5 * q;
         ctx.drawImage(this.sprites.dark, m.x - R * 0.7 * q, m.y - R * 0.5 * q, R * 1.4 * q, R * q);
         ctx.globalAlpha = 1;
@@ -2574,14 +2577,40 @@ export class Renderer {
     }
   }
 
-  // Düşen meteor (gökte): ateşli taş, alev kuyruğu ve ışık; son M.fall sn hızlanarak çakılır
+  // Ekran dışındaki asıl meteor için kenar oku: kameradan nişana doğru, ekran kenarının biraz içinde
+  drawMeteorArrow(game, m, blink) {
+    const ctx = this.ctx;
+    const c = game.cam;
+    const dx = m.x - c.x; const dy = m.y - c.y;
+    // Kenardan içeride: altta kontrol düğmeleri ve ipucu yazıları var
+    const kx = (c.halfW - 48) / Math.max(1e-6, Math.abs(dx));
+    const ky = (c.halfH - (dy > 0 ? 150 : 90)) / Math.max(1e-6, Math.abs(dy));
+    const q = Math.min(kx, ky);
+    const x = c.x + dx * q; const y = c.y + dy * q;
+    const a = Math.atan2(dy, dx);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(a);
+    ctx.globalAlpha = blink ? 1 : 0.75;
+    ctx.beginPath(); ctx.arc(-8, 0, 22, 0, 6.283);
+    ctx.fillStyle = 'rgba(40,6,4,.78)'; ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = blink ? '#ffffff' : '#ff5a36'; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(8, -15); ctx.lineTo(8, 15); ctx.closePath();
+    ctx.fillStyle = blink ? '#ffffff' : '#ff3b1f'; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = '#2a0402'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-8, 0, 6, 0, 6.283); ctx.fillStyle = '#ffb02e'; ctx.fill();
+    ctx.restore();
+  }
+
+  // Düşen meteor (gökte): ateşli taş, alev kuyruğu ve ışık; son düşüş süresinde (m.fall) hızlanarak çakılır
   drawMeteorSky(game, now) {
     const ctx = this.ctx;
     const M = CONFIG.meteor;
     const sp = this.sprites;
     for (const m of game.meteors.list) {
-      if (!m.alive || m.t < M.warn) continue;
-      const u = (m.t - M.warn) / M.fall; // 0 gökte, 1 yerde
+      const W = m.warn || M.warn; const F = m.fall || M.fall;
+      if (!m.alive || m.t < W) continue;
+      const u = Math.min(1, (m.t - W) / F); // 0 gökte, 1 yerde
       const q = u * u; // Hızlanarak düşer
       const h = (1 - q) * (game.cam.halfH * 0.7 + 80);
       const sz = 1.25 - 0.45 * q;

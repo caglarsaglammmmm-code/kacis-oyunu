@@ -282,7 +282,7 @@ const CONFIG = {
   name: NAMES.oyun,
   version: '24.2.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0-2/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0-3/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -441,7 +441,7 @@ const CONFIG = {
     { id: 'tilki', paints: [{ name: 'Tilki Turuncusu', color: '#ff6a1a', finish: 'gloss', accent: '#111318' }, { name: 'Gece Siyahı', color: '#111318', finish: 'gloss', accent: '#ff6a1a' }, { name: 'Mat Gri', color: '#5a6068', finish: 'matte', accent: '#ffd23f' }, { name: 'Buz Beyazı', color: '#eef3f8', finish: 'pearl', accent: '#2b6fd6' }], finish: 'gloss', name: NAMES.arabalar.tilki, cost: 2400, desc: 'Hafif, oynak drift coupe', shape: 'tilki', maxSpeed: 572, accel: 720, turnRate: 3.72, grip: 5.0, driftGrip: 0.68, durability: 1.66, mass: 1.05, len: 46, wid: 24, color: '#ff6a1a', accent: '#111318', engine: { kind: 'turbo', cyl: 4, idle: 1000, red: 8200, gears: 6, gain: 1.05 }, egzozPatlamaSansi: 0.55 },
     { id: 'kartal', paints: [{ name: 'Yarış Mavisi', color: '#1f5fbf', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Kan Kırmızı', color: '#a3121f', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Mat Siyah', color: '#16181c', finish: 'matte', accent: '#ffd23f' }, { name: 'Çift Ton Krem-Yeşil', color: '#e8dcbc', finish: 'gloss', roof: '#2f5a3a' }], finish: 'gloss', name: NAMES.arabalar.kartal, cost: 3200, desc: 'Uzun kaput, gürleyen V8', shape: 'kartal', maxSpeed: 586, accel: 760, turnRate: 3.6, grip: 5.05, driftGrip: 0.66, durability: 1.74, mass: 1.35, len: 52, wid: 26, color: '#1f5fbf', accent: '#f4f6f8', engine: { kind: 'v8', cyl: 8, idle: 560, red: 5400, gears: 4, gain: 1.25 }, egzozPatlamaSansi: 0.6 },
     { id: 'volt', paints: [{ name: 'Plazma Mavi', color: '#1fb8e8', finish: 'metal', accent: '#0c0e12' }, { name: 'Grafit', color: '#2e333b', finish: 'metal', accent: '#1fb8e8' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte', accent: '#1fb8e8' }, { name: 'Aurora Mor', color: '#6a3cd9', finish: 'pearl', accent: '#9fe8ff' }], finish: 'metal', name: NAMES.arabalar.volt, cost: 4500, desc: 'Sessiz ama çok hızlı elektrikli GT', shape: 'volt', maxSpeed: 600, accel: 860, turnRate: 3.78, grip: 5.15, driftGrip: 0.63, durability: 1.82, mass: 1.4, len: 52, wid: 26, color: '#1fb8e8', accent: '#0c0e12', engine: { kind: 'ev', cyl: 8, idle: 0, red: 26000, gears: 1, gain: 0.85 }, egzozPatlamaSansi: 0 },
-    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, desc: '360° taramalı silahlı süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 }, egzozPatlamaSansi: 0.5 },
+    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, codeOnly: true, desc: '360° taramalı silahlı süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 }, egzozPatlamaSansi: 0.5 },
   ],
 
   damage: {
@@ -759,12 +759,12 @@ const CONFIG = {
   // every: ateş aralığı, SALİSE (1/100 sn; 75 = 0,75 sn). hits: normal polisi kaç vuruşta indirir (1,5 = hasar
   // polis canının 1/1,5'i, yani 2 vuruşta iner). price: para
   guns: [
-    { id: 'g1', every: 100, hits: 15, price: 2500 },
-    { id: 'g2', every: 75, hits: 10, price: 6000 },
-    { id: 'g3', every: 50, hits: 7, price: 12000 },
-    { id: 'g4', every: 25, hits: 4, price: 25000 },
-    { id: 'g5', every: 20, hits: 2, price: 45000 },
-    { id: 'g6', every: 10, hits: 1.5, price: 90000 },
+    { id: 'g1', every: 100, hits: 15, price: 1250 },
+    { id: 'g2', every: 75, hits: 10, price: 3000 },
+    { id: 'g3', every: 50, hits: 7, price: 6000 },
+    { id: 'g4', every: 25, hits: 4, price: 12500 },
+    { id: 'g5', every: 20, hits: 2, price: 22500 },
+    { id: 'g6', every: 10, hits: 1.5, price: 45000 },
   ],
 
   // ZAMANLA ARTAN POLİS CANI. Yeni çıkan polisin canı = can * min(max, perMin ^ dakika). v24.2'den beri kapalı (max 1):
@@ -797,20 +797,25 @@ const CONFIG = {
   // içine giremez. Anıt (memorial.rect), gizli geçit (secret.ramp) ve iki stadyum (stadiums.*.rect)
   protect: { memorial: 320, secret: 360, stadium: 170, bullet: 0 },
 
-  // METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır: çarpma anında arabanın olacağı
-  // nokta tahmin edilir (konum + hız x (warn + fall)), yol üzerinde tutulur ve kilitlenir (sonra takip etmez).
-  // Hız değişimi ya da dönüşle kaçılabilir. Dalgadaki diğerleri çevreye düşen meteorlardır (onlar da zarar verir).
-  // warn: nişanın görünmesinden düşüşün başlamasına kadar (ASLA 3'ün altına inmez), fall: gökten düşüş süresi.
-  // radius: çarpma dairesi (nişan bu kadar), minR: asıl nişan oyuncuya en az bu uzaklıkta (tam üstünde doğmaz),
-  // maxLead: hızlı araçta nişan en çok bu kadar ileride, road: tahmini nokta bu yarıçapta yola çekilir.
-  // every / perWave: dalga aralığı ve sayısı (zamanla artar), max: aynı anda en çok meteor.
+  // METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır (js/meteor.js):
+  //   uyarı (warn sn) boyunca nişan arabanın çarpma anında olacağı yeri izler (konum + hız x kalan süre, yol boyunca,
+  //   köşede direksiyon yönüne döner); düşüş başlarken hedef = konum + hız x düşüş süresi noktasına KİLİTLENİR.
+  //   Düşüş süresi boyunca hız ya da yön değiştiren kaçar. Dalgadaki diğerleri çevreye düşen meteorlardır.
+  // warn: nişanın görünmesinden düşüşün başlamasına kadar (ASLA 3'ün altına inmez), fall: ilk düşüş süresi (sn).
+  // ZAMANLA ZORLAŞIR: fallCurve düşüş süresi [saniye, sn] (kısaldıkça meteor hızlanır), minFall: en kısa düşüş
+  //   (kaçış payı), every: dalga aralığı [saniye, sn] (kısaldıkça sıklaşır), minEvery: en sık, perWave: dalgadaki sayı.
+  // radius: çarpma dairesi (nişan bu kadar), minR: yeni asıl nişan oyuncuya en az bu uzaklıkta (tam üstünde doğmaz),
+  // maxLead: tahmin en çok bu kadar ileride (en hızlı araç x en uzun süreden büyük), turns: tahmin en çok kaç köşe döner,
+  // follow: nişanın tahmini noktaya yetişme hızı (1/sn), road: tahmini nokta bu yarıçapta yola çekilir (geriye değil).
+  // max: aynı anda en çok meteor.
   // randMin / randMax: çevre meteorlarının oyuncuya uzaklığı. quake / quakeShake: çarpmada kamera sarsıntısı süresi ve gücü,
   // flash: beyaz parlama süresi, trail: düşerken saniyede duman/alev parçası, blink: son bu kadar saniyede hızlı yanıp söner
   meteor: {
-    at: 380, warn: 3, fall: 0.7, radius: 64,
-    every: [[380, 4.6], [460, 3.6], [560, 2.8], [700, 2.1]],
+    at: 380, warn: 3, fall: 1.6, radius: 64,
+    fallCurve: [[380, 1.6], [480, 1.4], [600, 1.25], [750, 1.1]], minFall: 1.1,
+    every: [[380, 4.6], [460, 3.6], [560, 2.8], [700, 2.1], [900, 1.7]], minEvery: 1.6,
     perWave: [[380, 1], [450, 2], [540, 3], [680, 4]],
-    max: 7, minR: 170, maxLead: 1500, road: 80, randMin: 260, randMax: 760,
+    max: 7, minR: 170, maxLead: 3200, turns: 2, follow: 9, road: 80, randMin: 260, randMax: 760,
     tankDamage: 450, shake: 12, quake: 1.5, quakeShake: 9, flash: 0.18, sparks: 16, dust: 12, crater: 52, debris: 14,
     trail: 40, blink: 1,
   },
@@ -842,6 +847,7 @@ const CONFIG = {
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
   // Yeni kod eklemek için satır eklenir. car: açılan araba, coins: para ödülü, berserk: süreli para çarpanı (sn).
+  // codeOnly: true olan araba (42-66 / Kuzgun) satılmaz; garajda ve mağazada yalnız kodla açan oyuncuya görünür.
   // Her kod bir kayıtta bir kez kullanılır (storage.usedCodes)
   codes: [
     { code: '4266', car: 'kuzgun' },
@@ -5217,14 +5223,16 @@ class AutoGun {
 }
 
 // --- meteor.js ---
-// METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır: çarpma anında arabanın olacağı
-// nokta, oyuncunun konumu, hızı ve yönünden tahmin edilir (konum + hız x (uyarı + düşüş)), yol üzerinde tutulur ve
-// KİLİTLENİR: sonra takip etmez, oyuncu hız ya da yön değiştirerek kaçabilir. Diğerleri çevreye düşen meteorlardır.
-// Uyarı en az 3 sn; düşüş sonra başlar. İçindeki oyuncu ölür, dışındaki zarar görmez. Binalar yıkılır; polis, uzaylı,
+// METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır:
+//   1) Uyarı (warn sn): nişan her karede arabanın çarpma anında olacağı yeri izler. Tahmin = konum + hız x kalan süre,
+//      yol boyunca (köşede yolun döndüğü yere, direksiyon yönüne) ve hızla orantılı: hızlı arabada daha ileride.
+//   2) Düşüş (fall sn): meteor gökten düşmeye başlarken nişan KİLİTLENİR: hedef = konum + hız x düşüş süresi.
+//      Bundan sonra takip etmez; oyuncu düşüş süresi içinde hız ya da yön değiştirerek kaçar.
+// Zamanla dalgalar sıklaşır (every, minEvery) ve meteor hızlanır: düşüş süresi kısalır (fallCurve, minFall tabanı).
+// Diğerleri çevreye düşen meteorlardır. İçindeki oyuncu ölür, dışındaki zarar görmez. Binalar yıkılır; polis, uzaylı,
 // tank ve trafik etkilenir. Korunan alanlara (anıt, gizli geçit, stadyumlar) asla düşmez. Havuz kullanılır, sayı sınırlıdır.
 
 const MET = CONFIG.meteor;
-const MET_TOTAL = MET.warn + MET.fall; // Nişandan çarpmaya
 
 // [saniye, değer] noktaları arası doğrusal
 function meteorCurve(curve, t) {
@@ -5239,42 +5247,85 @@ function meteorCurve(curve, t) {
   return curve[curve.length - 1][1];
 }
 
-// Dalga aralığı ve dalgadaki sayı: zamanla artar, uyarı süresi hiç değişmez
+// Dalga aralığı, dalgadaki sayı ve düşüş süresi: zamanla sıklaşır ve hızlanır, tabanların altına inmez.
+// Uyarı süresi (warn) hiç değişmez
 function meteorRate(t) {
-  return { every: meteorCurve(MET.every, t), perWave: Math.round(meteorCurve(MET.perWave, t)) };
+  return {
+    every: Math.max(MET.minEvery, meteorCurve(MET.every, t)),
+    perWave: Math.round(meteorCurve(MET.perWave, t)),
+    fall: Math.max(MET.minFall, meteorCurve(MET.fallCurve, t)),
+  };
 }
 
-// Tahmini nişan: oyuncunun gidiş yönünde, hızla orantılı uzaklıkta, yol boyunca (binaya girmeden) ve yola çekilmiş.
-// out: x, y, lead (tahmin uzaklığı). Uygun yer yoksa false
-function meteorAim(game, out) {
+// Meteorun uyarı ve düşüş süresi (elle konmuş eski kayıtlarda varsayılan)
+const mWarn = (m) => m.warn || MET.warn;
+const mFall = (m) => m.fall || MET.fall;
+const meteorTotal = (m) => mWarn(m) + mFall(m);
+
+// t saniyede alınacak yol, oyun fiziğiyle aynı (js/physics.js): araba kendi gaz verir, hız
+// v' = ivme x gaz x (1 - v / son hız) - sürtünme x v. Yani yavaş araba hızlanır, son hızın üstündeki yavaşlar.
+// Gaz yoksa (fren, geri vites): konum + hız x süre. surf: oyuncunun zemini (son hız ve sürtünme)
+function meteorLead(sp, t, spec, gas = 1, surf = null) {
+  if (!spec || gas <= 0 || !(spec.accel > 0) || t <= 0) return sp * Math.max(0, t);
+  const top = spec.maxSpeed * (surf ? surf.speed : 1);
+  const drag = CONFIG.physics.rollingDrag + (surf ? surf.drag : 0);
+  const a = spec.accel * Math.min(1, gas);
+  const k = a / top + drag;
+  const vEnd = a / k; // Bu zeminde ulaşılan hız
+  return vEnd * t - ((vEnd - sp) * (1 - Math.exp(-k * t))) / k;
+}
+
+// Köşede hangi yöne dönülür: direksiyon yönü açıksa o, değilse daha açık taraf. 0: ikisi de kapalı
+function meteorTurn(w, x, y, dx, dy, steer) {
+  const open = (sx, sy) => { let n = 0; for (let d = 20; d <= 120; d += 20) { if (w.blockedAt(x + sx * d, y + sy * d)) break; n++; } return n; };
+  const r = open(-dy, dx); // +90 derece: sağ (ekranda y aşağı)
+  const l = open(dy, -dx);
+  if (steer > 0.2 && r >= 3) return 1;
+  if (steer < -0.2 && l >= 3) return -1;
+  if (r < 3 && l < 3) return 0;
+  return r >= l ? 1 : -1;
+}
+
+// Tahmini nişan: arabanın t saniye sonra olacağı yer. Hızla orantılı uzaklık (meteorLead), gidiş yönünde, binaya
+// girmeden; yol bitiyorsa köşeyi döner (en çok MET.turns kez), sonunda yola çekilir (geriye değil).
+// out: x, y, lead (yol boyunca uzaklık). t verilmezse yeni meteorun çarpmasına kalan süre. Uygun yer yoksa false
+function meteorAim(game, out, t = MET.warn + meteorRate(game.time).fall, { minR = MET.minR } = {}) {
   const p = game.player;
   const w = game.world;
   const sp = Math.hypot(p.vx, p.vy);
-  const dx = sp > 25 ? p.vx / sp : Math.cos(p.a);
-  const dy = sp > 25 ? p.vy / sp : Math.sin(p.a);
-  const lead = Math.min(MET.maxLead, sp * MET_TOTAL);
-  const want = Math.max(MET.minR, lead);
-  // Gidiş yönünde, binaya girmeden ne kadar ilerlenebilir: yol bitiyorsa nişan dönüş noktasına düşer
+  let dx = sp > 25 ? p.vx / sp : Math.cos(p.a);
+  let dy = sp > 25 ? p.vy / sp : Math.sin(p.a);
+  const surf = game.surfP ? (game.cheat ? CONFIG.surfaces[GROUND.ROAD] : game.surfP[w.groundAt(p.x, p.y)]) : null;
+  let left = Math.min(MET.maxLead, Math.max(0, meteorLead(sp, Math.max(0, t), game.carSpec, p.gas ?? 1, surf)));
+  let x = p.x; let y = p.y;
   let L = 0;
-  for (let d = 20; d <= want; d += 20) {
-    if (w.blockedAt(p.x + dx * d, p.y + dy * d)) break;
-    L = d;
+  let turns = 0;
+  while (left > 0.5) {
+    const s = Math.min(20, left);
+    const nx = x + dx * s; const ny = y + dy * s;
+    if (!w.blockedAt(nx, ny)) { x = nx; y = ny; left -= s; L += s; continue; }
+    // Yol bitti: araba orada durmaz, döner. Nişan da dönülen yolda kalan uzaklık kadar ileriye
+    const side = turns < MET.turns ? meteorTurn(w, x, y, dx, dy, game.lastSteer || 0) : 0;
+    if (!side) break;
+    [dx, dy] = side > 0 ? [-dy, dx] : [dy, -dx];
+    turns++;
   }
-  let x = p.x + dx * L; let y = p.y + dy * L;
-  // Yola çek: araba yoldan gidiyorsa nişan da yolda
+  // Yola çek: araba yoldan gidiyorsa nişan da yolda. Yalnız gidiş yönünde geriye düşmeyen noktalar
   if (w.groundAt(x, y) !== GROUND.ROAD) {
-    let best = null; let bd = 1e9;
+    let best = null;
     for (let r = 20; r <= MET.road && !best; r += 20) {
       for (let k = 0; k < 8; k++) {
         const a = (k / 8) * Math.PI * 2;
         const qx = x + Math.cos(a) * r; const qy = y + Math.sin(a) * r;
+        if ((qx - x) * dx + (qy - y) * dy < -r * 0.3) continue;
         if (w.groundAt(qx, qy) !== GROUND.ROAD || w.blockedAt(qx, qy)) continue;
-        if (r < bd) { bd = r; best = [qx, qy]; }
+        best = [qx, qy];
+        break;
       }
     }
     if (best) [x, y] = best;
   }
-  if (Math.hypot(x - p.x, y - p.y) < MET.minR) return false; // Tam üstünde (kaçılamaz) doğmaz
+  if (Math.hypot(x - p.x, y - p.y) < minR) return false; // Yeni nişan tam üstünde (kaçılamaz) doğmaz
   if (w.protectedAt(x, y, MET.radius)) return false;
   out.x = x; out.y = y; out.lead = L;
   return true;
@@ -5285,7 +5336,7 @@ const aimOut = { x: 0, y: 0, lead: 0 };
 class MeteorStorm {
   constructor() {
     this.list = [];
-    for (let i = 0; i < MET.max; i++) this.list.push({ alive: false, x: 0, y: 0, t: 0, seed: 0, main: false, falling: false });
+    for (let i = 0; i < MET.max; i++) this.list.push({ alive: false, x: 0, y: 0, t: 0, warn: MET.warn, fall: MET.fall, seed: 0, main: false, falling: false });
     this.reset();
   }
 
@@ -5328,19 +5379,32 @@ class MeteorStorm {
   spawn(game, main) {
     const m = this.list.find((k) => !k.alive);
     if (!m) return false;
+    const fall = meteorRate(game.time).fall;
     if (main) {
-      if (!meteorAim(game, aimOut) || this.clash(m, aimOut.x, aimOut.y)) return false;
+      if (!meteorAim(game, aimOut, MET.warn + fall) || this.clash(m, aimOut.x, aimOut.y)) return false;
       m.x = aimOut.x; m.y = aimOut.y;
       this.aimed++;
     } else if (!this.place(game, m)) return false;
     m.alive = true;
     m.main = main;
     m.t = 0;
+    m.warn = MET.warn;
+    m.fall = fall;
     m.falling = false;
     m.seed = Math.random();
     this.spawned++;
     game.emit('meteorwarn', main ? 1 : 0);
     return true;
+  }
+
+  // Asıl meteorun nişanı uyarı boyunca arabanın çarpma anındaki tahmini yerini izler; düşüş başlarken
+  // hedef = konum + hız x düşüş süresi noktasına kilitlenir. Korunan alana giden tahmin izlenmez
+  track(game, m, dt) {
+    const left = meteorTotal(m) - m.t;
+    if (!meteorAim(game, aimOut, left, { minR: 0 })) return;
+    const k = m.falling ? 1 : Math.min(1, dt * MET.follow);
+    m.x += (aimOut.x - m.x) * k;
+    m.y += (aimOut.y - m.y) * k;
   }
 
   update(game, dt) {
@@ -5352,15 +5416,22 @@ class MeteorStorm {
     for (const m of this.list) {
       if (!m.alive) continue;
       m.t += dt;
-      if (!m.falling && m.t >= MET.warn) { m.falling = true; game.emit('meteorfall', m.main ? 1 : 0.5); }
+      if (m.main && !m.falling && game.state === 'play') {
+        // Düşüş başlarken son kez ve yumuşatmasız: hedef = konum + hız x kalan düşüş süresi, sonra kilitli
+        const lock = m.t >= mWarn(m);
+        if (lock) m.falling = true;
+        this.track(game, m, dt);
+        if (lock) game.emit('meteorfall', 1);
+      }
+      if (!m.falling && m.t >= mWarn(m)) { m.falling = true; game.emit('meteorfall', m.main ? 1 : 0.5); }
       // Düşerken alev ve duman kuyruğu (yalnız ekrandaysa, sınırlı)
       if (m.falling && trail && game.onScreen(m.x, m.y, 200)) {
-        const q = (m.t - MET.warn) / MET.fall;
+        const q = (m.t - mWarn(m)) / mFall(m);
         const h = (1 - q) * (game.cam.halfH * 0.7 + 80);
         game.fx.spawn(FX.FIRE, m.x + (1 - q) * 120, m.y - h, 0, -30, 0.3, 14);
         game.fx.spawn(FX.SMOKE, m.x + (1 - q) * 130, m.y - h - 10, 0, -50, 0.7, 16);
       }
-      if (m.t >= MET_TOTAL) this.impact(game, m);
+      if (m.t >= meteorTotal(m)) this.impact(game, m);
     }
     if (game.state !== 'play') return;
     this.waveT -= dt;
@@ -16052,12 +16123,15 @@ class Renderer {
     const ctx = this.ctx;
     const M = CONFIG.meteor;
     const R = M.radius;
-    const T = M.warn + M.fall;
     for (const m of game.meteors.list) {
       if (!m.alive) continue;
+      // Her meteorun kendi süreleri: zamanla düşüş kısalır (meteor hızlanır)
+      const W = m.warn || M.warn; const F = m.fall || M.fall; const T = W + F;
       const k = Math.min(1, m.t / T);
       const left = T - m.t;
       const blink = left < M.blink ? Math.floor(now / 70) % 2 === 0 : Math.floor(now / 260) % 2 === 0;
+      // Asıl meteorun nişanı ekran dışındaysa (hızlı arabada uyarının başı): ekran kenarında o yöne bakan kırmızı ok
+      if (m.main && !game.onScreen(m.x, m.y, -R * 0.5)) { this.drawMeteorArrow(game, m, blink); continue; }
       // Yumuşak kırmızı-turuncu parlama (önceden çizilmiş ışık)
       ctx.globalCompositeOperation = 'lighter';
       ctx.globalAlpha = (0.18 + 0.22 * k) * (blink ? 1 : 0.7);
@@ -16082,8 +16156,8 @@ class Renderer {
       ctx.beginPath(); ctx.arc(m.x, m.y, r1 * 0.7, 0, 6.283); ctx.stroke();
       ctx.fillStyle = blink ? '#ffffff' : '#ff5a36'; ctx.fillRect(m.x - 1.5, m.y - 1.5, 3, 3);
       // Düşerken yerdeki gölge büyür
-      if (m.t > M.warn) {
-        const q = (m.t - M.warn) / M.fall;
+      if (m.t > W) {
+        const q = Math.min(1, (m.t - W) / F);
         ctx.globalAlpha = 0.2 + 0.5 * q;
         ctx.drawImage(this.sprites.dark, m.x - R * 0.7 * q, m.y - R * 0.5 * q, R * 1.4 * q, R * q);
         ctx.globalAlpha = 1;
@@ -16091,14 +16165,40 @@ class Renderer {
     }
   }
 
-  // Düşen meteor (gökte): ateşli taş, alev kuyruğu ve ışık; son M.fall sn hızlanarak çakılır
+  // Ekran dışındaki asıl meteor için kenar oku: kameradan nişana doğru, ekran kenarının biraz içinde
+  drawMeteorArrow(game, m, blink) {
+    const ctx = this.ctx;
+    const c = game.cam;
+    const dx = m.x - c.x; const dy = m.y - c.y;
+    // Kenardan içeride: altta kontrol düğmeleri ve ipucu yazıları var
+    const kx = (c.halfW - 48) / Math.max(1e-6, Math.abs(dx));
+    const ky = (c.halfH - (dy > 0 ? 150 : 90)) / Math.max(1e-6, Math.abs(dy));
+    const q = Math.min(kx, ky);
+    const x = c.x + dx * q; const y = c.y + dy * q;
+    const a = Math.atan2(dy, dx);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(a);
+    ctx.globalAlpha = blink ? 1 : 0.75;
+    ctx.beginPath(); ctx.arc(-8, 0, 22, 0, 6.283);
+    ctx.fillStyle = 'rgba(40,6,4,.78)'; ctx.fill();
+    ctx.lineWidth = 3; ctx.strokeStyle = blink ? '#ffffff' : '#ff5a36'; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(8, -15); ctx.lineTo(8, 15); ctx.closePath();
+    ctx.fillStyle = blink ? '#ffffff' : '#ff3b1f'; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = '#2a0402'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(-8, 0, 6, 0, 6.283); ctx.fillStyle = '#ffb02e'; ctx.fill();
+    ctx.restore();
+  }
+
+  // Düşen meteor (gökte): ateşli taş, alev kuyruğu ve ışık; son düşüş süresinde (m.fall) hızlanarak çakılır
   drawMeteorSky(game, now) {
     const ctx = this.ctx;
     const M = CONFIG.meteor;
     const sp = this.sprites;
     for (const m of game.meteors.list) {
-      if (!m.alive || m.t < M.warn) continue;
-      const u = (m.t - M.warn) / M.fall; // 0 gökte, 1 yerde
+      const W = m.warn || M.warn; const F = m.fall || M.fall;
+      if (!m.alive || m.t < W) continue;
+      const u = Math.min(1, (m.t - W) / F); // 0 gökte, 1 yerde
       const q = u * u; // Hızlanarak düşer
       const h = (1 - q) * (game.cam.halfH * 0.7 + 80);
       const sz = 1.25 - 0.45 * q;
@@ -16924,9 +17024,12 @@ class Storage {
     return first;
   }
 
-  // Garajda gezilen araçlar: satılık arabalar; gizli motosiklet yalnız bulunduysa (bulmayanda hiçbir iz yok)
+  // Garajda gezilen araçlar: satılık arabalar. Yalnız kodla açılan araba (codeOnly) yalnız sahibine görünür;
+  // gizli motosiklet yalnız bulunduysa (bulmayanda hiçbir iz yok)
   garageCars() {
-    return this.data.secret ? [...CONFIG.cars, CONFIG.secretCar] : CONFIG.cars;
+    const d = this.data;
+    const cars = CONFIG.cars.filter((c) => !c.codeOnly || d.owned.includes(c.id));
+    return d.secret ? [...cars, CONFIG.secretCar] : cars;
   }
 
   // Sonucu işler, rekor bilgisini döndürür
@@ -17060,7 +17163,7 @@ class Storage {
   buy(id) {
     const car = CONFIG.cars.find((c) => c.id === id);
     const d = this.data;
-    if (!car || d.owned.includes(id) || d.coins < car.cost) return false;
+    if (!car || car.codeOnly || d.owned.includes(id) || d.coins < car.cost) return false; // Kodla açılan araba satılmaz
     d.coins -= car.cost;
     d.owned.push(id);
     d.selected = id;

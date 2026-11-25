@@ -168,13 +168,13 @@ for (const flavor of ['play', 'arkadas']) {
   await page.waitForTimeout(300);
 
   // ---- SİLAH MAĞAZASI (garaj, Silah sekmesi, gerçek tıklama) ----
-  await page.evaluate(() => { __drift.storage.data.coins = 60000; __drift.storage.save(); __drift.ui.refreshMenu(); });
+  await page.evaluate(() => { __drift.storage.data.coins = 30000; __drift.storage.save(); __drift.ui.refreshMenu(); });
   await page.click('#btn-garage');
   await page.waitForSelector('#garage:not([hidden])');
   await page.click('.custom-tabs button[data-tab="gun"]');
   const chips = await page.$$eval('#custom-grid .chip.gun', (els) => els.map((e) => ({ locked: e.classList.contains('locked'), price: e.querySelector('em') && e.querySelector('em').textContent })));
   ok(chips.length === 6 && chips.every((c) => c.locked), `${flavor} 6 kilitli silah`, JSON.stringify(chips));
-  ok(chips.map((c) => c.price).join() === '2.500,6.000,12.000,25.000,45.000,90.000', `${flavor} fiyat etiketleri`, chips.map((c) => c.price).join());
+  ok(chips.map((c) => c.price).join() === '1.250,3.000,6.000,12.500,22.500,45.000', `${flavor} fiyat etiketleri`, chips.map((c) => c.price).join());
   await shot(page, `${flavor}-garaj-silah`);
   // Silah 2'yi seç, iki adımda satın al (Satın al -> Onayla)
   await page.click('#custom-grid .chip.gun.t2');
@@ -187,7 +187,7 @@ for (const flavor of ['play', 'arkadas']) {
   ok(/Onayla/.test(btn), `${flavor} onay`, btn);
   await page.click('#custom-buy');
   const bought = await page.evaluate(() => ({ guns: __drift.storage.data.guns, gun: __drift.storage.data.gun, coins: __drift.storage.data.coins, msg: document.getElementById('custom-msg').textContent, btn: document.getElementById('custom-buy').textContent }));
-  ok(bought.guns.join() === 'g2' && bought.gun === 'g2' && bought.coins === 54000, `${flavor} satın alındı ve takıldı`, JSON.stringify(bought));
+  ok(bought.guns.join() === 'g2' && bought.gun === 'g2' && bought.coins === 27000, `${flavor} satın alındı ve takıldı`, JSON.stringify(bought));
   ok(bought.btn === 'Çıkar', `${flavor} çıkar düğmesi`, bought.btn);
   await shot(page, `${flavor}-garaj-silah-alindi`);
   // Para yetmeyen silah

@@ -157,9 +157,12 @@ export class Storage {
     return first;
   }
 
-  // Garajda gezilen araçlar: satılık arabalar; gizli motosiklet yalnız bulunduysa (bulmayanda hiçbir iz yok)
+  // Garajda gezilen araçlar: satılık arabalar. Yalnız kodla açılan araba (codeOnly) yalnız sahibine görünür;
+  // gizli motosiklet yalnız bulunduysa (bulmayanda hiçbir iz yok)
   garageCars() {
-    return this.data.secret ? [...CONFIG.cars, CONFIG.secretCar] : CONFIG.cars;
+    const d = this.data;
+    const cars = CONFIG.cars.filter((c) => !c.codeOnly || d.owned.includes(c.id));
+    return d.secret ? [...cars, CONFIG.secretCar] : cars;
   }
 
   // Sonucu işler, rekor bilgisini döndürür
@@ -293,7 +296,7 @@ export class Storage {
   buy(id) {
     const car = CONFIG.cars.find((c) => c.id === id);
     const d = this.data;
-    if (!car || d.owned.includes(id) || d.coins < car.cost) return false;
+    if (!car || car.codeOnly || d.owned.includes(id) || d.coins < car.cost) return false; // Kodla açılan araba satılmaz
     d.coins -= car.cost;
     d.owned.push(id);
     d.selected = id;

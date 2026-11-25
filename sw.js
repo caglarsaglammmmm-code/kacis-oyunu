@@ -1,5 +1,5 @@
 // Çevrimdışı oyun için önbellek. Dosya değişince CACHE sürümünü artırın.
-const CACHE = 'drift-lab-v24.2.0-2';
+const CACHE = 'drift-lab-v24.2.0-3';
 const ASSETS = [
   './',
   'index.html',

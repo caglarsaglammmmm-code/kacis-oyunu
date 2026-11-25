@@ -19,7 +19,7 @@ export const CONFIG = {
   name: NAMES.oyun,
   version: '24.2.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0-2/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0-3/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -178,7 +178,7 @@ export const CONFIG = {
     { id: 'tilki', paints: [{ name: 'Tilki Turuncusu', color: '#ff6a1a', finish: 'gloss', accent: '#111318' }, { name: 'Gece Siyahı', color: '#111318', finish: 'gloss', accent: '#ff6a1a' }, { name: 'Mat Gri', color: '#5a6068', finish: 'matte', accent: '#ffd23f' }, { name: 'Buz Beyazı', color: '#eef3f8', finish: 'pearl', accent: '#2b6fd6' }], finish: 'gloss', name: NAMES.arabalar.tilki, cost: 2400, desc: 'Hafif, oynak drift coupe', shape: 'tilki', maxSpeed: 572, accel: 720, turnRate: 3.72, grip: 5.0, driftGrip: 0.68, durability: 1.66, mass: 1.05, len: 46, wid: 24, color: '#ff6a1a', accent: '#111318', engine: { kind: 'turbo', cyl: 4, idle: 1000, red: 8200, gears: 6, gain: 1.05 }, egzozPatlamaSansi: 0.55 },
     { id: 'kartal', paints: [{ name: 'Yarış Mavisi', color: '#1f5fbf', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Kan Kırmızı', color: '#a3121f', finish: 'gloss', accent: '#f4f6f8' }, { name: 'Mat Siyah', color: '#16181c', finish: 'matte', accent: '#ffd23f' }, { name: 'Çift Ton Krem-Yeşil', color: '#e8dcbc', finish: 'gloss', roof: '#2f5a3a' }], finish: 'gloss', name: NAMES.arabalar.kartal, cost: 3200, desc: 'Uzun kaput, gürleyen V8', shape: 'kartal', maxSpeed: 586, accel: 760, turnRate: 3.6, grip: 5.05, driftGrip: 0.66, durability: 1.74, mass: 1.35, len: 52, wid: 26, color: '#1f5fbf', accent: '#f4f6f8', engine: { kind: 'v8', cyl: 8, idle: 560, red: 5400, gears: 4, gain: 1.25 }, egzozPatlamaSansi: 0.6 },
     { id: 'volt', paints: [{ name: 'Plazma Mavi', color: '#1fb8e8', finish: 'metal', accent: '#0c0e12' }, { name: 'Grafit', color: '#2e333b', finish: 'metal', accent: '#1fb8e8' }, { name: 'Mat Beyaz', color: '#e6e8ea', finish: 'matte', accent: '#1fb8e8' }, { name: 'Aurora Mor', color: '#6a3cd9', finish: 'pearl', accent: '#9fe8ff' }], finish: 'metal', name: NAMES.arabalar.volt, cost: 4500, desc: 'Sessiz ama çok hızlı elektrikli GT', shape: 'volt', maxSpeed: 600, accel: 860, turnRate: 3.78, grip: 5.15, driftGrip: 0.63, durability: 1.82, mass: 1.4, len: 52, wid: 26, color: '#1fb8e8', accent: '#0c0e12', engine: { kind: 'ev', cyl: 8, idle: 0, red: 26000, gears: 1, gain: 0.85 }, egzozPatlamaSansi: 0 },
-    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, desc: '360° taramalı silahlı süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 }, egzozPatlamaSansi: 0.5 },
+    { id: 'kuzgun', paints: [{ name: 'Kuzgun Siyahı', color: '#0e0f14', finish: 'gloss', accent: '#ff2f6a' }, { name: 'Neon Kırmızı', color: '#e01a3c', finish: 'gloss', accent: '#0e0f14' }, { name: 'Mat Titanyum', color: '#7a828c', finish: 'matte', accent: '#21e6ff' }, { name: 'Çift Ton Beyaz-Siyah', color: '#f2f4f7', finish: 'pearl', roof: '#0e0f14' }], finish: 'gloss', name: NAMES.arabalar.kuzgun, cost: 60000, codeOnly: true, desc: '360° taramalı silahlı süper araba', shape: 'kuzgun', weapon: true, maxSpeed: 620, accel: 900, turnRate: 3.86, grip: 5.25, driftGrip: 0.6, durability: 1.95, mass: 1.3, len: 50, wid: 27, color: '#0e0f14', accent: '#ff2f6a', engine: { kind: 'super', cyl: 10, idle: 1100, red: 9200, gears: 7, gain: 1.15 }, egzozPatlamaSansi: 0.5 },
   ],
 
   damage: {
@@ -496,12 +496,12 @@ export const CONFIG = {
   // every: ateş aralığı, SALİSE (1/100 sn; 75 = 0,75 sn). hits: normal polisi kaç vuruşta indirir (1,5 = hasar
   // polis canının 1/1,5'i, yani 2 vuruşta iner). price: para
   guns: [
-    { id: 'g1', every: 100, hits: 15, price: 2500 },
-    { id: 'g2', every: 75, hits: 10, price: 6000 },
-    { id: 'g3', every: 50, hits: 7, price: 12000 },
-    { id: 'g4', every: 25, hits: 4, price: 25000 },
-    { id: 'g5', every: 20, hits: 2, price: 45000 },
-    { id: 'g6', every: 10, hits: 1.5, price: 90000 },
+    { id: 'g1', every: 100, hits: 15, price: 1250 },
+    { id: 'g2', every: 75, hits: 10, price: 3000 },
+    { id: 'g3', every: 50, hits: 7, price: 6000 },
+    { id: 'g4', every: 25, hits: 4, price: 12500 },
+    { id: 'g5', every: 20, hits: 2, price: 22500 },
+    { id: 'g6', every: 10, hits: 1.5, price: 45000 },
   ],
 
   // ZAMANLA ARTAN POLİS CANI. Yeni çıkan polisin canı = can * min(max, perMin ^ dakika). v24.2'den beri kapalı (max 1):
@@ -534,20 +534,25 @@ export const CONFIG = {
   // içine giremez. Anıt (memorial.rect), gizli geçit (secret.ramp) ve iki stadyum (stadiums.*.rect)
   protect: { memorial: 320, secret: 360, stadium: 170, bullet: 0 },
 
-  // METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır: çarpma anında arabanın olacağı
-  // nokta tahmin edilir (konum + hız x (warn + fall)), yol üzerinde tutulur ve kilitlenir (sonra takip etmez).
-  // Hız değişimi ya da dönüşle kaçılabilir. Dalgadaki diğerleri çevreye düşen meteorlardır (onlar da zarar verir).
-  // warn: nişanın görünmesinden düşüşün başlamasına kadar (ASLA 3'ün altına inmez), fall: gökten düşüş süresi.
-  // radius: çarpma dairesi (nişan bu kadar), minR: asıl nişan oyuncuya en az bu uzaklıkta (tam üstünde doğmaz),
-  // maxLead: hızlı araçta nişan en çok bu kadar ileride, road: tahmini nokta bu yarıçapta yola çekilir.
-  // every / perWave: dalga aralığı ve sayısı (zamanla artar), max: aynı anda en çok meteor.
+  // METEOR YAĞMURU (tanklardan sonra). Her dalganın ASIL meteoru oyuncuyu hedef alır (js/meteor.js):
+  //   uyarı (warn sn) boyunca nişan arabanın çarpma anında olacağı yeri izler (konum + hız x kalan süre, yol boyunca,
+  //   köşede direksiyon yönüne döner); düşüş başlarken hedef = konum + hız x düşüş süresi noktasına KİLİTLENİR.
+  //   Düşüş süresi boyunca hız ya da yön değiştiren kaçar. Dalgadaki diğerleri çevreye düşen meteorlardır.
+  // warn: nişanın görünmesinden düşüşün başlamasına kadar (ASLA 3'ün altına inmez), fall: ilk düşüş süresi (sn).
+  // ZAMANLA ZORLAŞIR: fallCurve düşüş süresi [saniye, sn] (kısaldıkça meteor hızlanır), minFall: en kısa düşüş
+  //   (kaçış payı), every: dalga aralığı [saniye, sn] (kısaldıkça sıklaşır), minEvery: en sık, perWave: dalgadaki sayı.
+  // radius: çarpma dairesi (nişan bu kadar), minR: yeni asıl nişan oyuncuya en az bu uzaklıkta (tam üstünde doğmaz),
+  // maxLead: tahmin en çok bu kadar ileride (en hızlı araç x en uzun süreden büyük), turns: tahmin en çok kaç köşe döner,
+  // follow: nişanın tahmini noktaya yetişme hızı (1/sn), road: tahmini nokta bu yarıçapta yola çekilir (geriye değil).
+  // max: aynı anda en çok meteor.
   // randMin / randMax: çevre meteorlarının oyuncuya uzaklığı. quake / quakeShake: çarpmada kamera sarsıntısı süresi ve gücü,
   // flash: beyaz parlama süresi, trail: düşerken saniyede duman/alev parçası, blink: son bu kadar saniyede hızlı yanıp söner
   meteor: {
-    at: 380, warn: 3, fall: 0.7, radius: 64,
-    every: [[380, 4.6], [460, 3.6], [560, 2.8], [700, 2.1]],
+    at: 380, warn: 3, fall: 1.6, radius: 64,
+    fallCurve: [[380, 1.6], [480, 1.4], [600, 1.25], [750, 1.1]], minFall: 1.1,
+    every: [[380, 4.6], [460, 3.6], [560, 2.8], [700, 2.1], [900, 1.7]], minEvery: 1.6,
     perWave: [[380, 1], [450, 2], [540, 3], [680, 4]],
-    max: 7, minR: 170, maxLead: 1500, road: 80, randMin: 260, randMax: 760,
+    max: 7, minR: 170, maxLead: 3200, turns: 2, follow: 9, road: 80, randMin: 260, randMax: 760,
     tankDamage: 450, shake: 12, quake: 1.5, quakeShake: 9, flash: 0.18, sparks: 16, dust: 12, crater: 52, debris: 14,
     trail: 40, blink: 1,
   },
@@ -579,6 +584,7 @@ export const CONFIG = {
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
   // Yeni kod eklemek için satır eklenir. car: açılan araba, coins: para ödülü, berserk: süreli para çarpanı (sn).
+  // codeOnly: true olan araba (42-66 / Kuzgun) satılmaz; garajda ve mağazada yalnız kodla açan oyuncuya görünür.
   // Her kod bir kayıtta bir kez kullanılır (storage.usedCodes)
   codes: [
     { code: '4266', car: 'kuzgun' },
