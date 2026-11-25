@@ -164,7 +164,7 @@ export class Game {
     this.gun = new AutoGun();
     this.weapon = null;
     this.gunId = ''; // Mağazadan takılı silah (boş: yok)
-    this.berserkT = 0; // Berserk kodunun kalan süresi (sn): main.js kayıttan verir, geri yazar
+    this.berserkT = 0; // Berserk kodunun kalan süresi (sn): saat kayıttadır (storage.tickBerserk), main.js her karede verir
     this.meteors = new MeteorStorm();
     this.alienLimit = AL.desktopCap; // Dokunmatikte main.js telefon tavanını verir
     // Hava: tür, yoğunluk (0-1, yumuşak geçiş) ve zemin tutuşları (oyuncu, polis). Bellek ayrılmaz
@@ -443,8 +443,6 @@ export class Game {
     this.updateDamage(dt);
     if (this.warnT > 0) this.warnT -= dt;
     if (this.hitFlash > 0) this.hitFlash -= dt * 3;
-    // Berserk süresi yalnız oynanan koşuda akar (duraklatma, menü ve arka planda tick çağrılmaz)
-    if (this.berserkT > 0) this.berserkT = Math.max(0, this.berserkT - dt);
   }
 
   // Berserk açıkken kazanılan para katı

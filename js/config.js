@@ -19,7 +19,7 @@ export const CONFIG = {
   name: NAMES.oyun,
   version: '24.2.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0-2/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -508,9 +508,11 @@ export const CONFIG = {
   // silah tablosundaki vuruş sayıları oyunun her anında geçerli. Açmak için ör. { perMin: 1.12, max: 3 }
   copHpGrowth: { perMin: 1.12, max: 1 },
 
-  // BERSERK KODU: süre (sn) boyunca kazanılan para mul katı. Süre yalnız koşu oynanırken azalır (duraklatma, menü,
-  // arka plan, kapalı uygulama saymaz). Kalan süre kayıtta tutulur, saveEvery saniyede bir yazılır
-  berserk: { seconds: 3600, mul: 2, saveEvery: 5 },
+  // BERSERK KODU: süre (sn) boyunca kazanılan para mul katı. Süre uygulama açık ve ekrandayken HER EKRANDA akar
+  // (yarış, duraklatma, menü, garaj, ayarlar). Yalnız uygulama kapalıyken ya da arka plandayken durur.
+  // Kalan süre kayıtta tutulur, saveEvery saniyede bir ve arka plana geçerken yazılır. maxStep: tek karede en çok
+  // sayılan süre (sn): telefon uykudan dönünce süre birden düşmesin
+  berserk: { seconds: 3600, mul: 2, saveEvery: 5, maxStep: 1 },
 
   // iPhone/iPad ana ekrana ekle rehberi: delay menü açıldıktan sonra kartın görünme gecikmesi (sn), key kayıt anahtarı
   a2hs: { delay: 1.2, key: 'drift-lab-a2hs' },
@@ -583,6 +585,7 @@ export const CONFIG = {
     { code: 'DANTE', coins: 3000 },
     { code: 'BERSERK', berserk: 3600 },
     { code: 'GUTS', coins: 10000 },
+    { code: 'ZORNA', coins: 300000 },
   ],
 
   // KIL PAYI KAÇIŞ: polis çok yakından geçip çarpmadan atlatılınca anında para.

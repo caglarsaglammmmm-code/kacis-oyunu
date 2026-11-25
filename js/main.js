@@ -63,12 +63,17 @@ function startRun(opts) {
   game.berserkT = storage.data.berserk;
 }
 
-// Berserk süresi oyunda azalır; yalnız koşu sürerken kayda geri yazılır (menüde girilen kodu ezmesin)
-let berserkSaveT = 0;
-function syncBerserk() {
-  if (game.state !== 'play' && game.state !== 'dying' && game.state !== 'over') return;
-  if (Math.abs(storage.data.berserk - game.berserkT) < 1e-3) return;
-  storage.setBerserk(game.berserkT);
+// Berserk saati: uygulama açık ve ekrandayken her ekranda (yarış, duraklatma, menü, garaj, ayarlar) akar.
+// Arka planda kare çizilmez ve visibilitychange saati sıfırlar: dönüşte süre kaldığı yerden sürer
+let bzLast = 0;
+let bzUiT = 0;
+function tickBerserk(now) {
+  const was = storage.data.berserk;
+  if (was > 0 && !document.hidden && bzLast) storage.tickBerserk((now - bzLast) / 1000);
+  bzLast = document.hidden ? 0 : now;
+  game.berserkT = storage.data.berserk;
+  // Menü etiketi saniyede birkaç kez yenilenir; süre bitince kaybolur
+  if ((bzUiT -= 1) <= 0 || (was > 0 && storage.data.berserk === 0)) { bzUiT = 15; ui.berserkTick(storage.data.berserk); }
 }
 
 function applySettings() {
@@ -238,7 +243,6 @@ function stepFilm(now) {
 }
 
 function toMenu() {
-  syncBerserk();
   paused = false;
   ui.setHud(false);
   ui.showHint(false);
@@ -259,7 +263,6 @@ function pause() {
   if (game.state !== 'play' || paused) return;
   paused = true;
   pausedDrawn = false;
-  syncBerserk();
   input.clear();
   audio.suspend();
   rememberQuality();
@@ -363,7 +366,6 @@ game.onEvent = (name, v) => {
     case 'memorialfail': ui.memorialFail(v); memorialCard.show(false); vibrate([160, 60, 260]); break;
     case 'gameover': {
       rememberQuality();
-      syncBerserk();
       // Hileli koşu rekor ve kazanç saymaz; anıt cezası yine de düşülür
       const record = game.result.cheated ? { newScore: false, newTime: false, penalty: storage.applyPenalty(game.result.penalty) } : storage.recordRun(game.result);
       memorialCard.show(false);
@@ -420,6 +422,7 @@ function frame(now) {
     if (paused) pausedDrawn = true;
   }
   if (film) stepFilm(now);
+  tickBerserk(now);
   audio.update(game, !paused, now);
   controls.update();
 
@@ -430,8 +433,6 @@ function frame(now) {
   hudT -= elapsed;
   if (hudT <= 0 && game.state === 'play') {
     hudT = 0.1;
-    berserkSaveT += 0.1;
-    if (berserkSaveT >= CONFIG.berserk.saveEvery) { berserkSaveT = 0; syncBerserk(); }
     ui.hud(game);
     if (cheatBadge.hidden === game.cheat) cheatBadge.hidden = !game.cheat;
   }
@@ -495,8 +496,11 @@ function boot() {
   resize();
   window.addEventListener('resize', () => { resize(); cover.layout(); });
   window.addEventListener('orientationchange', () => { resize(); cover.layout(); });
+  window.addEventListener('pagehide', () => storage.save()); // Uygulama kapanırken Berserk süresi kaydedilir
   document.addEventListener('visibilitychange', () => {
+    bzLast = 0; // Berserk: arka planda geçen süre sayılmaz
     if (document.hidden) {
+      storage.save(); // Kalan Berserk süresi (ve diğer her şey) arka plana geçerken yazılır
       rememberQuality();
       if (game.state === 'play') pause();
       else audio.suspend();

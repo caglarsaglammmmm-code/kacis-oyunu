@@ -29,7 +29,7 @@ export function defaultSave() {
     unlocked: { paints: [], rims: [], leds: [], exhausts: [] }, // satın alınan özelleştirmeler
     secret: false, // Gizli geçit bulundu: gizli motosiklet garajda
     usedCodes: [], // Kullanılmış para / süre kodları: her biri bir kayıtta bir kez
-    berserk: 0, // Berserk kodunun kalan süresi (sn), yalnız oynarken azalır
+    berserk: 0, // Berserk kodunun kalan süresi (sn): uygulama açıkken her ekranda azalır (tickBerserk)
     guns: [], // Satın alınan silahlar
     gun: '', // Takılı silah (boş: yok)
   };
@@ -206,10 +206,23 @@ export class Storage {
     return r;
   }
 
-  // Berserk kalan süresi (oyun sırasında main.js yazar)
+  // Berserk kalan süresini ayarlar (test ve geliştirici)
   setBerserk(sec, save = true) {
     this.data.berserk = Math.max(0, Math.min(CONFIG.berserk.seconds, Number(sec) || 0));
+    this.bzUnsaved = 0;
     if (save) this.save();
+  }
+
+  // Berserk saati: main.js uygulama açık ve görünürken her karede çağırır (ekran fark etmez).
+  // dt en çok maxStep sayılır. saveEvery saniyede bir ve süre bitince kaydedilir. Kalan süreyi döndürür
+  tickBerserk(dt) {
+    const d = this.data;
+    if (!(d.berserk > 0)) return 0;
+    const step = Math.max(0, Math.min(CONFIG.berserk.maxStep, Number(dt) || 0));
+    d.berserk = Math.max(0, d.berserk - step);
+    this.bzUnsaved = (this.bzUnsaved || 0) + step;
+    if (d.berserk === 0 || this.bzUnsaved >= CONFIG.berserk.saveEvery) { this.bzUnsaved = 0; this.save(); }
+    return d.berserk;
   }
 
   // --- Silahlar: 'ok' alındı (ve takıldı), 'owned' zaten var, 'poor' para yetmiyor, 'invalid' yok ---

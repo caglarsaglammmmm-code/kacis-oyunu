@@ -1,5 +1,5 @@
-// 24.2.0 tarayıcı sınaması (iki sürüm): Kod gir alanına gerçek yazı ve tıklamayla Dante / Berserk / Guts, kullanılmış ve
-// yanlış kod mesajları; Berserk sayacı oyunda görünür, oynarken azalır, duraklatınca ve menüde durur, kayıttan sürer;
+// 24.2.0 tarayıcı sınaması (iki sürüm): Kod gir alanına gerçek yazı ve tıklamayla Dante / Berserk / Guts / Zorna, kullanılmış
+// ve yanlış kod mesajları; Berserk sayacı menü, ayarlar, garaj, yarış ve duraklatmada akar, arka planda ve kapalıyken durur;
 // ayrı ses kaydırıcıları kaydedilip yeniden açılışta yüklenir ve ses grubuna uygulanır; garajın Silah sekmesinden satın
 // alma, takma, çıkarma; takılı silah oyunda gerçekten ateş eder ve normal polisi tablodaki vuruşta indirir. Konsol hatası olmamalı.
 // Önce iki sunucu: npm run serve (8080, play) ve FLAVOR=arkadas PORT=8082 node tools/serve.mjs
@@ -56,10 +56,14 @@ for (const flavor of ['play', 'arkadas']) {
   ok(m.trim() === 'Bu kod zaten kullanıldı.', `${flavor} Dante ikinci`, m);
   m = await enterCode(page, 'guts');
   ok(/10\.000/.test(m), `${flavor} Guts`, m);
+  m = await enterCode(page, ' zORNA ');
+  ok(/300\.000/.test(m), `${flavor} Zorna`, m);
+  m = await enterCode(page, 'Zorna');
+  ok(m.trim() === 'Bu kod zaten kullanıldı.', `${flavor} Zorna ikinci`, m);
   m = await enterCode(page, 'yanlis');
   ok(m.trim() === 'Geçersiz kod.', `${flavor} yanlış kod`, m);
   const coins1 = await page.evaluate(() => __drift.storage.data.coins);
-  ok(coins1 - coins0 === 13000, `${flavor} para +13000`, `${coins1 - coins0}`);
+  ok(coins1 - coins0 === 313000, `${flavor} para +313000`, `${coins1 - coins0}`);
   m = await enterCode(page, 'Berserk');
   ok(/BERSERK/.test(m), `${flavor} Berserk mesajı`, m);
   m = await enterCode(page, ' berserk ');
@@ -88,7 +92,7 @@ for (const flavor of ['play', 'arkadas']) {
   await back(page, 'settings');
   // Menüde Berserk etiketi
   const tag = await page.evaluate(() => ({ hidden: document.getElementById('menu-berserk').hidden, text: document.getElementById('menu-berserk').textContent }));
-  ok(!tag.hidden && /60:00/.test(tag.text), `${flavor} menüde Berserk`, JSON.stringify(tag));
+  ok(!tag.hidden && /(60:00|59:\d\d)/.test(tag.text), `${flavor} menüde Berserk`, JSON.stringify(tag));
   await shot(page, `${flavor}-menu-berserk`);
 
   // Yeniden açılış: ses ve kodlar kayıttan
@@ -96,42 +100,72 @@ for (const flavor of ['play', 'arkadas']) {
   await page.waitForFunction(() => window.__drift && !document.getElementById('menu').hidden, null, { timeout: 30000 });
   const re = await page.evaluate(() => ({ vols: __drift.storage.data.settings.vols, a: __drift.audio.vols, used: __drift.storage.data.usedCodes, bz: __drift.storage.data.berserk, slider: document.querySelector('#set-mix input[data-vol="police"]').value }));
   ok(re.vols.police === 20 && re.vols.gun === 0 && re.a.police === 0.2 && re.slider === '20', `${flavor} ses kayıttan yüklendi`, JSON.stringify(re));
-  ok(re.used.join() === 'DANTE,GUTS,BERSERK' && re.bz === 3600, `${flavor} kodlar kalıcı`, JSON.stringify(re));
+  ok(re.used.join() === 'DANTE,GUTS,ZORNA,BERSERK' && re.bz > 3500 && re.bz < 3600, `${flavor} kodlar kalıcı`, JSON.stringify(re));
 
-  // ---- BERSERK SAYACI ----
+  // ---- BERSERK SAYACI: uygulama açıkken her ekranda akar, arka planda ve kapalıyken durur ----
+  const bz = () => page.evaluate(() => __drift.storage.data.berserk);
+  const flows = async (where, ms = 3000) => {
+    const a = await bz();
+    await page.waitForTimeout(ms);
+    const b2 = await bz();
+    ok(a - b2 > (ms / 1000) * 0.75 && a - b2 < ms / 1000 + 0.6, `${flavor} ${where}: süre aktı`, `${a.toFixed(2)} -> ${b2.toFixed(2)}`);
+  };
+  const tagText = () => page.textContent('#menu-berserk-t');
+  const tag1 = await tagText();
+  await flows('ana menü');
+  const tag2 = await tagText();
+  ok(tag1 !== tag2, `${flavor} menü sayacı ekranda değişiyor`, `${tag1} / ${tag2}`);
+  await shot(page, `${flavor}-menu-berserk-akiyor`);
+  await openSettings(page);
+  await flows('ayarlar', 2000);
+  await back(page, 'settings');
+  await page.click('#btn-garage');
+  await page.waitForSelector('#garage:not([hidden])');
+  await flows('garaj / mağaza', 2000);
+  await back(page, 'garage');
   await play(page);
-  const hud0 = await page.evaluate(() => ({ hidden: document.getElementById('hud-berserk').hidden, t: document.getElementById('hud-berserk-t').textContent, mul: __drift.game.coinMul() }));
+  const hud0 = await page.evaluate(() => ({ hidden: document.getElementById('hud-berserk').hidden, mul: __drift.game.coinMul() }));
   ok(!hud0.hidden && hud0.mul === 2, `${flavor} HUD Berserk görünür, 2 kat`, JSON.stringify(hud0));
-  await page.waitForTimeout(3200);
-  const t1 = await page.evaluate(() => __drift.game.berserkT);
-  ok(t1 < 3598 && t1 > 3590, `${flavor} oynarken azaldı`, `${t1}`);
+  await flows('yarış');
   await shot(page, `${flavor}-hud-berserk`);
   await page.evaluate(() => __drift.pause());
-  const tp = await page.evaluate(() => __drift.storage.data.berserk);
-  ok(Math.abs(tp - t1) < 0.6, `${flavor} duraklatınca kaydedildi`, `${tp} ${t1}`);
-  await page.waitForTimeout(2500);
-  const tp2 = await page.evaluate(() => __drift.game.berserkT);
-  ok(Math.abs(tp2 - tp) < 1e-6 || tp2 <= tp, `${flavor} duraklatmada durdu`, `${tp} -> ${tp2}`);
-  ok(Math.abs(tp2 - tp) < 0.05, `${flavor} duraklatmada akmadı`, `${tp} -> ${tp2}`);
+  await flows('duraklatma ekranı', 2000);
+  // Arka plan: sayfa gizlenir (uygulama arka plana atıldı) -> süre durur, dönünce kaldığı yerden sürer
+  const setHidden = (h) => page.evaluate((v) => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => v }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => (v ? 'hidden' : 'visible') }); document.dispatchEvent(new Event('visibilitychange')); }, h);
+  await setHidden(true);
+  const h1 = await bz();
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('drift-lab-v1')).berserk);
+  ok(Math.abs(saved - h1) < 0.2, `${flavor} arka plana geçerken kaydedildi`, `${saved} ${h1}`);
+  await page.waitForTimeout(3000);
+  const h2 = await bz();
+  ok(Math.abs(h2 - h1) < 0.05, `${flavor} arka planda durdu`, `${h1} -> ${h2}`);
+  await setHidden(false);
+  await page.waitForTimeout(300);
+  const h3 = await bz();
+  ok(h2 - h3 >= 0 && h2 - h3 < 0.6, `${flavor} dönünce sıçramadan sürdü`, `${h2} -> ${h3}`);
+  await page.evaluate(() => __drift.resume());
   await page.evaluate(() => __drift.toMenu());
-  await page.waitForTimeout(2500);
-  const tm = await page.evaluate(() => __drift.storage.data.berserk);
-  ok(Math.abs(tm - tp2) < 0.05, `${flavor} menüde durdu`, `${tp2} -> ${tm}`);
-  // Uygulama kapanıp açılınca kaldığı yerden
+  // Uygulama kapatılır, bir süre kapalı kalır, açılınca kaldığı yerden
+  // Kapalıyken geçen 3 sn sayılmamalı; yalnız açılış (yükleme) sırasında açık geçen süre düşer
+  const c1 = await bz();
   await page.close();
+  await new Promise((r) => setTimeout(r, 3000));
+  const o0 = Date.now();
   page = await open(ctx, PORTS[flavor]);
-  const tr = await page.evaluate(() => __drift.storage.data.berserk);
-  ok(Math.abs(tr - tm) < 0.05, `${flavor} kapat-aç sonrası kaldığı yer`, `${tm} -> ${tr}`);
-  // Süre biterken: bar kaybolur, çarpan kalkar
+  const c2 = await bz();
+  const openSec = (Date.now() - o0) / 1000;
+  ok(c1 - c2 >= 0 && c1 - c2 <= openSec + 0.3, `${flavor} kapalıyken durdu, kaldığı yerden`, `${c1} -> ${c2} (açılış ${openSec.toFixed(2)} sn)`);
+  // Süre biterken (menüde): etiket kaybolur; yarışta bar yok, çarpan 1
   await page.evaluate(() => { __drift.storage.setBerserk(1.2); });
+  await page.waitForTimeout(2200);
+  const after = await page.evaluate(() => ({ s: __drift.storage.data.berserk, hidden: document.getElementById('menu-berserk').hidden, saved: JSON.parse(localStorage.getItem('drift-lab-v1')).berserk }));
+  ok(after.s === 0 && after.hidden && after.saved === 0, `${flavor} süre menüde bitti, etiket kalktı, kaydedildi`, JSON.stringify(after));
   await play(page);
-  await page.waitForTimeout(2600);
+  await page.waitForTimeout(400);
   const end = await page.evaluate(() => ({ t: __drift.game.berserkT, mul: __drift.game.coinMul(), hidden: document.getElementById('hud-berserk').hidden }));
-  ok(end.t === 0 && end.mul === 1 && end.hidden, `${flavor} süre bitti, bar kayboldu`, JSON.stringify(end));
+  ok(end.t === 0 && end.mul === 1 && end.hidden, `${flavor} bitince yarışta bar yok, 1 kat`, JSON.stringify(end));
   await page.evaluate(() => __drift.toMenu());
   await page.waitForTimeout(300);
-  const after = await page.evaluate(() => ({ s: __drift.storage.data.berserk, hidden: document.getElementById('menu-berserk').hidden }));
-  ok(after.s === 0 && after.hidden, `${flavor} menü etiketi kalktı`, JSON.stringify(after));
 
   // ---- SİLAH MAĞAZASI (garaj, Silah sekmesi, gerçek tıklama) ----
   await page.evaluate(() => { __drift.storage.data.coins = 60000; __drift.storage.save(); __drift.ui.refreshMenu(); });

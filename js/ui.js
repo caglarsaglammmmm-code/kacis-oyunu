@@ -228,11 +228,19 @@ export class UI {
     const car = this.storage.selectedCar();
     $('menu-car-name').textContent = carLabel(car);
     $('menu-car-paint').textContent = this.paintName(car, this.storage.paintIndex(car.id));
-    // Berserk açıksa menüde de kalan süre görünür (süre yalnız oynarken akar)
-    const bz = $('menu-berserk');
-    bz.hidden = !(d.berserk > 0);
-    if (d.berserk > 0) bz.textContent = tx('berserk.menu', { t: berserkClock(d.berserk) });
+    this.berserkTick(d.berserk);
     if (!$('menu').hidden) this.fit($('menu'));
+  }
+
+  // Menüdeki Berserk etiketi ve barı (süre her ekranda akar). Bitince kaybolur
+  berserkTick(t) {
+    const el = $('menu-berserk');
+    const on = t > 0;
+    if (el.hidden === on) el.hidden = !on;
+    if (!on) return;
+    const txt = tx('berserk.menu', { t: berserkClock(t) });
+    if ($('menu-berserk-t').textContent !== txt) $('menu-berserk-t').textContent = txt;
+    $('menu-berserk-bar').style.width = `${Math.min(100, (t / CONFIG.berserk.seconds) * 100).toFixed(2)}%`;
   }
 
   paintName(car, i) {

@@ -282,7 +282,7 @@ const CONFIG = {
   name: NAMES.oyun,
   version: '24.2.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0-2/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -771,9 +771,11 @@ const CONFIG = {
   // silah tablosundaki vuruş sayıları oyunun her anında geçerli. Açmak için ör. { perMin: 1.12, max: 3 }
   copHpGrowth: { perMin: 1.12, max: 1 },
 
-  // BERSERK KODU: süre (sn) boyunca kazanılan para mul katı. Süre yalnız koşu oynanırken azalır (duraklatma, menü,
-  // arka plan, kapalı uygulama saymaz). Kalan süre kayıtta tutulur, saveEvery saniyede bir yazılır
-  berserk: { seconds: 3600, mul: 2, saveEvery: 5 },
+  // BERSERK KODU: süre (sn) boyunca kazanılan para mul katı. Süre uygulama açık ve ekrandayken HER EKRANDA akar
+  // (yarış, duraklatma, menü, garaj, ayarlar). Yalnız uygulama kapalıyken ya da arka plandayken durur.
+  // Kalan süre kayıtta tutulur, saveEvery saniyede bir ve arka plana geçerken yazılır. maxStep: tek karede en çok
+  // sayılan süre (sn): telefon uykudan dönünce süre birden düşmesin
+  berserk: { seconds: 3600, mul: 2, saveEvery: 5, maxStep: 1 },
 
   // iPhone/iPad ana ekrana ekle rehberi: delay menü açıldıktan sonra kartın görünme gecikmesi (sn), key kayıt anahtarı
   a2hs: { delay: 1.2, key: 'drift-lab-a2hs' },
@@ -846,6 +848,7 @@ const CONFIG = {
     { code: 'DANTE', coins: 3000 },
     { code: 'BERSERK', berserk: 3600 },
     { code: 'GUTS', coins: 10000 },
+    { code: 'ZORNA', coins: 300000 },
   ],
 
   // KIL PAYI KAÇIŞ: polis çok yakından geçip çarpmadan atlatılınca anında para.
@@ -5566,7 +5569,7 @@ class Game {
     this.gun = new AutoGun();
     this.weapon = null;
     this.gunId = ''; // Mağazadan takılı silah (boş: yok)
-    this.berserkT = 0; // Berserk kodunun kalan süresi (sn): main.js kayıttan verir, geri yazar
+    this.berserkT = 0; // Berserk kodunun kalan süresi (sn): saat kayıttadır (storage.tickBerserk), main.js her karede verir
     this.meteors = new MeteorStorm();
     this.alienLimit = AL.desktopCap; // Dokunmatikte main.js telefon tavanını verir
     // Hava: tür, yoğunluk (0-1, yumuşak geçiş) ve zemin tutuşları (oyuncu, polis). Bellek ayrılmaz
@@ -5845,8 +5848,6 @@ class Game {
     this.updateDamage(dt);
     if (this.warnT > 0) this.warnT -= dt;
     if (this.hitFlash > 0) this.hitFlash -= dt * 3;
-    // Berserk süresi yalnız oynanan koşuda akar (duraklatma, menü ve arka planda tick çağrılmaz)
-    if (this.berserkT > 0) this.berserkT = Math.max(0, this.berserkT - dt);
   }
 
   // Berserk açıkken kazanılan para katı
@@ -16795,7 +16796,7 @@ function defaultSave() {
     unlocked: { paints: [], rims: [], leds: [], exhausts: [] }, // satın alınan özelleştirmeler
     secret: false, // Gizli geçit bulundu: gizli motosiklet garajda
     usedCodes: [], // Kullanılmış para / süre kodları: her biri bir kayıtta bir kez
-    berserk: 0, // Berserk kodunun kalan süresi (sn), yalnız oynarken azalır
+    berserk: 0, // Berserk kodunun kalan süresi (sn): uygulama açıkken her ekranda azalır (tickBerserk)
     guns: [], // Satın alınan silahlar
     gun: '', // Takılı silah (boş: yok)
   };
@@ -16972,10 +16973,23 @@ class Storage {
     return r;
   }
 
-  // Berserk kalan süresi (oyun sırasında main.js yazar)
+  // Berserk kalan süresini ayarlar (test ve geliştirici)
   setBerserk(sec, save = true) {
     this.data.berserk = Math.max(0, Math.min(CONFIG.berserk.seconds, Number(sec) || 0));
+    this.bzUnsaved = 0;
     if (save) this.save();
+  }
+
+  // Berserk saati: main.js uygulama açık ve görünürken her karede çağırır (ekran fark etmez).
+  // dt en çok maxStep sayılır. saveEvery saniyede bir ve süre bitince kaydedilir. Kalan süreyi döndürür
+  tickBerserk(dt) {
+    const d = this.data;
+    if (!(d.berserk > 0)) return 0;
+    const step = Math.max(0, Math.min(CONFIG.berserk.maxStep, Number(dt) || 0));
+    d.berserk = Math.max(0, d.berserk - step);
+    this.bzUnsaved = (this.bzUnsaved || 0) + step;
+    if (d.berserk === 0 || this.bzUnsaved >= CONFIG.berserk.saveEvery) { this.bzUnsaved = 0; this.save(); }
+    return d.berserk;
   }
 
   // --- Silahlar: 'ok' alındı (ve takıldı), 'owned' zaten var, 'poor' para yetmiyor, 'invalid' yok ---
@@ -18736,11 +18750,19 @@ class UI {
     const car = this.storage.selectedCar();
     $('menu-car-name').textContent = carLabel(car);
     $('menu-car-paint').textContent = this.paintName(car, this.storage.paintIndex(car.id));
-    // Berserk açıksa menüde de kalan süre görünür (süre yalnız oynarken akar)
-    const bz = $('menu-berserk');
-    bz.hidden = !(d.berserk > 0);
-    if (d.berserk > 0) bz.textContent = tx('berserk.menu', { t: berserkClock(d.berserk) });
+    this.berserkTick(d.berserk);
     if (!$('menu').hidden) this.fit($('menu'));
+  }
+
+  // Menüdeki Berserk etiketi ve barı (süre her ekranda akar). Bitince kaybolur
+  berserkTick(t) {
+    const el = $('menu-berserk');
+    const on = t > 0;
+    if (el.hidden === on) el.hidden = !on;
+    if (!on) return;
+    const txt = tx('berserk.menu', { t: berserkClock(t) });
+    if ($('menu-berserk-t').textContent !== txt) $('menu-berserk-t').textContent = txt;
+    $('menu-berserk-bar').style.width = `${Math.min(100, (t / CONFIG.berserk.seconds) * 100).toFixed(2)}%`;
   }
 
   paintName(car, i) {
@@ -19510,12 +19532,17 @@ function startRun(opts) {
   game.berserkT = storage.data.berserk;
 }
 
-// Berserk süresi oyunda azalır; yalnız koşu sürerken kayda geri yazılır (menüde girilen kodu ezmesin)
-let berserkSaveT = 0;
-function syncBerserk() {
-  if (game.state !== 'play' && game.state !== 'dying' && game.state !== 'over') return;
-  if (Math.abs(storage.data.berserk - game.berserkT) < 1e-3) return;
-  storage.setBerserk(game.berserkT);
+// Berserk saati: uygulama açık ve ekrandayken her ekranda (yarış, duraklatma, menü, garaj, ayarlar) akar.
+// Arka planda kare çizilmez ve visibilitychange saati sıfırlar: dönüşte süre kaldığı yerden sürer
+let bzLast = 0;
+let bzUiT = 0;
+function tickBerserk(now) {
+  const was = storage.data.berserk;
+  if (was > 0 && !document.hidden && bzLast) storage.tickBerserk((now - bzLast) / 1000);
+  bzLast = document.hidden ? 0 : now;
+  game.berserkT = storage.data.berserk;
+  // Menü etiketi saniyede birkaç kez yenilenir; süre bitince kaybolur
+  if ((bzUiT -= 1) <= 0 || (was > 0 && storage.data.berserk === 0)) { bzUiT = 15; ui.berserkTick(storage.data.berserk); }
 }
 
 function applySettings() {
@@ -19685,7 +19712,6 @@ function stepFilm(now) {
 }
 
 function toMenu() {
-  syncBerserk();
   paused = false;
   ui.setHud(false);
   ui.showHint(false);
@@ -19706,7 +19732,6 @@ function pause() {
   if (game.state !== 'play' || paused) return;
   paused = true;
   pausedDrawn = false;
-  syncBerserk();
   input.clear();
   audio.suspend();
   rememberQuality();
@@ -19810,7 +19835,6 @@ game.onEvent = (name, v) => {
     case 'memorialfail': ui.memorialFail(v); memorialCard.show(false); vibrate([160, 60, 260]); break;
     case 'gameover': {
       rememberQuality();
-      syncBerserk();
       // Hileli koşu rekor ve kazanç saymaz; anıt cezası yine de düşülür
       const record = game.result.cheated ? { newScore: false, newTime: false, penalty: storage.applyPenalty(game.result.penalty) } : storage.recordRun(game.result);
       memorialCard.show(false);
@@ -19867,6 +19891,7 @@ function frame(now) {
     if (paused) pausedDrawn = true;
   }
   if (film) stepFilm(now);
+  tickBerserk(now);
   audio.update(game, !paused, now);
   controls.update();
 
@@ -19877,8 +19902,6 @@ function frame(now) {
   hudT -= elapsed;
   if (hudT <= 0 && game.state === 'play') {
     hudT = 0.1;
-    berserkSaveT += 0.1;
-    if (berserkSaveT >= CONFIG.berserk.saveEvery) { berserkSaveT = 0; syncBerserk(); }
     ui.hud(game);
     if (cheatBadge.hidden === game.cheat) cheatBadge.hidden = !game.cheat;
   }
@@ -19942,8 +19965,11 @@ function boot() {
   resize();
   window.addEventListener('resize', () => { resize(); cover.layout(); });
   window.addEventListener('orientationchange', () => { resize(); cover.layout(); });
+  window.addEventListener('pagehide', () => storage.save()); // Uygulama kapanırken Berserk süresi kaydedilir
   document.addEventListener('visibilitychange', () => {
+    bzLast = 0; // Berserk: arka planda geçen süre sayılmaz
     if (document.hidden) {
+      storage.save(); // Kalan Berserk süresi (ve diğer her şey) arka plana geçerken yazılır
       rememberQuality();
       if (game.state === 'play') pause();
       else audio.suspend();

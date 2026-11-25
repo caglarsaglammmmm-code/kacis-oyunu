@@ -53,6 +53,19 @@ test('her kod bir kayıtta bir kez: ikinci girişte "used", para artmaz; yeniden
   assert.equal(again.data.coins, 13000);
 });
 
+test('Zorna: 300.000 para, büyük/küçük harf ve boşluk fark etmez, bir kayıtta bir kez', () => {
+  for (const code of ['Zorna', ' zORNA ', 'ZORNA']) {
+    const b = mem();
+    const s = new Storage(b);
+    s.data.coins = 7;
+    assert.equal(s.redeem(code), 'coins', code);
+    assert.equal(s.data.coins, 300007);
+    assert.equal(s.redeem('zorna'), 'used');
+    assert.equal(new Storage(b).redeem(' Zorna'), 'used', 'yeniden açılışta da kullanılmış');
+    assert.equal(s.data.coins, 300007);
+  }
+});
+
 test('yanlış kod "invalid"; eski araba kodu çalışmaya devam eder', () => {
   const s = new Storage(mem());
   for (const bad of ['dant', 'gutss', 'berserker', 'xyz', '']) assert.equal(s.redeem(bad), 'invalid', bad);
@@ -97,22 +110,30 @@ test('Berserk: para kazancı 2 kat (kıl payı ve makas), süre bitince 1 kat', 
   } finally { Math.random = realRandom; }
 });
 
-test('Berserk süresi yalnız oyun oynanırken azalır; duraklatma (tick yok) ve menüde durur; sıfırda biter', () => {
+test('Berserk saati her ekranda akar (storage.tickBerserk): yarışta, menüde aynı; tek karede en çok 1 sn; sıfırda biter ve kaydedilir', () => {
+  const b = mem();
+  const s = new Storage(b);
+  s.redeem('berserk');
+  for (let i = 0; i < 60; i++) s.tickBerserk(dt);
+  assert.ok(Math.abs(s.data.berserk - 3599) < 1e-6, `1 sn düştü: ${s.data.berserk}`);
+  s.tickBerserk(3600); // Uykudan dönüş gibi büyük adım: en çok 1 sn sayılır
+  assert.ok(Math.abs(s.data.berserk - 3598) < 1e-6);
+  // saveEvery saniyede bir kendiliğinden kaydedilir
+  for (let i = 0; i < 6 * 60; i++) s.tickBerserk(dt);
+  assert.ok(Math.abs(new Storage(b).data.berserk - s.data.berserk) <= CONFIG.berserk.saveEvery + 1e-6, 'düzenli kayıt');
+  s.setBerserk(0.5);
+  for (let i = 0; i < 60; i++) s.tickBerserk(dt);
+  assert.equal(s.data.berserk, 0);
+  assert.equal(new Storage(b).data.berserk, 0, 'bitince kaydedildi');
+  assert.equal(s.tickBerserk(1), 0, 'bitmiş süre eksiye inmez');
+  // Oyun saati tutmaz: yarış ilerlerken game.berserkT kendiliğinden düşmez (saat kayıttadır, main.js verir)
   const g = setup();
   g.berserkT = 10;
-  for (let i = 0; i < 60; i++) g.tick(dt, 0, false); // 1 sn oyun
-  assert.ok(Math.abs(g.berserkT - 9) < 0.02, `1 sn düştü: ${g.berserkT}`);
-  // Duraklatmada ana döngü tick çağırmaz: süre aynı kalır. Menüde (attract) tick oyunu ilerletmez
-  const keep = g.berserkT;
-  g.startAttract();
-  g.berserkT = keep;
-  for (let i = 0; i < 120; i++) g.tick(dt, 0, false);
-  assert.equal(g.berserkT, keep, 'menüde akmaz');
-  const h = setup();
-  h.berserkT = 0.5;
-  for (let i = 0; i < 60; i++) h.tick(dt, 0, false);
-  assert.equal(h.berserkT, 0);
-  assert.equal(h.coinMul(), 1, 'süre bitince çarpan kalkar');
+  for (let i = 0; i < 60; i++) g.tick(dt, 0, false);
+  assert.equal(g.berserkT, 10);
+  assert.equal(g.coinMul(), 2);
+  g.berserkT = 0;
+  assert.equal(g.coinMul(), 1, 'süre bitince çarpan kalkar');
 });
 
 test('Berserk kalan süresi kayda yazılır, yeniden açılışta kaldığı yerden sürer; bozuk değer temizlenir', () => {
