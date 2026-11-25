@@ -24,6 +24,7 @@
     <div class="hud-hp"><b id="hud-hp">100</b><div id="hud-health" aria-label="Sağlık" data-i18n-label="health"><i></i></div></div>
     <div id="hud-time">0:00</div>
     <div id="hud-combo"></div>
+    <div id="hud-berserk" hidden><b data-i18n="berserk.hud">BERSERK 2×</b><span id="hud-berserk-t">60:00</span><i><s id="hud-berserk-bar"></s></i></div>
   </div>
   <button id="btn-pause" aria-label="Duraklat" data-i18n-label="pause">❚❚</button>
   <div id="cheat-badge" hidden>HİLE AÇIK</div>
@@ -65,6 +66,7 @@
   <div class="menu-panel">
     <button id="btn-garage2" class="car-tag"><b id="menu-car-name"></b><small id="menu-car-paint"></small></button>
     <p id="menu-best" class="sub"></p>
+    <p id="menu-berserk" class="berserk-tag" hidden></p>
     <nav>
       <button id="btn-play" class="start" aria-label="Başla" data-i18n-label="start"><span class="start-art"><b class="start-txt" id="start-txt">BAŞLA</b></span></button>
       <div class="row">
@@ -72,7 +74,7 @@
         <button id="btn-settings" class="tile t-set"><svg viewBox="0 0 24 24"><path d="M12 8.5A3.5 3.5 0 1 0 12 15.5 3.5 3.5 0 0 0 12 8.5zM19.4 13l2-1.5-2-3.4-2.3.9a7 7 0 0 0-1.7-1L15 5h-4l-.4 2.5a7 7 0 0 0-1.7 1l-2.3-.9-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 1.7 1L11 22h4l.4-2.5a7 7 0 0 0 1.7-1l2.3.9 2-3.4-2-1.5a7 7 0 0 0 0-2z" transform="translate(0 -1.5)"/></svg><span data-i18n="menu.settings">Ayarlar</span></button>
         <button id="btn-howto" class="tile t-how"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm1 14h-2v-2h2zm2-7c0 2-3 2-3 4h-2c0-3 3-3 3-4.500A1.500 1.500 0 0 0 10 9H8a4 4 0 0 1 7 1z"/></svg><span data-i18n="menu.howto">Nasıl?</span></button>
       </div>
-      <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.1/DriftLab-PlayStore.apk" rel="noopener" data-i18n="menu.apk">APK İndir</a>
+      <a id="btn-apk" class="btn apk" href="https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0/DriftLab-PlayStore.apk" rel="noopener" data-i18n="menu.apk">APK İndir</a>
     </nav>
   </div>
   <aside id="a2hs" class="a2hs" hidden role="dialog" aria-labelledby="a2hs-title">
@@ -100,7 +102,7 @@
       <p id="garage-desc"></p>
       <div class="paint-row"><div id="garage-paints"></div><small id="garage-paint-name"></small></div>
       <div id="garage-custom" class="custom">
-        <div class="custom-tabs" role="tablist"><button data-tab="paint" data-i18n="custom.paint">Boya</button><button data-tab="rim" data-i18n="custom.rim">Jant</button><button data-tab="led" data-i18n="custom.led">Alt LED</button><button data-tab="exhaust" data-i18n="custom.exhaust">Egzoz</button></div>
+        <div class="custom-tabs" role="tablist"><button data-tab="paint" data-i18n="custom.paint">Boya</button><button data-tab="rim" data-i18n="custom.rim">Jant</button><button data-tab="led" data-i18n="custom.led">Alt LED</button><button data-tab="exhaust" data-i18n="custom.exhaust">Egzoz</button><button data-tab="gun" class="wide" data-i18n="custom.gun">Silah</button></div>
         <div id="custom-grid" class="custom-grid"></div>
         <div class="custom-foot"><small id="custom-name"></small><button id="custom-listen" class="btn listen" hidden data-i18n="custom.listen">Dinle</button><button id="custom-buy" class="btn" hidden></button></div>
         <p id="custom-msg" class="custom-msg" aria-live="polite"></p>
@@ -117,6 +119,15 @@
   <div class="form">
     <label class="toggle"><span data-i18n="settings.sound">Ses</span><input id="set-sound" type="checkbox"><i></i></label>
     <label class="volume"><span data-i18n="settings.volume">Ses düzeyi</span><input id="set-volume" type="range" min="0" max="100" step="5"></label>
+    <div class="mix" id="set-mix">
+      <h3 data-i18n="mix.title">Ses ayarları</h3>
+      <label class="volume"><span data-i18n="mix.music">Müzik</span><input data-vol="music" type="range" min="0" max="100" step="5"><output></output></label>
+      <label class="volume"><span data-i18n="mix.sfx">Ses efektleri</span><input data-vol="sfx" type="range" min="0" max="100" step="5"><output></output></label>
+      <label class="volume"><span data-i18n="mix.engine">Araba / motor</span><input data-vol="engine" type="range" min="0" max="100" step="5"><output></output></label>
+      <label class="volume"><span data-i18n="mix.police">Polis sesleri</span><input data-vol="police" type="range" min="0" max="100" step="5"><output></output></label>
+      <label class="volume"><span data-i18n="mix.traffic">Trafik</span><input data-vol="traffic" type="range" min="0" max="100" step="5"><output></output></label>
+      <label class="volume"><span data-i18n="mix.gun">Silah sesleri</span><input data-vol="gun" type="range" min="0" max="100" step="5"><output></output></label>
+    </div>
     <label class="toggle"><span data-i18n="settings.ambient">Sokak ambiyansı</span><input id="set-ambient" type="checkbox"><i></i></label>
     <label class="toggle"><span data-i18n="settings.vibrate">Titreşim</span><input id="set-vibrate" type="checkbox"><i></i></label>
     <div class="seg-row"><span data-i18n="settings.control">Kontrol</span><div class="seg" data-set="control" role="radiogroup" aria-label="Kontrol"><button data-v="zones" data-i18n="settings.zones">Sağ / Sol</button><button data-v="wheel" data-i18n="settings.wheel">Direksiyon</button><button data-v="stick" data-i18n="settings.stick">Joystick</button></div></div>
