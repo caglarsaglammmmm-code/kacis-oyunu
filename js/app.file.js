@@ -280,9 +280,9 @@ const BUILD = {
 
 const CONFIG = {
   name: NAMES.oyun,
-  version: '24.1.1',
+  version: '24.2.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.1/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -735,24 +735,45 @@ const CONFIG = {
     ],
   },
 
-  // 360° OTOMATİK TARAMALI SİLAH (weapon: true olan araçlar: 42-66 arabası ve gizli motosiklet; js/gun.js ortak).
-  // Araç hangi yöne bakarsa baksın EKRANDA GÖRÜNEN düşmanlara ateş eder; ekran dışına ateş etmez. Düğme yok, cephane sınırsız.
-  // rate: saniyede mermi (5-10 arası). damage: her merminin sabit hasarı. hp: oyunun başındaki silah canı (tür başına).
-  // Gereken mermi = tavan(hp / damage): polis 22, hızlı polis 22, motor 20, gelişmiş 30, SWAT 55, uzaylı 75/80/88, tank 120.
-  // Yeni çıkanların canı zamanla artar (copHpGrowth), yani bu sayılar en azdır.
+  // 360° OTOMATİK TARAMALI SİLAH (js/gun.js ortak). Araç hangi yöne bakarsa baksın EKRANDA GÖRÜNEN düşmanlara
+  // ateş eder; ekran dışına ateş etmez. Düğme yok, cephane sınırsız. İki kaynak:
+  //   a) Mağazadan alınıp takılan silah (guns tablosu, her arabada). Takılıysa o kullanılır.
+  //   b) Kendi silahı olan araçlar (weapon: true: 42-66 arabası ve gizli motosiklet): takılı silah yoksa dahili silah (builtin).
+  // DÜŞMAN SİLAH CANI = copHp x enemyHits[tür] / 15. enemyHits: Silah 1 ile kaç vuruşta iner (zorluk sırası).
+  // Hasar = copHp / silahın normal polis vuruşu. Yani her silah her düşmanı aynı oranla ölçekli indirir.
   // speed: mermi hızı, life: ömür (sn), inset: hedefin ekran kenarından bu kadar içeride olması gerekir,
   // maxBullets: havuz, maxTracers: aynı anda çizilen iz, hitR: isabet payı.
   // Hedef: önce tehlikeli ve yakın olana ama bekleyen her hedefin önceliği zamanla artar (wait), takılıp kalmaz
   weapon: {
-    rate: 7, damage: 10, speed: 1500, life: 0.75, inset: 8, maxBullets: 24, maxTracers: 18, hitR: 10, spread: 0.035,
-    hp: { car: 220, fast: 220, moto: 200, advanced: 300, swat: 550, dart: 750, blob: 800, crab: 880, tank: 1200 },
+    copHp: 150,
+    // Normal polis (araba, hızlı polis, motosiklet) 15, SWAT 20, ağır takviye 25, uzaylı ok 30, uzaylı balon 35,
+    // uzaylı yengeç 40, tank 45. Yeni tür eklenirse bir sonraki kademe +5 vuruş
+    enemyHits: { car: 15, fast: 15, moto: 15, swat: 20, advanced: 25, dart: 30, blob: 35, crab: 40, tank: 45 },
+    builtin: { every: 100 / 7, hits: 22 }, // 42-66 ve gizli motosiklet: saniyede 7 mermi, normal polis 22 vuruş
+    speed: 1500, life: 0.75, inset: 8, maxBullets: 24, maxTracers: 18, hitR: 10, spread: 0.035,
     danger: { car: 1, fast: 1.1, moto: 0.9, advanced: 1.3, swat: 1.5, dart: 1.7, blob: 1.8, crab: 1.9, tank: 2.2 },
     wait: 3.2, near: 900, maxSparks: 3,
   },
 
-  // ZAMANLA ARTAN POLİS CANI (silah canı, bütün arabalarda). Yeni çıkan polisin canı = hp * min(max, perMin ^ dakika).
-  // Sahadaki polisler değişmez. %12 / dk: 2. dk 1,25x, 5. dk 1,76x, ~9,7. dk'dan sonra 3x tavan
-  copHpGrowth: { perMin: 1.12, max: 3 },
+  // MAĞAZA SİLAHLARI (6 kademe). Parayla alınır, kayıtta saklanır, garajın Silah sekmesinden takılır / çıkarılır.
+  // every: ateş aralığı, SALİSE (1/100 sn; 75 = 0,75 sn). hits: normal polisi kaç vuruşta indirir (1,5 = hasar
+  // polis canının 1/1,5'i, yani 2 vuruşta iner). price: para
+  guns: [
+    { id: 'g1', every: 100, hits: 15, price: 2500 },
+    { id: 'g2', every: 75, hits: 10, price: 6000 },
+    { id: 'g3', every: 50, hits: 7, price: 12000 },
+    { id: 'g4', every: 25, hits: 4, price: 25000 },
+    { id: 'g5', every: 20, hits: 2, price: 45000 },
+    { id: 'g6', every: 10, hits: 1.5, price: 90000 },
+  ],
+
+  // ZAMANLA ARTAN POLİS CANI. Yeni çıkan polisin canı = can * min(max, perMin ^ dakika). v24.2'den beri kapalı (max 1):
+  // silah tablosundaki vuruş sayıları oyunun her anında geçerli. Açmak için ör. { perMin: 1.12, max: 3 }
+  copHpGrowth: { perMin: 1.12, max: 1 },
+
+  // BERSERK KODU: süre (sn) boyunca kazanılan para mul katı. Süre yalnız koşu oynanırken azalır (duraklatma, menü,
+  // arka plan, kapalı uygulama saymaz). Kalan süre kayıtta tutulur, saveEvery saniyede bir yazılır
+  berserk: { seconds: 3600, mul: 2, saveEvery: 5 },
 
   // iPhone/iPad ana ekrana ekle rehberi: delay menü açıldıktan sonra kartın görünme gecikmesi (sn), key kayıt anahtarı
   a2hs: { delay: 1.2, key: 'drift-lab-a2hs' },
@@ -818,8 +839,14 @@ const CONFIG = {
   secretCar: { id: 'golge', secret: true, weapon: true, paints: [{ name: 'Gece Nöbeti', color: '#111321', finish: 'gloss', accent: '#21e6ff' }, { name: 'Neon Pembe', color: '#1a0f1f', finish: 'gloss', accent: '#ff2fa0' }, { name: 'Zehir Yeşili', color: '#0f1a14', finish: 'matte', accent: '#39ff7a' }, { name: 'Gümüş Hayalet', color: '#c9d1dc', finish: 'metal', accent: '#7a2cff' }], finish: 'gloss', name: 'Gölge R', cost: 0, desc: 'Gizli geçidin hediyesi', shape: 'golge', maxSpeed: 650, accel: 1000, turnRate: 4.1, grip: 5.4, driftGrip: 0.9, durability: 1.5, mass: 0.8, len: 38, wid: 16, color: '#111321', accent: '#21e6ff', engine: { kind: 'beast', cyl: 2, idle: 950, red: 11500, gears: 6, gain: 1.75 }, egzozPatlamaSansi: 0.85 },
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
-  // Yeni kod eklemek için satır eklenir. car: açılan araba
-  codes: [{ code: '4266', car: 'kuzgun' }],
+  // Yeni kod eklemek için satır eklenir. car: açılan araba, coins: para ödülü, berserk: süreli para çarpanı (sn).
+  // Her kod bir kayıtta bir kez kullanılır (storage.usedCodes)
+  codes: [
+    { code: '4266', car: 'kuzgun' },
+    { code: 'DANTE', coins: 3000 },
+    { code: 'BERSERK', berserk: 3600 },
+    { code: 'GUTS', coins: 10000 },
+  ],
 
   // KIL PAYI KAÇIŞ: polis çok yakından geçip çarpmadan atlatılınca anında para.
   // distMul: yakınlık eşiği (araç gövdeleri arasındaki boşluk, oyuncu genişliğinin katı),
@@ -1039,8 +1066,9 @@ const TR = {
   },
   alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!', meteors: 'METEOR YAĞMURU!' },
   escape: { toast: '+{n} KIL PAYI!', makas: '+{n} MAKAS!', combo: 'KOMBO +{n}' },
-  code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.' },
+  code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.', coins: 'Kod kabul edildi! +{n} para.', berserk: 'BERSERK açıldı! {min} dakika boyunca 2 kat para.', used: 'Bu kod zaten kullanıldı.' },
   custom: {
+    gun: 'Silah', guns: { g1: 'Silah 1', g2: 'Silah 2', g3: 'Silah 3', g4: 'Silah 4', g5: 'Silah 5', g6: 'Silah 6' }, gunInfo: '{sec} sn\'de bir ateş · normal polis {hits} vuruş', equip: 'Tak', unequip: 'Çıkar', equipped: 'Silah takıldı!', unequipped: 'Silah çıkarıldı.', gunBought: 'Satın alındı ve takıldı!',
     title: 'Özelleştir', paint: 'Boya', rim: 'Jant', led: 'Alt LED', exhaust: 'Egzoz', listen: 'Dinle', buy: 'Satın al · {cost}', confirm: 'Onayla · {cost}', poor: 'Yetersiz para', bought: 'Satın alındı!', use: 'Zaten açık', ownFirst: 'Özelleştirmek için önce arabayı al.',
     paints: { gece: 'Gece Siyahı', gumus: 'Parlak Gümüş', kiraz: 'Kiraz Kırmızı', okyanus: 'Okyanus Mavisi', zumrut: 'Zümrüt Yeşili', limon: 'Limon Sarısı', mandalina: 'Mandalina', lavanta: 'Mat Lavanta', pembe: 'Şeker Pembe', haki: 'Mat Haki', fume: 'Mat Füme', bakir: 'Bakır', lacivert: 'Lacivert Metalik', neonyesil: 'Neon Yeşil', neonpembe: 'Neon Pembe', mor: 'Elektrik Moru', inci: 'İnci Beyazı', altin: 'Altın', krom: 'Ayna Krom', lav: 'Lav Kırmızısı' },
     rims: { std: 'Standart', bes: 'Beş Kollu', cok: 'Çok Kollu', spor: 'Spor', derin: 'Derin Çanak', turbin: 'Türbin', karbon: 'Karbon', altin: 'Altın' },
@@ -1048,6 +1076,8 @@ const TR = {
     exhausts: { std: 'Standart', v8: 'Gür V8', patlamali: 'Patlamalı', turbo: 'Turbo', spor: 'Spor Tiz', derin: 'Derin Bas' },
     exhaustInfo: { std: 'Fabrika çıkışı, dengeli ses', v8: 'Kalın, gürleyen sekiz silindir', patlamali: 'Gaz bırakınca sık sık pat pat pop', turbo: 'Tiz ıslık ve boşalma sesi', spor: 'Yüksek devirde keskin, tiz çığlık', derin: 'Yeri titreten derin bas' },
   },
+  mix: { title: 'Ses ayarları', music: 'Müzik', sfx: 'Ses efektleri', engine: 'Araba / motor', police: 'Polis sesleri', traffic: 'Trafik', gun: 'Silah sesleri' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK 2× para · {t} kaldı' },
   weather: { title: 'Hava durumu', random: 'Rastgele', sunny: 'Güneşli', rain: 'Yağmurlu', snow: 'Karlı', fog: 'Sisli', ice: 'Buzlu', iceWarn: 'Yol buzlu!' },
   cheat: { on: 'Aferin, hile kodunu buldun la!', off: 'Hile kapatıldı', badge: 'HİLE AÇIK' },
   cars: {
@@ -1143,8 +1173,9 @@ const EN = {
   },
   alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!', meteors: 'METEOR SHOWER!' },
   escape: { toast: '+{n} CLOSE CALL!', makas: '+{n} NEAR MISS!', combo: 'COMBO +{n}' },
-  code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.' },
+  code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.', coins: 'Code accepted! +{n} coins.', berserk: 'BERSERK on! 2× coins for {min} minutes.', used: 'This code has already been used.' },
   custom: {
+    gun: 'Gun', guns: { g1: 'Gun 1', g2: 'Gun 2', g3: 'Gun 3', g4: 'Gun 4', g5: 'Gun 5', g6: 'Gun 6' }, gunInfo: 'Fires every {sec} s · normal police: {hits} hits', equip: 'Equip', unequip: 'Remove', equipped: 'Gun equipped!', unequipped: 'Gun removed.', gunBought: 'Bought and equipped!',
     title: 'Customize', paint: 'Paint', rim: 'Rims', led: 'Underglow', exhaust: 'Exhaust', listen: 'Listen', buy: 'Buy · {cost}', confirm: 'Confirm · {cost}', poor: 'Not enough coins', bought: 'Purchased!', use: 'Already unlocked', ownFirst: 'Buy the car first to customize it.',
     paints: { gece: 'Midnight Black', gumus: 'Bright Silver', kiraz: 'Cherry Red', okyanus: 'Ocean Blue', zumrut: 'Emerald Green', limon: 'Lemon Yellow', mandalina: 'Tangerine', lavanta: 'Matte Lavender', pembe: 'Candy Pink', haki: 'Matte Khaki', fume: 'Matte Smoke Gray', bakir: 'Copper', lacivert: 'Navy Metallic', neonyesil: 'Neon Green', neonpembe: 'Neon Pink', mor: 'Electric Purple', inci: 'Pearl White', altin: 'Gold', krom: 'Mirror Chrome', lav: 'Lava Red' },
     rims: { std: 'Standard', bes: 'Five-Spoke Star', cok: 'Multi-Spoke', spor: 'Sport', derin: 'Deep Dish', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
@@ -1152,6 +1183,8 @@ const EN = {
     exhausts: { std: 'Stock', v8: 'Rumbling V8', patlamali: 'Popper', turbo: 'Turbo', spor: 'Sport Scream', derin: 'Deep Bass' },
     exhaustInfo: { std: 'Factory fitted, balanced sound', v8: 'Thick, roaring eight cylinders', patlamali: 'Pops and bangs whenever you lift off', turbo: 'High whistle and blow-off', spor: 'Sharp, high-revving scream', derin: 'Ground-shaking deep bass' },
   },
+  mix: { title: 'Sound mix', music: 'Music', sfx: 'Sound effects', engine: 'Car / engine', police: 'Police sounds', traffic: 'Traffic', gun: 'Gun sounds' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK 2× coins · {t} left' },
   weather: { title: 'Weather', random: 'Random', sunny: 'Sunny', rain: 'Rainy', snow: 'Snowy', fog: 'Foggy', ice: 'Icy', iceWarn: 'Icy road!' },
   cheat: { on: 'Well, look at you! You found the cheat code!', off: 'Cheat off', badge: 'CHEAT ON' },
   cars: {
@@ -1247,8 +1280,9 @@ const JA = {
   },
   alert: { swat: 'SWAT出動！', heavy: '重装増援！', tanks: '戦車だ！', aliens: 'エイリアン襲来！', meteors: '隕石の雨！' },
   escape: { toast: '+{n} ギリギリ回避！', makas: '+{n} ニアミス！', combo: 'コンボ +{n}' },
-  code: { title: 'コード入力', apply: '適用', ok: 'コード承認！{car}がガレージに追加されたよ。', owned: 'この車はもう持っているよ。', invalid: '無効なコードです。', empty: 'まずコードを入力してね。' },
+  code: { title: 'コード入力', apply: '適用', ok: 'コード承認！{car}がガレージに追加されたよ。', owned: 'この車はもう持っているよ。', invalid: '無効なコードです。', empty: 'まずコードを入力してね。', coins: 'コード承認！+{n} コイン。', berserk: 'BERSERK 発動！{min} 分間コイン2倍。', used: 'このコードはもう使われています。' },
   custom: {
+    gun: '武器', guns: { g1: '武器 1', g2: '武器 2', g3: '武器 3', g4: '武器 4', g5: '武器 5', g6: '武器 6' }, gunInfo: '{sec} 秒ごとに発射 · 通常パトカー {hits} 発', equip: '装備', unequip: '外す', equipped: '武器を装備した！', unequipped: '武器を外した。', gunBought: '購入して装備した！',
     title: 'カスタマイズ', paint: '塗装', rim: 'ホイール', led: 'アンダーネオン', exhaust: 'マフラー', listen: '試聴', buy: '購入 · {cost}', confirm: '確認 · {cost}', poor: 'コインが足りません', bought: '購入しました！', use: '解放済み', ownFirst: 'カスタマイズするには先に車を買おう。',
     paints: { gece: 'ミッドナイトブラック', gumus: 'ブライトシルバー', kiraz: 'チェリーレッド', okyanus: 'オーシャンブルー', zumrut: 'エメラルドグリーン', limon: 'レモンイエロー', mandalina: 'タンジェリン', lavanta: 'マット・ラベンダー', pembe: 'キャンディピンク', haki: 'マット・カーキ', fume: 'マット・スモークグレー', bakir: 'カッパー', lacivert: 'ネイビーメタリック', neonyesil: 'ネオングリーン', neonpembe: 'ネオンピンク', mor: 'エレクトリックパープル', inci: 'パールホワイト', altin: 'ゴールド', krom: 'ミラークローム', lav: 'ラヴァレッド' },
     rims: { std: 'スタンダード', bes: '5本スポーク', cok: 'マルチスポーク', spor: 'スポーツ', derin: 'ディープリム', turbin: 'タービン', karbon: 'カーボン', altin: 'ゴールド' },
@@ -1256,6 +1290,8 @@ const JA = {
     exhausts: { std: 'ノーマル', v8: '轟音V8', patlamali: 'アフターファイア', turbo: 'ターボ', spor: 'スポーツ高音', derin: '重低音' },
     exhaustInfo: { std: 'メーカー純正のバランスの良い音', v8: '太く轟く8気筒サウンド', patlamali: 'アクセルを戻すとパンパン鳴る', turbo: '甲高いタービン音とブローオフ', spor: '高回転で鋭く響く高音', derin: '地面を揺らす重低音' },
   },
+  mix: { title: 'サウンド設定', music: '音楽', sfx: '効果音', engine: '車 / エンジン', police: 'パトカーの音', traffic: '交通', gun: '銃の音' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK コイン2倍 · 残り {t}' },
   weather: { title: '天気', random: 'ランダム', sunny: '晴れ', rain: '雨', snow: '雪', fog: '霧', ice: '凍結', iceWarn: '路面凍結！' },
   cheat: { on: 'やるじゃん！隠しコマンドを見つけたね！', off: 'チート解除', badge: 'チートON' },
   cars: {
@@ -1351,8 +1387,9 @@ const ZH = {
   },
   alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！', meteors: '流星雨来袭！' },
   escape: { toast: '+{n} 惊险脱身！', makas: '+{n} 擦肩而过！', combo: '连击 +{n}' },
-  code: { title: '输入代码', apply: '确定', ok: '代码已接受！{car} 已加入你的车库。', owned: '这辆车你已经有了。', invalid: '无效代码。', empty: '请先输入代码。' },
+  code: { title: '输入代码', apply: '确定', ok: '代码已接受！{car} 已加入你的车库。', owned: '这辆车你已经有了。', invalid: '无效代码。', empty: '请先输入代码。', coins: '代码已接受！+{n} 金币。', berserk: 'BERSERK 已开启！{min} 分钟内金币翻倍。', used: '此代码已经使用过了。' },
   custom: {
+    gun: '武器', guns: { g1: '武器 1', g2: '武器 2', g3: '武器 3', g4: '武器 4', g5: '武器 5', g6: '武器 6' }, gunInfo: '每 {sec} 秒射击 · 普通警车 {hits} 发', equip: '装备', unequip: '卸下', equipped: '武器已装备！', unequipped: '武器已卸下。', gunBought: '已购买并装备！',
     title: '改装', paint: '涂装', rim: '轮毂', led: '底盘灯', exhaust: '排气', listen: '试听', buy: '购买 · {cost}', confirm: '确认 · {cost}', poor: '金币不足', bought: '购买成功！', use: '已解锁', ownFirst: '先购买这辆车才能改装。',
     paints: { gece: '午夜黑', gumus: '亮银', kiraz: '樱桃红', okyanus: '海洋蓝', zumrut: '祖母绿', limon: '柠檬黄', mandalina: '橘橙', lavanta: '哑光薰衣草', pembe: '糖果粉', haki: '哑光卡其', fume: '哑光烟灰', bakir: '古铜', lacivert: '藏青金属', neonyesil: '霓虹绿', neonpembe: '霓虹粉', mor: '电光紫', inci: '珍珠白', altin: '金色', krom: '镜面铬', lav: '熔岩红' },
     rims: { std: '标准', bes: '五辐星形', cok: '多辐', spor: '运动', derin: '深唇', turbin: '涡轮', karbon: '碳纤维', altin: '金色' },
@@ -1360,6 +1397,8 @@ const ZH = {
     exhausts: { std: '原厂', v8: '轰鸣V8', patlamali: '回火爆鸣', turbo: '涡轮', spor: '运动高音', derin: '深沉低音' },
     exhaustInfo: { std: '原厂配置，声音均衡', v8: '浑厚轰鸣的八缸声浪', patlamali: '松油门时噼啪回火', turbo: '尖锐的涡轮啸叫与泄压声', spor: '高转速下尖锐的嘶吼', derin: '震撼地面的深沉低音' },
   },
+  mix: { title: '声音设置', music: '音乐', sfx: '音效', engine: '汽车 / 引擎', police: '警车声音', traffic: '交通', gun: '枪声' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK 金币翻倍 · 剩余 {t}' },
   weather: { title: '天气', random: '随机', sunny: '晴天', rain: '雨天', snow: '雪天', fog: '雾天', ice: '结冰', iceWarn: '路面结冰！' },
   cheat: { on: '可以啊，你找到作弊码了！', off: '作弊已关闭', badge: '作弊已开启' },
   cars: {
@@ -1455,8 +1494,9 @@ const ES = {
   },
   alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!', meteors: '¡LLUVIA DE METEORITOS!' },
   escape: { toast: '+{n} ¡POR LOS PELOS!', makas: '+{n} ¡RASANTE!', combo: 'COMBO +{n}' },
-  code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.' },
+  code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.', coins: '¡Código aceptado! +{n} monedas.', berserk: '¡BERSERK activado! Monedas 2× durante {min} minutos.', used: 'Este código ya se ha usado.' },
   custom: {
+    gun: 'Arma', guns: { g1: 'Arma 1', g2: 'Arma 2', g3: 'Arma 3', g4: 'Arma 4', g5: 'Arma 5', g6: 'Arma 6' }, gunInfo: 'Dispara cada {sec} s · policía normal: {hits} impactos', equip: 'Equipar', unequip: 'Quitar', equipped: '¡Arma equipada!', unequipped: 'Arma quitada.', gunBought: '¡Comprada y equipada!',
     title: 'Personalizar', paint: 'Pintura', rim: 'Llantas', led: 'Luz inferior', exhaust: 'Escape', listen: 'Escuchar', buy: 'Comprar · {cost}', confirm: 'Confirmar · {cost}', poor: 'Monedas insuficientes', bought: '¡Comprado!', use: 'Ya desbloqueado', ownFirst: 'Compra el coche para personalizarlo.',
     paints: { gece: 'Negro medianoche', gumus: 'Plata brillante', kiraz: 'Rojo cereza', okyanus: 'Azul océano', zumrut: 'Verde esmeralda', limon: 'Amarillo limón', mandalina: 'Mandarina', lavanta: 'Lavanda mate', pembe: 'Rosa chicle', haki: 'Caqui mate', fume: 'Gris humo mate', bakir: 'Cobre', lacivert: 'Azul marino metalizado', neonyesil: 'Verde neón', neonpembe: 'Rosa neón', mor: 'Morado eléctrico', inci: 'Blanco perla', altin: 'Oro', krom: 'Cromo espejo', lav: 'Rojo lava' },
     rims: { std: 'Estándar', bes: 'Estrella de 5 radios', cok: 'Multirradio', spor: 'Deportiva', derin: 'Plato hondo', turbin: 'Turbina', karbon: 'Carbono', altin: 'Oro' },
@@ -1464,6 +1504,8 @@ const ES = {
     exhausts: { std: 'Estándar', v8: 'V8 Rugiente', patlamali: 'Petardeo', turbo: 'Turbo', spor: 'Deportivo agudo', derin: 'Bajo profundo' },
     exhaustInfo: { std: 'De fábrica, sonido equilibrado', v8: 'Ocho cilindros gruesos y rugientes', patlamali: 'Petardea al soltar el acelerador', turbo: 'Silbido agudo y soplido de válvula', spor: 'Grito agudo a altas revoluciones', derin: 'Bajo profundo que hace temblar el suelo' },
   },
+  mix: { title: 'Ajustes de sonido', music: 'Música', sfx: 'Efectos de sonido', engine: 'Coche / motor', police: 'Sonidos de policía', traffic: 'Tráfico', gun: 'Sonidos de armas' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK monedas 2× · quedan {t}' },
   weather: { title: 'Clima', random: 'Aleatorio', sunny: 'Soleado', rain: 'Lluvia', snow: 'Nieve', fog: 'Niebla', ice: 'Hielo', iceWarn: '¡Carretera helada!' },
   cheat: { on: '¡Toma ya! ¡Has encontrado el truco secreto!', off: 'Truco desactivado', badge: 'TRUCO ACTIVO' },
   cars: {
@@ -1559,8 +1601,9 @@ const DE = {
   },
   alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!', meteors: 'METEORITENHAGEL!' },
   escape: { toast: '+{n} HAARSCHARF!', makas: '+{n} KNAPP VORBEI!', combo: 'COMBO +{n}' },
-  code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.' },
+  code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.', coins: 'Code akzeptiert! +{n} Münzen.', berserk: 'BERSERK aktiv! {min} Minuten lang doppelte Münzen.', used: 'Dieser Code wurde bereits verwendet.' },
   custom: {
+    gun: 'Waffe', guns: { g1: 'Waffe 1', g2: 'Waffe 2', g3: 'Waffe 3', g4: 'Waffe 4', g5: 'Waffe 5', g6: 'Waffe 6' }, gunInfo: 'Feuert alle {sec} s · normale Polizei: {hits} Treffer', equip: 'Anbauen', unequip: 'Abbauen', equipped: 'Waffe angebaut!', unequipped: 'Waffe abgebaut.', gunBought: 'Gekauft und angebaut!',
     title: 'Anpassen', paint: 'Lack', rim: 'Felgen', led: 'Unterboden', exhaust: 'Auspuff', listen: 'Anhören', buy: 'Kaufen · {cost}', confirm: 'Bestätigen · {cost}', poor: 'Nicht genug Münzen', bought: 'Gekauft!', use: 'Schon freigeschaltet', ownFirst: 'Kaufe zuerst das Auto, um es anzupassen.',
     paints: { gece: 'Mitternachtsschwarz', gumus: 'Hellsilber', kiraz: 'Kirschrot', okyanus: 'Ozeanblau', zumrut: 'Smaragdgrün', limon: 'Zitronengelb', mandalina: 'Mandarine', lavanta: 'Mattes Lavendel', pembe: 'Bonbonrosa', haki: 'Mattes Khaki', fume: 'Mattes Rauchgrau', bakir: 'Kupfer', lacivert: 'Marineblau Metallic', neonyesil: 'Neongrün', neonpembe: 'Neonpink', mor: 'Elektrolila', inci: 'Perlweiß', altin: 'Gold', krom: 'Spiegelchrom', lav: 'Lavarot' },
     rims: { std: 'Standard', bes: 'Fünfspeichen-Stern', cok: 'Vielspeichen', spor: 'Sport', derin: 'Tiefbett', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
@@ -1568,6 +1611,8 @@ const DE = {
     exhausts: { std: 'Serie', v8: 'Grollender V8', patlamali: 'Fehlzündung', turbo: 'Turbo', spor: 'Sport hell', derin: 'Tiefer Bass' },
     exhaustInfo: { std: 'Ab Werk, ausgewogener Klang', v8: 'Dicker, grollender Achtzylinder', patlamali: 'Knallt beim Gaswegnehmen', turbo: 'Hohes Pfeifen und Abblasen', spor: 'Scharfer, hochdrehender Schrei', derin: 'Bodenerschütternder tiefer Bass' },
   },
+  mix: { title: 'Sound-Einstellungen', music: 'Musik', sfx: 'Soundeffekte', engine: 'Auto / Motor', police: 'Polizeigeräusche', traffic: 'Verkehr', gun: 'Waffengeräusche' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK 2× Münzen · noch {t}' },
   weather: { title: 'Wetter', random: 'Zufall', sunny: 'Sonnig', rain: 'Regen', snow: 'Schnee', fog: 'Nebel', ice: 'Glatteis', iceWarn: 'Achtung, Glatteis!' },
   cheat: { on: 'Na sieh mal einer an – du hast den Cheatcode gefunden!', off: 'Cheat aus', badge: 'CHEAT AN' },
   cars: {
@@ -4997,16 +5042,17 @@ class Crowd {
 }
 
 // --- gun.js ---
-// 360° OTOMATİK TARAMALI SİLAH: weapon: true olan bütün araçların ORTAK bileşeni (42-66 arabası ve gizli motosiklet).
-// Araç hangi yöne bakarsa baksın ekranda görünen düşmanlara sırayla ateş eder; ekran dışındakine ateş etmez.
-// Küçük hızlı mermiler, sabit hasar, sınırsız cephane, düğme yok. Mermiler havuzdan gelir: oyun sırasında bellek ayrılmaz.
+// 360° OTOMATİK TARAMALI SİLAH: mağazadan takılan 6 kademeli silahların ve kendi silahı olan araçların (42-66 arabası,
+// gizli motosiklet) ORTAK bileşeni. Araç hangi yöne bakarsa baksın ekranda görünen düşmanlara sırayla ateş eder;
+// ekran dışındakine ateş etmez. Hedefin varış anındaki yerine nişan alır. Sınırsız cephane, düğme yok.
+// Mermiler havuzdan gelir: oyun sırasında bellek ayrılmaz.
 // Korunan alanlara (anıt, gizli geçit, stadyum) giren mermi kaybolur; o alanların ardındaki hedefe nişan alınmaz.
 
 const GUN = CONFIG.weapon;
 const GUN_D = CONFIG.difficulty;
 const GUN_GROW = CONFIG.copHpGrowth;
 
-// Türün oyuna ilk girdiği saniye: can artışı o andan sayılır, yani her tür ilk çıktığında tablodaki mermi sayısıyla ölür
+// Türün oyuna ilk girdiği saniye: can artışı (açıksa) o andan sayılır
 function gunFirstAt(type) {
   if (type === 'swat') return GUN_D.swatAt;
   if (type === 'advanced') return GUN_D.advancedAt;
@@ -5015,20 +5061,44 @@ function gunFirstAt(type) {
   return 0;
 }
 
-// Yeni çıkan düşmanın silah canı: temel can x zamanla artan kat (tavanlı, hiç 1'in altına inmez)
-function gunHp(type, time) {
-  const base = GUN.hp[type] || GUN.hp.car;
-  const minutes = Math.max(0, time - gunFirstAt(type)) / 60;
-  return base * Math.min(GUN_GROW.max, GUN_GROW.perMin ** minutes);
+// Türün Silah 1 ile vuruş sayısı (zorluk kademesi). Tabloda olmayan tür en zor kademeden 5 fazla sayılır
+function enemyHits(type) {
+  const t = GUN.enemyHits;
+  if (t[type]) return t[type];
+  return Math.max(...Object.values(t)) + 5;
 }
 
-// Gereken mermi sayısı
-function bulletsToKill(type, time = gunFirstAt(type)) {
-  return Math.ceil(gunHp(type, time) / GUN.damage - 1e-9);
+// Temel silah canı: normal polis canı x kademe vuruşu / 15
+function gunBaseHp(type) {
+  return (GUN.copHp * enemyHits(type)) / GUN.enemyHits.car;
+}
+
+// Yeni çıkan düşmanın silah canı: temel can x zamanla artan kat (copHpGrowth, tavanlı; max 1 = kapalı)
+function gunHp(type, time) {
+  const minutes = Math.max(0, time - gunFirstAt(type)) / 60;
+  return gunBaseHp(type) * Math.min(GUN_GROW.max, GUN_GROW.perMin ** minutes);
+}
+
+// Silahın oyun değerleri: ateş aralığı (sn), saniyede mermi, mermi hasarı
+function gunStats(spec) {
+  const every = spec.every / 100;
+  return { id: spec.id || 'builtin', every, rate: 1 / every, damage: GUN.copHp / spec.hits, hits: spec.hits };
+}
+const gunSpec = (id) => CONFIG.guns.find((g) => g.id === id) || null;
+const BUILTIN = gunStats({ id: 'builtin', ...GUN.builtin });
+
+// Kayan nokta payı: 150 / 7 hasarın 7 katı canı tam bitirir
+const KILL_EPS = 1e-6;
+const gunDead = (mhp) => mhp <= KILL_EPS;
+
+// Gereken mermi sayısı (stats: gunStats; verilmezse dahili silah)
+function bulletsToKill(type, time = gunFirstAt(type), stats = BUILTIN) {
+  return Math.max(1, Math.ceil(gunHp(type, time) / stats.damage - 1e-6));
 }
 
 class AutoGun {
   constructor() {
+    this.stats = BUILTIN; // Takılı silah: game.start belirler (setGun)
     this.bullets = [];
     for (let i = 0; i < GUN.maxBullets; i++) this.bullets.push({ alive: false, x: 0, y: 0, px: 0, py: 0, vx: 0, vy: 0, t: 0 });
     this.reset();
@@ -5046,6 +5116,10 @@ class AutoGun {
     for (const b of this.bullets) b.alive = false;
   }
 
+  setGun(stats) {
+    this.stats = stats || BUILTIN;
+  }
+
   // Hedef ekranda mı: kenardan inset kadar içeride olmalı
   visible(game, c) {
     const cam = game.cam;
@@ -5059,7 +5133,7 @@ class AutoGun {
     let bs = -1e9;
     let n = 0;
     for (const c of game.cops) {
-      if (c.hp <= 0 || c.sinkT > 0 || !this.visible(game, c)) continue;
+      if (c.hp <= 0 || gunDead(c.mhp) || c.sinkT > 0 || !this.visible(game, c)) continue;
       if (game.world.segmentProtected(p.x, p.y, c.x, c.y)) continue;
       n++;
       const d = Math.hypot(c.x - p.x, c.y - p.y);
@@ -5100,12 +5174,12 @@ class AutoGun {
     if (this.flash > 0) this.flash -= dt;
     this.cd -= dt;
     if (game.state === 'play') {
-      // Düşük kare hızında da saniyede rate mermi: bir karede en çok üç
+      // Düşük kare hızında da ateş aralığı korunur: bir karede en çok üç mermi
       let k = 0;
       while (this.cd <= 0 && k < 3) {
         const c = this.pick(game);
         if (!c || !this.shoot(game, c)) { this.cd = 0; break; } // Hedef yokken süre birikmez
-        this.cd += 1 / GUN.rate;
+        this.cd += this.stats.every;
         k++;
       }
       if (this.target && (this.target.hp <= 0 || !game.cops.includes(this.target))) this.target = null;
@@ -5351,6 +5425,7 @@ const PU = CONFIG.pursuit;
 const ESC = CONFIG.escape;
 const WPN = CONFIG.weapon;
 const HPG = CONFIG.copHpGrowth;
+const BZ = CONFIG.berserk;
 const SEC = CONFIG.secret;
 const VW = CONFIG.vehWater;
 const RB = CONFIG.roadblock;
@@ -5490,6 +5565,8 @@ class Game {
     // 360° taramalı silah (weapon: true olan araçlar) ve meteor yağmuru: havuzlu, oyun sırasında bellek ayrılmaz
     this.gun = new AutoGun();
     this.weapon = null;
+    this.gunId = ''; // Mağazadan takılı silah (boş: yok)
+    this.berserkT = 0; // Berserk kodunun kalan süresi (sn): main.js kayıttan verir, geri yazar
     this.meteors = new MeteorStorm();
     this.alienLimit = AL.desktopCap; // Dokunmatikte main.js telefon tavanını verir
     // Hava: tür, yoğunluk (0-1, yumuşak geçiş) ve zemin tutuşları (oyuncu, polis). Bellek ayrılmaz
@@ -5599,7 +5676,7 @@ class Game {
     this.result = null;
   }
 
-  start(carSpec, { startTime = CONFIG.dev.startTime, god = CONFIG.dev.godMode, seed = (Math.random() * 1e9) | 0, keepWorld = false, weather = 'sunny' } = {}) {
+  start(carSpec, { startTime = CONFIG.dev.startTime, god = CONFIG.dev.godMode, seed = (Math.random() * 1e9) | 0, keepWorld = false, weather = 'sunny', gun = '' } = {}) {
     this.carSpec = carSpec;
     // Menüde hazırlanan dünya aynı havayla kullanılır: çizilmiş zemin yeniden işlenmez
     if (!keepWorld || this.weatherSetting !== weather) this.weather = pickWeather(weather);
@@ -5610,7 +5687,11 @@ class Game {
     this.god = god;
     if (!keepWorld) this.world.reset(seed);
     this.resetRun(startTime);
-    this.weapon = carSpec.weapon ? this.gun : null;
+    // Takılı mağaza silahı her arabada çalışır ve dahili silahın yerini alır; yoksa kendi silahı olan araçta dahili silah
+    const gs = gunSpec(gun);
+    this.gunId = gs ? gs.id : '';
+    this.gun.setGun(gs ? gunStats(gs) : BUILTIN);
+    this.weapon = gs || carSpec.weapon ? this.gun : null;
     this.dayT = 0;
     dayState(0, this.daylight);
     resetBody(this.player, 100, 300, Math.PI / 2, carSpec);
@@ -5764,6 +5845,13 @@ class Game {
     this.updateDamage(dt);
     if (this.warnT > 0) this.warnT -= dt;
     if (this.hitFlash > 0) this.hitFlash -= dt * 3;
+    // Berserk süresi yalnız oynanan koşuda akar (duraklatma, menü ve arka planda tick çağrılmaz)
+    if (this.berserkT > 0) this.berserkT = Math.max(0, this.berserkT - dt);
+  }
+
+  // Berserk açıkken kazanılan para katı
+  coinMul() {
+    return this.berserkT > 0 ? BZ.mul : 1;
   }
 
   tickDying(dt) {
@@ -6244,7 +6332,7 @@ class Game {
             const m = CONFIG.coin.magnet;
             if (dx * dx + dy * dy < m * m) {
               pr.alive = false;
-              this.coins++;
+              this.coins += this.coinMul();
               this.fx.burst(FX.GLINT, pr.x, pr.y, 6, 110, 0.4, 5);
               this.emit('coin');
             }
@@ -6559,14 +6647,16 @@ class Game {
   }
 
   // --- 360° taramalı silah (js/gun.js): isabet ---
-  // Her mermi sabit hasar. Silah canı (mhp) biterse araç patlar; çarpışma canı (hp) da aynı oranda düşer: duman, yanıp sönme
+  // Her mermi takılı silahın sabit hasarı. Silah canı (mhp) biterse araç patlar; çarpışma canı (hp) da aynı oranda düşer
   hitCop(c, x, y) {
     const full = c.mhpMax || gunHp(c.type, this.time);
-    c.mhp -= WPN.damage;
-    c.hp = Math.min(c.hp - (c.maxHp * WPN.damage) / full, (c.maxHp * c.mhp) / full);
-    if (c.mhp <= 0) { c.hp = -1; c.byWeapon = true; }
+    const dmg = this.gun.stats.damage;
+    c.mhp -= dmg;
+    c.hp = Math.min(c.hp - (c.maxHp * dmg) / full, (c.maxHp * c.mhp) / full);
+    const dead = gunDead(c.mhp);
+    if (dead) { c.mhp = 0; c.hp = -1; c.byWeapon = true; }
     c.hurtFlash = 0.12;
-    return c.mhp <= 0;
+    return dead;
   }
 
   gunHit(c, x, y) {
@@ -6635,7 +6725,7 @@ class Game {
 
   rewardPass(o) {
     const [lo, hi] = OD.makasPara;
-    const amount = lo + Math.floor(Math.random() * (hi - lo + 1));
+    const amount = (lo + Math.floor(Math.random() * (hi - lo + 1))) * this.coinMul();
     this.coins += amount;
     this.escCoins += amount;
     this.passes++;
@@ -6666,9 +6756,10 @@ class Game {
 
   rewardEscape(c) {
     const [lo, hi] = OD.polisPara;
-    const amount = lo + Math.floor(Math.random() * (hi - lo + 1));
+    const mul = this.coinMul();
+    const amount = (lo + Math.floor(Math.random() * (hi - lo + 1))) * mul;
     this.escCombo = this.runTime - this.escLastT <= ESC.comboWindow ? this.escCombo + 1 : 1;
-    const bonus = this.escCombo % ESC.comboEvery === 0 ? ESC.comboBonus : 0;
+    const bonus = this.escCombo % ESC.comboEvery === 0 ? ESC.comboBonus * mul : 0;
     const total = amount + bonus;
     this.coins += total;
     this.escCoins += total;
@@ -7184,7 +7275,7 @@ class Game {
       c.staticBody = true;
       c.roadblock = true;
       c.wakeT = 1e9;
-      c.mhpMax = WPN.hp.car; c.mhp = c.mhpMax; // Taramayla ~22 mermide patlar
+      c.mhpMax = gunBaseHp('car'); c.mhp = c.mhpMax; // Normal polis kadar: Silah 1 ile 15 vuruş
       r.cars.push(c);
     }
     r.made++;
@@ -16679,6 +16770,12 @@ class ControlView {
 
 const KEY = 'drift-lab-v1';
 
+// Ayrı ses grupları (0-100). Ana ses düzeyi (volume) hepsinin üstündedir
+const SOUND_GROUPS = ['music', 'sfx', 'engine', 'police', 'traffic', 'gun'];
+const defaultVols = () => Object.fromEntries(SOUND_GROUPS.map((k) => [k, 100]));
+// Kod metni: büyük/küçük harf, boşluk, tire ve diğer işaretler fark etmez ("  dante " = "DANTE")
+const normCode = (text) => String(text || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+
 // v24.2: beş kollu jantın kimliği 'bes' oldu. Eski kayıttaki bilinmeyen jant kimliği o janttır (başka jant
 // kimliği hiç değişmedi); satın alınmış jant kaybolmasın diye 'bes' sayılır
 const rimId = (id) => (typeof id !== 'string' || itemOf('rim', id) ? id : 'bes');
@@ -16690,13 +16787,17 @@ function defaultSave() {
     coins: 0,
     owned: [CONFIG.cars[0].id],
     selected: CONFIG.cars[0].id,
-    settings: { sound: true, vibrate: true, ambient: true, volume: 80, quality: 'auto', qLevel: -1, control: 'zones', lang: '', weather: 'random' },
+    settings: { sound: true, vibrate: true, ambient: true, volume: 80, vols: defaultVols(), quality: 'auto', qLevel: -1, control: 'zones', lang: '', weather: 'random' },
     dev: { god: false, startTime: 0 },
     tutorial: false,
     paints: {},
     custom: {}, // araba -> { rim, led, exhaust }
     unlocked: { paints: [], rims: [], leds: [], exhausts: [] }, // satın alınan özelleştirmeler
     secret: false, // Gizli geçit bulundu: gizli motosiklet garajda
+    usedCodes: [], // Kullanılmış para / süre kodları: her biri bir kayıtta bir kez
+    berserk: 0, // Berserk kodunun kalan süresi (sn), yalnız oynarken azalır
+    guns: [], // Satın alınan silahlar
+    gun: '', // Takılı silah (boş: yok)
   };
 }
 
@@ -16721,6 +16822,12 @@ function sanitize(data) {
     d.settings.vibrate = data.settings.vibrate !== false;
     d.settings.ambient = data.settings.ambient !== false;
     if (Number.isFinite(data.settings.volume)) d.settings.volume = Math.max(0, Math.min(100, data.settings.volume));
+    if (data.settings.vols && typeof data.settings.vols === 'object') {
+      for (const k of SOUND_GROUPS) {
+        const v = data.settings.vols[k];
+        if (Number.isFinite(v)) d.settings.vols[k] = Math.max(0, Math.min(100, Math.round(v)));
+      }
+    }
     if (['auto', 'high', 'low'].includes(data.settings.quality)) d.settings.quality = data.settings.quality;
     if (Number.isInteger(data.settings.qLevel) && data.settings.qLevel >= -1 && data.settings.qLevel <= 3) d.settings.qLevel = data.settings.qLevel;
     if (['zones', 'wheel', 'stick'].includes(data.settings.control)) d.settings.control = data.settings.control;
@@ -16732,6 +16839,10 @@ function sanitize(data) {
     d.dev.startTime = num(data.dev.startTime);
   }
   d.tutorial = data.tutorial === true;
+  if (Array.isArray(data.usedCodes)) d.usedCodes = [...new Set(data.usedCodes.map(normCode).filter((c) => CONFIG.codes.some((k) => k.code === c)))];
+  d.berserk = Math.min(CONFIG.berserk.seconds, num(data.berserk));
+  if (Array.isArray(data.guns)) d.guns = [...new Set(data.guns.filter((id) => CONFIG.guns.some((g) => g.id === id)))];
+  if (d.guns.includes(data.gun)) d.gun = data.gun;
   if (data.paints && typeof data.paints === 'object') {
     for (const c of [...CONFIG.cars, CONFIG.secretCar]) {
       const i = data.paints[c.id];
@@ -16839,9 +16950,10 @@ class Storage {
     return cut;
   }
 
-  // Gizli kod: 'ok' açıldı, 'owned' zaten sende, 'invalid' geçersiz
+  // Gizli kod. Araba kodu: 'ok' açıldı, 'owned' zaten sende. Para kodu: 'coins'. Berserk: 'berserk'.
+  // Para ve süre kodları bir kayıtta bir kez: ikincisinde 'used'. Yanlış kod: 'invalid'
   redeem(text) {
-    const code = String(text || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+    const code = normCode(text);
     const entry = code && CONFIG.codes.find((k) => k.code === code);
     if (!entry) return 'invalid';
     const d = this.data;
@@ -16849,8 +16961,47 @@ class Storage {
       if (d.owned.includes(entry.car)) return 'owned';
       d.owned.push(entry.car);
       this.save();
+      return 'ok';
     }
+    if (d.usedCodes.includes(code)) return 'used';
+    d.usedCodes.push(code);
+    let r = 'ok';
+    if (entry.coins) { d.coins += entry.coins; r = 'coins'; }
+    if (entry.berserk) { d.berserk = Math.min(CONFIG.berserk.seconds, d.berserk + entry.berserk); r = 'berserk'; }
+    this.save();
+    return r;
+  }
+
+  // Berserk kalan süresi (oyun sırasında main.js yazar)
+  setBerserk(sec, save = true) {
+    this.data.berserk = Math.max(0, Math.min(CONFIG.berserk.seconds, Number(sec) || 0));
+    if (save) this.save();
+  }
+
+  // --- Silahlar: 'ok' alındı (ve takıldı), 'owned' zaten var, 'poor' para yetmiyor, 'invalid' yok ---
+  ownsGun(id) {
+    return this.data.guns.includes(id);
+  }
+
+  buyGun(id) {
+    const g = CONFIG.guns.find((k) => k.id === id);
+    if (!g) return 'invalid';
+    const d = this.data;
+    if (d.guns.includes(id)) return 'owned';
+    if (d.coins < g.price) return 'poor';
+    d.coins -= g.price;
+    d.guns.push(id);
+    d.gun = id;
+    this.save();
     return 'ok';
+  }
+
+  // Satın alınmış silahı takar; boş kimlik silahı çıkarır
+  equipGun(id) {
+    if (id && !this.ownsGun(id)) return false;
+    this.data.gun = id || '';
+    this.save();
+    return true;
   }
 
   // Seçili arabanın görünüşü: boya, jant, alt LED
@@ -16975,6 +17126,28 @@ class AudioEngine {
     this.coinAt = 0;
     this.master = null;
     this.running = false;
+    // Ses grupları: her biri ana sesin altında ayrı kazanç. cur: o an çalınan kısa sesin grubu (via)
+    this.vols = { music: 1, sfx: 1, engine: 1, police: 1, traffic: 1, gun: 1 };
+    this.buses = null;
+    this.cur = null;
+  }
+
+  // Grup ses düzeyi (0-1): müzik, ses efektleri, oyuncu motoru, polis, trafik, silah
+  setGroupVolume(name, v) {
+    if (!(name in this.vols)) return;
+    this.vols[name] = Math.max(0, Math.min(1, v));
+    if (this.buses) this.buses[name].gain.setTargetAtTime(this.vols[name], this.ctx.currentTime, 0.02);
+  }
+
+  // Kısa sesleri bir gruba yönlendirir: fn içinde çalan tone / burst o grubun kazancından geçer
+  via(name, fn) {
+    const prev = this.cur;
+    this.cur = this.buses ? this.buses[name] : null;
+    try { fn(); } finally { this.cur = prev; }
+  }
+
+  out() {
+    return this.cur || (this.buses ? this.buses.sfx : this.master);
   }
 
   // Tarayıcılar sesi yalnızca kullanıcı dokunuşundan sonra başlatır
@@ -17008,6 +17181,13 @@ class AudioEngine {
     comp.connect(ceil);
     this.limiter = comp;
     ceil.connect(ctx.destination);
+    this.buses = {};
+    for (const k of Object.keys(this.vols)) {
+      const g = ctx.createGain();
+      g.gain.value = this.vols[k];
+      g.connect(this.master);
+      this.buses[k] = g;
+    }
     this.shots = 0; // Aynı anda çalan kısa ses sayısı
 
     // Beyaz gürültü tamponu: drift, çarpma, patlama
@@ -17032,7 +17212,7 @@ class AudioEngine {
     this.engFilter.connect(this.engRough);
     this.engRough.connect(this.engShaper);
     this.engShaper.connect(this.engGain);
-    this.engGain.connect(this.master);
+    this.engGain.connect(this.buses.engine);
     const sub = ctx.createOscillator();
     sub.type = 'sine';
     const subG = ctx.createGain();
@@ -17095,7 +17275,7 @@ class AudioEngine {
     this.driftGain.gain.value = 0;
     nsrc.connect(this.driftFilter);
     this.driftFilter.connect(this.driftGain);
-    this.driftGain.connect(this.master);
+    this.driftGain.connect(this.buses.engine);
     nsrc.start();
 
     // Sokak uğultusu: çok kısık alçak gürültü
@@ -17109,7 +17289,7 @@ class AudioEngine {
     this.ambGain.gain.value = this.ambientOn ? 0.035 : 0;
     ambSrc.connect(ambF);
     ambF.connect(this.ambGain);
-    this.ambGain.connect(this.master);
+    this.ambGain.connect(this.buses.sfx);
     // Yağmur: aynı gürültüden ince, sürekli hışırtı
     const rainSrc = ctx.createBufferSource();
     rainSrc.buffer = this.noise;
@@ -17123,7 +17303,7 @@ class AudioEngine {
     this.rainGain.gain.value = 0;
     rainSrc.connect(rainF);
     rainF.connect(this.rainGain);
-    this.rainGain.connect(this.master);
+    this.rainGain.connect(this.buses.sfx);
     rainSrc.start();
     ambSrc.start();
     this.setEngine(this.engine);
@@ -17139,7 +17319,7 @@ class AudioEngine {
     this.tyreGain.gain.value = 0;
     this.tyreOsc.connect(tyreF);
     tyreF.connect(this.tyreGain);
-    this.tyreGain.connect(this.master);
+    this.tyreGain.connect(this.buses.engine);
     this.tyreOsc.start();
 
     // Dört farklı siren: her tür en yakın aracına göre ayrı çalar
@@ -17157,7 +17337,7 @@ class AudioEngine {
       gain.gain.value = 0;
       osc.connect(f);
       f.connect(gain);
-      gain.connect(this.master);
+      gain.connect(this.buses.police);
       osc.start();
       this.voices[name] = { osc, gain };
     };
@@ -17208,8 +17388,10 @@ class AudioEngine {
     this.pv = { mode, at: this.ctx.currentTime, len: mode === 'start' ? 1.5 : 1.25 };
     if (mode === 'start') {
       // Marş dişlisi: hızlı tekrar eden kısa vuruşlar
-      if (e.kind !== 'ev') for (let i = 0; i < 6; i++) this.tone(120 + i * 8, 0.05, 0.05, 'square', 70, i * 0.055);
-      else this.tone(500, 0.4, 0.04, 'sine', 1800);
+      this.via('engine', () => {
+        if (e.kind !== 'ev') for (let i = 0; i < 6; i++) this.tone(120 + i * 8, 0.05, 0.05, 'square', 70, i * 0.055);
+        else this.tone(500, 0.4, 0.04, 'sine', 1800);
+      });
     }
   }
 
@@ -17302,7 +17484,7 @@ class AudioEngine {
       if (state.gear > this.gear) {
         this.shiftT = t + 0.09; // Vites atarken gaz bir an kesilir
         // Vites vuruşu: tok, kısa
-        if (on && e.kind !== 'ev') { this.tone(58, 0.14, SND.shift * vol, 'sine', 34); this.burst(0.07, 420, 0.12 * vol, 'lowpass', 120); }
+        if (on && e.kind !== 'ev') this.via('engine', () => { this.tone(58, 0.14, SND.shift * vol, 'sine', 34); this.burst(0.07, 420, 0.12 * vol, 'lowpass', 120); });
       }
       this.gear = state.gear;
     }
@@ -17326,7 +17508,7 @@ class AudioEngine {
     if (X.turbo) {
       this.turbo.o.frequency.setTargetAtTime(1600 + 3400 * ratio, t, 0.1);
       this.turbo.g.gain.setTargetAtTime(vol * X.turbo * 0.035 * gas * ratio, t, 0.08);
-      if (on && (this.lastGas ?? 1) >= 0.8 && gas < 0.6 && ratio > 0.3) this.burst(0.35, 3400, 0.14 * vol, 'bandpass', 700);
+      if (on && (this.lastGas ?? 1) >= 0.8 && gas < 0.6 && ratio > 0.3) this.via('engine', () => this.burst(0.35, 3400, 0.14 * vol, 'bandpass', 700));
     } else if (this.turboOn) this.turbo.g.gain.setTargetAtTime(0, t, 0.05);
     this.turboOn = !!X.turbo;
     this.lastGas = gas;
@@ -17414,7 +17596,7 @@ class AudioEngine {
     g.gain.exponentialRampToValueAtTime(0.001, t + duration);
     src.connect(f);
     f.connect(g);
-    g.connect(this.master);
+    g.connect(this.out());
     src.start(t, Math.random());
     this.voice(src, t + duration + 0.02);
   }
@@ -17432,7 +17614,7 @@ class AudioEngine {
     g.gain.exponentialRampToValueAtTime(gain, t + 0.008);
     g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
     o.connect(g);
-    g.connect(this.master);
+    g.connect(this.out());
     o.start(t);
     this.voice(o, t + duration + 0.02);
   }
@@ -17550,7 +17732,7 @@ class AudioEngine {
       o.connect(f);
       f.connect(g);
     }
-    g.connect(this.master);
+    g.connect(this.buses.sfx);
     o.start(t);
     vib.start(t);
     o.stop(t + dur + 0.02);
@@ -17683,7 +17865,7 @@ class AudioEngine {
     for (let i = 0; i < n; i++) {
       const last = i === n - 1;
       this.tone(last ? 54 : 72 + Math.random() * 36, last ? 0.12 : 0.07, last ? 0.5 : 0.38, 'square', 30, d);
-      setTimeout(() => this.burst(last ? 0.1 : 0.06, last ? 700 : 900 + Math.random() * 500, last ? 0.6 : 0.45, 'lowpass', 110), d * 1000);
+      setTimeout(() => this.via('engine', () => this.burst(last ? 0.1 : 0.06, last ? 700 : 900 + Math.random() * 500, last ? 0.6 : 0.45, 'lowpass', 110)), d * 1000);
       d += SND.popGap + Math.random() * SND.popGap;
     }
   }
@@ -17741,6 +17923,24 @@ class AudioEngine {
       this.tone(520, 0.34, 0.2, 'sawtooth', 1250, i * 0.36);
     }
   }
+}
+
+// Kısa seslerin grubu (ayarlardaki ayrı ses düzeyleri). Listede olmayanlar ses efektleri (sfx) grubundadır.
+// Sürekli sesler (motor, drift, lastik: engine; sirenler: police; ambiyans, yağmur: sfx) unlock içinde bağlanır
+const SOUND_GROUP_OF = {
+  press: 'music', purchase: 'music', cheat: 'music', power: 'music', powerEnd: 'music', secretDown: 'music',
+  landing: 'engine', backfire: 'engine',
+  radio: 'police', megaphone: 'police', alert: 'police', tankFire: 'police', alienArrive: 'police',
+  horn: 'traffic',
+  gunShot: 'gun',
+};
+for (const [name, group] of Object.entries(SOUND_GROUP_OF)) {
+  const f = AudioEngine.prototype[name];
+  AudioEngine.prototype[name] = function grouped(...args) {
+    let r;
+    this.via(group, () => { r = f.apply(this, args); });
+    return r;
+  };
 }
 
 // --- pixelcars.js ---
@@ -18325,6 +18525,9 @@ function formatTime(t) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
+// Berserk kalan süresi: yukarı yuvarlanır (59:59.2 -> 60:00), sıfıra yalnız gerçekten bitince iner
+const berserkClock = (t) => formatTime(Math.ceil(Math.max(0, t) - 1e-6));
+
 // Uzun yazı kutusuna sığmazsa yazı küçülür (özellikle Almanca); tek satırlık metinler
 const FIT = '.start-txt, .tile span, .menu .btn, .panel .btn, .seg button, .screen header h2, #over-title, .car-tag b, .car-tag small, #ctl-rev, .summary span, .big-score span, #hint b, #hint span, .toggle > span, .volume > span, .seg-row > span, #cheat-badge, #garage-action';
 function fitOne(el) {
@@ -18346,7 +18549,7 @@ class UI {
   constructor(storage, actions) {
     this.storage = storage;
     this.actions = actions; // play, resume, toMenu, sound, vibrate
-    this.last = { time: '', score: '', coins: '', stage: -1, stars: -1, combo: '' };
+    this.last = { time: '', score: '', coins: '', stage: -1, stars: -1, combo: '', bz: '' };
     this.devTaps = 0;
     this.bind();
     this.buildStars();
@@ -18413,6 +18616,15 @@ class UI {
     }
     $('set-sound').addEventListener('change', (e) => { d.settings.sound = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-volume').addEventListener('input', (e) => { d.settings.volume = Number(e.target.value); this.storage.save(); a.applySettings(); });
+    // Ayrı ses grupları: müzik, efektler, motor, polis, trafik, silah
+    for (const el of document.querySelectorAll('#set-mix input[data-vol]')) {
+      el.addEventListener('input', (e) => {
+        d.settings.vols[el.dataset.vol] = Number(e.target.value);
+        el.nextElementSibling.textContent = e.target.value;
+        this.storage.save();
+        a.applySettings();
+      });
+    }
     $('set-ambient').addEventListener('change', (e) => { d.settings.ambient = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-vibrate').addEventListener('change', (e) => { d.settings.vibrate = e.target.checked; this.storage.save(); a.applySettings(); });
     $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
@@ -18423,11 +18635,12 @@ class UI {
       const msg = $('code-msg');
       const raw = box.value.trim();
       const r = raw ? this.storage.redeem(raw) : 'empty';
-      const unlocked = CONFIG.codes.find((k) => k.code === raw.toUpperCase().replace(/[^0-9A-Z]/g, ''));
+      const unlocked = CONFIG.codes.find((k) => k.code === normCode(raw));
       const car = unlocked && CONFIG.cars.find((c) => c.id === unlocked.car);
-      msg.textContent = tx(`code.${r}`, { car: car ? car.name : '' });
-      msg.className = `code-msg ${r === 'ok' ? 'ok' : 'err'}`;
-      if (r === 'ok') { box.value = ''; this.refreshMenu(); a.purchased(); }
+      const good = r === 'ok' || r === 'coins' || r === 'berserk';
+      msg.textContent = tx(`code.${r}`, { car: car ? car.name : '', n: txNum((unlocked && unlocked.coins) || 0), min: Math.round(((unlocked && unlocked.berserk) || 0) / 60) });
+      msg.className = `code-msg ${good ? 'ok' : 'err'}`;
+      if (good) { box.value = ''; this.refreshMenu(); a.purchased(); }
       this.fit($('settings'));
     };
     $('code-apply').addEventListener('click', () => { a.tap(); applyCode(); });
@@ -18442,6 +18655,10 @@ class UI {
     const d = this.storage.data;
     $('set-sound').checked = d.settings.sound;
     $('set-volume').value = String(d.settings.volume);
+    for (const el of document.querySelectorAll('#set-mix input[data-vol]')) {
+      el.value = String(d.settings.vols[el.dataset.vol]);
+      el.nextElementSibling.textContent = el.value;
+    }
     this.syncMute();
     $('set-vibrate').checked = d.settings.vibrate;
     $('set-ambient').checked = d.settings.ambient;
@@ -18519,6 +18736,10 @@ class UI {
     const car = this.storage.selectedCar();
     $('menu-car-name').textContent = carLabel(car);
     $('menu-car-paint').textContent = this.paintName(car, this.storage.paintIndex(car.id));
+    // Berserk açıksa menüde de kalan süre görünür (süre yalnız oynarken akar)
+    const bz = $('menu-berserk');
+    bz.hidden = !(d.berserk > 0);
+    if (d.berserk > 0) bz.textContent = tx('berserk.menu', { t: berserkClock(d.berserk) });
     if (!$('menu').hidden) this.fit($('menu'));
   }
 
@@ -18692,7 +18913,7 @@ class UI {
   }
 
   resetHud() {
-    this.last = { time: '', score: '', coins: '', stage: -1, stars: -1, combo: '' };
+    this.last = { time: '', score: '', coins: '', stage: -1, stars: -1, combo: '', bz: '' };
     $('alert').classList.remove('run');
   }
 
@@ -18726,6 +18947,16 @@ class UI {
     this.powerChip('giant', g.giantT);
     const combo = g.combo >= 1.25 ? `x${txNum(g.combo, 1)}` : '';
     if (combo !== l.combo) { l.combo = combo; $('hud-combo').textContent = combo; }
+    // Berserk: kalan süre ve azalan bar; bitince kaybolur
+    const bz = g.berserkT > 0 ? berserkClock(g.berserkT) : '';
+    if (bz !== l.bz) {
+      l.bz = bz;
+      $('hud-berserk').hidden = !bz;
+      if (bz) {
+        $('hud-berserk-t').textContent = bz;
+        $('hud-berserk-bar').style.width = `${Math.min(100, (g.berserkT / CONFIG.berserk.seconds) * 100).toFixed(2)}%`;
+      }
+    }
   }
 
   powerChip(kind, left) {
@@ -18898,6 +19129,8 @@ class UI {
       b.onclick = () => { this.actions.tap(); this.tab = b.dataset.tab; this.prev = null; this.confirm = false; this.renderGarage(); };
     }
     grid.textContent = '';
+    grid.classList.toggle('guns', tab === 'gun');
+    if (tab === 'gun') { this.renderGuns(); return; }
     if (!owned) {
       box.classList.add('off');
       buy.hidden = true;
@@ -18967,6 +19200,70 @@ class UI {
     } else {
       buy.hidden = true;
     }
+  }
+
+  // Silah sekmesi: 6 kademe. Silahlar arabadan bağımsızdır (her arabada çalışır), bir kez alınır, takılır / çıkarılır.
+  // Kilitli silah önce seçilir, sonra onayla satın alınır (diğer sekmelerle aynı akış)
+  renderGuns() {
+    const box = $('garage-custom');
+    const grid = $('custom-grid');
+    const buy = $('custom-buy');
+    box.classList.remove('off');
+    $('custom-listen').hidden = true;
+    $('custom-listen').parentElement.classList.add('ex'); // Bilgi satırı iki satıra sığar (egzoz sekmesi gibi)
+    const d = this.storage.data;
+    const p = this.prev && this.prev.kind === 'gun' ? this.prev.id : null;
+    const sel = p || d.gun || CONFIG.guns[0].id;
+    CONFIG.guns.forEach((g, i) => {
+      const b = document.createElement('button');
+      const has = this.storage.ownsGun(g.id);
+      b.className = `chip gun t${i + 1}${g.id === sel ? ' on' : ''}${has ? '' : ' locked'}${d.gun === g.id ? ' fitted' : ''}`;
+      b.setAttribute('aria-label', tx(`custom.guns.${g.id}`));
+      const ic = document.createElement('i');
+      ic.className = 'gun-ic';
+      const n = document.createElement('b');
+      n.textContent = String(i + 1);
+      b.append(ic, n);
+      if (!has) { const tag = document.createElement('em'); tag.textContent = txNum(g.price); b.appendChild(tag); }
+      b.addEventListener('click', () => {
+        this.actions.tap();
+        this.confirm = false;
+        this.prev = { kind: 'gun', id: g.id };
+        $('custom-msg').textContent = '';
+        this.renderGarage();
+      });
+      grid.appendChild(b);
+    });
+    const g = CONFIG.guns.find((k) => k.id === sel);
+    const st = gunStats(g);
+    $('custom-name').textContent = `${tx(`custom.guns.${g.id}`)} · ${tx('custom.gunInfo', { sec: txNum(st.every, 2), hits: bulletsToKill('car', 0, st) })}`;
+    buy.hidden = false;
+    buy.classList.toggle('confirm', !!this.confirm);
+    if (this.storage.ownsGun(g.id)) {
+      const fitted = d.gun === g.id;
+      buy.disabled = false;
+      buy.textContent = tx(fitted ? 'custom.unequip' : 'custom.equip');
+      buy.onclick = () => {
+        this.actions.tap();
+        this.storage.equipGun(fitted ? '' : g.id);
+        this.prev = { kind: 'gun', id: g.id };
+        this.renderGarage();
+        $('custom-msg').textContent = tx(fitted ? 'custom.unequipped' : 'custom.equipped');
+      };
+      return;
+    }
+    const enough = d.coins >= g.price;
+    buy.disabled = !enough;
+    buy.textContent = !enough ? tx('custom.poor') : tx(this.confirm ? 'custom.confirm' : 'custom.buy', { cost: txNum(g.price) });
+    buy.onclick = () => {
+      this.actions.tap();
+      if (!this.confirm) { this.confirm = true; this.renderGarage(); return; }
+      const r = this.storage.buyGun(g.id);
+      this.confirm = false;
+      if (r === 'ok') this.actions.purchased();
+      this.renderGarage();
+      $('custom-msg').textContent = tx(r === 'ok' ? 'custom.gunBought' : r === 'poor' ? 'custom.poor' : 'custom.use');
+    };
   }
 
   // Egzoz takılınca garajdaki araçta kısa titreme ve egzoz ucunda parlama
@@ -19207,11 +19504,26 @@ function vibrate(ms) {
   }
 }
 
+// Koşuyu başlatır: seçili araba, takılı silah ve Berserk kalan süresi kayıttan gelir
+function startRun(opts) {
+  game.start(storage.selectedCar(), { ...opts, weather: storage.data.settings.weather, gun: storage.data.gun });
+  game.berserkT = storage.data.berserk;
+}
+
+// Berserk süresi oyunda azalır; yalnız koşu sürerken kayda geri yazılır (menüde girilen kodu ezmesin)
+let berserkSaveT = 0;
+function syncBerserk() {
+  if (game.state !== 'play' && game.state !== 'dying' && game.state !== 'over') return;
+  if (Math.abs(storage.data.berserk - game.berserkT) < 1e-3) return;
+  storage.setBerserk(game.berserkT);
+}
+
 function applySettings() {
   const lang = storage.data.settings.lang || detectLang(navigator.languages || [navigator.language]);
   if (lang !== getLang()) { setLang(lang); ui.applyLang(); }
   audio.setEnabled(storage.data.settings.sound);
   audio.setVolume(storage.data.settings.volume / 100);
+  for (const k of SOUND_GROUPS) audio.setGroupVolume(k, storage.data.settings.vols[k] / 100);
   ui.syncMute();
   audio.setAmbient(storage.data.settings.ambient);
   if (input.mode !== storage.data.settings.control) {
@@ -19271,7 +19583,7 @@ function play() {
   game.paint = storage.paintIndex(storage.selectedCar().id);
   game.look = storage.look(storage.selectedCar().id);
   const ready = menuWorld && warmDone;
-  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld, weather: storage.data.settings.weather });
+  startRun({ startTime, god, keepWorld: menuWorld });
   menuWorld = false;
   cover.stop();
   // Dünya hazır değilse siyah perde arkasında kurulur: ilk kare donmaz
@@ -19304,7 +19616,7 @@ function prepareWorld() {
   const god = params.get('god') === '1' || d.god || CONFIG.dev.godMode;
   game.paint = storage.paintIndex(storage.selectedCar().id);
   game.look = storage.look(storage.selectedCar().id);
-  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld, weather: storage.data.settings.weather });
+  startRun({ startTime, god, keepWorld: menuWorld });
   menuWorld = false;
   game.holdForDrop();
   input.clear();
@@ -19316,7 +19628,7 @@ let warmT = 0;
 let warmDone = false;
 function prewarmWorld() {
   if (game.state !== 'attract' || film) return;
-  game.start(storage.selectedCar(), { startTime: 0, god: false, weather: storage.data.settings.weather });
+  startRun({ startTime: 0, god: false });
   game.holdForDrop();
   game.updateCamera(1 / 60);
   game.state = 'attract';
@@ -19373,6 +19685,7 @@ function stepFilm(now) {
 }
 
 function toMenu() {
+  syncBerserk();
   paused = false;
   ui.setHud(false);
   ui.showHint(false);
@@ -19393,6 +19706,7 @@ function pause() {
   if (game.state !== 'play' || paused) return;
   paused = true;
   pausedDrawn = false;
+  syncBerserk();
   input.clear();
   audio.suspend();
   rememberQuality();
@@ -19496,6 +19810,7 @@ game.onEvent = (name, v) => {
     case 'memorialfail': ui.memorialFail(v); memorialCard.show(false); vibrate([160, 60, 260]); break;
     case 'gameover': {
       rememberQuality();
+      syncBerserk();
       // Hileli koşu rekor ve kazanç saymaz; anıt cezası yine de düşülür
       const record = game.result.cheated ? { newScore: false, newTime: false, penalty: storage.applyPenalty(game.result.penalty) } : storage.recordRun(game.result);
       memorialCard.show(false);
@@ -19562,6 +19877,8 @@ function frame(now) {
   hudT -= elapsed;
   if (hudT <= 0 && game.state === 'play') {
     hudT = 0.1;
+    berserkSaveT += 0.1;
+    if (berserkSaveT >= CONFIG.berserk.saveEvery) { berserkSaveT = 0; syncBerserk(); }
     ui.hud(game);
     if (cheatBadge.hidden === game.cheat) cheatBadge.hidden = !game.cheat;
   }

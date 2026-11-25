@@ -68,8 +68,9 @@ export default {
   },
   alert: { swat: '¡Llega el SWAT!', heavy: '¡Refuerzos pesados!', tanks: '¡TANQUES!', aliens: '¡HAN LLEGADO LOS ALIENS!', meteors: '¡LLUVIA DE METEORITOS!' },
   escape: { toast: '+{n} ¡POR LOS PELOS!', makas: '+{n} ¡RASANTE!', combo: 'COMBO +{n}' },
-  code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.' },
+  code: { title: 'Introducir código', apply: 'Aplicar', ok: '¡Código aceptado! {car} ya está en tu garaje.', owned: 'Ya tienes este coche.', invalid: 'Código no válido.', empty: 'Escribe un código primero.', coins: '¡Código aceptado! +{n} monedas.', berserk: '¡BERSERK activado! Monedas 2× durante {min} minutos.', used: 'Este código ya se ha usado.' },
   custom: {
+    gun: 'Arma', guns: { g1: 'Arma 1', g2: 'Arma 2', g3: 'Arma 3', g4: 'Arma 4', g5: 'Arma 5', g6: 'Arma 6' }, gunInfo: 'Dispara cada {sec} s · policía normal: {hits} impactos', equip: 'Equipar', unequip: 'Quitar', equipped: '¡Arma equipada!', unequipped: 'Arma quitada.', gunBought: '¡Comprada y equipada!',
     title: 'Personalizar', paint: 'Pintura', rim: 'Llantas', led: 'Luz inferior', exhaust: 'Escape', listen: 'Escuchar', buy: 'Comprar · {cost}', confirm: 'Confirmar · {cost}', poor: 'Monedas insuficientes', bought: '¡Comprado!', use: 'Ya desbloqueado', ownFirst: 'Compra el coche para personalizarlo.',
     paints: { gece: 'Negro medianoche', gumus: 'Plata brillante', kiraz: 'Rojo cereza', okyanus: 'Azul océano', zumrut: 'Verde esmeralda', limon: 'Amarillo limón', mandalina: 'Mandarina', lavanta: 'Lavanda mate', pembe: 'Rosa chicle', haki: 'Caqui mate', fume: 'Gris humo mate', bakir: 'Cobre', lacivert: 'Azul marino metalizado', neonyesil: 'Verde neón', neonpembe: 'Rosa neón', mor: 'Morado eléctrico', inci: 'Blanco perla', altin: 'Oro', krom: 'Cromo espejo', lav: 'Rojo lava' },
     rims: { std: 'Estándar', bes: 'Estrella de 5 radios', cok: 'Multirradio', spor: 'Deportiva', derin: 'Plato hondo', turbin: 'Turbina', karbon: 'Carbono', altin: 'Oro' },
@@ -77,6 +78,8 @@ export default {
     exhausts: { std: 'Estándar', v8: 'V8 Rugiente', patlamali: 'Petardeo', turbo: 'Turbo', spor: 'Deportivo agudo', derin: 'Bajo profundo' },
     exhaustInfo: { std: 'De fábrica, sonido equilibrado', v8: 'Ocho cilindros gruesos y rugientes', patlamali: 'Petardea al soltar el acelerador', turbo: 'Silbido agudo y soplido de válvula', spor: 'Grito agudo a altas revoluciones', derin: 'Bajo profundo que hace temblar el suelo' },
   },
+  mix: { title: 'Ajustes de sonido', music: 'Música', sfx: 'Efectos de sonido', engine: 'Coche / motor', police: 'Sonidos de policía', traffic: 'Tráfico', gun: 'Sonidos de armas' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK monedas 2× · quedan {t}' },
   weather: { title: 'Clima', random: 'Aleatorio', sunny: 'Soleado', rain: 'Lluvia', snow: 'Nieve', fog: 'Niebla', ice: 'Hielo', iceWarn: '¡Carretera helada!' },
   cheat: { on: '¡Toma ya! ¡Has encontrado el truco secreto!', off: 'Truco desactivado', badge: 'TRUCO ACTIVO' },
   cars: {

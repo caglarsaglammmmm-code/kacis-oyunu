@@ -6,7 +6,7 @@ import { Effects, FX } from './effects.js';
 import { FlowField, driveCop, planBarricade, newPlan } from './police.js';
 import { Crowd } from './crowd.js';
 import { tx } from './i18n/index.js';
-import { AutoGun, gunHp } from './gun.js';
+import { AutoGun, gunHp, gunBaseHp, gunDead, gunSpec, gunStats, BUILTIN } from './gun.js';
 import { MeteorStorm } from './meteor.js';
 import { engineRpm } from './audio.js';
 
@@ -23,6 +23,7 @@ const PU = CONFIG.pursuit;
 const ESC = CONFIG.escape;
 const WPN = CONFIG.weapon;
 const HPG = CONFIG.copHpGrowth;
+const BZ = CONFIG.berserk;
 const SEC = CONFIG.secret;
 const VW = CONFIG.vehWater;
 const RB = CONFIG.roadblock;
@@ -162,6 +163,8 @@ export class Game {
     // 360° taramalı silah (weapon: true olan araçlar) ve meteor yağmuru: havuzlu, oyun sırasında bellek ayrılmaz
     this.gun = new AutoGun();
     this.weapon = null;
+    this.gunId = ''; // Mağazadan takılı silah (boş: yok)
+    this.berserkT = 0; // Berserk kodunun kalan süresi (sn): main.js kayıttan verir, geri yazar
     this.meteors = new MeteorStorm();
     this.alienLimit = AL.desktopCap; // Dokunmatikte main.js telefon tavanını verir
     // Hava: tür, yoğunluk (0-1, yumuşak geçiş) ve zemin tutuşları (oyuncu, polis). Bellek ayrılmaz
@@ -271,7 +274,7 @@ export class Game {
     this.result = null;
   }
 
-  start(carSpec, { startTime = CONFIG.dev.startTime, god = CONFIG.dev.godMode, seed = (Math.random() * 1e9) | 0, keepWorld = false, weather = 'sunny' } = {}) {
+  start(carSpec, { startTime = CONFIG.dev.startTime, god = CONFIG.dev.godMode, seed = (Math.random() * 1e9) | 0, keepWorld = false, weather = 'sunny', gun = '' } = {}) {
     this.carSpec = carSpec;
     // Menüde hazırlanan dünya aynı havayla kullanılır: çizilmiş zemin yeniden işlenmez
     if (!keepWorld || this.weatherSetting !== weather) this.weather = pickWeather(weather);
@@ -282,7 +285,11 @@ export class Game {
     this.god = god;
     if (!keepWorld) this.world.reset(seed);
     this.resetRun(startTime);
-    this.weapon = carSpec.weapon ? this.gun : null;
+    // Takılı mağaza silahı her arabada çalışır ve dahili silahın yerini alır; yoksa kendi silahı olan araçta dahili silah
+    const gs = gunSpec(gun);
+    this.gunId = gs ? gs.id : '';
+    this.gun.setGun(gs ? gunStats(gs) : BUILTIN);
+    this.weapon = gs || carSpec.weapon ? this.gun : null;
     this.dayT = 0;
     dayState(0, this.daylight);
     resetBody(this.player, 100, 300, Math.PI / 2, carSpec);
@@ -436,6 +443,13 @@ export class Game {
     this.updateDamage(dt);
     if (this.warnT > 0) this.warnT -= dt;
     if (this.hitFlash > 0) this.hitFlash -= dt * 3;
+    // Berserk süresi yalnız oynanan koşuda akar (duraklatma, menü ve arka planda tick çağrılmaz)
+    if (this.berserkT > 0) this.berserkT = Math.max(0, this.berserkT - dt);
+  }
+
+  // Berserk açıkken kazanılan para katı
+  coinMul() {
+    return this.berserkT > 0 ? BZ.mul : 1;
   }
 
   tickDying(dt) {
@@ -916,7 +930,7 @@ export class Game {
             const m = CONFIG.coin.magnet;
             if (dx * dx + dy * dy < m * m) {
               pr.alive = false;
-              this.coins++;
+              this.coins += this.coinMul();
               this.fx.burst(FX.GLINT, pr.x, pr.y, 6, 110, 0.4, 5);
               this.emit('coin');
             }
@@ -1231,14 +1245,16 @@ export class Game {
   }
 
   // --- 360° taramalı silah (js/gun.js): isabet ---
-  // Her mermi sabit hasar. Silah canı (mhp) biterse araç patlar; çarpışma canı (hp) da aynı oranda düşer: duman, yanıp sönme
+  // Her mermi takılı silahın sabit hasarı. Silah canı (mhp) biterse araç patlar; çarpışma canı (hp) da aynı oranda düşer
   hitCop(c, x, y) {
     const full = c.mhpMax || gunHp(c.type, this.time);
-    c.mhp -= WPN.damage;
-    c.hp = Math.min(c.hp - (c.maxHp * WPN.damage) / full, (c.maxHp * c.mhp) / full);
-    if (c.mhp <= 0) { c.hp = -1; c.byWeapon = true; }
+    const dmg = this.gun.stats.damage;
+    c.mhp -= dmg;
+    c.hp = Math.min(c.hp - (c.maxHp * dmg) / full, (c.maxHp * c.mhp) / full);
+    const dead = gunDead(c.mhp);
+    if (dead) { c.mhp = 0; c.hp = -1; c.byWeapon = true; }
     c.hurtFlash = 0.12;
-    return c.mhp <= 0;
+    return dead;
   }
 
   gunHit(c, x, y) {
@@ -1307,7 +1323,7 @@ export class Game {
 
   rewardPass(o) {
     const [lo, hi] = OD.makasPara;
-    const amount = lo + Math.floor(Math.random() * (hi - lo + 1));
+    const amount = (lo + Math.floor(Math.random() * (hi - lo + 1))) * this.coinMul();
     this.coins += amount;
     this.escCoins += amount;
     this.passes++;
@@ -1338,9 +1354,10 @@ export class Game {
 
   rewardEscape(c) {
     const [lo, hi] = OD.polisPara;
-    const amount = lo + Math.floor(Math.random() * (hi - lo + 1));
+    const mul = this.coinMul();
+    const amount = (lo + Math.floor(Math.random() * (hi - lo + 1))) * mul;
     this.escCombo = this.runTime - this.escLastT <= ESC.comboWindow ? this.escCombo + 1 : 1;
-    const bonus = this.escCombo % ESC.comboEvery === 0 ? ESC.comboBonus : 0;
+    const bonus = this.escCombo % ESC.comboEvery === 0 ? ESC.comboBonus * mul : 0;
     const total = amount + bonus;
     this.coins += total;
     this.escCoins += total;
@@ -1856,7 +1873,7 @@ export class Game {
       c.staticBody = true;
       c.roadblock = true;
       c.wakeT = 1e9;
-      c.mhpMax = WPN.hp.car; c.mhp = c.mhpMax; // Taramayla ~22 mermide patlar
+      c.mhpMax = gunBaseHp('car'); c.mhp = c.mhpMax; // Normal polis kadar: Silah 1 ile 15 vuruş
       r.cars.push(c);
     }
     r.made++;

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { CONFIG } from '../js/config.js';
 import { Game } from '../js/game.js';
 import { Storage } from '../js/storage.js';
-import { AutoGun, gunHp, gunFirstAt, bulletsToKill } from '../js/gun.js';
+import { AutoGun, gunHp, gunFirstAt, bulletsToKill, BUILTIN, gunBaseHp } from '../js/gun.js';
 
 const dt = 1 / 60;
 const W = CONFIG.weapon;
@@ -42,7 +42,7 @@ test('silah yalnız 42-66 arabasında ve gizli motosiklette; ikisi de aynı orta
     assert.ok(!('ammo' in g.weapon), 'sınırsız cephane');
   }
   assert.equal(typeof new Game(1).fire, 'undefined', 'eski füze ve ateş düğmesi kalktı');
-  assert.ok(W.rate >= 5 && W.rate <= 10);
+  assert.ok(BUILTIN.rate >= 5 && BUILTIN.rate <= 10);
 });
 
 // Her tür ilk çıktığı anda: gerçek ateşle kaç mermide ölür
@@ -59,7 +59,7 @@ function bulletsFor(car, type) {
   return g.gun.hits - before;
 }
 
-test('mermi sayıları: polis ~20-25, SWAT ~50-60, uzaylı ~70-90, tank en az 100 (iki araçta aynı)', () => {
+test('dahili silah mermi sayıları (v24.2 can tablosu): polis 22, SWAT 30, uzaylı 44-59, tank 66 (iki araçta aynı)', () => {
   const table = {};
   for (const car of ARMED) {
     const row = {};
@@ -69,12 +69,12 @@ test('mermi sayıları: polis ~20-25, SWAT ~50-60, uzaylı ~70-90, tank en az 10
   console.log('# türün ilk çıktığı anda gereken mermi', JSON.stringify(table));
   assert.deepEqual(table.kuzgun, table.golge, 'iki araç aynı silah');
   const r = table.kuzgun;
-  assert.ok(r.car >= 20 && r.car <= 25, `polis ${r.car}`);
-  assert.ok(r.fast >= 20 && r.fast <= 25);
-  assert.ok(r.swat >= 50 && r.swat <= 60, `SWAT ${r.swat}`);
-  for (const a of ['dart', 'blob', 'crab']) assert.ok(r[a] >= 70 && r[a] <= 90, `${a} ${r[a]}`);
-  assert.ok(r.tank >= 100, `tank ${r.tank}`);
-  assert.ok(r.car < r.swat && r.swat < Math.min(r.dart, r.blob, r.crab) && Math.max(r.dart, r.blob, r.crab) < r.tank, 'güç sırası');
+  assert.equal(r.car, 22, `polis ${r.car}`);
+  assert.equal(r.fast, 22);
+  assert.equal(r.swat, 30, `SWAT ${r.swat}`);
+  for (const a of ['dart', 'blob', 'crab']) assert.ok(r[a] >= 44 && r[a] <= 59, `${a} ${r[a]}`);
+  assert.equal(r.tank, 66, `tank ${r.tank}`);
+  assert.ok(r.car < r.swat && r.swat < r.advanced && r.advanced < Math.min(r.dart, r.blob, r.crab) && Math.max(r.dart, r.blob, r.crab) < r.tank, 'güç sırası');
   for (const [t, n] of Object.entries(r)) assert.equal(n, bulletsToKill(t), t);
 });
 
@@ -95,7 +95,7 @@ test('saniyede ~7 mermi, düzenli; cephane sınırsız (300+ mermi)', () => {
     const span = at.at(-1) - at[0];
     const rate = (at.length - 1) / span;
     console.log(`# ${car.id}: ${at.length} mermi, ${rate.toFixed(2)} / sn`);
-    assert.ok(Math.abs(rate - W.rate) < 0.25, `hız ${rate}`);
+    assert.ok(Math.abs(rate - BUILTIN.rate) < 0.25, `hız ${rate}`);
     assert.ok(shots > 300, 'sınırsız');
   }
 });
@@ -155,21 +155,17 @@ test('ölen düşman çizgi film patlamasıyla gider ve oyuncuya yazılır; isab
   assert.equal(g.kills, kills + 1);
 });
 
-test('zamanla yeni düşmanların canı artar (tavanlı), ilk çıkıştaki sayının altına inmez; sahadakiler değişmez', () => {
-  const row = {};
+test('v24.2: zamanla can artışı kapalı; vuruş sayıları oyunun her anında aynı; sahadakiler değişmez', () => {
+  assert.equal(CONFIG.copHpGrowth.max, 1);
   for (const min of [0, 2, 5, 10, 30]) {
-    row[min] = { car: bulletsToKill('car', min * 60), swat: bulletsToKill('swat', gunFirstAt('swat') + min * 60), tank: bulletsToKill('tank', gunFirstAt('tank') + min * 60) };
+    for (const t of Object.keys(W.enemyHits)) assert.equal(bulletsToKill(t, gunFirstAt(t) + min * 60), bulletsToKill(t), `${t} ${min} dk`);
   }
-  console.log('# türün çıkışından sonraki dakikaya göre mermi', JSON.stringify(row));
-  assert.ok(row[2].car > row[0].car && row[5].car > row[2].car && row[10].car > row[5].car);
-  assert.ok(row[5].tank > row[0].tank);
-  assert.equal(gunHp('car', 3600), W.hp.car * CONFIG.copHpGrowth.max, 'tavan');
-  for (const t of Object.keys(W.hp)) assert.ok(bulletsToKill(t, 0) >= bulletsToKill(t), `${t} alt sınır`);
+  assert.equal(gunHp('car', 3600), gunBaseHp('car'));
   const g = setup(KUZGUN, 0);
   const old = g.spawnCop('car', 'chaser', 3000, 3000, 0);
   g.time = 600;
   g.spawnCop('car', 'chaser', 3000, 3000, 0);
-  assert.equal(old.mhpMax, W.hp.car, 'sahadaki polis değişmedi');
+  assert.equal(old.mhpMax, gunBaseHp('car'), 'sahadaki polis değişmedi');
 });
 
 test('mermi anıt alanına, gizli geçide ve stadyuma girince kaybolur; o alanların ardındaki hedefe nişan alınmaz', () => {
@@ -213,7 +209,7 @@ test('gizli kod: 42-66, 4266 ve 42 66 arabayı açar; yanlış kod açmaz; ikinc
     const again = new Storage(b);
     assert.ok(again.data.owned.includes('kuzgun'), 'kalıcı');
   }
-  assert.ok(CONFIG.codes.every((k) => k.code && k.car), 'kod tablosu');
+  assert.ok(CONFIG.codes.every((k) => k.code && (k.car || k.coins || k.berserk)), 'kod tablosu');
   assert.ok(!CONFIG.codes.some((k) => k.car === GOLGE.id), 'gizli motosiklet kodla açılmaz');
 });
 

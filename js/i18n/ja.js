@@ -68,8 +68,9 @@ export default {
   },
   alert: { swat: 'SWAT出動！', heavy: '重装増援！', tanks: '戦車だ！', aliens: 'エイリアン襲来！', meteors: '隕石の雨！' },
   escape: { toast: '+{n} ギリギリ回避！', makas: '+{n} ニアミス！', combo: 'コンボ +{n}' },
-  code: { title: 'コード入力', apply: '適用', ok: 'コード承認！{car}がガレージに追加されたよ。', owned: 'この車はもう持っているよ。', invalid: '無効なコードです。', empty: 'まずコードを入力してね。' },
+  code: { title: 'コード入力', apply: '適用', ok: 'コード承認！{car}がガレージに追加されたよ。', owned: 'この車はもう持っているよ。', invalid: '無効なコードです。', empty: 'まずコードを入力してね。', coins: 'コード承認！+{n} コイン。', berserk: 'BERSERK 発動！{min} 分間コイン2倍。', used: 'このコードはもう使われています。' },
   custom: {
+    gun: '武器', guns: { g1: '武器 1', g2: '武器 2', g3: '武器 3', g4: '武器 4', g5: '武器 5', g6: '武器 6' }, gunInfo: '{sec} 秒ごとに発射 · 通常パトカー {hits} 発', equip: '装備', unequip: '外す', equipped: '武器を装備した！', unequipped: '武器を外した。', gunBought: '購入して装備した！',
     title: 'カスタマイズ', paint: '塗装', rim: 'ホイール', led: 'アンダーネオン', exhaust: 'マフラー', listen: '試聴', buy: '購入 · {cost}', confirm: '確認 · {cost}', poor: 'コインが足りません', bought: '購入しました！', use: '解放済み', ownFirst: 'カスタマイズするには先に車を買おう。',
     paints: { gece: 'ミッドナイトブラック', gumus: 'ブライトシルバー', kiraz: 'チェリーレッド', okyanus: 'オーシャンブルー', zumrut: 'エメラルドグリーン', limon: 'レモンイエロー', mandalina: 'タンジェリン', lavanta: 'マット・ラベンダー', pembe: 'キャンディピンク', haki: 'マット・カーキ', fume: 'マット・スモークグレー', bakir: 'カッパー', lacivert: 'ネイビーメタリック', neonyesil: 'ネオングリーン', neonpembe: 'ネオンピンク', mor: 'エレクトリックパープル', inci: 'パールホワイト', altin: 'ゴールド', krom: 'ミラークローム', lav: 'ラヴァレッド' },
     rims: { std: 'スタンダード', bes: '5本スポーク', cok: 'マルチスポーク', spor: 'スポーツ', derin: 'ディープリム', turbin: 'タービン', karbon: 'カーボン', altin: 'ゴールド' },
@@ -77,6 +78,8 @@ export default {
     exhausts: { std: 'ノーマル', v8: '轟音V8', patlamali: 'アフターファイア', turbo: 'ターボ', spor: 'スポーツ高音', derin: '重低音' },
     exhaustInfo: { std: 'メーカー純正のバランスの良い音', v8: '太く轟く8気筒サウンド', patlamali: 'アクセルを戻すとパンパン鳴る', turbo: '甲高いタービン音とブローオフ', spor: '高回転で鋭く響く高音', derin: '地面を揺らす重低音' },
   },
+  mix: { title: 'サウンド設定', music: '音楽', sfx: '効果音', engine: '車 / エンジン', police: 'パトカーの音', traffic: '交通', gun: '銃の音' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK コイン2倍 · 残り {t}' },
   weather: { title: '天気', random: 'ランダム', sunny: '晴れ', rain: '雨', snow: '雪', fog: '霧', ice: '凍結', iceWarn: '路面凍結！' },
   cheat: { on: 'やるじゃん！隠しコマンドを見つけたね！', off: 'チート解除', badge: 'チートON' },
   cars: {

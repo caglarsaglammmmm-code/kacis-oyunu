@@ -5,7 +5,7 @@ import { Renderer } from './render.js';
 import { Input } from './input.js';
 import { ControlView } from './controls.js';
 import { AudioEngine } from './audio.js';
-import { Storage } from './storage.js';
+import { Storage, SOUND_GROUPS } from './storage.js';
 import { UI } from './ui.js';
 import { PixelMenu } from './pixelmenu.js';
 import { loadAtlas } from './sheet.js';
@@ -57,11 +57,26 @@ function vibrate(ms) {
   }
 }
 
+// Koşuyu başlatır: seçili araba, takılı silah ve Berserk kalan süresi kayıttan gelir
+function startRun(opts) {
+  game.start(storage.selectedCar(), { ...opts, weather: storage.data.settings.weather, gun: storage.data.gun });
+  game.berserkT = storage.data.berserk;
+}
+
+// Berserk süresi oyunda azalır; yalnız koşu sürerken kayda geri yazılır (menüde girilen kodu ezmesin)
+let berserkSaveT = 0;
+function syncBerserk() {
+  if (game.state !== 'play' && game.state !== 'dying' && game.state !== 'over') return;
+  if (Math.abs(storage.data.berserk - game.berserkT) < 1e-3) return;
+  storage.setBerserk(game.berserkT);
+}
+
 function applySettings() {
   const lang = storage.data.settings.lang || detectLang(navigator.languages || [navigator.language]);
   if (lang !== getLang()) { setLang(lang); ui.applyLang(); }
   audio.setEnabled(storage.data.settings.sound);
   audio.setVolume(storage.data.settings.volume / 100);
+  for (const k of SOUND_GROUPS) audio.setGroupVolume(k, storage.data.settings.vols[k] / 100);
   ui.syncMute();
   audio.setAmbient(storage.data.settings.ambient);
   if (input.mode !== storage.data.settings.control) {
@@ -121,7 +136,7 @@ function play() {
   game.paint = storage.paintIndex(storage.selectedCar().id);
   game.look = storage.look(storage.selectedCar().id);
   const ready = menuWorld && warmDone;
-  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld, weather: storage.data.settings.weather });
+  startRun({ startTime, god, keepWorld: menuWorld });
   menuWorld = false;
   cover.stop();
   // Dünya hazır değilse siyah perde arkasında kurulur: ilk kare donmaz
@@ -154,7 +169,7 @@ function prepareWorld() {
   const god = params.get('god') === '1' || d.god || CONFIG.dev.godMode;
   game.paint = storage.paintIndex(storage.selectedCar().id);
   game.look = storage.look(storage.selectedCar().id);
-  game.start(storage.selectedCar(), { startTime, god, keepWorld: menuWorld, weather: storage.data.settings.weather });
+  startRun({ startTime, god, keepWorld: menuWorld });
   menuWorld = false;
   game.holdForDrop();
   input.clear();
@@ -166,7 +181,7 @@ let warmT = 0;
 let warmDone = false;
 function prewarmWorld() {
   if (game.state !== 'attract' || film) return;
-  game.start(storage.selectedCar(), { startTime: 0, god: false, weather: storage.data.settings.weather });
+  startRun({ startTime: 0, god: false });
   game.holdForDrop();
   game.updateCamera(1 / 60);
   game.state = 'attract';
@@ -223,6 +238,7 @@ function stepFilm(now) {
 }
 
 function toMenu() {
+  syncBerserk();
   paused = false;
   ui.setHud(false);
   ui.showHint(false);
@@ -243,6 +259,7 @@ function pause() {
   if (game.state !== 'play' || paused) return;
   paused = true;
   pausedDrawn = false;
+  syncBerserk();
   input.clear();
   audio.suspend();
   rememberQuality();
@@ -346,6 +363,7 @@ game.onEvent = (name, v) => {
     case 'memorialfail': ui.memorialFail(v); memorialCard.show(false); vibrate([160, 60, 260]); break;
     case 'gameover': {
       rememberQuality();
+      syncBerserk();
       // Hileli koşu rekor ve kazanç saymaz; anıt cezası yine de düşülür
       const record = game.result.cheated ? { newScore: false, newTime: false, penalty: storage.applyPenalty(game.result.penalty) } : storage.recordRun(game.result);
       memorialCard.show(false);
@@ -412,6 +430,8 @@ function frame(now) {
   hudT -= elapsed;
   if (hudT <= 0 && game.state === 'play') {
     hudT = 0.1;
+    berserkSaveT += 0.1;
+    if (berserkSaveT >= CONFIG.berserk.saveEvery) { berserkSaveT = 0; syncBerserk(); }
     ui.hud(game);
     if (cheatBadge.hidden === game.cheat) cheatBadge.hidden = !game.cheat;
   }

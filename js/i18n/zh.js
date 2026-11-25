@@ -68,8 +68,9 @@ export default {
   },
   alert: { swat: 'SWAT 来了！', heavy: '重型增援！', tanks: '坦克来了！', aliens: '外星人入侵！', meteors: '流星雨来袭！' },
   escape: { toast: '+{n} 惊险脱身！', makas: '+{n} 擦肩而过！', combo: '连击 +{n}' },
-  code: { title: '输入代码', apply: '确定', ok: '代码已接受！{car} 已加入你的车库。', owned: '这辆车你已经有了。', invalid: '无效代码。', empty: '请先输入代码。' },
+  code: { title: '输入代码', apply: '确定', ok: '代码已接受！{car} 已加入你的车库。', owned: '这辆车你已经有了。', invalid: '无效代码。', empty: '请先输入代码。', coins: '代码已接受！+{n} 金币。', berserk: 'BERSERK 已开启！{min} 分钟内金币翻倍。', used: '此代码已经使用过了。' },
   custom: {
+    gun: '武器', guns: { g1: '武器 1', g2: '武器 2', g3: '武器 3', g4: '武器 4', g5: '武器 5', g6: '武器 6' }, gunInfo: '每 {sec} 秒射击 · 普通警车 {hits} 发', equip: '装备', unequip: '卸下', equipped: '武器已装备！', unequipped: '武器已卸下。', gunBought: '已购买并装备！',
     title: '改装', paint: '涂装', rim: '轮毂', led: '底盘灯', exhaust: '排气', listen: '试听', buy: '购买 · {cost}', confirm: '确认 · {cost}', poor: '金币不足', bought: '购买成功！', use: '已解锁', ownFirst: '先购买这辆车才能改装。',
     paints: { gece: '午夜黑', gumus: '亮银', kiraz: '樱桃红', okyanus: '海洋蓝', zumrut: '祖母绿', limon: '柠檬黄', mandalina: '橘橙', lavanta: '哑光薰衣草', pembe: '糖果粉', haki: '哑光卡其', fume: '哑光烟灰', bakir: '古铜', lacivert: '藏青金属', neonyesil: '霓虹绿', neonpembe: '霓虹粉', mor: '电光紫', inci: '珍珠白', altin: '金色', krom: '镜面铬', lav: '熔岩红' },
     rims: { std: '标准', bes: '五辐星形', cok: '多辐', spor: '运动', derin: '深唇', turbin: '涡轮', karbon: '碳纤维', altin: '金色' },
@@ -77,6 +78,8 @@ export default {
     exhausts: { std: '原厂', v8: '轰鸣V8', patlamali: '回火爆鸣', turbo: '涡轮', spor: '运动高音', derin: '深沉低音' },
     exhaustInfo: { std: '原厂配置，声音均衡', v8: '浑厚轰鸣的八缸声浪', patlamali: '松油门时噼啪回火', turbo: '尖锐的涡轮啸叫与泄压声', spor: '高转速下尖锐的嘶吼', derin: '震撼地面的深沉低音' },
   },
+  mix: { title: '声音设置', music: '音乐', sfx: '音效', engine: '汽车 / 引擎', police: '警车声音', traffic: '交通', gun: '枪声' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK 金币翻倍 · 剩余 {t}' },
   weather: { title: '天气', random: '随机', sunny: '晴天', rain: '雨天', snow: '雪天', fog: '雾天', ice: '结冰', iceWarn: '路面结冰！' },
   cheat: { on: '可以啊，你找到作弊码了！', off: '作弊已关闭', badge: '作弊已开启' },
   cars: {

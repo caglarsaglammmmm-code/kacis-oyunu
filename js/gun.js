@@ -1,6 +1,7 @@
-// 360° OTOMATİK TARAMALI SİLAH: weapon: true olan bütün araçların ORTAK bileşeni (42-66 arabası ve gizli motosiklet).
-// Araç hangi yöne bakarsa baksın ekranda görünen düşmanlara sırayla ateş eder; ekran dışındakine ateş etmez.
-// Küçük hızlı mermiler, sabit hasar, sınırsız cephane, düğme yok. Mermiler havuzdan gelir: oyun sırasında bellek ayrılmaz.
+// 360° OTOMATİK TARAMALI SİLAH: mağazadan takılan 6 kademeli silahların ve kendi silahı olan araçların (42-66 arabası,
+// gizli motosiklet) ORTAK bileşeni. Araç hangi yöne bakarsa baksın ekranda görünen düşmanlara sırayla ateş eder;
+// ekran dışındakine ateş etmez. Hedefin varış anındaki yerine nişan alır. Sınırsız cephane, düğme yok.
+// Mermiler havuzdan gelir: oyun sırasında bellek ayrılmaz.
 // Korunan alanlara (anıt, gizli geçit, stadyum) giren mermi kaybolur; o alanların ardındaki hedefe nişan alınmaz.
 import { CONFIG } from './config.js';
 
@@ -8,7 +9,7 @@ const GUN = CONFIG.weapon;
 const GUN_D = CONFIG.difficulty;
 const GUN_GROW = CONFIG.copHpGrowth;
 
-// Türün oyuna ilk girdiği saniye: can artışı o andan sayılır, yani her tür ilk çıktığında tablodaki mermi sayısıyla ölür
+// Türün oyuna ilk girdiği saniye: can artışı (açıksa) o andan sayılır
 export function gunFirstAt(type) {
   if (type === 'swat') return GUN_D.swatAt;
   if (type === 'advanced') return GUN_D.advancedAt;
@@ -17,20 +18,44 @@ export function gunFirstAt(type) {
   return 0;
 }
 
-// Yeni çıkan düşmanın silah canı: temel can x zamanla artan kat (tavanlı, hiç 1'in altına inmez)
-export function gunHp(type, time) {
-  const base = GUN.hp[type] || GUN.hp.car;
-  const minutes = Math.max(0, time - gunFirstAt(type)) / 60;
-  return base * Math.min(GUN_GROW.max, GUN_GROW.perMin ** minutes);
+// Türün Silah 1 ile vuruş sayısı (zorluk kademesi). Tabloda olmayan tür en zor kademeden 5 fazla sayılır
+export function enemyHits(type) {
+  const t = GUN.enemyHits;
+  if (t[type]) return t[type];
+  return Math.max(...Object.values(t)) + 5;
 }
 
-// Gereken mermi sayısı
-export function bulletsToKill(type, time = gunFirstAt(type)) {
-  return Math.ceil(gunHp(type, time) / GUN.damage - 1e-9);
+// Temel silah canı: normal polis canı x kademe vuruşu / 15
+export function gunBaseHp(type) {
+  return (GUN.copHp * enemyHits(type)) / GUN.enemyHits.car;
+}
+
+// Yeni çıkan düşmanın silah canı: temel can x zamanla artan kat (copHpGrowth, tavanlı; max 1 = kapalı)
+export function gunHp(type, time) {
+  const minutes = Math.max(0, time - gunFirstAt(type)) / 60;
+  return gunBaseHp(type) * Math.min(GUN_GROW.max, GUN_GROW.perMin ** minutes);
+}
+
+// Silahın oyun değerleri: ateş aralığı (sn), saniyede mermi, mermi hasarı
+export function gunStats(spec) {
+  const every = spec.every / 100;
+  return { id: spec.id || 'builtin', every, rate: 1 / every, damage: GUN.copHp / spec.hits, hits: spec.hits };
+}
+export const gunSpec = (id) => CONFIG.guns.find((g) => g.id === id) || null;
+export const BUILTIN = gunStats({ id: 'builtin', ...GUN.builtin });
+
+// Kayan nokta payı: 150 / 7 hasarın 7 katı canı tam bitirir
+const KILL_EPS = 1e-6;
+export const gunDead = (mhp) => mhp <= KILL_EPS;
+
+// Gereken mermi sayısı (stats: gunStats; verilmezse dahili silah)
+export function bulletsToKill(type, time = gunFirstAt(type), stats = BUILTIN) {
+  return Math.max(1, Math.ceil(gunHp(type, time) / stats.damage - 1e-6));
 }
 
 export class AutoGun {
   constructor() {
+    this.stats = BUILTIN; // Takılı silah: game.start belirler (setGun)
     this.bullets = [];
     for (let i = 0; i < GUN.maxBullets; i++) this.bullets.push({ alive: false, x: 0, y: 0, px: 0, py: 0, vx: 0, vy: 0, t: 0 });
     this.reset();
@@ -48,6 +73,10 @@ export class AutoGun {
     for (const b of this.bullets) b.alive = false;
   }
 
+  setGun(stats) {
+    this.stats = stats || BUILTIN;
+  }
+
   // Hedef ekranda mı: kenardan inset kadar içeride olmalı
   visible(game, c) {
     const cam = game.cam;
@@ -61,7 +90,7 @@ export class AutoGun {
     let bs = -1e9;
     let n = 0;
     for (const c of game.cops) {
-      if (c.hp <= 0 || c.sinkT > 0 || !this.visible(game, c)) continue;
+      if (c.hp <= 0 || gunDead(c.mhp) || c.sinkT > 0 || !this.visible(game, c)) continue;
       if (game.world.segmentProtected(p.x, p.y, c.x, c.y)) continue;
       n++;
       const d = Math.hypot(c.x - p.x, c.y - p.y);
@@ -102,12 +131,12 @@ export class AutoGun {
     if (this.flash > 0) this.flash -= dt;
     this.cd -= dt;
     if (game.state === 'play') {
-      // Düşük kare hızında da saniyede rate mermi: bir karede en çok üç
+      // Düşük kare hızında da ateş aralığı korunur: bir karede en çok üç mermi
       let k = 0;
       while (this.cd <= 0 && k < 3) {
         const c = this.pick(game);
         if (!c || !this.shoot(game, c)) { this.cd = 0; break; } // Hedef yokken süre birikmez
-        this.cd += 1 / GUN.rate;
+        this.cd += this.stats.every;
         k++;
       }
       if (this.target && (this.target.hp <= 0 || !game.cops.includes(this.target))) this.target = null;

@@ -232,9 +232,9 @@ test('barikat: geçilemez; hile açıkken geçilir; silahla patlatılınca yol a
   for (let i = 0; i < 90; i++) { p.vx = 0; p.vy = 300; p.a = Math.PI / 2; g.tick(dt, 0, false); }
   assert.ok(p.y > r.y + 20, 'hile açıkken geçti');
   g.toggleCheat();
-  // Silahla patlatılabilir: normal polis ~20-25 mermi
+  // Silahla patlatılabilir: normal polis kadar can (Silah 1 ile 15 vuruş)
   const c = r.cars[0];
-  assert.ok(c.mhpMax / CONFIG.weapon.damage >= 20 && c.mhpMax / CONFIG.weapon.damage <= 25, 'polis kadar mermi');
+  assert.equal(c.mhpMax, CONFIG.weapon.copHp, 'polis kadar can');
   while (c.mhp > 0) g.hitCop(c, c.x, c.y);
   g.updateCops(dt);
   assert.ok(!g.cops.includes(c), 'patladı, yol açıldı');

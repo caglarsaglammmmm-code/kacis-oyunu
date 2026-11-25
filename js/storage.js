@@ -4,6 +4,12 @@ import { itemOf } from './custom.js';
 
 const KEY = 'drift-lab-v1';
 
+// Ayrı ses grupları (0-100). Ana ses düzeyi (volume) hepsinin üstündedir
+export const SOUND_GROUPS = ['music', 'sfx', 'engine', 'police', 'traffic', 'gun'];
+const defaultVols = () => Object.fromEntries(SOUND_GROUPS.map((k) => [k, 100]));
+// Kod metni: büyük/küçük harf, boşluk, tire ve diğer işaretler fark etmez ("  dante " = "DANTE")
+export const normCode = (text) => String(text || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+
 // v24.2: beş kollu jantın kimliği 'bes' oldu. Eski kayıttaki bilinmeyen jant kimliği o janttır (başka jant
 // kimliği hiç değişmedi); satın alınmış jant kaybolmasın diye 'bes' sayılır
 const rimId = (id) => (typeof id !== 'string' || itemOf('rim', id) ? id : 'bes');
@@ -15,13 +21,17 @@ export function defaultSave() {
     coins: 0,
     owned: [CONFIG.cars[0].id],
     selected: CONFIG.cars[0].id,
-    settings: { sound: true, vibrate: true, ambient: true, volume: 80, quality: 'auto', qLevel: -1, control: 'zones', lang: '', weather: 'random' },
+    settings: { sound: true, vibrate: true, ambient: true, volume: 80, vols: defaultVols(), quality: 'auto', qLevel: -1, control: 'zones', lang: '', weather: 'random' },
     dev: { god: false, startTime: 0 },
     tutorial: false,
     paints: {},
     custom: {}, // araba -> { rim, led, exhaust }
     unlocked: { paints: [], rims: [], leds: [], exhausts: [] }, // satın alınan özelleştirmeler
     secret: false, // Gizli geçit bulundu: gizli motosiklet garajda
+    usedCodes: [], // Kullanılmış para / süre kodları: her biri bir kayıtta bir kez
+    berserk: 0, // Berserk kodunun kalan süresi (sn), yalnız oynarken azalır
+    guns: [], // Satın alınan silahlar
+    gun: '', // Takılı silah (boş: yok)
   };
 }
 
@@ -46,6 +56,12 @@ export function sanitize(data) {
     d.settings.vibrate = data.settings.vibrate !== false;
     d.settings.ambient = data.settings.ambient !== false;
     if (Number.isFinite(data.settings.volume)) d.settings.volume = Math.max(0, Math.min(100, data.settings.volume));
+    if (data.settings.vols && typeof data.settings.vols === 'object') {
+      for (const k of SOUND_GROUPS) {
+        const v = data.settings.vols[k];
+        if (Number.isFinite(v)) d.settings.vols[k] = Math.max(0, Math.min(100, Math.round(v)));
+      }
+    }
     if (['auto', 'high', 'low'].includes(data.settings.quality)) d.settings.quality = data.settings.quality;
     if (Number.isInteger(data.settings.qLevel) && data.settings.qLevel >= -1 && data.settings.qLevel <= 3) d.settings.qLevel = data.settings.qLevel;
     if (['zones', 'wheel', 'stick'].includes(data.settings.control)) d.settings.control = data.settings.control;
@@ -57,6 +73,10 @@ export function sanitize(data) {
     d.dev.startTime = num(data.dev.startTime);
   }
   d.tutorial = data.tutorial === true;
+  if (Array.isArray(data.usedCodes)) d.usedCodes = [...new Set(data.usedCodes.map(normCode).filter((c) => CONFIG.codes.some((k) => k.code === c)))];
+  d.berserk = Math.min(CONFIG.berserk.seconds, num(data.berserk));
+  if (Array.isArray(data.guns)) d.guns = [...new Set(data.guns.filter((id) => CONFIG.guns.some((g) => g.id === id)))];
+  if (d.guns.includes(data.gun)) d.gun = data.gun;
   if (data.paints && typeof data.paints === 'object') {
     for (const c of [...CONFIG.cars, CONFIG.secretCar]) {
       const i = data.paints[c.id];
@@ -164,9 +184,10 @@ export class Storage {
     return cut;
   }
 
-  // Gizli kod: 'ok' açıldı, 'owned' zaten sende, 'invalid' geçersiz
+  // Gizli kod. Araba kodu: 'ok' açıldı, 'owned' zaten sende. Para kodu: 'coins'. Berserk: 'berserk'.
+  // Para ve süre kodları bir kayıtta bir kez: ikincisinde 'used'. Yanlış kod: 'invalid'
   redeem(text) {
-    const code = String(text || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+    const code = normCode(text);
     const entry = code && CONFIG.codes.find((k) => k.code === code);
     if (!entry) return 'invalid';
     const d = this.data;
@@ -174,8 +195,47 @@ export class Storage {
       if (d.owned.includes(entry.car)) return 'owned';
       d.owned.push(entry.car);
       this.save();
+      return 'ok';
     }
+    if (d.usedCodes.includes(code)) return 'used';
+    d.usedCodes.push(code);
+    let r = 'ok';
+    if (entry.coins) { d.coins += entry.coins; r = 'coins'; }
+    if (entry.berserk) { d.berserk = Math.min(CONFIG.berserk.seconds, d.berserk + entry.berserk); r = 'berserk'; }
+    this.save();
+    return r;
+  }
+
+  // Berserk kalan süresi (oyun sırasında main.js yazar)
+  setBerserk(sec, save = true) {
+    this.data.berserk = Math.max(0, Math.min(CONFIG.berserk.seconds, Number(sec) || 0));
+    if (save) this.save();
+  }
+
+  // --- Silahlar: 'ok' alındı (ve takıldı), 'owned' zaten var, 'poor' para yetmiyor, 'invalid' yok ---
+  ownsGun(id) {
+    return this.data.guns.includes(id);
+  }
+
+  buyGun(id) {
+    const g = CONFIG.guns.find((k) => k.id === id);
+    if (!g) return 'invalid';
+    const d = this.data;
+    if (d.guns.includes(id)) return 'owned';
+    if (d.coins < g.price) return 'poor';
+    d.coins -= g.price;
+    d.guns.push(id);
+    d.gun = id;
+    this.save();
     return 'ok';
+  }
+
+  // Satın alınmış silahı takar; boş kimlik silahı çıkarır
+  equipGun(id) {
+    if (id && !this.ownsGun(id)) return false;
+    this.data.gun = id || '';
+    this.save();
+    return true;
   }
 
   // Seçili arabanın görünüşü: boya, jant, alt LED

@@ -68,8 +68,9 @@ export default {
   },
   alert: { swat: 'SWAT im Anmarsch!', heavy: 'Schwere Verstärkung!', tanks: 'PANZER!', aliens: 'DIE ALIENS SIND GELANDET!', meteors: 'METEORITENHAGEL!' },
   escape: { toast: '+{n} HAARSCHARF!', makas: '+{n} KNAPP VORBEI!', combo: 'COMBO +{n}' },
-  code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.' },
+  code: { title: 'Code eingeben', apply: 'Einlösen', ok: 'Code akzeptiert! {car} steht jetzt in deiner Garage.', owned: 'Dieses Auto hast du schon.', invalid: 'Ungültiger Code.', empty: 'Gib zuerst einen Code ein.', coins: 'Code akzeptiert! +{n} Münzen.', berserk: 'BERSERK aktiv! {min} Minuten lang doppelte Münzen.', used: 'Dieser Code wurde bereits verwendet.' },
   custom: {
+    gun: 'Waffe', guns: { g1: 'Waffe 1', g2: 'Waffe 2', g3: 'Waffe 3', g4: 'Waffe 4', g5: 'Waffe 5', g6: 'Waffe 6' }, gunInfo: 'Feuert alle {sec} s · normale Polizei: {hits} Treffer', equip: 'Anbauen', unequip: 'Abbauen', equipped: 'Waffe angebaut!', unequipped: 'Waffe abgebaut.', gunBought: 'Gekauft und angebaut!',
     title: 'Anpassen', paint: 'Lack', rim: 'Felgen', led: 'Unterboden', exhaust: 'Auspuff', listen: 'Anhören', buy: 'Kaufen · {cost}', confirm: 'Bestätigen · {cost}', poor: 'Nicht genug Münzen', bought: 'Gekauft!', use: 'Schon freigeschaltet', ownFirst: 'Kaufe zuerst das Auto, um es anzupassen.',
     paints: { gece: 'Mitternachtsschwarz', gumus: 'Hellsilber', kiraz: 'Kirschrot', okyanus: 'Ozeanblau', zumrut: 'Smaragdgrün', limon: 'Zitronengelb', mandalina: 'Mandarine', lavanta: 'Mattes Lavendel', pembe: 'Bonbonrosa', haki: 'Mattes Khaki', fume: 'Mattes Rauchgrau', bakir: 'Kupfer', lacivert: 'Marineblau Metallic', neonyesil: 'Neongrün', neonpembe: 'Neonpink', mor: 'Elektrolila', inci: 'Perlweiß', altin: 'Gold', krom: 'Spiegelchrom', lav: 'Lavarot' },
     rims: { std: 'Standard', bes: 'Fünfspeichen-Stern', cok: 'Vielspeichen', spor: 'Sport', derin: 'Tiefbett', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
@@ -77,6 +78,8 @@ export default {
     exhausts: { std: 'Serie', v8: 'Grollender V8', patlamali: 'Fehlzündung', turbo: 'Turbo', spor: 'Sport hell', derin: 'Tiefer Bass' },
     exhaustInfo: { std: 'Ab Werk, ausgewogener Klang', v8: 'Dicker, grollender Achtzylinder', patlamali: 'Knallt beim Gaswegnehmen', turbo: 'Hohes Pfeifen und Abblasen', spor: 'Scharfer, hochdrehender Schrei', derin: 'Bodenerschütternder tiefer Bass' },
   },
+  mix: { title: 'Sound-Einstellungen', music: 'Musik', sfx: 'Soundeffekte', engine: 'Auto / Motor', police: 'Polizeigeräusche', traffic: 'Verkehr', gun: 'Waffengeräusche' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK 2× Münzen · noch {t}' },
   weather: { title: 'Wetter', random: 'Zufall', sunny: 'Sonnig', rain: 'Regen', snow: 'Schnee', fog: 'Nebel', ice: 'Glatteis', iceWarn: 'Achtung, Glatteis!' },
   cheat: { on: 'Na sieh mal einer an – du hast den Cheatcode gefunden!', off: 'Cheat aus', badge: 'CHEAT AN' },
   cars: {

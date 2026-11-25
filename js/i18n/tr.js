@@ -68,8 +68,9 @@ export default {
   },
   alert: { swat: 'SWAT geliyor!', heavy: 'Ağır takviye!', tanks: 'TANKLAR!', aliens: 'UZAYLILAR GELDİ!', meteors: 'METEOR YAĞMURU!' },
   escape: { toast: '+{n} KIL PAYI!', makas: '+{n} MAKAS!', combo: 'KOMBO +{n}' },
-  code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.' },
+  code: { title: 'Kod Gir', apply: 'Uygula', ok: 'Kod kabul edildi! {car} artık garajında.', owned: 'Bu araba zaten sende.', invalid: 'Geçersiz kod.', empty: 'Önce bir kod yaz.', coins: 'Kod kabul edildi! +{n} para.', berserk: 'BERSERK açıldı! {min} dakika boyunca 2 kat para.', used: 'Bu kod zaten kullanıldı.' },
   custom: {
+    gun: 'Silah', guns: { g1: 'Silah 1', g2: 'Silah 2', g3: 'Silah 3', g4: 'Silah 4', g5: 'Silah 5', g6: 'Silah 6' }, gunInfo: '{sec} sn\'de bir ateş · normal polis {hits} vuruş', equip: 'Tak', unequip: 'Çıkar', equipped: 'Silah takıldı!', unequipped: 'Silah çıkarıldı.', gunBought: 'Satın alındı ve takıldı!',
     title: 'Özelleştir', paint: 'Boya', rim: 'Jant', led: 'Alt LED', exhaust: 'Egzoz', listen: 'Dinle', buy: 'Satın al · {cost}', confirm: 'Onayla · {cost}', poor: 'Yetersiz para', bought: 'Satın alındı!', use: 'Zaten açık', ownFirst: 'Özelleştirmek için önce arabayı al.',
     paints: { gece: 'Gece Siyahı', gumus: 'Parlak Gümüş', kiraz: 'Kiraz Kırmızı', okyanus: 'Okyanus Mavisi', zumrut: 'Zümrüt Yeşili', limon: 'Limon Sarısı', mandalina: 'Mandalina', lavanta: 'Mat Lavanta', pembe: 'Şeker Pembe', haki: 'Mat Haki', fume: 'Mat Füme', bakir: 'Bakır', lacivert: 'Lacivert Metalik', neonyesil: 'Neon Yeşil', neonpembe: 'Neon Pembe', mor: 'Elektrik Moru', inci: 'İnci Beyazı', altin: 'Altın', krom: 'Ayna Krom', lav: 'Lav Kırmızısı' },
     rims: { std: 'Standart', bes: 'Beş Kollu', cok: 'Çok Kollu', spor: 'Spor', derin: 'Derin Çanak', turbin: 'Türbin', karbon: 'Karbon', altin: 'Altın' },
@@ -77,6 +78,8 @@ export default {
     exhausts: { std: 'Standart', v8: 'Gür V8', patlamali: 'Patlamalı', turbo: 'Turbo', spor: 'Spor Tiz', derin: 'Derin Bas' },
     exhaustInfo: { std: 'Fabrika çıkışı, dengeli ses', v8: 'Kalın, gürleyen sekiz silindir', patlamali: 'Gaz bırakınca sık sık pat pat pop', turbo: 'Tiz ıslık ve boşalma sesi', spor: 'Yüksek devirde keskin, tiz çığlık', derin: 'Yeri titreten derin bas' },
   },
+  mix: { title: 'Ses ayarları', music: 'Müzik', sfx: 'Ses efektleri', engine: 'Araba / motor', police: 'Polis sesleri', traffic: 'Trafik', gun: 'Silah sesleri' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK 2× para · {t} kaldı' },
   weather: { title: 'Hava durumu', random: 'Rastgele', sunny: 'Güneşli', rain: 'Yağmurlu', snow: 'Karlı', fog: 'Sisli', ice: 'Buzlu', iceWarn: 'Yol buzlu!' },
   cheat: { on: 'Aferin, hile kodunu buldun la!', off: 'Hile kapatıldı', badge: 'HİLE AÇIK' },
   cars: {

@@ -63,6 +63,28 @@ export class AudioEngine {
     this.coinAt = 0;
     this.master = null;
     this.running = false;
+    // Ses grupları: her biri ana sesin altında ayrı kazanç. cur: o an çalınan kısa sesin grubu (via)
+    this.vols = { music: 1, sfx: 1, engine: 1, police: 1, traffic: 1, gun: 1 };
+    this.buses = null;
+    this.cur = null;
+  }
+
+  // Grup ses düzeyi (0-1): müzik, ses efektleri, oyuncu motoru, polis, trafik, silah
+  setGroupVolume(name, v) {
+    if (!(name in this.vols)) return;
+    this.vols[name] = Math.max(0, Math.min(1, v));
+    if (this.buses) this.buses[name].gain.setTargetAtTime(this.vols[name], this.ctx.currentTime, 0.02);
+  }
+
+  // Kısa sesleri bir gruba yönlendirir: fn içinde çalan tone / burst o grubun kazancından geçer
+  via(name, fn) {
+    const prev = this.cur;
+    this.cur = this.buses ? this.buses[name] : null;
+    try { fn(); } finally { this.cur = prev; }
+  }
+
+  out() {
+    return this.cur || (this.buses ? this.buses.sfx : this.master);
   }
 
   // Tarayıcılar sesi yalnızca kullanıcı dokunuşundan sonra başlatır
@@ -96,6 +118,13 @@ export class AudioEngine {
     comp.connect(ceil);
     this.limiter = comp;
     ceil.connect(ctx.destination);
+    this.buses = {};
+    for (const k of Object.keys(this.vols)) {
+      const g = ctx.createGain();
+      g.gain.value = this.vols[k];
+      g.connect(this.master);
+      this.buses[k] = g;
+    }
     this.shots = 0; // Aynı anda çalan kısa ses sayısı
 
     // Beyaz gürültü tamponu: drift, çarpma, patlama
@@ -120,7 +149,7 @@ export class AudioEngine {
     this.engFilter.connect(this.engRough);
     this.engRough.connect(this.engShaper);
     this.engShaper.connect(this.engGain);
-    this.engGain.connect(this.master);
+    this.engGain.connect(this.buses.engine);
     const sub = ctx.createOscillator();
     sub.type = 'sine';
     const subG = ctx.createGain();
@@ -183,7 +212,7 @@ export class AudioEngine {
     this.driftGain.gain.value = 0;
     nsrc.connect(this.driftFilter);
     this.driftFilter.connect(this.driftGain);
-    this.driftGain.connect(this.master);
+    this.driftGain.connect(this.buses.engine);
     nsrc.start();
 
     // Sokak uğultusu: çok kısık alçak gürültü
@@ -197,7 +226,7 @@ export class AudioEngine {
     this.ambGain.gain.value = this.ambientOn ? 0.035 : 0;
     ambSrc.connect(ambF);
     ambF.connect(this.ambGain);
-    this.ambGain.connect(this.master);
+    this.ambGain.connect(this.buses.sfx);
     // Yağmur: aynı gürültüden ince, sürekli hışırtı
     const rainSrc = ctx.createBufferSource();
     rainSrc.buffer = this.noise;
@@ -211,7 +240,7 @@ export class AudioEngine {
     this.rainGain.gain.value = 0;
     rainSrc.connect(rainF);
     rainF.connect(this.rainGain);
-    this.rainGain.connect(this.master);
+    this.rainGain.connect(this.buses.sfx);
     rainSrc.start();
     ambSrc.start();
     this.setEngine(this.engine);
@@ -227,7 +256,7 @@ export class AudioEngine {
     this.tyreGain.gain.value = 0;
     this.tyreOsc.connect(tyreF);
     tyreF.connect(this.tyreGain);
-    this.tyreGain.connect(this.master);
+    this.tyreGain.connect(this.buses.engine);
     this.tyreOsc.start();
 
     // Dört farklı siren: her tür en yakın aracına göre ayrı çalar
@@ -245,7 +274,7 @@ export class AudioEngine {
       gain.gain.value = 0;
       osc.connect(f);
       f.connect(gain);
-      gain.connect(this.master);
+      gain.connect(this.buses.police);
       osc.start();
       this.voices[name] = { osc, gain };
     };
@@ -296,8 +325,10 @@ export class AudioEngine {
     this.pv = { mode, at: this.ctx.currentTime, len: mode === 'start' ? 1.5 : 1.25 };
     if (mode === 'start') {
       // Marş dişlisi: hızlı tekrar eden kısa vuruşlar
-      if (e.kind !== 'ev') for (let i = 0; i < 6; i++) this.tone(120 + i * 8, 0.05, 0.05, 'square', 70, i * 0.055);
-      else this.tone(500, 0.4, 0.04, 'sine', 1800);
+      this.via('engine', () => {
+        if (e.kind !== 'ev') for (let i = 0; i < 6; i++) this.tone(120 + i * 8, 0.05, 0.05, 'square', 70, i * 0.055);
+        else this.tone(500, 0.4, 0.04, 'sine', 1800);
+      });
     }
   }
 
@@ -390,7 +421,7 @@ export class AudioEngine {
       if (state.gear > this.gear) {
         this.shiftT = t + 0.09; // Vites atarken gaz bir an kesilir
         // Vites vuruşu: tok, kısa
-        if (on && e.kind !== 'ev') { this.tone(58, 0.14, SND.shift * vol, 'sine', 34); this.burst(0.07, 420, 0.12 * vol, 'lowpass', 120); }
+        if (on && e.kind !== 'ev') this.via('engine', () => { this.tone(58, 0.14, SND.shift * vol, 'sine', 34); this.burst(0.07, 420, 0.12 * vol, 'lowpass', 120); });
       }
       this.gear = state.gear;
     }
@@ -414,7 +445,7 @@ export class AudioEngine {
     if (X.turbo) {
       this.turbo.o.frequency.setTargetAtTime(1600 + 3400 * ratio, t, 0.1);
       this.turbo.g.gain.setTargetAtTime(vol * X.turbo * 0.035 * gas * ratio, t, 0.08);
-      if (on && (this.lastGas ?? 1) >= 0.8 && gas < 0.6 && ratio > 0.3) this.burst(0.35, 3400, 0.14 * vol, 'bandpass', 700);
+      if (on && (this.lastGas ?? 1) >= 0.8 && gas < 0.6 && ratio > 0.3) this.via('engine', () => this.burst(0.35, 3400, 0.14 * vol, 'bandpass', 700));
     } else if (this.turboOn) this.turbo.g.gain.setTargetAtTime(0, t, 0.05);
     this.turboOn = !!X.turbo;
     this.lastGas = gas;
@@ -502,7 +533,7 @@ export class AudioEngine {
     g.gain.exponentialRampToValueAtTime(0.001, t + duration);
     src.connect(f);
     f.connect(g);
-    g.connect(this.master);
+    g.connect(this.out());
     src.start(t, Math.random());
     this.voice(src, t + duration + 0.02);
   }
@@ -520,7 +551,7 @@ export class AudioEngine {
     g.gain.exponentialRampToValueAtTime(gain, t + 0.008);
     g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
     o.connect(g);
-    g.connect(this.master);
+    g.connect(this.out());
     o.start(t);
     this.voice(o, t + duration + 0.02);
   }
@@ -638,7 +669,7 @@ export class AudioEngine {
       o.connect(f);
       f.connect(g);
     }
-    g.connect(this.master);
+    g.connect(this.buses.sfx);
     o.start(t);
     vib.start(t);
     o.stop(t + dur + 0.02);
@@ -771,7 +802,7 @@ export class AudioEngine {
     for (let i = 0; i < n; i++) {
       const last = i === n - 1;
       this.tone(last ? 54 : 72 + Math.random() * 36, last ? 0.12 : 0.07, last ? 0.5 : 0.38, 'square', 30, d);
-      setTimeout(() => this.burst(last ? 0.1 : 0.06, last ? 700 : 900 + Math.random() * 500, last ? 0.6 : 0.45, 'lowpass', 110), d * 1000);
+      setTimeout(() => this.via('engine', () => this.burst(last ? 0.1 : 0.06, last ? 700 : 900 + Math.random() * 500, last ? 0.6 : 0.45, 'lowpass', 110)), d * 1000);
       d += SND.popGap + Math.random() * SND.popGap;
     }
   }
@@ -829,4 +860,22 @@ export class AudioEngine {
       this.tone(520, 0.34, 0.2, 'sawtooth', 1250, i * 0.36);
     }
   }
+}
+
+// Kısa seslerin grubu (ayarlardaki ayrı ses düzeyleri). Listede olmayanlar ses efektleri (sfx) grubundadır.
+// Sürekli sesler (motor, drift, lastik: engine; sirenler: police; ambiyans, yağmur: sfx) unlock içinde bağlanır
+export const SOUND_GROUP_OF = {
+  press: 'music', purchase: 'music', cheat: 'music', power: 'music', powerEnd: 'music', secretDown: 'music',
+  landing: 'engine', backfire: 'engine',
+  radio: 'police', megaphone: 'police', alert: 'police', tankFire: 'police', alienArrive: 'police',
+  horn: 'traffic',
+  gunShot: 'gun',
+};
+for (const [name, group] of Object.entries(SOUND_GROUP_OF)) {
+  const f = AudioEngine.prototype[name];
+  AudioEngine.prototype[name] = function grouped(...args) {
+    let r;
+    this.via(group, () => { r = f.apply(this, args); });
+    return r;
+  };
 }

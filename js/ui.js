@@ -5,6 +5,8 @@ import { CONFIG, MAX_STARS } from './config.js';
 import { paintPower, POWER_LOOK } from './art.js';
 import { tx, txNum, getLang, LANGS } from './i18n/index.js';
 import { NAMES } from './names.js';
+import { normCode } from './storage.js';
+import { gunStats, bulletsToKill } from './gun.js';
 
 const $ = (id) => document.getElementById(id);
 // Araç adı: gizli motosikletin adı dil dosyasında, diğerleri isim tablosunda
@@ -14,6 +16,9 @@ export function formatTime(t) {
   const s = Math.floor(t);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
+
+// Berserk kalan süresi: yukarı yuvarlanır (59:59.2 -> 60:00), sıfıra yalnız gerçekten bitince iner
+export const berserkClock = (t) => formatTime(Math.ceil(Math.max(0, t) - 1e-6));
 
 // Uzun yazı kutusuna sığmazsa yazı küçülür (özellikle Almanca); tek satırlık metinler
 const FIT = '.start-txt, .tile span, .menu .btn, .panel .btn, .seg button, .screen header h2, #over-title, .car-tag b, .car-tag small, #ctl-rev, .summary span, .big-score span, #hint b, #hint span, .toggle > span, .volume > span, .seg-row > span, #cheat-badge, #garage-action';
@@ -36,7 +41,7 @@ export class UI {
   constructor(storage, actions) {
     this.storage = storage;
     this.actions = actions; // play, resume, toMenu, sound, vibrate
-    this.last = { time: '', score: '', coins: '', stage: -1, stars: -1, combo: '' };
+    this.last = { time: '', score: '', coins: '', stage: -1, stars: -1, combo: '', bz: '' };
     this.devTaps = 0;
     this.bind();
     this.buildStars();
@@ -103,6 +108,15 @@ export class UI {
     }
     $('set-sound').addEventListener('change', (e) => { d.settings.sound = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-volume').addEventListener('input', (e) => { d.settings.volume = Number(e.target.value); this.storage.save(); a.applySettings(); });
+    // Ayrı ses grupları: müzik, efektler, motor, polis, trafik, silah
+    for (const el of document.querySelectorAll('#set-mix input[data-vol]')) {
+      el.addEventListener('input', (e) => {
+        d.settings.vols[el.dataset.vol] = Number(e.target.value);
+        el.nextElementSibling.textContent = e.target.value;
+        this.storage.save();
+        a.applySettings();
+      });
+    }
     $('set-ambient').addEventListener('change', (e) => { d.settings.ambient = e.target.checked; this.storage.save(); a.applySettings(); });
     $('set-vibrate').addEventListener('change', (e) => { d.settings.vibrate = e.target.checked; this.storage.save(); a.applySettings(); });
     $('dev-god').addEventListener('change', (e) => { d.dev.god = e.target.checked; this.storage.save(); });
@@ -113,11 +127,12 @@ export class UI {
       const msg = $('code-msg');
       const raw = box.value.trim();
       const r = raw ? this.storage.redeem(raw) : 'empty';
-      const unlocked = CONFIG.codes.find((k) => k.code === raw.toUpperCase().replace(/[^0-9A-Z]/g, ''));
+      const unlocked = CONFIG.codes.find((k) => k.code === normCode(raw));
       const car = unlocked && CONFIG.cars.find((c) => c.id === unlocked.car);
-      msg.textContent = tx(`code.${r}`, { car: car ? car.name : '' });
-      msg.className = `code-msg ${r === 'ok' ? 'ok' : 'err'}`;
-      if (r === 'ok') { box.value = ''; this.refreshMenu(); a.purchased(); }
+      const good = r === 'ok' || r === 'coins' || r === 'berserk';
+      msg.textContent = tx(`code.${r}`, { car: car ? car.name : '', n: txNum((unlocked && unlocked.coins) || 0), min: Math.round(((unlocked && unlocked.berserk) || 0) / 60) });
+      msg.className = `code-msg ${good ? 'ok' : 'err'}`;
+      if (good) { box.value = ''; this.refreshMenu(); a.purchased(); }
       this.fit($('settings'));
     };
     $('code-apply').addEventListener('click', () => { a.tap(); applyCode(); });
@@ -132,6 +147,10 @@ export class UI {
     const d = this.storage.data;
     $('set-sound').checked = d.settings.sound;
     $('set-volume').value = String(d.settings.volume);
+    for (const el of document.querySelectorAll('#set-mix input[data-vol]')) {
+      el.value = String(d.settings.vols[el.dataset.vol]);
+      el.nextElementSibling.textContent = el.value;
+    }
     this.syncMute();
     $('set-vibrate').checked = d.settings.vibrate;
     $('set-ambient').checked = d.settings.ambient;
@@ -209,6 +228,10 @@ export class UI {
     const car = this.storage.selectedCar();
     $('menu-car-name').textContent = carLabel(car);
     $('menu-car-paint').textContent = this.paintName(car, this.storage.paintIndex(car.id));
+    // Berserk açıksa menüde de kalan süre görünür (süre yalnız oynarken akar)
+    const bz = $('menu-berserk');
+    bz.hidden = !(d.berserk > 0);
+    if (d.berserk > 0) bz.textContent = tx('berserk.menu', { t: berserkClock(d.berserk) });
     if (!$('menu').hidden) this.fit($('menu'));
   }
 
@@ -382,7 +405,7 @@ export class UI {
   }
 
   resetHud() {
-    this.last = { time: '', score: '', coins: '', stage: -1, stars: -1, combo: '' };
+    this.last = { time: '', score: '', coins: '', stage: -1, stars: -1, combo: '', bz: '' };
     $('alert').classList.remove('run');
   }
 
@@ -416,6 +439,16 @@ export class UI {
     this.powerChip('giant', g.giantT);
     const combo = g.combo >= 1.25 ? `x${txNum(g.combo, 1)}` : '';
     if (combo !== l.combo) { l.combo = combo; $('hud-combo').textContent = combo; }
+    // Berserk: kalan süre ve azalan bar; bitince kaybolur
+    const bz = g.berserkT > 0 ? berserkClock(g.berserkT) : '';
+    if (bz !== l.bz) {
+      l.bz = bz;
+      $('hud-berserk').hidden = !bz;
+      if (bz) {
+        $('hud-berserk-t').textContent = bz;
+        $('hud-berserk-bar').style.width = `${Math.min(100, (g.berserkT / CONFIG.berserk.seconds) * 100).toFixed(2)}%`;
+      }
+    }
   }
 
   powerChip(kind, left) {
@@ -588,6 +621,8 @@ export class UI {
       b.onclick = () => { this.actions.tap(); this.tab = b.dataset.tab; this.prev = null; this.confirm = false; this.renderGarage(); };
     }
     grid.textContent = '';
+    grid.classList.toggle('guns', tab === 'gun');
+    if (tab === 'gun') { this.renderGuns(); return; }
     if (!owned) {
       box.classList.add('off');
       buy.hidden = true;
@@ -657,6 +692,70 @@ export class UI {
     } else {
       buy.hidden = true;
     }
+  }
+
+  // Silah sekmesi: 6 kademe. Silahlar arabadan bağımsızdır (her arabada çalışır), bir kez alınır, takılır / çıkarılır.
+  // Kilitli silah önce seçilir, sonra onayla satın alınır (diğer sekmelerle aynı akış)
+  renderGuns() {
+    const box = $('garage-custom');
+    const grid = $('custom-grid');
+    const buy = $('custom-buy');
+    box.classList.remove('off');
+    $('custom-listen').hidden = true;
+    $('custom-listen').parentElement.classList.add('ex'); // Bilgi satırı iki satıra sığar (egzoz sekmesi gibi)
+    const d = this.storage.data;
+    const p = this.prev && this.prev.kind === 'gun' ? this.prev.id : null;
+    const sel = p || d.gun || CONFIG.guns[0].id;
+    CONFIG.guns.forEach((g, i) => {
+      const b = document.createElement('button');
+      const has = this.storage.ownsGun(g.id);
+      b.className = `chip gun t${i + 1}${g.id === sel ? ' on' : ''}${has ? '' : ' locked'}${d.gun === g.id ? ' fitted' : ''}`;
+      b.setAttribute('aria-label', tx(`custom.guns.${g.id}`));
+      const ic = document.createElement('i');
+      ic.className = 'gun-ic';
+      const n = document.createElement('b');
+      n.textContent = String(i + 1);
+      b.append(ic, n);
+      if (!has) { const tag = document.createElement('em'); tag.textContent = txNum(g.price); b.appendChild(tag); }
+      b.addEventListener('click', () => {
+        this.actions.tap();
+        this.confirm = false;
+        this.prev = { kind: 'gun', id: g.id };
+        $('custom-msg').textContent = '';
+        this.renderGarage();
+      });
+      grid.appendChild(b);
+    });
+    const g = CONFIG.guns.find((k) => k.id === sel);
+    const st = gunStats(g);
+    $('custom-name').textContent = `${tx(`custom.guns.${g.id}`)} · ${tx('custom.gunInfo', { sec: txNum(st.every, 2), hits: bulletsToKill('car', 0, st) })}`;
+    buy.hidden = false;
+    buy.classList.toggle('confirm', !!this.confirm);
+    if (this.storage.ownsGun(g.id)) {
+      const fitted = d.gun === g.id;
+      buy.disabled = false;
+      buy.textContent = tx(fitted ? 'custom.unequip' : 'custom.equip');
+      buy.onclick = () => {
+        this.actions.tap();
+        this.storage.equipGun(fitted ? '' : g.id);
+        this.prev = { kind: 'gun', id: g.id };
+        this.renderGarage();
+        $('custom-msg').textContent = tx(fitted ? 'custom.unequipped' : 'custom.equipped');
+      };
+      return;
+    }
+    const enough = d.coins >= g.price;
+    buy.disabled = !enough;
+    buy.textContent = !enough ? tx('custom.poor') : tx(this.confirm ? 'custom.confirm' : 'custom.buy', { cost: txNum(g.price) });
+    buy.onclick = () => {
+      this.actions.tap();
+      if (!this.confirm) { this.confirm = true; this.renderGarage(); return; }
+      const r = this.storage.buyGun(g.id);
+      this.confirm = false;
+      if (r === 'ok') this.actions.purchased();
+      this.renderGarage();
+      $('custom-msg').textContent = tx(r === 'ok' ? 'custom.gunBought' : r === 'poor' ? 'custom.poor' : 'custom.use');
+    };
   }
 
   // Egzoz takılınca garajdaki araçta kısa titreme ve egzoz ucunda parlama

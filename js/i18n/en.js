@@ -68,8 +68,9 @@ export default {
   },
   alert: { swat: 'SWAT incoming!', heavy: 'Heavy backup!', tanks: 'TANKS!', aliens: 'ALIENS HAVE LANDED!', meteors: 'METEOR SHOWER!' },
   escape: { toast: '+{n} CLOSE CALL!', makas: '+{n} NEAR MISS!', combo: 'COMBO +{n}' },
-  code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.' },
+  code: { title: 'Enter Code', apply: 'Apply', ok: 'Code accepted! {car} is now in your garage.', owned: 'You already own this car.', invalid: 'Invalid code.', empty: 'Type a code first.', coins: 'Code accepted! +{n} coins.', berserk: 'BERSERK on! 2× coins for {min} minutes.', used: 'This code has already been used.' },
   custom: {
+    gun: 'Gun', guns: { g1: 'Gun 1', g2: 'Gun 2', g3: 'Gun 3', g4: 'Gun 4', g5: 'Gun 5', g6: 'Gun 6' }, gunInfo: 'Fires every {sec} s · normal police: {hits} hits', equip: 'Equip', unequip: 'Remove', equipped: 'Gun equipped!', unequipped: 'Gun removed.', gunBought: 'Bought and equipped!',
     title: 'Customize', paint: 'Paint', rim: 'Rims', led: 'Underglow', exhaust: 'Exhaust', listen: 'Listen', buy: 'Buy · {cost}', confirm: 'Confirm · {cost}', poor: 'Not enough coins', bought: 'Purchased!', use: 'Already unlocked', ownFirst: 'Buy the car first to customize it.',
     paints: { gece: 'Midnight Black', gumus: 'Bright Silver', kiraz: 'Cherry Red', okyanus: 'Ocean Blue', zumrut: 'Emerald Green', limon: 'Lemon Yellow', mandalina: 'Tangerine', lavanta: 'Matte Lavender', pembe: 'Candy Pink', haki: 'Matte Khaki', fume: 'Matte Smoke Gray', bakir: 'Copper', lacivert: 'Navy Metallic', neonyesil: 'Neon Green', neonpembe: 'Neon Pink', mor: 'Electric Purple', inci: 'Pearl White', altin: 'Gold', krom: 'Mirror Chrome', lav: 'Lava Red' },
     rims: { std: 'Standard', bes: 'Five-Spoke Star', cok: 'Multi-Spoke', spor: 'Sport', derin: 'Deep Dish', turbin: 'Turbine', karbon: 'Carbon', altin: 'Gold' },
@@ -77,6 +78,8 @@ export default {
     exhausts: { std: 'Stock', v8: 'Rumbling V8', patlamali: 'Popper', turbo: 'Turbo', spor: 'Sport Scream', derin: 'Deep Bass' },
     exhaustInfo: { std: 'Factory fitted, balanced sound', v8: 'Thick, roaring eight cylinders', patlamali: 'Pops and bangs whenever you lift off', turbo: 'High whistle and blow-off', spor: 'Sharp, high-revving scream', derin: 'Ground-shaking deep bass' },
   },
+  mix: { title: 'Sound mix', music: 'Music', sfx: 'Sound effects', engine: 'Car / engine', police: 'Police sounds', traffic: 'Traffic', gun: 'Gun sounds' },
+  berserk: { hud: 'BERSERK 2×', menu: 'BERSERK 2× coins · {t} left' },
   weather: { title: 'Weather', random: 'Random', sunny: 'Sunny', rain: 'Rainy', snow: 'Snowy', fog: 'Foggy', ice: 'Icy', iceWarn: 'Icy road!' },
   cheat: { on: 'Well, look at you! You found the cheat code!', off: 'Cheat off', badge: 'CHEAT ON' },
   cars: {

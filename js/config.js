@@ -17,9 +17,9 @@ export const BUILD = {
 
 export const CONFIG = {
   name: NAMES.oyun,
-  version: '24.1.1',
+  version: '24.2.0',
   // Arkadaş sürümünün indirme adresi isim tablosundadır; Play sürümü kendi sürümünün APK'sını gösterir
-  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.1.1/DriftLab-PlayStore.apk',
+  apkUrl: NAMES.indir || 'https://github.com/caglarsaglammmmm-code/kacis-oyunu/releases/download/driftlab-v24.2.0/DriftLab-PlayStore.apk',
 
   // TEK HIZ DÜĞMESİ. Tüm son hızlar açılışta bu çarpanlarla ölçeklenir (dosyanın sonuna bakın).
   // player: oyuncu araçları. npc: sokak trafiği. highway: otoban trafiği.
@@ -472,24 +472,45 @@ export const CONFIG = {
     ],
   },
 
-  // 360° OTOMATİK TARAMALI SİLAH (weapon: true olan araçlar: 42-66 arabası ve gizli motosiklet; js/gun.js ortak).
-  // Araç hangi yöne bakarsa baksın EKRANDA GÖRÜNEN düşmanlara ateş eder; ekran dışına ateş etmez. Düğme yok, cephane sınırsız.
-  // rate: saniyede mermi (5-10 arası). damage: her merminin sabit hasarı. hp: oyunun başındaki silah canı (tür başına).
-  // Gereken mermi = tavan(hp / damage): polis 22, hızlı polis 22, motor 20, gelişmiş 30, SWAT 55, uzaylı 75/80/88, tank 120.
-  // Yeni çıkanların canı zamanla artar (copHpGrowth), yani bu sayılar en azdır.
+  // 360° OTOMATİK TARAMALI SİLAH (js/gun.js ortak). Araç hangi yöne bakarsa baksın EKRANDA GÖRÜNEN düşmanlara
+  // ateş eder; ekran dışına ateş etmez. Düğme yok, cephane sınırsız. İki kaynak:
+  //   a) Mağazadan alınıp takılan silah (guns tablosu, her arabada). Takılıysa o kullanılır.
+  //   b) Kendi silahı olan araçlar (weapon: true: 42-66 arabası ve gizli motosiklet): takılı silah yoksa dahili silah (builtin).
+  // DÜŞMAN SİLAH CANI = copHp x enemyHits[tür] / 15. enemyHits: Silah 1 ile kaç vuruşta iner (zorluk sırası).
+  // Hasar = copHp / silahın normal polis vuruşu. Yani her silah her düşmanı aynı oranla ölçekli indirir.
   // speed: mermi hızı, life: ömür (sn), inset: hedefin ekran kenarından bu kadar içeride olması gerekir,
   // maxBullets: havuz, maxTracers: aynı anda çizilen iz, hitR: isabet payı.
   // Hedef: önce tehlikeli ve yakın olana ama bekleyen her hedefin önceliği zamanla artar (wait), takılıp kalmaz
   weapon: {
-    rate: 7, damage: 10, speed: 1500, life: 0.75, inset: 8, maxBullets: 24, maxTracers: 18, hitR: 10, spread: 0.035,
-    hp: { car: 220, fast: 220, moto: 200, advanced: 300, swat: 550, dart: 750, blob: 800, crab: 880, tank: 1200 },
+    copHp: 150,
+    // Normal polis (araba, hızlı polis, motosiklet) 15, SWAT 20, ağır takviye 25, uzaylı ok 30, uzaylı balon 35,
+    // uzaylı yengeç 40, tank 45. Yeni tür eklenirse bir sonraki kademe +5 vuruş
+    enemyHits: { car: 15, fast: 15, moto: 15, swat: 20, advanced: 25, dart: 30, blob: 35, crab: 40, tank: 45 },
+    builtin: { every: 100 / 7, hits: 22 }, // 42-66 ve gizli motosiklet: saniyede 7 mermi, normal polis 22 vuruş
+    speed: 1500, life: 0.75, inset: 8, maxBullets: 24, maxTracers: 18, hitR: 10, spread: 0.035,
     danger: { car: 1, fast: 1.1, moto: 0.9, advanced: 1.3, swat: 1.5, dart: 1.7, blob: 1.8, crab: 1.9, tank: 2.2 },
     wait: 3.2, near: 900, maxSparks: 3,
   },
 
-  // ZAMANLA ARTAN POLİS CANI (silah canı, bütün arabalarda). Yeni çıkan polisin canı = hp * min(max, perMin ^ dakika).
-  // Sahadaki polisler değişmez. %12 / dk: 2. dk 1,25x, 5. dk 1,76x, ~9,7. dk'dan sonra 3x tavan
-  copHpGrowth: { perMin: 1.12, max: 3 },
+  // MAĞAZA SİLAHLARI (6 kademe). Parayla alınır, kayıtta saklanır, garajın Silah sekmesinden takılır / çıkarılır.
+  // every: ateş aralığı, SALİSE (1/100 sn; 75 = 0,75 sn). hits: normal polisi kaç vuruşta indirir (1,5 = hasar
+  // polis canının 1/1,5'i, yani 2 vuruşta iner). price: para
+  guns: [
+    { id: 'g1', every: 100, hits: 15, price: 2500 },
+    { id: 'g2', every: 75, hits: 10, price: 6000 },
+    { id: 'g3', every: 50, hits: 7, price: 12000 },
+    { id: 'g4', every: 25, hits: 4, price: 25000 },
+    { id: 'g5', every: 20, hits: 2, price: 45000 },
+    { id: 'g6', every: 10, hits: 1.5, price: 90000 },
+  ],
+
+  // ZAMANLA ARTAN POLİS CANI. Yeni çıkan polisin canı = can * min(max, perMin ^ dakika). v24.2'den beri kapalı (max 1):
+  // silah tablosundaki vuruş sayıları oyunun her anında geçerli. Açmak için ör. { perMin: 1.12, max: 3 }
+  copHpGrowth: { perMin: 1.12, max: 1 },
+
+  // BERSERK KODU: süre (sn) boyunca kazanılan para mul katı. Süre yalnız koşu oynanırken azalır (duraklatma, menü,
+  // arka plan, kapalı uygulama saymaz). Kalan süre kayıtta tutulur, saveEvery saniyede bir yazılır
+  berserk: { seconds: 3600, mul: 2, saveEvery: 5 },
 
   // iPhone/iPad ana ekrana ekle rehberi: delay menü açıldıktan sonra kartın görünme gecikmesi (sn), key kayıt anahtarı
   a2hs: { delay: 1.2, key: 'drift-lab-a2hs' },
@@ -555,8 +576,14 @@ export const CONFIG = {
   secretCar: { id: 'golge', secret: true, weapon: true, paints: [{ name: 'Gece Nöbeti', color: '#111321', finish: 'gloss', accent: '#21e6ff' }, { name: 'Neon Pembe', color: '#1a0f1f', finish: 'gloss', accent: '#ff2fa0' }, { name: 'Zehir Yeşili', color: '#0f1a14', finish: 'matte', accent: '#39ff7a' }, { name: 'Gümüş Hayalet', color: '#c9d1dc', finish: 'metal', accent: '#7a2cff' }], finish: 'gloss', name: 'Gölge R', cost: 0, desc: 'Gizli geçidin hediyesi', shape: 'golge', maxSpeed: 650, accel: 1000, turnRate: 4.1, grip: 5.4, driftGrip: 0.9, durability: 1.5, mass: 0.8, len: 38, wid: 16, color: '#111321', accent: '#21e6ff', engine: { kind: 'beast', cyl: 2, idle: 950, red: 11500, gears: 6, gain: 1.75 }, egzozPatlamaSansi: 0.85 },
 
   // Gizli kodlar: yazılan metin büyük harfe çevrilir, harf ve rakam dışı her şey atılır ("42-66", "42 66" = "4266").
-  // Yeni kod eklemek için satır eklenir. car: açılan araba
-  codes: [{ code: '4266', car: 'kuzgun' }],
+  // Yeni kod eklemek için satır eklenir. car: açılan araba, coins: para ödülü, berserk: süreli para çarpanı (sn).
+  // Her kod bir kayıtta bir kez kullanılır (storage.usedCodes)
+  codes: [
+    { code: '4266', car: 'kuzgun' },
+    { code: 'DANTE', coins: 3000 },
+    { code: 'BERSERK', berserk: 3600 },
+    { code: 'GUTS', coins: 10000 },
+  ],
 
   // KIL PAYI KAÇIŞ: polis çok yakından geçip çarpmadan atlatılınca anında para.
   // distMul: yakınlık eşiği (araç gövdeleri arasındaki boşluk, oyuncu genişliğinin katı),
